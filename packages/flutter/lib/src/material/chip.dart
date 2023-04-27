@@ -9,15 +9,18 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'material_state_mixin.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
@@ -60,11 +63,7 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
 ///  * <https://material.io/design/components/chips.html>
-abstract class ChipAttributes {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  ChipAttributes._();
-
+abstract interface class ChipAttributes {
   /// The primary content of the chip.
   ///
   /// Typically a [Text] widget.
@@ -212,11 +211,7 @@ abstract class ChipAttributes {
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
 ///  * <https://material.io/design/components/chips.html>
-abstract class DeletableChipAttributes {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  DeletableChipAttributes._();
-
+abstract interface class DeletableChipAttributes {
   /// The icon displayed when [onDeleted] is set.
   ///
   /// Defaults to an [Icon] widget set to use [Icons.cancel].
@@ -280,13 +275,11 @@ abstract class DeletableChipAttributes {
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
+///  * [ChoiceChip], allows a single selection from a set of options. Choice
+///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * <https://material.io/design/components/chips.html>
-abstract class CheckmarkableChipAttributes {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  CheckmarkableChipAttributes._();
-
+abstract interface class CheckmarkableChipAttributes {
   /// Whether or not to show a check mark when
   /// [SelectableChipAttributes.selected] is true.
   ///
@@ -317,11 +310,7 @@ abstract class CheckmarkableChipAttributes {
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * <https://material.io/design/components/chips.html>
-abstract class SelectableChipAttributes {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  SelectableChipAttributes._();
-
+abstract interface class SelectableChipAttributes {
   /// Whether or not this chip is selected.
   ///
   /// If [onSelected] is not null, this value will be used to determine if the
@@ -427,11 +416,7 @@ abstract class SelectableChipAttributes {
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * <https://material.io/design/components/chips.html>
-abstract class DisabledChipAttributes {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  DisabledChipAttributes._();
-
+abstract interface class DisabledChipAttributes {
   /// Whether or not this chip is enabled for input.
   ///
   /// If this is true, but all of the user action callbacks are null (i.e.
@@ -475,11 +460,7 @@ abstract class DisabledChipAttributes {
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
 ///  * <https://material.io/design/components/chips.html>
-abstract class TappableChipAttributes {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  TappableChipAttributes._();
-
+abstract interface class TappableChipAttributes {
   /// Called when the user taps the chip.
   ///
   /// If [onPressed] is set, then this callback will be called when the user
@@ -1232,7 +1213,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget? child) {
-            return Container(
+            return Ink(
               decoration: ShapeDecoration(
                 shape: resolvedShape,
                 color: _getBackgroundColor(theme, chipTheme, chipDefaults),
@@ -1293,10 +1274,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           minWidth: kMinInteractiveDimension + densityAdjustment.dx,
           minHeight: kMinInteractiveDimension + densityAdjustment.dy,
         );
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
-        break;
     }
     result = _ChipRedirectingHitDetectionWidget(
       constraints: constraints,
@@ -1840,7 +1819,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         } else {
           _pressRect = Rect.zero;
         }
-        break;
       case TextDirection.ltr:
         double start = left;
         if (theme.showCheckmark || theme.showAvatar) {
@@ -1873,7 +1851,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         } else {
           _deleteButtonRect = Rect.zero;
         }
-        break;
     }
     // Center the label vertically.
     labelOffset = labelOffset +
@@ -1917,13 +1894,11 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           begin: Colors.white.withAlpha(_kDisabledAlpha),
           end: Colors.white,
         );
-        break;
       case Brightness.dark:
         enableTween = ColorTween(
           begin: Colors.black.withAlpha(_kDisabledAlpha),
           end: Colors.black,
         );
-        break;
     }
     return enableTween.evaluate(enableAnimation)!;
   }
@@ -1936,10 +1911,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       switch (theme.brightness) {
         case Brightness.light:
           paintColor = theme.showAvatar ? Colors.white : Colors.black.withAlpha(_kCheckmarkAlpha);
-          break;
         case Brightness.dark:
           paintColor = theme.showAvatar ? Colors.black : Colors.white.withAlpha(_kCheckmarkAlpha);
-          break;
       }
     }
 
@@ -2186,10 +2159,10 @@ bool _hitIsOnDeleteIcon({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _ChipDefaultsM3 extends ChipThemeData {
-  const _ChipDefaultsM3(this.context, this.isEnabled)
+  _ChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -2198,9 +2171,11 @@ class _ChipDefaultsM3 extends ChipThemeData {
 
   final BuildContext context;
   final bool isEnabled;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
@@ -2209,7 +2184,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get selectedColor => null;
@@ -2225,14 +2200,14 @@ class _ChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => isEnabled
-    ? BorderSide(color: Theme.of(context).colorScheme.outline)
-    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+    ? BorderSide(color: _colors.outline)
+    : BorderSide(color: _colors.onSurface.withOpacity(0.12));
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? Theme.of(context).colorScheme.primary
-      : Theme.of(context).colorScheme.onSurface,
+      ? _colors.primary
+      : _colors.onSurface,
     size: 18.0,
   );
 

@@ -1,8 +1,7 @@
 {
-  "version": "v0_158",
+  "version": "v0_162",
 
-  "md.comp.checkbox.container.height": 18.0,
-  "md.comp.checkbox.container.width": 18.0,
+  "md.comp.checkbox.container.size": 18.0,
   "md.comp.checkbox.error.focus.state-layer.color": "error",
   "md.comp.checkbox.error.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.checkbox.error.hover.state-layer.color": "error",

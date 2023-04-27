@@ -136,11 +136,11 @@ The `stop()` command takes one parameter, `appId`. It returns a `bool` to indica
 
 #### app.start
 
-This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, and `launchMode`.
+This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, `launchMode` (`run`/`attach`) and `mode` (`debug`, `profile`, `release`, `jit_release`).
 
 #### app.debugPort
 
-This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a URI using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
+This is sent when a VM service port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a URI using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
 
 #### app.started
 

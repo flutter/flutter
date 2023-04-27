@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -17,6 +18,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import 'migrations/version_migration.dart';
 import 'visual_studio.dart';
 
 // These characters appear to be fine: @%()-+_{}[]`~
@@ -51,6 +53,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
 
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
+    VersionMigration(windowsProject, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -73,7 +76,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
         'Please run `flutter doctor` for more details.');
   }
 
-  final String buildModeName = getNameForBuildMode(buildInfo.mode);
+  final String buildModeName = buildInfo.mode.cliName;
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
@@ -92,6 +95,23 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   } finally {
     status.stop();
   }
+
+  final String? binaryName = getCmakeExecutableName(windowsProject);
+  final File appFile = buildDirectory
+    .childDirectory('runner')
+    .childDirectory(sentenceCase(buildModeName))
+    .childFile('$binaryName.exe');
+  if (appFile.existsSync()) {
+    final String appSize = (buildInfo.mode == BuildMode.debug)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsMB(appFile.lengthSync())})';
+    globals.logger.printStatus(
+      '${globals.logger.terminal.successMark}  '
+      'Built ${globals.fs.path.relative(appFile.path)}$appSize.',
+      color: TerminalColor.green,
+    );
+  }
+
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -121,8 +141,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
     globals.printStatus(
       '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'flutter pub global activate devtools; flutter pub global run devtools '
-      '--appSizeBase=$relativeAppSizePath'
+      'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
 }

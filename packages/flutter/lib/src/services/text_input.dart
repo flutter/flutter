@@ -1843,7 +1843,6 @@ class TextInput {
       case 'TextInputClient.updateEditingState':
         final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
-        break;
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
         final List<TextEditingDelta> deltas = <TextEditingDelta>[];
@@ -1856,7 +1855,6 @@ class TextInput {
         }
 
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
-        break;
       case 'TextInputClient.performAction':
         if (args[1] as String == 'TextInputAction.commitContent') {
           final KeyboardInsertedContent content = KeyboardInsertedContent.fromJson(args[2] as Map<String, dynamic>);
@@ -1864,11 +1862,9 @@ class TextInput {
         } else {
           _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
         }
-        break;
       case 'TextInputClient.performSelectors':
         final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
         selectors.forEach(_currentConnection!._client.performSelector);
-        break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
@@ -1877,28 +1873,21 @@ class TextInput {
               ? <String, dynamic>{}
               : firstArg['data'] as Map<String, dynamic>,
         );
-        break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(
           _toTextCursorAction(args[1] as String),
           args[2] as Map<String, dynamic>,
         ));
-        break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection!._client.connectionClosed();
-        break;
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
-        break;
       case 'TextInputClient.showToolbar':
         _currentConnection!._client.showToolbar();
-        break;
       case 'TextInputClient.insertTextPlaceholder':
         _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-        break;
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
-        break;
       default:
         throw MissingPluginException();
     }

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -16,6 +15,7 @@ import '../base/project_migrator.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../device.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -27,7 +27,6 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
-import 'iproxy.dart';
 import 'migrations/host_app_info_plist_migration.dart';
 import 'migrations/ios_deployment_target_migration.dart';
 import 'migrations/project_base_configuration_migration.dart';
@@ -87,7 +86,7 @@ class IMobileDevice {
   Future<void> takeScreenshot(
     File outputFile,
     String deviceID,
-    IOSDeviceConnectionInterface interfaceType,
+    DeviceConnectionInterface interfaceType,
   ) {
     return _processUtils.run(
       <String>[
@@ -95,7 +94,7 @@ class IMobileDevice {
         outputFile.path,
         '--udid',
         deviceID,
-        if (interfaceType == IOSDeviceConnectionInterface.network)
+        if (interfaceType == DeviceConnectionInterface.wireless)
           '--network',
       ],
       throwOnError: true,
@@ -493,8 +492,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 /// Extended attributes applied by Finder can cause code signing errors. Remove them.
 /// https://developer.apple.com/library/archive/qa/qa1940/_index.html
-@visibleForTesting
-Future<void> removeFinderExtendedAttributes(Directory projectDirectory, ProcessUtils processUtils, Logger logger) async {
+Future<void> removeFinderExtendedAttributes(FileSystemEntity projectDirectory, ProcessUtils processUtils, Logger logger) async {
   final bool success = await processUtils.exitsHappy(
     <String>[
       'xattr',
@@ -683,10 +681,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue,
   switch (issue.type) {
     case XCResultIssueType.error:
       logger.printError(issueSummary);
-      break;
     case XCResultIssueType.warning:
       logger.printWarning(issueSummary);
-      break;
   }
 
   final String? message = issue.message;

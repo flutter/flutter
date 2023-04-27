@@ -18,6 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../web/web_device.dart';
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
@@ -76,7 +77,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
-        help: 'Suppress analytics reporting when this command runs.');
+        help: 'Suppress analytics reporting for the current CLI invocation.');
+    argParser.addFlag('disable-telemetry',
+        negatable: false,
+        help: 'Disable telemetry reporting when this command runs.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -111,6 +115,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'List the special "flutter-tester" device in device listings. '
               'This headless device is used to test Flutter tooling.');
+    argParser.addFlag('show-web-server-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special "web-server" device in device listings.',
+    );
   }
 
   @override
@@ -179,6 +188,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, Object?> contextOverrides = <Type, Object?>{};
 
+    // If the disable-telemetry flag has been passed, return out
+    if (topLevelResults.wasParsed('disable-telemetry')) {
+      return;
+    }
+
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
     // terminal size changes during a run.
@@ -208,6 +222,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (((topLevelResults['show-test-device'] as bool?) ?? false)
         || topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
+    }
+    if (((topLevelResults['show-web-server-device'] as bool?) ?? false)
+        || topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
     }
 
     // Set up the tooling configuration.

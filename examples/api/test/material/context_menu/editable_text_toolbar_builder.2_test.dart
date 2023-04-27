@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('showing and hiding the context menu in TextField with a custom toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.EditableTextToolbarBuilderExampleApp(),
     );
 
     expect(BrowserContextMenu.enabled, !kIsWeb);
@@ -32,18 +32,14 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsAtLeastNWidgets(1));
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(find.byType(TextSelectionToolbarTextButton), findsAtLeastNWidgets(1));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(DesktopTextSelectionToolbarButton), findsAtLeastNWidgets(1));
-        break;
       case TargetPlatform.macOS:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsAtLeastNWidgets(1));
-        break;
     }
     expect(find.text('Copy'), findsNothing);
     expect(find.text('Cut'), findsNothing);

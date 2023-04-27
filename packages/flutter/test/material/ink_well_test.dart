@@ -816,6 +816,91 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     );
   });
 
+  testWidgets('InkWell splash customBorder can be updated', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/121626.
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    Widget boilerplate(BorderRadius borderRadius) {
+      return Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: MouseRegion(
+                child: InkWell(
+                  focusNode: focusNode,
+                  customBorder: RoundedRectangleBorder(borderRadius: borderRadius),
+                  onTap: () { },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(20)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getRect(find.byType(InkWell)).center);
+    await tester.pump(const Duration(milliseconds: 200)); // Unconfirmed splash is well underway.
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 2)); // Splash and highlight.
+
+    const Rect expectedClipRect = Rect.fromLTRB(0, 0, 100, 100);
+    Path expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(20),
+      ));
+
+    // Check that the splash and the highlight are correctly clipped.
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        ))
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        )),
+    );
+
+    await tester.pumpWidget(boilerplate(BorderRadius.circular(40)));
+    await tester.pumpAndSettle();
+    expectedClipPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+          expectedClipRect,
+          const Radius.circular(40),
+      ));
+
+    // Check that the splash and the highlight are correctly clipped.
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        ))
+        ..clipPath(pathMatcher: coversSameAreaAs(
+          expectedClipPath,
+          areaToCompare: expectedClipRect.inflate(20.0),
+          sampleSize: 100,
+        )),
+    );
+
+    await gesture.up();
+  });
+
   testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
@@ -933,6 +1018,27 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/104595.
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: Material(
+          child: InkResponse(
+            onTap: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   group('feedback', () {
@@ -2014,5 +2120,68 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     // 50ms fadeout is 50% complete, overlay color alpha goes from 0xff to 0x80
     await tester.pump(const Duration(milliseconds: 25));
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0x8000ff00)));
+  });
+
+  testWidgets('InkWell secondary tap test', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onSecondaryTap: () {
+              log.add('secondary-tap');
+            },
+            onSecondaryTapDown: (TapDownDetails details) {
+              log.add('secondary-tap-down');
+            },
+            onSecondaryTapUp: (TapUpDetails details) {
+              log.add('secondary-tap-up');
+            },
+            onSecondaryTapCancel: () {
+              log.add('secondary-tap-cancel');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell), pointer: 1, buttons: kSecondaryButton);
+
+    expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-up', 'secondary-tap']));
+    log.clear();
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)), pointer: 2, buttons: kSecondaryButton);
+    await gesture.moveTo(const Offset(100, 100));
+    await gesture.up();
+
+    expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-cancel']));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124328.
+  testWidgets('InkWell secondary tap should not draw a splash when no secondary callbacks are defined', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTap: () {},
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getRect(find.byType(InkWell)).center,
+      buttons: kSecondaryButton,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // No splash should be painted.
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+
+    await gesture.up();
   });
 }

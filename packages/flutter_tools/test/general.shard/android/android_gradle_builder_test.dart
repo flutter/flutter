@@ -5,7 +5,9 @@
 import 'package:archive/archive.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -14,6 +16,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -23,6 +27,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('gradle build', () {
@@ -92,6 +97,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -187,6 +193,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[],
       );
       expect(processManager, hasNoRemainingExpectations);
@@ -256,6 +263,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -350,6 +358,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
               test: (String line) {
@@ -441,6 +450,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsProcessException());
@@ -520,6 +530,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[
           GradleHandledError(
             test: (String line) {
@@ -636,6 +647,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: <GradleHandledError>[],
       );
 
@@ -704,6 +716,7 @@ void main() {
         ),
         target: 'lib/main.dart',
         isBuildingBundle: false,
+        configOnly: false,
         localGradleErrors: const <GradleHandledError>[],
       );
 
@@ -712,6 +725,126 @@ void main() {
         contains('Built build/app/outputs/flutter-apk/app-release.apk (0.0MB)'),
       );
       expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('Uses namespace attribute if manifest lacks a package attribute', () async {
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      final AndroidSdk sdk = FakeAndroidSdk();
+
+      fileSystem.directory(project.android.hostAppGradleRoot)
+        .childFile('build.gradle')
+        .createSync(recursive: true);
+
+      fileSystem.directory(project.android.hostAppGradleRoot)
+        .childDirectory('app')
+        .childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+'''
+apply from: irrelevant/flutter.gradle
+
+android {
+    namespace 'com.example.foo'
+}
+''');
+
+      fileSystem.directory(project.android.hostAppGradleRoot)
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childFile('AndroidManifest.xml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:label="namespacetest"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+''');
+
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        processUtils: ProcessUtils(processManager: processManager, logger: logger),
+        userMessages: UserMessages(),
+        buildInfo: const BuildInfo(BuildMode.debug, null, treeShakeIcons: false),
+      );
+
+      expect(androidApk?.id, 'com.example.foo');
+    });
+
+    testUsingContext('can call custom gradle task getBuildOptions and parse the result', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stdout: '''
+BuildVariant: freeDebug
+BuildVariant: paidDebug
+BuildVariant: freeRelease
+BuildVariant: paidRelease
+BuildVariant: freeProfile
+BuildVariant: paidProfile
+        ''',
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, <String>['freeDebug', 'paidDebug', 'freeRelease', 'paidRelease', 'freeProfile', 'paidProfile']);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stderr: '''
+Gradle Crashed
+        ''',
+        exitCode: 1,
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, const <String>[]);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });
@@ -963,6 +1096,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1039,6 +1173,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1115,6 +1250,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1192,6 +1328,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());
@@ -1250,6 +1387,7 @@ void main() {
           ),
           target: 'lib/main.dart',
           isBuildingBundle: false,
+          configOnly: false,
           localGradleErrors: const <GradleHandledError>[],
         );
       }, throwsToolExit());

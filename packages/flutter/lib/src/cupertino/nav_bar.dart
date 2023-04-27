@@ -144,10 +144,8 @@ Widget _wrapWithBackground({
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
-        break;
       case Brightness.light:
         overlayStyle = SystemUiOverlayStyle.dark;
-        break;
     }
     // [SystemUiOverlayStyle.light] and [SystemUiOverlayStyle.dark] set some system
     // navigation bar properties,
@@ -897,7 +895,7 @@ class _LargeTitleNavigationBarSliverDelegate
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
         border: border,
-        hasUserMiddle: userMiddle != null,
+        hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
         child: navBar,
       ),
@@ -1544,7 +1542,6 @@ class _BackChevron extends StatelessWidget {
           transformHitTests: false,
           child: iconWidget,
         );
-        break;
       case TextDirection.ltr:
         break;
     }

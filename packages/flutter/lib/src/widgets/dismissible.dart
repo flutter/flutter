@@ -390,19 +390,16 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
         _dragExtent += delta;
-        break;
 
       case DismissDirection.up:
         if (_dragExtent + delta < 0) {
           _dragExtent += delta;
         }
-        break;
 
       case DismissDirection.down:
         if (_dragExtent + delta > 0) {
           _dragExtent += delta;
         }
-        break;
 
       case DismissDirection.endToStart:
         switch (Directionality.of(context)) {
@@ -410,14 +407,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             if (_dragExtent + delta > 0) {
               _dragExtent += delta;
             }
-            break;
           case TextDirection.ltr:
             if (_dragExtent + delta < 0) {
               _dragExtent += delta;
             }
-            break;
         }
-        break;
 
       case DismissDirection.startToEnd:
         switch (Directionality.of(context)) {
@@ -425,18 +419,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             if (_dragExtent + delta < 0) {
               _dragExtent += delta;
             }
-            break;
           case TextDirection.ltr:
             if (_dragExtent + delta > 0) {
               _dragExtent += delta;
             }
-            break;
         }
-        break;
 
       case DismissDirection.none:
         _dragExtent = 0;
-        break;
     }
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(() {
@@ -526,13 +516,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         }
         _dragExtent = flingVelocity.sign;
         _moveController!.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-        break;
       case _FlingGestureKind.reverse:
         assert(_dragExtent != 0.0);
         assert(!_moveController!.isDismissed);
         _dragExtent = flingVelocity.sign;
         _moveController!.fling(velocity: -flingVelocity.abs() * _kFlingVelocityScale);
-        break;
       case _FlingGestureKind.none:
         if (!_moveController!.isDismissed) { // we already know it's not completed, we check that above
           if (_moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold)) {
@@ -541,7 +529,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             _moveController!.reverse();
           }
         }
-        break;
     }
   }
 

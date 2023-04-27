@@ -92,7 +92,7 @@ void main() {
     expect(text, isNotNull);
     expect(text.textScaleFactor, 1.3);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, anyOf(131.0, 130.0));
+    expect(largeSize.width, 130.0);
     expect(largeSize.height, equals(26.0));
   });
 
@@ -135,7 +135,7 @@ void main() {
 
   testWidgets('inline widgets works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35869
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -168,7 +168,7 @@ void main() {
 
   testWidgets('inline widgets hitTest works with ellipsis', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/68559
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -514,7 +514,7 @@ void main() {
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -569,7 +569,7 @@ void main() {
   testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 200);
+    const TextStyle textStyle = TextStyle(fontSize: 200);
     const String onScreenText = 'onscreen\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n';
     const String offScreenText = 'off screen';
     final ScrollController controller = ScrollController();
@@ -637,7 +637,7 @@ void main() {
 
   testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       SizedBox(
         height: 10,
@@ -688,7 +688,7 @@ void main() {
 
   testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -746,7 +746,7 @@ void main() {
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       RichText(
         text: TextSpan(
@@ -827,7 +827,7 @@ void main() {
 
   testWidgets('TapGesture recognizers contribute link semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -867,7 +867,7 @@ void main() {
 
   testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -941,7 +941,7 @@ void main() {
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
@@ -1305,6 +1305,7 @@ void main() {
         ),
       ],
     )));
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1328,29 +1329,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'included'),
             TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              children: <TestSemantics>[
+                TestSemantics(label: 'included'),
+                TestSemantics(
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
+                TestSemantics(label: 'included2'),
               ],
             ),
-            TestSemantics(label: 'included2'),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1386,29 +1392,34 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'foo'),
-            TestSemantics(label: 'bar'),
             TestSemantics(
-              label: 'HELLO',
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isLink,
+              children: <TestSemantics>[
+                TestSemantics(label: 'foo'),
+                TestSemantics(label: 'bar'),
+                TestSemantics(
+                  label: 'HELLO',
+                  actions: <SemanticsAction>[
+                    SemanticsAction.tap,
+                  ],
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isLink,
+                  ],
+                ),
               ],
             ),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   // Regression test for https://github.com/flutter/flutter/issues/69787
@@ -1457,24 +1468,29 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(TestSemantics.root(
-      children: <TestSemantics>[
-        TestSemantics(
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
           children: <TestSemantics>[
-            TestSemantics(label: 'not clipped'),
             TestSemantics(
-              label: 'next WS is clipped',
-              flags: <SemanticsFlag>[SemanticsFlag.isLink],
-              actions: <SemanticsAction>[SemanticsAction.tap],
+              children: <TestSemantics>[
+                TestSemantics(label: 'not clipped'),
+                TestSemantics(
+                  label: 'next WS is clipped',
+                  flags: <SemanticsFlag>[SemanticsFlag.isLink],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ),
-    ignoreId: true,
-    ignoreRect: true,
-    ignoreTransform: true,
-    ));
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+    semantics.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87877
 
   testWidgets('RenderParagraph intrinsic width', (WidgetTester tester) async {
@@ -1567,6 +1583,39 @@ void main() {
 
       await tester.tap(find.text('Hello World'));
       expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: SelectionArea(
+        child: Text('Flutter'),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: DefaultSelectionStyle.merge(
+          mouseCursor: SystemMouseCursors.click,
+          child: const Text('Flutter'),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 }
 

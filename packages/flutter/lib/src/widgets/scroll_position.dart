@@ -643,19 +643,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       case AxisDirection.up:
         forward = SemanticsAction.scrollDown;
         backward = SemanticsAction.scrollUp;
-        break;
       case AxisDirection.right:
         forward = SemanticsAction.scrollLeft;
         backward = SemanticsAction.scrollRight;
-        break;
       case AxisDirection.down:
         forward = SemanticsAction.scrollUp;
         backward = SemanticsAction.scrollDown;
-        break;
       case AxisDirection.left:
         forward = SemanticsAction.scrollRight;
         backward = SemanticsAction.scrollLeft;
-        break;
     }
 
     final Set<SemanticsAction> actions = <SemanticsAction>{};
@@ -710,19 +706,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
         target = clampDouble(viewport.getOffsetToReveal(object, alignment, rect: targetRect).offset, minScrollExtent, maxScrollExtent);
-        break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
         target = clampDouble(viewport.getOffsetToReveal(object, 1.0, rect: targetRect).offset, minScrollExtent, maxScrollExtent);
         if (target < pixels) {
           target = pixels;
         }
-        break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
         target = clampDouble(viewport.getOffsetToReveal(object, 0.0, rect: targetRect).offset, minScrollExtent, maxScrollExtent);
         if (target > pixels) {
           target = pixels;
         }
-        break;
     }
 
     if (target == pixels) {

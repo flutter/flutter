@@ -214,6 +214,9 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+
+    expect(0, moreOrLessEquals(0.0));
+    expect(0.0, moreOrLessEquals(0));
   });
 
   test('matrixMoreOrLessEquals', () {
@@ -613,11 +616,11 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
-        actions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        actions |= action.index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
-        flags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        flags |= flag.index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -737,7 +740,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -789,13 +791,13 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 
   group('containsSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -889,17 +891,18 @@ void main() {
         )),
         reason: 'onTapHint "scans" should not have matched "scan".',
       );
+      handle.dispose();
     });
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
-        actions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        actions |= action.index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
-        flags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        flags |= flag.index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -1081,11 +1084,11 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      for (final int index in SemanticsAction.values.keys) {
-        allActions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        allActions |= action.index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
-        allFlags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        allFlags |= flag.index;
       }
       final SemanticsData emptyData = SemanticsData(
         flags: 0,
@@ -1233,7 +1236,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -1283,6 +1285,7 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 

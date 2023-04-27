@@ -48,7 +48,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-    ).devices, <Device>[]);
+    ).devices(), <Device>[]);
   });
 
   testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
@@ -61,7 +61,7 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       fileSystem: MemoryFileSystem.test(),
-    ).devices, hasLength(1));
+    ).devices(), hasLength(1));
   });
 
   testWithoutContext('isSupportedForProject is true with editable host app', () async {
@@ -130,5 +130,5 @@ WindowsDevice setUpWindowsDevice({
 
 class FakeWindowsApp extends Fake implements WindowsApp {
   @override
-  String executable(BuildMode buildMode) => '${buildMode.name}/executable';
+  String executable(BuildMode buildMode) => '${buildMode.cliName}/executable';
 }
