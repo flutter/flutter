@@ -900,16 +900,17 @@ void main() {
       ),
     ));
 
-    final Material material = tester.widget<Material>(
-      find.descendant(
-        of: find.byType(BottomSheet),
-        matching: find.byType(Material),
-      ),
+    final Finder finder = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.byType(Material),
     );
+    final Material material = tester.widget<Material>(finder);
+
     expect(material.color, surfaceColor);
     expect(material.surfaceTintColor, surfaceTintColor);
     expect(material.elevation, 1.0);
     expect(material.shape, defaultShape);
+    expect(tester.getSize(finder).width, 640);
   });
 
   testWidgets('BottomSheet has transparent shadow in material3', (WidgetTester tester) async {
