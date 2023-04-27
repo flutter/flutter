@@ -1444,7 +1444,7 @@ class _MoreOrLessEquals extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    if (object is! double) {
+    if (object is! num) {
       return false;
     }
     if (object == value) {
