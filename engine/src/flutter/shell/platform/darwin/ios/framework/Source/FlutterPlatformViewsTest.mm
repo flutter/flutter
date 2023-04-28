@@ -2790,4 +2790,111 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   return NO;
 }
 
+- (void)testDisposingViewInCompositionOrderDoNotCrash {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("FlutterPlatformViewsTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners);
+
+  UIView* mockFlutterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)] autorelease];
+  flutterPlatformViewsController->SetFlutterView(mockFlutterView);
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory new] autorelease];
+  flutterPlatformViewsController->RegisterViewFactory(
+      factory, @"MockFlutterPlatformView",
+      FlutterPlatformViewGestureRecognizersBlockingPolicyEager);
+  FlutterResult result = ^(id result) {
+  };
+
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @0, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+  flutterPlatformViewsController->OnMethodCall(
+      [FlutterMethodCall
+          methodCallWithMethodName:@"create"
+                         arguments:@{@"id" : @1, @"viewType" : @"MockFlutterPlatformView"}],
+      result);
+
+  {
+    // **** First frame, view id 0, 1 in the composition_order_, disposing view 0 is called. **** //
+    // No view should be disposed, or removed from the composition order.
+    flutterPlatformViewsController->BeginFrame(SkISize::Make(300, 300));
+    flutter::MutatorsStack stack;
+    SkMatrix finalMatrix;
+    auto embeddedViewParams0 =
+        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    flutterPlatformViewsController->PrerollCompositeEmbeddedView(0, std::move(embeddedViewParams0));
+    flutterPlatformViewsController->CompositeEmbeddedView(0);
+
+    auto embeddedViewParams1 =
+        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    flutterPlatformViewsController->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams1));
+    flutterPlatformViewsController->CompositeEmbeddedView(1);
+    XCTAssertEqual(flutterPlatformViewsController->EmbeddedViewCount(), 2UL);
+
+    XCTestExpectation* expectation = [self expectationWithDescription:@"dispose call ended."];
+    FlutterResult disposeResult = ^(id result) {
+      [expectation fulfill];
+    };
+
+    flutterPlatformViewsController->OnMethodCall(
+        [FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@0], disposeResult);
+    [self waitForExpectationsWithTimeout:30 handler:nil];
+
+    const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
+    sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+    flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+    auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
+        std::move(mock_sk_surface), framebuffer_info,
+        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+        /*frame_size=*/SkISize::Make(800, 600));
+    XCTAssertTrue(
+        flutterPlatformViewsController->SubmitFrame(nullptr, nullptr, std::move(mock_surface)));
+
+    // Disposing won't remove embedded views until the view is removed from the composition_order_
+    XCTAssertEqual(flutterPlatformViewsController->EmbeddedViewCount(), 2UL);
+    XCTAssertNotNil(flutterPlatformViewsController->GetPlatformViewByID(0));
+    XCTAssertNotNil(flutterPlatformViewsController->GetPlatformViewByID(1));
+  }
+
+  {
+    // **** Second frame, view id 1 in the composition_order_, no disposing view is called,  **** //
+    // View 0 is removed from the composition order in this frame, hence also disposed.
+    flutterPlatformViewsController->BeginFrame(SkISize::Make(300, 300));
+    flutter::MutatorsStack stack;
+    SkMatrix finalMatrix;
+    auto embeddedViewParams1 =
+        std::make_unique<flutter::EmbeddedViewParams>(finalMatrix, SkSize::Make(300, 300), stack);
+    flutterPlatformViewsController->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams1));
+    flutterPlatformViewsController->CompositeEmbeddedView(1);
+
+    const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
+    sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+    flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+    auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
+        std::move(mock_sk_surface), framebuffer_info,
+        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+        /*frame_size=*/SkISize::Make(800, 600));
+    XCTAssertTrue(
+        flutterPlatformViewsController->SubmitFrame(nullptr, nullptr, std::move(mock_surface)));
+
+    // Disposing won't remove embedded views until the view is removed from the composition_order_
+    XCTAssertEqual(flutterPlatformViewsController->EmbeddedViewCount(), 1UL);
+    XCTAssertNil(flutterPlatformViewsController->GetPlatformViewByID(0));
+    XCTAssertNotNil(flutterPlatformViewsController->GetPlatformViewByID(1));
+  }
+}
+
 @end
