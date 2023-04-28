@@ -1243,10 +1243,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       case PopupMenuPosition.over:
         offset = widget.offset;
       case PopupMenuPosition.under:
-        offset = Offset(
-          0.0,
-          button.size.height,
-        ) + widget.offset;
+        offset = Offset(0.0, button.size.height) + widget.offset;
         if (widget.child == null) {
           // Remove the padding of the icon button.
           offset -= Offset(0.0, widget.padding.vertical / 2);
