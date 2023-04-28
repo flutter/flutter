@@ -1058,7 +1058,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
   assert(project.isNotEmpty);
   for (final XmlElement versionElement in document.findAllElements('version')) {
     if (versionElement.parent == project.first) {
-      return versionElement.text;
+      return versionElement.innerText;
     }
   }
   throwToolExit('Error while parsing the <version> element from $pomPath');
