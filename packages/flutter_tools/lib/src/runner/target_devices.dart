@@ -12,6 +12,7 @@ import '../base/user_messages.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../ios/ios_deploy.dart';
 
 const String _checkingForWirelessDevicesMessage = 'Checking for wireless devices...';
 const String _connectedDevicesMessage = 'Connected devices:';
@@ -408,9 +409,12 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     }();
   }
 
+
+
   Future<Device?> _waitForIOSDeviceToConnect(IOSDevice device) async {
     for (final DeviceDiscovery discoverer in _deviceManager.deviceDiscoverers) {
       if (discoverer is IOSDevices) {
+
         _logger.printStatus('Waiting for ${device.name} to connect...');
         final Status waitingStatus = _logger.startSpinner(
           timeout: const Duration(seconds: 30),
@@ -484,8 +488,17 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       );
       if (devices.length == 1) {
         Device? matchedDevice = devices.first;
+
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
+
+          final bool devModeEnabled = await matchedDevice.isDevModeEnabled();
+
+          if (!devModeEnabled) {
+            throwToolExit('');
+          }
+
           matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
+
         }
         if (matchedDevice != null && matchedDevice.isConnected) {
           return <Device>[matchedDevice];

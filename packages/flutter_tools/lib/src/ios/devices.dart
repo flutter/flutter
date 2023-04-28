@@ -434,6 +434,7 @@ class IOSDevice extends Device {
         debuggingOptions.disablePortPublication) {
       throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
     }
+
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
@@ -633,6 +634,18 @@ class IOSDevice extends Device {
   @visibleForTesting
   void setLogReader(IOSApp app, DeviceLogReader logReader) {
     _logReaders[app] = logReader;
+  }
+
+  Future<bool> isDevModeEnabled() async {
+    final bool isDevModeEnabled = await _iosDeploy.testForDevMode(
+        deviceId: id
+    );
+
+    if (!isDevModeEnabled) {
+      _logger.printError('Developer Mode is not enabled on $id. Please enable it under Setting > Privacy > Enable Developer Mode');
+      return false;
+    }
+    return true;
   }
 
   @override
