@@ -214,6 +214,9 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+
+    expect(0, moreOrLessEquals(0.0));
+    expect(0.0, moreOrLessEquals(0));
   });
 
   test('matrixMoreOrLessEquals', () {
