@@ -8,7 +8,8 @@
                     "base_path": "out/linux_profile_arm64/zip_archives/",
                     "include_paths": [
                         "out/linux_profile_arm64/zip_archives/linux-arm64-profile/linux-arm64-flutter-gtk.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -45,7 +46,8 @@
                         "out/linux_debug_arm64/zip_archives/linux-arm64/font-subset.zip",
                         "out/linux_debug_arm64/zip_archives/linux-arm64-debug/linux-arm64-flutter-gtk.zip",
                         "out/linux_debug_arm64/zip_archives/dart-sdk-linux-arm64.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -81,7 +83,8 @@
                     "base_path": "out/linux_release_arm64/zip_archives/",
                     "include_paths": [
                         "out/linux_release_arm64/zip_archives/linux-arm64-release/linux-arm64-flutter-gtk.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
