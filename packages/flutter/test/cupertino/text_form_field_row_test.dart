@@ -496,7 +496,7 @@ void main() {
   testWidgets('CupertinoTextFormFieldRow onChanged to initialValue when Form reset', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String value='initialValue';
+    String value = 'initialValue';
 
     await tester.pumpWidget(
       CupertinoApp(
