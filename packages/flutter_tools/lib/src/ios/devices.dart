@@ -635,6 +635,7 @@ class IOSDevice extends Device {
     _logReaders[app] = logReader;
   }
 
+  @visibleForTesting
   Future<bool> isDeveloperModeEnabled() async {
     final bool enabled = await _iosDeploy.isDeveloperModeEnabled(
         deviceId: id
