@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' as io;
+import 'dart:io' as ios;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
