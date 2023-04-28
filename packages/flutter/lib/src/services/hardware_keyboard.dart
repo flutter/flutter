@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 import 'raw_keyboard.dart';
+import 'system_channels.dart';
 
 export 'dart:ui' show KeyData;
 
@@ -491,6 +492,20 @@ class HardwareKeyboard {
       _modifiedHandlers!.remove(handler);
     } else {
       _handlers.remove(handler);
+    }
+  }
+
+  /// Query the engine and update _pressedKeys accordingly to the engine answer.
+  Future<void> syncKeyboardState() async {
+    final Map<int, int>? keyboardState = await SystemChannels.keyboard.invokeMapMethod<int, int>(
+      'getKeyboardState',
+    );
+    if (keyboardState != null) {
+      for (final int key in keyboardState.keys) {
+        final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey(key);
+        final LogicalKeyboardKey logicalKey = LogicalKeyboardKey(keyboardState[key]!);
+        _pressedKeys[physicalKey] = logicalKey;
+      }
     }
   }
 

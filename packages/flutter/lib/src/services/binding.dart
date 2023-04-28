@@ -68,8 +68,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void _initKeyboard() {
     _keyboard = HardwareKeyboard();
     _keyEventManager = KeyEventManager(_keyboard, RawKeyboard.instance);
-    platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
-    SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+    _keyboard.syncKeyboardState().then((_) {
+      platformDispatcher.onKeyData = _keyEventManager.handleKeyData;
+      SystemChannels.keyEvent.setMessageHandler(_keyEventManager.handleRawKeyMessage);
+    });
   }
 
   /// The default instance of [BinaryMessenger].
