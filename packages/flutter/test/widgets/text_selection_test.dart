@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show ValueListenable, defaultTargetPlatform;
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,12 +12,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
 
+const int kSingleTapUpTimeout = 500;
+
 void main() {
   late int tapCount;
   late int singleTapUpCount;
   late int singleTapCancelCount;
   late int singleLongTapStartCount;
   late int doubleTapDownCount;
+  late int tripleTapDownCount;
   late int forcePressStartCount;
   late int forcePressEndCount;
   late int dragStartCount;
@@ -30,6 +33,7 @@ void main() {
   void handleSingleTapCancel() { singleTapCancelCount++; }
   void handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
   void handleDoubleTapDown(TapDragDownDetails details) { doubleTapDownCount++; }
+  void handleTripleTapDown(TapDragDownDetails details) { tripleTapDownCount++; }
   void handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
   void handleDragSelectionStart(TapDragStartDetails details) { dragStartCount++; }
@@ -42,6 +46,7 @@ void main() {
     singleTapCancelCount = 0;
     singleLongTapStartCount = 0;
     doubleTapDownCount = 0;
+    tripleTapDownCount = 0;
     forcePressStartCount = 0;
     forcePressEndCount = 0;
     dragStartCount = 0;
@@ -58,6 +63,7 @@ void main() {
         onSingleTapCancel: handleSingleTapCancel,
         onSingleLongTapStart: handleSingleLongTapStart,
         onDoubleTapDown: handleDoubleTapDown,
+        onTripleTapDown: handleTripleTapDown,
         onForcePressStart: handleForcePressStart,
         onForcePressEnd: handleForcePressEnd,
         onDragSelectionStart: handleDragSelectionStart,
@@ -113,7 +119,7 @@ void main() {
     expect(tapCount, 6);
   });
 
-  testWidgets('in a series of rapid taps, onTapDown and onDoubleTapDown alternate', (WidgetTester tester) async {
+  testWidgets('in a series of rapid taps, onTapDown, onDoubleTapDown, and onTripleTapDown alternate', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
@@ -124,20 +130,29 @@ void main() {
     expect(doubleTapDownCount, 1);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
+    expect(singleTapUpCount, 1);
+    expect(doubleTapDownCount, 1);
+    expect(tripleTapDownCount, 1);
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump(const Duration(milliseconds: 50));
     expect(singleTapUpCount, 2);
     expect(doubleTapDownCount, 1);
+    expect(tripleTapDownCount, 1);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
     expect(singleTapUpCount, 2);
     expect(doubleTapDownCount, 2);
+    expect(tripleTapDownCount, 1);
     await tester.tapAt(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(singleTapUpCount, 3);
+    expect(singleTapUpCount, 2);
     expect(doubleTapDownCount, 2);
+    expect(tripleTapDownCount, 2);
     await tester.tapAt(const Offset(200, 200));
     expect(singleTapUpCount, 3);
-    expect(doubleTapDownCount, 3);
-    expect(tapCount, 6);
+    expect(doubleTapDownCount, 2);
+    expect(tripleTapDownCount, 2);
+    expect(tapCount, 7);
   });
 
   testWidgets('quick tap-tap-hold is a double tap down', (WidgetTester tester) async {
@@ -447,8 +462,12 @@ void main() {
     expect(dragEndCount, 1);
   });
 
-  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms', (WidgetTester tester) async {
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on Apple Platforms - focused renderEditable', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    renderEditable.hasFocus = true;
+
     final TestGesture gesture = await tester.startGesture(
       const Offset(200.0, 200.0),
       pointer: 0,
@@ -457,11 +476,28 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
-    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectPositionAtCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgets('test TextSelectionGestureDetectorBuilder long press on iOS - renderEditable not focused', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+    );
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(state.showToolbarCalled, isTrue);
+    expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('test TextSelectionGestureDetectorBuilder long press on non-Apple Platforms', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
@@ -477,6 +513,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.longPress);
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('TextSelectionGestureDetectorBuilder right click Apple platforms', (WidgetTester tester) async {
@@ -503,6 +540,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.tap);
 
     // Right clicking on a word within a selection shouldn't change the selection
     renderEditable.selectWordCalled = false;
@@ -589,14 +627,14 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isTrue);
-        break;
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
       case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
-        break;
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -621,14 +659,13 @@ void main() {
       case TargetPlatform.iOS:
         expect(renderEditable.selectWordEdgeCalled, isFalse);
         expect(state.toggleToolbarCalled, isTrue);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(renderEditable.selectPositionAtCalled, isTrue);
-        break;
+        expect(renderEditable.lastCause, SelectionChangedCause.tap);
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -653,6 +690,47 @@ void main() {
 
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
+  testWidgets('test TextSelectionGestureDetectorBuilder shows spell check toolbar on single tap on iOS if word misspelled and text selection toolbar on additonal taps', (WidgetTester tester) async {
+    await pumpTextSelectionGestureDetectorBuilder(tester);
+    final FakeEditableTextState state = tester.state(find.byType(FakeEditableText));
+    final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
+    const TextSelection selection = TextSelection.collapsed(offset: 1);
+    state.updateEditingValue(const TextEditingValue(text: 'something misspelled', selection: selection));
+
+    // Mark word to be tapped as misspelled for testing.
+    state.markCurrentSelectionAsMisspelled = true;
+    await tester.pump();
+
+    // Test spell check suggestions toolbar is shown on first tap of misspelled word.
+    const Offset position = Offset(25.0, 200.0);
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isTrue);
+
+    // Reset and test text selection toolbar is toggled for additional taps.
+    state.showSpellCheckSuggestionsToolbarCalled = false;
+    renderEditable.selection = selection;
+    await tester.pump(const Duration(milliseconds: kSingleTapUpTimeout));
+
+    // Test first tap.
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isTrue);
+
+    // Reset and test second tap.
+    state.toggleToolbarCalled = false;
+    await tester.pump(const Duration(milliseconds: kSingleTapUpTimeout));
+
+    await tester.tapAt(position);
+    await tester.pumpAndSettle();
+
+    expect(state.showSpellCheckSuggestionsToolbarCalled, isFalse);
+    expect(state.toggleToolbarCalled, isTrue);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
+
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.startGesture(
@@ -670,6 +748,7 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isTrue);
     expect(renderEditable.selectWordCalled, isTrue);
+    expect(renderEditable.lastCause, SelectionChangedCause.doubleTap);
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
@@ -1374,11 +1453,11 @@ void main() {
     group('when Clipboard fails', () {
       setUp(() {
         final MockClipboard mockClipboard = MockClipboard(hasStringsThrows: true);
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('Clipboard API failure is gracefully recovered from', () async {
@@ -1394,11 +1473,11 @@ void main() {
       final MockClipboard mockClipboard = MockClipboard();
 
       setUp(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
       });
 
       tearDown(() {
-        TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       test('update sets value based on clipboard contents', () async {
@@ -1610,6 +1689,7 @@ class FakeEditableTextState extends EditableTextState {
   bool showToolbarCalled = false;
   bool toggleToolbarCalled = false;
   bool showSpellCheckSuggestionsToolbarCalled = false;
+  bool markCurrentSelectionAsMisspelled = false;
 
   @override
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
@@ -1630,6 +1710,15 @@ class FakeEditableTextState extends EditableTextState {
   bool showSpellCheckSuggestionsToolbar() {
     showSpellCheckSuggestionsToolbarCalled = true;
     return true;
+  }
+
+  @override
+  SuggestionSpan? findSuggestionSpanAtCursorIndex(int cursorIndex) {
+    return markCurrentSelectionAsMisspelled
+      ? const SuggestionSpan(
+        TextRange(start: 7, end: 12),
+        <String>['word', 'world', 'old'],
+      ) : null;
   }
 
   @override
@@ -1655,7 +1744,7 @@ class FakeEditable extends LeafRenderObjectWidget {
 class FakeRenderEditable extends RenderEditable {
   FakeRenderEditable(EditableTextState delegate) : super(
     text: const TextSpan(
-      style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+      style: TextStyle(height: 1.0, fontSize: 10.0),
       text: 'placeholder',
     ),
     startHandleLayerLink: LayerLink(),
@@ -1671,11 +1760,14 @@ class FakeRenderEditable extends RenderEditable {
     ),
   );
 
+  SelectionChangedCause? lastCause;
+
   bool selectWordsInRangeCalled = false;
   @override
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     selectWordsInRangeCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectWordEdgeCalled = false;
@@ -1683,6 +1775,7 @@ class FakeRenderEditable extends RenderEditable {
   void selectWordEdge({ required SelectionChangedCause cause }) {
     selectWordEdgeCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectPositionAtCalled = false;
@@ -1694,12 +1787,14 @@ class FakeRenderEditable extends RenderEditable {
     selectPositionAtFrom = from;
     selectPositionAtTo = to;
     hasFocus = true;
+    lastCause = cause;
   }
 
   bool selectPositionCalled = false;
   @override
   void selectPosition({ required SelectionChangedCause cause }) {
     selectPositionCalled = true;
+    lastCause = cause;
     return super.selectPosition(cause: cause);
   }
 
@@ -1708,6 +1803,7 @@ class FakeRenderEditable extends RenderEditable {
   void selectWord({ required SelectionChangedCause cause }) {
     selectWordCalled = true;
     hasFocus = true;
+    lastCause = cause;
   }
 
   @override
@@ -1740,7 +1836,7 @@ class TextSelectionControlsSpy extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return Text('dummy', key: toolBarKey);

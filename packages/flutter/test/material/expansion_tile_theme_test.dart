@@ -47,6 +47,12 @@ void main() {
     expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
   });
 
+  test('ExpansionTileThemeData lerp special cases', () {
+    expect(ExpansionTileThemeData.lerp(null, null, 0), null);
+    const ExpansionTileThemeData data = ExpansionTileThemeData();
+    expect(identical(ExpansionTileThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ExpansionTileThemeData defaults', () {
     const ExpansionTileThemeData theme = ExpansionTileThemeData();
     expect(theme.backgroundColor, null);

@@ -166,11 +166,11 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
 
     final Completer<ForwardedPort?> completer = Completer<ForwardedPort?>();
 
-    // read the outputs of the process, if we find a line that matches
+    // Read the outputs of the process; if we find a line that matches
     // the configs forwardPortSuccessRegex, we complete with a successfully
-    // forwarded port
-    // Note that if that regex never matches, this will potentially run forever
-    // and the forwarding will never complete
+    // forwarded port.
+    // If that regex never matches, this will potentially run forever
+    // and the forwarding will never complete.
     final CustomDeviceLogReader reader = CustomDeviceLogReader(_deviceName)..listenToProcessOutput(process);
     final StreamSubscription<String> logLinesSubscription = reader.logLines.listen((String line) {
       if (_forwardPortSuccessRegex.hasMatch(line) && !completer.isCompleted) {
@@ -309,7 +309,7 @@ class CustomDeviceAppSession {
         'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
-          'observatory-port=${debuggingOptions.deviceVmServicePort}',
+          'vm-service-port=${debuggingOptions.deviceVmServicePort}',
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           'enable-checked-mode=true',
           'verify-entry-points=true',
@@ -374,7 +374,7 @@ class CustomDeviceAppSession {
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.observatory(
+    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -388,14 +388,14 @@ class CustomDeviceAppSession {
     // in the same microtask AFAICT but this way we're on the safe side.
     logReader.listenToProcessOutput(process);
 
-    final Uri? observatoryUri = await discovery.uri;
+    final Uri? vmServiceUri = await discovery.uri;
     await discovery.cancel();
 
     if (_device._config.usesPortForwarding) {
-      _forwardedHostPort = observatoryUri?.port;
+      _forwardedHostPort = vmServiceUri?.port;
     }
 
-    return LaunchResult.succeeded(observatoryUri: observatoryUri);
+    return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
   }
 
   void _maybeUnforwardPort() {

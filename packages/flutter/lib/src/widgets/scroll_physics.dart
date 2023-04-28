@@ -67,6 +67,11 @@ enum ScrollDecelerationRate {
 /// // ...
 /// final ScrollPhysics mergedPhysics = physics.applyTo(const AlwaysScrollableScrollPhysics());
 /// ```
+///
+/// When implementing a subclass, you must override [applyTo] so that it returns
+/// an appropriate instance of your subclass.  Otherwise, classes like
+/// [Scrollable] that inform a [ScrollPosition] will combine them with
+/// the default [ScrollPhysics] object instead of your custom subclass.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -192,7 +197,8 @@ class ScrollPhysics {
   }
 
   /// Whether the scrollable should let the user adjust the scroll offset, for
-  /// example by dragging.
+  /// example by dragging. If [allowUserScrolling] is false, the scrollable
+  /// will never allow user input to change the scroll position.
   ///
   /// By default, the user can manipulate the scroll offset if, and only if,
   /// there is actually content outside the viewport to reveal.
@@ -201,6 +207,10 @@ class ScrollPhysics {
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
   bool shouldAcceptUserOffset(ScrollMetrics position) {
+    if (!allowUserScrolling) {
+      return false;
+    }
+
     if (parent == null) {
       return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     }
@@ -365,6 +375,28 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
+  ///
+  /// This method can potentially be called in every frame, even in the middle
+  /// of what the user perceives as a single ballistic scroll.  For example, in
+  /// a [ListView] when previously off-screen items come into view and are laid
+  /// out, this method may be called with a new [ScrollMetrics.maxScrollExtent].
+  /// The method implementation should ensure that when the same ballistic
+  /// scroll motion is still intended, these calls have no side effects on the
+  /// physics beyond continuing that motion.
+  ///
+  /// Generally this is ensured by having the [Simulation] conform to a physical
+  /// metaphor of a particle in ballistic flight, where the forces on the
+  /// particle depend only on its position, velocity, and environment, and not
+  /// on the current time or any internal state.  This means that the
+  /// time-derivative of [Simulation.dx] should be possible to write
+  /// mathematically as a function purely of the values of [Simulation.x],
+  /// [Simulation.dx], and the parameters used to construct the [Simulation],
+  /// independent of the time.
+  // TODO(gnprice): Some scroll physics in the framework violate that invariant; fix them.
+  //   An audit found three cases violating the invariant:
+  //     https://github.com/flutter/flutter/issues/120338
+  //     https://github.com/flutter/flutter/issues/120340
+  //     https://github.com/flutter/flutter/issues/109675
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     if (parent == null) {
       return null;
@@ -459,6 +491,9 @@ class ScrollPhysics {
   /// whether the viewport associated with this object is allowed to change the
   /// scroll position to fulfill such a request.
   bool get allowImplicitScrolling => true;
+
+  /// Whether a viewport is allowed to change the scroll position as the result of user input.
+  bool get allowUserScrolling => true;
 
   @override
   String toString() {
@@ -658,7 +693,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double frictionFactor(double overscrollFraction) {
     switch (decelerationRate) {
       case ScrollDecelerationRate.fast:
-        return 0.07 * math.pow(1 - overscrollFraction, 2);
+        return 0.26 * math.pow(1 - overscrollFraction, 2);
       case ScrollDecelerationRate.normal:
         return 0.52 * math.pow(1 - overscrollFraction, 2);
     }
@@ -685,6 +720,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
         : frictionFactor(overscrollPast / position.viewportDimension);
     final double direction = offset.sign;
 
+    if (easing && decelerationRate == ScrollDecelerationRate.fast) {
+      return direction * offset.abs();
+    }
     return direction * _applyFriction(overscrollPast, offset.abs(), friction);
   }
 
@@ -713,10 +751,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
       switch (decelerationRate) {
         case ScrollDecelerationRate.fast:
           constantDeceleration = 1400;
-          break;
         case ScrollDecelerationRate.normal:
           constantDeceleration = 0;
-          break;
       }
       return BouncingScrollSimulation(
         spring: spring,
@@ -937,7 +973,7 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  bool shouldAcceptUserOffset(ScrollMetrics position) => false;
+  bool get allowUserScrolling => false;
 
   @override
   bool get allowImplicitScrolling => false;

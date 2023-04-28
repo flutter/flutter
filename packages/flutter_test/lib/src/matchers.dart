@@ -10,10 +10,8 @@ import 'package:flutter/material.dart' show Card;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-// This import is discouraged in general, but we need it to implement flutter_test.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart';
+import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
@@ -1446,7 +1444,7 @@ class _MoreOrLessEquals extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    if (object is! double) {
+    if (object is! num) {
       return false;
     }
     if (object == value) {
@@ -2533,7 +2531,11 @@ class _MatchesSemanticsData extends Matcher {
 
   static String _createEnumsSummary<T extends Object>(List<T> enums) {
     assert(T == SemanticsAction || T == SemanticsFlag, 'This method is only intended for lists of SemanticsActions or SemanticsFlags.');
-    return '[${enums.map(describeEnum).join(', ')}]';
+    if (T == SemanticsAction) {
+      return '[${(enums as List<SemanticsAction>).map((SemanticsAction d) => d.name).join(', ')}]';
+    } else {
+      return '[${(enums as List<SemanticsFlag>).map((SemanticsFlag d) => d.name).join(', ')}]';
+    }
   }
 }
 

@@ -648,7 +648,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
-  /// Note that this includes entering and leaving the target.
+  /// This includes entering and leaving the target.
   final DragTargetMove<T>? onMove;
 
   /// How to behave during hit testing.
@@ -896,10 +896,12 @@ class _DragAvatar<T extends Object> extends Drag {
     return Positioned(
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
-      child: IgnorePointer(
-        ignoring: ignoringFeedbackPointer,
-        ignoringSemantics: ignoringFeedbackSemantics,
-        child: feedback,
+      child: ExcludeSemantics(
+        excluding: ignoringFeedbackSemantics,
+        child: IgnorePointer(
+          ignoring: ignoringFeedbackPointer,
+          child: feedback,
+        ),
       ),
     );
   }

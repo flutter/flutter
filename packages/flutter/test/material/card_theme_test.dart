@@ -16,6 +16,12 @@ void main() {
     expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
   });
 
+  test('CardTheme lerp special cases', () {
+    expect(CardTheme.lerp(null, null, 0), const CardTheme());
+    const CardTheme theme = CardTheme();
+    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(

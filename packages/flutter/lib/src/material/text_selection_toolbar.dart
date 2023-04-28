@@ -4,9 +4,9 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'icon_button.dart';
@@ -76,15 +76,6 @@ class TextSelectionToolbar extends StatelessWidget {
   /// {@endtemplate}
   final ToolbarBuilder toolbarBuilder;
 
-  /// Minimal padding from all edges of the selection toolbar to all edges of the
-  /// viewport.
-  ///
-  /// See also:
-  ///
-  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
-  ///    padding from the edges of the viewport.
-  static const double kToolbarScreenPadding = 8.0;
-
   /// The size of the text selection handles.
   ///
   /// See also:
@@ -111,19 +102,20 @@ class TextSelectionToolbar extends StatelessWidget {
     final Offset anchorBelowPadded =
         anchorBelow + const Offset(0.0, kToolbarContentDistanceBelow);
 
+    const double screenPadding = CupertinoTextSelectionToolbar.kToolbarScreenPadding;
     final double paddingAbove = MediaQuery.paddingOf(context).top
-        + kToolbarScreenPadding;
+        + screenPadding;
     final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
     // Makes up for the Padding above the Stack.
-    final Offset localAdjustment = Offset(kToolbarScreenPadding, paddingAbove);
+    final Offset localAdjustment = Offset(screenPadding, paddingAbove);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        kToolbarScreenPadding,
+        screenPadding,
         paddingAbove,
-        kToolbarScreenPadding,
-        kToolbarScreenPadding,
+        screenPadding,
+        screenPadding,
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(
@@ -373,7 +365,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 // Renders the menu items in the correct positions in the menu and its overflow
 // submenu based on calculating which item would first overflow.
 class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
-  _TextSelectionToolbarItemsLayout({
+  const _TextSelectionToolbarItemsLayout({
     required this.isAbove,
     required this.overflowOpen,
     required super.children,

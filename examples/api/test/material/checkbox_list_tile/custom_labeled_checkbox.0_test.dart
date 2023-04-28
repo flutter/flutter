@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('LinkedLabelCheckbox contains RichText and Checkbox', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.LabeledCheckBoxApp(),
+      const example.LabeledCheckboxApp(),
     );
 
     // Label text is in a RichText widget with the correct text.

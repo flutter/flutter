@@ -116,9 +116,7 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
   }
 }
 
-class _UntilNextFrame {
-  _UntilNextFrame._();
-
+abstract final class _UntilNextFrame {
   static Completer<void>? _completer;
 
   static Future<void> wait() {

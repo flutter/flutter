@@ -26,12 +26,12 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'empty'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   const String testText =
@@ -89,38 +89,6 @@ void main() {
       ),
     );
   }
-
-  testWidgets(
-    'Movement/Deletion shortcuts do nothing when the selection is invalid',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(buildEditableText());
-      controller.text = testText;
-      controller.selection = const TextSelection.collapsed(offset: -1);
-      await tester.pump();
-
-      const List<LogicalKeyboardKey> triggers = <LogicalKeyboardKey>[
-        LogicalKeyboardKey.backspace,
-        LogicalKeyboardKey.delete,
-        LogicalKeyboardKey.arrowLeft,
-        LogicalKeyboardKey.arrowRight,
-        LogicalKeyboardKey.arrowUp,
-        LogicalKeyboardKey.arrowDown,
-        LogicalKeyboardKey.pageUp,
-        LogicalKeyboardKey.pageDown,
-        LogicalKeyboardKey.home,
-        LogicalKeyboardKey.end,
-      ];
-
-      for (final SingleActivator activator in triggers.expand(allModifierVariants)) {
-        await sendKeyCombination(tester, activator);
-        await tester.pump();
-        expect(controller.text, testText, reason: activator.toString());
-        expect(controller.selection, const TextSelection.collapsed(offset: -1), reason: activator.toString());
-      }
-    },
-    skip: kIsWeb, // [intended] on web these keys are handled by the browser.
-    variant: TargetPlatformVariant.all(),
-  );
 
   group('Common text editing shortcuts: ',
     () {

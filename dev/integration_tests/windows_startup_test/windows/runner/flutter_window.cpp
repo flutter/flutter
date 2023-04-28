@@ -114,6 +114,7 @@ bool FlutterWindow::OnCreate() {
         for (int32_t code_point : code_points) {
           wide_str.push_back((wchar_t)(code_point));
         }
+        wide_str.push_back((wchar_t)0);
         const std::string string = Utf8FromUtf16(wide_str.data());
         result->Success(string);
       } else {

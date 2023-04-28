@@ -655,7 +655,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 }
 
 class _MergeableMaterialListBody extends ListBody {
-  _MergeableMaterialListBody({
+  const _MergeableMaterialListBody({
     required super.children,
     super.mainAxis,
     required this.items,

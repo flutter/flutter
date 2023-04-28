@@ -278,14 +278,14 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
+        enableImpeller: ImpellerStatus.enabled,
         nullAssertions: true,
-        enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',
     );
 
-    // This fails to start due to observatory discovery issues.
+    // This fails to start due to VM Service discovery issues.
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });

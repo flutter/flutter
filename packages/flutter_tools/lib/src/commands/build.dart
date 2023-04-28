@@ -110,13 +110,8 @@ abstract class BuildSubCommand extends FlutterCommand {
   /// This is similar to the run message in run_hot.dart
   @protected
   void displayNullSafetyMode(BuildInfo buildInfo) {
-    _logger.printStatus('');
-    if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-      _logger.printStatus(
-        '💪 Building with sound null safety 💪',
-        emphasis: true,
-      );
-    } else {
+    if (buildInfo.nullSafetyMode != NullSafetyMode.sound) {
+      _logger.printStatus('');
       _logger.printStatus(
         'Building without sound null safety ⚠️',
         emphasis: true,

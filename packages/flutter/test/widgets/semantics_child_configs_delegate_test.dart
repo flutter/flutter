@@ -71,6 +71,7 @@ void main() {
         ),
       ],
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+    semantics.dispose();
   });
 
   testWidgets('Semantics can drop semantics config', (WidgetTester tester) async {
@@ -128,6 +129,7 @@ void main() {
         ),
       ],
     ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+    semantics.dispose();
   });
 
   testWidgets('Semantics throws when mark the same config twice case 1', (WidgetTester tester) async {

@@ -152,7 +152,7 @@ Future<void> main() async {
 
     // Border color is resolved correctly.
     final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
-    expect(decoration1.border!.top.color.value, 0x4C000000);
+    expect(decoration1.border!.top.color.value, 0x4D000000);
 
     // Switch to dark mode.
     await pumpWidgetWithBoilerplate(tester, MediaQuery(

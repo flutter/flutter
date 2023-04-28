@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_ffx.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
@@ -32,6 +33,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
+import '../../src/fakes.dart';
 
 final vm_service.Isolate fakeIsolate = vm_service.Isolate(
   id: '1',
@@ -483,6 +485,7 @@ void main() {
       expect(device.supportsScreenshot, true);
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('is not supported on Windows', () {
@@ -493,6 +496,7 @@ void main() {
       Platform: () => FakePlatform(
             operatingSystem: 'windows',
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     test("takeScreenshot throws if file isn't .ppm", () async {
@@ -532,6 +536,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext('takeScreenshot throws if scp failed', () async {
@@ -582,6 +587,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
 
     testUsingContext(
@@ -632,6 +638,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     }, testOn: 'posix');
 
     testUsingContext('takeScreenshot returns', () async {
@@ -674,6 +681,7 @@ void main() {
               'FUCHSIA_SSH_CONFIG': '/fuchsia/out/default/.ssh',
             },
           ),
+      FeatureFlags: () => TestFeatureFlags(isFuchsiaEnabled: true),
     });
   });
 
@@ -1035,7 +1043,7 @@ class FakeDartDevelopmentService extends Fake
     implements DartDevelopmentService {
   @override
   Future<void> startDartDevelopmentService(
-    Uri observatoryUri, {
+    Uri vmServiceUri, {
     required Logger logger,
     int? hostPort,
     bool? ipv6,

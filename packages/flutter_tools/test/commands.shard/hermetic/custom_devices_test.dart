@@ -1120,7 +1120,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Successfully resetted the custom devices config file and created a '
+            'Successfully reset the custom devices config file and created a '
             'backup at "/.flutter_custom_devices.json.bak".'
           )
         );
@@ -1152,7 +1152,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Successfully resetted the custom devices config file.'
+            'Successfully reset the custom devices config file.'
           )
         );
 

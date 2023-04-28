@@ -405,7 +405,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 }
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedControlRenderWidget({
+  const _SegmentedControlRenderWidget({
     super.key,
     super.children,
     required this.selectedIndex,
@@ -657,14 +657,12 @@ class _RenderSegmentedControl<T> extends RenderBox
           lastChild,
           firstChild,
         );
-        break;
       case TextDirection.ltr:
         _layoutRects(
           childAfter,
           firstChild,
           lastChild,
         );
-        break;
     }
 
     size = _computeOverallSizeFromChildSize(childSize);

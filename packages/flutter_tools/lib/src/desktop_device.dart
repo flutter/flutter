@@ -123,9 +123,9 @@ abstract class DesktopDevice extends Device {
     }
 
     // Ensure that the executable is locatable.
-    final BuildMode buildMode = debuggingOptions.buildInfo.mode;
+    final BuildInfo buildInfo = debuggingOptions.buildInfo;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    final String? executable = executablePathForDevice(package, buildMode);
+    final String? executable = executablePathForDevice(package, buildInfo);
     if (executable == null) {
       _logger.printError('Unable to find executable to run');
       return LaunchResult.failed();
@@ -152,17 +152,17 @@ abstract class DesktopDevice extends Device {
     if (debuggingOptions.buildInfo.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
+    final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: ipv6,
       logger: _logger,
     );
     try {
-      final Uri? observatoryUri = await observatoryDiscovery.uri;
-      if (observatoryUri != null) {
-        onAttached(package, buildMode, process);
-        return LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri? vmServiceUri = await vmServiceDiscovery.uri;
+      if (vmServiceUri != null) {
+        onAttached(package, buildInfo, process);
+        return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
         'Error waiting for a debug connection: '
@@ -171,7 +171,7 @@ abstract class DesktopDevice extends Device {
     } on Exception catch (error) {
       _logger.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery.cancel();
+      await vmServiceDiscovery.cancel();
     }
     return LaunchResult.failed();
   }
@@ -203,11 +203,11 @@ abstract class DesktopDevice extends Device {
 
   /// Returns the path to the executable to run for [package] on this device for
   /// the given [buildMode].
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode);
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(ApplicationPackage package, BuildMode buildMode, Process process) {}
+  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
@@ -270,7 +270,7 @@ abstract class DesktopDevice extends Device {
     // tool and the device, usually in debug or profile mode.
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.deviceVmServicePort != null) {
-        addFlag('observatory-port=${debuggingOptions.deviceVmServicePort}');
+        addFlag('vm-service-port=${debuggingOptions.deviceVmServicePort}');
       }
       if (debuggingOptions.buildInfo.isDebug) {
         addFlag('enable-checked-mode=true');

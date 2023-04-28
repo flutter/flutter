@@ -23,7 +23,7 @@ enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
 
-  /// Button text is [ThemeData.accentColor].
+  /// Button text is [ColorScheme.secondary].
   accent,
 
   /// Button text is based on [ThemeData.primaryColor].

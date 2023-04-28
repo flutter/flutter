@@ -103,6 +103,32 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.text('removing item'), findsNothing);
+
+    listKey.currentState!.insertAllItems(0, 2);
+    await tester.pump();
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('item 3'), findsOneWidget);
+
+    // Test for removeAllItems.
+    listKey.currentState!.removeAllItems(
+          (BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing item')),
+        );
+      },
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsWidgets);
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('item 2'), findsNothing);
+    expect(find.text('item 3'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('removing item'), findsNothing);
   });
 
   group('SliverAnimatedGrid', () {
@@ -224,6 +250,62 @@ void main() {
       expect(itemRight(2), 300.0);
     });
 
+    testWidgets('insertAll', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedGrid(
+                key: listKey,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return ScaleTransition(
+                    key: ValueKey<int>(index),
+                    scale: animation,
+                    child: SizedBox(
+                      height: 100.0,
+                      child: Center(child: Text('item $index')),
+                    ),
+                  );
+                },
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 100.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      double itemScale(int index) =>
+          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
+      double itemLeft(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
+      double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
+
+      listKey.currentState!.insertAllItems(0, 2, duration: const Duration(milliseconds: 100));
+      await tester.pump();
+
+      // Newly inserted items 0 & 1's scale should animate from 0 to 1
+      expect(itemScale(0), 0.0);
+      expect(itemScale(1), 0.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemScale(0), 0.5);
+      expect(itemScale(1), 0.5);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(itemScale(0), 1.0);
+      expect(itemScale(1), 1.0);
+
+      // The list now contains two fully expanded items at the top:
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(itemLeft(0), 0.0);
+      expect(itemRight(0), 100.0);
+      expect(itemLeft(1), 100.0);
+      expect(itemRight(1), 200.0);
+    });
+
     testWidgets('remove', (WidgetTester tester) async {
       final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
       final List<int> items = <int>[0, 1, 2];
@@ -300,6 +382,58 @@ void main() {
       expect(itemRight(1), 100.0);
       expect(itemLeft(2), 100.0);
       expect(itemRight(2), 200.0);
+    });
+
+    testWidgets('removeAll', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedGridState> listKey = GlobalKey<SliverAnimatedGridState>();
+      final List<int> items = <int>[0, 1, 2];
+
+      Widget buildItem(BuildContext context, int item, Animation<double> animation) {
+        return ScaleTransition(
+          key: ValueKey<int>(item),
+          scale: animation,
+          child: SizedBox(
+            height: 100.0,
+            child: Center(
+              child: Text('item $item', textDirection: TextDirection.ltr),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAnimatedGrid(
+                key: listKey,
+                initialItemCount: 3,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return buildItem(context, items[index], animation);
+                },
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 100.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.text('item 0'), findsOneWidget);
+      expect(find.text('item 1'), findsOneWidget);
+      expect(find.text('item 2'), findsOneWidget);
+
+      items.clear();
+      listKey.currentState!.removeAllItems((BuildContext context, Animation<double> animation) => buildItem(context, 0, animation),
+        duration: const Duration(milliseconds: 100),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('item 0'), findsNothing);
+      expect(find.text('item 1'), findsNothing);
+      expect(find.text('item 2'), findsNothing);
     });
 
     testWidgets('works in combination with other slivers', (WidgetTester tester) async {

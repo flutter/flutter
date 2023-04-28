@@ -17,6 +17,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
 import 'clipboard.dart' show Clipboard;
+import 'keyboard_inserted_content.dart';
 import 'message_codec.dart';
 import 'platform_channel.dart';
 import 'system_channels.dart';
@@ -477,6 +478,7 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
     this.autofillConfiguration = AutofillConfiguration.disabled,
     this.enableIMEPersonalizedLearning = true,
+    this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
   }) : smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
@@ -618,6 +620,9 @@ class TextInputConfiguration {
   /// {@endtemplate}
   final bool enableIMEPersonalizedLearning;
 
+  /// {@macro flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
+  final List<String> allowedMimeTypes;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -634,6 +639,7 @@ class TextInputConfiguration {
     Brightness? keyboardAppearance,
     TextCapitalization? textCapitalization,
     bool? enableIMEPersonalizedLearning,
+    List<String>? allowedMimeTypes,
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
   }) {
@@ -650,6 +656,7 @@ class TextInputConfiguration {
       textCapitalization: textCapitalization ?? this.textCapitalization,
       keyboardAppearance: keyboardAppearance ?? this.keyboardAppearance,
       enableIMEPersonalizedLearning: enableIMEPersonalizedLearning?? this.enableIMEPersonalizedLearning,
+      allowedMimeTypes: allowedMimeTypes ?? this.allowedMimeTypes,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
     );
@@ -697,6 +704,7 @@ class TextInputConfiguration {
       'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
       'enableIMEPersonalizedLearning': enableIMEPersonalizedLearning,
+      'contentCommitMimeTypes': allowedMimeTypes,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel' : enableDeltaModel,
     };
@@ -1104,6 +1112,9 @@ mixin TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  /// Notify client about new content insertion from Android keyboard.
+  void insertContent(KeyboardInsertedContent content) {}
 
   /// Request from the input method that this client perform the given private
   /// command.
@@ -1832,7 +1843,6 @@ class TextInput {
       case 'TextInputClient.updateEditingState':
         final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
-        break;
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
         final List<TextEditingDelta> deltas = <TextEditingDelta>[];
@@ -1845,14 +1855,16 @@ class TextInput {
         }
 
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
-        break;
       case 'TextInputClient.performAction':
-        _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
-        break;
+        if (args[1] as String == 'TextInputAction.commitContent') {
+          final KeyboardInsertedContent content = KeyboardInsertedContent.fromJson(args[2] as Map<String, dynamic>);
+          _currentConnection!._client.insertContent(content);
+        } else {
+          _currentConnection!._client.performAction(_toTextInputAction(args[1] as String));
+        }
       case 'TextInputClient.performSelectors':
         final List<String> selectors = (args[1] as List<dynamic>).cast<String>();
         selectors.forEach(_currentConnection!._client.performSelector);
-        break;
       case 'TextInputClient.performPrivateCommand':
         final Map<String, dynamic> firstArg = args[1] as Map<String, dynamic>;
         _currentConnection!._client.performPrivateCommand(
@@ -1861,28 +1873,21 @@ class TextInput {
               ? <String, dynamic>{}
               : firstArg['data'] as Map<String, dynamic>,
         );
-        break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection!._client.updateFloatingCursor(_toTextPoint(
           _toTextCursorAction(args[1] as String),
           args[2] as Map<String, dynamic>,
         ));
-        break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection!._client.connectionClosed();
-        break;
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
-        break;
       case 'TextInputClient.showToolbar':
         _currentConnection!._client.showToolbar();
-        break;
       case 'TextInputClient.insertTextPlaceholder':
         _currentConnection!._client.insertTextPlaceholder(Size((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-        break;
       case 'TextInputClient.removeTextPlaceholder':
         _currentConnection!._client.removeTextPlaceholder();
-        break;
       default:
         throw MissingPluginException();
     }

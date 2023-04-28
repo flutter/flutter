@@ -144,13 +144,23 @@ Widget _wrapWithBackground({
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
-        break;
       case Brightness.light:
         overlayStyle = SystemUiOverlayStyle.dark;
-        break;
     }
+    // [SystemUiOverlayStyle.light] and [SystemUiOverlayStyle.dark] set some system
+    // navigation bar properties,
+    // Before https://github.com/flutter/flutter/pull/104827 those properties
+    // had no effect, now they are used if there is no AnnotatedRegion on the
+    // bottom of the screen.
+    // For backward compatibility, create a `SystemUiOverlayStyle` without the
+    // system navigation bar properties.
     result = AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
+      value: SystemUiOverlayStyle(
+        statusBarColor: overlayStyle.statusBarColor,
+        statusBarBrightness: overlayStyle.statusBarBrightness,
+        statusBarIconBrightness: overlayStyle.statusBarIconBrightness,
+        systemStatusBarContrastEnforced: overlayStyle.systemStatusBarContrastEnforced,
+      ),
       child: result,
     );
   }
@@ -885,7 +895,7 @@ class _LargeTitleNavigationBarSliverDelegate
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
         border: border,
-        hasUserMiddle: userMiddle != null,
+        hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
         child: navBar,
       ),
@@ -955,8 +965,8 @@ class _RenderLargeTitle extends RenderShiftedBox {
       return;
     }
 
-    final BoxConstraints childConstriants = constraints.widthConstraints().loosen();
-    child.layout(childConstriants, parentUsesSize: true);
+    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
+    child.layout(childConstraints, parentUsesSize: true);
 
     final double maxScale = child.size.width != 0.0
       ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
@@ -1532,7 +1542,6 @@ class _BackChevron extends StatelessWidget {
           transformHitTests: false,
           child: iconWidget,
         );
-        break;
       case TextDirection.ltr:
         break;
     }

@@ -14,6 +14,12 @@ void main() {
     expect(const ButtonStyle().hashCode, const ButtonStyle().copyWith().hashCode);
   });
 
+  test('ButtonStyle lerp special cases', () {
+    expect(ButtonStyle.lerp(null, null, 0), null);
+    const ButtonStyle data = ButtonStyle();
+    expect(identical(ButtonStyle.lerp(data, data, 0.5), data), true);
+  });
+
   test('ButtonStyle defaults', () {
     const ButtonStyle style = ButtonStyle();
     expect(style.textStyle, null);

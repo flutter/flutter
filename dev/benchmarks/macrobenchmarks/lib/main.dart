@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'common.dart';
-
+import 'src/animated_blur_backdrop_filter.dart';
 import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
 import 'src/animated_image.dart';
@@ -34,6 +34,7 @@ import 'src/raster_cache_use_memory.dart';
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
+import 'src/sliders.dart';
 import 'src/stack_size.dart';
 import 'src/text.dart';
 
@@ -84,6 +85,8 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedComplexOpacityPerfRouteName: (BuildContext context) => const AnimatedComplexOpacity(),
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
         kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
+        kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
+        kSlidersRouteName: (BuildContext context) => const SlidersPage(),
       },
     );
   }
@@ -201,7 +204,7 @@ class HomePage extends StatelessWidget {
           ),
           ElevatedButton(
             key: const Key(kColorFilterWithUnstableChildName),
-            child: const Text('Color Filter with Ustable Child'),
+            child: const Text('Color Filter with Unstable Child'),
             onPressed: () {
               Navigator.pushNamed(context, kColorFilterWithUnstableChildName);
             },
@@ -309,6 +312,20 @@ class HomePage extends StatelessWidget {
             child: const Text('A list with lots of text'),
             onPressed: () {
               Navigator.pushNamed(context, kListTextLayoutRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedBlurBackdropFilter),
+            child: const Text('An animating backdrop filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedBlurBackdropFilter);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kSlidersRouteName),
+            child: const Text('Sliders'),
+            onPressed: () {
+              Navigator.pushNamed(context, kSlidersRouteName);
             },
           ),
         ],

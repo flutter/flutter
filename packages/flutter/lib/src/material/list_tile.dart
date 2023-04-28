@@ -12,6 +12,8 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'list_tile_theme.dart';
@@ -61,6 +63,49 @@ enum ListTileControlAffinity {
   platform,
 }
 
+/// Defines how [ListTile.leading] and [ListTile.trailing] are
+/// vertically aligned relative to the [ListTile]'s titles
+/// ([ListTile.title] and [ListTile.subtitle]).
+///
+/// See also:
+///
+///  * [ListTile.titleAlignment], to configure the title alignment for an
+///    individual [ListTile].
+///  * [ListTileThemeData.titleAlignment], to configure the title alignment
+///    for all of the [ListTile]s under a [ListTileTheme].
+///  * [ThemeData.listTileTheme], to configure the [ListTileTheme]
+///    for an entire app.
+enum ListTileTitleAlignment {
+  /// The top of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed [ListTile.minVerticalPadding] below the top of the [ListTile.title]
+  /// if [ListTile.isThreeLine] is true, otherwise they're centered relative
+  /// to the [ListTile.title] and [ListTile.subtitle] widgets.
+  ///
+  /// This is the default when [ThemeData.useMaterial3] is true.
+  threeLine,
+
+  /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed 16 units below the top of the [ListTile.title]
+  /// if the titles' overall height is greater than 72, otherwise they're
+  /// centered relative to the [ListTile.title] and [ListTile.subtitle] widgets.
+  ///
+  /// This is the default when [ThemeData.useMaterial3] is false.
+  titleHeight,
+
+  /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed [ListTile.minVerticalPadding] below the top of the [ListTile.title].
+  top,
+
+  /// The [ListTile.leading] and [ListTile.trailing] widgets are
+  /// centered relative to the [ListTile]'s titles.
+  center,
+
+  /// The bottoms of the [ListTile.leading] and [ListTile.trailing] widgets are
+  /// placed [ListTile.minVerticalPadding] above the bottom of the [ListTile]'s
+  /// titles.
+  bottom,
+}
+
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
 ///
@@ -86,7 +131,7 @@ enum ListTileControlAffinity {
 /// see the example below to see how to adhere to both Material spec and
 /// accessibility requirements.
 ///
-/// Note that [leading] and [trailing] widgets can expand as far as they wish
+/// The [leading] and [trailing] widgets can expand as far as they wish
 /// horizontally, so ensure that they are properly constrained.
 ///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
@@ -154,14 +199,22 @@ enum ListTileControlAffinity {
 /// ** See code in examples/api/lib/material/list_tile/list_tile.3.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [ListTile.titleAlignment] can be used to configure the
+/// [leading] and [trailing] widgets alignment relative to the [title] and
+/// [subtitle] widgets.
+///
+/// ** See code in examples/api/lib/material/list_tile/list_tile.4.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 /// To use a [ListTile] within a [Row], it needs to be wrapped in an
 /// [Expanded] widget. [ListTile] requires fixed width constraints,
 /// whereas a [Row] does not constrain its children.
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     Expanded(
 ///       child: ListTile(
 ///         leading: FlutterLogo(),
@@ -315,6 +368,7 @@ class ListTile extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.minLeadingWidth,
+    this.titleAlignment,
   }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
@@ -420,7 +474,7 @@ class ListTile extends StatelessWidget {
   /// Defines the default color for [leading] and [trailing] icons.
   ///
   /// If this property is null and [selected] is false then [ListTileThemeData.iconColor]
-  /// is used. If that is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurface]
+  /// is used. If that is also null and [ThemeData.useMaterial3] is true, [ColorScheme.onSurfaceVariant]
   /// is used, otherwise if [ThemeData.brightness] is [Brightness.light], [Colors.black54] is used,
   /// and if [ThemeData.brightness] is [Brightness.dark], the value is null.
   ///
@@ -614,6 +668,20 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
+  /// Defines how [ListTile.leading] and [ListTile.trailing] are
+  /// vertically aligned relative to the [ListTile]'s titles
+  /// ([ListTile.title] and [ListTile.subtitle]).
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.threeLine]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
+
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
@@ -692,6 +760,9 @@ class ListTile extends StatelessWidget {
       ?? resolveColor(theme.listTileTheme.textColor, theme.listTileTheme.selectedColor, theme.listTileTheme.textColor)
       ?? resolveColor(defaults.textColor, defaults.selectedColor, defaults.textColor, theme.disabledColor);
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
+    final IconButtonThemeData iconButtonThemeData = IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: effectiveIconColor),
+    );
 
     TextStyle? leadingAndTrailingStyle;
     if (leading != null || trailing != null) {
@@ -756,6 +827,7 @@ class ListTile extends StatelessWidget {
     final EdgeInsets resolvedContentPadding = contentPadding?.resolve(textDirection)
       ?? tileTheme.contentPadding?.resolve(textDirection)
       ?? defaults.contentPadding!.resolve(textDirection);
+
     // Show basic cursor when ListTile isn't enabled or gesture callbacks are null.
     final Set<MaterialState> mouseStates = <MaterialState>{
       if (!enabled || (onTap == null && onLongPress == null)) MaterialState.disabled,
@@ -763,6 +835,10 @@ class ListTile extends StatelessWidget {
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, mouseStates)
       ?? tileTheme.mouseCursor?.resolve(mouseStates)
       ?? MaterialStateMouseCursor.clickable.resolve(mouseStates);
+
+    final ListTileTitleAlignment effectiveTitleAlignment = titleAlignment
+      ?? tileTheme.titleAlignment
+      ?? (theme.useMaterial3 ? ListTileTitleAlignment.threeLine : ListTileTitleAlignment.titleHeight);
 
     return InkWell(
       customBorder: shape ?? tileTheme.shape,
@@ -791,21 +867,24 @@ class ListTile extends StatelessWidget {
             minimum: resolvedContentPadding,
             child: IconTheme.merge(
               data: iconThemeData,
-              child: _ListTile(
-                leading: leadingIcon,
-                title: titleText,
-                subtitle: subtitleText,
-                trailing: trailingIcon,
-                isDense: _isDenseLayout(theme, tileTheme),
-                visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                isThreeLine: isThreeLine,
-                textDirection: textDirection,
-                titleBaselineType: titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
-                subtitleBaselineType: subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
-                horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
-                minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
-                minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
-                material3: theme.useMaterial3,
+              child: IconButtonTheme(
+                data: iconButtonThemeData,
+                child: _ListTile(
+                  leading: leadingIcon,
+                  title: titleText,
+                  subtitle: subtitleText,
+                  trailing: trailingIcon,
+                  isDense: _isDenseLayout(theme, tileTheme),
+                  visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
+                  isThreeLine: isThreeLine,
+                  textDirection: textDirection,
+                  titleBaselineType: titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
+                  subtitleBaselineType: subtitleStyle?.textBaseline ?? defaults.subtitleTextStyle!.textBaseline!,
+                  horizontalTitleGap: horizontalTitleGap ?? tileTheme.horizontalTitleGap ?? 16,
+                  minVerticalPadding: minVerticalPadding ?? tileTheme.minVerticalPadding ?? defaults.minVerticalPadding!,
+                  minLeadingWidth: minLeadingWidth ?? tileTheme.minLeadingWidth ?? defaults.minLeadingWidth!,
+                  titleAlignment: effectiveTitleAlignment,
+                ),
               ),
             ),
           ),
@@ -848,6 +927,7 @@ class ListTile extends StatelessWidget {
     properties.add(DoubleProperty('horizontalTitleGap', horizontalTitleGap, defaultValue: null));
     properties.add(DoubleProperty('minVerticalPadding', minVerticalPadding, defaultValue: null));
     properties.add(DoubleProperty('minLeadingWidth', minLeadingWidth, defaultValue: null));
+    properties.add(DiagnosticsProperty<ListTileTitleAlignment>('titleAlignment', titleAlignment, defaultValue: null));
   }
 }
 
@@ -902,7 +982,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
     required this.minVerticalPadding,
     required this.minLeadingWidth,
     this.subtitleBaselineType,
-    required this.material3,
+    required this.titleAlignment,
   });
 
   final Widget? leading;
@@ -918,7 +998,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   final double horizontalTitleGap;
   final double minVerticalPadding;
   final double minLeadingWidth;
-  final bool material3;
+  final ListTileTitleAlignment titleAlignment;
 
   @override
   Iterable<_ListTileSlot> get slots => _ListTileSlot.values;
@@ -949,7 +1029,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       horizontalTitleGap: horizontalTitleGap,
       minVerticalPadding: minVerticalPadding,
       minLeadingWidth: minLeadingWidth,
-      material3: material3,
+      titleAlignment: titleAlignment,
     );
   }
 
@@ -965,7 +1045,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
       ..horizontalTitleGap = horizontalTitleGap
       ..minLeadingWidth = minLeadingWidth
       ..minVerticalPadding = minVerticalPadding
-      ..material3 = material3;
+      ..titleAlignment = titleAlignment;
   }
 }
 
@@ -980,7 +1060,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     required double horizontalTitleGap,
     required double minVerticalPadding,
     required double minLeadingWidth,
-    required bool material3,
+    required ListTileTitleAlignment titleAlignment,
   }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
@@ -990,7 +1070,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
-       _material3 = material3;
+       _titleAlignment = titleAlignment;
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
   RenderBox? get title => childForSlot(_ListTileSlot.title);
@@ -1106,13 +1186,13 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     markNeedsLayout();
   }
 
-  bool get material3 => _material3;
-  bool _material3;
-  set material3(bool value) {
-    if (_material3 == value) {
+  ListTileTitleAlignment get titleAlignment => _titleAlignment;
+  ListTileTitleAlignment _titleAlignment;
+  set titleAlignment(ListTileTitleAlignment value) {
+    if (_titleAlignment == value) {
       return;
     }
-    _material3 = value;
+    _titleAlignment = value;
     markNeedsLayout();
   }
 
@@ -1306,30 +1386,51 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
     final double leadingY;
     final double trailingY;
-    if (material3) {
-      if (isThreeLine) {
+
+    switch (titleAlignment) {
+      case ListTileTitleAlignment.threeLine: {
+        if (isThreeLine) {
+          leadingY = _minVerticalPadding;
+          trailingY = _minVerticalPadding;
+        } else {
+          leadingY = (tileHeight - leadingSize.height) / 2.0;
+          trailingY = (tileHeight - trailingSize.height) / 2.0;
+        }
+        break;
+      }
+      case ListTileTitleAlignment.titleHeight: {
+        // This attempts to implement the redlines for the vertical position of the
+        // leading and trailing icons on the spec page:
+        //   https://m2.material.io/components/lists#specs
+        // The interpretation for these redlines is as follows:
+        //  - For large tiles (> 72dp), both leading and trailing controls should be
+        //    a fixed distance from top. As per guidelines this is set to 16dp.
+        //  - For smaller tiles, trailing should always be centered. Leading can be
+        //    centered or closer to the top. It should never be further than 16dp
+        //    to the top.
+        if (tileHeight > 72.0) {
+          leadingY = 16.0;
+          trailingY = 16.0;
+        } else {
+          leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
+          trailingY = (tileHeight - trailingSize.height) / 2.0;
+        }
+        break;
+      }
+      case ListTileTitleAlignment.top: {
         leadingY = _minVerticalPadding;
         trailingY = _minVerticalPadding;
-      } else {
+        break;
+      }
+      case ListTileTitleAlignment.center: {
         leadingY = (tileHeight - leadingSize.height) / 2.0;
         trailingY = (tileHeight - trailingSize.height) / 2.0;
+        break;
       }
-    } else {
-      // This attempts to implement the redlines for the vertical position of the
-      // leading and trailing icons on the spec page:
-      //   https://material.io/design/components/lists.html#specs
-      // The interpretation for these redlines is as follows:
-      //  - For large tiles (> 72dp), both leading and trailing controls should be
-      //    a fixed distance from top. As per guidelines this is set to 16dp.
-      //  - For smaller tiles, trailing should always be centered. Leading can be
-      //    centered or closer to the top. It should never be further than 16dp
-      //    to the top.
-      if (tileHeight > 72.0) {
-        leadingY = 16.0;
-        trailingY = 16.0;
-      } else {
-        leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
-        trailingY = (tileHeight - trailingSize.height) / 2.0;
+      case ListTileTitleAlignment.bottom: {
+        leadingY = tileHeight - leadingSize.height - _minVerticalPadding;
+        trailingY = tileHeight - trailingSize.height - _minVerticalPadding;
+        break;
       }
     }
 
@@ -1460,7 +1561,7 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_162
 
 class _LisTileDefaultsM3 extends ListTileThemeData {
   _LisTileDefaultsM3(this.context)
@@ -1492,7 +1593,7 @@ class _LisTileDefaultsM3 extends ListTileThemeData {
   Color? get selectedColor => _colors.primary;
 
   @override
-  Color? get iconColor => _colors.onSurface;
+  Color? get iconColor => _colors.onSurfaceVariant;
 }
 
 // END GENERATED TOKEN PROPERTIES - LisTile

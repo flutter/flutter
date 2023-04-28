@@ -19,9 +19,6 @@ const double _kToolbarHeight = 43.0;
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
-// Minimal padding from all edges of the selection toolbar to all edges of the
-// screen.
-const double _kToolbarScreenPadding = 8.0;
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
@@ -38,19 +35,6 @@ const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBr
   // Color extracted from https://developer.apple.com/design/resources/.
   // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
   darkColor: Color(0xFF808080),
-);
-
-// These values were extracted from a screenshot of iOS 16.0.3, as light mode
-// didn't appear in the Apple design resources assets linked above.
-final BoxDecoration _kToolbarShadow = BoxDecoration(
-  borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-  boxShadow: <BoxShadow>[
-    BoxShadow(
-      color: CupertinoColors.black.withOpacity(0.1),
-      blurRadius: 16.0,
-      offset: Offset(0, _kToolbarArrowSize.height / 2),
-    ),
-  ],
 );
 
 /// The type for a Function that builds a toolbar's container with the given
@@ -123,6 +107,16 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   /// default Cupertino toolbar.
   final CupertinoToolbarBuilder toolbarBuilder;
 
+  /// Minimal padding from all edges of the selection toolbar to all edges of the
+  /// viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which uses this same value for its
+  ///    padding from the edges of the viewport.
+  ///  * [TextSelectionToolbar], which uses this same value as well.
+  static const double kToolbarScreenPadding = 8.0;
+
   // Add the visual vertical line spacer between children buttons.
   static List<Widget> _addChildrenSpacers(List<Widget> children) {
     final List<Widget> nextChildren = <Widget>[];
@@ -153,7 +147,22 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       return outputChild;
     }
     return DecoratedBox(
-      decoration: _kToolbarShadow,
+      // These shadow values were eyeballed from a screenshot of iOS 16.3.1, as
+      // light mode didn't appear in the Apple design resources assets linked at
+      // the top of this file.
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: CupertinoColors.black.withOpacity(0.2),
+            blurRadius: 15.0,
+            offset: Offset(
+              0.0,
+              isAbove ? 0.0 : _kToolbarArrowSize.height,
+            ),
+          ),
+        ],
+      ),
       child: outputChild,
     );
   }
@@ -163,7 +172,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
-    final double paddingAbove = mediaQueryPadding.top + _kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryPadding.top + kToolbarScreenPadding;
     final double toolbarHeightNeeded = paddingAbove
         + _kToolbarContentDistance
         + _kToolbarHeight;
@@ -180,15 +189,15 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     );
     final Offset anchorBelowAdjusted = Offset(
       clampDouble(anchorBelow.dx, leftMargin, rightMargin),
-      anchorBelow.dy - _kToolbarContentDistance + paddingAbove,
+      anchorBelow.dy + _kToolbarContentDistance - paddingAbove,
     );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
         paddingAbove,
-        _kToolbarScreenPadding,
-        _kToolbarScreenPadding,
+        kToolbarScreenPadding,
+        kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
         delegate: TextSelectionToolbarLayoutDelegate(
@@ -580,13 +589,10 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     switch (slot) {
       case _CupertinoTextSelectionToolbarItemsSlot.backButton:
         renderObject.backButton = child;
-        break;
       case _CupertinoTextSelectionToolbarItemsSlot.nextButton:
         renderObject.nextButton = child;
-        break;
       case _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled:
         renderObject.nextButtonDisabled = child;
-        break;
     }
   }
 
