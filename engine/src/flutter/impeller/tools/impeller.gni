@@ -459,7 +459,7 @@ template("_impeller_shaders_metal") {
     symbol_name = shaders_base_name
     blob = metal_library_files[0]
     hdr = "$target_gen_dir/mtl/$shaders_base_name.h"
-    cc = "$target_gen_dir/mtl/$shaders_base_name.c"
+    cc = "$target_gen_dir/mtl/$shaders_base_name.cc"
     deps = [ ":$mtl_lib" ]
   }
 
@@ -553,7 +553,7 @@ template("_impeller_shaders_gles") {
     symbol_name = shaders_base_name
     blob = gles_library_files[0]
     hdr = "$target_gen_dir/gles/$shaders_base_name.h"
-    cc = "$target_gen_dir/gles/$shaders_base_name.c"
+    cc = "$target_gen_dir/gles/$shaders_base_name.cc"
     deps = [ ":$gles_lib" ]
   }
 
@@ -629,7 +629,7 @@ template("_impeller_shaders_vk") {
     symbol_name = shaders_base_name
     blob = vk_library_files[0]
     hdr = "$target_gen_dir/vk/$shaders_base_name.h"
-    cc = "$target_gen_dir/vk/$shaders_base_name.c"
+    cc = "$target_gen_dir/vk/$shaders_base_name.cc"
     deps = [ ":$vk_lib" ]
   }
 
