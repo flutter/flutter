@@ -148,7 +148,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
         for (final XmlElement element in resources.findElements('string')) {
           final String? name = element.getAttribute('name');
           if (requiredEntriesMap.containsKey(name)) {
-            if (element.value != requiredEntriesMap[name]) {
+            if (element.text != requiredEntriesMap[name]) {
               element.innerText = requiredEntriesMap[name]!;
               modified = true;
             }
