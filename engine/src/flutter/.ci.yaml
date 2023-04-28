@@ -390,7 +390,7 @@ targets:
       cpu: arm64
       lint_host: "true"
       lint_ios: "false"
-    timeout: 75
+    timeout: 120
     runIf:
       - DEPS
       - .ci.yaml
@@ -411,7 +411,7 @@ targets:
       cpu: arm64
       lint_host: "false"
       lint_ios: "true"
-    timeout: 75
+    timeout: 120
     runIf:
       - DEPS
       - .ci.yaml
