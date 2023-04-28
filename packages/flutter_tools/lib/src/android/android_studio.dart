@@ -52,7 +52,8 @@ class AndroidStudio {
     _initAndValidate();
   }
 
-  static AndroidStudio? fromMacOSBundle(String bundlePath, {
+  static AndroidStudio? fromMacOSBundle(
+    String bundlePath, {
     String? configuredPath,
   }) {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
