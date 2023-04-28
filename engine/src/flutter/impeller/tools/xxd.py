@@ -60,7 +60,10 @@ def main():
   with open(args.source, 'rb') as source, open(output_source, 'w') as output:
     data_len = 0
     output.write(f'#include "{output_header_basename}"\n')
-    output.write(f'const unsigned char impeller_{args.symbol_name}_data[] =\n')
+    output.write('#include <cstddef>\n')
+    output.write(
+        f'alignas(std::max_align_t) const unsigned char impeller_{args.symbol_name}_data[] =\n'
+    )
     output.write('{\n')
     while True:
       byte = source.read(1)
