@@ -7,8 +7,6 @@
 #include <utility>
 
 #include "flutter/fml/logging.h"
-#include "third_party/skia/include/codec/SkEncodedOrigin.h"
-#include "third_party/skia/include/codec/SkPixmapUtils.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImage.h"
 
@@ -83,43 +81,34 @@ std::unique_ptr<ImageGenerator> BuiltinSkiaImageGenerator::MakeFromGenerator(
 
 BuiltinSkiaCodecImageGenerator::~BuiltinSkiaCodecImageGenerator() = default;
 
-static SkImageInfo getInfoIncludingExif(SkCodec* codec) {
-  SkImageInfo info = codec->getInfo();
-  if (SkEncodedOriginSwapsWidthHeight(codec->getOrigin())) {
-    info = SkPixmapUtils::SwapWidthHeight(info);
-  }
-  return info;
-}
-
 BuiltinSkiaCodecImageGenerator::BuiltinSkiaCodecImageGenerator(
     std::unique_ptr<SkCodec> codec)
-    : codec_(std::move(codec)) {
-  image_info_ = getInfoIncludingExif(codec_.get());
-}
+    : codec_generator_(static_cast<SkCodecImageGenerator*>(
+          SkCodecImageGenerator::MakeFromCodec(std::move(codec)).release())) {}
 
 BuiltinSkiaCodecImageGenerator::BuiltinSkiaCodecImageGenerator(
     sk_sp<SkData> buffer)
-    : codec_(SkCodec::MakeFromData(std::move(buffer)).release()) {
-  image_info_ = getInfoIncludingExif(codec_.get());
-}
+    : codec_generator_(static_cast<SkCodecImageGenerator*>(
+          SkCodecImageGenerator::MakeFromEncodedCodec(std::move(buffer))
+              .release())) {}
 
 const SkImageInfo& BuiltinSkiaCodecImageGenerator::GetInfo() {
-  return image_info_;
+  return codec_generator_->getInfo();
 }
 
 unsigned int BuiltinSkiaCodecImageGenerator::GetFrameCount() const {
-  return codec_->getFrameCount();
+  return codec_generator_->getFrameCount();
 }
 
 unsigned int BuiltinSkiaCodecImageGenerator::GetPlayCount() const {
-  auto repetition_count = codec_->getRepetitionCount();
+  auto repetition_count = codec_generator_->getRepetitionCount();
   return repetition_count < 0 ? kInfinitePlayCount : repetition_count + 1;
 }
 
 const ImageGenerator::FrameInfo BuiltinSkiaCodecImageGenerator::GetFrameInfo(
     unsigned int frame_index) {
   SkCodec::FrameInfo info = {};
-  codec_->getFrameInfo(frame_index, &info);
+  codec_generator_->getFrameInfo(frame_index, &info);
   return {
       .required_frame = info.fRequiredFrame == SkCodec::kNoFrame
                             ? std::nullopt
@@ -130,11 +119,7 @@ const ImageGenerator::FrameInfo BuiltinSkiaCodecImageGenerator::GetFrameInfo(
 
 SkISize BuiltinSkiaCodecImageGenerator::GetScaledDimensions(
     float desired_scale) {
-  SkISize size = codec_->getScaledDimensions(desired_scale);
-  if (SkEncodedOriginSwapsWidthHeight(codec_->getOrigin())) {
-    std::swap(size.fWidth, size.fHeight);
-  }
-  return size;
+  return codec_generator_->getScaledDimensions(desired_scale);
 }
 
 bool BuiltinSkiaCodecImageGenerator::GetPixels(
@@ -148,40 +133,7 @@ bool BuiltinSkiaCodecImageGenerator::GetPixels(
   if (prior_frame.has_value()) {
     options.fPriorFrame = prior_frame.value();
   }
-  SkEncodedOrigin origin = codec_->getOrigin();
-
-  SkPixmap output_pixmap(info, pixels, row_bytes);
-  SkPixmap temp_pixmap;
-  SkBitmap temp_bitmap;
-  if (origin == kTopLeft_SkEncodedOrigin) {
-    // We can decode directly into the output buffer.
-    temp_pixmap = output_pixmap;
-  } else {
-    // We need to decode into a different buffer so we can re-orient
-    // the pixels later.
-    SkImageInfo temp_info = output_pixmap.info();
-    if (SkEncodedOriginSwapsWidthHeight(origin)) {
-      // We'll be decoding into a buffer that has height and width swapped.
-      temp_info = SkPixmapUtils::SwapWidthHeight(temp_info);
-    }
-    if (!temp_bitmap.tryAllocPixels(temp_info)) {
-      FML_DLOG(ERROR) << "Failed to allocate memory for bitmap of size "
-                      << temp_info.computeMinByteSize() << "B";
-      return false;
-    }
-    temp_pixmap = temp_bitmap.pixmap();
-  }
-
-  SkCodec::Result result = codec_->getPixels(temp_pixmap, &options);
-  if (result != SkCodec::kSuccess) {
-    FML_DLOG(WARNING) << "codec could not get pixels. "
-                      << SkCodec::ResultToString(result);
-    return false;
-  }
-  if (origin == kTopLeft_SkEncodedOrigin) {
-    return true;
-  }
-  return SkPixmapUtils::Orient(output_pixmap, temp_pixmap, origin);
+  return codec_generator_->getPixels(info, pixels, row_bytes, &options);
 }
 
 std::unique_ptr<ImageGenerator> BuiltinSkiaCodecImageGenerator::MakeFromData(
