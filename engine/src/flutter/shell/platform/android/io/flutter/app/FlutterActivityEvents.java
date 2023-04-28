@@ -64,4 +64,10 @@ public interface FlutterActivityEvents
 
   /** @see android.app.Activity#onUserLeaveHint() */
   void onUserLeaveHint();
+
+  /**
+   * @param hasFocus True if the current activity window has focus.
+   * @see android.app.Activity#onWindowFocusChanged(boolean)
+   */
+  void onWindowFocusChanged(boolean hasFocus);
 }
