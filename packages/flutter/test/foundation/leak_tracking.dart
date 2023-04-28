@@ -44,15 +44,18 @@ class _TestAdjustments {
 }
 
 extension LeakTrackerAdjustments on WidgetTester {
-  static final Expando<_TestAdjustments> _abjustments = Expando<_TestAdjustments>();
+  static final Expando<_TestAdjustments> _abjustmentsExpando = Expando<_TestAdjustments>();
 
   T addHeldObject<T  extends Object>(T object){
-    if (_abjustments[this] == null){
-      _abjustments[this] = _TestAdjustments();
-    }
-
-    _abjustments[this]!.heldObjects.add(object);
+    _adjustments.heldObjects.add(object);
     return object;
+  }
+
+  _TestAdjustments get _adjustments {
+    if (_abjustmentsExpando[this] == null) {
+      _abjustmentsExpando[this] = _TestAdjustments();
+    }
+    return _abjustmentsExpando[this]!;
   }
 }
 
