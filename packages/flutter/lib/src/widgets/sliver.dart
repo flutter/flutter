@@ -1388,8 +1388,8 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 ///
 /// See also:
 ///
-/// * [SliverCrossAxisGroup], the widget which makes use of 0 flex factor set by
-///   this widget.
+///  * [SliverCrossAxisGroup], the widget which makes use of 0 flex factor set by
+///    this widget.
 class SliverConstrainedCrossAxis extends StatelessWidget {
   /// Creates a sliver that constrains the cross axis extent of its sliver child.
   ///
@@ -1557,10 +1557,10 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
 ///
 /// See also:
 ///
-///   * [SliverCrossAxisExpanded], which is the [ParentDataWidget] for setting a flex
-///     value to a widget.
-///   * [SliverConstrainedCrossAxis], which is a [RenderObjectWidget] for setting
-///     an extent to constrain the widget to.
+///  * [SliverCrossAxisExpanded], which is the [ParentDataWidget] for setting a flex
+///    value to a widget.
+///  * [SliverConstrainedCrossAxis], which is a [RenderObjectWidget] for setting
+///    an extent to constrain the widget to.
 class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
   /// Creates a sliver that places sliver children in a linear array along
   /// the cross axis.
