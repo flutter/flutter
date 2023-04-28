@@ -517,7 +517,7 @@ void main() {
 
     expect(stateKey.currentState!.value, 'initialValue');
     expect(value, 'initialValue');
-    //change value to 'changedValue'
+    // Change value to 'changedValue'.
     await tester.enterText(find.byType(CupertinoTextField), 'changedValue');
     expect(stateKey.currentState!.value,'changedValue');
     expect(value, 'changedValue');
