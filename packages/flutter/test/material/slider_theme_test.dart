@@ -1430,6 +1430,51 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/125467
+  testWidgets('The RangeSlider track layout correctly when the overlay size is smaller than the thumb size', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      overlayShape: SliderComponentShape.noOverlay,
+    );
+
+    await tester.pumpWidget(_buildRangeApp(sliderTheme, values: const RangeValues(0.0, 1.0)));
+
+    final MaterialInkController material = Material.of(
+      tester.element(find.byType(RangeSlider)),
+    );
+
+    // The track rectangle begins at 10 pixels from the left of the screen and ends 10 pixels from the right
+    // (790 pixels from the left). The main check here it that the track itself should be centered on
+    // the 800 pixel-wide screen.
+    expect(
+      material,
+      paints
+        // active track RRect. Starts 10 pixels from left of screen.
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          10.0,
+          298.0,
+          10.0,
+          302.0,
+          topLeft: const Radius.circular(2.0),
+          bottomLeft: const Radius.circular(2.0),
+        ))
+      // active track RRect Start 10 pixels from left screen.
+        ..rect(rect:const Rect.fromLTRB(10.0, 297.0, 790.0, 303.0),)
+        // inactive track RRect. Ends 10 pixels from right of screen.
+        ..rrect(rrect: RRect.fromLTRBAndCorners(
+          790.0,
+          298.0,
+          790.0,
+          302.0,
+          topRight: const Radius.circular(2.0),
+          bottomRight: const Radius.circular(2.0),
+        ))
+        // The thumb Left.
+        ..circle(x: 10.0, y: 300.0, radius: 10.0)
+        // The thumb Right.
+        ..circle(x: 790.0, y: 300.0, radius: 10.0),
+    );
+  });
+
   // Only the thumb, overlay, and tick mark have special shortcuts to provide
   // no-op or empty shapes.
   //
