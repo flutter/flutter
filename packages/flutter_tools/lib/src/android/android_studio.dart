@@ -471,9 +471,13 @@ the configured path by running this command: flutter config --android-studio-dir
         .firstOrNull;
       if (matchingAlreadyFoundInstall != null) {
         studios.remove(matchingAlreadyFoundInstall);
-        studios.add(AndroidStudio(configuredStudioDir,
-          configuredPath: configuredStudioDir,
-          version: matchingAlreadyFoundInstall.version));
+        studios.add(
+          AndroidStudio(
+            configuredStudioDir,
+            configuredPath: configuredStudioDir,
+            version: matchingAlreadyFoundInstall.version,
+          ),
+        );
       } else {
         studios.add(AndroidStudio(configuredStudioDir,
           configuredPath: configuredStudioDir));
