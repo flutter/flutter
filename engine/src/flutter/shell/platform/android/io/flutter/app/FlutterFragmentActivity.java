@@ -156,6 +156,12 @@ public class FlutterFragmentActivity extends FragmentActivity
   }
 
   @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    eventDelegate.onWindowFocusChanged(hasFocus);
+  }
+
+  @Override
   public void onTrimMemory(int level) {
     super.onTrimMemory(level);
     eventDelegate.onTrimMemory(level);

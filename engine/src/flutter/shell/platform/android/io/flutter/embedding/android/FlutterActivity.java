@@ -950,6 +950,14 @@ public class FlutterActivity extends Activity
   }
 
   @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    if (stillAttachedForEvent("onWindowFocusChanged")) {
+      delegate.onWindowFocusChanged(hasFocus);
+    }
+  }
+
+  @Override
   public void onTrimMemory(int level) {
     super.onTrimMemory(level);
     if (stillAttachedForEvent("onTrimMemory")) {

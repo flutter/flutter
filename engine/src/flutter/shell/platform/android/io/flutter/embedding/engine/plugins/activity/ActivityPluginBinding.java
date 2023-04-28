@@ -92,6 +92,19 @@ public interface ActivityPluginBinding {
   void removeOnUserLeaveHintListener(@NonNull PluginRegistry.UserLeaveHintListener listener);
 
   /**
+   * Adds a listener that is invoked whenever the associated {@link android.app.Activity}'s {@code
+   * onWindowFocusChanged()} method is invoked.
+   */
+  void addOnWindowFocusChangedListener(@NonNull PluginRegistry.WindowFocusChangedListener listener);
+
+  /**
+   * Removes a listener that was added in {@link
+   * #addOnWindowFocusChangedListener(PluginRegistry.WindowFocusChangedListener)}.
+   */
+  void removeOnWindowFocusChangedListener(
+      @NonNull PluginRegistry.WindowFocusChangedListener listener);
+
+  /**
    * Adds a listener that is invoked when the associated {@code Activity} or {@code Fragment} saves
    * and restores instance state.
    */
