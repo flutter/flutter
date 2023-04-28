@@ -318,6 +318,7 @@ void main () {
         await iosDeployDebugger.launchAndAttach();
         expect(logger.errorText, contains('Try launching from within Xcode'));
       });
+
     });
 
     testWithoutContext('detach', () async {

@@ -228,6 +228,59 @@ void main() {
       expect(logger.traceText, contains('${iosApp.id} not installed on ${device.id}'));
     });
 
+    testWithoutContext('returns true when device does have developer mode enabled', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+            command: <String>[
+              iosDeployPath,
+              '--id',
+              '1234',
+              '--check-developer-mode'
+            ],
+            environment: const <String, String>{
+              'PATH': '/usr/bin:null',
+              ...kDyLdLibEntry,
+            }, stdout: '''
+[....] Waiting for iOS device to be connected
+[....] Using 1234 (J407AP, iPad Air 5, iphoneos, arm64e, 16.3.1, 20D67) a.k.a. 'iPad (2)'.
+Developer mode is enabled.
+'''),
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger, artifacts: artifacts);
+      final bool isDevModeEnabled = await device.isDeveloperModeEnabled();
+
+      expect(isDevModeEnabled, isTrue);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('returns false when device does not have developer mode enabled', () async {
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            iosDeployPath,
+            '--id',
+            '1234',
+            '--check-developer-mode'
+          ],
+          environment: const <String, String>{
+            'PATH': '/usr/bin:null',
+            ...kDyLdLibEntry,
+          }, stdout: '''
+[....] Waiting for iOS device to be connected
+[....] 1234 (J407AP, iPad Air 5, iphoneos, arm64e, 16.3.1, 20D67) a.k.a. 'iPad (2)'.
+Developer mode is not enabled.
+'''),
+      ]);
+      final BufferLogger logger = BufferLogger.test();
+      final IOSDevice device = setUpIOSDevice(processManager: processManager, logger: logger, artifacts: artifacts);
+      final bool isDevModeEnabled = await device.isDeveloperModeEnabled();
+
+      expect(isDevModeEnabled, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(logger.traceText, contains('${device.id} does not have Developer Mode enabled'));
+    });
+
     testWithoutContext('returns false on command timeout or other error', () async {
       final IOSApp iosApp = PrebuiltIOSApp(
         projectBundleId: 'app',

@@ -636,13 +636,12 @@ class IOSDevice extends Device {
     _logReaders[app] = logReader;
   }
 
-  Future<bool> isDevModeEnabled() async {
-    final bool isDevModeEnabled = await _iosDeploy.testForDevMode(
+  Future<bool> isDeveloperModeEnabled() async {
+    final bool enabled = await _iosDeploy.isDeveloperModeEnabled(
         deviceId: id
     );
-
-    if (!isDevModeEnabled) {
-      _logger.printError('Developer Mode is not enabled on $id. Please enable it under Setting > Privacy > Enable Developer Mode');
+    if (!enabled) {
+      _logger.printError('To use $name for development, enable Developer Mode in Settings → Privacy & Security.');
       return false;
     }
     return true;

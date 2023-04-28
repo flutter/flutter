@@ -235,8 +235,7 @@ class IOSDeploy {
     return true;
   }
 
-
-  Future<bool> testForDevMode({
+  Future<bool> isDeveloperModeEnabled({
     required String deviceId,
   }) async {
     final List<String> launchCommand = <String>[
@@ -250,7 +249,7 @@ class IOSDeploy {
       environment: iosDeployEnv,
     );
     // Device does not have developer mode enabled.
-    if (result.exitCode == 0) {
+    if (result.stdout.trim().split('\n')[2] == 'Developer mode is not enabled.') {
       _logger.printTrace('$deviceId does not have Developer Mode enabled');
       return false;
     }
