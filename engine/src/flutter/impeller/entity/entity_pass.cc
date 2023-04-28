@@ -214,37 +214,30 @@ uint32_t EntityPass::GetTotalPassReads(ContentContext& renderer) const {
 
 bool EntityPass::Render(ContentContext& renderer,
                         const RenderTarget& render_target) const {
-  if (render_target.GetColorAttachments().empty()) {
+  auto root_render_target = render_target;
+
+  if (root_render_target.GetColorAttachments().empty()) {
     VALIDATION_LOG << "The root RenderTarget must have a color attachment.";
     return false;
   }
 
-  if (!render_target.GetStencilAttachment().has_value()) {
-    VALIDATION_LOG << "The root RenderTarget must have a stencil attachment.";
-    return false;
-  }
-
-  auto stencil_texture = render_target.GetStencilAttachment()->texture;
-  if (!stencil_texture) {
-    VALIDATION_LOG << "The root RenderTarget must have a stencil texture.";
-    return false;
-  }
-
   StencilCoverageStack stencil_coverage_stack = {StencilCoverageLayer{
-      .coverage = Rect::MakeSize(render_target.GetRenderTargetSize()),
+      .coverage = Rect::MakeSize(root_render_target.GetRenderTargetSize()),
       .stencil_depth = 0}};
 
-  bool supports_root_pass_reads =
+  bool supports_onscreen_backdrop_reads =
       renderer.GetDeviceCapabilities().SupportsReadFromOnscreenTexture() &&
       // If the backend doesn't have `SupportsReadFromResolve`, we need to flip
       // between two textures when restoring a previous MSAA pass.
-      renderer.GetDeviceCapabilities().SupportsReadFromResolve() &&
-      stencil_texture->GetTextureDescriptor().storage_mode !=
-          StorageMode::kDeviceTransient;
-  if (!supports_root_pass_reads && GetTotalPassReads(renderer) > 0) {
+      renderer.GetDeviceCapabilities().SupportsReadFromResolve();
+  bool reads_from_onscreen_backdrop = GetTotalPassReads(renderer) > 0;
+  // In this branch path, we need to render everything to an offscreen texture
+  // and then blit the results onto the onscreen texture. If using this branch,
+  // there's no need to set up a stencil attachment on the root render target.
+  if (!supports_onscreen_backdrop_reads && reads_from_onscreen_backdrop) {
     auto offscreen_target =
-        CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true,
-                           clear_color_.Premultiply());
+        CreateRenderTarget(renderer, root_render_target.GetRenderTargetSize(),
+                           true, clear_color_.Premultiply());
 
     if (!OnRender(renderer,  // renderer
                   offscreen_target.GetRenderTarget()
@@ -263,6 +256,9 @@ bool EntityPass::Render(ContentContext& renderer,
     auto command_buffer = renderer.GetContext()->CreateCommandBuffer();
     command_buffer->SetLabel("EntityPass Root Command Buffer");
 
+    // If the context supports blitting, blit the offscreen texture to the
+    // onscreen texture. Otherwise, draw it to the parent texture using a
+    // pipeline (slower).
     if (renderer.GetContext()
             ->GetCapabilities()
             ->SupportsTextureToTextureBlits()) {
@@ -270,7 +266,7 @@ bool EntityPass::Render(ContentContext& renderer,
 
       blit_pass->AddCopy(
           offscreen_target.GetRenderTarget().GetRenderTargetTexture(),
-          render_target.GetRenderTargetTexture());
+          root_render_target.GetRenderTargetTexture());
 
       if (!blit_pass->EncodeCommands(
               renderer.GetContext()->GetResourceAllocator())) {
@@ -278,7 +274,7 @@ bool EntityPass::Render(ContentContext& renderer,
         return false;
       }
     } else {
-      auto render_pass = command_buffer->CreateRenderPass(render_target);
+      auto render_pass = command_buffer->CreateRenderPass(root_render_target);
       render_pass->SetLabel("EntityPass Root Render Pass");
 
       {
@@ -309,11 +305,43 @@ bool EntityPass::Render(ContentContext& renderer,
     return true;
   }
 
-  // Set up the clear color of the root pass.
-  auto color0 = render_target.GetColorAttachments().find(0)->second;
-  color0.clear_color = clear_color_.Premultiply();
+  // If we make it this far, that means the context is capable of rendering
+  // everything directly to the onscreen texture.
 
-  auto root_render_target = render_target;
+  // The safety check for fetching this color attachment is at the beginning of
+  // this method.
+  auto color0 = root_render_target.GetColorAttachments().find(0)->second;
+
+  // If a root stencil was provided by the caller, then verify that it has a
+  // configuration which can be used to render this pass.
+  if (root_render_target.GetStencilAttachment().has_value()) {
+    auto stencil_texture = root_render_target.GetStencilAttachment()->texture;
+    if (!stencil_texture) {
+      VALIDATION_LOG << "The root RenderTarget must have a stencil texture.";
+      return false;
+    }
+
+    auto stencil_storage_mode =
+        stencil_texture->GetTextureDescriptor().storage_mode;
+    if (reads_from_onscreen_backdrop &&
+        stencil_storage_mode == StorageMode::kDeviceTransient) {
+      VALIDATION_LOG << "The given root RenderTarget stencil needs to be read, "
+                        "but it's marked as transient.";
+      return false;
+    }
+  }
+  // Setup a new root stencil with an optimal configuration if one wasn't
+  // provided by the caller.
+  else {
+    root_render_target.SetupStencilAttachment(
+        *renderer.GetContext(), color0.texture->GetSize(),
+        renderer.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
+        "ImpellerOnscreen",
+        GetDefaultStencilConfig(reads_from_onscreen_backdrop));
+  }
+
+  // Set up the clear color of the root pass.
+  color0.clear_color = clear_color_.Premultiply();
   root_render_target.SetColorAttachment(color0, 0);
 
   EntityPassTarget pass_target(
