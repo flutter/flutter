@@ -11,6 +11,20 @@ import 'leak_tracking.dart';
 final String _leakTrackedClassName = '$_LeakTrackedClass';
 
 Future<void> main() async {
+  testWidgets('$WidgetTester preserves held objects', (WidgetTester tester) async {
+    final DateTime object1 = DateTime(2023);
+    final DateTime object2 = DateTime(2024);
+    final DateTime object3 = DateTime(2025);
+
+    tester.addHeldObject(object1);
+    tester.addHeldObject(object2);
+
+    expect(tester.isHeld(object1), true);
+    expect(tester.isHeld(object2), true);
+    expect(tester.isHeld(object3), false);
+  });
+
+
   group('Leak tracking works for non-web', () {
     testWidgetsWithLeakTracking(
       'Leak tracker respects all allow lists',

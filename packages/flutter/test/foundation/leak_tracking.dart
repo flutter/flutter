@@ -51,6 +51,10 @@ extension LeakTrackerAdjustments on WidgetTester {
     return object;
   }
 
+  bool isHeld(Object object){
+    return _adjustments.heldObjects.contains(object);
+  }
+
   _TestAdjustments get _adjustments {
     if (_abjustmentsExpando[this] == null) {
       _abjustmentsExpando[this] = _TestAdjustments();
