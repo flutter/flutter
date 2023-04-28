@@ -361,7 +361,7 @@ void main() {
     expect(_getInkWell(tester)?.customBorder, shape);
   });
 
-  testWidgets('NavigationDrawer.padding defaults to EdgeInsets.symmetric(horizontal: 12.0)', (WidgetTester tester) async {
+  testWidgets('NavigationDrawer.tilePadding defaults to EdgeInsets.symmetric(horizontal: 12.0)', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     widgetSetup(tester, 3000, viewHeight: 3000);
     final Widget widget = _buildWidget(
@@ -378,10 +378,10 @@ void main() {
     );
 
     await tester.pumpWidget(widget);
-    scaffoldKey.currentState!.openDrawer();
+    scaffoldKey.currentState?.openDrawer();
     await tester.pump();
     final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
-    expect(drawer.padding, const EdgeInsets.symmetric(horizontal: 12.0));
+    expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
   });
 }
 
