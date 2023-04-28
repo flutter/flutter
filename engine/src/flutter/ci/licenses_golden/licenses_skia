@@ -1,4 +1,4 @@
-Signature: 22c46ddbf02271a20eb6b0e13be8c9ad
+Signature: 25a9866770bbe193940e9df2cd68b8fa
 
 ====================================================================================================
 LIBRARY: etc1
@@ -656,9 +656,9 @@ ORIGIN: ../../../third_party/skia/src/base/SkTSort.h + ../../../third_party/skia
 ORIGIN: ../../../third_party/skia/src/base/SkUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkAlphaRuns.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkAlphaRuns.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkAnalyticEdge.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkAnalyticEdge.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkAntiRun.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlitBWMaskTemplate.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlitter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlitter.h + ../../../third_party/skia/LICENSE
@@ -805,9 +805,9 @@ FILE: ../../../third_party/skia/src/base/SkTSort.h
 FILE: ../../../third_party/skia/src/base/SkUtils.cpp
 FILE: ../../../third_party/skia/src/base/SkUtils.h
 FILE: ../../../third_party/skia/src/core/SkAlphaRuns.cpp
+FILE: ../../../third_party/skia/src/core/SkAlphaRuns.h
 FILE: ../../../third_party/skia/src/core/SkAnalyticEdge.cpp
 FILE: ../../../third_party/skia/src/core/SkAnalyticEdge.h
-FILE: ../../../third_party/skia/src/core/SkAntiRun.h
 FILE: ../../../third_party/skia/src/core/SkBlitBWMaskTemplate.h
 FILE: ../../../third_party/skia/src/core/SkBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter.h
