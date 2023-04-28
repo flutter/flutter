@@ -434,7 +434,6 @@ class IOSDevice extends Device {
         debuggingOptions.disablePortPublication) {
       throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
     }
-
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 

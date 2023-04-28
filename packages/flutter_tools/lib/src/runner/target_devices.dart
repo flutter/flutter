@@ -408,12 +408,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     }();
   }
 
-
-
   Future<Device?> _waitForIOSDeviceToConnect(IOSDevice device) async {
     for (final DeviceDiscovery discoverer in _deviceManager.deviceDiscoverers) {
       if (discoverer is IOSDevices) {
-
         _logger.printStatus('Waiting for ${device.name} to connect...');
         final Status waitingStatus = _logger.startSpinner(
           timeout: const Duration(seconds: 30),
