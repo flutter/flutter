@@ -102,13 +102,11 @@ template("sdk_targets") {
   foreach(part, meta_json.parts) {
     part_meta_json = {
     }
-
     part_meta = part.meta
     part_meta_rebased = "$fuchsia_sdk_path/$part_meta"
 
-    part_meta_json = read_file(part_meta_rebased, "json")
-
     if (part_meta != "version_history.json") {
+      part_meta_json = read_file(part_meta_rebased, "json")
       subtarget_name = part_meta_json.name
 
       # Check if the part is using `part.element_type` or `part.type`.
