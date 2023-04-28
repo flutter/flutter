@@ -28,7 +28,7 @@ TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
 TaskFunction createGalleryTransitionE2EBuildTest(
   List<String> args, {
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return GalleryTransitionBuildTest(
     args,
@@ -44,7 +44,7 @@ TaskFunction createGalleryTransitionE2EBuildTest(
 
 TaskFunction createGalleryTransitionE2ETest({
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return GalleryTransitionTest(
     testFile: semanticsEnabled
@@ -91,14 +91,14 @@ class GalleryTransitionTest {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller,
   });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
-  final bool enableImpeller;
+  final bool? enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -136,7 +136,8 @@ class GalleryTransitionTest {
       await flutter('drive', options: <String>[
         '--no-dds',
         '--profile',
-        if (enableImpeller) '--enable-impeller',
+        if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+        if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
         if (needFullTimeline)
           '--trace-startup',
         if (applicationBinaryPath != null)
@@ -235,14 +236,14 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller,
   }) : super(workingDirectory: galleryDirectory);
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
-  final bool enableImpeller;
+  final bool? enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -280,7 +281,8 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     return <String>[
       '--no-dds',
       '--profile',
-      if (enableImpeller) '--enable-impeller',
+      if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+      if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
       if (needFullTimeline) '--trace-startup',
       '-t',
       'test_driver/$testFile.dart',
