@@ -62,15 +62,15 @@ enum TabAlignment {
   // horizontal offset when it is available.
   // It's currently sourced from androidx/compose/material3/TabRow.kt.
   /// If [TabBar.isScrollable] is true, tabs are aligned to the
-  /// start of the [TabBar] with a horizontal offset of 52.0 pixels.
-  /// Otherwise throws an exception.
+  /// start of the [TabBar]. Otherwise throws an exception.
   ///
   /// It is not recommended to set [TabAlignment.start] when
   /// [ThemeData.useMaterial3] is false.
   start,
 
   /// If [TabBar.isScrollable] is true, tabs are aligned to the
-  /// start of the [TabBar]. Otherwise throws an exception.
+  /// start of the [TabBar] with an offset of 52.0 pixels.
+  /// Otherwise throws an exception.
   ///
   /// It is not recommended to set [TabAlignment.startOffset] when
   /// [ThemeData.useMaterial3] is false.
