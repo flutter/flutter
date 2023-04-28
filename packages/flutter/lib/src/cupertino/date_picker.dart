@@ -272,7 +272,10 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// [use24hFormat] decides whether 24 hour format is used. Defaults to false.
   ///
-  /// [dateOrder] determines the order of the columns inside [CupertinoDatePicker] in date mode.
+  /// [dateOrder] determines the order of the columns inside [CupertinoDatePicker]
+  /// in [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear]
+  /// mode. When using monthYear mode, both [DatePickerDateOrder.dmy] and
+  /// [DatePickerDateOrder.mdy] will result in the month|year order.
   /// Defaults to the locale's default date format/order.
   CupertinoDatePicker({
     super.key,
@@ -381,7 +384,10 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Whether to use 24 hour format. Defaults to false.
   final bool use24hFormat;
 
-  /// Determines the order of the columns inside [CupertinoDatePicker] in date mode.
+  /// Determines the order of the columns inside [CupertinoDatePicker] in
+  /// [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear]
+  /// mode. When using monthYear mode, both [DatePickerDateOrder.dmy] and
+  /// [DatePickerDateOrder.mdy] will result in the month|year order.
   /// Defaults to the locale's default date format/order.
   final DatePickerDateOrder? dateOrder;
 
