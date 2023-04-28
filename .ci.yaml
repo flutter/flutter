@@ -2578,7 +2578,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "xcode", "version": "14c18"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
