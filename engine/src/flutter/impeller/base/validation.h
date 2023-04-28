@@ -4,6 +4,12 @@
 
 #pragma once
 
+#ifndef IMPELLER_ENABLE_VALIDATION
+#ifdef IMPELLER_DEBUG
+#define IMPELLER_ENABLE_VALIDATION 1
+#endif
+#endif
+
 #include <sstream>
 
 #include "flutter/fml/macros.h"
