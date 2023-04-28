@@ -1018,8 +1018,8 @@ class SliverPhysicalParentData extends ParentData {
   ///
   /// See also:
   ///
-  ///   * [SliverCrossAxisGroup], which lays out multiple slivers along the
-  ///     cross axis direction.
+  ///  * [SliverCrossAxisGroup], which lays out multiple slivers along the
+  ///    cross axis direction.
   int? crossAxisFlex;
 
   /// Apply the [paintOffset] to the given [transform].
