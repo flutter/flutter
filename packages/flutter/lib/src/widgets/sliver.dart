@@ -1556,10 +1556,11 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
 /// {@end-tool}
 ///
 /// See also:
-/// * [SliverCrossAxisExpanded], which is the [ParentDataWidget] for setting a flex
-///   value to a widget.
-/// * [SliverConstrainedCrossAxis], which is a [RenderObjectWidget] for setting
-///   an extent to constrain the widget to.
+///
+///   * [SliverCrossAxisExpanded], which is the [ParentDataWidget] for setting a flex
+///     value to a widget.
+///   * [SliverConstrainedCrossAxis], which is a [RenderObjectWidget] for setting
+///     an extent to constrain the widget to.
 class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
   /// Creates a sliver that places sliver children in a linear array along
   /// the cross axis.
