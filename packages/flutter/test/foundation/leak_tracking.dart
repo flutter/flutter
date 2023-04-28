@@ -7,6 +7,104 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
+/// Set of objects, references weakly.
+class _WeakObjects {
+  /// Maps object's hash code to the list of weak references to the object.
+  ///
+  /// The list size is more than one in case of hash code duplicates.
+  final Map<int, List<WeakReference<Object>>> _objects = <int, List<WeakReference<Object>>>{};
+
+  void add(Object object) {
+    if (contains(object)) {
+      return;
+    }
+
+    final List<WeakReference<Object>> list =
+      _objects.putIfAbsent(identityHashCode(object), () => <WeakReference<Object>>[]);
+    list.add(WeakReference<Object>(object));
+  }
+
+  bool contains(Object object) {
+    final List<WeakReference<Object>>? list = _objects[identityHashCode(object)];
+    if (list == null) {
+      return false;
+    }
+    for (final WeakReference<Object> ref in list) {
+      if (ref.target == object) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+
+class _TestAdjustments {
+  _TestAdjustments(WidgetTester tester);
+
+  bool get isGCed => tester.target == null;
+
+  bool isMatch(WidgetTester tester) => tester == this.tester.target;
+
+  final WeakReference<WidgetTester> tester;
+  final _WeakObjects heldObjects = _WeakObjects();
+}
+
+extension LeakTrackerAdjustments on WidgetTester {
+
+  static final List<_TestAdjustments> _adjustments = <_TestAdjustments>[];
+
+  T addHeldObject<T>(T object){
+    Set<WeakReference<Object>>? objects = _cleanHeldObjectsAndFindThis();
+    if (objects == null) {
+      objects = <WeakReference<Object>>{};
+      _heldObjects[WeakReference<WidgetTester>(this)] = objects;
+    }
+
+
+
+    return object;
+  }
+
+  /// Cleans garbage collected items from [_heldObjects] and adds value for [this] if needed.
+  ///
+  /// Returns adjustements for [this].
+  _TestAdjustments? _cleanAdjustmentsAndFindThis(){
+    // Most expected case.
+    if (_adjustments.length == 1 && _adjustments.first.isMatch(this)) {
+      return _adjustments.last;
+    }
+
+    if (_adjustments.isEmpty) {
+      _adjustments.add(_TestAdjustments(this));
+    }
+
+    for (final _TestAdjustments adj in _adjustments) {
+      if (adj.isGCed) {
+        _adjustments.remove(adj);
+      }
+      if (adj.isMatch(this)) {
+        return adj;
+      }
+    }
+
+    final List<WeakReference<WidgetTester>> keys = <WeakReference<WidgetTester>>[..._heldObjects.keys];
+    Set<WeakReference<Object>>? result;
+
+    for (final WeakReference<WidgetTester> ref in keys) {
+      if (ref.target == null) {
+        _heldObjects.remove(ref);
+      }
+
+      if (ref.target == this) {
+        result = _heldObjects[ref];
+      }
+    }
+    assert(_heldObjects.length < 100, 'As tests do not nest, the size of the array is expected to be very small');
+    return result;
+  }
+}
+
 /// Wrapper for [testWidgets] with leak tracking.
 ///
 /// This method is temporal with the plan:
@@ -65,7 +163,7 @@ bool _webWarningPrinted = false;
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
-/// Pass [config] to troublceshoot or exempt leaks. See [LeakTrackingTestConfig]
+/// Pass [config] to troubleshoot or exempt leaks. See [LeakTrackingTestConfig]
 /// for details.
 Future<void> _withFlutterLeakTracking(
   DartAsyncCallback callback,

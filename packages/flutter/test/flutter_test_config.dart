@@ -23,7 +23,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  // Disable warning.
   LeakTrackingTestConfig.warnForNonSupportedPlatforms = false;
 
   // Enable golden file testing using Skia Gold.
