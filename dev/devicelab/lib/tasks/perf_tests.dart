@@ -26,7 +26,7 @@ String _testOutputDirectory(String testDirectory) {
 TaskFunction createComplexLayoutScrollPerfTest({
   bool measureCpuGpu = true,
   bool badScroll = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -39,7 +39,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
+TaskFunction createTilesScrollPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
@@ -48,7 +48,7 @@ TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
+TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
@@ -59,7 +59,7 @@ TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool enableImpeller = false}) {
+TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf_non_intersecting.dart',
@@ -130,7 +130,7 @@ TaskFunction createCubicBezierPerfE2ETest() {
 
 TaskFunction createBackdropFilterPerfTest({
     bool measureCpuGpu = true,
-    bool enableImpeller = false,
+    bool? enableImpeller,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -174,7 +174,7 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
 
 TaskFunction createSimpleAnimationPerfTest({
   bool measureCpuGpu = true,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -364,7 +364,7 @@ TaskFunction createFullscreenTextfieldPerfTest() {
 }
 
 TaskFunction createFullscreenTextfieldPerfE2ETest({
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -390,7 +390,7 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfE2ETest({bool enableImpeller = false}) {
+TaskFunction createColorFilterAndFadePerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_and_fade_perf_e2e.dart',
@@ -437,7 +437,7 @@ TaskFunction createFadingChildAnimationPerfTest() {
 }
 
 TaskFunction createImageFilteredTransformAnimationPerfTest({
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -456,7 +456,7 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createListTextLayoutPerfE2ETest({bool enableImpeller = false}) {
+TaskFunction createListTextLayoutPerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/list_text_layout_perf_e2e.dart',
@@ -630,7 +630,7 @@ TaskFunction createGradientStaticPerfE2ETest() {
 }
 
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -643,7 +643,7 @@ TaskFunction createAnimatedBlurBackropFilterPerfTest({
 }
 
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -653,7 +653,7 @@ TaskFunction createAnimatedComplexOpacityPerfE2ETest({
 }
 
 TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -944,8 +944,8 @@ class PerfTest {
     String? resultFilename,
     this.device,
     this.flutterDriveCallback,
-    this.enableImpeller = false,
     this.timeoutSeconds,
+    this.enableImpeller,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -960,8 +960,8 @@ class PerfTest {
     String resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
-    this.enableImpeller = false,
     this.timeoutSeconds,
+    this.enableImpeller,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -994,7 +994,7 @@ class PerfTest {
   final FlutterDriveCallback? flutterDriveCallback;
 
   /// Whether the perf test should enable Impeller.
-  final bool enableImpeller;
+  final bool? enableImpeller;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
@@ -1068,7 +1068,8 @@ class PerfTest {
           ...<String>['--use-existing-app', existingApp],
         if (dartDefine.isNotEmpty)
           ...<String>['--dart-define', dartDefine],
-        if (enableImpeller) '--enable-impeller',
+        if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+        if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
         '-d',
         deviceId,
       ];
