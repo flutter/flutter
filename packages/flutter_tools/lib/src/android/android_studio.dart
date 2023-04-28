@@ -333,7 +333,7 @@ the configured path by running this command: flutter config --android-studio-dir
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     FileSystemEntity? configuredStudioDirAsEntity;
     if (configuredStudioDir != null) {
-      configuredStudioDirAsEntity = globals.fs.file(configuredStudioDir);
+      configuredStudioDirAsEntity = globals.fs.directory(configuredStudioDir);
       if (configuredStudioDirAsEntity.basename == 'Contents') {
         configuredStudioDirAsEntity = configuredStudioDirAsEntity.parent;
       }
