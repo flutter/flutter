@@ -40,68 +40,19 @@ class _WeakObjects {
 
 
 class _TestAdjustments {
-  _TestAdjustments(WidgetTester tester);
-
-  bool get isGCed => tester.target == null;
-
-  bool isMatch(WidgetTester tester) => tester == this.tester.target;
-
-  final WeakReference<WidgetTester> tester;
   final _WeakObjects heldObjects = _WeakObjects();
 }
 
 extension LeakTrackerAdjustments on WidgetTester {
+  static final Expando<_TestAdjustments> _abjustments = Expando<_TestAdjustments>();
 
-  static final List<_TestAdjustments> _adjustments = <_TestAdjustments>[];
-
-  T addHeldObject<T>(T object){
-    Set<WeakReference<Object>>? objects = _cleanHeldObjectsAndFindThis();
-    if (objects == null) {
-      objects = <WeakReference<Object>>{};
-      _heldObjects[WeakReference<WidgetTester>(this)] = objects;
+  T addHeldObject<T  extends Object>(T object){
+    if (_abjustments[this] == null){
+      _abjustments[this] = _TestAdjustments();
     }
 
-
-
+    _abjustments[this]!.heldObjects.add(object);
     return object;
-  }
-
-  /// Cleans garbage collected items from [_heldObjects] and adds value for [this] if needed.
-  ///
-  /// Returns adjustements for [this].
-  _TestAdjustments? _cleanAdjustmentsAndFindThis(){
-    // Most expected case.
-    if (_adjustments.length == 1 && _adjustments.first.isMatch(this)) {
-      return _adjustments.last;
-    }
-
-    if (_adjustments.isEmpty) {
-      _adjustments.add(_TestAdjustments(this));
-    }
-
-    for (final _TestAdjustments adj in _adjustments) {
-      if (adj.isGCed) {
-        _adjustments.remove(adj);
-      }
-      if (adj.isMatch(this)) {
-        return adj;
-      }
-    }
-
-    final List<WeakReference<WidgetTester>> keys = <WeakReference<WidgetTester>>[..._heldObjects.keys];
-    Set<WeakReference<Object>>? result;
-
-    for (final WeakReference<WidgetTester> ref in keys) {
-      if (ref.target == null) {
-        _heldObjects.remove(ref);
-      }
-
-      if (ref.target == this) {
-        result = _heldObjects[ref];
-      }
-    }
-    assert(_heldObjects.length < 100, 'As tests do not nest, the size of the array is expected to be very small');
-    return result;
   }
 }
 
