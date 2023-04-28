@@ -26,6 +26,10 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
+    // Conditional for compatibility with AGP <4.2.
+    if (project.android.hasProperty("namespace")) {
+        namespace 'dev.flutter.integration_test'
+    }
     compileSdkVersion 31
 
     compileOptions {
