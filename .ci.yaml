@@ -3813,7 +3813,6 @@ targets:
       task_name: new_gallery_ios__transition_perf
 
   - name: Mac_ios new_gallery_skia_ios__transition_perf
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
