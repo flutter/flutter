@@ -108,33 +108,8 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   color0.store_action = StoreAction::kMultisampleResolve;
   color0.resolve_texture = resolve_tex;
 
-  TextureDescriptor stencil_tex_desc;
-  stencil_tex_desc.storage_mode = StorageMode::kDevicePrivate;
-  stencil_tex_desc.type = TextureType::kTexture2DMultisample;
-  stencil_tex_desc.sample_count = SampleCount::kCount4;
-  stencil_tex_desc.format =
-      context->GetCapabilities()->GetDefaultStencilFormat();
-  stencil_tex_desc.size = msaa_tex_desc.size;
-  stencil_tex_desc.usage =
-      static_cast<TextureUsageMask>(TextureUsage::kRenderTarget);
-  auto stencil_tex =
-      context->GetResourceAllocator()->CreateTexture(stencil_tex_desc);
-
-  if (!stencil_tex) {
-    VALIDATION_LOG << "Could not create stencil texture.";
-    return nullptr;
-  }
-  stencil_tex->SetLabel("ImpellerOnscreenStencil");
-
-  StencilAttachment stencil0;
-  stencil0.texture = stencil_tex;
-  stencil0.clear_stencil = 0;
-  stencil0.load_action = LoadAction::kClear;
-  stencil0.store_action = StoreAction::kDontCare;
-
   RenderTarget render_target_desc;
   render_target_desc.SetColorAttachment(color0, 0u);
-  render_target_desc.SetStencilAttachment(stencil0);
 
   // The constructor is private. So make_unique may not be used.
   return std::unique_ptr<SurfaceMTL>(
