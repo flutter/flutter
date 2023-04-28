@@ -104,7 +104,7 @@ class Checkbox extends StatefulWidget {
   /// design [Checkbox].
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [hoverColor], [overlayColor], [splashRadius],
+  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
   /// [side] will still affect the [CupertinoCheckbox] and should be handled if
   /// native fidelity is important.
@@ -452,10 +452,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     });
   }
 
-  BorderSide? _resolveSide(BorderSide? side) {
+  BorderSide? _resolveSide(BorderSide? side, Set<MaterialState> states) {
     if (side is MaterialStateBorderSide) {
-      final Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
-      return MaterialStateProperty.resolveAs<BorderSide?>(side, sideStates);
+      return MaterialStateProperty.resolveAs<BorderSide?>(side, states);
     }
     if (!states.contains(MaterialState.selected)) {
       return side;
@@ -521,10 +520,12 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     });
 
     // Colors need to be resolved in selected and non selected states separately
-    // so that they can be lerped between.
-    final Set<MaterialState> errorState = states..add(MaterialState.error);
-    final Set<MaterialState> activeStates = widget.isError ? (errorState..add(MaterialState.selected)) : states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = widget.isError ? (errorState..remove(MaterialState.selected)) : states..remove(MaterialState.selected);
+    final Set<MaterialState> activeStates = states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates = states..remove(MaterialState.selected);
+    if (widget.isError) {
+      activeStates.add(MaterialState.error);
+      inactiveStates.add(MaterialState.error);
+    }
     final Color? activeColor = widget.fillColor?.resolve(activeStates)
       ?? _widgetFillColor.resolve(activeStates)
       ?? checkboxTheme.fillColor?.resolve(activeStates);
@@ -536,13 +537,26 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final Color effectiveInactiveColor = inactiveColor
       ?? defaults.fillColor!.resolve(inactiveStates)!;
 
-    final Set<MaterialState> focusedStates = widget.isError ? (errorState..add(MaterialState.focused)) : states..add(MaterialState.focused);
+    final BorderSide activeSide = _resolveSide(widget.side, activeStates)
+      ?? _resolveSide(checkboxTheme.side, activeStates)
+      ?? _resolveSide(defaults.side, activeStates)!;
+    final BorderSide inactiveSide = _resolveSide(widget.side, inactiveStates)
+      ?? _resolveSide(checkboxTheme.side, inactiveStates)
+      ?? _resolveSide(defaults.side, inactiveStates)!;
+
+    final Set<MaterialState> focusedStates = states..add(MaterialState.focused);
+    if (widget.isError) {
+      focusedStates.add(MaterialState.error);
+    }
     Color effectiveFocusOverlayColor = widget.overlayColor?.resolve(focusedStates)
       ?? widget.focusColor
       ?? checkboxTheme.overlayColor?.resolve(focusedStates)
       ?? defaults.overlayColor!.resolve(focusedStates)!;
 
-    final Set<MaterialState> hoveredStates = widget.isError ? (errorState..add(MaterialState.hovered)) : states..add(MaterialState.hovered);
+    final Set<MaterialState> hoveredStates = states..add(MaterialState.hovered);
+    if (widget.isError) {
+      hoveredStates.add(MaterialState.error);
+    }
     Color effectiveHoverOverlayColor = widget.overlayColor?.resolve(hoveredStates)
       ?? widget.hoverColor
       ?? checkboxTheme.overlayColor?.resolve(hoveredStates)
@@ -606,7 +620,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..value = value
           ..previousValue = _previousValue
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
-          ..side = _resolveSide(widget.side) ?? _resolveSide(checkboxTheme.side),
+          ..activeSide = activeSide
+          ..inactiveSide = inactiveSide,
       ),
     );
   }
@@ -656,13 +671,23 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  BorderSide? get side => _side;
-  BorderSide? _side;
-  set side(BorderSide? value) {
-    if (_side == value) {
+  BorderSide get activeSide => _activeSide!;
+  BorderSide? _activeSide;
+  set activeSide(BorderSide value) {
+    if (_activeSide == value) {
       return;
     }
-    _side = value;
+    _activeSide = value;
+    notifyListeners();
+  }
+
+  BorderSide get inactiveSide => _inactiveSide!;
+  BorderSide? _inactiveSide;
+  set inactiveSide(BorderSide value) {
+    if (_inactiveSide == value) {
+      return;
+    }
+    _inactiveSide = value;
     notifyListeners();
   }
 
@@ -677,8 +702,7 @@ class _CheckboxPainter extends ToggleablePainter {
     return rect;
   }
 
-  // The checkbox's border color if value == false, or its fill color when
-  // value == true or null.
+  // The checkbox's fill color
   Color _colorAt(double t) {
     // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
     return t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!;
@@ -692,10 +716,8 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeWidth = _kStrokeWidth;
   }
 
-  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
-    if (fill) {
-      canvas.drawPath(shape.getOuterPath(outer), paint);
-    }
+  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
+    canvas.drawPath(shape.getOuterPath(outer), paint);
     if (side != null) {
       shape.copyWith(side: side).paint(canvas, outer);
     }
@@ -754,10 +776,10 @@ class _CheckboxPainter extends ToggleablePainter {
       final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
-        final BorderSide border = side ?? BorderSide(width: 2, color: paint.color);
-        _drawBox(canvas, outer, paint, border, false); // only paint the border
+        final BorderSide border = BorderSide.lerp(inactiveSide, activeSide, t);
+        _drawBox(canvas, outer, paint, border);
       } else {
-        _drawBox(canvas, outer, paint, side, true);
+        _drawBox(canvas, outer, paint, activeSide);
         final double tShrink = (t - 0.5) * 2.0;
         if (previousValue == null || value == null) {
           _drawDash(canvas, origin, tShrink, strokePaint);
@@ -769,7 +791,7 @@ class _CheckboxPainter extends ToggleablePainter {
       final Rect outer = _outerRectAt(origin, 1.0);
       final Paint paint = Paint() ..color = _colorAt(1.0);
 
-      _drawBox(canvas, outer, paint, side, true);
+      _drawBox(canvas, outer, paint, activeSide);
       if (tNormalized <= 0.5) {
         final double tShrink = 1.0 - tNormalized * 2.0;
         if (previousValue ?? false) {
@@ -799,15 +821,34 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
+  MaterialStateBorderSide? get side {
+    return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return const BorderSide(width: 2.0, color: Colors.transparent);
+        }
+        return BorderSide(width: 2.0, color: _theme.disabledColor);
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const BorderSide(width: 2.0, color: Colors.transparent);
+      }
+      return BorderSide(width: 2.0, color: _theme.unselectedWidgetColor);
+    });
+  }
+
+  @override
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return _theme.disabledColor;
+        if (states.contains(MaterialState.selected)) {
+          return _theme.disabledColor;
+        }
+        return Colors.transparent;
       }
       if (states.contains(MaterialState.selected)) {
         return _colors.secondary;
       }
-      return _theme.unselectedWidgetColor;
+      return Colors.transparent;
     });
   }
 
@@ -865,27 +906,49 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
   final ColorScheme _colors;
 
   @override
+  MaterialStateBorderSide? get side {
+    return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return const BorderSide(width: 2.0, color: Colors.transparent);
+        }
+        return BorderSide(width: 2.0, color: _colors.onSurface.withOpacity(0.38));
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const BorderSide(width: 0.0, color: Colors.transparent);
+      }
+      if (states.contains(MaterialState.error)) {
+        return BorderSide(width: 2.0, color: _colors.error);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return BorderSide(width: 2.0, color: _colors.onSurface);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(width: 2.0, color: _colors.onSurface);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return BorderSide(width: 2.0, color: _colors.onSurface);
+      }
+      return BorderSide(width: 2.0, color: _colors.onSurfaceVariant);
+    });
+  }
+
+  @override
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return _colors.onSurface.withOpacity(0.38);
-      }
-      if (states.contains(MaterialState.error)) {
-        return _colors.error;
+        if (states.contains(MaterialState.selected)) {
+          return _colors.onSurface.withOpacity(0.38);
+        }
+        return Colors.transparent;
       }
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.error)) {
+          return _colors.error;
+        }
         return _colors.primary;
       }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface;
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onSurface;
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface;
-      }
-      return _colors.onSurfaceVariant;
+      return Colors.transparent;
     });
   }
 
