@@ -2238,6 +2238,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
 
+  - name: Linux_android slider_perf_android
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: slider_perf_android
+
   - name: Linux_android platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2942,7 +2952,6 @@ targets:
 
   - name: Mac module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/125425
     timeout: 60
     properties:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
@@ -2962,7 +2971,6 @@ targets:
 
   - name: Mac_arm64_ios module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true # Flaky: https://github.com/flutter/flutter/issues/125425
     presubmit: false
     timeout: 60
     properties:
@@ -3803,6 +3811,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: new_gallery_ios__transition_perf
+
+  - name: Mac_ios new_gallery_skia_ios__transition_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: new_gallery_skia_ios__transition_perf
 
   - name: Mac_ios ios_picture_cache_complexity_scoring_perf__timeline_summary
     recipe: devicelab/devicelab_drone
