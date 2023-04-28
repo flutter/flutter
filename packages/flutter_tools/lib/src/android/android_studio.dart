@@ -52,7 +52,8 @@ class AndroidStudio {
     _initAndValidate();
   }
 
-  static AndroidStudio? fromMacOSBundle(String bundlePath, {
+  static AndroidStudio? fromMacOSBundle(
+    String bundlePath, {
     String? configuredPath,
   }) {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
@@ -244,7 +245,7 @@ class AndroidStudio {
   /// Android Studio found at that location is always returned, even if it is
   /// invalid.
   static AndroidStudio? latestValid() {
-   final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
+    final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioPath != null && !globals.fs.directory(configuredStudioPath).existsSync()) {
       throwToolExit('''
 Could not find the Android Studio installation at the manually configured path "$configuredStudioPath".
