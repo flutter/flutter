@@ -4666,9 +4666,11 @@ void main() {
         MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
+              print('justin stateful builder. popEnabled? ${popEnabled()}');
               return CanPopScope(
                 popEnabled: popEnabled(),
                 onPop: () {
+                  print('justin CanPopScope onPop. popEnabled? ${popEnabled()}');
                   if (popEnabled()) {
                     return;
                   }
@@ -4738,10 +4740,8 @@ void main() {
       expect(calls, hasLength(1));
       expect(calls.last, isFalse);
 
-      print('justin first tap.');
       await tester.tap(find.text('Go to _Page.one'));
       await tester.pumpAndSettle();
-      print('justin done first tap\'s pumpAndSettle.');
 
       expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(2));
@@ -4754,6 +4754,7 @@ void main() {
       expect(calls, hasLength(3));
       expect(calls.last, isFalse);
 
+      print('justin going to noPop page.');
       await tester.tap(find.text('Go to _Page.noPop'));
       await tester.pumpAndSettle();
 
@@ -4761,6 +4762,7 @@ void main() {
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
+      print('justin going back, which should be  blocked by noPop page.');
       await systemBack();
       await tester.pumpAndSettle();
 

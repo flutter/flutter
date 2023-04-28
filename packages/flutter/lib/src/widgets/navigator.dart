@@ -3403,6 +3403,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   late List<NavigatorObserver> _effectiveObservers;
 
+  bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
+
   void _onHistoryChanged() {
     if (widget.onHistoryChanged == null || true) {
       // TODO(justinmc): I'm adding the notification logic here in the case that
@@ -3412,7 +3414,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       //return;
 
       final NavigationNotification notification = NavigationNotification(
-        canPop: canPop(),
+        canPop: _usingPagesAPI
+            ? widget.pages.length > 1
+            : canPop(),
       );
       print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot');
       notification.dispatch(context);
@@ -3426,8 +3430,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void initState() {
     super.initState();
     assert(() {
-      if (widget.pages != const <Page<dynamic>>[]) {
-        // This navigator uses page API.
+      if (_usingPagesAPI) {
         if (widget.pages.isEmpty) {
           FlutterError.reportError(
             FlutterErrorDetails(
@@ -3634,7 +3637,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(() {
-      if (widget.pages != const <Page<dynamic>>[]) {
+      if (_usingPagesAPI) {
         // This navigator uses page API.
         if (widget.pages.isEmpty) {
           FlutterError.reportError(
