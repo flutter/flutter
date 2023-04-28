@@ -58,12 +58,18 @@ import 'ticker_provider.dart';
 /// As a result listeners of the [OverlayEntry] can get notified for one last
 /// time after the [dispose] call, when the widget is eventually unmounted.
 ///
+/// {@macro flutter.widgets.overlayPortalVsOverlayEntry}
+///
 /// See also:
 ///
-///  * [Overlay]
-///  * [OverlayState]
-///  * [WidgetsApp]
-///  * [MaterialApp]
+///  * [OverlayPortal], an alternative API for inserting widgets into an
+///    [Overlay] using a builder callback.
+///  * [Overlay], a stack of entries that can be managed independently.
+///  * [OverlayState], the current state of an Overlay.
+///  * [WidgetsApp], a convenience widget that wraps a number of widgets that
+///    are commonly required for an application.
+///  * [MaterialApp], a convenience widget that wraps a number of widgets that
+///    are commonly required for Material Design applications.
 class OverlayEntry implements Listenable {
   /// Creates an overlay entry.
   ///
@@ -1404,20 +1410,22 @@ class OverlayPortalController {
 /// [OverlayPortalController.show] was called. The last [OverlayPortal] to have
 /// called `show` gets to paint its overlay child in the foreground.
 ///
+/// {@template flutter.widgets.overlayPortalVsOverlayEntry}
 /// ### Differences between [OverlayPortal] and [OverlayEntry]
 ///
 /// The main difference between [OverlayEntry] and [OverlayPortal] is that
 /// [OverlayEntry] builds its widget subtree as a child of the target [Overlay],
-/// while [OverlayPortal] uses [overlayChildBuilder] to build a child widget of
-/// itself. This allows [OverlayPortal]'s overlay child to depend on the same
-/// set of [InheritedWidget]s as [OverlayPortal], and it's also guaranteed that
-/// the overlay child will not outlive its [OverlayPortal].
+/// while [OverlayPortal] uses [OverlayPortal.overlayChildBuilder] to build a
+/// child widget of itself. This allows [OverlayPortal]'s overlay child to depend
+/// on the same set of [InheritedWidget]s as [OverlayPortal], and it's also
+/// guaranteed that the overlay child will not outlive its [OverlayPortal].
 ///
 /// On the other hand, [OverlayPortal]'s implementation is more complex. For
 /// instance, it does a bit more work than a regular widget during global key
 /// reparenting. If the content to be shown on the [Overlay] doesn't benefit
 /// from being a part of [OverlayPortal]'s subtree, consider using an
 /// [OverlayEntry] instead.
+/// {@endtemplate}
 ///
 /// See also:
 ///
