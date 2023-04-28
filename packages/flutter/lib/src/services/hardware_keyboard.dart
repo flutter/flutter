@@ -34,8 +34,8 @@ bool _keyboardDebug(
 ]) {
   if (kReleaseMode) {
     throw StateError(
-      '_keyboardDebug was called in Release mode. It should always be wrapped in '
-      'an assert. Always call _keyboardDebug like so:\n'
+      '_keyboardDebug was called in Release mode, which means they are called '
+      'without being wrapped in an assert. Always call _keyboardDebug like so:\n'
       r"  assert(_keyboardDebug(() => 'Blah $foo'));"
     );
   }
