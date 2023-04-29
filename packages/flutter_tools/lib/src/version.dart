@@ -74,6 +74,7 @@ abstract class FlutterVersion {
     SystemClock clock = const SystemClock(),
     required FileSystem fs,
     required String flutterRoot,
+    bool fetchTags = false,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
     if (versionFile.existsSync()) {
@@ -93,6 +94,7 @@ abstract class FlutterVersion {
       frameworkRevision: frameworkRevision,
       fs: fs,
       flutterRoot: flutterRoot,
+      fetchTags: fetchTags,
     );
   }
 
@@ -106,12 +108,14 @@ abstract class FlutterVersion {
     required String flutterRoot,
     required String frameworkRevision,
     required FileSystem fs,
+    bool fetchTags = false,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
       globals.processUtils,
       globals.platform,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
+      fetchTags: fetchTags,
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
     return _FlutterVersionGit._(
@@ -433,6 +437,11 @@ class _FlutterVersionFromFile extends FlutterVersion {
       // ignore: avoid_catches_without_on_clauses
     } catch (err) {
       globals.printTrace('Failed to parse ${jsonFile.path} with $err');
+      try {
+        jsonFile.deleteSync();
+      } on FileSystemException {
+        globals.printTrace('Failed to delete ${jsonFile.path}');
+      }
       // Returning null means fallback to git implementation.
       return null;
     }
@@ -446,6 +455,9 @@ class _FlutterVersionFromFile extends FlutterVersion {
 
   @override
   final String channel;
+
+  @override
+  String getBranchName({bool redactUnknownBranches = false}) => channel;
 
   @override
   final String repositoryUrl;

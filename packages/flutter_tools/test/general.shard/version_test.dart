@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -106,7 +105,7 @@ void main() {
           ),
         ]);
 
-        final FlutterVersion flutterVersion = globals.flutterVersion;
+        final FlutterVersion flutterVersion = FlutterVersion(clock: _testClock, fs: fs, flutterRoot: flutterRoot);
         await flutterVersion.checkFlutterVersionFreshness();
         expect(flutterVersion.channel, channel);
         expect(flutterVersion.repositoryUrl, flutterUpstreamUrl);
@@ -129,7 +128,6 @@ void main() {
         expect(testLogger.statusText, isEmpty);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(clock: _testClock, fs: fs, flutterRoot: flutterRoot),
         ProcessManager: () => processManager,
         Cache: () => cache,
       });
@@ -428,15 +426,121 @@ void main() {
       ),
     ]);
 
-    final FlutterVersion flutterVersion = globals.flutterVersion;
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final FlutterVersion flutterVersion = FlutterVersion(
+      clock: _testClock,
+      fs: fs,
+      flutterRoot: '/path/to/flutter',
+    );
     expect(flutterVersion.channel, 'feature-branch');
     expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
     expect(flutterVersion.getBranchName(), 'feature-branch');
     expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
     expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
+
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FlutterVersion(clock: _testClock, fs: MemoryFileSystem.test(), flutterRoot: '/path/to/flutter'),
+    ProcessManager: () => processManager,
+    Cache: () => cache,
+  });
+
+  testUsingContext('ensureVersionFile() writes version information to disk', () async {
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
+        stdout: '1234abcd',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', '1234abcd'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
+        stdout: '0.1.2-3-1234abcd',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+        stdout: 'feature-branch',
+      ),
+      FakeCommand(
+        command: const <String>[
+          'git',
+          '-c',
+          'log.showSignature=false',
+          'log',
+          'HEAD',
+          '-n',
+          '1',
+          '--pretty=format:%ad',
+          '--date=iso',
+        ],
+        stdout: _testClock.ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2).toString(),
+      ),
+    ]);
+
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final Directory flutterRoot = fs.directory('/path/to/flutter')
+        ..createSync(recursive: true);
+    final FlutterVersion flutterVersion = FlutterVersion(
+      clock: _testClock,
+      fs: fs,
+      flutterRoot: flutterRoot.path,
+    );
+
+    final File versionFile = fs.file('/path/to/flutter/.version.json');
+    expect(versionFile.existsSync(), isFalse);
+
+    flutterVersion.ensureVersionFile();
+    expect(versionFile.existsSync(), isTrue);
+    expect(versionFile.readAsStringSync(), '''
+{
+  "frameworkVersion": "0.0.0-unknown",
+  "channel": "feature-branch",
+  "repositoryUrl": "unknown source",
+  "frameworkRevision": "1234abcd",
+  "frameworkCommitDate": "2014-10-02 01:00:00.000",
+  "engineRevision": "abcdefg",
+  "dartSdkVersion": "2.12.0",
+  "devToolsVersion": "2.8.0",
+  "flutterVersion": "0.0.0-unknown"
+}''');
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+    Cache: () => cache,
+  });
+
+  testUsingContext('version does not call git if a .version.json file exists', () async {
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+    const String devToolsVersion = '0000000';
+    const Map<String, Object> versionJson = <String, Object>{
+      'channel': 'stable',
+      'frameworkVersion': '1.2.3',
+      'repositoryUrl': 'https://github.com/flutter/flutter.git',
+      'frameworkRevision': '1234abcd',
+      'frameworkCommitDate': '2023-04-28 12:34:56 -0400',
+      'engineRevision': 'deadbeef',
+      'dartSdkVersion': 'deadbeef2',
+      'devToolsVersion': devToolsVersion,
+      'flutterVersion': 'foo',
+    };
+    flutterRoot.childFile('.version.json').writeAsStringSync(
+      jsonEncode(versionJson),
+    );
+    final FlutterVersion flutterVersion = FlutterVersion(
+      clock: _testClock,
+      fs: fs,
+      flutterRoot: flutterRoot.path,
+    );
+    expect(flutterVersion.channel, 'stable');
+    expect(flutterVersion.getVersionString(), 'stable/1.2.3');
+    expect(flutterVersion.getBranchName(), 'stable');
+    expect(flutterVersion.dartSdkVersion, 'deadbeef2');
+    expect(flutterVersion.devToolsVersion, devToolsVersion);
+    expect(flutterVersion.engineRevision, 'deadbeef');
+
+    expect(processManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
     Cache: () => cache,
   });
