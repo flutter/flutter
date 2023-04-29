@@ -124,7 +124,7 @@ bool Entity::SetInheritedOpacity(Scalar alpha) {
   return true;
 }
 
-/// @brief  Returns true if the blend mode is "destrictive", meaning that even
+/// @brief  Returns true if the blend mode is "destructive", meaning that even
 ///         fully transparent source colors would result in the destination
 ///         getting changed.
 ///
