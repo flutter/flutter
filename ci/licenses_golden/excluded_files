@@ -2800,8 +2800,6 @@
 ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
 ../../../third_party/skia/src/gpu/gl/BUILD.bazel
 ../../../third_party/skia/src/gpu/mtl/BUILD.bazel
-../../../third_party/skia/src/gpu/piet/BUILD.bazel
-../../../third_party/skia/src/gpu/piet/README.md
 ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 ../../../third_party/skia/src/gpu/vk/BUILD.bazel
 ../../../third_party/skia/src/image/BUILD.bazel
@@ -2842,7 +2840,6 @@
 ../../../third_party/skia/third_party/libjpeg-turbo
 ../../../third_party/skia/third_party/libpng
 ../../../third_party/skia/third_party/lua
-../../../third_party/skia/third_party/piet-gpu/Makefile
 ../../../third_party/skia/third_party/vulkanmemoryallocator/BUILD.bazel
 ../../../third_party/skia/toolchain/BUILD.bazel
 ../../../third_party/skia/toolchain/android_trampolines/gen_trampolines/BUILD.bazel
