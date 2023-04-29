@@ -516,6 +516,7 @@ void main() {
       unexpectedPaths: <String>[
         'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
         'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
         'example/ios/Runner/AppDelegate.h',
         'example/ios/Runner/AppDelegate.m',
@@ -525,9 +526,18 @@ void main() {
         'ios/Classes/FlutterProjectPlugin.m',
         'ios/Runner/AppDelegate.h',
         'ios/Runner/AppDelegate.m',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/GeneratedPluginRegistrant.m',
         'ios/Runner/main.m',
         'lib/main.dart',
         'test/widget_test.dart',
+        'windows/flutter/generated_plugin_registrant.cc',
+        'windows/flutter/generated_plugin_registrant.h',
+        'windows/flutter/generated_plugins.cmake',
+        'linux/flutter/generated_plugin_registrant.cc',
+        'linux/flutter/generated_plugin_registrant.h',
+        'linux/flutter/generated_plugins.cmake',
+        'macos/Flutter/GeneratedPluginRegistrant.swift',
       ],
     );
     return _runFlutterTest(projectDir);
