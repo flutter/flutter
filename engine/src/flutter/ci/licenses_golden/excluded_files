@@ -2840,6 +2840,7 @@
 ../../../third_party/skia/third_party/libjpeg-turbo
 ../../../third_party/skia/third_party/libpng
 ../../../third_party/skia/third_party/lua
+../../../third_party/skia/third_party/vello
 ../../../third_party/skia/third_party/vulkanmemoryallocator/BUILD.bazel
 ../../../third_party/skia/toolchain/BUILD.bazel
 ../../../third_party/skia/toolchain/android_trampolines/gen_trampolines/BUILD.bazel
