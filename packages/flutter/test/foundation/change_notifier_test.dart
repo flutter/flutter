@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'leak_tracking.dart';
+
 class TestNotifier extends ChangeNotifier {
   void notify() {
     notifyListeners();
@@ -49,7 +51,7 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
-  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
     bool callbackDidFinish = false;
     void foo() {
@@ -65,7 +67,7 @@ void main() {
     expect(callbackDidFinish, isFalse);
   });
 
-  testWidgets('ChangeNotifier', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
       log.add('listener');
