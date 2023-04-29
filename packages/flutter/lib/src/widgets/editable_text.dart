@@ -3994,7 +3994,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         || platformNotSupported
         || widget.readOnly
         || _selectionOverlay == null
-        || !_spellCheckResultsReceived) {
+        || !_spellCheckResultsReceived
+        || findSuggestionSpanAtCursorIndex(textEditingValue.selection.extentOffset) == null) {
       // Only attempt to show the spell check suggestions toolbar if there
       // is a toolbar specified and spell check suggestions available to show.
       return false;
