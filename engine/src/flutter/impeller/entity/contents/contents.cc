@@ -109,9 +109,6 @@ bool Contents::ShouldRender(const Entity& entity,
   if (!stencil_coverage.has_value()) {
     return false;
   }
-  if (Entity::IsBlendModeDestructive(entity.GetBlendMode())) {
-    return true;
-  }
 
   auto coverage = GetCoverage(entity);
   if (!coverage.has_value()) {

@@ -2163,5 +2163,19 @@ TEST_P(AiksTest, OpaqueEntitiesGetCoercedToSource) {
   ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSource);
 }
 
+TEST_P(AiksTest, CanRenderDestructiveSaveLayer) {
+  Canvas canvas;
+
+  canvas.DrawPaint({.color = Color::Red()});
+  // Draw an empty savelayer with a destructive blend mode, which will replace
+  // the entire red screen with fully transparent black, except for the green
+  // circle drawn within the layer.
+  canvas.SaveLayer({.blend_mode = BlendMode::kSource});
+  canvas.DrawCircle({300, 300}, 100, {.color = Color::Green()});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
