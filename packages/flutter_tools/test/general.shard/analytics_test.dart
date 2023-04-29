@@ -387,6 +387,7 @@ class FakeDoctor extends Fake implements Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
+    required FlutterVersion version,
   }) async {
     return diagnoseSucceeds;
   }

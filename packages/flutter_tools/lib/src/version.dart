@@ -67,9 +67,6 @@ Channel? getChannelForName(String name) {
 abstract class FlutterVersion {
   /// Parses the Flutter version from currently available tags in the local
   /// repo.
-  ///
-  /// Call [fetchTagsAndUpdate] to update the version based on the latest tags
-  /// available upstream.
   factory FlutterVersion({
     SystemClock clock = const SystemClock(),
     required FileSystem fs,
@@ -77,12 +74,22 @@ abstract class FlutterVersion {
     bool fetchTags = false,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
-    if (versionFile.existsSync()) {
-      final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, flutterRoot: flutterRoot);
+    // TODO only fetch tags if channel is master/main
+    if (!fetchTags && versionFile.existsSync()) {
+      final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(
+        versionFile,
+        flutterRoot: flutterRoot,
+      );
       if (version != null) {
         return version;
       }
     }
+
+    // if we are fetching tags, ignore cached versionFile
+    if (fetchTags && versionFile.existsSync()) {
+      versionFile.deleteSync();
+    }
+
     final String frameworkRevision = _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
@@ -129,14 +136,6 @@ abstract class FlutterVersion {
   }
 
   final SystemClock _clock;
-
-  /// Fetches tags from the upstream Flutter repository and re-calculates the
-  /// version.
-  ///
-  /// This carries a performance penalty, and should only be called when the
-  /// user explicitly wants to get the version, e.g. for `flutter --version` or
-  /// `flutter doctor`.
-  void fetchTagsAndUpdate();
 
   String? get repositoryUrl;
 
@@ -491,19 +490,15 @@ class _FlutterVersionGit extends FlutterVersion {
     required super.clock,
     required super.flutterRoot,
     required this.frameworkRevision,
-    required String frameworkVersion,
-    required GitTagVersion gitTagVersion,
+    required this.frameworkVersion,
+    required this.gitTagVersion,
     required this.fs,
-  }) : _frameworkVersion = frameworkVersion,
-       _gitTagVersion = gitTagVersion,
-       super._();
+  }) : super._();
 
   final FileSystem fs;
 
-  late GitTagVersion _gitTagVersion;
-
   @override
-  GitTagVersion get gitTagVersion => _gitTagVersion;
+  final GitTagVersion gitTagVersion;
 
   @override
   final String frameworkRevision;
@@ -527,10 +522,8 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String get engineRevision => globals.cache.engineRevision;
 
-  // this is late since fetching tags can overwrite it.
-  late String _frameworkVersion;
   @override
-  String get frameworkVersion => _frameworkVersion;
+  final String frameworkVersion;
 
   String? _channel;
   @override
@@ -562,15 +555,8 @@ class _FlutterVersionGit extends FlutterVersion {
   }
 
   @override
-  void fetchTagsAndUpdate() {
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: flutterRoot, fetchTags: true);
-    _frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
-  }
-
-  @override
   void ensureVersionFile() {
-    fs.file(fs.path.join(flutterRoot, 'version'))
-        .writeAsStringSync(_frameworkVersion);
+    fs.file(fs.path.join(flutterRoot, 'version')).writeAsStringSync(frameworkVersion);
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final File versionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!versionFile.existsSync()) {

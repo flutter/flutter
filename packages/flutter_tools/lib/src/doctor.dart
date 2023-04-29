@@ -356,6 +356,7 @@ class Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
+    FlutterVersion? version,
   }) async {
     final bool showColor = globals.terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {

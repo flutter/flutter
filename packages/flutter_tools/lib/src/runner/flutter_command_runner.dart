@@ -18,6 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../version.dart';
 import '../web/web_device.dart';
 
 class FlutterCommandRunner extends CommandRunner<void> {
@@ -288,14 +289,18 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults['version'] as bool?) ?? false) {
           globals.flutterUsage.sendCommand('version');
-          globals.flutterVersion.fetchTagsAndUpdate();
+          final FlutterVersion version = FlutterVersion(
+            fs: globals.fs,
+            flutterRoot: Cache.flutterRoot!,
+            fetchTags: true,
+          );
           String status;
           if (machineFlag) {
-            final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
+            final Map<String, Object> jsonOut = version.toJson();
             jsonOut['flutterRoot'] = Cache.flutterRoot!;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
-            status = globals.flutterVersion.toString();
+            status = version.toString();
           }
           globals.printStatus(status);
           return;
