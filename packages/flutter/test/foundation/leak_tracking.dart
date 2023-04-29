@@ -7,40 +7,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
-/// Set of objects, references weakly.
-class _WeakObjects {
+/// Eaak set of objects.
+///
+/// Does not hold the objects from garbafge collection.
+/// The objects are referenced by hash codes and can duplicate with low probability.
+class _WeakSet {
   /// Maps object's hash code to the list of weak references to the object.
   ///
   /// The list size is more than one in case of hash code duplicates.
-  final Map<int, List<WeakReference<Object>>> _objects = <int, List<WeakReference<Object>>>{};
+  final Set<String> _objectCodes = <String>{};
+
+  String _toCode(int hashCode, String type) => '$type-$hashCode';
 
   void add(Object object) {
-    if (contains(object)) {
-      return;
-    }
-
-    final List<WeakReference<Object>> list =
-      _objects.putIfAbsent(identityHashCode(object), () => <WeakReference<Object>>[]);
-    list.add(WeakReference<Object>(object));
+    _objectCodes.add(_toCode(identityHashCode(object), object.runtimeType.toString()));
   }
 
-  bool contains(Object object) {
-    final List<WeakReference<Object>>? list = _objects[identityHashCode(object)];
-    if (list == null) {
-      return false;
-    }
-    for (final WeakReference<Object> ref in list) {
-      if (ref.target == object) {
-        return true;
-      }
-    }
-    return false;
+  bool contains(int hashCode, String type) {
+    return _objectCodes.contains(_toCode(hashCode, type));
   }
 }
 
 
 class _TestAdjustments {
-  final _WeakObjects heldObjects = _WeakObjects();
+  final _WeakSet heldObjects = _WeakSet();
 }
 
 extension LeakTrackerAdjustments on WidgetTester {
@@ -52,7 +42,10 @@ extension LeakTrackerAdjustments on WidgetTester {
   }
 
   bool isHeld(Object object){
-    return _adjustments.heldObjects.contains(object);
+    return _adjustments.heldObjects.contains(
+      identityHashCode(object),
+      object.runtimeType.toString(),
+    );
   }
 
   _TestAdjustments get _adjustments {
@@ -155,12 +148,12 @@ Future<void> _withFlutterLeakTracking(
         shouldThrowOnLeaks: false,
       );
 
-      leaks = _cleanUpLeaks(leaks, config);
+      leaks = _LeakCleaner(config, tester._adjustments).clean(leaks);
 
       if (leaks.total > 0) {
         config.onLeaks?.call(leaks);
         if (config.failTestOnLeaks) {
-          expect(leaks, isLeakFree, reason: 'Set allow lists in $LeakTrackingTestConfig to ignore leaks.');
+          expect(leaks, isLeakFree, reason: 'Use .');
         }
       }
     } finally {
@@ -169,30 +162,28 @@ Future<void> _withFlutterLeakTracking(
   });
 }
 
-/// Removes leaks that are allowed by [config].
-Leaks _cleanUpLeaks(Leaks leaks, LeakTrackingTestConfig config) {
-  final Map<LeakType, List<LeakReport>> cleaned = <LeakType, List<LeakReport>>{
-    LeakType.notGCed: <LeakReport>[],
-    LeakType.notDisposed: <LeakReport>[],
-    LeakType.gcedLate: <LeakReport>[],
-  };
+/// Removes leaks that are allowed by [config] and [adjustments].
+class _LeakCleaner {
+  _LeakCleaner(this.config, this.adjustments);
 
-  for (final LeakReport leak in leaks.notGCed) {
-    if (!config.notGCedAllowList.contains(leak.type)) {
-      cleaned[LeakType.notGCed]!.add(leak);
-    }
+  final LeakTrackingTestConfig config;
+  final _TestAdjustments adjustments;
+
+  Leaks clean(Leaks leaks) {
+    return Leaks(<LeakType, List<LeakReport>>{
+      for (LeakType leakType in leaks.byType.keys)
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _isLeakAllowed(leakType, leak)).toList()
+    });
   }
 
-  for (final LeakReport leak in leaks.gcedLate) {
-    if (!config.notGCedAllowList.contains(leak.type)) {
-      cleaned[LeakType.gcedLate]!.add(leak);
+  bool _isLeakAllowed(LeakType leakType, LeakReport leak) {
+    switch (leakType) {
+      case LeakType.notDisposed:
+        return config.notDisposedAllowList.contains(leak.type);
+      case LeakType.notGCed:
+      case LeakType.gcedLate:
+        return config.notDisposedAllowList.contains(leak.type) ||
+            adjustments.heldObjects.contains(leak.hashCode, leak.type);
     }
   }
-
-  for (final LeakReport leak in leaks.notDisposed) {
-    if (!config.notDisposedAllowList.contains(leak.type)) {
-      cleaned[LeakType.notDisposed]!.add(leak);
-    }
-  }
-  return Leaks(cleaned);
 }
