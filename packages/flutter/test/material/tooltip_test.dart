@@ -1037,7 +1037,8 @@ void main() {
       ),
     );
 
-    final TooltipState tooltipState = tester.addHeldObject(tester.state(find.byType(Tooltip)));
+    //final TooltipState tooltipState = tester.addHeldObject(tester.state(find.byType(Tooltip)));
+    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
     expect(tooltipState.ensureTooltipVisible(), true);
 
     // Remove the tooltip.

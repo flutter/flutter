@@ -10,13 +10,15 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   /*
    * Here lies tests for packages/flutter_test/lib/src/animation_sheet.dart
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('correctly records frames using display', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly records frames using display', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -52,7 +54,7 @@ void main() {
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('correctly wraps a row', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly wraps a row', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     const Duration duration = Duration(seconds: 2);
@@ -70,7 +72,7 @@ void main() {
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly records frames using collate', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -104,7 +106,7 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
