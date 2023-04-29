@@ -192,7 +192,7 @@ class NativeFunctionVisitor extends RecursiveAstVisitor<void> {
         type = (parameter.parameter as SimpleFormalParameter).type;
       }
       if (type! is NamedType) {
-        final String name = (type as NamedType).name.name;
+        final String name = (type as NamedType).name2.lexeme;
         if (type.question != null && simpleTypes.contains(name)) {
           errors.add(description);
           return;
