@@ -168,6 +168,24 @@ tasks.register("clean", Delete) {
             gradleWrapperToMigrate);
       });
 
+      testWithoutContext('skipped if android studio version is null', () {
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
+          bufferLogger,
+          project: project,
+          androidStudio: FakeAndroidStudio(version: null),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
+        migration.migrate();
+        expect(bufferLogger.traceText, contains(androidStudioNotFound));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(),
+            gradleWrapperToMigrate);
+      });
+
       testWithoutContext('skipped if android studio version is less than flamingo', () {
         final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
@@ -267,14 +285,14 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
-  FakeAndroidStudio({required Version version}) {
+  FakeAndroidStudio({required Version? version}) {
     _version = version;
   }
 
-  late Version _version;
+  late Version? _version;
 
   @override
-  Version get version => _version;
+  Version? get version => _version;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
