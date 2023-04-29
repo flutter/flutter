@@ -1,4 +1,4 @@
-Signature: cbf55328783469998d1343d91f759471
+Signature: ba6c7ad462a099f10e28806312569279
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8353,8 +8353,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/PaintParams.cpp + ../../../th
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PaintParams.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PaintParamsKey.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PaintParamsKey.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PipelineData.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/PipelineData.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Precompile.cpp + ../../../third_party/skia/LICENSE
@@ -8575,8 +8573,6 @@ FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParams.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParamsKey.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PaintParamsKey.h
-FILE: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.cpp
-FILE: ../../../third_party/skia/src/gpu/graphite/PietRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/graphite/PipelineData.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/PipelineData.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Precompile.cpp
@@ -8757,11 +8753,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/MutableTextureStateRef.h + ../../../th
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/piet/PietTypes.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/piet/Render.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/piet/Render.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/piet/Scene.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/piet/Scene.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/tessellate/MidpointContourParser.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLPosition.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -8779,11 +8770,6 @@ FILE: ../../../third_party/skia/src/gpu/MutableTextureStateRef.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/dawn/GrDawnAsyncWait.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphiteTypes.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/PietTypes.h
-FILE: ../../../third_party/skia/src/gpu/piet/Render.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/Render.h
-FILE: ../../../third_party/skia/src/gpu/piet/Scene.cpp
-FILE: ../../../third_party/skia/src/gpu/piet/Scene.h
 FILE: ../../../third_party/skia/src/gpu/tessellate/MidpointContourParser.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPosition.cpp
 ----------------------------------------------------------------------------------------------------
