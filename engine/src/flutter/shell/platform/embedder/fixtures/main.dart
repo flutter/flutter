@@ -1206,3 +1206,17 @@ void draw_solid_green() {
 void draw_solid_blue() {
   drawSolidColor(const Color.fromARGB(255, 0, 0, 255));
 }
+
+@pragma('vm:entry-point')
+void pointer_data_packet() {
+  PlatformDispatcher.instance.onPointerDataPacket =
+    (PointerDataPacket packet) {
+    signalNativeCount(packet.data.length);
+
+    for (final pointerData in packet.data) {
+      signalNativeMessage(pointerData.toString());
+    }
+  };
+
+  signalNativeTest();
+}
