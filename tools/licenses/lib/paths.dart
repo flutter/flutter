@@ -178,6 +178,7 @@ final Set<String> skippedPaths = <String>{
   r'third_party/skia/third_party/libjpeg-turbo', // we use our own version
   r'third_party/skia/third_party/libpng', // we use our own version
   r'third_party/skia/third_party/lua', // not linked in
+  r'third_party/skia/third_party/vello', // not linked in
   r'third_party/skia/tools', // contains nothing that ends up in the binary executable
   r'third_party/swiftshader', // only used on hosts for tests
   r'third_party/tinygltf',
