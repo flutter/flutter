@@ -28,9 +28,6 @@ class Window final {
 
   const ViewportMetrics& viewport_metrics() const { return viewport_metrics_; }
 
-  // Dispatch a packet to the framework that indicates one or a few pointer
-  // events.
-  void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
 
  private:
