@@ -10,6 +10,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   /*
    * Here lies golden tests for packages/flutter_test/lib/src/binding.dart
@@ -18,7 +20,7 @@ void main() {
 
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
-  testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
@@ -76,6 +78,8 @@ void main() {
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
+  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
