@@ -371,8 +371,7 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
-    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.ac_unit).first).data.color, customIconTheme.color);
-    expect(getIconTheme(tester).color, customIconTheme.color, reason:'Chip Icon Theme does not reflect custom iconTheme color.');
+    expect(getIconTheme(tester), customIconTheme, reason:'Chip Icon Theme does not reflect custom iconTheme.');
   });
 
   testWidgets('Chip uses constructor parameters', (WidgetTester tester) async {
@@ -474,8 +473,7 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
     );
 
     expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
-    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.cabin).first).data.color, customIconTheme.color);
-    expect(getIconTheme(tester).color, customIconTheme.color, reason:'Chip Icon Theme does not reflect custom iconTheme color.');
+    expect(getIconTheme(tester), customIconTheme, reason:'Chip Icon Theme does not reflect custom iconTheme.');
   });
 
   testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {
