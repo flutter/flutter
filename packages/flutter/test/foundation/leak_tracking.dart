@@ -21,8 +21,13 @@ class WeakSet {
     _objectCodes.add(_toCode(identityHashCode(object), object.runtimeType.toString()));
   }
 
+  void addByCode(int hashCode, String type) {
+    _objectCodes.add(_toCode(hashCode, type));
+  }
+
   bool contains(int hashCode, String type) {
-    return _objectCodes.contains(_toCode(hashCode, type));
+    final result = _objectCodes.contains(_toCode(hashCode, type));
+    return result;
   }
 }
 
@@ -179,11 +184,13 @@ class LeakCleaner {
   bool _isLeakAllowed(LeakType leakType, LeakReport leak) {
     switch (leakType) {
       case LeakType.notDisposed:
-        return config.notDisposedAllowList.contains(leak.type);
+        final result = config.notDisposedAllowList.contains(leak.type);
+        return result;
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return config.notGCedAllowList.contains(leak.type) ||
-            adjustments.heldObjects.contains(leak.hashCode, leak.type);
+        final result = config.notGCedAllowList.contains(leak.type) ||
+            adjustments.heldObjects.contains(leak.code, leak.type);
+        return result;
     }
   }
 }

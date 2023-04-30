@@ -10,7 +10,7 @@ import 'leak_tracking.dart';
 
 final String _leakTrackedClassName = '$_LeakTrackedClass';
 
-Leaks testLeaks() => Leaks(<LeakType, List<LeakReport>> {
+Leaks _leaksOfAllTypes() => Leaks(<LeakType, List<LeakReport>> {
   LeakType.notDisposed: <LeakReport>[LeakReport(code: 1, context: <String, dynamic>{}, type:'myNotDisposedClass', trackedClass: 'myTrackedClass')],
   LeakType.notGCed: <LeakReport>[LeakReport(code: 2, context: <String, dynamic>{}, type:'myNotGCedClass', trackedClass: 'myTrackedClass')],
   LeakType.gcedLate: <LeakReport>[LeakReport(code: 3, context: <String, dynamic>{}, type:'myGCedLateClass', trackedClass: 'myTrackedClass')],
@@ -19,13 +19,32 @@ Leaks testLeaks() => Leaks(<LeakType, List<LeakReport>> {
 Future<void> main() async {
   test('Trivial $LeakCleaner returns the same result.', () {
     final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig(), TestAdjustments());
-    final leaks = testLeaks();
+    final Leaks leaks = _leaksOfAllTypes();
+    final int leakTotal = leaks.total;
+
+    final Leaks cleanedLeaks = leakCleaner.clean(leaks);
+
+    expect(leaks.total, leakTotal);
+    expect(cleanedLeaks.total, leakTotal);
+  });
+
+  test('$LeakCleaner respects held objects for nonGCed leaks.', () {
+    final leaks = _leaksOfAllTypes();
+
+    final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig(),
+      TestAdjustments()
+        ..heldObjects.addByCode(leaks.notGCed.first.code, leaks.notGCed.first.type)
+        ..heldObjects.addByCode(leaks.gcedLate.first.code, leaks.gcedLate.first.type)
+        ..heldObjects.addByCode(leaks.notDisposed.first.code, leaks.notDisposed.first.type)
+    );
+
     final leakTotal = leaks.total;
 
     final cleanedLeaks = leakCleaner.clean(leaks);
 
     expect(leaks.total, leakTotal);
-    expect(cleanedLeaks.total, leakTotal);
+    expect(cleanedLeaks.total, 1);
+    expect(cleanedLeaks.notDisposed, hasLength(1));
   });
 
   testWidgets('$WidgetTester preserves held objects', (WidgetTester tester) async {
