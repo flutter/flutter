@@ -789,6 +789,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.capturedThemes,
     this.constraints,
     required this.clipBehavior,
+    super.settings,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
@@ -949,6 +950,7 @@ Future<T?> showMenu<T>({
   bool useRootNavigator = false,
   BoxConstraints? constraints,
   Clip clipBehavior = Clip.none,
+  RouteSettings? routeSettings,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -979,6 +981,7 @@ Future<T?> showMenu<T>({
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
     clipBehavior: clipBehavior,
+    settings: routeSettings,
   ));
 }
 
