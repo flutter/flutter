@@ -156,7 +156,7 @@ Future<void> _withFlutterLeakTracking(
       if (leaks.total > 0) {
         config.onLeaks?.call(leaks);
         if (config.failTestOnLeaks) {
-          expect(leaks, isLeakFree, reason: 'Use .');
+          expect(leaks, isLeakFree);
         }
       }
     } finally {
