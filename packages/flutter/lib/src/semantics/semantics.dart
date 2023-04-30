@@ -437,6 +437,7 @@ class SemanticsData with Diagnosticable {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.headingLevel,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -534,6 +535,11 @@ class SemanticsData with Diagnosticable {
   ///
   /// The reading direction is given by [textDirection].
   final String tooltip;
+
+  /// The hierarchy level of the widget as a header.
+  ///
+  /// This should only be set when [SemanticsFlag.isHeader] is set.
+  final int? headingLevel;
 
   /// The reading direction for the text in [label], [value],
   /// [increasedValue], [decreasedValue], and [hint].
@@ -706,6 +712,7 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(IntProperty('headingLevel', headingLevel, defaultValue: null));
   }
 
   @override
@@ -734,7 +741,8 @@ class SemanticsData with Diagnosticable {
         && other.transform == transform
         && other.elevation == elevation
         && other.thickness == thickness
-        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
+        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds)
+        && other.headingLevel == headingLevel;
   }
 
   @override
@@ -764,6 +772,7 @@ class SemanticsData with Diagnosticable {
       elevation,
       thickness,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
+      headingLevel,
     ),
   );
 
@@ -876,6 +885,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.button,
     this.link,
     this.header,
+    this.headingLevel,
     this.textField,
     this.slider,
     this.keyboardKey,
@@ -1320,6 +1330,14 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If a [tooltip] is provided, there must either by an ambient
   /// [Directionality] or an explicit [textDirection] should be provided.
   final String? tooltip;
+
+  /// The level of the widget (when it's defined as a header) within
+  /// the structural hierarchy of the screen. A value of 1 indicates the highest
+  /// level of structural hierarchy. A value of 2 indicates the next level,
+  /// and so on.
+  ///
+  /// This should only be set when [header] is set.
+  final int? headingLevel;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -2080,7 +2098,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         || _maxValueLength != config._maxValueLength
         || _currentValueLength != config._currentValueLength
         || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
-        || _areUserActionsBlocked != config.isBlockingUserActions;
+        || _areUserActionsBlocked != config.isBlockingUserActions
+        || _headingLevel != config._headingLevel;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2380,7 +2399,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   int? get currentValueLength => _currentValueLength;
   int? _currentValueLength;
 
-  bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
+  /// The level of the widget (when it's defined as a header) within
+  /// the structural hierarchy of the screen. A value of 1 indicates the highest
+  /// level of structural hierarchy. A value of 2 indicates the next level,
+  /// and so on.
+  ///
+  /// This should only be set when [header] is set.
+  int? get headingLevel => _headingLevel;
+  int? _headingLevel;
+
+  bool _canPerformAction(SemanticsAction action) =>
+      _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
@@ -2435,6 +2464,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _maxValueLength = config._maxValueLength;
     _currentValueLength = config._currentValueLength;
     _areUserActionsBlocked = config.isBlockingUserActions;
+    _headingLevel = config._headingLevel;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -2475,6 +2505,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     int? platformViewId = _platformViewId;
     int? maxValueLength = _maxValueLength;
     int? currentValueLength = _currentValueLength;
+    int? headingLevel = _headingLevel;
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
@@ -2514,6 +2545,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         platformViewId ??= node._platformViewId;
         maxValueLength ??= node._maxValueLength;
         currentValueLength ??= node._currentValueLength;
+        headingLevel ??= node._headingLevel;
         if (attributedValue.string == '') {
           attributedValue = node._attributedValue;
         }
@@ -2593,6 +2625,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       maxValueLength: maxValueLength,
       currentValueLength: currentValueLength,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
+      headingLevel: headingLevel,
     );
   }
 
@@ -2667,6 +2700,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: customSemanticsActionIds ?? _kEmptyCustomSemanticsActionsList,
+      headingLevel: data.headingLevel ?? -1,
     );
     _dirty = false;
   }
@@ -4437,6 +4471,18 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isHeader, value);
   }
 
+  /// Indicates the owning [RenderObject]'s hierarchy level.
+  int? get headingLevel => _headingLevel;
+  int? _headingLevel;
+
+  set headingLevel(int? value) {
+    if (value == headingLevel) {
+      return;
+    }
+    _headingLevel = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the owning [RenderObject] is a slider (true) or not (false).
   bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
   set isSlider(bool value) {
@@ -4766,7 +4812,8 @@ class SemanticsConfiguration {
       .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions)
-      ..isBlockingUserActions = isBlockingUserActions;
+      ..isBlockingUserActions = isBlockingUserActions
+      .._headingLevel = _headingLevel;
   }
 }
 

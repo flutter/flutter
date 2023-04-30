@@ -212,6 +212,7 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    required int headingLevel,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
@@ -247,6 +248,7 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
       additionalActions: additionalActions,
+      headingLevel: headingLevel,
     );
   }
 }
@@ -284,6 +286,7 @@ class SemanticsNodeUpdateObservation {
     required this.childrenInTraversalOrder,
     required this.childrenInHitTestOrder,
     required this.additionalActions,
+    required this.headingLevel,
   });
 
   final int id;
@@ -317,4 +320,5 @@ class SemanticsNodeUpdateObservation {
   final Int32List childrenInTraversalOrder;
   final Int32List childrenInHitTestOrder;
   final Int32List additionalActions;
+  final int headingLevel;
 }
