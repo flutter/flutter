@@ -7,14 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
-/// Eaak set of objects.
+/// Set of objects.
 ///
 /// Does not hold the objects from garbafge collection.
 /// The objects are referenced by hash codes and can duplicate with low probability.
-class _WeakSet {
-  /// Maps object's hash code to the list of weak references to the object.
-  ///
-  /// The list size is more than one in case of hash code duplicates.
+@visibleForTesting
+class WeakSet {
   final Set<String> _objectCodes = <String>{};
 
   String _toCode(int hashCode, String type) => '$type-$hashCode';
@@ -28,13 +26,13 @@ class _WeakSet {
   }
 }
 
-
-class _TestAdjustments {
-  final _WeakSet heldObjects = _WeakSet();
+@visibleForTesting
+class TestAdjustments {
+  final WeakSet heldObjects = WeakSet();
 }
 
 extension LeakTrackerAdjustments on WidgetTester {
-  static final Expando<_TestAdjustments> _abjustmentsExpando = Expando<_TestAdjustments>();
+  static final Expando<TestAdjustments> _abjustmentsExpando = Expando<TestAdjustments>();
 
   T addHeldObject<T  extends Object>(T object){
     _adjustments.heldObjects.add(object);
@@ -48,9 +46,9 @@ extension LeakTrackerAdjustments on WidgetTester {
     );
   }
 
-  _TestAdjustments get _adjustments {
+  TestAdjustments get _adjustments {
     if (_abjustmentsExpando[this] == null) {
-      _abjustmentsExpando[this] = _TestAdjustments();
+      _abjustmentsExpando[this] = TestAdjustments();
     }
     return _abjustmentsExpando[this]!;
   }
@@ -148,7 +146,7 @@ Future<void> _withFlutterLeakTracking(
         shouldThrowOnLeaks: false,
       );
 
-      leaks = _LeakCleaner(config, tester._adjustments).clean(leaks);
+      leaks = LeakCleaner(config, tester._adjustments).clean(leaks);
 
       if (leaks.total > 0) {
         config.onLeaks?.call(leaks);
@@ -162,18 +160,20 @@ Future<void> _withFlutterLeakTracking(
   });
 }
 
-/// Removes leaks that are allowed by [config] and [adjustments].
-class _LeakCleaner {
-  _LeakCleaner(this.config, this.adjustments);
+/// Cleans leaks that are allowed by [config] and [adjustments].
+@visibleForTesting
+class LeakCleaner {
+  LeakCleaner(this.config, this.adjustments);
 
   final LeakTrackingTestConfig config;
-  final _TestAdjustments adjustments;
+  final TestAdjustments adjustments;
 
   Leaks clean(Leaks leaks) {
-    return Leaks(<LeakType, List<LeakReport>>{
+    final result =  Leaks(<LeakType, List<LeakReport>>{
       for (LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _isLeakAllowed(leakType, leak)).toList()
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => !_isLeakAllowed(leakType, leak)).toList()
     });
+    return result;
   }
 
   bool _isLeakAllowed(LeakType leakType, LeakReport leak) {
@@ -182,7 +182,7 @@ class _LeakCleaner {
         return config.notDisposedAllowList.contains(leak.type);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return config.notDisposedAllowList.contains(leak.type) ||
+        return config.notGCedAllowList.contains(leak.type) ||
             adjustments.heldObjects.contains(leak.hashCode, leak.type);
     }
   }

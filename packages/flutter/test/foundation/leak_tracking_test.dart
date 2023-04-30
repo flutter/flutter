@@ -10,7 +10,24 @@ import 'leak_tracking.dart';
 
 final String _leakTrackedClassName = '$_LeakTrackedClass';
 
+Leaks testLeaks() => Leaks(<LeakType, List<LeakReport>> {
+  LeakType.notDisposed: <LeakReport>[LeakReport(code: 1, context: <String, dynamic>{}, type:'myNotDisposedClass', trackedClass: 'myTrackedClass')],
+  LeakType.notGCed: <LeakReport>[LeakReport(code: 2, context: <String, dynamic>{}, type:'myNotGCedClass', trackedClass: 'myTrackedClass')],
+  LeakType.gcedLate: <LeakReport>[LeakReport(code: 3, context: <String, dynamic>{}, type:'myGCedLateClass', trackedClass: 'myTrackedClass')],
+});
+
 Future<void> main() async {
+  test('Trivial $LeakCleaner returns the same result.', () {
+    final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig(), TestAdjustments());
+    final leaks = testLeaks();
+    final leakTotal = leaks.total;
+
+    final cleanedLeaks = leakCleaner.clean(leaks);
+
+    expect(leaks.total, leakTotal);
+    expect(cleanedLeaks.total, leakTotal);
+  });
+
   testWidgets('$WidgetTester preserves held objects', (WidgetTester tester) async {
     final DateTime object1 = DateTime(2023);
     final DateTime object2 = DateTime(2024);
@@ -23,7 +40,6 @@ Future<void> main() async {
     expect(tester.isHeld(object2), true);
     expect(tester.isHeld(object3), false);
   });
-
 
   group('Leak tracking works for non-web', () {
     testWidgetsWithLeakTracking(
