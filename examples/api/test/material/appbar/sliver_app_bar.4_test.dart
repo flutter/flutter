@@ -15,6 +15,10 @@ void main() {
       const example.StretchableSliverAppBar(),
     );
 
+    final Finder switchFinder = find.byType(Switch);
+    Switch materialSwitch = tester.widget<Switch>(switchFinder);
+    expect(materialSwitch.value, true);
+
     expect(find.widgetWithText(SliverAppBar, 'SliverAppBar'), findsOneWidget);
     expect(tester.getBottomLeft(find.text('SliverAppBar')).dy, 184.0);
 
@@ -22,7 +26,21 @@ void main() {
         touchSlopY: 0, warnIfMissed: false);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
+    expect(find.widgetWithText(SliverAppBar, 'SliverAppBar'), findsOneWidget);
     expect(
         tester.getBottomLeft(find.text('SliverAppBar')).dy, 187.63506380825314);
+
+    await tester.tap(switchFinder);
+    await tester.pumpAndSettle();
+    materialSwitch = tester.widget<Switch>(switchFinder);
+    expect(materialSwitch.value, false);
+
+    await tester.drag(find.text('0'), _kOffset,
+        touchSlopY: 0, warnIfMissed: false);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('SliverAppBar'), findsOneWidget);
+    expect(tester.getBottomLeft(find.text('SliverAppBar')).dy, 184.0);
   });
 }
