@@ -28,6 +28,9 @@ PLATFORM_2_PATH = {
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, '..', '..', '..'))
 MATERIAL_TTF = os.path.join(SCRIPT_DIR, 'fixtures', 'MaterialIcons-Regular.ttf')
+VARIABLE_MATERIAL_TTF = os.path.join(
+    SCRIPT_DIR, 'fixtures', 'MaterialSymbols-Variable.ttf'
+)
 IS_WINDOWS = sys.platform.startswith(('cygwin', 'win'))
 EXE = '.exe' if IS_WINDOWS else ''
 BAT = '.bat' if IS_WINDOWS else ''
@@ -67,6 +70,27 @@ COMPARE_TESTS = (
         r'0xE004',
         r'0xE021',
     ]),
+    # repeat tests with variable input font and verified variable output goldens
+    (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'57347']),
+    (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'0xE003']),
+    (True, '1variable.ttf', VARIABLE_MATERIAL_TTF, [r'\uE003']),
+    (False, '1variable.ttf', VARIABLE_MATERIAL_TTF,
+     [r'57348']),  # False because different codepoint
+    (True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [r'0xE003', r'0xE004']),
+    (
+        True, '2variable.ttf', VARIABLE_MATERIAL_TTF, [
+            r'0xE003',
+            r'0xE004',
+            r'57347',
+        ]
+    ),  # Duplicated codepoint
+    (
+        True, '3variable.ttf', VARIABLE_MATERIAL_TTF, [
+            r'0xE003',
+            r'0xE004',
+            r'0xE021',
+        ]
+    ),
 )
 
 FAIL_TESTS = [
@@ -95,6 +119,29 @@ FAIL_TESTS = [
     ]),  # empty input
     ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], []),  # empty input
     ([FONT_SUBSET, 'output.ttf', MATERIAL_TTF], ['']),  # empty input
+    # repeat tests with variable input font
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+        '0xFFFFFFFF',
+    ]),  # Value too big.
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+        '-1',
+    ]),  # invalid value
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+        'foo',
+    ]),  # no valid values
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+        '0xE003',
+        '0x12',
+        '0xE004',
+    ]),  # codepoint not in font
+    ([FONT_SUBSET, 'non-existent-dir/output.ttf', VARIABLE_MATERIAL_TTF], [
+        '0xE003',
+    ]),  # dir doesn't exist
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], [
+        ' ',
+    ]),  # empty input
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], []),  # empty input
+    ([FONT_SUBSET, 'output.ttf', VARIABLE_MATERIAL_TTF], ['']),  # empty input
 ]
 
 
