@@ -257,14 +257,8 @@ void main() {
       ),
     );
 
-    final RenderBox materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
-    expect(getMaterial(tester).elevation, chipTheme.elevation);
     expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
-    expect(getMaterial(tester).shape, chipTheme.shape);
-    expect(getLabelStyle(tester).style.fontSize, 14);
-    expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.ac_unit).first).data.color, customIconTheme.color);
-    expect(getIconTheme(tester).color, customIconTheme.color);
+    expect(getIconTheme(tester), customIconTheme, reason:'Chip Icon Theme does not reflect custom iconTheme.');
   });
 
 
@@ -472,7 +466,12 @@ testWidgets('Chip uses constructor parameters with Avatar and IconThemeData', (W
       ),
     );
 
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..circle(color: backgroundColor));
     expect(tester.getSize(find.byType(RawChip)), const Size(400, 250)); // icon + label + padding + labelPadding
+    expect(getMaterial(tester).elevation, elevation);
+    expect(getMaterial(tester).shape, shape);
+    expect(getLabelStyle(tester).style.fontSize, 32);
     expect(getIconTheme(tester), customIconTheme, reason:'Chip Icon Theme does not reflect custom iconTheme.');
   });
 
