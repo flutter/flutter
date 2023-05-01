@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 RenderBox getMaterialBox(WidgetTester tester) {
@@ -71,7 +72,7 @@ void main() {
     expect(themeData.pressElevation, null);
   });
 
-  testWidgets('Default ChipThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ChipThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ChipThemeData().debugFillProperties(builder);
 
@@ -83,7 +84,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ChipThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChipThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ChipThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -135,7 +136,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Chip uses ThemeData chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses ThemeData chip theme', (WidgetTester tester) async {
     const ChipThemeData chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
@@ -172,7 +173,7 @@ void main() {
     expect(getLabelStyle(tester).style.fontSize, 32);
   });
 
-  testWidgets('Chip uses ChipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses ChipTheme', (WidgetTester tester) async {
     const ChipThemeData chipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
@@ -225,7 +226,7 @@ void main() {
     expect(getLabelStyle(tester).style.fontSize, 32);
   });
 
-  testWidgets('Chip uses constructor parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses constructor parameters', (WidgetTester tester) async {
     const ChipThemeData shadowedChipTheme = ChipThemeData(
       backgroundColor: Color(0xff112233),
       elevation: 4,
@@ -277,7 +278,7 @@ void main() {
     expect(getLabelStyle(tester).style.fontSize, 32);
   });
 
-  testWidgets('ChipTheme.fromDefaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChipTheme.fromDefaults', (WidgetTester tester) async {
     const TextStyle labelStyle = TextStyle();
     ChipThemeData chipTheme = ChipThemeData.fromDefaults(
       brightness: Brightness.light,
@@ -330,7 +331,7 @@ void main() {
   });
 
 
-  testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
     final TextStyle customStyle = ThemeData.fallback().textTheme.bodyLarge!.copyWith(color: customColor2);
@@ -393,7 +394,7 @@ void main() {
     expect(customTheme.brightness, equals(Brightness.light));
   });
 
-  testWidgets('ChipThemeData lerps correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChipThemeData lerps correctly', (WidgetTester tester) async {
     final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
@@ -541,7 +542,7 @@ void main() {
     expect(lerp.iconTheme, isNull);
   });
 
-  testWidgets('Chip uses stateful color from chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful color from chip theme', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -637,7 +638,7 @@ void main() {
     expect(textColor(), disabledColor);
   });
 
-  testWidgets('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
@@ -677,7 +678,7 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
-  testWidgets('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side from chip theme', (WidgetTester tester) async {
     const Color selectedColor = Color(0x00000001);
     const Color defaultColor = Color(0x00000002);
 
@@ -719,7 +720,7 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: selectedColor));
   });
 
-  testWidgets('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful shape from chip theme', (WidgetTester tester) async {
     OutlinedBorder? getShape(Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return const RoundedRectangleBorder();

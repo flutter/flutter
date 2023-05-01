@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
@@ -26,7 +27,7 @@ Widget _buildSingleChildScrollViewWithScrollbar({
 }
 
 void main() {
-  testWidgets('Viewport basic test (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport basic test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
@@ -52,7 +53,7 @@ void main() {
     );
   });
 
-  testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport basic test (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       textDirection: TextDirection.rtl,
       child: const SizedBox(width: 4000.0, height: 4000.0),
@@ -79,7 +80,7 @@ void main() {
     );
   });
 
-  testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('works with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
@@ -123,7 +124,7 @@ void main() {
     );
   });
 
-  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(

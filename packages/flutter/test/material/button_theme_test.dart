@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('ButtonThemeData defaults', () {
     const ButtonThemeData theme = ButtonThemeData();
@@ -66,7 +68,7 @@ void main() {
     expect(theme.colorScheme, const ColorScheme.dark());
   });
 
-  testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonTheme alignedDropdown', (WidgetTester tester) async {
     final Key dropdownKey = UniqueKey();
 
     Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {

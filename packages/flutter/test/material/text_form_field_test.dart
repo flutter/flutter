@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
@@ -25,7 +26,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -101,7 +102,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -247,7 +248,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -291,7 +292,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('the desktop cut/copy buttons are disabled for obscured form fields', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -342,7 +343,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('TextFormField accepts TextField.noMaxLength as value to maxLength parameter', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextFormField accepts TextField.noMaxLength as value to maxLength parameter', (WidgetTester tester) async {
     bool asserted;
     try {
       TextFormField(
@@ -355,7 +356,7 @@ void main() {
     expect(asserted, false);
   });
 
-  testWidgets('Passes textAlign to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes textAlign to underlying TextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
@@ -377,7 +378,7 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
-  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
@@ -399,7 +400,7 @@ void main() {
     expect(textFieldWidget.scrollPhysics, scrollPhysics);
   });
 
-  testWidgets('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes textAlignVertical to underlying TextField', (WidgetTester tester) async {
     const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 
     await tester.pumpWidget(
@@ -421,7 +422,7 @@ void main() {
     expect(textFieldWidget.textAlignVertical, textAlignVertical);
   });
 
-  testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -441,7 +442,7 @@ void main() {
     expect(textFieldWidget.textInputAction, TextInputAction.next);
   });
 
-  testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
     void onEditingComplete() { }
 
     await tester.pumpWidget(
@@ -463,7 +464,7 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
     const double cursorWidth = 3.14;
     const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(4);
@@ -494,7 +495,7 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool called = false;
 
     await tester.pumpWidget(
@@ -515,7 +516,7 @@ void main() {
     expect(called, true);
   });
 
-  testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onChanged callbacks are called', (WidgetTester tester) async {
     late String value;
 
     await tester.pumpWidget(
@@ -537,7 +538,7 @@ void main() {
     expect(value, 'Soup');
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autovalidateMode is passed to super', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -562,7 +563,7 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('validate is called if widget is enabled', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -589,7 +590,7 @@ void main() {
   });
 
 
-  testWidgets('Disabled field hides helper and counter', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled field hides helper and counter', (WidgetTester tester) async {
     const String helperText = 'helper text';
     const String counterText = 'counter text';
     const String errorText = 'error text';
@@ -636,7 +637,7 @@ void main() {
     expect(errorWidget.style!.color, equals(Colors.transparent));
   });
 
-  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('passing a buildCounter shows returned widget', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -659,7 +660,7 @@ void main() {
     expect(find.text('5 of 10'), findsOneWidget);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('readonly text form field will hide cursor by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -701,7 +702,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTap is called upon tap', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -728,7 +729,7 @@ void main() {
     expect(tapCount, 3);
   });
 
-  testWidgets('onTapOutside is called upon tap outside', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onTapOutside is called upon tap outside', (WidgetTester tester) async {
     int tapOutsideCount = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -759,7 +760,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -782,7 +783,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
-  testWidgets("didChange resets the text field's value to empty when passed null", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("didChange resets the text field's value to empty when passed null", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -805,7 +806,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
-  testWidgets("reset resets the text field's value to empty when initialValue is null", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("reset resets the text field's value to empty when initialValue is null", (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -828,7 +829,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('didChange changes text fields value', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -850,7 +851,7 @@ void main() {
     expect(find.text('changedValue'), findsOneWidget);
   });
 
-  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
     bool called = false;
 
     late FormFieldState<String> state;
@@ -877,7 +878,7 @@ void main() {
     expect(called, true);
   });
 
-  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autofillHints is passed to super', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -894,7 +895,7 @@ void main() {
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('autovalidateMode is passed to super', (WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -919,7 +920,7 @@ void main() {
     expect(validateCalled, 1);
   });
 
-  testWidgets('textSelectionControls is passed to super', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('textSelectionControls is passed to super', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -936,7 +937,7 @@ void main() {
     expect(widget.selectionControls, equals(materialTextSelectionControls));
   });
 
-  testWidgets('TextFormField respects hintTextDirection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextFormField respects hintTextDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Directionality(
@@ -978,7 +979,7 @@ void main() {
     expect(textDirection, TextDirection.rtl);
   });
 
-  testWidgets('Passes scrollController to underlying TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes scrollController to underlying TextField', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
 
     await tester.pumpWidget(
@@ -1000,7 +1001,7 @@ void main() {
     expect(textFieldWidget.scrollController, scrollController);
   });
 
-  testWidgets('TextFormField changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextFormField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1064,7 +1065,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101587.
-  testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Right clicking menu behavior', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -1145,7 +1146,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('spellCheckConfiguration passes through to EditableText', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('spellCheckConfiguration passes through to EditableText', (WidgetTester tester) async {
     final SpellCheckConfiguration mySpellCheckConfiguration = SpellCheckConfiguration(
         spellCheckService: DefaultSpellCheckService(),
         misspelledTextStyle: TextField.materialMisspelledTextStyle,
@@ -1175,7 +1176,7 @@ void main() {
     );
   });
 
-  testWidgets('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('magnifierConfiguration passes through to EditableText', (WidgetTester tester) async {
     final TextMagnifierConfiguration myTextMagnifierConfiguration = TextMagnifierConfiguration(
       magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo> notifier) {
         return const Placeholder();
@@ -1196,7 +1197,7 @@ void main() {
     expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
   });
 
-  testWidgets('Error color for cursor while validating', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Error color for cursor while validating', (WidgetTester tester) async {
     const Color errorColor = Color(0xff123456);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(

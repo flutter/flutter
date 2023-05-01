@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 /// Adds the basic requirements for a Chip.
@@ -85,7 +86,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('FilterChip can be tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilterChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -101,7 +102,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -113,7 +114,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -126,7 +127,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -139,7 +140,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(checkmarkColor: const Color(0xff00ff00)),
@@ -151,7 +152,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(checkmarkColor: const Color(0xffff0000)),
@@ -164,7 +165,7 @@ void main() {
     );
   });
 
-  testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { })));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -173,7 +174,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('M3 width should not change with selection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('M3 width should not change with selection', (WidgetTester tester) async {
     // Regression tests for: https://github.com/flutter/flutter/issues/110645
 
     // For the text "FilterChip" the chip should default to 175 regardless of selection.

@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 const Key key = Key('testContainer');
 const Color trueColor = Colors.red;
 const Color falseColor = Colors.green;
@@ -83,7 +85,7 @@ void main() {
     expect(tester.widget<ColoredBox>(find.byKey(key)).color, falseColor);
   }
 
-  testWidgets('MaterialState.pressed is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.pressed is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -93,7 +95,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.focused is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.focused is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -103,7 +105,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.hovered is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.hovered is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -113,7 +115,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.disabled is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.disabled is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -123,7 +125,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.selected is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.selected is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -133,7 +135,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.scrolledUnder is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.scrolledUnder is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -143,7 +145,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.dragged is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.dragged is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,
@@ -153,7 +155,7 @@ void main() {
     await verify(tester, widget, controller);
   });
 
-  testWidgets('MaterialState.error is tracked', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialState.error is tracked', (WidgetTester tester) async {
     final StreamController<bool> controller = StreamController<bool>();
     final _MyWidget widget = _MyWidget(
       controller: controller,

@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -215,7 +216,7 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
 
     Widget buildFrame(Brightness brightness) {
@@ -292,7 +293,7 @@ void main() {
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
   });
 
-  testWidgets('M3 Chip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
     final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
@@ -373,7 +374,7 @@ void main() {
     expect(labelStyle.wordSpacing, textTheme.labelLarge?.wordSpacing);
   });
 
-  testWidgets('Chip control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     final List<String> deletedChipLabels = <String>[];
     await tester.pumpWidget(
@@ -422,7 +423,7 @@ void main() {
     feedback.dispose();
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Chip does not constrain size of label widget if it does not exceed '
     'the available space',
     (WidgetTester tester) async {
@@ -458,7 +459,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Chip constrains the size of the label widget when it exceeds the '
     'available space',
     (WidgetTester tester) async {
@@ -466,7 +467,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Chip constrains the size of the label widget when it exceeds the '
     'available space and the avatar is present',
     (WidgetTester tester) async {
@@ -477,7 +478,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Chip constrains the size of the label widget when it exceeds the '
     'available space and the delete icon is present',
     (WidgetTester tester) async {
@@ -488,7 +489,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Chip constrains the size of the label widget when it exceeds the '
     'available space and both avatar and delete icons are present',
     (WidgetTester tester) async {
@@ -500,7 +501,7 @@ void main() {
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Chip constrains the avatar, label, and delete icons to the bounds of '
     'the chip when it exceeds the available space',
     (WidgetTester tester) async {
@@ -575,7 +576,7 @@ void main() {
     },
   );
 
-  testWidgets('Chip in row works ok', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip in row works ok', (WidgetTester tester) async {
     const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
@@ -612,7 +613,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
   });
 
-  testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapForChip(
           child: const Column(
@@ -634,7 +635,7 @@ void main() {
     },
   );
 
-  testWidgets('delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
     final UniqueKey deleteKey = UniqueKey();
     bool calledDelete = false;
     await tester.pumpWidget(
@@ -693,7 +694,7 @@ void main() {
     expect(calledDelete, isFalse);
   });
 
-  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
@@ -728,7 +729,7 @@ void main() {
     expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byKey(iconKey)).dx));
   });
 
-  testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         child: const Column(
@@ -804,7 +805,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).last), const Size(132.0, 48.0));
   });
 
-  testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Labels can be non-text widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
     final Key keyB = GlobalKey();
     await tester.pumpWidget(
@@ -830,7 +831,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).last), const Size(58.0, 48.0));
   });
 
-  testWidgets('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
     await tester.pumpWidget(
       wrapForChip(
@@ -848,7 +849,7 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgets('Delete icons can be non-icon widgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete icons can be non-icon widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
     await tester.pumpWidget(
       wrapForChip(
@@ -867,7 +868,7 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgets('Chip padding - LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
@@ -903,7 +904,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
-  testWidgets('Chip padding - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
@@ -941,7 +942,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(361.0, 309.0));
   });
 
-  testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
     Future<void> pushChip({ Widget? avatar }) async {
       return tester.pumpWidget(
@@ -1053,7 +1054,7 @@ void main() {
     expect(find.byKey(avatarKey), findsNothing);
   });
 
-  testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
     const Key labelKey = Key('label');
     const Key deleteButtonKey = Key('delete');
     bool wasDeleted = false;
@@ -1169,7 +1170,7 @@ void main() {
     expect(find.byKey(deleteButtonKey), findsNothing);
   });
 
-  testWidgets('Delete button takes up at most half of the chip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button takes up at most half of the chip', (WidgetTester tester) async {
     final UniqueKey chipKey = UniqueKey();
     bool chipPressed = false;
     bool deletePressed = false;
@@ -1205,7 +1206,7 @@ void main() {
     expect(deletePressed, isTrue);
   });
 
-  testWidgets('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
 
@@ -1254,7 +1255,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Delete button is focusable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button is focusable', (WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
     final GlobalKey deleteButtonKey = GlobalKey();
 
@@ -1287,7 +1288,7 @@ void main() {
     expect(Focus.of(labelKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
 
@@ -1340,7 +1341,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Delete button in a chip with null onPressed creates ripple when tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Delete button in a chip with null onPressed creates ripple when tapped', (WidgetTester tester) async {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
 
@@ -1394,7 +1395,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('RTL delete button responds to tap on the left of the chip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RTL delete button responds to tap on the left of the chip', (WidgetTester tester) async {
     // Creates an RTL chip with a delete button.
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
@@ -1424,7 +1425,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Chip without delete button creates correct ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip without delete button creates correct ripple', (WidgetTester tester) async {
     // Creates a chip with a delete button.
     final UniqueKey labelKey = UniqueKey();
 
@@ -1478,7 +1479,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
@@ -1558,7 +1559,7 @@ void main() {
     expect(getDeleteDrawerProgress(tester), equals(0.0));
   });
 
-  testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
     Future<void> pushChip({ bool selectable = false }) async {
@@ -1631,7 +1632,7 @@ void main() {
     expect(getDeleteDrawerProgress(tester), equals(0.0));
   });
 
-  testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
@@ -1687,7 +1688,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -1717,7 +1718,7 @@ void main() {
     expect(materialBox, paints..rrect(color: chipTheme.disabledColor));
   });
 
-  testWidgets('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip merges ChipThemeData label style with the provided label style', (WidgetTester tester) async {
     // The font family should be preserved even if the chip overrides some label style properties
     final ThemeData theme = ThemeData(
       fontFamily: 'MyFont',
@@ -1743,7 +1744,7 @@ void main() {
     expect(labelStyle.fontWeight, FontWeight.w200);
   });
 
-  testWidgets('ChipTheme labelStyle with inherit:true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChipTheme labelStyle with inherit:true', (WidgetTester tester) async {
     Widget buildChip() {
       return wrapForChip(
         child: Theme(
@@ -1763,7 +1764,7 @@ void main() {
     expect(labelStyle.height, 4);
   });
 
-  testWidgets('Chip does not merge inherit:false label style with the theme label style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip does not merge inherit:false label style with the theme label style', (WidgetTester tester) async {
     Widget buildChip() {
       return wrapForChip(
         child: Theme(
@@ -1787,7 +1788,7 @@ void main() {
     expect(labelStyle.fontWeight, FontWeight.w200);
   });
 
-  testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
       wrapForChip(
@@ -1823,7 +1824,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
   });
 
-  testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -1947,7 +1948,7 @@ void main() {
   });
 
   group('Chip semantics', () {
-    testWidgets('label only', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('label only', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(const MaterialApp(
@@ -1995,7 +1996,7 @@ void main() {
       semanticsTester.dispose();
     });
 
-    testWidgets('delete', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('delete', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(MaterialApp(
@@ -2055,7 +2056,7 @@ void main() {
       semanticsTester.dispose();
     });
 
-    testWidgets('with onPressed', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('with onPressed', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(MaterialApp(
@@ -2109,7 +2110,7 @@ void main() {
     });
 
 
-    testWidgets('with onSelected', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('with onSelected', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       bool selected = false;
 
@@ -2219,7 +2220,7 @@ void main() {
       semanticsTester.dispose();
     });
 
-    testWidgets('disabled', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('disabled', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(MaterialApp(
@@ -2271,7 +2272,7 @@ void main() {
       semanticsTester.dispose();
     });
 
-    testWidgets('tapEnabled explicitly false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('tapEnabled explicitly false', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       await tester.pumpWidget(const MaterialApp(
@@ -2319,7 +2320,7 @@ void main() {
       semanticsTester.dispose();
     });
 
-    testWidgets('enabled when tapEnabled and canTap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('enabled when tapEnabled and canTap', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
       // These settings make a Chip which can be tapped, both in general and at this moment.
@@ -2373,7 +2374,7 @@ void main() {
       semanticsTester.dispose();
     });
 
-    testWidgets('disabled when tapEnabled but not canTap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('disabled when tapEnabled but not canTap', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
         // These settings make a Chip which _could_ be tapped, but not currently (ensures `canTap == false`).
         await tester.pumpWidget(const MaterialApp(
@@ -2423,7 +2424,7 @@ void main() {
     });
   });
 
-  testWidgets('can be tapped outside of chip delete icon', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can be tapped outside of chip delete icon', (WidgetTester tester) async {
     bool deleted = false;
     await tester.pumpWidget(
       wrapForChip(
@@ -2449,7 +2450,7 @@ void main() {
     expect(deleted, true);
   });
 
-  testWidgets('Chips can be tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chips can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -2464,7 +2465,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Chip elevation and shadow color work correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip elevation and shadow color work correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -2514,7 +2515,7 @@ void main() {
     expect(material.shadowColor, Colors.blue);
   });
 
-  testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can be tapped outside of chip body', (WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       wrapForChip(
@@ -2539,7 +2540,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgets('is hitTestable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('is hitTestable', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
         child: InputChip(
@@ -2560,7 +2561,7 @@ void main() {
     expect(materials.last.clipBehavior, clipBehavior);
   }
 
-  testWidgets('Chip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const Chip(label: label)));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -2569,7 +2570,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
     await tester.pumpWidget(wrapForChip(child: const FilterChip(
       avatar: CircleAvatar(child: Text('t')),
       label: Text('test'),
@@ -2592,7 +2593,7 @@ void main() {
     ]));
   });
 
-  testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28646
     await tester.pumpWidget(
       MaterialApp(
@@ -2607,7 +2608,7 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
-  testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2695,7 +2696,7 @@ void main() {
     expect(textColor(), disabledColor);
   });
 
-  testWidgets('Chip uses stateful border side color in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2774,7 +2775,7 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2854,7 +2855,7 @@ void main() {
 
   });
 
-  testWidgets('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2942,7 +2943,7 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip uses stateful shape in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     OutlinedBorder? getShape(Set<MaterialState> states) {
 
@@ -3012,7 +3013,7 @@ void main() {
     expect(getMaterial(tester).shape, isA<BeveledRectangleBorder>());
   });
 
-  testWidgets('Chip defers to theme, if shape and side resolves to null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip defers to theme, if shape and side resolves to null', (WidgetTester tester) async {
     const OutlinedBorder themeShape = StadiumBorder();
     const OutlinedBorder selectedShape = RoundedRectangleBorder();
     const BorderSide themeBorderSide = BorderSide(color: Color(0x00000001));
@@ -3063,7 +3064,7 @@ void main() {
     expect(find.byType(RawChip), paints..rect()..drrect(color: selectedBorderSide.color));
   });
 
-  testWidgets('Chip responds to density changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     const Key textKey = Key('test text');
     const Key iconKey = Key('test icon');
@@ -3168,7 +3169,7 @@ void main() {
     expect(box.size, equals(const Size(128, 24.0 + 16.0)));
   });
 
-  testWidgets('Chip delete button tooltip can be disabled using useDeleteButtonTooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip delete button tooltip can be disabled using useDeleteButtonTooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
         deletable: true,
@@ -3193,7 +3194,7 @@ void main() {
     await tapGesture.up();
   });
 
-  testWidgets('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
@@ -3218,7 +3219,7 @@ void main() {
     expect(findTooltipContainer(''), findsNothing);
   });
 
-  testWidgets('Disabling delete button tooltip does not disable chip tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabling delete button tooltip does not disable chip tooltip', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
@@ -3246,7 +3247,7 @@ void main() {
     expect(findTooltipContainer('Chip Tooltip'), findsOneWidget);
   });
 
-  testWidgets('Triggering delete button tooltip does not trigger Chip tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Triggering delete button tooltip does not trigger Chip tooltip', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
@@ -3273,7 +3274,7 @@ void main() {
     expect(findTooltipContainer('Delete'), findsOneWidget);
   });
 
-  testWidgets('intrinsicHeight implementation meets constraints', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('intrinsicHeight implementation meets constraints', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/49478.
     await tester.pumpWidget(wrapForChip(
       child: const Chip(
@@ -3285,7 +3286,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Chip background color and shape are drawn on Ink', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip background color and shape are drawn on Ink', (WidgetTester tester) async {
     const Color backgroundColor = Color(0xff00ff00);
     const OutlinedBorder shape = ContinuousRectangleBorder();
 
@@ -3306,7 +3307,7 @@ void main() {
     expect(decoration.shape, shape);
   });
 
-  testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawChip');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color backgroundColor = Color(0xff00ff00);

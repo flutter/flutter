@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -28,7 +29,7 @@ void main() {
     mockOnPressedFunction = MockOnPressedFunction();
   });
 
-  testWidgets('test icon is findable by key', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test icon is findable by key', (WidgetTester tester) async {
     const ValueKey<String> key = ValueKey<String>('icon-button');
     await tester.pumpWidget(
       wrap(
@@ -44,7 +45,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -63,7 +64,7 @@ void main() {
     expect(mockOnPressedFunction.called, 1);
   });
 
-  testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test small icons are sized up to 48dp', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -80,7 +81,7 @@ void main() {
     expect(iconButton.size, const Size(48.0, 48.0));
   });
 
-  testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test icons can be small when total size is >48dp', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -98,7 +99,7 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
-  testWidgets('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -118,7 +119,7 @@ void main() {
     expect(icon.size, const Size(24.0, 24.0));
   });
 
-  testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
     RenderBox icon;
     final bool material3 = theme.useMaterial3;
 
@@ -202,7 +203,7 @@ void main() {
     expect(icon.size, const Size(10.0, 10.0));
   });
 
-  testWidgets('when non-null, iconSize precedes IconTheme.of(context).size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('when non-null, iconSize precedes IconTheme.of(context).size', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -222,7 +223,7 @@ void main() {
     expect(icon.size, const Size(10.0, 10.0));
   });
 
-  testWidgets('Small icons with non-null constraints can be <48dp for M2, but =48dp for M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Small icons with non-null constraints can be <48dp for M2, but =48dp for M3', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -247,7 +248,7 @@ void main() {
     expect(icon.size, const Size(10.0, 10.0));
   });
 
-  testWidgets('Small icons with non-null constraints and custom padding can be <48dp', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Small icons with non-null constraints and custom padding can be <48dp', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       wrap(
@@ -273,7 +274,7 @@ void main() {
     expect(icon.size, const Size(10.0, 10.0));
   });
 
-  testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     final ThemeData themeDataM2 = ThemeData(
       useMaterial3: material3,
@@ -311,7 +312,7 @@ void main() {
     expect(iconButton.size, material3 ? const Size(52.0, 44.0) : const Size(36.0, 28.0));
   });
 
-  testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         useMaterial3: theme.useMaterial3,
@@ -328,7 +329,7 @@ void main() {
     expect(box.size, const Size(80.0, 80.0));
   });
 
-  testWidgets('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -372,7 +373,7 @@ void main() {
     expect(boxM3.size, const Size(48.0, 600.0));
   });
 
-  testWidgets('test default padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         useMaterial3: theme.useMaterial3,
@@ -388,7 +389,7 @@ void main() {
     expect(box.size, const Size(96.0, 96.0));
   });
 
-  testWidgets('test default alignment', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         useMaterial3: theme.useMaterial3,
@@ -404,7 +405,7 @@ void main() {
     expect(align.alignment, Alignment.center);
   });
 
-  testWidgets('test tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -446,7 +447,7 @@ void main() {
     expect(mockOnPressedFunction.called, 1);
   });
 
-  testWidgets('IconButton AppBar size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton AppBar size', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       MaterialApp(
@@ -473,7 +474,7 @@ void main() {
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in buttons_test.dart. If you change this one, you may want to also change that one.
-  testWidgets('IconButton with explicit splashColor and highlightColor - M2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton with explicit splashColor and highlightColor - M2', (WidgetTester tester) async {
     const Color directSplashColor = Color(0xFF00000F);
     const Color directHighlightColor = Color(0xFF0000F0);
 
@@ -559,7 +560,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton with explicit splash radius - M2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton with explicit splash radius - M2', (WidgetTester tester) async {
     const double splashRadius = 30.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -590,7 +591,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton Semantics (enabled) - M2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton Semantics (enabled) - M2', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -624,7 +625,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('IconButton Semantics (disabled) - M2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton Semantics (disabled) - M2', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -653,7 +654,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('IconButton loses focus when disabled.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton loses focus when disabled.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
     await tester.pumpWidget(
       wrap(
@@ -685,7 +686,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('IconButton keeps focus when disabled in directional navigation mode.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton keeps focus when disabled in directional navigation mode.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
     await tester.pumpWidget(
       wrap(
@@ -727,7 +728,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
 
@@ -774,7 +775,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('IconButton with disabled feedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('IconButton with disabled feedback', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -797,7 +798,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('IconButton with enabled feedback', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -819,7 +820,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('IconButton with enabled feedback by default', (WidgetTester tester) async {
       final Widget button = Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -842,7 +843,7 @@ void main() {
     });
   });
 
-  testWidgets('IconButton responds to density changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     final bool material3 = theme.useMaterial3;
     Future<void> buildTest(VisualDensity visualDensity) async {
@@ -886,7 +887,7 @@ void main() {
     expect(box.size, equals(material3 ? const Size(64, 36) : const Size(60, 40)));
   });
 
-  testWidgets('IconButton.mouseCursor changes cursor on hover', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton.mouseCursor changes cursor on hover', (WidgetTester tester) async {
     // Test argument works
     await tester.pumpWidget(
       MaterialApp(
@@ -934,7 +935,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgets('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('disabled IconButton has basic mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -960,7 +961,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('IconButton.mouseCursor overrides implicit setting of mouse cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton.mouseCursor overrides implicit setting of mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -1007,7 +1008,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.none);
   });
 
-  testWidgets('IconTheme opacity test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconTheme opacity test', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: false);
 
     await tester.pumpWidget(
@@ -1050,7 +1051,7 @@ void main() {
     expect(iconColorWithOpacity(), Colors.purple.withOpacity(0.5));
   });
 
-  testWidgets('IconButton defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton
@@ -1133,7 +1134,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('IconButton.fill defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton.fill defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton
@@ -1219,7 +1220,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Toggleable IconButton.fill defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Toggleable IconButton.fill defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled selected IconButton
@@ -1334,7 +1335,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton.tonal
@@ -1420,7 +1421,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Toggleable IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Toggleable IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled selected IconButton
@@ -1535,7 +1536,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('IconButton.outlined defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton.outlined defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled IconButton.tonal
@@ -1621,7 +1622,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Toggleable IconButton.outlined defaults - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Toggleable IconButton.outlined defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
     // Enabled selected IconButton
@@ -1736,7 +1737,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -1783,7 +1784,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('IconButton uses stateful color for icon color in different states - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton uses stateful color for icon color in different states - M3', (WidgetTester tester) async {
     bool isSelected = false;
     final FocusNode focusNode = FocusNode();
 
@@ -1869,7 +1870,7 @@ void main() {
     expect(iconColor(), pressedColor);
   });
 
-  testWidgets('Does IconButton contribute semantics - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does IconButton contribute semantics - M3', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -1916,7 +1917,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('IconButton size is configurable by ThemeData.materialTapTargetSize - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconButton size is configurable by ThemeData.materialTapTargetSize - M3', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize) {
       return Theme(
         data: ThemeData(materialTapTargetSize: tapTargetSize, useMaterial3: true),
@@ -1940,7 +1941,7 @@ void main() {
     expect(tester.getSize(find.byType(IconButton)), const Size(40.0, 40.0));
   });
 
-  testWidgets('Override IconButton default padding - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Override IconButton default padding - M3', (WidgetTester tester) async {
     // Use [IconButton]'s padding property to override default value.
     await tester.pumpWidget(
       MaterialApp(
@@ -2016,7 +2017,7 @@ void main() {
     expect(paddingWidget3.padding, const EdgeInsets.all(22));
   });
 
-  testWidgets('Default IconButton is not selectable - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default IconButton is not selectable - M3', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
@@ -2050,7 +2051,7 @@ void main() {
     expect(buttonMaterial().color, Colors.transparent);
   });
 
-  testWidgets('Icon button is selectable when isSelected is not null - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon button is selectable when isSelected is not null - M3', (WidgetTester tester) async {
     bool isSelected = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -2103,7 +2104,7 @@ void main() {
     expect(buttonMaterial().color, Colors.transparent);
   });
 
-  testWidgets('The IconButton is in selected status if isSelected is true by default - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The IconButton is in selected status if isSelected is true by default - M3', (WidgetTester tester) async {
     bool isSelected = true;
     await tester.pumpWidget(
       MaterialApp(
@@ -2149,7 +2150,7 @@ void main() {
     expect(buttonMaterial().color, Colors.transparent);
   });
 
-  testWidgets("The selectedIcon is used if it's not null and the button is clicked" , (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("The selectedIcon is used if it's not null and the button is clicked" , (WidgetTester tester) async {
     bool isSelected = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -2189,7 +2190,7 @@ void main() {
     expect(find.byIcon(Icons.account_box), findsNothing);
   });
 
-  testWidgets('The original icon is used for selected and unselected status when selectedIcon is null' , (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The original icon is used for selected and unselected status when selectedIcon is null' , (WidgetTester tester) async {
     bool isSelected = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -2225,7 +2226,7 @@ void main() {
     expect(find.byIcon(Icons.account_box), findsOneWidget);
   });
 
-  testWidgets('The selectedIcon is used for disabled button if isSelected is true - M3' , (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The selectedIcon is used for disabled button if isSelected is true - M3' , (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
@@ -2246,7 +2247,7 @@ void main() {
     expect(find.byIcon(Icons.ac_unit), findsOneWidget);
   });
 
-  testWidgets('The visualDensity of M3 IconButton can be configured by IconButtonTheme, '
+  testWidgetsWithLeakTracking('The visualDensity of M3 IconButton can be configured by IconButtonTheme, '
       'but cannot be configured by ThemeData - M3' , (WidgetTester tester) async {
     Future<void> buildTest({VisualDensity? iconButtonThemeVisualDensity, VisualDensity? themeVisualDensity}) async {
       return tester.pumpWidget(
@@ -2297,7 +2298,7 @@ void main() {
   });
 
   group('IconTheme tests in Material 3', () {
-    testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('IconTheme overrides default values in M3', (WidgetTester tester) async {
       // Theme's IconTheme
       await tester.pumpWidget(
         MaterialApp(
@@ -2340,7 +2341,7 @@ void main() {
       expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(35, 35)),);
     });
 
-    testWidgets('Theme IconButtonTheme overrides IconTheme in Material3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Theme IconButtonTheme overrides IconTheme in Material3', (WidgetTester tester) async {
       // When IconButtonTheme and IconTheme both exist in ThemeData, the IconButtonTheme can override IconTheme.
       await tester.pumpWidget(
         MaterialApp(
@@ -2363,7 +2364,7 @@ void main() {
       expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(27, 27)),);
     });
 
-    testWidgets('Button IconButtonTheme always overrides IconTheme in Material3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button IconButtonTheme always overrides IconTheme in Material3', (WidgetTester tester) async {
       // When IconButtonTheme is closer to IconButton, IconButtonTheme overrides IconTheme
       await tester.pumpWidget(
         MaterialApp(
@@ -2413,7 +2414,7 @@ void main() {
       expect(tester.getSize(find.byIcon(Icons.account_box)), equals(const Size(36, 36)),);
     });
 
-    testWidgets('White icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('White icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.from(
@@ -2433,7 +2434,7 @@ void main() {
       expect(iconColor1(), Colors.white);
     });
 
-    testWidgets('In light mode, icon color is M3 default color instead of IconTheme.of(context).color, '
+    testWidgetsWithLeakTracking('In light mode, icon color is M3 default color instead of IconTheme.of(context).color, '
         'if only setting color in IconTheme', (WidgetTester tester) async {
       final ColorScheme darkScheme = const ColorScheme.dark().copyWith(onSurfaceVariant: const Color(0xffe91e60));
       // Brightness.dark
@@ -2456,7 +2457,7 @@ void main() {
       expect(iconColor0(), darkScheme.onSurfaceVariant); // onSurfaceVariant
     });
 
-    testWidgets('In dark mode, icon color is M3 default color instead of IconTheme.of(context).color, '
+    testWidgetsWithLeakTracking('In dark mode, icon color is M3 default color instead of IconTheme.of(context).color, '
         'if only setting color in IconTheme', (WidgetTester tester) async {
       final ColorScheme lightScheme = const ColorScheme.light().copyWith(onSurfaceVariant: const Color(0xffe91e60));
       // Brightness.dark
@@ -2479,11 +2480,11 @@ void main() {
       expect(iconColor0(), lightScheme.onSurfaceVariant); // onSurfaceVariant
     });
 
-    testWidgets('black87 icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('black87 icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
 
     });
 
-    testWidgets("IconButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("IconButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/118071.
       await tester.pumpWidget(
         Directionality(
