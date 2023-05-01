@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/gestures/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
@@ -22,7 +21,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgetsWithLeakTracking('Checkbox size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('Checkbox size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme.copyWith(materialTapTargetSize: MaterialTapTargetSize.padded),
@@ -62,7 +61,7 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0));
   });
 
-  testWidgetsWithLeakTracking('Checkbox semantics', (WidgetTester tester) async {
+  testWidgets('Checkbox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -220,7 +219,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Can wrap Checkbox with Semantics', (WidgetTester tester) async {
+  testWidgets('Can wrap Checkbox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(Theme(
@@ -249,7 +248,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('Checkbox tristate: true', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate: true', (WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
@@ -296,7 +295,7 @@ void main() {
     expect(checkBoxValue, null);
   });
 
-  testWidgetsWithLeakTracking('has semantics for tristate', (WidgetTester tester) async {
+  testWidgets('has semantics for tristate', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Theme(
@@ -372,7 +371,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('has semantic events', (WidgetTester tester) async {
+  testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
@@ -415,7 +414,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgetsWithLeakTracking('Checkbox tristate rendering, programmatic transitions', (WidgetTester tester) async {
+  testWidgets('Checkbox tristate rendering, programmatic transitions', (WidgetTester tester) async {
     Widget buildFrame(bool? checkboxValue) {
       return Theme(
         data: theme,
@@ -474,7 +473,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
   });
 
-  testWidgetsWithLeakTracking('Checkbox color rendering', (WidgetTester tester) async {
+  testWidgets('Checkbox color rendering', (WidgetTester tester) async {
     const Color borderColor = Color(0xff2196f3);
     Color checkColor = const Color(0xffFFFFFF);
     Color activeColor;
@@ -532,7 +531,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // paints's color is 0xFF000000 (params)
   });
 
-  testWidgetsWithLeakTracking('Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Checkbox is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
@@ -608,7 +607,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox with splash radius set', (WidgetTester tester) async {
+  testWidgets('Checkbox with splash radius set', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -637,7 +636,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox starts the splash in center, even when tap is on the corner', (WidgetTester tester) async {
+  testWidgets('Checkbox starts the splash in center, even when tap is on the corner', (WidgetTester tester) async {
     Widget buildApp() {
       return MaterialApp(
         theme: theme,
@@ -669,7 +668,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('Checkbox can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     final bool material3 = theme.useMaterial3;
@@ -726,7 +725,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
     Widget buildApp({bool enabled = true}) {
@@ -767,7 +766,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Checkbox responds to density changes.', (WidgetTester tester) async {
+  testWidgets('Checkbox responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -805,7 +804,7 @@ void main() {
     expect(box.size, equals(const Size(60, 36)));
   });
 
-  testWidgetsWithLeakTracking('Checkbox stops hover animation when removed from the tree.', (WidgetTester tester) async {
+  testWidgets('Checkbox stops hover animation when removed from the tree.', (WidgetTester tester) async {
     const Key checkboxKey = Key('checkbox');
     bool? checkboxVal = true;
 
@@ -859,7 +858,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('Checkbox changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('Checkbox changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test Checkbox() constructor
     await tester.pumpWidget(
       MaterialApp(
@@ -964,7 +963,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('Checkbox fill color resolves in enabled/disabled states', (WidgetTester tester) async {
+  testWidgets('Checkbox fill color resolves in enabled/disabled states', (WidgetTester tester) async {
     const Color activeEnabledFillColor = Color(0xFF000001);
     const Color activeDisabledFillColor = Color(0xFF000002);
 
@@ -1008,7 +1007,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeDisabledFillColor));
   });
 
-  testWidgetsWithLeakTracking('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
+  testWidgets('Checkbox fill color resolves in hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'checkbox');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredFillColor = Color(0xFF000001);
@@ -1064,7 +1063,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: hoveredFillColor));
   });
 
-  testWidgetsWithLeakTracking('Checkbox respects shape and side', (WidgetTester tester) async {
+  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder =
         RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 
@@ -1107,7 +1106,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox default overlay color in active/pressed/focused/hovered states', (WidgetTester tester) async {
+  testWidgets('Checkbox default overlay color in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1184,7 +1183,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+  testWidgets('Checkbox overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1320,7 +1319,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Tristate Checkbox overlay color resolves in pressed active/inactive states', (WidgetTester tester) async {
+  testWidgets('Tristate Checkbox overlay color resolves in pressed active/inactive states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -1427,7 +1426,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
     Widget buildCheckbox(bool show) {
       return MaterialApp(
         theme: theme,
@@ -1451,7 +1450,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Checkbox BorderSide side only applies when unselected', (WidgetTester tester) async {
+  testWidgets('Checkbox BorderSide side only applies when unselected', (WidgetTester tester) async {
     const Color borderColor = Color(0xfff44336);
     const Color activeColor = Color(0xff123456);
     const BorderSide side = BorderSide(
@@ -1515,7 +1514,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
   });
 
-  testWidgetsWithLeakTracking('Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
+  testWidgets('Checkbox MaterialStateBorderSide applies unconditionally', (WidgetTester tester) async {
     const Color borderColor = Color(0xfff44336);
     const BorderSide side = BorderSide(
       width: 4,
@@ -1568,7 +1567,7 @@ void main() {
     expectBorder();
   });
 
-  testWidgetsWithLeakTracking('disabled checkbox shows tooltip', (WidgetTester tester) async {
+  testWidgets('disabled checkbox shows tooltip', (WidgetTester tester) async {
     const String longPressTooltip = 'long press tooltip';
     const String tapTooltip = 'tap tooltip';
     await tester.pumpWidget(
@@ -1619,7 +1618,7 @@ void main() {
     expect(find.text(tapTooltip), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
+  testWidgets('Checkbox has default error color when isError is set to true - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -1691,7 +1690,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('Checkbox MaterialStateBorderSide applies in error states - M3', (WidgetTester tester) async {
+  testWidgets('Checkbox MaterialStateBorderSide applies in error states - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
     final ThemeData themeData = ThemeData(useMaterial3: true);
     const Color borderColor = Color(0xffffeb3b);
@@ -1770,7 +1769,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('Checkbox has correct default shape - M3', (WidgetTester tester) async {
+  testWidgets('Checkbox has correct default shape - M3', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(useMaterial3: true);
 
     Widget buildApp() {
@@ -1804,7 +1803,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Checkbox.adaptive shows the correct platform widget', (WidgetTester tester) async {
+  testWidgets('Checkbox.adaptive shows the correct platform widget', (WidgetTester tester) async {
     Widget buildApp(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -1836,7 +1835,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
+  testWidgets('Checkbox respects fillColor when it is unchecked', (WidgetTester tester) async {
     const Color activeBackgroundColor = Color(0xff123456);
     const Color inactiveBackgroundColor = Color(0xff654321);
 

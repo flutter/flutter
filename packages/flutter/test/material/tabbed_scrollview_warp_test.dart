@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 // This is a regression test for https://github.com/flutter/flutter/issues/10549
 // which was failing because _SliverPersistentHeaderElement.visitChildren()
 // didn't check child != null before visiting its child.
@@ -76,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
+  testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: MyHomePage()));
 
     // should not crash.

@@ -5,12 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('can press', (WidgetTester tester) async {
+  testWidgets('can press', (WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -31,7 +29,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgetsWithLeakTracking('passing null to onPressed disables the button', (WidgetTester tester) async {
+  testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(

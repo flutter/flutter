@@ -8,12 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
+  testWidgets('OutlinedButton, OutlinedButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final bool material3 = theme.useMaterial3;
@@ -177,7 +176,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgetsWithLeakTracking('Does OutlinedButton work with hover', (WidgetTester tester) async {
+  testWidgets('Does OutlinedButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -205,7 +204,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: hoverColor));
   });
 
-  testWidgetsWithLeakTracking('Does OutlinedButton work with focus', (WidgetTester tester) async {
+  testWidgets('Does OutlinedButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -235,7 +234,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
-  testWidgetsWithLeakTracking('Does OutlinedButton work with autofocus', (WidgetTester tester) async {
+  testWidgets('Does OutlinedButton work with autofocus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
     Color? getOverlayColor(Set<MaterialState> states) {
@@ -265,7 +264,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
-  testWidgetsWithLeakTracking('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -311,7 +310,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgetsWithLeakTracking('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     Color getTextColor(Set<MaterialState> states) {
@@ -380,7 +379,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgetsWithLeakTracking('OutlinedButton uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -447,7 +446,7 @@ void main() {
     expect(textColor(), pressedColor);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton uses stateful color for icon color in different states', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses stateful color for icon color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
@@ -514,7 +513,7 @@ void main() {
     expect(iconColor(), pressedColor);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton uses stateful color for border color in different states', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses stateful color for border color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -582,7 +581,7 @@ void main() {
     expect(outlinedButton, paints..drrect(color: pressedColor));
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets('OutlinedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
 
     bool wasPressed;
     Finder outlinedButton;
@@ -626,7 +625,7 @@ void main() {
     expect(tester.widget<OutlinedButton>(outlinedButton).enabled, false);
   });
 
-  testWidgetsWithLeakTracking("OutlinedButton response doesn't hover when disabled", (WidgetTester tester) async {
+  testWidgets("OutlinedButton response doesn't hover when disabled", (WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'OutlinedButton Focus');
     final GlobalKey childKey = GlobalKey();
@@ -676,7 +675,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('disabled and hovered OutlinedButton responds to mouse-exit', (WidgetTester tester) async {
+  testWidgets('disabled and hovered OutlinedButton responds to mouse-exit', (WidgetTester tester) async {
     int onHoverCount = 0;
     late bool hover;
 
@@ -738,7 +737,7 @@ void main() {
     expect(hover, false);
   });
 
-  testWidgetsWithLeakTracking('Can set OutlinedButton focus and Can set unFocus.', (WidgetTester tester) async {
+  testWidgets('Can set OutlinedButton focus and Can set unFocus.', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'OutlinedButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -767,7 +766,7 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking('When OutlinedButton disable, Can not set OutlinedButton focus.', (WidgetTester tester) async {
+  testWidgets('When OutlinedButton disable, Can not set OutlinedButton focus.', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'OutlinedButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -790,7 +789,7 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-  testWidgetsWithLeakTracking("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
+  testWidgets("Outline button doesn't crash if disabled during a gesture", (WidgetTester tester) async {
     Widget buildFrame(VoidCallback? onPressed) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -810,7 +809,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton shape and border component overrides', (WidgetTester tester) async {
+  testWidgets('OutlinedButton shape and border component overrides', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
     const BorderSide disabledBorderSide = BorderSide(color: Color(0xFFFF0000), width: 3);
     const BorderSide enabledBorderSide = BorderSide(color: Color(0xFFFF00FF), width: 4);
@@ -888,7 +887,7 @@ void main() {
     expect(getBorderSide(), enabledBorderSide);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton has no clip by default', (WidgetTester tester) async {
+  testWidgets('OutlinedButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -910,7 +909,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('OutlinedButton contributes semantics', (WidgetTester tester) async {
+  testWidgets('OutlinedButton contributes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -955,7 +954,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton scales textScaleFactor', (WidgetTester tester) async {
+  testWidgets('OutlinedButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         // Force Material 2 typography.
@@ -1037,7 +1036,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/122066
 
-  testWidgetsWithLeakTracking('OutlinedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgets('OutlinedButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -1068,7 +1067,7 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton responds to density changes.', (WidgetTester tester) async {
+  testWidgets('OutlinedButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
@@ -1201,7 +1200,7 @@ void main() {
             if (textDirection == TextDirection.rtl)
               'RTL',
           ].join(', ');
-          testWidgetsWithLeakTracking(testName, (WidgetTester tester) async {
+          testWidgets(testName, (WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
                 theme: ThemeData(
@@ -1348,7 +1347,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Override OutlinedButton default padding', (WidgetTester tester) async {
+  testWidgets('Override OutlinedButton default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -1382,7 +1381,7 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
-  testWidgetsWithLeakTracking('M3 OutlinedButton has correct padding', (WidgetTester tester) async {
+  testWidgets('M3 OutlinedButton has correct padding', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1408,7 +1407,7 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 24));
   });
 
-  testWidgetsWithLeakTracking('M3 OutlinedButton.icon has correct padding', (WidgetTester tester) async {
+  testWidgets('M3 OutlinedButton.icon has correct padding', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1435,7 +1434,7 @@ void main() {
    expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 24.0, 0.0));
   });
 
-  testWidgetsWithLeakTracking('Fixed size OutlinedButtons', (WidgetTester tester) async {
+  testWidgets('Fixed size OutlinedButtons', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1468,7 +1467,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OutlinedButton, 'wx200')).height, 200);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+  testWidgets('OutlinedButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
     Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         home: Scaffold(
@@ -1508,7 +1507,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -1535,7 +1534,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('OutlinedButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
+  testWidgets('OutlinedButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     await tester.pumpWidget(
@@ -1557,7 +1556,7 @@ void main() {
     expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('OutlinedButton.icon does not overflow', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon does not overflow', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
     await tester.pumpWidget(
       MaterialApp(
@@ -1578,7 +1577,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton.icon icon,label layout', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon icon,label layout', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
     final Key labelKey = UniqueKey();
@@ -1615,7 +1614,7 @@ void main() {
     expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton maximumSize', (WidgetTester tester) async {
+  testWidgets('OutlinedButton maximumSize', (WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
 
@@ -1657,7 +1656,7 @@ void main() {
     expect(tester.getSize(find.byKey(key1)), const Size(104.0, 224.0));
   });
 
-  testWidgetsWithLeakTracking('Fixed size OutlinedButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
+  testWidgets('Fixed size OutlinedButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1687,7 +1686,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OutlinedButton, '200,200')), const Size(200, 200));
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('OutlinedButton changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1765,7 +1764,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('OutlinedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1788,7 +1787,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1918,15 +1917,15 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgetsWithLeakTracking('OutlinedButton statesController', (WidgetTester tester) async {
+  testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgetsWithLeakTracking('OutlinedButton.icon statesController', (WidgetTester tester) async {
+  testWidgets('OutlinedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgetsWithLeakTracking('Disabled OutlinedButton statesController', (WidgetTester tester) async {
+  testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
@@ -1949,7 +1948,7 @@ void main() {
     expect(count, 1);
   });
 
-  testWidgetsWithLeakTracking("OutlinedButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
+  testWidgets("OutlinedButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/118071.
     await tester.pumpWidget(
       Directionality(

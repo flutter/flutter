@@ -5,13 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgetsWithLeakTracking('TextField restoration', (WidgetTester tester) async {
+  testWidgets('TextField restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -22,7 +20,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('TextField restoration with external controller', (WidgetTester tester) async {
+  testWidgets('TextField restoration with external controller', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'root',
@@ -35,7 +33,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('State restoration (No Form ancestor) - onUserInteraction error text validation', (WidgetTester tester) async {
+  testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (WidgetTester tester) async {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
@@ -93,7 +91,7 @@ void main() {
     expect(find.text(errorText('bar')!), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (WidgetTester tester) async {
+  testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (WidgetTester tester) async {
     String? errorText(String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 

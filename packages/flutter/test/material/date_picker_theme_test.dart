@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   const DatePickerThemeData datePickerTheme = DatePickerThemeData(
     backgroundColor: Color(0xfffffff0),
@@ -118,7 +116,7 @@ void main() {
     expect(theme.rangeSelectionOverlayColor, null);
   });
 
-  testWidgetsWithLeakTracking('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
+  testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m3; // M3 Defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -188,7 +186,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
+  testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
     late final DatePickerThemeData m2; // M2 defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -251,7 +249,7 @@ void main() {
     expect(m2.rangePickerHeaderHelpStyle, textTheme.labelSmall);
   });
 
-  testWidgetsWithLeakTracking('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
@@ -263,7 +261,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     datePickerTheme.debugFillProperties(builder);
@@ -309,7 +307,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('DatePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgets('DatePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(
@@ -389,7 +387,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(

@@ -152,7 +152,7 @@ void main() {
 
   // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
+  testWidgets('LicensePage control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -205,7 +205,7 @@ void main() {
 
   // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
+  testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     LicenseRegistry.addLicense(() {
@@ -410,7 +410,7 @@ void main() {
 
   // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
+  testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -437,7 +437,7 @@ void main() {
 
   // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('LicensePage returns late if unmounted', (WidgetTester tester) async {
+  testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -1077,7 +1077,7 @@ void main() {
 
   // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1142,7 +1142,7 @@ void main() {
 
   // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);

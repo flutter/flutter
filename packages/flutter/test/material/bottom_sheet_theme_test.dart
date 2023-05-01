@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   test('BottomSheetThemeData copyWith, ==, hashCode basics', () {
     expect(const BottomSheetThemeData(), const BottomSheetThemeData().copyWith());
@@ -38,7 +36,7 @@ void main() {
     expect(bottomSheetTheme.dragHandleSize, null);
   });
 
-  testWidgetsWithLeakTracking('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData().debugFillProperties(builder);
 
@@ -50,7 +48,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
@@ -80,7 +78,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: BottomSheet(
@@ -104,7 +102,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
+  testWidgets('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
     final BottomSheetThemeData bottomSheetTheme = _bottomSheetTheme();
 
     await tester.pumpWidget(MaterialApp(
@@ -131,7 +129,7 @@ void main() {
     expect(material.clipBehavior, bottomSheetTheme.clipBehavior);
   });
 
-  testWidgetsWithLeakTracking('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color shadowColor = Colors.blue;
     const double elevation = 7.0;
@@ -170,7 +168,7 @@ void main() {
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgetsWithLeakTracking('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -201,7 +199,7 @@ void main() {
     expect(modalBarrier.color, modalBarrierColor);
   });
 
-  testWidgetsWithLeakTracking('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
+  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -227,7 +225,7 @@ void main() {
     expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgetsWithLeakTracking("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
+  testWidgets("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -249,7 +247,7 @@ void main() {
     expect(material.color, null);
   });
 
-  testWidgetsWithLeakTracking('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
     const double lightElevation = 5.0;
     const double darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;

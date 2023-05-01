@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 // From bottom_sheet.dart.
@@ -17,7 +16,7 @@ const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/103741
-  testWidgetsWithLeakTracking('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
+  testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget buildFrame({required bool extendBodyBehindAppBar}) {
       return MediaQuery(
@@ -49,7 +48,7 @@ void main() {
     expect(controller.position.pixels, 100.0);
   });
 
-  testWidgetsWithLeakTracking('Scaffold drawer callback test', (WidgetTester tester) async {
+  testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
 
@@ -88,7 +87,7 @@ void main() {
     expect(isEndDrawerOpen, false);
   });
 
-  testWidgetsWithLeakTracking('Scaffold drawer callback test - only call when changed', (WidgetTester tester) async {
+  testWidgets('Scaffold drawer callback test - only call when changed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87914
     bool onDrawerChangedCalled = false;
     bool onEndDrawerChangedCalled = false;
@@ -122,7 +121,7 @@ void main() {
     expect(onEndDrawerChangedCalled, false);
   });
 
-  testWidgetsWithLeakTracking('Scaffold control test', (WidgetTester tester) async {
+  testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = UniqueKey();
     Widget boilerplate(Widget child) {
       return Localizations(
@@ -172,7 +171,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
-  testWidgetsWithLeakTracking('Scaffold large bottom padding test', (WidgetTester tester) async {
+  testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = UniqueKey();
 
     Widget boilerplate(Widget child) {
@@ -229,7 +228,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
   });
 
-  testWidgetsWithLeakTracking('Floating action entrance/exit animation', (WidgetTester tester) async {
+  testWidgets('Floating action entrance/exit animation', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Scaffold(
       floatingActionButton: FloatingActionButton(
         key: Key('one'),
@@ -267,7 +266,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
 
-  testWidgetsWithLeakTracking('Floating action button directionality', (WidgetTester tester) async {
+  testWidgets('Floating action button directionality', (WidgetTester tester) async {
     Widget build(TextDirection textDirection) {
       return Directionality(
         textDirection: textDirection,
@@ -295,7 +294,7 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
   });
 
-  testWidgetsWithLeakTracking('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
+  testWidgets('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
     final Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
@@ -333,7 +332,7 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
-  testWidgetsWithLeakTracking('viewPadding change should trigger _ScaffoldLayout re-layout', (WidgetTester tester) async {
+  testWidgets('viewPadding change should trigger _ScaffoldLayout re-layout', (WidgetTester tester) async {
     Widget buildFrame(EdgeInsets viewPadding) {
       return MediaQuery(
         data: MediaQueryData(
@@ -364,7 +363,7 @@ void main() {
     expect(renderBox.debugNeedsLayout, true);
   });
 
-  testWidgetsWithLeakTracking('Drawer scrolling', (WidgetTester tester) async {
+  testWidgets('Drawer scrolling', (WidgetTester tester) async {
     final Key drawerKey = UniqueKey();
     const double appBarHeight = 256.0;
 
@@ -447,7 +446,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('Tapping the status bar scrolls to top', (WidgetTester tester) async {
+  testWidgets('Tapping the status bar scrolls to top', (WidgetTester tester) async {
     await tester.pumpWidget(buildStatusBarTestApp(debugDefaultTargetPlatformOverride));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
@@ -457,7 +456,7 @@ void main() {
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Tapping the status bar scrolls to top with ease out curve animation', (WidgetTester tester) async {
+  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (WidgetTester tester) async {
     const int duration = 1000;
     final List<double> stops = <double>[0.842, 0.959, 0.993, 1.0];
     const double scrollOffset = 1000;
@@ -486,7 +485,7 @@ void main() {
     expect(scrollable.position.pixels, equals(0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgetsWithLeakTracking('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
+  testWidgets('Tapping the status bar does not scroll to top', (WidgetTester tester) async {
     await tester.pumpWidget(buildStatusBarTestApp(TargetPlatform.android));
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
@@ -497,7 +496,7 @@ void main() {
     expect(scrollable.position.pixels, equals(500.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }));
 
-  testWidgetsWithLeakTracking('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
+  testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -538,7 +537,7 @@ void main() {
     expect(appBarBottomRight, equals(sheetTopRight));
   });
 
-  testWidgetsWithLeakTracking('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+  testWidgets('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
     final Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
@@ -571,7 +570,7 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
-  testWidgetsWithLeakTracking('Persistent bottom buttons are persistent', (WidgetTester tester) async {
+  testWidgets('Persistent bottom buttons are persistent', (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -601,7 +600,7 @@ void main() {
     expect(didPressButton, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Persistent bottom buttons alignment', (WidgetTester tester) async {
+  testWidgets('Persistent bottom buttons alignment', (WidgetTester tester) async {
     Widget buildApp(AlignmentDirectional persistentAlignment) {
       return MaterialApp(
           home: Scaffold(
@@ -636,7 +635,7 @@ void main() {
     expect(tester.getTopLeft(footerButton).dx, 8.0);
   });
 
-  testWidgetsWithLeakTracking('Persistent bottom buttons apply media padding', (WidgetTester tester) async {
+  testWidgets('Persistent bottom buttons apply media padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -663,7 +662,7 @@ void main() {
     expect(tester.getBottomRight(buttonsBar), const Offset(770.0, 560.0));
   });
 
-  testWidgetsWithLeakTracking('persistentFooterButtons with bottomNavigationBar apply SafeArea properly', (WidgetTester tester) async {
+  testWidgets('persistentFooterButtons with bottomNavigationBar apply SafeArea properly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/92039
     await tester.pumpWidget(
       MaterialApp(
@@ -712,7 +711,7 @@ void main() {
     expect(tester.getTopLeft(buttonsBar), const Offset(0.0, 488.0));
   });
 
-  testWidgetsWithLeakTracking('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+  testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
     final Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
@@ -765,11 +764,11 @@ void main() {
       expect(icon.icon, expectedIcon);
     }
 
-    testWidgetsWithLeakTracking('Back arrow uses correct default', (WidgetTester tester) async {
+    testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
       await expectBackIcon(tester, Icons.arrow_back);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
-    testWidgetsWithLeakTracking('Back arrow uses correct default', (WidgetTester tester) async {
+    testWidgets('Back arrow uses correct default', (WidgetTester tester) async {
       await expectBackIcon(tester, kIsWeb ? Icons.arrow_back : Icons.arrow_back_ios);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
   });
@@ -820,21 +819,21 @@ void main() {
       );
     }
 
-    testWidgetsWithLeakTracking('Close button shows correctly', (WidgetTester tester) async {
+    testWidgets('Close button shows correctly', (WidgetTester tester) async {
       await expectCloseIcon(tester, materialRouteBuilder, 'materialRouteBuilder');
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('Close button shows correctly with PageRouteBuilder', (WidgetTester tester) async {
+    testWidgets('Close button shows correctly with PageRouteBuilder', (WidgetTester tester) async {
       await expectCloseIcon(tester, pageRouteBuilder, 'pageRouteBuilder');
     }, variant: TargetPlatformVariant.all());
 
-    testWidgetsWithLeakTracking('Close button shows correctly with custom page route', (WidgetTester tester) async {
+    testWidgets('Close button shows correctly with custom page route', (WidgetTester tester) async {
       await expectCloseIcon(tester, customPageRouteBuilder, 'customPageRouteBuilder');
     }, variant: TargetPlatformVariant.all());
   });
 
   group('body size', () {
-    testWidgetsWithLeakTracking('body size with container', (WidgetTester tester) async {
+    testWidgets('body size with container', (WidgetTester tester) async {
       final Key testKey = UniqueKey();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -851,7 +850,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
-    testWidgetsWithLeakTracking('body size with sized container', (WidgetTester tester) async {
+    testWidgets('body size with sized container', (WidgetTester tester) async {
       final Key testKey = UniqueKey();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -869,7 +868,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
-    testWidgetsWithLeakTracking('body size with centered container', (WidgetTester tester) async {
+    testWidgets('body size with centered container', (WidgetTester tester) async {
       final Key testKey = UniqueKey();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -888,7 +887,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
-    testWidgetsWithLeakTracking('body size with button', (WidgetTester tester) async {
+    testWidgets('body size with button', (WidgetTester tester) async {
       final Key testKey = UniqueKey();
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -907,7 +906,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), Offset.zero);
     });
 
-    testWidgetsWithLeakTracking('body size with extendBody', (WidgetTester tester) async {
+    testWidgets('body size with extendBody', (WidgetTester tester) async {
       final Key bodyKey = UniqueKey();
       late double mediaQueryBottom;
 
@@ -964,7 +963,7 @@ void main() {
       expect(mediaQueryBottom, 0.0);
     });
 
-    testWidgetsWithLeakTracking('body size with extendBodyBehindAppBar', (WidgetTester tester) async {
+    testWidgets('body size with extendBodyBehindAppBar', (WidgetTester tester) async {
       final Key appBarKey = UniqueKey();
       final Key bodyKey = UniqueKey();
 
@@ -1061,7 +1060,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Open drawer hides underlying semantics tree', (WidgetTester tester) async {
+  testWidgets('Open drawer hides underlying semantics tree', (WidgetTester tester) async {
     const String bodyLabel = 'I am the body';
     const String persistentFooterButtonLabel = 'a button on the bottom';
     const String bottomNavigationBarLabel = 'a bar in an app';
@@ -1097,7 +1096,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Scaffold and extreme window padding', (WidgetTester tester) async {
+  testWidgets('Scaffold and extreme window padding', (WidgetTester tester) async {
     final Key appBar = UniqueKey();
     final Key body = UniqueKey();
     final Key floatingActionButton = UniqueKey();
@@ -1202,7 +1201,7 @@ void main() {
     expect(tester.getRect(find.byKey(insideBottomNavigationBar)), const Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
   });
 
-  testWidgetsWithLeakTracking('Scaffold and extreme window padding - persistent footer buttons only', (WidgetTester tester) async {
+  testWidgets('Scaffold and extreme window padding - persistent footer buttons only', (WidgetTester tester) async {
     final Key appBar = UniqueKey();
     final Key body = UniqueKey();
     final Key floatingActionButton = UniqueKey();
@@ -1297,7 +1296,7 @@ void main() {
 
 
   group('ScaffoldGeometry', () {
-    testWidgetsWithLeakTracking('bottomNavigationBar', (WidgetTester tester) async {
+    testWidgets('bottomNavigationBar', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: Container(),
@@ -1319,7 +1318,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('no bottomNavigationBar', (WidgetTester tester) async {
+    testWidgets('no bottomNavigationBar', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
@@ -1336,7 +1335,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.', (WidgetTester tester) async {
+    testWidgets('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.', (WidgetTester tester) async {
       Widget boilerplate(Widget child) {
         return Localizations(
           locale: const Locale('en', 'us'),
@@ -1399,7 +1398,7 @@ void main() {
       expect(initialPoint, finalPoint);
     });
 
-    testWidgetsWithLeakTracking('floatingActionButton', (WidgetTester tester) async {
+    testWidgets('floatingActionButton', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: Container(),
@@ -1422,7 +1421,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('no floatingActionButton', (WidgetTester tester) async {
+    testWidgets('no floatingActionButton', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
@@ -1439,7 +1438,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('floatingActionButton entrance/exit animation', (WidgetTester tester) async {
+    testWidgets('floatingActionButton entrance/exit animation', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(
             body: ConstrainedBox(
@@ -1501,7 +1500,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('change notifications', (WidgetTester tester) async {
+    testWidgets('change notifications', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       int numNotificationsAtLastFrame = 0;
       await tester.pumpWidget(MaterialApp(home: Scaffold(
@@ -1539,7 +1538,7 @@ void main() {
       numNotificationsAtLastFrame = listenerState.numNotifications;
     });
 
-    testWidgetsWithLeakTracking('Simultaneous drawers on either side', (WidgetTester tester) async {
+    testWidgets('Simultaneous drawers on either side', (WidgetTester tester) async {
       const String bodyLabel = 'I am the body';
       const String drawerLabel = 'I am the label on start side';
       const String endDrawerLabel = 'I am the label on end side';
@@ -1573,7 +1572,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('Drawer state query correctly', (WidgetTester tester) async {
+    testWidgets('Drawer state query correctly', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SafeArea(
@@ -1629,7 +1628,7 @@ void main() {
       expect(scaffoldState.isDrawerOpen, true);
     });
 
-    testWidgetsWithLeakTracking('Dual Drawer Opening', (WidgetTester tester) async {
+    testWidgets('Dual Drawer Opening', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SafeArea(
@@ -1681,7 +1680,7 @@ void main() {
       expect(find.text('drawer'), findsOneWidget);
     });
 
-    testWidgetsWithLeakTracking('Drawer opens correctly with padding from MediaQuery (LTR)', (WidgetTester tester) async {
+    testWidgets('Drawer opens correctly with padding from MediaQuery (LTR)', (WidgetTester tester) async {
       const double simulatedNotchSize = 40.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1735,7 +1734,7 @@ void main() {
       expect(scaffoldState.isDrawerOpen, true);
     });
 
-    testWidgetsWithLeakTracking('Drawer opens correctly with padding from MediaQuery (RTL)', (WidgetTester tester) async {
+    testWidgets('Drawer opens correctly with padding from MediaQuery (RTL)', (WidgetTester tester) async {
       const double simulatedNotchSize = 40.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -1799,7 +1798,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
+  testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
     // The default edge drag width is 20.0.
     await tester.pumpWidget(
       MaterialApp(
@@ -1845,7 +1844,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgetsWithLeakTracking('Drawer does not open with a drag gesture when it is disabled on mobile', (WidgetTester tester) async {
+  testWidgets('Drawer does not open with a drag gesture when it is disabled on mobile', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1909,7 +1908,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, false);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgetsWithLeakTracking('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
+  testWidgets('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1949,7 +1948,7 @@ void main() {
     expect(scaffoldState.isDrawerOpen, false);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('End drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
+  testWidgets('End drawer does not open with a drag gesture when it is disabled', (WidgetTester tester) async {
     late double screenWidth;
     await tester.pumpWidget(
       MaterialApp(
@@ -2019,7 +2018,7 @@ void main() {
     expect(scaffoldState.isEndDrawerOpen, false);
   });
 
-  testWidgetsWithLeakTracking('Nested scaffold body insets', (WidgetTester tester) async {
+  testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295
     final Key bodyKey = UniqueKey();
 
@@ -2071,7 +2070,7 @@ void main() {
   });
 
   group('FlutterError control test', () {
-    testWidgetsWithLeakTracking('showBottomSheet() while Scaffold has bottom sheet',
+    testWidgets('showBottomSheet() while Scaffold has bottom sheet',
       (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         await tester.pumpWidget(
@@ -2120,7 +2119,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking(
+    testWidgets(
       'didUpdate bottomSheet while a previous bottom sheet is still displayed',
       (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
@@ -2175,7 +2174,7 @@ void main() {
       },
     );
 
-    testWidgetsWithLeakTracking('Call to Scaffold.of() without context', (WidgetTester tester) async {
+    testWidgets('Call to Scaffold.of() without context', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -2248,7 +2247,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('Call to Scaffold.geometryOf() without context', (WidgetTester tester) async {
+    testWidgets('Call to Scaffold.geometryOf() without context', (WidgetTester tester) async {
       ValueListenable<ScaffoldGeometry>? geometry;
       await tester.pumpWidget(
         MaterialApp(
@@ -2314,7 +2313,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
+    testWidgets('FloatingActionButton always keeps the same position regardless of extendBodyBehindAppBar', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           appBar: AppBar(),
@@ -2344,7 +2343,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('ScaffoldMessenger.maybeOf can return null if not found', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger.maybeOf can return null if not found', (WidgetTester tester) async {
     ScaffoldMessengerState? scaffoldMessenger;
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(Directionality(
@@ -2375,7 +2374,7 @@ void main() {
     expect(scaffoldMessenger, isNull);
   });
 
-  testWidgetsWithLeakTracking('ScaffoldMessenger.of will assert if not found', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger.of will assert if not found', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
 
     final List<dynamic> exceptions = <dynamic>[];
@@ -2462,7 +2461,7 @@ void main() {
     ));
   });
 
-  testWidgetsWithLeakTracking('ScaffoldMessenger checks for nesting when a new Scaffold is registered', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger checks for nesting when a new Scaffold is registered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77251
     const String snackBarContent = 'SnackBar Content';
     await tester.pumpWidget(MaterialApp(
@@ -2533,7 +2532,7 @@ void main() {
     expect(find.text(snackBarContent), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Drawer can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+  testWidgets('Drawer can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106131
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
@@ -2581,7 +2580,7 @@ void main() {
     expect(isEndDrawerOpen, false);
   });
 
-  testWidgetsWithLeakTracking('ScaffoldMessenger showSnackBar throws an intuitive error message if called during build', (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger showSnackBar throws an intuitive error message if called during build', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -2598,7 +2597,7 @@ void main() {
     expect(summary.toString(), 'The showSnackBar() method cannot be called during build.');
   });
 
-  testWidgetsWithLeakTracking('Persistent BottomSheet is not dismissible via a11y means', (WidgetTester tester) async {
+  testWidgets('Persistent BottomSheet is not dismissible via a11y means', (WidgetTester tester) async {
     final Key bottomSheetKey = UniqueKey();
 
     await tester.pumpWidget(MaterialApp(
@@ -2621,7 +2620,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/117004
-  testWidgetsWithLeakTracking('can rebuild and remove bottomSheet at the same time', (WidgetTester tester) async {
+  testWidgets('can rebuild and remove bottomSheet at the same time', (WidgetTester tester) async {
     bool themeIsLight = true;
     bool? defaultBottomSheet = true;
     final GlobalKey bottomSheetKey1 = GlobalKey();

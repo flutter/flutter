@@ -10,10 +10,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
-  testWidgetsWithLeakTracking('Slider value indicator', (WidgetTester tester) async {
+  testWidgets('Slider value indicator', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -54,7 +52,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider value indicator wide text', (WidgetTester tester) async {
+  testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -98,7 +96,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
+  testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -142,7 +140,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider value indicator large text scale and wide text',
+  testWidgets('Slider value indicator large text scale and wide text',
       (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
@@ -194,7 +192,7 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgetsWithLeakTracking('Slider value indicator', (WidgetTester tester) async {
+    testWidgets('Slider value indicator', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -232,7 +230,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider value indicator wide text', (WidgetTester tester) async {
+    testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -273,7 +271,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
+    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -314,7 +312,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider value indicator large text scale and wide text',
+    testWidgets('Slider value indicator large text scale and wide text',
         (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,

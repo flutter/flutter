@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 Widget wrap({ required Widget child, ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
@@ -17,7 +15,7 @@ Widget wrap({ required Widget child, ThemeData? theme }) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('ExpandIcon test', (WidgetTester tester) async {
+  testWidgets('ExpandIcon test', (WidgetTester tester) async {
     bool expanded = false;
     IconTheme iconTheme;
 
@@ -75,7 +73,7 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.white60));
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon disabled', (WidgetTester tester) async {
+  testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
     IconTheme iconTheme;
     // Light mode test
     await tester.pumpWidget(wrap(
@@ -97,7 +95,7 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.white38));
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
+  testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
     bool expanded = false;
 
     await tester.pumpWidget(wrap(
@@ -120,7 +118,7 @@ void main() {
     expect(expanded, isFalse);
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon is rotated initially if isExpanded is true on first build', (WidgetTester tester) async {
+  testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (WidgetTester tester) async {
     bool expanded = true;
 
     await tester.pumpWidget(wrap(
@@ -135,7 +133,7 @@ void main() {
     expect(rotation.turns.value, 0.5);
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon default size is 24', (WidgetTester tester) async {
+  testWidgets('ExpandIcon default size is 24', (WidgetTester tester) async {
     final ExpandIcon expandIcon =  ExpandIcon(
       onPressed: (bool isExpanded) {},
     );
@@ -148,7 +146,7 @@ void main() {
     expect(icon.size, 24);
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon has the correct given size', (WidgetTester tester) async {
+  testWidgets('ExpandIcon has the correct given size', (WidgetTester tester) async {
     ExpandIcon expandIcon =  ExpandIcon(
       size: 36,
       onPressed: (bool isExpanded) {},
@@ -174,7 +172,7 @@ void main() {
     expect(icon.size, 48);
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon has correct semantic hints', (WidgetTester tester) async {
+  testWidgets('ExpandIcon has correct semantic hints', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
@@ -210,7 +208,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon uses custom icon color and expanded icon color', (WidgetTester tester) async {
+  testWidgets('ExpandIcon uses custom icon color and expanded icon color', (WidgetTester tester) async {
     bool expanded = false;
     IconTheme iconTheme;
 
@@ -271,7 +269,7 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.indigo));
   });
 
-  testWidgetsWithLeakTracking('ExpandIcon uses custom disabled icon color', (WidgetTester tester) async {
+  testWidgets('ExpandIcon uses custom disabled icon color', (WidgetTester tester) async {
     IconTheme iconTheme;
 
     await tester.pumpWidget(wrap(

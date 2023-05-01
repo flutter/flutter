@@ -10,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -70,7 +69,7 @@ void main() {
   final ThemeData material3Theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
   final ThemeData material2Theme = ThemeData(useMaterial3: false, brightness: Brightness.dark);
 
-  testWidgetsWithLeakTracking('Dialog is scrollable', (WidgetTester tester) async {
+  testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
     final AlertDialog dialog = AlertDialog(
       content: Container(
@@ -97,7 +96,7 @@ void main() {
     expect(didPressOk, true);
   });
 
-  testWidgetsWithLeakTracking('Dialog background color from AlertDialog', (WidgetTester tester) async {
+  testWidgets('Dialog background color from AlertDialog', (WidgetTester tester) async {
     const Color customColor = Colors.pink;
     const AlertDialog dialog = AlertDialog(
       backgroundColor: customColor,
@@ -112,7 +111,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgetsWithLeakTracking('Dialog Defaults', (WidgetTester tester) async {
+  testWidgets('Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -147,7 +146,7 @@ void main() {
     expect(material3Widget.elevation, 6.0);
   });
 
-  testWidgetsWithLeakTracking('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+  testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
     const String dialogTextM2 = 'Fullscreen Dialog - M2';
     const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
@@ -194,7 +193,7 @@ void main() {
     expect(find.text(dialogTextM3), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Custom dialog elevation', (WidgetTester tester) async {
+  testWidgets('Custom dialog elevation', (WidgetTester tester) async {
     const double customElevation = 12.0;
     const Color shadowColor = Color(0xFF000001);
     const Color surfaceTintColor = Color(0xFF000002);
@@ -215,7 +214,7 @@ void main() {
     expect(materialWidget.surfaceTintColor, surfaceTintColor);
   });
 
-  testWidgetsWithLeakTracking('Custom Title Text Style', (WidgetTester tester) async {
+  testWidgets('Custom Title Text Style', (WidgetTester tester) async {
     const String titleText = 'Title';
     const TextStyle titleTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(
@@ -232,7 +231,7 @@ void main() {
     expect(title.text.style, titleTextStyle);
   });
 
-  testWidgetsWithLeakTracking('Custom Content Text Style', (WidgetTester tester) async {
+  testWidgets('Custom Content Text Style', (WidgetTester tester) async {
     const String contentText = 'Content';
     const TextStyle contentTextStyle = TextStyle(color: Colors.pink);
     const AlertDialog dialog = AlertDialog(
@@ -249,7 +248,7 @@ void main() {
     expect(content.text.style, contentTextStyle);
   });
 
-  testWidgetsWithLeakTracking('AlertDialog custom clipBehavior', (WidgetTester tester) async {
+  testWidgets('AlertDialog custom clipBehavior', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[],
       clipBehavior: Clip.antiAlias,
@@ -263,7 +262,7 @@ void main() {
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
+  testWidgets('SimpleDialog custom clipBehavior', (WidgetTester tester) async {
     const SimpleDialog dialog = SimpleDialog(
       clipBehavior: Clip.antiAlias,
       children: <Widget>[],
@@ -277,7 +276,7 @@ void main() {
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('Custom dialog shape', (WidgetTester tester) async {
+  testWidgets('Custom dialog shape', (WidgetTester tester) async {
     const RoundedRectangleBorder customBorder =
       RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const AlertDialog dialog = AlertDialog(
@@ -293,7 +292,7 @@ void main() {
     expect(materialWidget.shape, customBorder);
   });
 
-  testWidgetsWithLeakTracking('Null dialog shape', (WidgetTester tester) async {
+  testWidgets('Null dialog shape', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
     );
@@ -306,7 +305,7 @@ void main() {
     expect(materialWidget.shape, _defaultM2DialogShape);
   });
 
-  testWidgetsWithLeakTracking('Rectangular dialog shape', (WidgetTester tester) async {
+  testWidgets('Rectangular dialog shape', (WidgetTester tester) async {
     const ShapeBorder customBorder = Border();
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
@@ -321,7 +320,7 @@ void main() {
     expect(materialWidget.shape, customBorder);
   });
 
-  testWidgetsWithLeakTracking('Custom dialog alignment', (WidgetTester tester) async {
+  testWidgets('Custom dialog alignment', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       actions: <Widget>[ ],
       alignment: Alignment.bottomLeft,
@@ -338,7 +337,7 @@ void main() {
     expect(bottomLeft.dy, 576.0);
   });
 
-  testWidgetsWithLeakTracking('Simple dialog control test', (WidgetTester tester) async {
+  testWidgets('Simple dialog control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -381,7 +380,7 @@ void main() {
     expect(await result, equals(42));
   });
 
-  testWidgetsWithLeakTracking('Can show dialog using navigator global key', (WidgetTester tester) async {
+  testWidgets('Can show dialog using navigator global key', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -421,7 +420,7 @@ void main() {
     expect(await result, equals(42));
   });
 
-  testWidgetsWithLeakTracking('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
+  testWidgets('Custom padding on SimpleDialogOption', (WidgetTester tester) async {
     const EdgeInsets customPadding = EdgeInsets.fromLTRB(4, 10, 8, 6);
     final SimpleDialog dialog = SimpleDialog(
       title: const Text('Title'),
@@ -447,7 +446,7 @@ void main() {
     expect(textRect.bottom, dialogRect.bottom - customPadding.bottom);
   });
 
-  testWidgetsWithLeakTracking('Barrier dismissible', (WidgetTester tester) async {
+  testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -508,7 +507,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Barrier color', (WidgetTester tester) async {
+  testWidgets('Barrier color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(child: Text('Test')),
@@ -539,7 +538,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
   });
 
-  testWidgetsWithLeakTracking('Dialog hides underlying semantics tree', (WidgetTester tester) async {
+  testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const String buttonText = 'A button covered by dialog overlay';
     await tester.pumpWidget(
@@ -575,7 +574,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('AlertDialog.actionsPadding defaults', (WidgetTester tester) async {
+  testWidgets('AlertDialog.actionsPadding defaults', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
@@ -608,7 +607,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width);
   });
 
-  testWidgetsWithLeakTracking('AlertDialog.actionsPadding surrounds actions with padding', (WidgetTester tester) async {
+  testWidgets('AlertDialog.actionsPadding surrounds actions with padding', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
@@ -644,7 +643,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgetsWithLeakTracking('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+  testWidgets('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -742,7 +741,7 @@ void main() {
     ); // right
   });
 
-  testWidgetsWithLeakTracking('AlertDialog.buttonPadding custom values', (WidgetTester tester) async {
+  testWidgets('AlertDialog.buttonPadding custom values', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -944,7 +943,7 @@ void main() {
     ];
 
     for (final double textScaleFactor in textScaleFactors) {
-      testWidgetsWithLeakTracking('AlertDialog padding is correct when only icon and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when only icon and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           icon: icon,
           actions: actions,
@@ -996,7 +995,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('AlertDialog padding is correct when only icon, title and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when only icon, title and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           icon: icon,
           title: title,
@@ -1068,7 +1067,7 @@ void main() {
       });
 
       for (final bool isM3 in <bool>[true, false]) {
-        testWidgetsWithLeakTracking('AlertDialog padding is correct when only icon, content and actions are specified [textScaleFactor]=$textScaleFactor [isM3]=$isM3', (WidgetTester tester) async {
+        testWidgets('AlertDialog padding is correct when only icon, content and actions are specified [textScaleFactor]=$textScaleFactor [isM3]=$isM3', (WidgetTester tester) async {
           final AlertDialog dialog = AlertDialog(
             icon: icon,
             content: content,
@@ -1140,7 +1139,7 @@ void main() {
         });
       }
 
-      testWidgetsWithLeakTracking('AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when only title and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           title: title,
           actions: actions,
@@ -1192,7 +1191,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when only content and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           content: content,
           actions: actions,
@@ -1244,7 +1243,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('AlertDialog padding is correct when title, content, and actions are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final AlertDialog dialog = AlertDialog(
           title: title,
           content: content,
@@ -1315,7 +1314,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('SimpleDialog padding is correct when only children are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final SimpleDialog dialog = SimpleDialog(
           children: children,
         );
@@ -1348,7 +1347,7 @@ void main() {
         );
       });
 
-      testWidgetsWithLeakTracking('SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
+      testWidgets('SimpleDialog padding is correct when title and children are specified [textScaleFactor]=$textScaleFactor', (WidgetTester tester) async {
         final SimpleDialog dialog = SimpleDialog(
           title: title,
           children: children,
@@ -1402,7 +1401,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Dialogs can set the vertical direction of overflowing actions', (WidgetTester tester) async {
+  testWidgets('Dialogs can set the vertical direction of overflowing actions', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -1437,7 +1436,7 @@ void main() {
     expect(buttonTwoRect.bottom, lessThanOrEqualTo(buttonOneRect.top));
   });
 
-  testWidgetsWithLeakTracking('Dialogs have no spacing by default for overflowing actions', (WidgetTester tester) async {
+  testWidgets('Dialogs have no spacing by default for overflowing actions', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -1470,7 +1469,7 @@ void main() {
     expect(buttonOneRect.bottom, buttonTwoRect.top);
   });
 
-  testWidgetsWithLeakTracking('Dialogs can set the button spacing of overflowing actions', (WidgetTester tester) async {
+  testWidgets('Dialogs can set the button spacing of overflowing actions', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -1504,7 +1503,7 @@ void main() {
     expect(buttonOneRect.bottom, buttonTwoRect.top - 10.0);
   });
 
-  testWidgetsWithLeakTracking('Dialogs can set the alignment of the OverflowBar', (WidgetTester tester) async {
+  testWidgets('Dialogs can set the alignment of the OverflowBar', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -1538,7 +1537,7 @@ void main() {
     expect(buttonOneRect.center.dx, buttonTwoRect.center.dx);
   });
 
-  testWidgetsWithLeakTracking('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
+  testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
     late BuildContext outerContext;
     late BuildContext routeContext;
     late BuildContext dialogContext;
@@ -1593,7 +1592,7 @@ void main() {
     expect(MediaQuery.of(dialogContext).viewInsets, EdgeInsets.zero);
   });
 
-  testWidgetsWithLeakTracking('Dialog widget insets by viewInsets', (WidgetTester tester) async {
+  testWidgets('Dialog widget insets by viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(
@@ -1627,7 +1626,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Dialog insetPadding added to outside of dialog', (WidgetTester tester) async {
+  testWidgets('Dialog insetPadding added to outside of dialog', (WidgetTester tester) async {
     // The default testing screen (800, 600)
     const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
 
@@ -1667,7 +1666,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/78229.
-  testWidgetsWithLeakTracking('AlertDialog has correct semantics for content in iOS', (WidgetTester tester) async {
+  testWidgets('AlertDialog has correct semantics for content in iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1732,7 +1731,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
+  testWidgets('AlertDialog widget always contains alert route semantics for android', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1788,7 +1787,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SimpleDialog does not introduce additional node', (WidgetTester tester) async {
+  testWidgets('SimpleDialog does not introduce additional node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1831,7 +1830,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/78229.
-  testWidgetsWithLeakTracking('SimpleDialog has correct semantics for title in iOS', (WidgetTester tester) async {
+  testWidgets('SimpleDialog has correct semantics for title in iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1904,7 +1903,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
+  testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 
@@ -2035,7 +2034,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/28505.
-  testWidgetsWithLeakTracking('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
+  testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
     Widget buildFrame(Key builderKey) {
       return MaterialApp(
         home: Center(
@@ -2072,7 +2071,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgetsWithLeakTracking('showDialog safe area', (WidgetTester tester) async {
+  testWidgets('showDialog safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
@@ -2113,7 +2112,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
   });
 
-  testWidgetsWithLeakTracking('showDialog uses root navigator by default', (WidgetTester tester) async {
+  testWidgets('showDialog uses root navigator by default', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
 
@@ -2148,7 +2147,7 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgetsWithLeakTracking('showDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgets('showDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final DialogObserver rootObserver = DialogObserver();
     final DialogObserver nestedObserver = DialogObserver();
 
@@ -2184,7 +2183,7 @@ void main() {
     expect(nestedObserver.dialogCount, 1);
   });
 
-  testWidgetsWithLeakTracking('showDialog throws a friendly user message when context is not active', (WidgetTester tester) async {
+  testWidgets('showDialog throws a friendly user message when context is not active', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12467
     await tester.pumpWidget(
       const MaterialApp(
@@ -2220,7 +2219,7 @@ void main() {
   });
 
   group('showDialog avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('positioning with anchorPoint', (WidgetTester tester) async {
+    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -2258,7 +2257,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning with Directionality', (WidgetTester tester) async {
+    testWidgets('positioning with Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -2298,7 +2297,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgetsWithLeakTracking('positioning by default', (WidgetTester tester) async {
+    testWidgets('positioning by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -2337,7 +2336,7 @@ void main() {
   });
 
   group('AlertDialog.scrollable: ', () {
-    testWidgetsWithLeakTracking('Title is scrollable', (WidgetTester tester) async {
+    testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
         title: Container(
@@ -2357,7 +2356,7 @@ void main() {
       expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
     });
 
-    testWidgetsWithLeakTracking('Content is scrollable', (WidgetTester tester) async {
+    testWidgets('Content is scrollable', (WidgetTester tester) async {
       final Key contentKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
         content: Container(
@@ -2377,7 +2376,7 @@ void main() {
       expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
     });
 
-    testWidgetsWithLeakTracking('Title and content are scrollable', (WidgetTester tester) async {
+    testWidgets('Title and content are scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final Key contentKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
@@ -2416,7 +2415,7 @@ void main() {
     });
   });
 
-  testWidgetsWithLeakTracking('Dialog with RouteSettings', (WidgetTester tester) async {
+  testWidgets('Dialog with RouteSettings', (WidgetTester tester) async {
     late RouteSettings currentRouteSetting;
 
     await tester.pumpWidget(
@@ -2470,7 +2469,7 @@ void main() {
     expect(currentRouteSetting.name, '/');
   });
 
-  testWidgetsWithLeakTracking('showDialog - custom barrierLabel', (WidgetTester tester) async {
+  testWidgets('showDialog - custom barrierLabel', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -2510,7 +2509,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('DialogRoute is state restorable', (WidgetTester tester) async {
+  testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -2540,7 +2539,7 @@ void main() {
     expect(find.byType(AlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgetsWithLeakTracking('AlertDialog.actionsAlignment', (WidgetTester tester) async {
+  testWidgets('AlertDialog.actionsAlignment', (WidgetTester tester) async {
     final Key actionKey = UniqueKey();
 
     Widget buildFrame(MainAxisAlignment? alignment) {
@@ -2592,7 +2591,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(actionKey)).dx, (800 - 20) / 2 + 20);
   });
 
-  testWidgetsWithLeakTracking('Uses closed loop focus traversal', (WidgetTester tester) async {
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     final FocusNode cancelNode = FocusNode();
 
@@ -2660,7 +2659,7 @@ void main() {
     expect(cancelNode.hasFocus, false);
   });
 
-  testWidgetsWithLeakTracking('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog.adaptive(
       content: Container(
         height: 5000.0,
@@ -2702,7 +2701,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
+  testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2762,7 +2761,7 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Uses open focus traversal when overridden', (WidgetTester tester) async {
+  testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     final FocusNode cancelNode = FocusNode();
 

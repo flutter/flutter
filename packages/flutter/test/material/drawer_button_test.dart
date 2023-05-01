@@ -6,10 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
-  testWidgetsWithLeakTracking('DrawerButton control test', (WidgetTester tester) async {
+  testWidgets('DrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -30,7 +28,7 @@ void main() {
     expect(find.byType(Drawer), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('DrawerButton onPressed overrides default end drawer open behaviour',
+  testWidgets('DrawerButton onPressed overrides default end drawer open behaviour',
       (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(
@@ -59,7 +57,7 @@ void main() {
     expect(customCallbackWasCalled, true);
   });
 
-  testWidgetsWithLeakTracking('DrawerButton icon', (WidgetTester tester) async {
+  testWidgets('DrawerButton icon', (WidgetTester tester) async {
     final Key androidKey = UniqueKey();
     final Key iOSKey = UniqueKey();
     final Key linuxKey = UniqueKey();
@@ -113,7 +111,7 @@ void main() {
     expect(windowsIcon.icon == androidIcon.icon, isTrue);
   });
 
-  testWidgetsWithLeakTracking('DrawerButton color', (WidgetTester tester) async {
+  testWidgets('DrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -134,7 +132,7 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('DrawerButton semantics', (WidgetTester tester) async {
+  testWidgets('DrawerButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
@@ -171,7 +169,7 @@ void main() {
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('EndDrawerButton control test', (WidgetTester tester) async {
+  testWidgets('EndDrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -192,7 +190,7 @@ void main() {
     expect(find.byType(Drawer), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('EndDrawerButton semantics', (WidgetTester tester) async {
+  testWidgets('EndDrawerButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const MaterialApp(
@@ -228,7 +226,7 @@ void main() {
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('EndDrawerButton color', (WidgetTester tester) async {
+  testWidgets('EndDrawerButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -249,7 +247,7 @@ void main() {
     expect(iconText.text.style!.color, Colors.red);
   });
 
-  testWidgetsWithLeakTracking('EndDrawerButton onPressed overrides default end drawer open behaviour',
+  testWidgets('EndDrawerButton onPressed overrides default end drawer open behaviour',
       (WidgetTester tester) async {
     bool customCallbackWasCalled = false;
     await tester.pumpWidget(

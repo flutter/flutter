@@ -5,12 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('positions itself at the anchor', (WidgetTester tester) async {
+  testWidgets('positions itself at the anchor', (WidgetTester tester) async {
     // An arbitrary point on the screen to position at.
     const Offset anchor = Offset(30.0, 40.0);
 

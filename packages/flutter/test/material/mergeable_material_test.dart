@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 
 enum RadiusType {
@@ -66,7 +65,7 @@ BorderRadius? getBorderRadius(WidgetTester tester, int index) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('MergeableMaterial empty', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -81,7 +80,7 @@ void main() {
     expect(box.size.height, equals(0));
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial update slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial update slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -129,7 +128,7 @@ void main() {
     expect(box.size.height, equals(200.0));
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial swap slices', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial swap slices', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -200,7 +199,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial paints shadows', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const MaterialApp(
@@ -234,7 +233,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const MaterialApp(
@@ -264,7 +263,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial merge gap', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -341,7 +340,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial separate slices', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial separate slices', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -418,7 +417,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial separate merge separate', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial separate merge separate', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -577,7 +576,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial insert slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial insert slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -652,7 +651,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial remove slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial remove slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -728,7 +727,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial insert chunk', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial insert chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -817,7 +816,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial remove chunk', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial remove chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -905,7 +904,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -997,7 +996,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1099,7 +1098,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('MergeableMaterial dividers', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1222,7 +1221,7 @@ void main() {
     expect(isDivider(boxes[offset + 3], true, false), isTrue);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial respects dividerColor', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial respects dividerColor', (WidgetTester tester) async {
     const Color dividerColor = Colors.red;
     await tester.pumpWidget(
       const MaterialApp(
@@ -1259,7 +1258,7 @@ void main() {
     expect(decoration.border!.top.color, dividerColor);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
     const Color themeCardColor = Colors.red;
     const Color materialSliceColor = Colors.green;
 

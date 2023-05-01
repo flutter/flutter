@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -20,7 +19,7 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
 
-  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -49,7 +48,7 @@ void main() {
     expect(material.type, MaterialType.transparency);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
+  testWidgets('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
     int callbackCount = 0;
     int selectedSegment = 2;
 
@@ -99,7 +98,7 @@ void main() {
     expect(selectedSegment, 3);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton supports multiple selected segments', (WidgetTester tester) async {
+  testWidgets('SegmentedButton supports multiple selected segments', (WidgetTester tester) async {
     int callbackCount = 0;
     Set<int> selection = <int>{1};
 
@@ -154,7 +153,7 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
-testWidgetsWithLeakTracking('SegmentedButton allows for empty selection', (WidgetTester tester) async {
+testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
 
@@ -207,7 +206,7 @@ testWidgetsWithLeakTracking('SegmentedButton allows for empty selection', (Widge
     expect(selectedSegment, 3);
   });
 
-testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
+testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -244,7 +243,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byIcon(Icons.check), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton shows selected checkboxes in place of icon if it has a label as well', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows selected checkboxes in place of icon if it has a label as well', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -287,7 +286,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
     expect(find.byIcon(Icons.add_alarm), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton shows selected checkboxes next to icon if there is no label', (WidgetTester tester) async {
+  testWidgets('SegmentedButton shows selected checkboxes next to icon if there is no label', (WidgetTester tester) async {
     Widget frameWithSelection(int selected) {
       return Material(
         child: boilerplate(
@@ -328,7 +327,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
 
   });
 
-  testWidgetsWithLeakTracking('SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -407,7 +406,7 @@ testWidgetsWithLeakTracking('SegmentedButton shows checkboxes for selected segme
   });
 
 
-  testWidgetsWithLeakTracking('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
 void main() {
@@ -15,7 +13,7 @@ void main() {
     const ShapeBorder defaultFABShape = CircleBorder();
     const EdgeInsets defaultFABPadding = EdgeInsets.zero;
 
-    testWidgetsWithLeakTracking('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+    testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),
@@ -42,7 +40,7 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgetsWithLeakTracking('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+    testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),

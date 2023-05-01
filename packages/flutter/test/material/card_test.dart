@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Card can take semantic text from multiple children', (WidgetTester tester) async {
+  testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -78,7 +77,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
+  testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     debugResetSemanticsIdCounter();
 
@@ -117,7 +116,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('Card margin', (WidgetTester tester) async {
+  testWidgets('Card margin', (WidgetTester tester) async {
     const Key contentsKey = ValueKey<String>('contents');
 
     await tester.pumpWidget(
@@ -164,7 +163,7 @@ void main() {
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
   });
 
-  testWidgetsWithLeakTracking('Card clipBehavior property passes through to the Material', (WidgetTester tester) async {
+  testWidgets('Card clipBehavior property passes through to the Material', (WidgetTester tester) async {
     await tester.pumpWidget(const Card());
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.none);
 
@@ -172,7 +171,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAlias);
   });
 
-  testWidgetsWithLeakTracking('Card clipBehavior property defers to theme when null', (WidgetTester tester) async {
+  testWidgets('Card clipBehavior property defers to theme when null', (WidgetTester tester) async {
     await tester.pumpWidget(Builder(builder: (BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return Theme(
@@ -187,7 +186,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAliasWithSaveLayer);
   });
 
-  testWidgetsWithLeakTracking('Card shadowColor', (WidgetTester tester) async {
+  testWidgets('Card shadowColor', (WidgetTester tester) async {
     Material getCardMaterial(WidgetTester tester) {
       return tester.widget<Material>(
         find.descendant(

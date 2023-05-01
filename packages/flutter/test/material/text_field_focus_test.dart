@@ -8,11 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87099
-  testWidgetsWithLeakTracking('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {
+  testWidgets('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -29,7 +27,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgetsWithLeakTracking('Dialog interaction', (WidgetTester tester) async {
+  testWidgets('Dialog interaction', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
@@ -72,7 +70,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Request focus shows keyboard', (WidgetTester tester) async {
+  testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -99,7 +97,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Autofocus shows keyboard', (WidgetTester tester) async {
+  testWidgets('Autofocus shows keyboard', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
@@ -121,7 +119,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Tap shows keyboard', (WidgetTester tester) async {
+  testWidgets('Tap shows keyboard', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
@@ -160,7 +158,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Focus triggers keep-alive', (WidgetTester tester) async {
+  testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -200,7 +198,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     Widget makeTest(String? prefix) {
@@ -235,7 +233,7 @@ void main() {
     expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('TextField with decoration:null', (WidgetTester tester) async {
+  testWidgets('TextField with decoration:null', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
@@ -256,7 +254,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isTrue);
   });
 
-  testWidgetsWithLeakTracking('Sibling FocusScopes', (WidgetTester tester) async {
+  testWidgets('Sibling FocusScopes', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusScopeNode focusScopeNode0 = FocusScopeNode();
@@ -322,7 +320,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Sibling Navigators', (WidgetTester tester) async {
+  testWidgets('Sibling Navigators', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final Key textField0 = UniqueKey();
@@ -397,7 +395,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgetsWithLeakTracking('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -454,7 +452,7 @@ void main() {
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final Key iconKey = UniqueKey();
 
@@ -491,7 +489,7 @@ void main() {
     expect(focusNodeA.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgetsWithLeakTracking('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
     final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
     final Key key = UniqueKey();
