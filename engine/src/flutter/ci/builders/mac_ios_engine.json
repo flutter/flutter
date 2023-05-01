@@ -163,6 +163,14 @@
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py",
                 "language": "python3"
+            },
+            {
+                "name": "Verify-export-symbols-release-binaries",
+                "parameters": [
+                    "src/out"
+                ],
+                "script": "flutter/testing/symbols/verify_exported.dart",
+                "language": "dart"
             }
         ]
     },
