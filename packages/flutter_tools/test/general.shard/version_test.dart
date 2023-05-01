@@ -18,7 +18,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 
-final SystemClock _testClock = SystemClock.fixed(DateTime(2015));
+final SystemClock _testClock = SystemClock.fixed(DateTime.utc(2015));
 final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate ~/ 2);
 final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
 
@@ -491,12 +491,6 @@ void main() {
 
     flutterVersion.ensureVersionFile();
     expect(versionFile.existsSync(), isTrue);
-    //final Map<String, Object?> versionMap = jsonDecode(versionFile.readAsStringSync()) as Map<String, Object?>;
-    //expect(versionMap['frameworkVersion'], '0.0.0-unknown');
-    //expect(versionMap['channel'], 'feature-branch');
-    //expect(versionMap['repositoryUrl'], 'unknown source');
-    //expect(versionMap['frameworkRevision'], '1234abcd');
-    //expect(versionMap['frameworkCommitDate'], '1234abcd');
     expect(versionFile.readAsStringSync(), '''
 {
   "frameworkVersion": "0.0.0-unknown",
