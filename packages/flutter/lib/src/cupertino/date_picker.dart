@@ -531,9 +531,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       case CupertinoDatePickerMode.time:
         return 0;
       case CupertinoDatePickerMode.date:
-        break;
       case CupertinoDatePickerMode.monthYear:
-        break;
     }
     assert(
       false,
@@ -1809,8 +1807,6 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
     );
   }
 }
-
-
 
 // The iOS date picker and timer picker has their width fixed to 320.0 in all
 // modes. The only exception is the hms mode (which doesn't have a native counterpart),
