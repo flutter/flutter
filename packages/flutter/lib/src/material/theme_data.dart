@@ -163,7 +163,7 @@ enum MaterialTapTargetSize {
 /// or a widget subtree within the app.
 ///
 /// The [MaterialApp] theme property can be used to configure the appearance
-/// of the entire app. Widget subtree's within an app can override the app's
+/// of the entire app. Widget subtrees within an app can override the app's
 /// theme by including a [Theme] widget at the top of the subtree.
 ///
 /// Widgets whose appearance should align with the overall theme can obtain the

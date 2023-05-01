@@ -14,6 +14,7 @@ import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
+import '../web/web_constants.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
@@ -91,7 +92,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     argParser.addFlag(
       FlutterOptions.kWebWasmFlag,
-      help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
+      help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
