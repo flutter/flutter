@@ -35,7 +35,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "14c18"
+                    "sdk_version": "14e222b"
                 }
             }
         },
@@ -75,7 +75,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "14c18"
+                    "sdk_version": "14e222b"
                 }
             }
         },
@@ -115,7 +115,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "14c18"
+                    "sdk_version": "14e222b"
                 }
             }
         },
@@ -154,7 +154,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "14c18"
+                    "sdk_version": "14e222b"
                 }
             }
         },
@@ -194,7 +194,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "14c18"
+                    "sdk_version": "14e222b"
                 }
             }
         },
@@ -234,7 +234,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "14c18"
+                    "sdk_version": "14e222b"
                 }
             }
         }
