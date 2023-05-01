@@ -289,6 +289,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       // height is kept as top window padding.
       _view.padding.top / 2.0,
     );
+    // Center of the RenderView
+    final Offset center = Offset(
+      // Horizontal center of the RenderView
+      bounds.center.dx,
+      // Vertical center of the RenderView
+      bounds.center.dy,
+    );
     // Center of the navigation bar
     final Offset bottom = Offset(
       // Horizontal center of the screen
@@ -300,7 +307,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       // bottom drawn pixel is at 1919 position.
       bounds.bottom - 1.0 - _view.padding.bottom / 2.0,
     );
-    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
+    final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top) ?? layer!.find<SystemUiOverlayStyle>(center);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle? lowerOverlayStyle;
     switch (defaultTargetPlatform) {
