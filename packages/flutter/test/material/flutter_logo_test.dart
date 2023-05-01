@@ -15,7 +15,7 @@ import '../foundation/leak_tracking.dart';
 void main() {
   // TODO(polina-c): fix Image not disposed and and switch to testWidgetsWithLeakTracking.
   // https://github.com/flutter/devtools/issues/3951
-  testWidgetsWithLeakTracking('Flutter Logo golden test', (WidgetTester tester) async {
+  testWidgets('Flutter Logo golden test', (WidgetTester tester) async {
     final Key logo = UniqueKey();
     await tester.pumpWidget(FlutterLogo(key: logo));
 
