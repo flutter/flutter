@@ -59,14 +59,20 @@ struct HarfBuzzSubset {
     // The prior version of harfbuzz automatically dropped layout tables,
     // but in the new version they are kept by default. So re-add them to the
     // drop list to retain the same behaviour.
-
-    hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
-               HB_TAG('G', 'S', 'U', 'B'));
-    hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
-               HB_TAG('G', 'P', 'O', 'S'));
-    hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
-               HB_TAG('G', 'D', 'E', 'F'));
-
+    if (!hb_ot_var_has_data(face) || hb_ot_var_get_axis_count(face) == 0) {
+      // we can only drop GSUB/GPOS/GDEF for non variable fonts, they may be
+      // needed for variable fonts (guessing we need to keep all of these, but
+      // in Material Symbols Icon variable fonts if we drop the GSUB table (they
+      // do not have GPOS/DEF) then the Fill=1,Weight=100 variation is rendered
+      // incorrect. (and other variations are probably less noticibly
+      // incorrect))
+      hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
+                 HB_TAG('G', 'S', 'U', 'B'));
+      hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
+                 HB_TAG('G', 'P', 'O', 'S'));
+      hb_set_add(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG),
+                 HB_TAG('G', 'D', 'E', 'F'));
+    }
     return HarfbuzzWrappers::HbFacePtr(hb_subset_or_fail(face, input));
   }
 };
