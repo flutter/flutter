@@ -106,6 +106,7 @@ class Switch extends StatelessWidget {
     this.thumbColor,
     this.trackColor,
     this.trackOutlineColor,
+    this.trackOutlineWidth,
     this.thumbIcon,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -132,7 +133,7 @@ class Switch extends StatelessWidget {
   /// design [Switch].
   ///
   /// If a [CupertinoSwitch] is created, the following parameters are ignored:
-  /// [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
+  /// [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor], [trackOutlineWidth]
   /// [activeThumbImage], [onActiveThumbImageError], [inactiveThumbImage],
   /// [onInactiveThumbImageError], [materialTapTargetSize].
   ///
@@ -153,6 +154,7 @@ class Switch extends StatelessWidget {
     this.thumbColor,
     this.trackColor,
     this.trackOutlineColor,
+    this.trackOutlineWidth,
     this.thumbIcon,
     this.dragStartBehavior = DragStartBehavior.start,
     this.mouseCursor,
@@ -385,6 +387,40 @@ class Switch extends StatelessWidget {
   /// the [Switch] track has no outline by default.
   final MaterialStateProperty<Color?>? trackOutlineColor;
 
+  /// {@template flutter.material.switch.trackOutlineWidth}
+  /// The outline width of this [Switch]'s track.
+  ///
+  /// Resolved in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  ///
+  /// {@tool snippet}
+  /// This example resolves the [trackOutlineWidth] based on the current
+  /// [MaterialState] of the [Switch], providing a different width when it is
+  /// [MaterialState.disabled].
+  ///
+  /// ```dart
+  /// Switch(
+  ///   value: true,
+  ///   onChanged: (_) => true,
+  ///   trackOutlineWidth: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.disabled)) {
+  ///       return 5.0;
+  ///     }
+  ///     return null; // Use the default color.
+  ///   }),
+  /// )
+  /// ```
+  /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// In Material 3, the outline width defaults to 2.0 in the selected
+  /// state and [ColorScheme.outline] in the unselected state. In Material 2,
+  /// the [Switch] track has no outline by default.
+  final MaterialStateProperty<double?>? trackOutlineWidth;
+
   /// {@template flutter.material.switch.thumbIcon}
   /// The icon to use on the thumb of this switch
   ///
@@ -572,6 +608,7 @@ class Switch extends StatelessWidget {
       thumbColor: thumbColor,
       trackColor: trackColor,
       trackOutlineColor: trackOutlineColor,
+      trackOutlineWidth: trackOutlineWidth,
       thumbIcon: thumbIcon,
       materialTapTargetSize: materialTapTargetSize,
       dragStartBehavior: dragStartBehavior,
@@ -632,6 +669,7 @@ class _MaterialSwitch extends StatefulWidget {
     this.thumbColor,
     this.trackColor,
     this.trackOutlineColor,
+    this.trackOutlineWidth,
     this.thumbIcon,
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -659,6 +697,7 @@ class _MaterialSwitch extends StatefulWidget {
   final MaterialStateProperty<Color?>? thumbColor;
   final MaterialStateProperty<Color?>? trackColor;
   final MaterialStateProperty<Color?>? trackOutlineColor;
+  final MaterialStateProperty<double?>? trackOutlineWidth;
   final MaterialStateProperty<Icon?>? thumbIcon;
   final MaterialTapTargetSize? materialTapTargetSize;
   final DragStartBehavior dragStartBehavior;
@@ -821,6 +860,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates)
       ?? switchTheme.trackOutlineColor?.resolve(activeStates)
       ?? Colors.transparent;
+    final double effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates)
+      ?? switchTheme.trackOutlineWidth?.resolve(activeStates)
+      ?? 2.0;
 
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
       ?? _widgetTrackColor.resolve(inactiveStates)
@@ -829,6 +871,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(inactiveStates)
       ?? switchTheme.trackOutlineColor?.resolve(inactiveStates)
       ?? defaults.trackOutlineColor?.resolve(inactiveStates);
+    final double effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates)
+        ?? switchTheme.trackOutlineWidth?.resolve(inactiveStates)
+        ?? 2.0;
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates)
       ?? switchTheme.thumbIcon?.resolve(activeStates);
@@ -918,8 +963,10 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
             ..onInactiveThumbImageError = widget.onInactiveThumbImageError
             ..activeTrackColor = effectiveActiveTrackColor
             ..activeTrackOutlineColor = effectiveActiveTrackOutlineColor
+            ..activeTrackOutlineWidth = effectiveActiveTrackOutlineWidth
             ..inactiveTrackColor = effectiveInactiveTrackColor
             ..inactiveTrackOutlineColor = effectiveInactiveTrackOutlineColor
+            ..inactiveTrackOutlineWidth = effectiveInactiveTrackOutlineWidth
             ..configuration = createLocalImageConfiguration(context)
             ..isInteractive = isInteractive
             ..trackInnerLength = _trackInnerLength
@@ -1169,6 +1216,26 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  double get activeTrackOutlineWidth => _activeTrackOutlineWidth!;
+  double? _activeTrackOutlineWidth;
+  set activeTrackOutlineWidth(double value) {
+    if (value == _activeTrackOutlineWidth) {
+      return;
+    }
+    _activeTrackOutlineWidth = value;
+    notifyListeners();
+  }
+
+  double get inactiveTrackOutlineWidth => _inactiveTrackOutlineWidth!;
+  double? _inactiveTrackOutlineWidth;
+  set inactiveTrackOutlineWidth(double value) {
+    if (value == _inactiveTrackOutlineWidth) {
+      return;
+    }
+    _inactiveTrackOutlineWidth = value;
+    notifyListeners();
+  }
+
   Color get inactiveTrackColor => _inactiveTrackColor!;
   Color? _inactiveTrackColor;
   set inactiveTrackColor(Color value) {
@@ -1366,6 +1433,7 @@ class _SwitchPainter extends ToggleablePainter {
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
     final Color? trackOutlineColor = inactiveTrackOutlineColor == null ? null
         : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
+    final double? trackOutlineWidth = lerpDouble(inactiveTrackOutlineWidth, activeTrackOutlineWidth, colorValue);
     Color lerpedThumbColor;
     if (!reaction.isDismissed) {
       lerpedThumbColor = Color.lerp(inactivePressedColor, activePressedColor, colorValue)!;
@@ -1395,7 +1463,7 @@ class _SwitchPainter extends ToggleablePainter {
     final Offset thumbPaintOffset = _computeThumbPaintOffset(trackPaintOffset, thumbSize, visualPosition);
     final Offset radialReactionOrigin = Offset(thumbPaintOffset.dx + thumbSize.height / 2, size.height / 2);
 
-    _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor);
+    _paintTrackWith(canvas, paint, trackPaintOffset, trackOutlineColor, trackOutlineWidth);
     paintRadialReaction(canvas: canvas, origin: radialReactionOrigin);
     _paintThumbWith(
       thumbPaintOffset,
@@ -1433,7 +1501,7 @@ class _SwitchPainter extends ToggleablePainter {
     return Offset(thumbHorizontalOffset, thumbVerticalOffset);
   }
 
-  void _paintTrackWith(Canvas canvas, Paint paint, Offset trackPaintOffset, Color? trackOutlineColor) {
+  void _paintTrackWith(Canvas canvas, Paint paint, Offset trackPaintOffset, Color? trackOutlineColor, double? trackOutlineWidth) {
     final Rect trackRect = Rect.fromLTWH(
       trackPaintOffset.dx,
       trackPaintOffset.dy,
@@ -1462,7 +1530,7 @@ class _SwitchPainter extends ToggleablePainter {
       );
       final Paint outlinePaint = Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
+        ..strokeWidth = trackOutlineWidth ?? 0.0
         ..color = trackOutlineColor;
       canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
