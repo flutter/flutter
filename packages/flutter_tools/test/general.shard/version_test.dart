@@ -497,7 +497,7 @@ void main() {
   "channel": "feature-branch",
   "repositoryUrl": "unknown source",
   "frameworkRevision": "1234abcd",
-  "frameworkCommitDate": "2014-10-02 00:00:00.000",
+  "frameworkCommitDate": "2014-10-02 00:00:00.000Z",
   "engineRevision": "abcdefg",
   "dartSdkVersion": "2.12.0",
   "devToolsVersion": "2.8.0",
