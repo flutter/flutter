@@ -532,6 +532,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         return 0;
       case CupertinoDatePickerMode.date:
       case CupertinoDatePickerMode.monthYear:
+      break;
     }
     assert(
       false,
