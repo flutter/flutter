@@ -489,6 +489,15 @@ abstract final class SystemChrome {
       'SystemChrome.restoreSystemUIOverlays',
     );
   }
+  
+  static void Function(SystemUiOverlayStyle? style)?
+      _systemUiOverlayStyleCallback;
+
+  /// Sets the callback method for responding to changes in the SystemUiOverlayStyle.
+  static void setSystemUiOverlayStyleCallback(
+      void Function(SystemUiOverlayStyle? style)? callback) {
+    _systemUiOverlayStyleCallback = callback;
+  }
 
   /// Specifies the style to use for the system overlays (e.g. the status bar on
   /// Android or iOS, the system navigation bar on Android) that are visible (if any).
@@ -564,6 +573,9 @@ abstract final class SystemChrome {
           _pendingStyle!._toMap(),
         );
         _latestStyle = _pendingStyle;
+        if (_systemUiOverlayStyleCallback != null) {
+          _systemUiOverlayStyleCallback!(_latestStyle);
+        }
       }
       _pendingStyle = null;
     });
