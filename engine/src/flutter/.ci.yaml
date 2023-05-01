@@ -54,7 +54,7 @@ platform_properties:
       device_type: none
       cpu: x86
       os: Mac-12
-      xcode: 14c18
+      xcode: 14e222b
     dimensions:
       mac_model: "Macmini8,1|Macmini9,1"
   windows:
@@ -362,7 +362,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
       $flutter/osx_sdk : >-
-        { "sdk_version": "14c18" }
+        { "sdk_version": "14e222b" }
 
   - name: Linux mac_unopt
     recipe: engine_v2/engine_v2
@@ -378,8 +378,8 @@ targets:
       add_recipes_cq: "true"
       runtime_versions: >-
         [
-          "ios-16-2_14c18",
-          "ios-16-0_14a5294e"
+          "ios-16-4_14e222b",
+          "ios-16-2_14c18"
         ]
       mac_model: "Macmini8,1"
     timeout: 75
@@ -442,7 +442,7 @@ targets:
       release_build: "true"
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
-        { "sdk_version": "14c18" }
+        { "sdk_version": "14e222b" }
       dependencies: >-
         [
           {"dependency": "jazzy", "version": "0.14.1"}
