@@ -40,6 +40,7 @@ class TabBarTheme with Diagnosticable {
     this.overlayColor,
     this.splashFactory,
     this.mouseCursor,
+    this.tabAlignment,
   });
 
   /// Overrides the default value for [TabBar.indicator].
@@ -90,6 +91,9 @@ class TabBarTheme with Diagnosticable {
   /// If specified, overrides the default value of [TabBar.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Overrides the default value for [TabBar.tabAlignment].
+  final TabAlignment? tabAlignment;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
@@ -105,6 +109,7 @@ class TabBarTheme with Diagnosticable {
     MaterialStateProperty<Color?>? overlayColor,
     InteractiveInkFeatureFactory? splashFactory,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    TabAlignment? tabAlignment,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -119,6 +124,7 @@ class TabBarTheme with Diagnosticable {
       overlayColor: overlayColor ?? this.overlayColor,
       splashFactory: splashFactory ?? this.splashFactory,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      tabAlignment: tabAlignment ?? this.tabAlignment,
     );
   }
 
@@ -149,6 +155,7 @@ class TabBarTheme with Diagnosticable {
       overlayColor: MaterialStateProperty.lerp<Color?>(a.overlayColor, b.overlayColor, t, Color.lerp),
       splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
+      tabAlignment: t < 0.5 ? a.tabAlignment : b.tabAlignment,
     );
   }
 
@@ -166,6 +173,7 @@ class TabBarTheme with Diagnosticable {
     overlayColor,
     splashFactory,
     mouseCursor,
+    tabAlignment,
   );
 
   @override
@@ -188,6 +196,7 @@ class TabBarTheme with Diagnosticable {
         && other.unselectedLabelStyle == unselectedLabelStyle
         && other.overlayColor == overlayColor
         && other.splashFactory == splashFactory
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.tabAlignment == tabAlignment;
   }
 }
