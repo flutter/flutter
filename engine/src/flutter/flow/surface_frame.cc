@@ -31,7 +31,8 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
     canvas_ = &adapter_;
   } else if (display_list_fallback) {
     FML_DCHECK(!frame_size.isEmpty());
-    dl_builder_ = sk_make_sp<DisplayListBuilder>(SkRect::Make(frame_size));
+    dl_builder_ =
+        sk_make_sp<DisplayListBuilder>(SkRect::Make(frame_size), true);
     canvas_ = dl_builder_.get();
   }
 }
