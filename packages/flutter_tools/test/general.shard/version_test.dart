@@ -491,6 +491,12 @@ void main() {
 
     flutterVersion.ensureVersionFile();
     expect(versionFile.existsSync(), isTrue);
+    //final Map<String, Object?> versionMap = jsonDecode(versionFile.readAsStringSync()) as Map<String, Object?>;
+    //expect(versionMap['frameworkVersion'], '0.0.0-unknown');
+    //expect(versionMap['channel'], 'feature-branch');
+    //expect(versionMap['repositoryUrl'], 'unknown source');
+    //expect(versionMap['frameworkRevision'], '1234abcd');
+    //expect(versionMap['frameworkCommitDate'], '1234abcd');
     expect(versionFile.readAsStringSync(), '''
 {
   "frameworkVersion": "0.0.0-unknown",
