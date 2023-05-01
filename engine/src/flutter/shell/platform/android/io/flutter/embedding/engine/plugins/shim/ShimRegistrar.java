@@ -39,8 +39,6 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
       new HashSet<>();
   private final Set<PluginRegistry.NewIntentListener> newIntentListeners = new HashSet<>();
   private final Set<PluginRegistry.UserLeaveHintListener> userLeaveHintListeners = new HashSet<>();
-  private final Set<PluginRegistry.WindowFocusChangedListener> WindowFocusChangedListeners =
-      new HashSet<>();
   private FlutterPlugin.FlutterPluginBinding pluginBinding;
   private ActivityPluginBinding activityPluginBinding;
 
@@ -149,18 +147,6 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
   }
 
   @Override
-  public PluginRegistry.Registrar addWindowFocusChangedListener(
-      PluginRegistry.WindowFocusChangedListener listener) {
-    WindowFocusChangedListeners.add(listener);
-
-    if (activityPluginBinding != null) {
-      activityPluginBinding.addOnWindowFocusChangedListener(listener);
-    }
-
-    return this;
-  }
-
-  @Override
   @NonNull
   public PluginRegistry.Registrar addViewDestroyListener(
       @NonNull PluginRegistry.ViewDestroyListener listener) {
@@ -226,9 +212,6 @@ class ShimRegistrar implements PluginRegistry.Registrar, FlutterPlugin, Activity
     }
     for (PluginRegistry.UserLeaveHintListener listener : userLeaveHintListeners) {
       activityPluginBinding.addOnUserLeaveHintListener(listener);
-    }
-    for (PluginRegistry.WindowFocusChangedListener listener : WindowFocusChangedListeners) {
-      activityPluginBinding.addOnWindowFocusChangedListener(listener);
     }
   }
 }
