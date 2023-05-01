@@ -235,6 +235,7 @@ class DisplayList : public SkRefCnt {
 
   void Dispatch(DlOpReceiver& ctx) const;
   void Dispatch(DlOpReceiver& ctx, const SkRect& cull_rect) const;
+  void Dispatch(DlOpReceiver& ctx, const SkIRect& cull_rect) const;
 
   // From historical behavior, SkPicture always included nested bytes,
   // but nested ops are only included if requested. The defaults used

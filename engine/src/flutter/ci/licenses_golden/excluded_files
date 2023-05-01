@@ -120,6 +120,7 @@
 ../../../flutter/impeller/.gitignore
 ../../../flutter/impeller/README.md
 ../../../flutter/impeller/aiks/aiks_unittests.cc
+../../../flutter/impeller/aiks/canvas_unittests.cc
 ../../../flutter/impeller/archivist/archivist_unittests.cc
 ../../../flutter/impeller/base/README.md
 ../../../flutter/impeller/base/base_unittests.cc
