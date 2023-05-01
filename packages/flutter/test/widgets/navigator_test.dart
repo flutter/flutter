@@ -4658,7 +4658,7 @@ void main() {
     );
 
     testWidgets('Navigator page API', (WidgetTester tester) async {
-      late StateSetter setState;
+      late StateSetter builderSetState;
       final List<_Page> pages = <_Page>[_Page.home];
       bool popEnabled() => pages.length <= 1;
 
@@ -4666,12 +4666,13 @@ void main() {
         MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
+              builderSetState = setState;
               print('justin stateful builder. popEnabled? ${popEnabled()}');
               return CanPopScope(
                 popEnabled: popEnabled(),
                 onPop: () {
-                  print('justin CanPopScope onPop. popEnabled? ${popEnabled()}');
-                  if (popEnabled()) {
+                  print('justin CanPopScope onPop. popEnabled? ${popEnabled()}. $pages');
+                  if (popEnabled() || pages.last == _Page.noPop) {
                     return;
                   }
                   setState(() {
@@ -4754,7 +4755,6 @@ void main() {
       expect(calls, hasLength(3));
       expect(calls.last, isFalse);
 
-      print('justin going to noPop page.');
       await tester.tap(find.text('Go to _Page.noPop'));
       await tester.pumpAndSettle();
 
@@ -4762,7 +4762,6 @@ void main() {
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
-      print('justin going back, which should be  blocked by noPop page.');
       await systemBack();
       await tester.pumpAndSettle();
 

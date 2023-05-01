@@ -1532,6 +1532,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final bool popEnabled = _canPopScopes.every((CanPopScope widget) {
       return widget.popEnabled;
     });
+    print('justin popEnabled checked ${_canPopScopes.length} CanPopScopes and get popEnabled $popEnabled');
 
     if (!popEnabled) {
       return RoutePopDisposition.doNotPop;
@@ -1663,11 +1664,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// [unregisterCanPopScope], which performs the opposite operation.
   void registerCanPopScope(CanPopScope widget) {
     _canPopScopes.add(widget);
+    print('justin registered a CanPopScope, seding notification with popEnabled: ${popEnabled()}');
     _updateSystemNavigator();
   }
 
   void unregisterCanPopScope(CanPopScope widget) {
     _canPopScopes.remove(widget);
+    print('justin unregistered a CanPopScope, seding notification with popEnabled: ${popEnabled()}');
     _updateSystemNavigator();
   }
 
@@ -1681,7 +1684,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       // false. Hence the seemingly backward logic here.
       canPop: popEnabled() == RoutePopDisposition.doNotPop,
     );
-    print('justin CanPopScope\'s _updateSystemNavigator is dispatching with canPop ${notification.canPop}');
+    //print('justin CanPopScope\'s _updateSystemNavigator is dispatching with canPop ${notification.canPop}');
     notification.dispatch(subtreeContext);
 
     /*

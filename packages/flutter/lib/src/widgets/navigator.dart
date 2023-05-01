@@ -5097,6 +5097,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
 
     final RoutePopDisposition disposition = lastEntry.route.popEnabled();
+    print('justin Navigator.maybePop calling popEnabled on its current route. Is it using pages? $_usingPagesAPI. Got $disposition');
     switch (disposition) {
       case RoutePopDisposition.bubble:
         return false;
