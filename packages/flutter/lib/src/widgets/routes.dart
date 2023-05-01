@@ -1532,7 +1532,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final bool popEnabled = _canPopScopes.every((CanPopScope widget) {
       return widget.popEnabled;
     });
-    print('justin popEnabled checked ${_canPopScopes.length} CanPopScopes and get popEnabled $popEnabled');
 
     if (!popEnabled) {
       return RoutePopDisposition.doNotPop;

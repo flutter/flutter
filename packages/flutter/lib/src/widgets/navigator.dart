@@ -3375,6 +3375,11 @@ class _History extends ChangeNotifier {
     notifyListeners();
     return entry;
   }
+
+  @override
+  String toString() {
+    return _value.toString();
+  }
 }
 
 /// The state for a [Navigator] widget.
@@ -3418,7 +3423,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             ? widget.pages.length > 1
             : canPop(),
       );
-      print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot');
+      print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot. History: $_history');
       notification.dispatch(context);
       return;
     }
@@ -3870,7 +3875,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
       // We found the page for all the consecutive pageless routes below. Attach these
       // pageless routes to the page.
-      if(unattachedPagelessRoutes.isNotEmpty) {
+      if (unattachedPagelessRoutes.isNotEmpty) {
          pageRouteToPagelessRoutes.putIfAbsent(
           oldEntry,
           () =>  List<_RouteEntry>.from(unattachedPagelessRoutes),
@@ -5097,7 +5102,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
 
     final RoutePopDisposition disposition = lastEntry.route.popEnabled();
-    print('justin Navigator.maybePop calling popEnabled on its current route. Is it using pages? $_usingPagesAPI. Got $disposition');
     switch (disposition) {
       case RoutePopDisposition.bubble:
         return false;
