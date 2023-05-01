@@ -35,7 +35,7 @@ import 'two_dimensional_viewport.dart';
 ///
 /// [TwoDimensionalScrollView] helps orchestrate these pieces by creating the
 /// [TwoDimensionalScrollable] and deferring to its subclass to implement
-/// [viewportBuilder], which builds a subclass of [TwoDimensionalViewport]. The
+/// [buildViewport], which builds a subclass of [TwoDimensionalViewport]. The
 /// [TwoDimensionalChildDelegate] is provided by the [delegate] parameter.
 ///
 /// A [TwoDimensionalScrollView] has two different [ScrollPosition]s, one for
