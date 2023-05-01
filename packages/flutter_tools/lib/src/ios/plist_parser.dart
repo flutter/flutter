@@ -126,7 +126,7 @@ class PlistParser {
     for (final XmlNode child in node.children) {
       if (child is XmlElement) {
         if (child.name.local == 'key') {
-          lastKey = child.text;
+          lastKey = child.innerText;
         } else {
           assert(lastKey != null);
           result[lastKey!] = _parseXmlNode(child)!;
@@ -143,19 +143,19 @@ class PlistParser {
   Object? _parseXmlNode(XmlElement node) {
     switch (node.name.local){
       case 'string':
-        return node.text;
+        return node.innerText;
       case 'real':
-        return double.parse(node.text);
+        return double.parse(node.innerText);
       case 'integer':
-        return int.parse(node.text);
+        return int.parse(node.innerText);
       case 'true':
         return true;
       case 'false':
         return false;
       case 'date':
-        return DateTime.parse(node.text);
+        return DateTime.parse(node.innerText);
       case 'data':
-        return base64.decode(node.text.replaceAll(_nonBase64Pattern, ''));
+        return base64.decode(node.innerText.replaceAll(_nonBase64Pattern, ''));
       case 'array':
         return node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList();
       case 'dict':
