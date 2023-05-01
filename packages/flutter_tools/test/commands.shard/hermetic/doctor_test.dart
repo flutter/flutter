@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
@@ -15,8 +14,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -32,15 +29,12 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  late FakeFlutterVersion flutterVersion;
   late BufferLogger logger;
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
-    flutterVersion = FakeFlutterVersion();
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
   });
@@ -765,23 +759,6 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
-  testUsingContext('Fetches tags to get the right version', () async {
-    Cache.disableLocking();
-
-    final DoctorCommand doctorCommand = DoctorCommand();
-    final CommandRunner<void> commandRunner = createTestCommandRunner(doctorCommand);
-
-    await commandRunner.run(<String>['doctor']);
-
-    expect(flutterVersion.didFetchTagsAndUpdate, true);
-    Cache.enableLocking();
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.any(),
-    FileSystem: () => MemoryFileSystem.test(),
-    FlutterVersion: () => flutterVersion,
-    Doctor: () => NoOpDoctor(),
-  }, initializeFlutterRoot: false);
-
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
     final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
@@ -826,6 +803,7 @@ class NoOpDoctor implements Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
+    FlutterVersion? version,
   }) async => true;
 
   @override

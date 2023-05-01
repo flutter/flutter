@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -342,6 +343,14 @@ class FakeFlutterVersion implements FlutterVersion {
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
 
+  @override
+    FlutterVersion fetchTagsAndGetVersion({
+      SystemClock clock = const SystemClock(),
+    }) {
+    _didFetchTagsAndUpdate = true;
+    return this;
+  }
+
   bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;
   bool _didCheckFlutterVersionFreshness = false;
 
@@ -385,9 +394,7 @@ class FakeFlutterVersion implements FlutterVersion {
   final GitTagVersion gitTagVersion;
 
   @override
-  void fetchTagsAndUpdate() {
-    _didFetchTagsAndUpdate = true;
-  }
+  FileSystem get fs => throw UnimplementedError('FakeFlutterVersion.fs is not implemented');
 
   @override
   Future<void> checkFlutterVersionFreshness() async {

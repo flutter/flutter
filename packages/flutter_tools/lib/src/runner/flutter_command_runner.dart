@@ -289,12 +289,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
         if ((topLevelResults['version'] as bool?) ?? false) {
           globals.flutterUsage.sendCommand('version');
-          final FlutterVersion version = FlutterVersion(
-            fs: globals.fs,
-            flutterRoot: Cache.flutterRoot!,
-            fetchTags: true,
+          final FlutterVersion version = globals.flutterVersion.fetchTagsAndGetVersion(
+            clock: globals.systemClock,
           );
-          String status;
+          final String status;
           if (machineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
             jsonOut['flutterRoot'] = Cache.flutterRoot!;

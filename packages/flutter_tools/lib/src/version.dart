@@ -71,10 +71,11 @@ abstract class FlutterVersion {
     SystemClock clock = const SystemClock(),
     required FileSystem fs,
     required String flutterRoot,
+    @protected
     bool fetchTags = false,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
-    // TODO only fetch tags if channel is master/main
+
     if (!fetchTags && versionFile.existsSync()) {
       final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(
         versionFile,
@@ -108,6 +109,7 @@ abstract class FlutterVersion {
   FlutterVersion._({
     required SystemClock clock,
     required this.flutterRoot,
+    required this.fs,
   }) : _clock = clock;
 
   factory FlutterVersion.fromRevision({
@@ -134,6 +136,32 @@ abstract class FlutterVersion {
       fs: fs,
     );
   }
+
+  /// Ensure the latest git tags are fetched and recalculate [FlutterVersion].
+  ///
+  /// This is only required when not on beta or stable and we need to calculate
+  /// the current version relative to upstream tags.
+  ///
+  /// This is a method and not a factory constructor so that test classes can
+  /// override it.
+  FlutterVersion fetchTagsAndGetVersion({
+    SystemClock clock = const SystemClock(),
+  }) {
+    // We don't need to fetch tags on beta and stable to calculate the version,
+    // we should already exactly be on a tag that was pushed when this release
+    // was published.
+    if (channel != globals.kDefaultFrameworkChannel && channel != 'main') {
+      return this;
+    }
+    return FlutterVersion(
+      clock: clock,
+      flutterRoot: flutterRoot,
+      fs: fs,
+      fetchTags: true,
+    );
+  }
+
+  final FileSystem fs;
 
   final SystemClock _clock;
 
@@ -409,6 +437,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.devToolsVersion,
     required this.gitTagVersion,
     required super.flutterRoot,
+    required super.fs,
   }) : super._();
 
   static _FlutterVersionFromFile? tryParseFromFile(
@@ -432,6 +461,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         devToolsVersion: manifest['devToolsVersion']! as String,
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
         flutterRoot: flutterRoot,
+        fs: jsonFile.fileSystem,
       );
       // ignore: avoid_catches_without_on_clauses
     } catch (err) {
@@ -478,11 +508,6 @@ class _FlutterVersionFromFile extends FlutterVersion {
 
   @override
   void ensureVersionFile() {}
-
-  @override
-  void fetchTagsAndUpdate() {
-    // no-op
-  }
 }
 
 class _FlutterVersionGit extends FlutterVersion {
@@ -492,10 +517,8 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.frameworkRevision,
     required this.frameworkVersion,
     required this.gitTagVersion,
-    required this.fs,
+    required super.fs,
   }) : super._();
-
-  final FileSystem fs;
 
   @override
   final GitTagVersion gitTagVersion;

@@ -4,10 +4,8 @@
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
-import '../cache.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
-import '../version.dart';
 
 class DoctorCommand extends FlutterCommand {
   DoctorCommand({this.verbose = false}) {
@@ -52,11 +50,7 @@ class DoctorCommand extends FlutterCommand {
       androidLicenses: boolArg('android-licenses'),
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
-      version: FlutterVersion(
-        flutterRoot: Cache.flutterRoot!,
-        fs: globals.fs,
-        fetchTags: true,
-      ),
+      version: globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
     ) ?? false;
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
