@@ -73,7 +73,9 @@ extension LeakTrackerAdjustments on WidgetTester {
 ///
 /// 3. Replace [testWidgetsWithLeakTracking] with [testWidgets]
 ///
-/// See https://github.com/flutter/devtools/issues/3951 for details.
+/// Memory leak troubleshooting tips:
+///
+/// See https://github.com/flutter/devtools/issues/3951 for more details.
 @isTest
 void testWidgetsWithLeakTracking(
   String description,
