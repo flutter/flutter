@@ -48,7 +48,7 @@ echo ""
 
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
-  -destination 'platform=iOS Simulator,OS=16.0,name=iPhone 8' \
+  -destination 'platform=iOS Simulator,OS=16.2,name=iPhone SE (3rd generation)' \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE"
 
@@ -58,7 +58,7 @@ echo ""
 # Skip testFontRenderingWhenSuppliedWithBogusFont: https://github.com/flutter/flutter/issues/113250
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
-  -destination 'platform=iOS Simulator,OS=16.0,name=iPhone 8' \
+  -destination 'platform=iOS Simulator,OS=16.2,name=iPhone SE (3rd generation)' \
   clean test \
   FLUTTER_ENGINE="$FLUTTER_ENGINE" \
   -skip-testing "ScenariosUITests/BogusFontTextTest/testFontRenderingWhenSuppliedWithBogusFont" \
