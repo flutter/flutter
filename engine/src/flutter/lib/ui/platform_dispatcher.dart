@@ -1642,61 +1642,31 @@ class FrameTiming {
 /// States that an application can be in.
 ///
 /// The values below describe notifications from the operating system.
-/// Applications should not expect to always receive all possible notifications.
-/// For example, if the users pulls out the battery from the device, no
-/// notification will be sent before the application is suddenly terminated,
-/// along with the rest of the operating system.
-///
-/// For historical and name collision reasons, Flutter's application state names
-/// do not correspond one to one with the state names on all platforms. On
-/// Android, for instance, when the OS calls
-/// [`Activity.onPause`](https://developer.android.com/reference/android/app/Activity#onPause()),
-/// Flutter will enter the [inactive] state, but when Android calls
-/// [`Activity.onStop`](https://developer.android.com/reference/android/app/Activity#onStop()),
-/// Flutter enters the [paused] state. See the individual state's documentation
-/// for descriptions of what they mean on each platform.
+/// Applications should not expect to always receive all possible
+/// notifications. For example, if the users pulls out the battery from the
+/// device, no notification will be sent before the application is suddenly
+/// terminated, along with the rest of the operating system.
 ///
 /// See also:
 ///
-/// * [WidgetsBindingObserver], for a mechanism to observe the lifecycle state
-///   from the widgets layer.
-/// * iOS's [IOKit activity lifecycle](https://developer.apple.com/documentation/uikit/app_and_environment/managing_your_app_s_life_cycle?language=objc) documentation.
-/// * Android's [activity lifecycle](https://developer.android.com/guide/components/activities/activity-lifecycle) documentation.
-/// * macOS's [AppKit activity lifecycle](https://developer.apple.com/documentation/appkit/nsapplicationdelegate?language=objc) documentation.
+///  * [WidgetsBindingObserver], for a mechanism to observe the lifecycle state
+///    from the widgets layer.
 enum AppLifecycleState {
-  /// The application is visible and responsive to user input.
-  ///
-  /// On Android, this state corresponds to the Flutter host view having focus
-  /// ([`Activity.onWindowFocusChanged`](https://developer.android.com/reference/android/app/Activity#onWindowFocusChanged(boolean))
-  /// was called with true) while in Android's "resumed" state. It is possible
-  /// for the Flutter app to be in the [inactive] state while still being in
-  /// Android's
-  /// ["onResume"](https://developer.android.com/guide/components/activities/activity-lifecycle)
-  /// state if the app has lost focus
-  /// ([`Activity.onWindowFocusChanged`](https://developer.android.com/reference/android/app/Activity#onWindowFocusChanged(boolean))
-  /// was called with false), but hasn't had
-  /// [`Activity.onPause`](https://developer.android.com/reference/android/app/Activity#onPause())
-  /// called on it.
+  /// The application is visible and responding to user input.
   resumed,
 
   /// The application is in an inactive state and is not receiving user input.
   ///
   /// On iOS, this state corresponds to an app or the Flutter host view running
-  /// in the foreground inactive state. Apps transition to this state when in a
-  /// phone call, responding to a TouchID request, when entering the app
+  /// in the foreground inactive state. Apps transition to this state when in
+  /// a phone call, responding to a TouchID request, when entering the app
   /// switcher or the control center, or when the UIViewController hosting the
   /// Flutter app is transitioning.
   ///
-  /// On Android, this corresponds to an app or the Flutter host view running in
-  /// Android's paused state (i.e.
-  /// [`Activity.onPause`](https://developer.android.com/reference/android/app/Activity#onPause())
-  /// has been called), or in Android's "resumed" state (i.e.
-  /// [`Activity.onResume`](https://developer.android.com/reference/android/app/Activity#onResume())
-  /// has been called) but it has lost window focus. Examples of when apps
-  /// transition to this state include when the app is partially obscured or
-  /// another activity is focused, such as: a split-screen app, a phone call, a
-  /// picture-in-picture app, a system dialog, another view, when the
-  /// notification window shade is down, or the application switcher is visible.
+  /// On Android, this corresponds to an app or the Flutter host view running
+  /// in the foreground inactive state.  Apps transition to this state when
+  /// another activity is focused, such as a split-screen app, a phone call,
+  /// a picture-in-picture app, a system dialog, or another view.
   ///
   /// Apps in this state should assume that they may be [paused] at any time.
   inactive,

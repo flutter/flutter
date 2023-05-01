@@ -107,36 +107,13 @@ public class FlutterActivityAndFragmentDelegateTest {
     // By the time an Activity/Fragment is started, we don't expect any lifecycle messages
     // to have been sent to Flutter.
     delegate.onStart();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
+    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
 
     // When the Activity/Fragment is resumed, a resumed message should have been sent to Flutter.
     delegate.onResume();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
-
-    // When the app loses focus because something else has it (e.g. notification
-    // windowshade or app switcher), it should go to inactive.
-    delegate.onWindowFocusChanged(false);
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsDetached();
-
-    // When the app regains focus, it should go to resumed again.
-    delegate.onWindowFocusChanged(true);
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
@@ -144,8 +121,6 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // When the Activity/Fragment is paused, an inactive message should have been sent to Flutter.
     delegate.onPause();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
@@ -155,8 +130,6 @@ public class FlutterActivityAndFragmentDelegateTest {
     // Notice that Flutter uses the term "paused" in a different way, and at a different time
     // than the Android OS.
     delegate.onStop();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
@@ -164,8 +137,6 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // When activity detaches, a detached message should have been sent to Flutter.
     delegate.onDetach();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), times(1)).noWindowsAreFocused();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsInactive();
     verify(mockFlutterEngine.getLifecycleChannel(), times(1)).appIsPaused();
@@ -186,14 +157,10 @@ public class FlutterActivityAndFragmentDelegateTest {
     delegate.onCreateView(null, null, null, 0, true);
     delegate.onStart();
     delegate.onResume();
-    delegate.onWindowFocusChanged(false);
-    delegate.onWindowFocusChanged(true);
     delegate.onPause();
     delegate.onStop();
     delegate.onDetach();
 
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).aWindowIsFocused();
-    verify(mockFlutterEngine.getLifecycleChannel(), never()).noWindowsAreFocused();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsResumed();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsPaused();
     verify(mockFlutterEngine.getLifecycleChannel(), never()).appIsInactive();

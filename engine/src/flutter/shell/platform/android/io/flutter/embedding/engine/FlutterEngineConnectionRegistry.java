@@ -733,10 +733,6 @@ import java.util.Set;
         onUserLeaveHintListeners = new HashSet<>();
 
     @NonNull
-    private final Set<io.flutter.plugin.common.PluginRegistry.WindowFocusChangedListener>
-        onWindowFocusChangedListeners = new HashSet<>();
-
-    @NonNull
     private final Set<OnSaveInstanceStateListener> onSaveInstanceStateListeners = new HashSet<>();
 
     public FlutterEngineActivityPluginBinding(
@@ -849,25 +845,6 @@ import java.util.Set;
     public void removeOnUserLeaveHintListener(
         @NonNull io.flutter.plugin.common.PluginRegistry.UserLeaveHintListener listener) {
       onUserLeaveHintListeners.remove(listener);
-    }
-
-    @Override
-    public void addOnWindowFocusChangedListener(
-        @NonNull io.flutter.plugin.common.PluginRegistry.WindowFocusChangedListener listener) {
-      onWindowFocusChangedListeners.add(listener);
-    }
-
-    @Override
-    public void removeOnWindowFocusChangedListener(
-        @NonNull io.flutter.plugin.common.PluginRegistry.WindowFocusChangedListener listener) {
-      onWindowFocusChangedListeners.remove(listener);
-    }
-
-    void onWindowFocusChanged(boolean hasFocus) {
-      for (io.flutter.plugin.common.PluginRegistry.WindowFocusChangedListener listener :
-          onWindowFocusChangedListeners) {
-        listener.onWindowFocusChanged(hasFocus);
-      }
     }
 
     @Override
