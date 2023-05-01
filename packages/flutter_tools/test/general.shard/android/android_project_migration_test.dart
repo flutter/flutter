@@ -186,6 +186,24 @@ tasks.register("clean", Delete) {
             gradleWrapperToMigrate);
       });
 
+      testWithoutContext('skipped if error is encountered in migrate()', () {
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
+          bufferLogger,
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeErroringAndroidSdk(javaVersion: '17'),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
+        migration.migrate();
+        expect(bufferLogger.traceText, contains(errorWhileMigrating));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(),
+            gradleWrapperToMigrate);
+      });
+
       testWithoutContext('skipped if android studio version is less than flamingo', () {
         final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
@@ -312,6 +330,25 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
     required ProcessUtils processUtils,
   }) {
     return _javaVersion;
+  }
+}
+
+class FakeErroringAndroidSdk extends Fake implements AndroidSdk {
+  FakeErroringAndroidSdk({required String javaVersion}) {
+    _javaVersion = javaVersion;
+  }
+
+  late String _javaVersion;
+
+  @override
+  String? getJavaVersion({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessUtils processUtils,
+  }) {
+    throw const FileSystemException();
   }
 }
 
