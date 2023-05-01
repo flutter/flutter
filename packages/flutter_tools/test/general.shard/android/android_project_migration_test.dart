@@ -195,7 +195,7 @@ tasks.register("clean", Delete) {
           processUtils: FakeProcessUtils(),
           platform: FakePlatform(),
           os: FakeOperatingSystemUtils(),
-          androidSdk: FakeErroringAndroidSdk(javaVersion: '17'),
+          androidSdk: FakeErroringAndroidSdk(),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
@@ -334,11 +334,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 }
 
 class FakeErroringAndroidSdk extends Fake implements AndroidSdk {
-  FakeErroringAndroidSdk({required String javaVersion}) {
-    _javaVersion = javaVersion;
-  }
-
-  late String _javaVersion;
+  FakeErroringAndroidSdk();
 
   @override
   String? getJavaVersion({
