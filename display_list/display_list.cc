@@ -141,6 +141,11 @@ void DisplayList::Dispatch(DlOpReceiver& receiver) const {
 }
 
 void DisplayList::Dispatch(DlOpReceiver& receiver,
+                           const SkIRect& cull_rect) const {
+  Dispatch(receiver, SkRect::Make(cull_rect));
+}
+
+void DisplayList::Dispatch(DlOpReceiver& receiver,
                            const SkRect& cull_rect) const {
   if (cull_rect.isEmpty()) {
     return;

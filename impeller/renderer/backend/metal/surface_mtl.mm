@@ -149,6 +149,11 @@ bool SurfaceMTL::ShouldPerformPartialRepaint(std::optional<IRect> damage_rect) {
 }
 
 // |Surface|
+IRect SurfaceMTL::coverage() const {
+  return IRect::MakeSize(resolve_texture_->GetSize());
+}
+
+// |Surface|
 bool SurfaceMTL::Present() const {
   if (drawable_ == nil) {
     return false;

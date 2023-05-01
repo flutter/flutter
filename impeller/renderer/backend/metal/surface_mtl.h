@@ -48,6 +48,9 @@ class SurfaceMTL final : public Surface {
 
   id<MTLDrawable> drawable() const { return drawable_; }
 
+  // Returns a Rect defining the area of the surface in device pixels
+  IRect coverage() const;
+
   // |Surface|
   bool Present() const override;
 

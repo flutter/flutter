@@ -224,21 +224,21 @@ struct TRect {
         // Full cutout.
         return std::nullopt;
       }
-      if (b_top <= a_top) {
+      if (b_top <= a_top && b_bottom > a_top) {
         // Cuts off the top.
         return TRect::MakeLTRB(a_left, b_bottom, a_right, a_bottom);
       }
-      if (b_bottom >= b_bottom) {
+      if (b_bottom >= a_bottom && b_top < a_bottom) {
         // Cuts out the bottom.
         return TRect::MakeLTRB(a_left, a_top, a_right, b_top);
       }
     }
     if (b_top <= a_top && b_bottom >= a_bottom) {
-      if (b_left <= a_left) {
+      if (b_left <= a_left && b_right > a_left) {
         // Cuts out the left.
         return TRect::MakeLTRB(b_right, a_top, a_right, a_bottom);
       }
-      if (b_right >= a_right) {
+      if (b_right >= a_right && b_left < a_right) {
         // Cuts out the right.
         return TRect::MakeLTRB(a_left, a_top, b_left, a_bottom);
       }

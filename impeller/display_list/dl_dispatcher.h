@@ -15,6 +15,10 @@ class DlDispatcher final : public flutter::DlOpReceiver {
  public:
   DlDispatcher();
 
+  explicit DlDispatcher(Rect cull_rect);
+
+  explicit DlDispatcher(IRect cull_rect);
+
   ~DlDispatcher();
 
   Picture EndRecordingAsPicture();
