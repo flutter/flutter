@@ -494,6 +494,7 @@ abstract final class SystemChrome {
       _systemUiOverlayStyleCallback;
 
   /// Sets the callback method for responding to changes in the SystemUiOverlayStyle.
+  // ignore: use_setters_to_change_properties
   static void setSystemUiOverlayStyleCallback(
       void Function(SystemUiOverlayStyle? style)? callback) {
     _systemUiOverlayStyleCallback = callback;
