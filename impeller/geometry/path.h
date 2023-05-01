@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
-#include "path_component.h"
 
 namespace impeller {
 
