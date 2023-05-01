@@ -1877,6 +1877,9 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
   }
 
   @override
+  MaterialStatePropertyAll<double> get trackOutlineWidth => const MaterialStatePropertyAll<double>(2.0);
+
+  @override
   double get splashRadius => 40.0 / 2;
 }
 
