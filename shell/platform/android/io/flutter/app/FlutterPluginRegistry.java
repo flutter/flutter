@@ -28,7 +28,6 @@ public class FlutterPluginRegistry
         PluginRegistry.RequestPermissionsResultListener,
         PluginRegistry.ActivityResultListener,
         PluginRegistry.NewIntentListener,
-        PluginRegistry.WindowFocusChangedListener,
         PluginRegistry.UserLeaveHintListener,
         PluginRegistry.ViewDestroyListener {
   private static final String TAG = "FlutterPluginRegistry";
@@ -45,7 +44,6 @@ public class FlutterPluginRegistry
   private final List<ActivityResultListener> mActivityResultListeners = new ArrayList<>(0);
   private final List<NewIntentListener> mNewIntentListeners = new ArrayList<>(0);
   private final List<UserLeaveHintListener> mUserLeaveHintListeners = new ArrayList<>(0);
-  private final List<WindowFocusChangedListener> mWindowFocusChangedListeners = new ArrayList<>(0);
   private final List<ViewDestroyListener> mViewDestroyListeners = new ArrayList<>(0);
 
   public FlutterPluginRegistry(FlutterNativeView nativeView, Context context) {
@@ -185,12 +183,6 @@ public class FlutterPluginRegistry
     }
 
     @Override
-    public Registrar addWindowFocusChangedListener(WindowFocusChangedListener listener) {
-      mWindowFocusChangedListeners.add(listener);
-      return this;
-    }
-
-    @Override
     public Registrar addViewDestroyListener(ViewDestroyListener listener) {
       mViewDestroyListeners.add(listener);
       return this;
@@ -232,13 +224,6 @@ public class FlutterPluginRegistry
   public void onUserLeaveHint() {
     for (UserLeaveHintListener listener : mUserLeaveHintListeners) {
       listener.onUserLeaveHint();
-    }
-  }
-
-  @Override
-  public void onWindowFocusChanged(boolean hasFocus) {
-    for (WindowFocusChangedListener listener : mWindowFocusChangedListeners) {
-      listener.onWindowFocusChanged(hasFocus);
     }
   }
 
