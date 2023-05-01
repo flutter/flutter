@@ -489,9 +489,8 @@ abstract final class SystemChrome {
       'SystemChrome.restoreSystemUIOverlays',
     );
   }
-  
-  static void Function(SystemUiOverlayStyle? style)?
-      _systemUiOverlayStyleCallback;
+
+  static void Function(SystemUiOverlayStyle? style)? _systemUiOverlayStyleCallback;
 
   /// Sets the callback method for responding to changes in the SystemUiOverlayStyle.
   // ignore: use_setters_to_change_properties
