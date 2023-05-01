@@ -52,7 +52,7 @@ typedef SharedAppDataInitCallback<T> = T Function();
 ///
 /// {@tool dartpad}
 /// The following sample demonstrates using the automatically created
-/// `SharedAppData`. Button presses cause changes to the values for keys
+/// [SharedAppData]. Button presses cause changes to the values for keys
 /// 'foo', and 'bar', and those changes only cause the widgets that
 /// depend on those keys to be rebuilt.
 ///
@@ -121,7 +121,7 @@ class SharedAppData extends StatefulWidget {
   /// The type parameter `K` is the type of the value's keyword and `V`
   /// is the type of the value.
   static void setValue<K extends Object, V>(BuildContext context, K key, V value) {
-    final _SharedAppModel? model = context.getElementForInheritedWidgetOfExactType<_SharedAppModel>()?.widget as _SharedAppModel?;
+    final _SharedAppModel? model = context.getInheritedWidgetOfExactType<_SharedAppModel>();
     assert(_debugHasSharedAppData(model, context, 'setValue'));
     model!.sharedAppDataState.setValue<K, V>(key, value);
   }

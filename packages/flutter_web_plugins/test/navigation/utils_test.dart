@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('browser') // Uses web-only Flutter SDK
+library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/src/navigation/utils.dart';

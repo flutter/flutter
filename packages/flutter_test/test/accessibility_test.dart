@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,6 +22,61 @@ void main() {
       );
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
+    });
+
+    testWidgets('Multiple text with same label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          const Column(
+            children: <Widget>[
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              Text(
+                'this is a test',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      );
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets(
+      'Multiple text with same label but Nodes excluded from '
+      'semantic tree have failing contrast should pass a11y guideline ',
+      (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _boilerplate(
+            const Column(
+              children: <Widget>[
+                Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.black),
+                ),
+                SizedBox(height: 50),
+                Text(
+                  'this is a test',
+                  style: TextStyle(fontSize: 14.0, color: Colors.black),
+                ),
+                SizedBox(height: 50),
+                ExcludeSemantics(
+                  child: Text(
+                    'this is a test',
+                    style: TextStyle(fontSize: 14.0, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
     });
 
     testWidgets('white text on black background - Text Widget - direct style',
@@ -42,6 +98,40 @@ void main() {
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
+
+    testWidgets('White text on white background fails contrast test',
+      (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _boilerplate(
+        Container(
+          width: 200.0,
+          height: 300.0,
+          color: Colors.white,
+          child: const Column(
+            children: <Widget>[
+              Text(
+                'this is a white text',
+                style: TextStyle(fontSize: 14.0, color: Colors.white),
+              ),
+              SizedBox(height: 50),
+              Text(
+                'this is a black text test1',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+              SizedBox(height: 50),
+              Text(
+                'this is a black text test2',
+                style: TextStyle(fontSize: 14.0, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+    handle.dispose();
+  });
 
     const Color surface = Color(0xFFF0F0F0);
 
@@ -128,6 +218,37 @@ void main() {
             child: TextField(
               style: const TextStyle(color: Colors.amber),
               controller: TextEditingController(text: 'this is a test'),
+            ),
+          ),
+        ),
+      );
+      await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _boilerplate(
+          Padding(
+            padding: const EdgeInsets.only(left: 100),
+            child: Semantics(
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 100),
+                child: Semantics(
+                  container: true,
+                  child: Container(
+                    width: 100.0,
+                    height: 200.0,
+                    color: Colors.amberAccent,
+                    child: const Text(
+                      'this',
+                      style: TextStyle(color: Colors.amber),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -696,6 +817,36 @@ void main() {
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
+
+    testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(title: const Text('Foo')),
+              body: ListView(
+                  controller: controller,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Semantics(container: true, onTap: () {}, child: const Text('hello'))),
+                    ),
+                    Container(
+                      height: 1000,
+                      color: Colors.red,
+                    ),
+                  ]
+              ),
+            ),
+          )
+      );
+      controller.jumpTo(90);
+      await tester.pump();
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    });
   });
 
   group('Labeled tappable node guideline', () {
@@ -750,6 +901,14 @@ void main() {
           child: const SizedBox(width: 10.0, height: 10.0),
         ),
       )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+
+    testWidgets('Passes if text field does not have label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(const TextField()));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
       expect(result.passed, true);
       handle.dispose();

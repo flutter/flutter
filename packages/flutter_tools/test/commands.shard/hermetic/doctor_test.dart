@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
@@ -57,7 +58,7 @@ void main() {
   group('doctor', () {
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -84,7 +85,7 @@ void main() {
     testUsingContext('vs code validator when 64bit installed', () async {
       expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -99,7 +100,7 @@ void main() {
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -156,7 +157,7 @@ void main() {
           userMessages: UserMessages(),
         );
         final ValidationResult result = await deviceValidator.validate();
-        expect(result.type, ValidationType.installed);
+        expect(result.type, ValidationType.success);
         expect(result.messages, const <ValidationMessage>[
           ValidationMessage('name (mobile) • device-id • android • 1.2.3'),
           ValidationMessage.hint('Device locked'),
@@ -353,7 +354,7 @@ void main() {
       FakeAsync().run<void>((FakeAsync time) {
         final Doctor doctor = FakeAsyncStuckDoctor(logger);
         doctor.diagnose(verbose: false);
-        time.elapse(Doctor.doctorDuration + const Duration(seconds: 1));
+        time.elapse(const Duration(minutes: 5));
         time.flushMicrotasks();
       });
 
@@ -750,6 +751,20 @@ void main() {
     ProcessManager: () => fakeProcessManager,
   });
 
+  testUsingContext('CustomDevicesWorkflow is a part of validator workflows if enabled', () async {
+    final List<Workflow> workflows = DoctorValidatorsProvider.test(
+      featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      platform: FakePlatform(),
+    ).workflows;
+    expect(
+      workflows,
+      contains(isA<CustomDeviceWorkflow>()),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => fakeProcessManager,
+  });
+
   testUsingContext('Fetches tags to get the right version', () async {
     Cache.disableLocking();
 
@@ -835,7 +850,7 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+    return const ValidationResult(ValidationType.success, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -847,7 +862,7 @@ class PiiValidator extends DoctorValidator {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('Contains PII path/to/username', piiStrippedMessage: 'Does not contain PII'),
     ];
-    return const ValidationResult(ValidationType.installed, messages);
+    return const ValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1074,7 +1089,7 @@ class PassingGroupedValidator extends DoctorValidator {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages);
+    return const ValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1110,7 +1125,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A different message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+    return const ValidationResult(ValidationType.success, messages, statusInfo: 'A status message');
   }
 }
 
@@ -1177,7 +1192,15 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   List<Device> devices = <Device>[];
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
+
+  @override
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;

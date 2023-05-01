@@ -44,19 +44,14 @@ class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
     required AndroidSdk? androidSdk,
     required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
   }) : _androidSdk = androidSdk,
-       _featureFlags = featureFlags,
-       _operatingSystemUtils = operatingSystemUtils;
+       _featureFlags = featureFlags;
 
   final AndroidSdk? _androidSdk;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled
-    // Android Studio is not currently supported on Linux Arm64 Hosts.
-    && _operatingSystemUtils.hostPlatform != HostPlatform.linux_arm64;
+  bool get appliesToHostPlatform => _featureFlags.isAndroidEnabled;
 
   @override
   bool get canListDevices => appliesToHostPlatform && _androidSdk != null
@@ -263,7 +258,7 @@ class AndroidValidator extends DoctorValidator {
     }
 
     // Success.
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 }
 
@@ -321,7 +316,6 @@ class AndroidLicenseValidator extends DoctorValidator {
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
         messages.add(ValidationMessage(_userMessages.androidLicensesAll));
-        break;
       case LicensesAccepted.some:
         messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
@@ -332,7 +326,7 @@ class AndroidLicenseValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
@@ -441,11 +435,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       unawaited(process.stdin.addStream(_stdio.stdin)
         // If the process exits unexpectedly with an error, that will be
         // handled by the caller.
-        .catchError((dynamic err, StackTrace stack) {
-          _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
-          _logger.printTrace('$err\n$stack');
-        }
-      ));
+        .then(
+          (Object? socket) => socket,
+          onError: (dynamic err, StackTrace stack) {
+            _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
+            _logger.printTrace('$err\n$stack');
+          },
+        ),
+      );
 
       // Wait for stdout and stderr to be fully processed, because process.exitCode
       // may complete first.
@@ -460,7 +457,14 @@ class AndroidLicenseValidator extends DoctorValidator {
       }
 
       final int exitCode = await process.exitCode;
-      return exitCode == 0;
+      if (exitCode != 0) {
+        throwToolExit(_userMessages.androidCannotRunSdkManager(
+          _androidSdk?.sdkManagerPath ?? '',
+          'exited code $exitCode',
+          _platform,
+        ));
+      }
+      return true;
     } on ProcessException catch (e) {
       throwToolExit(_userMessages.androidCannotRunSdkManager(
         _androidSdk?.sdkManagerPath ?? '',

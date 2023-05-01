@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'dart:async';
 
 import 'package:file/memory.dart';
@@ -24,18 +22,18 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 
 void main() {
-  Daemon daemon;
-  NotifyingLogger notifyingLogger;
-  BufferLogger bufferLogger;
-  FakeAndroidDevice fakeDevice;
+  Daemon? daemon;
+  late NotifyingLogger notifyingLogger;
+  late BufferLogger bufferLogger;
+  late FakeAndroidDevice fakeDevice;
 
-  FakeApplicationPackageFactory applicationPackageFactory;
-  MemoryFileSystem memoryFileSystem;
-  FakeProcessManager fakeProcessManager;
+  late FakeApplicationPackageFactory applicationPackageFactory;
+  late MemoryFileSystem memoryFileSystem;
+  late FakeProcessManager fakeProcessManager;
 
   group('ProxiedDevices', () {
-    DaemonConnection serverDaemonConnection;
-    DaemonConnection clientDaemonConnection;
+    late DaemonConnection serverDaemonConnection;
+    late DaemonConnection clientDaemonConnection;
     setUp(() {
       bufferLogger = BufferLogger.test();
       notifyingLogger = NotifyingLogger(verbose: false, parent: bufferLogger);
@@ -60,7 +58,7 @@ void main() {
 
     tearDown(() async {
       if (daemon != null) {
-        return daemon.shutdown();
+        return daemon!.shutdown();
       }
       notifyingLogger.dispose();
       await serverDaemonConnection.dispose();
@@ -74,7 +72,7 @@ void main() {
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
-      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
@@ -95,12 +93,12 @@ void main() {
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
-      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final bool supportsRuntimeMode = await device.supportsRuntimeMode(BuildMode.release);
@@ -115,7 +113,7 @@ void main() {
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
-      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
@@ -123,7 +121,7 @@ void main() {
       final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final DeviceLogReader logReader = await device.getLogReader();
@@ -145,7 +143,7 @@ void main() {
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
-      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
@@ -155,7 +153,7 @@ void main() {
       dummyApplicationBinary.writeAsStringSync('dummy content');
       prebuiltApplicationPackage.applicationPackage = dummyApplicationBinary;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -163,8 +161,8 @@ void main() {
       final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
       applicationPackageFactory.applicationPackage = applicationPackage;
 
-      final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
-      fakeDevice.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
+      fakeDevice.launchResult = LaunchResult.succeeded(vmServiceUri: vmServiceUri);
 
       final LaunchResult launchResult = await device.startApp(
         prebuiltApplicationPackage,
@@ -172,10 +170,10 @@ void main() {
       );
 
       expect(launchResult.started, true);
-      // The returned observatoryUri was a forwarded port, so we cannot compare them directly.
-      expect(launchResult.observatoryUri.path, observatoryUri.path);
+      // The returned vmServiceUri was a forwarded port, so we cannot compare them directly.
+      expect(launchResult.vmServiceUri!.path, vmServiceUri.path);
 
-      expect(applicationPackageFactory.applicationBinaryRequested.readAsStringSync(), 'dummy content');
+      expect(applicationPackageFactory.applicationBinaryRequested!.readAsStringSync(), 'dummy content');
       expect(applicationPackageFactory.platformRequested, TargetPlatform.android_arm);
 
       expect(fakeDevice.startAppPackage, applicationPackage);
@@ -197,12 +195,12 @@ void main() {
       );
       fakeDevice = FakeAndroidDevice();
       final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
-      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(fakeDevice);
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -230,7 +228,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int> binary ]) {
+  void send(Map<String, dynamic> message, [ List<int>? binary ]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -271,6 +269,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final bool ephemeral = false;
 
   @override
+  bool get isConnected => true;
+
+  @override
   Future<String> get sdkNameAndVersion async => 'Android 12';
 
   @override
@@ -294,48 +295,48 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   bool get supportsStartPaused => true;
 
-  BuildMode supportsRuntimeModeCalledBuildMode;
+  BuildMode? supportsRuntimeModeCalledBuildMode;
   @override
   Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
     supportsRuntimeModeCalledBuildMode = buildMode;
     return true;
   }
 
-  DeviceLogReader logReader;
+  late DeviceLogReader logReader;
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => logReader;
 
-  ApplicationPackage startAppPackage;
-  LaunchResult launchResult;
+  ApplicationPackage? startAppPackage;
+  late LaunchResult launchResult;
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
-    String mainPath,
-    String route,
-    DebuggingOptions debuggingOptions,
-    Map<String, Object> platformArgs = const <String, Object>{},
+    ApplicationPackage? package, {
+    String? mainPath,
+    String? route,
+    DebuggingOptions? debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object>{},
     bool prebuiltApplication = false,
     bool ipv6 = false,
-    String userIdentifier,
+    String? userIdentifier,
   }) async {
     startAppPackage = package;
     return launchResult;
   }
 
-  ApplicationPackage stopAppPackage;
+  ApplicationPackage? stopAppPackage;
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
-    String userIdentifier,
+    ApplicationPackage? app, {
+    String? userIdentifier,
   }) async {
     stopAppPackage = app;
     return true;
   }
 
-  List<int> screenshot;
+  late List<int> screenshot;
   @override
   Future<void> takeScreenshot(File outputFile) {
     return outputFile.writeAsBytes(screenshot);
@@ -347,10 +348,10 @@ class FakeDeviceLogReader implements DeviceLogReader {
   bool disposeCalled = false;
 
   @override
-  int appPid;
+  int? appPid;
 
   @override
-  FlutterVmService connectedVMService;
+  FlutterVmService? connectedVMService;
 
   @override
   void dispose() {
@@ -366,12 +367,12 @@ class FakeDeviceLogReader implements DeviceLogReader {
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {
-  TargetPlatform platformRequested;
-  File applicationBinaryRequested;
-  ApplicationPackage applicationPackage;
+  TargetPlatform? platformRequested;
+  File? applicationBinaryRequested;
+  ApplicationPackage? applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo buildInfo, File applicationBinary}) async {
+  Future<ApplicationPackage?> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
     platformRequested = platform;
     applicationBinaryRequested = applicationBinary;
     return applicationPackage;
@@ -382,5 +383,5 @@ class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
 class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {
   @override
-  File applicationPackage;
+  late File applicationPackage;
 }

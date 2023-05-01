@@ -55,8 +55,8 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: Stack(
-                children: const <Widget> [
+              child: const Stack(
+                children: <Widget> [
                   DummyPlatformView(),
                   RotationContainer(),
                 ],
@@ -116,6 +116,13 @@ class _RotationContainerState extends State<RotationContainer>
     );
     _rotationController.repeat();
   }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return RotationTransition(

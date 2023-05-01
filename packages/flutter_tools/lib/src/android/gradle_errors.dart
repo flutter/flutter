@@ -11,6 +11,7 @@ import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_utils.dart';
 import 'multidex.dart';
@@ -82,6 +83,8 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   outdatedGradleHandler,
   sslExceptionHandler,
   zipExceptionHandler,
+  incompatibleJavaAndGradleVersionsHandler,
+  remoteTerminatedHandshakeHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -337,7 +340,6 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
-    assert(licenseFailure != null);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
@@ -379,7 +381,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: <String, String>{
         if (javaPath != null)
-          'JAVA_HOME': javaPath!,
+          AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
       },
     );
     // Extract build types and product flavors.
@@ -462,9 +464,9 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
     globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
       '$textInBold\n'
-      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
-      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration',
+      'Following this change, your app will not be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n'
+      'Consider searching for a version of this plugin that supports these lower versions of the Android SDK instead.\n'
+      'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration',
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
@@ -552,7 +554,7 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
         .childFile('build.gradle');
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
-      'Find the latest version on https://kotlinlang.org/docs/gradle.html#plugin-and-versions, then update ${gradleFile.path}:\n'
+      'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update ${gradleFile.path}:\n'
       "ext.kotlin_version = '<latest-version>'",
       title: _boxTitle,
     );
@@ -669,4 +671,52 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'ssl-exception-tag-mismatch',
+);
+
+/// If an incompatible Java and Gradle versions error is caught, we expect an
+/// error specifying that the Java major class file version, one of
+/// https://javaalmanac.io/bytecode/versions/, is unsupported by Gradle.
+final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported class file major version\s+\d+');
+
+@visibleForTesting
+final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
+  test: (String line) {
+    return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
+  },
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    // TODO(reidbaker): Replace URL with constant defined in
+    // https://github.com/flutter/flutter/pull/123916.
+    globals.printBox(
+      "${globals.logger.terminal.warningMark} Your project's Gradle version "
+      'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
+      'To fix this issue, consult the migration guide at docs.flutter.dev/go/android-java-gradle-error.',
+      title: _boxTitle,
+    );
+    return GradleBuildStatus.exit;
+  },
+  eventLabel: 'incompatible-java-gradle-version',
+);
+
+@visibleForTesting
+final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
+  test: (String line) => line.contains('Remote host terminated the handshake'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
+
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'remote-terminated-handshake',
 );

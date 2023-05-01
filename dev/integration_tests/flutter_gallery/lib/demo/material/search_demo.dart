@@ -70,13 +70,13 @@ class _SearchDemoState extends State<SearchDemo> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            MergeSemantics(
+            const MergeSemantics(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const <Widget>[
+                    children: <Widget>[
                       Text('Press the '),
                       Tooltip(
                         message: 'search',
@@ -88,7 +88,7 @@ class _SearchDemoState extends State<SearchDemo> {
                       Text(' icon in the AppBar'),
                     ],
                   ),
-                  const Text('and search for an integer between 0 and 100,000.'),
+                  Text('and search for an integer between 0 and 100,000.'),
                 ],
               ),
             ),
@@ -255,7 +255,7 @@ class _ResultCard extends StatelessWidget {
               Text(title!),
               Text(
                 '$integer',
-                style: theme.textTheme.headline5!.copyWith(fontSize: 72.0),
+                style: theme.textTheme.headlineSmall!.copyWith(fontSize: 72.0),
               ),
             ],
           ),
@@ -284,11 +284,11 @@ class _SuggestionList extends StatelessWidget {
           title: RichText(
             text: TextSpan(
               text: suggestion.substring(0, query!.length),
-              style: theme.textTheme.subtitle1!.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
                 TextSpan(
                   text: suggestion.substring(query!.length),
-                  style: theme.textTheme.subtitle1,
+                  style: theme.textTheme.titleMedium,
                 ),
               ],
             ),

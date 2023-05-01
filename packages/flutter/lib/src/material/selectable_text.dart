@@ -9,10 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
+import 'adaptive_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
 import 'feedback.dart';
+import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// late BuildContext context;
+// late FocusNode myFocusNode;
 
 /// An eyeballed value that moves the cursor slightly left of where it is
 /// rendered for text on Android so its positioning more accurately matches the
@@ -24,7 +30,6 @@ const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
   _TextSpanEditingController({required TextSpan textSpan}):
-    assert(textSpan != null),
     _textSpan = textSpan,
     super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
@@ -79,20 +84,18 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onSingleTapUp(TapUpDetails details) {
+  void onSingleTapUp(TapDragUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-          break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
       }
     }
     _state.widget.onTap?.call();
@@ -185,7 +188,11 @@ class SelectableText extends StatefulWidget {
     this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    this.toolbarOptions,
     this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
@@ -203,27 +210,15 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-  }) :  assert(showCursor != null),
-        assert(autofocus != null),
-        assert(dragStartBehavior != null),
-        assert(selectionHeightStyle != null),
-        assert(selectionWidthStyle != null),
-        assert(maxLines == null || maxLines > 0),
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.magnifierConfiguration,
+  }) :  assert(maxLines == null || maxLines > 0),
         assert(minLines == null || minLines > 0),
         assert(
           (maxLines == null) || (minLines == null) || (maxLines >= minLines),
           "minLines can't be greater than maxLines",
         ),
-        assert(
-          data != null,
-          'A non-null String must be provided to a SelectableText widget.',
-        ),
-        textSpan = null,
-        toolbarOptions = toolbarOptions ??
-          const ToolbarOptions(
-            selectAll: true,
-            copy: true,
-          );
+        textSpan = null;
 
   /// Creates a selectable text widget with a [TextSpan].
   ///
@@ -242,7 +237,11 @@ class SelectableText extends StatefulWidget {
     this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
-    ToolbarOptions? toolbarOptions,
+    @Deprecated(
+      'Use `contextMenuBuilder` instead. '
+      'This feature was deprecated after v3.3.0-0.5.pre.',
+    )
+    this.toolbarOptions,
     this.minLines,
     this.maxLines,
     this.cursorWidth = 2.0,
@@ -260,25 +259,15 @@ class SelectableText extends StatefulWidget {
     this.textHeightBehavior,
     this.textWidthBasis,
     this.onSelectionChanged,
-  }) :  assert(showCursor != null),
-    assert(autofocus != null),
-    assert(dragStartBehavior != null),
-    assert(maxLines == null || maxLines > 0),
+    this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.magnifierConfiguration,
+  }) :  assert(maxLines == null || maxLines > 0),
     assert(minLines == null || minLines > 0),
     assert(
       (maxLines == null) || (minLines == null) || (maxLines >= minLines),
       "minLines can't be greater than maxLines",
     ),
-    assert(
-      textSpan != null,
-      'A non-null TextSpan must be provided to a SelectableText.rich widget.',
-    ),
-    data = null,
-    toolbarOptions = toolbarOptions ??
-      const ToolbarOptions(
-        selectAll: true,
-        copy: true,
-      );
+    data = null;
 
   /// The text to display.
   ///
@@ -310,7 +299,7 @@ class SelectableText extends StatefulWidget {
   /// to the [focusNode]:
   ///
   /// ```dart
-  /// focusNode.addListener(() { print(myFocusNode.hasFocus); });
+  /// myFocusNode.addListener(() { print(myFocusNode.hasFocus); });
   /// ```
   ///
   /// If null, this widget will create its own [FocusNode] with
@@ -390,7 +379,11 @@ class SelectableText extends StatefulWidget {
   /// Paste and cut will be disabled regardless.
   ///
   /// If not set, select all and copy will be enabled by default.
-  final ToolbarOptions toolbarOptions;
+  @Deprecated(
+    'Use `contextMenuBuilder` instead. '
+    'This feature was deprecated after v3.3.0-0.5.pre.',
+  )
+  final ToolbarOptions? toolbarOptions;
 
   /// {@macro flutter.widgets.editableText.selectionEnabled}
   bool get selectionEnabled => enableInteractiveSelection;
@@ -426,6 +419,26 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.onSelectionChanged}
   final SelectionChangedCallback? onSelectionChanged;
+
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
+  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+    return AdaptiveTextSelectionToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
+  ///
+  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  ///
+  /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
+  /// on Android, and builds nothing on all other platforms. If it is desired to
+  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  final TextMagnifierConfiguration? magnifierConfiguration;
 
   @override
   State<SelectableText> createState() => _SelectableTextState();
@@ -482,7 +495,9 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   @override
   void initState() {
     super.initState();
-    _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(state: this);
+    _selectionGestureDetectorBuilder = _SelectableTextSelectionGestureDetectorBuilder(
+      state: this,
+    );
     _controller = _TextSpanEditingController(
         textSpan: widget.textSpan ?? TextSpan(text: widget.data),
     );
@@ -509,7 +524,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   @override
   void dispose() {
     _focusNode?.dispose();
-    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -524,8 +539,6 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     });
   }
 
-  TextSelection? _lastSeenTextSelection;
-
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -533,12 +546,8 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         _showSelectionHandles = willShowSelectionHandles;
       });
     }
-    // TODO(chunhtai): The selection may be the same. We should remove this
-    // check once this is fixed https://github.com/flutter/flutter/issues/76349.
-    if (widget.onSelectionChanged != null && _lastSeenTextSelection != selection) {
-      widget.onSelectionChanged!(selection, cause);
-    }
-    _lastSeenTextSelection = selection;
+
+    widget.onSelectionChanged?.call(selection, cause);
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
@@ -619,46 +628,42 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
       case TargetPlatform.iOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = true;
-        textSelectionControls ??= cupertinoTextSelectionControls;
+        textSelectionControls ??= cupertinoTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
-        break;
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
 
       case TargetPlatform.macOS:
         final CupertinoThemeData cupertinoTheme = CupertinoTheme.of(context);
         forcePressEnabled = false;
-        textSelectionControls ??= cupertinoDesktopTextSelectionControls;
+        textSelectionControls ??= cupertinoDesktopTextSelectionHandleControls;
         paintCursorAboveText = true;
         cursorOpacityAnimates = true;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor = selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
         cursorRadius ??= const Radius.circular(2.0);
-        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
-        break;
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         forcePressEnabled = false;
-        textSelectionControls ??= materialTextSelectionControls;
+        textSelectionControls ??= materialTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        break;
 
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         forcePressEnabled = false;
-        textSelectionControls ??= desktopTextSelectionControls;
+        textSelectionControls ??= desktopTextSelectionHandleControls;
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor = widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
-        break;
     }
 
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -666,14 +671,12 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     if (effectiveTextStyle == null || effectiveTextStyle.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(widget.style ?? _controller._textSpan.style);
     }
-    if (MediaQuery.boldTextOverride(context)) {
-      effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
-    }
     final Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
         style: effectiveTextStyle,
         readOnly: true,
+        toolbarOptions: widget.toolbarOptions,
         textWidthBasis: widget.textWidthBasis ?? defaultTextStyle.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior ?? defaultTextStyle.textHeightBehavior,
         showSelectionHandles: _showSelectionHandles,
@@ -686,7 +689,6 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         textScaleFactor: widget.textScaleFactor,
         autofocus: widget.autofocus,
         forceLine: false,
-        toolbarOptions: widget.toolbarOptions,
         minLines: widget.minLines,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: selectionColor,
@@ -705,9 +707,11 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
         paintCursorAboveText: paintCursorAboveText,
         backgroundCursorColor: CupertinoColors.inactiveGray,
         enableInteractiveSelection: widget.enableInteractiveSelection,
+        magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
         dragStartBehavior: widget.dragStartBehavior,
         scrollPhysics: widget.scrollPhysics,
         autofillHints: null,
+        contextMenuBuilder: widget.contextMenuBuilder,
       ),
     );
 

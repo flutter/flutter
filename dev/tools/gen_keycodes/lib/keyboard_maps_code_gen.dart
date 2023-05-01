@@ -13,8 +13,9 @@ import 'physical_key_data.dart';
 import 'utils.dart';
 
 bool _isAsciiLetter(String? char) {
-  if (char == null)
+  if (char == null) {
     return false;
+  }
   const int charUpperA = 0x41;
   const int charUpperZ = 0x5A;
   const int charLowerA = 0x61;
@@ -26,8 +27,9 @@ bool _isAsciiLetter(String? char) {
 }
 
 bool _isDigit(String? char) {
-  if (char == null)
+  if (char == null) {
     return false;
+  }
   final int charDigit0 = '0'.codeUnitAt(0);
   final int charDigit9 = '9'.codeUnitAt(0);
   assert(char.length == 1);
@@ -142,10 +144,8 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _androidScanCodeMap {
     final OutputLines<int> lines = OutputLines<int>('Android scancode map');
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.androidScanCodes != null) {
-        for (final int code in entry.androidScanCodes) {
-          lines.add(code, '  $code: PhysicalKeyboardKey.${entry.constantName},');
-        }
+      for (final int code in entry.androidScanCodes) {
+        lines.add(code, '  $code: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return lines.sortedJoin().trimRight();
@@ -294,9 +294,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _fuchsiaHidCodeMap {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
     for (final PhysicalKeyEntry entry in keyData.entries) {
-      if (entry.usbHidCode != null) {
-        fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
-      }
+      fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
     }
     return fuchsiaScanCodeMap.toString().trimRight();
   }
@@ -326,9 +324,7 @@ class KeyboardMapsCodeGenerator extends BaseCodeGenerator {
   String get _webNumpadMap {
     final OutputLines<String> lines = OutputLines<String>('Web numpad map');
     for (final LogicalKeyEntry entry in _numpadLogicalKeyData) {
-      if (entry.name != null) {
-        lines.add(entry.name, "  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
-      }
+      lines.add(entry.name, "  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
     }
     return lines.sortedJoin().trimRight();
   }

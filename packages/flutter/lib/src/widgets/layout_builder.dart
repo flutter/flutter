@@ -40,7 +40,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   const ConstrainedLayoutBuilder({
     super.key,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   @override
   RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
@@ -48,7 +48,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   /// Called at layout time to construct the widget tree.
   ///
   /// The builder must not return null.
-  final Widget Function(BuildContext, ConstraintType) builder;
+  final Widget Function(BuildContext context, ConstraintType constraints) builder;
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
@@ -120,7 +120,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         built = ErrorWidget.builder(
-          _debugReportException(
+          _reportException(
             ErrorDescription('building $widget'),
             e,
             stack,
@@ -136,7 +136,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         assert(_child != null);
       } catch (e, stack) {
         built = ErrorWidget.builder(
-          _debugReportException(
+          _reportException(
             ErrorDescription('building $widget'),
             e,
             stack,
@@ -267,10 +267,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const LayoutBuilder({
     super.key,
     required super.builder,
-  }) : assert(builder != null);
-
-  @override
-  LayoutWidgetBuilder get builder => super.builder;
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
@@ -358,7 +355,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 }
 
-FlutterErrorDetails _debugReportException(
+FlutterErrorDetails _reportException(
   DiagnosticsNode context,
   Object exception,
   StackTrace stack, {

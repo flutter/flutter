@@ -5,7 +5,9 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -168,14 +170,14 @@ void main() {
 
       // The first item is at the center of the viewport.
       expect(
-      tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
-      const Offset(0.0, 250.0),
+        tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
 
       // The last item is just before the first item.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '9')),
-        const Offset(0.0, 150.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 150.0), epsilon: 15.0),
       );
 
       controller.jumpTo(1000.0);
@@ -184,7 +186,7 @@ void main() {
       // We have passed the end of the list, the list should have looped back.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '0')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
     });
 
@@ -217,7 +219,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '-1000')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
 
       // Can be scrolled infinitely for positive indexes.
@@ -225,7 +227,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '1000')),
-        const Offset(0.0, 250.0),
+        offsetMoreOrLessEquals(const Offset(200.0, 250.0)),
       );
     });
 
@@ -287,6 +289,44 @@ void main() {
   });
 
   group('layout', () {
+    testWidgets('Flings with high velocity should not break the children lower and upper limits', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/112526
+      final FixedExtentScrollController controller = FixedExtentScrollController();
+      Widget buildFrame() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView.useDelegate(
+            physics: const FixedExtentScrollPhysics(),
+            controller: controller,
+            itemExtent: 400.0,
+            onSelectedItemChanged: (_) { },
+            childDelegate: ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                if (index < 0 || index > 5) {
+                  return null;
+                }
+                return SizedBox(
+                  width: 400.0,
+                  height: 400.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      expect(tester.renderObject(find.text('0')).attached, true);
+      expect(tester.renderObject(find.text('1')).attached, true);
+      expect(find.text('2'), findsNothing);
+      expect(controller.selectedItem, 0);
+
+      // Flings with high velocity and stop at the child boundary.
+      await tester.fling(find.byType(ListWheelScrollView), const Offset(0.0, 40000.0), 8000.0);
+      expect(controller.selectedItem, 0);
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
+
     // Regression test for https://github.com/flutter/flutter/issues/90953
     testWidgets('ListWheelScrollView childDelegate update test 2', (WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController( initialItem: 2 );
@@ -563,6 +603,41 @@ void main() {
       // 12 instead of 6 children are laid out + 1 because the middle item is
       // centered.
       expect(viewport.childCount, 13);
+    });
+
+    testWidgets('Active children are laid out with correct offset', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/123497
+      Future<void> buildWidget(double width) async {
+        return tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListWheelScrollView(
+              itemExtent: 100.0,
+              children: <Widget>[
+                SizedBox(
+                  width: width,
+                  child: const Center(child: Text('blah')),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      double getSizedBoxWidth() => tester.getSize(find.byType(SizedBox)).width;
+      double getSizedBoxCenterX() => tester.getCenter(find.byType(SizedBox)).dx;
+
+      await buildWidget(200.0);
+      expect(getSizedBoxWidth(), 200.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(100.0);
+      expect(getSizedBoxWidth(), 100.0);
+      expect(getSizedBoxCenterX(), 400.0);
+
+      await buildWidget(300.0);
+      expect(getSizedBoxWidth(), 300.0);
+      expect(getSizedBoxCenterX(), 400.0);
     });
   });
 
@@ -1352,7 +1427,8 @@ void main() {
         find.byType(ListWheelScrollView),
         // High and random numbers that's unlikely to land on exact multiples of 100.
         const Offset(0.0, -567.0),
-        678.0,
+        // macOS has reduced ballistic distance, need to increase speed to compensate.
+        debugDefaultTargetPlatformOverride == TargetPlatform.macOS ? 1678.0 : 678.0,
       );
 
       // After the drag, 40 + 567px should be on the 46th item.
@@ -1495,5 +1571,91 @@ void main() {
     expect(controller.offset, greaterThan(700.0));
     await tester.pumpAndSettle();
     expect(controller.offset, 700.0);
+  });
+
+  group('gestures', () {
+    testWidgets('ListWheelScrollView allows taps for on its children', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
+      final List<int> children = List<int>.generate(100, (int index) => index);
+      final List<int> paintedChildren = <int>[];
+      final Set<int> tappedChildren = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100,
+            children: children
+                .map((int index) => GestureDetector(
+                  key: ValueKey<int>(index),
+                  onTap: () {
+                    tappedChildren.add(index);
+                  },
+                  child: SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CustomPaint(
+                      painter: TestCallbackPainter(onPaint: () {
+                        paintedChildren.add(index);
+                      }),
+                    ),
+                  ),
+                ))
+                .toList(),
+          ),
+        ),
+      );
+
+      // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
+      expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
+
+      for (final int child in paintedChildren) {
+        await tester.tap(find.byKey(ValueKey<int>(child)));
+      }
+      expect(tappedChildren, paintedChildren);
+    });
+
+    testWidgets('ListWheelScrollView allows for horizontal drags on its children', (WidgetTester tester) async {
+      final PageController pageController = PageController();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            itemExtent: 100,
+            children: <Widget>[
+              PageView(
+                controller: pageController,
+                children: List<int>.generate(100, (int index) => index)
+                  .map((int index) => Text(index.toString()))
+                  .toList(),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(pageController.page, 0.0);
+
+      await tester.drag(find.byType(PageView), const Offset(-800, 0));
+
+      expect(pageController.page, 1.0);
+    });
+  });
+
+  testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ListWheelScrollView(
+        overAndUnderCenterOpacity: 0.5,
+        itemExtent: 20.0,
+        children: <Widget>[
+          for (int i = 0; i < 20; i++)
+            Container(),
+        ],
+      ),
+    );
+
+    expect(tester.layers.whereType<OpacityLayer>(), hasLength(1));
   });
 }

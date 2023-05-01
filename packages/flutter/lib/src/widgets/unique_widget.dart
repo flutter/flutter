@@ -24,11 +24,10 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   /// inflated instance of this widget.
   const UniqueWidget({
     required GlobalKey<T> key,
-  }) : assert(key != null),
-       super(key: key);
+  }) : super(key: key);
 
   @override
-  T createState(); // ignore: no_logic_in_create_state, https://github.com/dart-lang/linter/issues/2345
+  T createState();
 
   /// The state for the unique inflated instance of this widget.
   ///

@@ -6,7 +6,6 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart';
-import '../base/version.dart';
 import '../doctor_validator.dart';
 import '../intellij/intellij.dart';
 import 'android_studio.dart';
@@ -46,7 +45,7 @@ class AndroidStudioValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
-    final String? studioVersionText = _studio.version == Version.unknown
+    final String? studioVersionText = _studio.version == null
       ? null
       : userMessages.androidStudioVersion(_studio.version.toString());
     messages.add(ValidationMessage(
@@ -73,7 +72,7 @@ class AndroidStudioValidator extends DoctorValidator {
     if (_studio.isValid) {
       type = _hasIssues(messages)
         ? ValidationType.partial
-        : ValidationType.installed;
+        : ValidationType.success;
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
         (String m) => ValidationMessage(m),
       ));
@@ -83,7 +82,7 @@ class AndroidStudioValidator extends DoctorValidator {
         (String m) => ValidationMessage.error(m),
       ));
       messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
-      if (_studio.configured != null) {
+      if (_studio.configuredPath != null) {
         messages.add(ValidationMessage(userMessages.androidStudioResetDir));
       }
     }

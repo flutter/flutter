@@ -14,20 +14,52 @@ void main() {
       mapperUrl: 'mapper.js',
     );
     // require js source is interpolated correctly.
-    expect(result, contains('requireEl.src = "require.js";'));
+    expect(result, contains('"requireJs": "require.js"'));
+    expect(result, contains('requireEl.src = getTTScriptUrl("requireJs");'));
     // stack trace mapper source is interpolated correctly.
-    expect(result, contains('mapperEl.src = "mapper.js";'));
+    expect(result, contains('"mapper": "mapper.js"'));
+    expect(result, contains('mapperEl.src = getTTScriptUrl("mapper");'));
     // data-main is set to correct bootstrap module.
     expect(result, contains('requireEl.setAttribute("data-main", "main_module.bootstrap");'));
   });
 
-test('generateBootstrapScript includes loading indicator', () {
+  test('generateBootstrapScript includes loading indicator', () {
     final String result = generateBootstrapScript(
       requireUrl: 'require.js',
       mapperUrl: 'mapper.js',
     );
     expect(result, contains('"flutter-loader"'));
     expect(result, contains('"indeterminate"'));
+  });
+
+  // https://github.com/flutter/flutter/issues/107742
+  test('generateBootstrapScript loading indicator does not trigger scrollbars', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+    );
+
+    // See: https://regexr.com/6q0ft
+    final RegExp regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
+
+    expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
+  });
+
+  // https://github.com/flutter/flutter/issues/82524
+  test('generateMainModule removes timeout from requireJS', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nullAssertions: false,
+      nativeNullAssertions: false,
+    );
+
+    // See: https://regexr.com/6q0kp
+    final RegExp regex = RegExp(
+      r'(?:require\.config\(\{)(?:.|\s(?!\}\);))*'
+        r'(?:waitSeconds\:\s*0[,]?)'
+      r'(?:(?!\}\);).|\s)*\}\);');
+
+    expect(result, matches(regex), reason: 'require.config must have a waitSeconds: 0 config entry');
   });
 
   test('generateMainModule embeds urls correctly', () {

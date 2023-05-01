@@ -58,10 +58,9 @@ Future<TaskResult> _doTest() async {
     final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final String gradlewExecutable =
         Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-    final String flutterPath = path.join(flutterDirectory, 'bin', 'flutter');
-    await utils.eval(flutterPath, <String>['precache', '--android'],
+    await utils.flutter('precache', options: <String>['--android'],
         workingDirectory: modulePath);
-    await utils.eval(flutterPath, <String>['pub', 'get'],
+    await utils.flutter('pub', options: <String>['get'],
         workingDirectory: modulePath);
     _copyGradleFromModule(modulePath, androidPath);
 

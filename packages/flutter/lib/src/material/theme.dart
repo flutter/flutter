@@ -42,8 +42,7 @@ class Theme extends StatelessWidget {
     super.key,
     required this.data,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -72,7 +71,7 @@ class Theme extends StatelessWidget {
   /// Widget build(BuildContext context) {
   ///   return Text(
   ///     'Example',
-  ///     style: Theme.of(context).textTheme.headline6,
+  ///     style: Theme.of(context).textTheme.titleLarge,
   ///   );
   /// }
   /// ```
@@ -89,14 +88,14 @@ class Theme extends StatelessWidget {
   /// Widget build(BuildContext context) {
   ///   return MaterialApp(
   ///     theme: ThemeData.light(),
-  ///     body: Builder(
+  ///     home: Builder(
   ///       // Create an inner BuildContext so that we can refer to
   ///       // the Theme with Theme.of().
   ///       builder: (BuildContext context) {
   ///         return Center(
   ///           child: Text(
   ///             'Example',
-  ///             style: Theme.of(context).textTheme.headline6,
+  ///             style: Theme.of(context).textTheme.titleLarge,
   ///           ),
   ///         );
   ///       },
@@ -154,7 +153,7 @@ class _InheritedTheme extends InheritedTheme {
   const _InheritedTheme({
     required this.theme,
     required super.child,
-  }) : assert(theme != null);
+  });
 
   final Theme theme;
 
@@ -211,8 +210,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     super.duration = kThemeAnimationDuration,
     super.onEnd,
     required this.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

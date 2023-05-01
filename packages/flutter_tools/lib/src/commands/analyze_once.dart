@@ -22,6 +22,7 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.processManager,
     required super.terminal,
     required super.artifacts,
+    required super.suppressAnalytics,
     this.workingDirectory,
   }) : super(
         repoRoots: repoRoots,
@@ -67,6 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
 
     Stopwatch? timer;
@@ -167,8 +169,7 @@ class AnalyzeOnce extends AnalyzeBase {
       if (severityLevel == AnalysisSeverity.error) {
         return true;
       }
-      if (severityLevel == AnalysisSeverity.warning &&
-        (argResults['fatal-warnings'] as bool || argResults['fatal-infos'] as bool)) {
+      if (severityLevel == AnalysisSeverity.warning && argResults['fatal-warnings'] as bool) {
         return true;
       }
       if (severityLevel == AnalysisSeverity.info && argResults['fatal-infos'] as bool) {

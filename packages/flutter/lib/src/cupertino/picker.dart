@@ -66,8 +66,8 @@ class CupertinoPicker extends StatefulWidget {
   /// the current picker index or for selecting an initial index value.
   ///
   /// The [looping] argument decides whether the child list loops and can be
-  /// scrolled infinitely.  If set to true, scrolling past the end of the list
-  /// will loop the list back to the beginning.  If set to false, the list will
+  /// scrolled infinitely. If set to true, scrolling past the end of the list
+  /// will loop the list back to the beginning. If set to false, the list will
   /// stop scrolling when you reach the end or the beginning.
   CupertinoPicker({
     super.key,
@@ -83,13 +83,9 @@ class CupertinoPicker extends StatefulWidget {
     required List<Widget> children,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
     bool looping = false,
-  }) : assert(children != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
        childDelegate = looping
                        ? ListWheelChildLoopingListDelegate(children: children)
@@ -126,13 +122,9 @@ class CupertinoPicker extends StatefulWidget {
     required NullableIndexedWidgetBuilder itemBuilder,
     int? childCount,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
-  }) : assert(itemBuilder != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+  }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
-       assert(itemExtent != null),
        assert(itemExtent > 0),
-       assert(squeeze != null),
        assert(squeeze > 0),
        childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount);
 
@@ -245,16 +237,13 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         hasSuitableHapticHardware = true;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         hasSuitableHapticHardware = false;
-        break;
     }
-    assert(hasSuitableHapticHardware != null);
     if (hasSuitableHapticHardware && index != _lastHapticIndex) {
       _lastHapticIndex = index;
       HapticFeedback.selectionClick();
@@ -355,9 +344,7 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
     this.background = CupertinoColors.tertiarySystemFill,
     this.capStartEdge = true,
     this.capEndEdge = true,
-  }) : assert(background != null),
-       assert(capStartEdge != null),
-       assert(capEndEdge != null);
+  });
 
   /// Whether to use the default use rounded corners and margin on the start side.
   final bool capStartEdge;
@@ -512,5 +499,11 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
       config.onDecrease = _handleDecrease;
     }
     node.updateWith(config: config);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.removeListener(_handleScrollUpdate);
   }
 }

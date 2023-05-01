@@ -1015,6 +1015,7 @@ void main() {
   });
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1025,6 +1026,7 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   );
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1042,9 +1044,12 @@ class PagedTestWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: restorationId,
-      child: const Directionality(
+      child: Directionality(
         textDirection: TextDirection.ltr,
-        child: PagedTestNavigator(),
+        child: MediaQuery(
+          data: MediaQueryData.fromView(View.of(context)),
+          child: const PagedTestNavigator(),
+        ),
       ),
     );
   }
@@ -1167,20 +1172,23 @@ class TestWidget extends StatelessWidget {
       restorationId: restorationId,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: Navigator(
-          initialRoute: 'home',
-          restorationScopeId: 'app',
-          onGenerateRoute: (RouteSettings settings) {
-            return MaterialPageRoute<int>(
-              settings: settings,
-              builder: (BuildContext context) {
-                return RouteWidget(
-                  name: settings.name!,
-                  arguments: settings.arguments,
-                );
-              },
-            );
-          },
+        child: MediaQuery(
+          data: MediaQueryData.fromView(View.of(context)),
+          child: Navigator(
+            initialRoute: 'home',
+            restorationScopeId: 'app',
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<int>(
+                settings: settings,
+                builder: (BuildContext context) {
+                  return RouteWidget(
+                    name: settings.name!,
+                    arguments: settings.arguments,
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

@@ -114,7 +114,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     }
 
     return ValidationResult(
-      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
+      _hasIssues(messages) ? ValidationType.partial : ValidationType.success,
       messages,
       statusInfo: _userMessages.intellijStatusInfo(version),
     );
@@ -125,11 +125,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
-    // Ignore unknown versions.
-    if (minVersion == Version.unknown) {
-      return;
-    }
-
     final Version? installedVersion = Version.parse(version);
     if (installedVersion == null) {
       return;

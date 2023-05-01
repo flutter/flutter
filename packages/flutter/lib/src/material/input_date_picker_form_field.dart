@@ -58,10 +58,8 @@ class InputDatePickerFormField extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.autofocus = false,
-  }) : assert(firstDate != null),
-       assert(lastDate != null),
-       assert(autofocus != null),
-       initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
+    this.acceptEmptyDate = false,
+  }) : initialDate = initialDate != null ? DateUtils.dateOnly(initialDate) : null,
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate) {
     assert(
@@ -133,6 +131,13 @@ class InputDatePickerFormField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
+  /// Determines if an empty date would show [errorFormatText] or not.
+  ///
+  /// Defaults to false.
+  ///
+  /// If true, [errorFormatText] is not shown when the date input field is empty.
+  final bool acceptEmptyDate;
+
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
 }
@@ -179,7 +184,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     if (_selectedDate != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       _inputText = localizations.formatCompactDate(_selectedDate!);
-      TextEditingValue textEditingValue = _controller.value.copyWith(text: _inputText);
+      TextEditingValue textEditingValue = TextEditingValue(text: _inputText!);
       // Select the new text if we are auto focused and haven't selected the text before.
       if (widget.autofocus && !_autoSelected) {
         textEditingValue = textEditingValue.copyWith(selection: TextSelection(
@@ -191,7 +196,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       _controller.value = textEditingValue;
     } else {
       _inputText = '';
-      _controller.value = _controller.value.copyWith(text: _inputText);
+      _controller.value = TextEditingValue(text: _inputText!);
     }
   }
 
@@ -209,6 +214,9 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   String? _validateDate(String? text) {
+    if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
+      return null;
+    }
     final DateTime? date = _parseDate(text);
     if (date == null) {
       return widget.errorFormatText ?? MaterialLocalizations.of(context).invalidDateFormatLabel;
@@ -237,11 +245,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final InputDecorationTheme inputTheme = Theme.of(context).inputDecorationTheme;
+    final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
+    final InputBorder inputBorder = inputTheme.border
+      ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
+
     return TextFormField(
       decoration: InputDecoration(
-        border: inputTheme.border ?? const UnderlineInputBorder(),
+        border: inputBorder,
         filled: inputTheme.filled,
         hintText: widget.fieldHintText ?? localizations.dateHelpText,
         labelText: widget.fieldLabelText ?? localizations.dateInputLabel,

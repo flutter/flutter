@@ -56,9 +56,11 @@ void main() {
     WidgetTester tester,
     Future<void> Function(Future<DateTimeRange?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
+    bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -106,6 +108,36 @@ void main() {
     await callback(range);
   }
 
+  group('Landscape input-only date picker headers use headlineSmall', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122056
+
+    // Common screen size roughly based on a Pixel 1
+    const Size kCommonScreenSizePortrait = Size(1070, 1770);
+    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+
+    Future<void> showPicker(WidgetTester tester, Size size) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+      await preparePicker(tester, (Future<DateTimeRange?> range) async { }, useMaterial3: true);
+    }
+
+    testWidgets('portrait', (WidgetTester tester) async {
+      await showPicker(tester, kCommonScreenSizePortrait);
+      expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 32);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('landscape', (WidgetTester tester) async {
+      await showPicker(tester, kCommonScreenSizeLandscape);
+      expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+    });
+  });
+
   testWidgets('Save and help text is used', (WidgetTester tester) async {
     helpText = 'help';
     saveText = 'make it so';
@@ -113,6 +145,13 @@ void main() {
       expect(find.text(helpText!), findsOneWidget);
       expect(find.text(saveText!), findsOneWidget);
     });
+  });
+
+  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Select range'), findsOneWidget);
+    }, useMaterial3: true);
   });
 
   testWidgets('Initial date is the default', (WidgetTester tester) async {
@@ -1076,6 +1115,190 @@ void main() {
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(390.0, 600.0));
     });
   });
+
+  group('Semantics', () {
+    testWidgets('calendar mode', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      currentDate = DateTime(2016, DateTime.january, 30);
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        expect(
+          tester.getSemantics(find.text('30')),
+          matchesSemantics(
+            label: '30, Saturday, January 30, 2016, Today',
+            hasTapAction: true,
+            isFocusable: true,
+          ),
+        );
+      });
+      semantics.dispose();
+    });
+  });
+
+  for (final TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
+    testWidgets('DateRangePicker takes keyboardType $keyboardType', (WidgetTester  tester) async {
+      late BuildContext buttonContext;
+      const InputBorder border = InputBorder.none;
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.light().copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            border: border,
+          ),
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  buttonContext = context;
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ));
+
+      await tester.tap(find.text('Go'));
+      expect(buttonContext, isNotNull);
+
+      if (keyboardType == null) {
+        // If no keyboardType, expect the default.
+        showDateRangePicker(
+          context: buttonContext,
+          initialDateRange: initialDateRange,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          initialEntryMode: DatePickerEntryMode.input,
+        );
+      } else {
+        // If there is a keyboardType, expect it to be passed through.
+        showDateRangePicker(
+          context: buttonContext,
+          initialDateRange: initialDateRange,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          initialEntryMode: DatePickerEntryMode.input,
+          keyboardType: keyboardType,
+        );
+      }
+      await tester.pumpAndSettle();
+
+      final DateRangePickerDialog picker = tester.widget(find.byType(DateRangePickerDialog));
+      expect(picker.keyboardType, keyboardType ?? TextInputType.datetime);
+    });
+  }
+
+  testWidgets('honors switchToInputEntryModeIcon', (WidgetTester tester) async {
+    Widget buildApp({bool? useMaterial3, Icon? switchToInputEntryModeIcon}) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: useMaterial3 ?? false,
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('Click X'),
+                onPressed: () {
+                  showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                    switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.edit), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildApp(useMaterial3: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      buildApp(
+        switchToInputEntryModeIcon: const Icon(Icons.keyboard),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.keyboard), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('honors switchToCalendarEntryModeIcon', (WidgetTester tester) async {
+    Widget buildApp({bool? useMaterial3, Icon? switchToCalendarEntryModeIcon}) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: useMaterial3 ?? false,
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('Click X'),
+                onPressed: () {
+                  showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                    switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+                    initialEntryMode: DatePickerEntryMode.input,
+                    cancelText: 'CANCEL',
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildApp(useMaterial3: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      buildApp(
+        switchToCalendarEntryModeIcon: const Icon(Icons.favorite),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pumpAndSettle();
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {
@@ -1123,6 +1346,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
     }
   }
 
+  @pragma('vm:entry-point')
   static Route<DateTimeRange?> _dateRangePickerRoute(
     BuildContext context,
     Object? arguments,

@@ -14,6 +14,12 @@ void main() {
     expect(const TextTheme(), equals(const TextTheme().copyWith()));
   });
 
+  test('TextTheme lerp special cases', () {
+    expect(TextTheme.lerp(null, null, 0), const TextTheme());
+    const TextTheme theme = TextTheme();
+    expect(identical(TextTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   test('TextTheme copyWith apply, merge basics with Typography.black', () {
     final Typography typography = Typography.material2018();
     expect(typography.black, equals(typography.black.copyWith()));
@@ -50,9 +56,9 @@ void main() {
 
 
   test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = TextTheme(headline6: TextStyle(color: Color(0xcafefeed)));
+    const TextTheme partialTheme = TextTheme(titleLarge: TextStyle(color: Color(0xcafefeed)));
     final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.headline6!.color, equals(partialTheme.headline6!.color));
+    expect(fullTheme.titleLarge!.color, equals(partialTheme.titleLarge!.color));
 
     const TextTheme onlyHeadlineSmallAndTitleLarge = TextTheme(
       headlineSmall: TextStyle(color: Color(0xcafefeed)),
@@ -79,6 +85,7 @@ void main() {
     const Color displayColor = Color(0x00000001);
     const Color bodyColor = Color(0x00000002);
     const String fontFamily = 'fontFamily';
+    const List<String> fontFamilyFallback = <String>['font', 'family', 'fallback'];
     const Color decorationColor = Color(0x00000003);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
@@ -89,6 +96,7 @@ void main() {
     final Typography typography = Typography.material2018();
     final TextTheme theme = typography.black.apply(
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       displayColor: displayColor,
       bodyColor: bodyColor,
       decoration: decoration,
@@ -130,6 +138,7 @@ void main() {
       theme.labelSmall!,
     ];
     expect(themeStyles.every((TextStyle style) => style.fontFamily == fontFamily), true);
+    expect(themeStyles.every((TextStyle style) => style.fontFamilyFallback == fontFamilyFallback), true);
     expect(themeStyles.every((TextStyle style) => style.decorationColor == decorationColor), true);
     expect(themeStyles.every((TextStyle style) => style.decorationStyle == decorationStyle), true);
     expect(themeStyles.every((TextStyle style) => style.decoration == decoration), true);

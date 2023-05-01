@@ -1,0 +1,35 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+void main() {
+  // Changes made in https://github.com/flutter/flutter/pull/86198
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = AppBarTheme(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme = AppBarTheme(error: '');
+  appBarTheme = appBarTheme.copyWith(error: '');
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.dark);
+  appBarTheme = appBarTheme.copyWith(systemOverlayStyle: SystemUiOverlayStyle.light);
+  appBarTheme.systemOverlayStyle;
+
+  TextTheme myTextTheme = TextTheme();
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBarTheme = AppBarTheme(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+  appBarTheme = appBarTheme.copyWith(toolbarTextStyle: myTextTheme.bodyMedium, titleTextStyle: myTextTheme.titleLarge);
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme();
+  appBarTheme = AppBarTheme();
+  appBarTheme = appBarTheme.copyWith();
+  appBarTheme = appBarTheme.copyWith();
+  appBarTheme.backwardsCompatibility; // Removing field reference not supported.
+
+  AppBarTheme appBarTheme = AppBarTheme();
+  appBarTheme.backgroundColor;
+}

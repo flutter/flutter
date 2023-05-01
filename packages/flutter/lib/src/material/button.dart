@@ -26,14 +26,16 @@ import 'theme_data.dart';
 /// from the themes or from app-specific sources.
 ///
 /// This class is planned to be deprecated in a future release, see
-/// [ButtonStyleButton], the base class of [TextButton], [ElevatedButton], and
-/// [OutlinedButton].
+/// [ButtonStyleButton], the base class of [ElevatedButton], [FilledButton],
+/// [OutlinedButton] and [TextButton].
 ///
 /// See also:
 ///
-///  * [TextButton], a simple flat button without a shadow.
 ///  * [ElevatedButton], a filled button whose material elevates when pressed.
-///  * [OutlinedButton], a [TextButton] with a border outline.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
 @Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
@@ -72,17 +74,11 @@ class RawMaterialButton extends StatefulWidget {
     this.child,
     this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
-       assert(shape != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(focusElevation != null && focusElevation >= 0.0),
-       assert(hoverElevation != null && hoverElevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
-       assert(padding != null),
-       assert(constraints != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null);
+       assert(elevation >= 0.0),
+       assert(focusElevation >= 0.0),
+       assert(hoverElevation >= 0.0),
+       assert(highlightElevation >= 0.0),
+       assert(disabledElevation >= 0.0);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -419,10 +415,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(

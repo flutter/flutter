@@ -75,7 +75,6 @@ void main() {
       return false;
     });
     // While ShiftLeft is held (the event of which was skipped), press keyA.
-    // ignore: prefer_const_declarations
     final Map<String, dynamic> rawMessage = kIsWeb ? (
       KeyEventSimulator.getKeyData(
         LogicalKeyboardKey.keyA,
@@ -225,7 +224,7 @@ void main() {
       LogicalKeyboardKey.shiftLeft,
       platform: 'web',
     )..['metaState'] = 0;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
       SystemChannels.keyEvent.codec.encodeMessage(data2),
       (ByteData? data) {},

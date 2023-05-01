@@ -11,7 +11,7 @@ void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
     final ByteData? message =
         const StringCodec().encodeMessage(state.toString());
-    await ServicesBinding.instance.defaultBinaryMessenger
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage('flutter/lifecycle', message, (_) {});
   }
 
@@ -124,6 +124,8 @@ void main() {
     expect(lastDuration, const Duration(milliseconds: 20));
 
     ticker.dispose();
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   testWidgets('Ticker can be slowed down with time dilation', (WidgetTester tester) async {
@@ -140,6 +142,8 @@ void main() {
     expect(lastDuration, const Duration(milliseconds: 5));
 
     ticker.dispose();
+
+    timeDilation = 1.0; // restore time dilation, or it will affect other tests
   });
 
   testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {

@@ -93,6 +93,11 @@ bool FlutterWindow::OnCreate() {
           }));
 
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+    this->Show();
+  });
+
   return true;
 }
 

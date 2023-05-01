@@ -7,8 +7,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
+import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/hooks.dart' show TestFailure;
 
 import 'binding.dart';
 import 'finders.dart';
@@ -29,6 +30,15 @@ Future<ui.Image> captureImage(Element element) {
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
+
+/// Whether or not [captureImage] is supported.
+///
+/// This can be used to skip tests on platforms that don't support
+/// capturing images.
+///
+/// Currently this is true except when tests are running in the context of a web
+/// browser (`flutter test --platform chrome`).
+const bool canCaptureImage = true;
 
 /// The matcher created by [matchesGoldenFile]. This class is enabled when the
 /// test is running on a VM using conditional import.
@@ -84,7 +94,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image? image = await imageFuture;
       if (image == null) {

@@ -71,8 +71,8 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
     }
 
-    final List<SimDevice> connected = await _simControl.getConnectedDevices();
-    return connected.map<IOSSimulator?>((SimDevice device) {
+    final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
+    return connected.map<IOSSimulator?>((BootedSimDevice device) {
       final String? udid = device.udid;
       final String? name = device.name;
       if (udid == null) {
@@ -109,30 +109,45 @@ class SimControl {
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
-  Future<Map<String, Object?>> _list(SimControlListSection section) async {
-    // Sample output from `simctl list --json`:
+  Future<Map<String, Object?>> _listBootedDevices() async {
+    // Sample output from `simctl list available booted --json`:
     //
     // {
-    //   "devicetypes": { ... },
-    //   "runtimes": { ... },
     //   "devices" : {
-    //     "com.apple.CoreSimulator.SimRuntime.iOS-8-2" : [
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-14-0" : [
     //       {
-    //         "state" : "Shutdown",
-    //         "availability" : " (unavailable, runtime profile not found)",
-    //         "name" : "iPhone 4s",
-    //         "udid" : "1913014C-6DCB-485D-AC6B-7CD76D322F5B"
-    //       },
-    //       ...
-    //   },
-    //   "pairs": { ... },
+    //         "lastBootedAt" : "2022-07-26T01:46:23Z",
+    //         "dataPath" : "\/Users\/magder\/Library\/Developer\/CoreSimulator\/Devices\/9EC90A99-6924-472D-8CDD-4D8234AB4779\/data",
+    //         "dataPathSize" : 1620578304,
+    //         "logPath" : "\/Users\/magder\/Library\/Logs\/CoreSimulator\/9EC90A99-6924-472D-8CDD-4D8234AB4779",
+    //         "udid" : "9EC90A99-6924-472D-8CDD-4D8234AB4779",
+    //         "isAvailable" : true,
+    //         "logPathSize" : 9740288,
+    //         "deviceTypeIdentifier" : "com.apple.CoreSimulator.SimDeviceType.iPhone-11",
+    //         "state" : "Booted",
+    //         "name" : "iPhone 11"
+    //       }
+    //     ],
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-13-0" : [
+    //
+    //     ],
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-12-4" : [
+    //
+    //     ],
+    //     "com.apple.CoreSimulator.SimRuntime.iOS-16-0" : [
+    //
+    //     ]
+    //   }
+    // }
 
     final List<String> command = <String>[
       ..._xcode.xcrunCommand(),
       'simctl',
       'list',
+      'devices',
+      'booted',
+      'iOS',
       '--json',
-      section.name,
     ];
     _logger.printTrace(command.join(' '));
     final RunResult results = await _processUtils.run(command);
@@ -141,7 +156,7 @@ class SimControl {
       return <String, Map<String, Object?>>{};
     }
     try {
-      final Object? decodeResult = (json.decode(results.stdout) as Map<String, Object?>)[section.name];
+      final Object? decodeResult = (json.decode(results.stdout) as Map<String, Object?>)['devices'];
       if (decodeResult is Map<String, Object?>) {
         return decodeResult;
       }
@@ -156,28 +171,22 @@ class SimControl {
     }
   }
 
-  /// Returns a list of all available devices, both potential and connected.
-  Future<List<SimDevice>> getDevices() async {
-    final List<SimDevice> devices = <SimDevice>[];
+  /// Returns all the connected simulator devices.
+  Future<List<BootedSimDevice>> getConnectedDevices() async {
+    final List<BootedSimDevice> devices = <BootedSimDevice>[];
 
-    final Map<String, Object?> devicesSection = await _list(SimControlListSection.devices);
+    final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     for (final String deviceCategory in devicesSection.keys) {
       final Object? devicesData = devicesSection[deviceCategory];
       if (devicesData != null && devicesData is List<Object?>) {
         for (final Map<String, Object?> data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>()) {
-          devices.add(SimDevice(deviceCategory, data));
+          devices.add(BootedSimDevice(deviceCategory, data));
         }
       }
     }
 
     return devices;
-  }
-
-  /// Returns all the connected simulator devices.
-  Future<List<SimDevice>> getConnectedDevices() async {
-    final List<SimDevice> simDevices = await getDevices();
-    return simDevices.where((SimDevice device) => device.isBooted).toList();
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
@@ -248,6 +257,25 @@ class SimControl {
     return result;
   }
 
+  Future<RunResult> stopApp(String deviceId, String appIdentifier) async {
+    RunResult result;
+    try {
+      result = await _processUtils.run(
+        <String>[
+          ..._xcode.xcrunCommand(),
+          'simctl',
+          'terminate',
+          deviceId,
+          appIdentifier,
+        ],
+        throwOnError: true,
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to terminate $appIdentifier on $deviceId:\n$exception');
+    }
+    return result;
+  }
+
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
       await _processUtils.run(
@@ -267,54 +295,15 @@ class SimControl {
   }
 }
 
-/// Enumerates all data sections of `xcrun simctl list --json` command.
-class SimControlListSection {
-  const SimControlListSection._(this.name);
 
-  final String name;
-
-  static const SimControlListSection devices = SimControlListSection._('devices');
-  static const SimControlListSection devicetypes = SimControlListSection._('devicetypes');
-  static const SimControlListSection runtimes = SimControlListSection._('runtimes');
-  static const SimControlListSection pairs = SimControlListSection._('pairs');
-}
-
-/// A simulated device type.
-///
-/// Simulated device types can be listed using the command
-/// `xcrun simctl list devicetypes`.
-class SimDeviceType {
-  SimDeviceType(this.name, this.identifier);
-
-  /// The name of the device type.
-  ///
-  /// Examples:
-  ///
-  ///     "iPhone 6s"
-  ///     "iPhone 6 Plus"
-  final String name;
-
-  /// The identifier of the device type.
-  ///
-  /// Examples:
-  ///
-  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6s"
-  ///     "com.apple.CoreSimulator.SimDeviceType.iPhone-6-Plus"
-  final String identifier;
-}
-
-class SimDevice {
-  SimDevice(this.category, this.data);
+class BootedSimDevice {
+  BootedSimDevice(this.category, this.data);
 
   final String category;
   final Map<String, Object?> data;
 
-  String? get state => data['state']?.toString();
-  String? get availability => data['availability']?.toString();
   String? get name => data['name']?.toString();
   String? get udid => data['udid']?.toString();
-
-  bool get isBooted => state == 'Booted';
 }
 
 class IOSSimulator extends Device {
@@ -338,7 +327,7 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -380,8 +369,7 @@ class IOSSimulator extends Device {
     String? userIdentifier,
   }) async {
     try {
-      final IOSApp iosApp = app;
-      await _simControl.install(id, iosApp.simulatorBundlePath);
+      await _simControl.install(id, app.simulatorBundlePath);
       return true;
     } on Exception {
       return false;
@@ -431,7 +419,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant IOSApp package, {
+    IOSApp package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -456,30 +444,15 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-    final List<String> args = <String>[
-      '--enable-dart-profiling',
-      if (debuggingOptions.debuggingEnabled) ...<String>[
-        if (debuggingOptions.buildInfo.isDebug) ...<String>[
-          '--enable-checked-mode',
-          '--verify-entry-points',
-        ],
-        if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
-        if (debuggingOptions.startPaused) '--start-paused',
-        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
-        if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
-        if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
-        if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
-        if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
-        if (route != null) '--route=$route',
-      ],
-    ];
+    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
+      EnvironmentType.simulator,
+      route,
+      platformArgs,
+    );
 
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         getLogReader(app: package),
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
@@ -501,7 +474,7 @@ class IOSSimulator extends Device {
         return LaunchResult.failed();
       }
 
-      await _simControl.launch(id, bundleIdentifier, args);
+      await _simControl.launch(id, bundleIdentifier, launchArguments);
     } on Exception catch (error) {
       globals.printError('$error');
       return LaunchResult.failed();
@@ -512,13 +485,13 @@ class IOSSimulator extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on..."
-    globals.printTrace('Waiting for observatory port to be available...');
+    // device has printed "Dart VM Service is listening on..."
+    globals.printTrace('Waiting for VM Service port to be available...');
 
     try {
-      final Uri? deviceUri = await observatoryDiscovery?.uri;
+      final Uri? deviceUri = await vmServiceDiscovery?.uri;
       if (deviceUri != null) {
-        return LaunchResult.succeeded(observatoryUri: deviceUri);
+        return LaunchResult.succeeded(vmServiceUri: deviceUri);
       }
       globals.printError(
         'Error waiting for a debug connection: '
@@ -527,12 +500,12 @@ class IOSSimulator extends Device {
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }
 
-  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
+  Future<void> _setupUpdatedApplicationBundle(BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
@@ -562,11 +535,13 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
-    // Currently we don't have a way to stop an app running on iOS.
-    return false;
+    if (app == null) {
+      return false;
+    }
+    return (await _simControl.stopApp(id, app.id)).exitCode == 0;
   }
 
   String get logFilePath {
@@ -598,7 +573,7 @@ class IOSSimulator extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
+    covariant IOSApp? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
@@ -890,9 +865,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     }
 
     final String filteredLine = _filterSystemLog(line);
-    if (filteredLine == null) {
-      return;
-    }
 
     _linesController.add(filteredLine);
   }

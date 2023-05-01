@@ -37,8 +37,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   const ContinuousRectangleBorder({
     super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  });
 
   /// The radius for each corner.
   ///
@@ -59,7 +58,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    assert(t != null);
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -71,7 +69,6 @@ class ContinuousRectangleBorder extends OutlinedBorder {
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    assert(t != null);
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -148,10 +145,10 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection);
-        final Paint paint = side.toPaint();
-        canvas.drawPath(path, paint);
-        break;
+        canvas.drawPath(
+          getOuterPath(rect, textDirection: textDirection),
+          side.toPaint(),
+        );
     }
   }
 

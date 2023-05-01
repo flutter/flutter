@@ -50,7 +50,7 @@ void main() {
   testWithoutContext('WebValidator can find executable on macOS', () async {
     final ValidationResult result = await webValidator.validate();
 
-    expect(result.type, ValidationType.installed);
+    expect(result.type, ValidationType.success);
   });
 
   testWithoutContext('WebValidator Can notice missing macOS executable ', () async {

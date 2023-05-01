@@ -35,6 +35,14 @@ String? get localEngineSrcPathFromEnv {
   return isDefined ? const String.fromEnvironment('localEngineSrcPath') : null;
 }
 
+/// The local Web SDK to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localWebSdkFromEnv {
+  const bool isDefined = bool.hasEnvironment('localWebSdk');
+  return isDefined ? const String.fromEnvironment('localWebSdk') : null;
+}
+
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 
@@ -126,19 +134,20 @@ void copy(File sourceFile, Directory targetDirectory, {String? name}) {
 }
 
 void recursiveCopy(Directory source, Directory target) {
-  if (!target.existsSync())
+  if (!target.existsSync()) {
     target.createSync();
+  }
 
   for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
-    if (entity is Directory && !entity.path.contains('.dart_tool'))
+    if (entity is Directory && !entity.path.contains('.dart_tool')) {
       recursiveCopy(entity, Directory(path.join(target.path, name)));
-    else if (entity is File) {
+    } else if (entity is File) {
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
       // Preserve executable bit
       final String modes = entity.statSync().modeString();
-      if (modes != null && modes.contains('x')) {
+      if (modes.contains('x')) {
         makeExecutable(dest);
       }
     }
@@ -194,8 +203,9 @@ void section(String title) {
     title = '╡ ••• $title ••• ╞';
     final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
     output = '$line$title$line';
-    if (output.length == 79)
+    if (output.length == 79) {
       output += '═';
+    }
   }
   print('\n\n$output\n');
 }
@@ -209,10 +219,12 @@ Future<String> getDartVersion() async {
   //   Dart VM version: 1.17.0-dev.2.0 (Tue May  3 12:14:52 2016) on "macos_x64"
   // to:
   //   1.17.0-dev.2.0
-  if (version.contains('('))
+  if (version.contains('(')) {
     version = version.substring(0, version.indexOf('(')).trim();
-  if (version.contains(':'))
+  }
+  if (version.contains(':')) {
     version = version.substring(version.indexOf(':') + 1).trim();
+  }
 
   return version.replaceAll('"', "'");
 }
@@ -272,13 +284,13 @@ Future<Process> startProcess(
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
   String? workingDirectory,
 }) async {
-  assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
   final String finalWorkingDirectory = workingDirectory ?? cwd;
   final Map<String, String> newEnvironment = Map<String, String>.from(environment ?? <String, String>{});
   newEnvironment['BOT'] = isBot ? 'true' : 'false';
   newEnvironment['LANG'] = 'en_US.UTF-8';
   print('Executing "$command" in "$finalWorkingDirectory" with environment $newEnvironment');
+
   final Process process = await _processManager.start(
     <String>[executable, ...?arguments],
     environment: newEnvironment,
@@ -295,8 +307,9 @@ Future<Process> startProcess(
 }
 
 Future<void> forceQuitRunningProcesses() async {
-  if (_runningProcesses.isEmpty)
+  if (_runningProcesses.isEmpty) {
     return;
+  }
 
   // Give normally quitting processes a chance to report their exit code.
   await Future<void>.delayed(const Duration(seconds: 1));
@@ -354,8 +367,9 @@ Future<int> _execute(
   );
   final int exitCode = await process.exitCode;
 
-  if (exitCode != 0 && !canFail)
+  if (exitCode != 0 && !canFail) {
     fail('Executable "$executable" failed with exit code $exitCode.');
+  }
 
   return exitCode;
 }
@@ -427,7 +441,7 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
-List<String> flutterCommandArgs(String command, List<String> options) {
+List<String> _flutterCommandArgs(String command, List<String> options) {
   // Commands support the --device-timeout flag.
   final Set<String> supportedDeviceTimeoutCommands = <String>{
     'attach',
@@ -440,6 +454,7 @@ List<String> flutterCommandArgs(String command, List<String> options) {
   };
   final String? localEngine = localEngineFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
+  final String? localWebSdk = localWebSdkFromEnv;
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios && supportedDeviceTimeoutCommands.contains(command))
@@ -454,6 +469,7 @@ List<String> flutterCommandArgs(String command, List<String> options) {
     ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
   ];
 }
@@ -464,10 +480,16 @@ Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
-}) {
-  final List<String> args = flutterCommandArgs(command, options);
-  return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-    canFail: canFail, environment: environment);
+  String? workingDirectory,
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options);
+  final int exitCode = await exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
+    canFail: canFail, environment: environment, workingDirectory: workingDirectory);
+
+  if (exitCode != 0 && !canFail) {
+    await _flutterScreenshot(workingDirectory: workingDirectory);
+  }
+  return exitCode;
 }
 
 /// Starts a Flutter subprocess.
@@ -496,15 +518,23 @@ Future<Process> startFlutter(String command, {
   List<String> options = const <String>[],
   Map<String, String> environment = const <String, String>{},
   bool isBot = true, // set to false to pretend not to be on a bot (e.g. to test user-facing outputs)
-}) {
-  assert(isBot != null);
-  final List<String> args = flutterCommandArgs(command, options);
-  return startProcess(
+  String? workingDirectory,
+}) async {
+  final List<String> args = _flutterCommandArgs(command, options);
+  final Process process = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     args,
     environment: environment,
     isBot: isBot,
+    workingDirectory: workingDirectory,
   );
+
+  unawaited(process.exitCode.then<void>((int exitCode) async {
+    if (exitCode != 0) {
+      await _flutterScreenshot(workingDirectory: workingDirectory);
+    }
+  }));
+  return process;
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
@@ -513,20 +543,62 @@ Future<String> evalFlutter(String command, {
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String>? environment,
   StringBuffer? stderr, // if not null, the stderr will be written here.
+  String? workingDirectory,
 }) {
-  final List<String> args = flutterCommandArgs(command, options);
+  final List<String> args = _flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment, stderr: stderr);
+      canFail: canFail, environment: environment, stderr: stderr, workingDirectory: workingDirectory);
 }
 
 Future<ProcessResult> executeFlutter(String command, {
   List<String> options = const <String>[],
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
 }) async {
-  final List<String> args = flutterCommandArgs(command, options);
-  return _processManager.run(
+  final List<String> args = _flutterCommandArgs(command, options);
+  final ProcessResult processResult = await _processManager.run(
     <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
     workingDirectory: cwd,
   );
+
+  if (processResult.exitCode != 0 && !canFail) {
+    await _flutterScreenshot();
+  }
+  return processResult;
+}
+
+Future<void> _flutterScreenshot({ String? workingDirectory }) async {
+  try {
+    final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    if (dumpDirectory == null) {
+      return;
+    }
+    // On command failure try uploading screenshot of failing command.
+    final String screenshotPath = path.join(
+      dumpDirectory.path,
+      'device-screenshot-${DateTime.now().toLocal().toIso8601String()}.png',
+    );
+
+    final String deviceId = (await devices.workingDevice).deviceId;
+    print('Taking screenshot of working device $deviceId at $screenshotPath');
+    final List<String> args = _flutterCommandArgs(
+      'screenshot',
+      <String>[
+        '--out',
+        screenshotPath,
+        '-d', deviceId,
+      ],
+    );
+    final ProcessResult screenshot = await _processManager.run(
+      <String>[path.join(flutterDirectory.path, 'bin', 'flutter'), ...args],
+      workingDirectory: workingDirectory ?? cwd,
+    );
+
+    if (screenshot.exitCode != 0) {
+      print('Failed to take screenshot. Continuing.');
+    }
+  } catch (exception) {
+    print('Failed to take screenshot. Continuing.\n$exception');
+  }
 }
 
 String get dartBin =>
@@ -545,8 +617,9 @@ Future<String?> findJavaHome() async {
       'Java binary at: ',
       from: await evalFlutter('doctor', options: <String>['-v']),
     );
-    if (hits.isEmpty)
+    if (hits.isEmpty) {
       return null;
+    }
     final String javaBinary = hits.first
         .split(': ')
         .last;
@@ -579,24 +652,29 @@ void cd(dynamic directory) {
     throw FileSystemException('Unsupported directory type ${directory.runtimeType}', directory.toString());
   }
 
-  if (!d.existsSync())
+  if (!d.existsSync()) {
     throw FileSystemException('Cannot cd into directory that does not exist', d.toString());
+  }
 }
 
 Directory get flutterDirectory => Directory.current.parent.parent;
 
+Directory get openpayDirectory => Directory(requireEnvVar('OPENPAY_CHECKOUT_PATH'));
+
 String requireEnvVar(String name) {
   final String? value = Platform.environment[name];
 
-  if (value == null)
+  if (value == null) {
     fail('$name environment variable is missing. Quitting.');
+  }
 
   return value!;
 }
 
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
-  if (!map.containsKey(propertyName))
+  if (!map.containsKey(propertyName)) {
     fail('Configuration property not found: $propertyName');
+  }
   final T result = map[propertyName] as T;
   return result;
 }
@@ -620,38 +698,6 @@ Future<void> getNewGallery(String revision, Directory galleryDir) async {
   await inDirectory<void>(galleryDir, () async {
     await exec('git', <String>['checkout', revision]);
   });
-}
-
-void checkNotNull(Object o1,
-    [Object o2 = 1,
-    Object o3 = 1,
-    Object o4 = 1,
-    Object o5 = 1,
-    Object o6 = 1,
-    Object o7 = 1,
-    Object o8 = 1,
-    Object o9 = 1,
-    Object o10 = 1]) {
-  if (o1 == null)
-    throw 'o1 is null';
-  if (o2 == null)
-    throw 'o2 is null';
-  if (o3 == null)
-    throw 'o3 is null';
-  if (o4 == null)
-    throw 'o4 is null';
-  if (o5 == null)
-    throw 'o5 is null';
-  if (o6 == null)
-    throw 'o6 is null';
-  if (o7 == null)
-    throw 'o7 is null';
-  if (o8 == null)
-    throw 'o8 is null';
-  if (o9 == null)
-    throw 'o9 is null';
-  if (o10 == null)
-    throw 'o10 is null';
 }
 
 /// Splits [from] into lines and selects those that contain [pattern].
@@ -685,14 +731,14 @@ Future<void> runAndCaptureAsyncStacks(Future<void> Function() callback) {
 bool canRun(String path) => _processManager.canRun(path);
 
 final RegExp _obsRegExp =
-  RegExp('An Observatory debugger .* is available at: ');
+  RegExp('A Dart VM Service .* is available at: ');
 final RegExp _obsPortRegExp = RegExp(r'(\S+:(\d+)/\S*)$');
 final RegExp _obsUriRegExp = RegExp(r'((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
 /// Tries to extract a port from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+/// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
 int? parseServicePort(String line, {
   Pattern? prefix,
 }) {
@@ -710,7 +756,7 @@ int? parseServicePort(String line, {
 /// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+/// `prefix` defaults to the RegExp: `A Dart VM Service .* is available at: `.
 Uri? parseServiceUri(String line, {
   Pattern? prefix,
 }) {

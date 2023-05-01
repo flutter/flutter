@@ -259,7 +259,6 @@ class RestorationManager extends ChangeNotifier {
   /// called.
   @protected
   void handleRestorationUpdateFromEngine({required bool enabled, required Uint8List? data}) {
-    assert(enabled != null);
     assert(enabled || data == null);
 
     _isReplacing = _rootBucketIsValid && enabled;
@@ -297,7 +296,6 @@ class RestorationManager extends ChangeNotifier {
   /// by the data.
   @protected
   Future<void> sendToEngine(Uint8List encodedData) {
-    assert(encodedData != null);
     return SystemChannels.restoration.invokeMethod<void>(
       'put',
       encodedData,
@@ -308,7 +306,6 @@ class RestorationManager extends ChangeNotifier {
     switch (call.method) {
       case 'push':
         _parseAndHandleRestorationUpdateFromEngine(call.arguments as Map<Object?, Object?>);
-        break;
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by $runtimeType");
     }
@@ -344,7 +341,6 @@ class RestorationManager extends ChangeNotifier {
   @protected
   @visibleForTesting
   void scheduleSerializationFor(RestorationBucket bucket) {
-    assert(bucket != null);
     assert(bucket._manager == this);
     assert(!_debugDoingUpdate);
     _bucketsNeedingSerialization.add(bucket);
@@ -366,7 +362,6 @@ class RestorationManager extends ChangeNotifier {
   @protected
   @visibleForTesting
   void unscheduleSerializationFor(RestorationBucket bucket) {
-    assert(bucket != null);
     assert(bucket._manager == this);
     assert(!_debugDoingUpdate);
     _bucketsNeedingSerialization.remove(bucket);
@@ -502,8 +497,7 @@ class RestorationBucket {
   RestorationBucket.empty({
     required String restorationId,
     required Object? debugOwner,
-  }) : assert(restorationId != null),
-       _restorationId = restorationId,
+  }) : _restorationId = restorationId,
        _rawData = <String, Object?>{} {
     assert(() {
       _debugOwner = debugOwner;
@@ -537,8 +531,7 @@ class RestorationBucket {
   RestorationBucket.root({
     required RestorationManager manager,
     required Map<Object?, Object?>? rawData,
-  }) : assert(manager != null),
-       _manager = manager,
+  }) : _manager = manager,
        _rawData = rawData ?? <Object?, Object?>{},
        _restorationId = 'root' {
     assert(() {
@@ -561,9 +554,7 @@ class RestorationBucket {
     required String restorationId,
     required RestorationBucket parent,
     required Object? debugOwner,
-  }) : assert(restorationId != null),
-       assert(parent != null),
-       assert(parent._rawChildren[restorationId] != null),
+  }) : assert(parent._rawChildren[restorationId] != null),
        _manager = parent._manager,
        _parent = parent,
        _rawData = parent._rawChildren[restorationId]! as Map<Object?, Object?>,
@@ -635,7 +626,6 @@ class RestorationBucket {
   ///    restoration ID.
   P? read<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
-    assert(restorationId != null);
     return _rawValues[restorationId] as P?;
   }
 
@@ -657,7 +647,6 @@ class RestorationBucket {
   ///    restoration ID.
   void write<P>(String restorationId, P value) {
     assert(_debugAssertNotDisposed());
-    assert(restorationId != null);
     assert(debugIsSerializableForRestoration(value));
     if (_rawValues[restorationId] != value || !_rawValues.containsKey(restorationId)) {
       _rawValues[restorationId] = value;
@@ -679,7 +668,6 @@ class RestorationBucket {
   ///    restoration ID.
   P? remove<P>(String restorationId) {
     assert(_debugAssertNotDisposed());
-    assert(restorationId != null);
     final bool needsUpdate = _rawValues.containsKey(restorationId);
     final P? result = _rawValues.remove(restorationId) as P?;
     if (_rawValues.isEmpty) {
@@ -701,7 +689,6 @@ class RestorationBucket {
   ///  * [remove], which removes a value from the bucket.
   bool contains(String restorationId) {
     assert(_debugAssertNotDisposed());
-    assert(restorationId != null);
     return _rawValues.containsKey(restorationId);
   }
 
@@ -737,7 +724,6 @@ class RestorationBucket {
   /// delete the information stored in it from the app's restoration data.
   RestorationBucket claimChild(String restorationId, {required Object? debugOwner}) {
     assert(_debugAssertNotDisposed());
-    assert(restorationId != null);
     // There are three cases to consider:
     // 1. Claiming an ID that has already been claimed.
     // 2. Claiming an ID that doesn't yet exist in [_rawChildren].
@@ -787,7 +773,6 @@ class RestorationBucket {
   /// No-op if the provided bucket is already a child of this bucket.
   void adoptChild(RestorationBucket child) {
     assert(_debugAssertNotDisposed());
-    assert(child != null);
     if (child._parent != this) {
       child._parent?._removeChildData(child);
       child._parent = this;
@@ -801,7 +786,6 @@ class RestorationBucket {
   }
 
   void _dropChild(RestorationBucket child) {
-    assert(child != null);
     assert(child._parent == this);
     _removeChildData(child);
     child._parent = null;
@@ -876,7 +860,6 @@ class RestorationBucket {
   }
 
   void _removeChildData(RestorationBucket child) {
-    assert(child != null);
     assert(child._parent == this);
     if (_claimedChildren.remove(child.restorationId) == child) {
       _rawChildren.remove(child.restorationId);
@@ -901,7 +884,6 @@ class RestorationBucket {
   }
 
   void _addChildData(RestorationBucket child) {
-    assert(child != null);
     assert(child._parent == this);
     if (_claimedChildren.containsKey(child.restorationId)) {
       // Delay addition until the end of the frame in the hopes that the current
@@ -944,7 +926,6 @@ class RestorationBucket {
   /// another ID, or has moved it to a new parent via [adoptChild].
   void rename(String newRestorationId) {
     assert(_debugAssertNotDisposed());
-    assert(newRestorationId != null);
     if (newRestorationId == restorationId) {
       return;
     }

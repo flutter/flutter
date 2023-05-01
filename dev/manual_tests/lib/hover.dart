@@ -29,7 +29,7 @@ class _HoverDemoState extends State<HoverDemo> {
     );
 
     return DefaultTextStyle(
-      style: textTheme.headline4!,
+      style: textTheme.headlineMedium!,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Hover Demo'),

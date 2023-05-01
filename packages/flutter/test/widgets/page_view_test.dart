@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -141,7 +142,7 @@ void main() {
 
     // Set the starting viewportDimension to 0.0
     await tester.binding.setSurfaceSize(Size.zero);
-    final MediaQueryData mediaQueryData = MediaQueryData.fromWindow(tester.binding.window);
+    final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
     Widget build(Size size) {
       return MediaQuery(
@@ -271,7 +272,12 @@ void main() {
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
     // Easing overscroll past overscroll limit.
-    await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
+    if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS) {
+      await tester.drag(find.byType(PageView), const Offset(-500.0, 0.0));
+    }
+    else {
+      await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
+    }
     await tester.pump();
 
     expect(leftOf(0), lessThan(0.0));
@@ -412,9 +418,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
-        child: SizedBox(
-          width: 0.0,
-          height: 0.0,
+        child: SizedBox.shrink(
           child: PageView(
             children: kStates.map<Widget>((String state) => Text(state)).toList(),
           ),
@@ -1044,6 +1048,7 @@ void main() {
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,
       viewportFraction: 1.0,
+      devicePixelRatio: tester.view.devicePixelRatio,
     );
     expect(page.page, 6);
     final PageMetrics page2 = page.copyWith(

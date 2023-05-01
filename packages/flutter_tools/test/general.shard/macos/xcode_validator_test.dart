@@ -56,7 +56,7 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Flutter requires Xcode 13 or higher'));
+      expect(result.messages.last.message, contains('Flutter requires Xcode 14 or higher'));
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
@@ -98,7 +98,7 @@ void main() {
           'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.',
         ),
         const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list'],
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
         ),
       ]);
       final Xcode xcode = Xcode.test(
@@ -135,7 +135,7 @@ void main() {
           command: <String>['xcrun', 'clang'],
         ),
         const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list'],
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
           exitCode: 1,
         ),
       ]);
@@ -173,7 +173,7 @@ void main() {
           command: <String>['xcrun', 'clang'],
         ),
         const FakeCommand(
-          command: <String>['xcrun', 'simctl', 'list'],
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
         ),
       ]);
       final Xcode xcode = Xcode.test(
@@ -182,7 +182,7 @@ void main() {
       );
       final XcodeValidator validator = XcodeValidator(xcode: xcode, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.messages.length, 2);
       final ValidationMessage firstMessage = result.messages.first;
       expect(firstMessage.type, ValidationMessageType.information);

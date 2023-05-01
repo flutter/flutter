@@ -22,8 +22,7 @@ REM If available, add location of bundled mingit to PATH
 SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
 IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
 
-REM Test if Git is available on the Host
-where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
+REM We test if Git is available on the Host as we run git in shared.bat
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.

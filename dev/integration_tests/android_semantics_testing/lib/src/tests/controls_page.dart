@@ -9,7 +9,7 @@ export 'controls_constants.dart';
 
 /// A test page with a checkbox, three radio buttons, and a switch.
 class SelectionControlsPage extends StatefulWidget {
-  const SelectionControlsPage({Key key}) : super(key: key);
+  const SelectionControlsPage({super.key});
 
   @override
   State<StatefulWidget> createState() => _SelectionControlsPageState();
@@ -28,15 +28,15 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
   bool _isLabeledOn = false;
   int _radio = 0;
 
-  void _updateCheckbox(bool newValue) {
+  void _updateCheckbox(bool? newValue) {
     setState(() {
-      _isChecked = newValue;
+      _isChecked = newValue!;
     });
   }
 
-  void _updateRadio(int newValue) {
+  void _updateRadio(int? newValue) {
     setState(() {
-      _radio = newValue;
+      _radio = newValue!;
     });
   }
 
@@ -68,6 +68,8 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
               const Checkbox(
                 key: checkbox2Key,
                 value: false,
+                // TODO(scheglov): Requires linter fix, https://github.com/dart-lang/sdk/issues/49596.
+                // ignore: avoid_redundant_argument_values
                 onChanged: null,
               ),
             ],

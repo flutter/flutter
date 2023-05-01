@@ -36,8 +36,7 @@ final EnumIndex<HealthStatus> _healthStatusIndex =
 /// [FlutterDriver.checkHealth] test.
 class Health extends Result {
   /// Creates a [Health] object with the given [status].
-  const Health(this.status)
-    : assert(status != null);
+  const Health(this.status);
 
   /// The status represented by this object.
   ///

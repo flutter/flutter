@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -183,7 +186,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get hasTerminal => _hasTerminal;
   set hasTerminal(bool value) {
-    assert(value != null);
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
@@ -194,7 +196,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get supportsAnsiEscapes => _supportsAnsiEscapes;
   set supportsAnsiEscapes(bool value) {
-    assert(value != null);
     _supportsAnsiEscapes = value;
   }
   bool _supportsAnsiEscapes = true;
@@ -253,9 +254,6 @@ class FakeStdin extends Fake implements Stdin {
   bool echoMode = true;
 
   @override
-  bool echoNewlineMode = true;
-
-  @override
   bool lineMode = true;
 
   @override
@@ -300,6 +298,16 @@ class FakePlistParser implements PlistParser {
   @override
   String? getStringValueFromFile(String plistFilePath, String key) {
     return _underlyingValues[key] as String?;
+  }
+
+  @override
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+    if (value == null) {
+      _underlyingValues.remove(key);
+      return true;
+    }
+    setProperty(key, value);
+    return true;
   }
 }
 
@@ -416,6 +424,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
   });
 
   @override
@@ -444,6 +453,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
+
+  @override
+  final bool isFlutterWebWasmEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -563,4 +575,30 @@ class FakeStopwatchFactory implements StopwatchFactory {
   Stopwatch createStopwatch([String name = '']) {
     return stopwatches[name] ?? FakeStopwatch();
   }
+}
+
+class FakeFlutterProjectFactory implements FlutterProjectFactory {
+  @override
+  FlutterProject fromDirectory(Directory directory) {
+    return FlutterProject.fromDirectoryTest(directory);
+  }
+
+  @override
+  Map<String, FlutterProject> get projects => throw UnimplementedError();
+}
+
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  late bool platformToolsAvailable;
+
+  @override
+  late bool licensesAvailable;
+
+  @override
+  AndroidSdkVersion? latestVersion;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
 }

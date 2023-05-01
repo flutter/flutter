@@ -13,7 +13,7 @@ class DeferredComponentsProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.12.0-0 <3.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -134,7 +134,7 @@ class BasicDeferredComponentsConfig extends DeferredComponentsConfig {
       project.evaluationDependsOn(':app')
   }
 
-  task clean(type: Delete) {
+  tasks.register("clean", Delete) {
       delete rootProject.buildDir
   }
   ''';

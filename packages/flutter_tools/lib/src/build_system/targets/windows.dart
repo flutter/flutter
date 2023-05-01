@@ -12,6 +12,7 @@ import 'assets.dart';
 import 'common.dart';
 import 'desktop.dart';
 import 'icon_tree_shaker.dart';
+import 'shader_compiler.dart';
 
 /// The only files/subdirectories we care about.
 const List<String> _kWindowsArtifacts = <String>[
@@ -55,7 +56,7 @@ class UnpackWindows extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String engineSourcePath = environment.artifacts
       .getArtifactPath(
         Artifact.windowsDesktopPath,
@@ -126,7 +127,7 @@ abstract class BundleWindowsAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory outputDirectory = environment.outputDir
       .childDirectory('flutter_assets');
     if (!outputDirectory.existsSync()) {
@@ -142,6 +143,7 @@ abstract class BundleWindowsAssets extends Target {
       environment,
       outputDirectory,
       targetPlatform: TargetPlatform.windows_x64,
+      shaderTarget: ShaderTarget.sksl,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,

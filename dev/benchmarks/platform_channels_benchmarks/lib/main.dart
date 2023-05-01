@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:microbenchmarks/common.dart';
 
 List<Object?> _makeTestBuffer(int size) {
@@ -17,31 +16,22 @@ List<Object?> _makeTestBuffer(int size) {
     switch (i % 9) {
       case 0:
         answer.add(1);
-        break;
       case 1:
         answer.add(math.pow(2, 65));
-        break;
       case 2:
         answer.add(1234.0);
-        break;
       case 3:
         answer.add(null);
-        break;
       case 4:
         answer.add(<int>[1234]);
-        break;
       case 5:
         answer.add(<String, int>{'hello': 1234});
-        break;
       case 6:
         answer.add('this is a test');
-        break;
       case 7:
         answer.add(true);
-        break;
       case 8:
         answer.add(Uint8List(64));
-        break;
     }
   }
   return answer;
@@ -195,7 +185,7 @@ Future<void> _runTests() async {
   );
 
   /// WARNING: Don't change the following line of code, it will invalidate
-  /// `Large` tests.  Instead make a different test.  The size of largeBuffer
+  /// `Large` tests. Instead make a different test. The size of largeBuffer
   /// serialized is 14214 bytes.
   final List<Object?> largeBuffer = _makeTestBuffer(1000);
   final ByteData largeBufferBytes =

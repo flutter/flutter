@@ -4,7 +4,6 @@
 
 import 'package:flutter/rendering.dart';
 
-
 /// Positions the toolbar at [anchor] if it fits, otherwise moves it so that it
 /// just fits fully on-screen.
 ///
