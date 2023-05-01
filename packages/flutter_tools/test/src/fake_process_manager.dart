@@ -111,13 +111,13 @@ class FakeCommand {
     final List<dynamic> matchers = this.command.map((Pattern x) => x is String ? x : matches(x)).toList();
     expect(command, matchers);
     if (this.workingDirectory != null) {
-      expect(this.workingDirectory, workingDirectory);
+      expect(workingDirectory, this.workingDirectory);
     }
     if (this.environment != null) {
-      expect(this.environment, environment);
+      expect(environment, this.environment);
     }
     if (this.encoding != null) {
-      expect(this.encoding, encoding);
+      expect(encoding, this.encoding);
     }
   }
 }
