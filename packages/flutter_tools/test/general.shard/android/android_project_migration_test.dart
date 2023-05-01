@@ -253,8 +253,9 @@ tasks.register("clean", Delete) {
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrateTo);
-        expect(bufferLogger.statusText, contains('Conflict detected between Android Studio Java version and Gradle version, '
-            'upgrading Gradle version from 6.7 to 7.6.1.'));
+        expect(bufferLogger.statusText, contains('Conflict detected between '
+            'Android Studio Java version and Gradle version, upgrading Gradle '
+            'version from 6.7 to $gradleVersion7_6_1.'));
       });
 
       testWithoutContext('change is not made when opt out flag is set', () {

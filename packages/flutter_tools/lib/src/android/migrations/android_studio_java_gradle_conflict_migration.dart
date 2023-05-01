@@ -20,7 +20,7 @@ import '../gradle_utils.dart';
 @visibleForTesting
 final Version androidStudioFlamingo = Version(2022, 2, 0);
 
-const String _gradleVersion7_6_1 = r'7.6.1';
+const String gradleVersion7_6_1 = r'7.6.1';
 
 // String that can be placed in the gradle-wrapper.properties to opt out of this
 // migrator.
@@ -151,10 +151,10 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
     final String existingVersionString = gradleDistributionUrl[1]!;
     if (gradleVersionsToUpgradeFrom.contains(existingVersionString)) {
       logger.printStatus('Conflict detected between Android Studio Java version and Gradle version, '
-          'upgrading Gradle version from $existingVersionString to $_gradleVersion7_6_1.');
+          'upgrading Gradle version from $existingVersionString to $gradleVersion7_6_1.');
       final String gradleDistributionUrlString = gradleDistributionUrl.group(0)!;
       final String upgradedDistributionUrl =
-        gradleDistributionUrlString.replaceAll(existingVersionString, _gradleVersion7_6_1);
+        gradleDistributionUrlString.replaceAll(existingVersionString, gradleVersion7_6_1);
       fileContents = fileContents.replaceFirst(gradleOrgVersionMatch, upgradedDistributionUrl);
     }
     return fileContents;
