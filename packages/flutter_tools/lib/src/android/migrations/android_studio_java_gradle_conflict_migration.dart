@@ -62,6 +62,9 @@ const String gradleVersionNotFound = 'Failed to parse Gradle version from distri
 @visibleForTesting
 const String optOutFlagEnabled = 'Skipping Android Studio Java-Gradle compatibility '
     "because opt out flag: '$optOutFlag' is enabled in gradle-wrapper.properties file.";
+@visibleForTesting
+const String errorWhileMigrating = 'Encountered an error while attempting Gradle-Java '
+    'version compatibility check, skipping migration attempt. Error was: ';
 
 
 /// Migrate to a newer version of Gradle when the existing one does not support
@@ -96,38 +99,42 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
 
   @override
   void migrate() {
-    if (!_gradleWrapperPropertiesFile.existsSync()) {
-      logger.printTrace(gradleWrapperNotFound);
-      return;
-    }
+    try {
+      if (!_gradleWrapperPropertiesFile.existsSync()) {
+        logger.printTrace(gradleWrapperNotFound);
+        return;
+      }
 
-    if (_androidStudio == null) {
-      logger.printTrace(androidStudioNotFound);
-      return;
-    } else if (_androidStudio!.version!.major < androidStudioFlamingo.major) {
-      logger.printTrace(androidStudioVersionBelowFlamingo);
-      return;
-    }
+      if (_androidStudio == null || _androidStudio!.version == null) {
+        logger.printTrace(androidStudioNotFound);
+        return;
+      } else if (_androidStudio!.version!.major < androidStudioFlamingo.major) {
+        logger.printTrace(androidStudioVersionBelowFlamingo);
+        return;
+      }
 
-    final String? javaVersionString = _androidSdk?.getJavaVersion(
-      androidStudio: _androidStudio,
-      fileSystem: _fileSystem,
-      operatingSystemUtils: _os,
-      platform: _platform,
-      processUtils: _processUtils,
-    );
-    final Version? javaVersion = Version.parse(javaVersionString);
-    if (javaVersion == null) {
-      logger.printTrace(javaVersionNotFound);
-      return;
-    }
+      final String? javaVersionString = _androidSdk?.getJavaVersion(
+        androidStudio: _androidStudio,
+        fileSystem: _fileSystem,
+        operatingSystemUtils: _os,
+        platform: _platform,
+        processUtils: _processUtils,
+      );
+      final Version? javaVersion = Version.parse(javaVersionString);
+      if (javaVersion == null) {
+        logger.printTrace(javaVersionNotFound);
+        return;
+      }
 
-    if (javaVersion.major != flamingoBundledJava.major) {
-      logger.printTrace(javaVersionNot17);
-      return;
-    }
+      if (javaVersion.major != flamingoBundledJava.major) {
+        logger.printTrace(javaVersionNot17);
+        return;
+      }
 
-    processFileLines(_gradleWrapperPropertiesFile);
+      processFileLines(_gradleWrapperPropertiesFile);
+    } on Exception catch (e) {
+      logger.printTrace(errorWhileMigrating + e.toString());
+    }
   }
 
   @override
