@@ -72,10 +72,15 @@ function run_tests() (
 # Runs in a subshell.
 function collect_licenses() (
   cd "$SRC_DIR/flutter/tools/licenses"
-  dart --enable-asserts lib/main.dart         \
-    --src ../../..                            \
-    --out ../../../out/license_script_output  \
-    --golden ../../ci/licenses_golden \
+  # `--interpret_irregexp`` tells dart to use interpreter mode for running
+  # the regexp matching, rather than generating machine code for it.
+  # For very large RegExps that are currently used in license script using
+  # interpreter is faster than using unoptimized machine code, which has
+  # no chance of being optimized(due to its size).
+  dart --enable-asserts --interpret_irregexp lib/main.dart \
+    --src ../../..                                         \
+    --out ../../../out/license_script_output               \
+    --golden ../../ci/licenses_golden                      \
     "${QUIET}"
 )
 
