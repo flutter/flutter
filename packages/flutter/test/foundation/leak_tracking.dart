@@ -64,6 +64,7 @@ extension LeakTrackerAdjustments on WidgetTester {
 /// This method is temporal with the plan:
 ///
 /// 1. For each occurence of [testWidgets] in flutter framework, do one of three:
+///
 /// * replace [testWidgets] with [testWidgetsWithLeakTracking]
 /// * comment why leak tracking is not needed
 /// * link bug about memory leak
@@ -71,11 +72,13 @@ extension LeakTrackerAdjustments on WidgetTester {
 /// 2. Enable [testWidgets] to track leaks, disabled by default for users,
 /// and may be enabled by default for flutter framework.
 ///
-/// 3. Replace [testWidgetsWithLeakTracking] with [testWidgets]
+/// 3. Replace [testWidgetsWithLeakTracking] with [testWidgets].
 ///
 /// Memory leak troubleshooting tips:
+/// https://github.com/dart-lang/leak_tracker/blob/main/doc/TROUBLESHOOT.md
 ///
-/// See https://github.com/flutter/devtools/issues/3951 for more details.
+/// See https://github.com/flutter/devtools/issues/3951 for more details
+/// on leak tracking.
 @isTest
 void testWidgetsWithLeakTracking(
   String description,
