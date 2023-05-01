@@ -11,9 +11,9 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkImageGenerator.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
-#include "third_party/skia/src/codec/SkCodecImageGenerator.h"  // nogncheck
 
 namespace flutter {
 
@@ -213,7 +213,8 @@ class BuiltinSkiaCodecImageGenerator : public ImageGenerator {
 
  private:
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(BuiltinSkiaCodecImageGenerator);
-  std::unique_ptr<SkCodecImageGenerator> codec_generator_;
+  std::unique_ptr<SkCodec> codec_;
+  SkImageInfo image_info_;
 };
 
 }  // namespace flutter

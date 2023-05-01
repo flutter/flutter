@@ -838,7 +838,8 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   auto data = OpenFixtureAsSkData("Horizontal.jpg");
   auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
-  ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
+  ASSERT_EQ(600, image->width());
+  ASSERT_EQ(200, image->height());
 
   ImageGeneratorRegistry registry;
   std::shared_ptr<ImageGenerator> generator =
@@ -847,11 +848,11 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
 
   auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
                                                          std::move(generator));
-
-  ASSERT_EQ(ImageDecoderSkia::ImageFromCompressedData(
-                descriptor.get(), 6, 2, fml::tracing::TraceFlow(""))
-                ->dimensions(),
-            SkISize::Make(6, 2));
+  auto compressed_image = ImageDecoderSkia::ImageFromCompressedData(
+      descriptor.get(), 6, 2, fml::tracing::TraceFlow(""));
+  ASSERT_EQ(compressed_image->width(), 6);
+  ASSERT_EQ(compressed_image->height(), 2);
+  ASSERT_EQ(compressed_image->alphaType(), kOpaque_SkAlphaType);
 
 #if IMPELLER_SUPPORTS_RENDERING
   std::shared_ptr<impeller::Allocator> allocator =
@@ -859,13 +860,33 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   auto result_1 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), SkISize::Make(6, 2), {100, 100},
       /*supports_wide_gamut=*/false, allocator);
-  ASSERT_EQ(result_1->sk_bitmap->dimensions(), SkISize::Make(6, 2));
+  ASSERT_EQ(result_1->sk_bitmap->width(), 6);
+  ASSERT_EQ(result_1->sk_bitmap->height(), 2);
 
   auto result_2 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), SkISize::Make(60, 20), {10, 10},
       /*supports_wide_gamut=*/false, allocator);
-  ASSERT_EQ(result_2->sk_bitmap->dimensions(), SkISize::Make(10, 10));
+  ASSERT_EQ(result_2->sk_bitmap->width(), 10);
+  ASSERT_EQ(result_2->sk_bitmap->height(), 10);
 #endif  // IMPELLER_SUPPORTS_RENDERING
+}
+
+TEST(ImageDecoderTest, ImagesWithTransparencyArePremulAlpha) {
+  auto data = OpenFixtureAsSkData("heart_end.png");
+  ASSERT_TRUE(data);
+  ImageGeneratorRegistry registry;
+  std::shared_ptr<ImageGenerator> generator =
+      registry.CreateCompatibleGenerator(data);
+  ASSERT_TRUE(generator);
+
+  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(std::move(data),
+                                                         std::move(generator));
+  auto compressed_image = ImageDecoderSkia::ImageFromCompressedData(
+      descriptor.get(), 250, 250, fml::tracing::TraceFlow(""));
+  ASSERT_TRUE(compressed_image);
+  ASSERT_EQ(compressed_image->width(), 250);
+  ASSERT_EQ(compressed_image->height(), 250);
+  ASSERT_EQ(compressed_image->alphaType(), kPremul_SkAlphaType);
 }
 
 TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
@@ -878,9 +899,15 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
   auto descriptor =
       fml::MakeRefCounted<ImageDescriptor>(data, std::move(generator));
 
+  // If Exif metadata is ignored, the height and width will be swapped because
+  // "Rotate 90 CW" is what is encoded there.
+  ASSERT_EQ(600, descriptor->width());
+  ASSERT_EQ(200, descriptor->height());
+
   auto image = SkImages::DeferredFromEncodedData(data);
   ASSERT_TRUE(image != nullptr);
-  ASSERT_EQ(SkISize::Make(600, 200), image->dimensions());
+  ASSERT_EQ(600, image->width());
+  ASSERT_EQ(200, image->height());
 
   auto decode = [descriptor](uint32_t target_width, uint32_t target_height) {
     return ImageDecoderSkia::ImageFromCompressedData(
@@ -894,8 +921,9 @@ TEST(ImageDecoderTest, VerifySubpixelDecodingPreservesExifOrientation) {
 
   auto assert_image = [&](auto decoded_image) {
     ASSERT_EQ(decoded_image->dimensions(), SkISize::Make(300, 100));
-    ASSERT_TRUE(SkPngEncoder::Encode(nullptr, decoded_image.get(), {})
-                    ->equals(expected_data.get()));
+    sk_sp<SkData> encoded =
+        SkPngEncoder::Encode(nullptr, decoded_image.get(), {});
+    ASSERT_TRUE(encoded->equals(expected_data.get()));
   };
 
   assert_image(decode(300, 100));
