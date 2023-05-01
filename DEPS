@@ -497,8 +497,8 @@ deps = {
   'src/third_party/dart/third_party/pkg/yaml_edit':
    Var('dart_git') + '/yaml_edit.git' + '@' + Var('dart_yaml_edit_rev'),
 
-  'src/third_party/dart/tools/sdks':
-   {'packages': [{'version': 'version:3.0.0-417.2.beta', 'package': 'dart/dart-sdk/${{platform}}'}], 'dep_type': 'cipd'},
+  'src/third_party/dart/tools/sdks/dart-sdk':
+   {'packages': [{'version': 'git_revision:d2b8bf9c2ec1bd479dfd255ae70a62aa723df931', 'package': 'dart/dart-sdk/${{platform}}'}], 'dep_type': 'cipd'},
 
   # WARNING: end of dart dependencies list that is cleaned up automatically - see create_updated_flutter_deps.py.
 
