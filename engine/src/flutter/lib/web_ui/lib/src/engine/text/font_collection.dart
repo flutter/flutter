@@ -194,7 +194,12 @@ class FontManager {
     if (_downloadedFonts.isEmpty) {
       return;
     }
-    _downloadedFonts.forEach(domDocument.fonts!.add);
+    // Since we can't use tear-offs for interop members, this code is faster and
+    // easier to read with a for loop instead of forEach.
+    // ignore: prefer_foreach
+    for (final DomFontFace font in _downloadedFonts) {
+      domDocument.fonts!.add(font);
+    }
   }
 
 
