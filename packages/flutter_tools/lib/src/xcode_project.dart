@@ -279,7 +279,7 @@ class IosProject extends XcodeBasedProject {
     if (productName == null) {
       globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to $hostAppProjectName');
     }
-    return productName ?? '$_defaultHostAppName.app';
+    return productName ?? '$XcodeBasedProject._defaultHostAppName.app';
   }
 
   /// The build settings for the host app of this project, as a detached map.
@@ -511,7 +511,7 @@ class IosProject extends XcodeBasedProject {
         ? _flutterLibRoot
             .childDirectory('Flutter')
             .childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(_defaultHostAppName);
+        : hostAppRoot.childDirectory(XcodeBasedProject._defaultHostAppName);
   }
 
   File get pluginRegistrantHeader {
