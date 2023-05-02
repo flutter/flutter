@@ -1896,6 +1896,60 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('prevent mouse events on Android', () {
+      // Regression test for https://github.com/flutter/flutter/issues/124483.
+      debugOperatingSystemOverride = OperatingSystem.android;
+      debugBrowserEngineOverride = BrowserEngine.blink;
+
+      /// During initialization [HybridTextEditing] will pick the correct
+      /// text editing strategy for [OperatingSystem.android].
+      textEditing = HybridTextEditing();
+
+      final MethodCall setClient = MethodCall(
+        'TextInput.setClient',
+        <dynamic>[123, flutterMultilineConfig],
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      // Editing shouldn't have started yet.
+      expect(defaultTextEditingRoot.ownerDocument?.activeElement, domDocument.body);
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final List<double> transform = Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(150, 50, transform);
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      final DomHTMLTextAreaElement textarea = textEditing!.strategy.domElement! as DomHTMLTextAreaElement;
+      checkTextAreaEditingState(textarea, '', 0, 0);
+
+      // Can set editing state and preserve new lines.
+      const MethodCall setEditingState = MethodCall(
+        'TextInput.setEditingState',
+        <String, dynamic>{
+          'text': '1\n2\n3\n4\n',
+          'selectionBase': 8,
+          'selectionExtent': 8,
+          'composingBase': null,
+          'composingExtent': null,
+        },
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+      checkTextAreaEditingState(textarea, '1\n2\n3\n4\n', 8, 8);
+
+      // 'mousedown' event should be prevented.
+      final DomEvent event = createDomEvent('Event', 'mousedown');
+      textarea.dispatchEvent(event);
+      expect(event.defaultPrevented, isTrue);
+
+      hideKeyboard();
+    });
+
     test('sets correct input type in iOS', () {
       // Test on ios-safari only.
       if (browserEngine == BrowserEngine.webkit &&
