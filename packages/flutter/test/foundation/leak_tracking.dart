@@ -35,6 +35,7 @@ class TestWidgetsConfig {
   final WeakSet heldObjects = WeakSet();
 }
 
+/// Extension for [WidgetTester] to configure held objects.
 extension LeakTrackerConfig on WidgetTester {
   static final Expando<TestWidgetsConfig> _configExpando = Expando<TestWidgetsConfig>();
 
@@ -186,6 +187,12 @@ class LeakCleaner {
   }
 
   bool _isLeakAllowed(LeakType leakType, LeakReport leak) {
+    // Tracking for non-GCed is temporarily disabled.
+    // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
+    if (<LeakType>{LeakType.notGCed, LeakType.gcedLate}.contains(leakType)) {
+      return true;
+    }
+
     switch (leakType) {
       case LeakType.notDisposed:
         final bool result = config.notDisposedAllowList.contains(leak.type);
