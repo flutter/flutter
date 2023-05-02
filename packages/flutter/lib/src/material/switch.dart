@@ -288,7 +288,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (_) => true,
+  ///   onChanged: (bool value) => true,
   ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -329,7 +329,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (_) => true,
+  ///   onChanged: (bool value) => true,
   ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -370,7 +370,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (_) => true,
+  ///   onChanged: (bool value) => true,
   ///   trackOutlineColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -404,7 +404,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (_) => true,
+  ///   onChanged: (bool value) => true,
   ///   trackOutlineWidth: MaterialStateProperty.resolveWith<double?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return 5.0;
@@ -416,8 +416,7 @@ class Switch extends StatelessWidget {
   /// {@end-tool}
   /// {@endtemplate}
   ///
-  /// In Material 3, the outline width defaults to 2.0 in the selected
-  /// state and [ColorScheme.outline] in the unselected state. In Material 2,
+  /// In Material 3, the outline width defaults to 2.0. In Material 2,
   /// the [Switch] track has no outline by default.
   final MaterialStateProperty<double?>? trackOutlineWidth;
 
@@ -438,7 +437,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (_) => true,
+  ///   onChanged: (bool value) => true,
   ///   thumbIcon: MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return const Icon(Icons.close);
@@ -1528,11 +1527,13 @@ class _SwitchPainter extends ToggleablePainter {
         outlineTrackRect,
         Radius.circular(trackRadius),
       );
-      final Paint outlinePaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = trackOutlineWidth ?? 0.0
-        ..color = trackOutlineColor;
-      canvas.drawRRect(outlineTrackRRect, outlinePaint);
+      if (trackOutlineWidth != null) {
+        final Paint outlinePaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = trackOutlineWidth
+          ..color = trackOutlineColor;
+        canvas.drawRRect(outlineTrackRRect, outlinePaint);
+      }
     }
   }
 
