@@ -684,6 +684,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _actionHandler(_AdjustSliderIntent intent) {
     final _RenderSlider renderSlider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext!);
+    bool sliderIncreased = false;
+    widget.onChangeStart?.call(widget.value);
+
     switch (intent.type) {
       case _SliderAdjustmentType.right:
         switch (textDirection) {
@@ -691,18 +694,30 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             renderSlider.decreaseAction();
           case TextDirection.ltr:
             renderSlider.increaseAction();
+            sliderIncreased = true;
         }
       case _SliderAdjustmentType.left:
         switch (textDirection) {
           case TextDirection.rtl:
             renderSlider.increaseAction();
+            sliderIncreased = true;
           case TextDirection.ltr:
             renderSlider.decreaseAction();
         }
       case _SliderAdjustmentType.up:
         renderSlider.increaseAction();
+        sliderIncreased = true;
       case _SliderAdjustmentType.down:
         renderSlider.decreaseAction();
+    }
+
+    if(sliderIncreased)
+    {
+      widget.onChangeEnd?.call(_lerp(clampDouble(renderSlider.value  + renderSlider._semanticActionUnit,0.0,1.0)));
+    }
+    else
+    {
+      widget.onChangeEnd?.call(_lerp(clampDouble(renderSlider.value  - renderSlider._semanticActionUnit,0.0,1.0)));
     }
   }
 
