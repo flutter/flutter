@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-// ignore: deprecated_member_use
 import 'package:test_api/scaffolding.dart' as test_package;
 
 /// Signature for the [reportTestException] callback.

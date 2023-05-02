@@ -11,7 +11,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
-// ignore: deprecated_member_use
 import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'all_elements.dart';
@@ -47,7 +46,6 @@ export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
 export 'package:test_api/hooks.dart' show TestFailure;
-// ignore: deprecated_member_use
 export 'package:test_api/scaffolding.dart'
     hide group, setUp, setUpAll, tearDown, tearDownAll, test;
 
