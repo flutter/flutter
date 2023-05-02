@@ -1670,11 +1670,11 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
       if (states.contains(MaterialState.pressed)) {
         return thumbColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
-      if (states.contains(MaterialState.focused)) {
-        return _theme.focusColor;
-      }
       if (states.contains(MaterialState.hovered)) {
         return _theme.hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
       }
       return null;
     });

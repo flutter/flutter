@@ -892,20 +892,24 @@ class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   @override
   Color? resolve(Set<MaterialState> states) {
     if (selected) {
-      if (states.contains(MaterialState.hovered)) {
-        return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
-      } else if (states.contains(MaterialState.focused)) {
-        return focusColor ?? colorScheme?.primary.withOpacity(0.12);
-      } else if (states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed)) {
         return splashColor ?? colorScheme?.primary.withOpacity(0.16);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusColor ?? colorScheme?.primary.withOpacity(0.12);
+      }
     } else if (unselected) {
+      if (states.contains(MaterialState.pressed)) {
+        return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
+      }
       if (states.contains(MaterialState.hovered)) {
         return hoverColor ?? colorScheme?.onSurface.withOpacity(0.04);
-      } else if (states.contains(MaterialState.focused)) {
+      }
+      if (states.contains(MaterialState.focused)) {
         return focusColor ?? colorScheme?.onSurface.withOpacity(0.12);
-      } else if (states.contains(MaterialState.pressed)) {
-        return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
       }
     }
     return null;
