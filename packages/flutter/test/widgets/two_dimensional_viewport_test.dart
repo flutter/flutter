@@ -91,7 +91,7 @@ class SimpleTableViewport extends TwoDimensionalViewport {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderTwoDimensionalViewport createRenderObject(BuildContext context) {
     return RenderSimpleTableViewport(
       horizontalOffset: horizontalOffset,
       horizontalAxisDirection: horizontalAxisDirection,
