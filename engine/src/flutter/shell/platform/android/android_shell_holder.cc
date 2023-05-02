@@ -180,12 +180,14 @@ AndroidShellHolder::AndroidShellHolder(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<ThreadHost>& thread_host,
     std::unique_ptr<Shell> shell,
+    std::unique_ptr<APKAssetProvider> apk_asset_provider,
     const fml::WeakPtr<PlatformViewAndroid>& platform_view)
     : settings_(settings),
       jni_facade_(jni_facade),
       platform_view_(platform_view),
       thread_host_(thread_host),
-      shell_(std::move(shell)) {
+      shell_(std::move(shell)),
+      apk_asset_provider_(std::move(apk_asset_provider)) {
   FML_DCHECK(jni_facade);
   FML_DCHECK(shell_);
   FML_DCHECK(shell_->IsSetup());
@@ -270,9 +272,9 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
       shell_->Spawn(std::move(config.value()), initial_route,
                     on_create_platform_view, on_create_rasterizer);
 
-  return std::unique_ptr<AndroidShellHolder>(
-      new AndroidShellHolder(GetSettings(), jni_facade, thread_host_,
-                             std::move(shell), weak_platform_view));
+  return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
+      GetSettings(), jni_facade, thread_host_, std::move(shell),
+      apk_asset_provider_->Clone(), weak_platform_view));
 }
 
 void AndroidShellHolder::Launch(
