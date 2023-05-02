@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -6,6 +8,16 @@ import 'widget_span.dart';
 
 /// A callback that passes a [String] representing a URL.
 typedef UriStringCallback = void Function(String urlString);
+
+/// Builds an InlineSpan for displaying [linkText].
+///
+/// If tappable, then uses the [onTap] handler.
+///
+/// Typically used for styling a link in some inline text.
+typedef LinkBuilder = InlineSpan Function(
+  String linkText,
+  UriStringCallback? onTap,
+);
 
 // TODO(justinmc): Change name to something link-agnostic?
 // TODO(justinmc): Add regexp parameter. No, builder? Both?
@@ -31,6 +43,7 @@ class Linkifier extends StatelessWidget {
   }
 }
 
+// TODO(justinmc): Make agnostic to URLs, just "links", which could be GitHub PRs, etc.
 /// A [TextSpan] that makes parts of the [text] interactive.
 class InlineLinkifier extends TextSpan {
   /// Create an instance of [InlineLinkifier].
@@ -43,14 +56,16 @@ class InlineLinkifier extends TextSpan {
     required String text,
     Iterable<TextRange>? ranges,
     UriStringCallback? onTap,
+    LinkBuilder? linkBuilder,
   }) : super(
          children: _spansFromRanges(
            text: text,
+           linkBuilder: linkBuilder,
+           onTap: onTap,
            ranges: ranges ?? _rangesFromText(
              text: text,
              regExp: _urlRegExp,
            ),
-           onTap: onTap,
          ),
        );
 
@@ -58,27 +73,40 @@ class InlineLinkifier extends TextSpan {
   /// given [regExp] is made interactive.
   ///
   /// By default, [regExp] matches URLs.
+  ///
+  /// See also:
+  ///
+  ///  * [InlineLinkifier.new], which can be passed [TextRange]s directly.
   InlineLinkifier.regExp({
     super.style,
     required String text,
     UriStringCallback ? onTap,
+    LinkBuilder? linkBuilder,
     RegExp? regExp,
   }) : super(
          children: _spansFromRanges(
            text: text,
+           linkBuilder: linkBuilder,
+           onTap: onTap,
            ranges: _rangesFromText(
              text: text,
              regExp: regExp ?? _urlRegExp,
            ),
-           onTap: onTap,
          ),
        );
-
-  // TODO(justinmc): Function constructor.
 
   // TODO(justinmc): Consider revising this regexp.
   static final RegExp _urlRegExp = RegExp(r'((http|https|ftp):\/\/)?([a-zA-Z\-]*\.)?[a-zA-Z0-9\-]*\.[a-zA-Z]*');
 
+  static InlineSpan _defaultLinkBuilder(String linkText, UriStringCallback? onTap) {
+    return _InlineLink(
+      onTap: onTap,
+      text: linkText,
+    );
+  }
+
+  // Turns all matches from the regExp into a list of TextRanges, allowing
+  // compatibility with _spansFromRanges.
   static Iterable<TextRange> _rangesFromText({
     required String text,
     required RegExp regExp,
@@ -92,9 +120,11 @@ class InlineLinkifier extends TextSpan {
     });
   }
 
+  // Highlights the text in the given `ranges` and makes them interactive.
   static List<InlineSpan> _spansFromRanges({
     required String text,
     required Iterable<TextRange> ranges,
+    LinkBuilder? linkBuilder = _defaultLinkBuilder,
     UriStringCallback? onTap,
   }) {
     // Sort ranges to facilitate ignoring overlapping ranges.
@@ -113,7 +143,11 @@ class InlineLinkifier extends TextSpan {
           text: text.substring(index, range.start),
         ));
       }
-      // TODO(justinmc): Allow customization of this. Merge `style` param in.
+      // TODO(justinmc): Allow custom style if don't pass whole builder fn.
+      spans.add(linkBuilder!(
+        text.substring(range.start, range.end),
+        onTap,
+      ));
       spans.add(_InlineLink(
         onTap: onTap,
         text: text.substring(range.start, range.end),
@@ -134,6 +168,7 @@ class InlineLinkifier extends TextSpan {
 class _InlineLink extends WidgetSpan {
   _InlineLink({
     required String text,
+    // TODO(justinmc): Include these super parameters?
     /*
     super.alignment,
     super.baseline,
@@ -174,7 +209,8 @@ class _TextLink extends StatelessWidget {
         child: Text(
           uriString,
           style: const TextStyle(
-            // TODO(justinmc): Correct color per-platform.
+            // TODO(justinmc): Correct color per-platform. Get it from Theme in
+            // Material somehow?
             color: Color(0xff0000ff),
           ),
         ),
