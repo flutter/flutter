@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -513,6 +514,11 @@ class XCDevice {
           if (errorMessage != null) {
             if (errorMessage.contains('not paired')) {
               UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
+            }
+
+            if (errorMessage.contains('enable Developer Mode')) {
+              _logger.printStatus(errorMessage);
+              continue;
             }
             _logger.printTrace(errorMessage);
           }

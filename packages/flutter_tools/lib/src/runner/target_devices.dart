@@ -493,12 +493,12 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       if (devices.length == 1) {
         Device? matchedDevice = devices.first;
 
-        if (matchedDevice is IOSDevice) {
-          final bool devModeEnabled = await matchedDevice.isDeveloperModeEnabled();
-          if (!devModeEnabled) {
-            throwToolExit('');
-          }
-        }
+        // if (matchedDevice is IOSDevice) {
+        //   final bool devModeEnabled = await matchedDevice.isDeveloperModeEnabled();
+        //   if (!devModeEnabled) {
+        //     throwToolExit('');
+        //   }
+        // }
 
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
           matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
