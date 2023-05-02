@@ -7,9 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
-/// Set of objects.
+/// Set of objects, that does not hold the objects from garbafge collection.
 ///
-/// Does not hold the objects from garbafge collection.
 /// The objects are referenced by hash codes and can duplicate with low probability.
 @visibleForTesting
 class WeakSet {
@@ -26,36 +25,36 @@ class WeakSet {
   }
 
   bool contains(int hashCode, String type) {
-    final result = _objectCodes.contains(_toCode(hashCode, type));
+    final bool result = _objectCodes.contains(_toCode(hashCode, type));
     return result;
   }
 }
 
 @visibleForTesting
-class TestAdjustments {
+class TestWidgetsConfig {
   final WeakSet heldObjects = WeakSet();
 }
 
-extension LeakTrackerAdjustments on WidgetTester {
-  static final Expando<TestAdjustments> _abjustmentsExpando = Expando<TestAdjustments>();
+extension LeakTrackerConfig on WidgetTester {
+  static final Expando<TestWidgetsConfig> _configExpando = Expando<TestWidgetsConfig>();
 
   T addHeldObject<T  extends Object>(T object){
-    _adjustments.heldObjects.add(object);
+    _config.heldObjects.add(object);
     return object;
   }
 
   bool isHeld(Object object){
-    return _adjustments.heldObjects.contains(
+    return _config.heldObjects.contains(
       identityHashCode(object),
       object.runtimeType.toString(),
     );
   }
 
-  TestAdjustments get _adjustments {
-    if (_abjustmentsExpando[this] == null) {
-      _abjustmentsExpando[this] = TestAdjustments();
+  TestWidgetsConfig get _config {
+    if (_configExpando[this] == null) {
+      _configExpando[this] = TestWidgetsConfig();
     }
-    return _abjustmentsExpando[this]!;
+    return _configExpando[this]!;
   }
 }
 
@@ -156,7 +155,7 @@ Future<void> _withFlutterLeakTracking(
         shouldThrowOnLeaks: false,
       );
 
-      leaks = LeakCleaner(config, tester._adjustments).clean(leaks);
+      leaks = LeakCleaner(config, tester._config).clean(leaks);
 
       if (leaks.total > 0) {
         config.onLeaks?.call(leaks);
@@ -176,10 +175,10 @@ class LeakCleaner {
   LeakCleaner(this.config, this.adjustments);
 
   final LeakTrackingTestConfig config;
-  final TestAdjustments adjustments;
+  final TestWidgetsConfig adjustments;
 
   Leaks clean(Leaks leaks) {
-    final result =  Leaks(<LeakType, List<LeakReport>>{
+    final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
       for (LeakType leakType in leaks.byType.keys)
         leakType: leaks.byType[leakType]!.where((LeakReport leak) => !_isLeakAllowed(leakType, leak)).toList()
     });
@@ -189,11 +188,11 @@ class LeakCleaner {
   bool _isLeakAllowed(LeakType leakType, LeakReport leak) {
     switch (leakType) {
       case LeakType.notDisposed:
-        final result = config.notDisposedAllowList.contains(leak.type);
+        final bool result = config.notDisposedAllowList.contains(leak.type);
         return result;
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        final result = config.notGCedAllowList.contains(leak.type) ||
+        final bool result = config.notGCedAllowList.contains(leak.type) ||
             adjustments.heldObjects.contains(leak.code, leak.type);
         return result;
     }
