@@ -7,6 +7,7 @@ import 'widget_span.dart';
 /// A callback that passes a [String] representing a URL.
 typedef UriStringCallback = void Function(String urlString);
 
+// TODO(justinmc): Change name to something link-agnostic?
 // TODO(justinmc): Add regexp parameter. No, builder? Both?
 class Linkifier extends StatelessWidget {
   const Linkifier({
@@ -21,7 +22,7 @@ class Linkifier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: _InlineLinkifier(
+      text: InlineLinkifier(
         onTap: onTap,
         style: DefaultTextStyle.of(context).style,
         text: text,
@@ -30,45 +31,95 @@ class Linkifier extends StatelessWidget {
   }
 }
 
-class _InlineLinkifier extends TextSpan {
-  _InlineLinkifier({
-    required String text,
+/// A [TextSpan] that makes parts of the [text] interactive.
+class InlineLinkifier extends TextSpan {
+  /// Create an instance of [InlineLinkifier].
+  ///
+  /// If [ranges] is given, then makes the text indicated by that interactive.
+  ///
+  /// Otherwise, finds URLs in the text and makes them interactive.
+  InlineLinkifier({
     super.style,
-    this.onTap,
-    RegExp? regExp,
-  }) : regExp = regExp ?? _urlRegExp,
-       super(
-         children: _spansFromText(text, onTap),
+    required String text,
+    Iterable<TextRange>? ranges,
+    UriStringCallback? onTap,
+  }) : super(
+         children: _spansFromRanges(
+           text: text,
+           ranges: ranges ?? _rangesFromText(
+             text: text,
+             regExp: _urlRegExp,
+           ),
+           onTap: onTap,
+         ),
        );
 
-  final UriStringCallback? onTap;
-  final RegExp regExp;
+  /// Create an instance of [InlineLinkifier] where the text matched by the
+  /// given [regExp] is made interactive.
+  ///
+  /// By default, [regExp] matches URLs.
+  InlineLinkifier.regExp({
+    super.style,
+    required String text,
+    UriStringCallback ? onTap,
+    RegExp? regExp,
+  }) : super(
+         children: _spansFromRanges(
+           text: text,
+           ranges: _rangesFromText(
+             text: text,
+             regExp: regExp ?? _urlRegExp,
+           ),
+           onTap: onTap,
+         ),
+       );
+
+  // TODO(justinmc): Function constructor.
 
   // TODO(justinmc): Consider revising this regexp.
   static final RegExp _urlRegExp = RegExp(r'((http|https|ftp):\/\/)?([a-zA-Z\-]*\.)?[a-zA-Z0-9\-]*\.[a-zA-Z]*');
 
-  static List<InlineSpan> _spansFromText(String text, UriStringCallback? onTap) {
-    final Iterable<RegExpMatch> matches = _urlRegExp.allMatches(text);
-    int index = 0;
+  static Iterable<TextRange> _rangesFromText({
+    required String text,
+    required RegExp regExp,
+  }) {
+    final Iterable<RegExpMatch> matches = regExp.allMatches(text);
+    return matches.map((RegExpMatch match) {
+      return TextRange(
+        start: match.start,
+        end: match.end,
+      );
+    });
+  }
+
+  static List<InlineSpan> _spansFromRanges({
+    required String text,
+    required Iterable<TextRange> ranges,
+    UriStringCallback? onTap,
+  }) {
+    // Sort ranges to facilitate ignoring overlapping ranges.
+    final List<TextRange> rangesList = ranges.toList()
+        ..sort((TextRange a, TextRange b) => a.start.compareTo(b.start));
+
     final List<InlineSpan> spans = <InlineSpan>[];
-    for (final RegExpMatch match in matches) {
-      // TODO(justinmc): I'm assuming matches are ordered by start.
-      // Ignore overlapping matches.
-      if (index > match.start) {
+    int index = 0;
+    for (final TextRange range in rangesList) {
+      // Ignore overlapping ranges.
+      if (index > range.start) {
         continue;
       }
-      if (index < match.start) {
+      if (index < range.start) {
         spans.add(TextSpan(
-          text: text.substring(index, match.start),
+          text: text.substring(index, range.start),
         ));
       }
       // TODO(justinmc): Allow customization of this. Merge `style` param in.
       spans.add(_InlineLink(
         onTap: onTap,
-        text: text.substring(match.start, match.end),
+        text: text.substring(range.start, range.end),
       ));
 
-      index = match.end;
+      index = range.end;
     }
     if (index < text.length) {
       spans.add(TextSpan(
