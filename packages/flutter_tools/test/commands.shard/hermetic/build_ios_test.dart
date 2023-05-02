@@ -90,13 +90,6 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  void createMinimalMockProjectFilesWithCustomNaming() {
-    fileSystem.directory(fileSystem.path.join('ios', 'RenamedProj.xcodeproj')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('ios', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
-    fileSystem.file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj')).createSync();
-    createCoreMockProjectFiles();
-  }
-
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
@@ -292,7 +285,11 @@ void main() {
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
-    createMinimalMockProjectFilesWithCustomNaming();
+
+    fileSystem.directory(fileSystem.path.join('ios', 'RenamedProj.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('ios', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj')).createSync();
+    createCoreMockProjectFiles();
 
     await createTestCommandRunner(command).run(
         const <String>['build', 'ios', '--no-pub']

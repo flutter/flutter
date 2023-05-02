@@ -91,12 +91,6 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  void createMinimalMockProjectFilesWithCustomNaming() {
-    fileSystem.directory(fileSystem.path.join('macos', 'RenamedProj.xcodeproj')).createSync(recursive: true);
-    fileSystem.directory(fileSystem.path.join('macos', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
-    createCoreMockProjectFiles();
-  }
-
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function()? onRun }) {
@@ -165,7 +159,7 @@ STDERR STUFF
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build successfully with renamed .xcproj/.xcworkspace files', () async {
+  testUsingContext('macOS build successfully with renamed .xcodeproj/.xcworkspace files', () async {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -173,7 +167,10 @@ STDERR STUFF
       logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
-    createMinimalMockProjectFilesWithCustomNaming();
+
+    fileSystem.directory(fileSystem.path.join('macos', 'RenamedProj.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('macos', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
+    createCoreMockProjectFiles();
 
     await createTestCommandRunner(command).run(
         const <String>['build', 'macos', '--no-pub']
