@@ -58,13 +58,15 @@ void main() {
       test.dispose();
       callbackDidFinish = true;
     }
-
     test.addListener(foo);
+
     test.notify();
+
     final AssertionError error = tester.takeException() as AssertionError;
     expect(error.toString().contains('dispose()'), isTrue);
     // Make sure it crashes during dispose call.
     expect(callbackDidFinish, isFalse);
+    test.dispose();
   });
 
   testWidgetsWithLeakTracking('ChangeNotifier', (WidgetTester tester) async {
@@ -149,6 +151,7 @@ void main() {
     expect(log, <String>['badListener', 'listener1', 'listener2']);
     expect(tester.takeException(), isArgumentError);
     log.clear();
+    test.dispose();
   });
 
   test('ChangeNotifier with mutating listener', () {
