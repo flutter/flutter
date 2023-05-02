@@ -356,6 +356,11 @@ List<String> _stringify(List<dynamic> list) => <String>[
   for (final dynamic item in list) item.toString(),
 ];
 
+/// the callback method for responding to changes in the [SystemUiOverlayStyle].
+///
+/// used by [SystemChrome.setSystemUIChangeCallback].
+typedef SystemUiOverlayStyleCallback = void Function(SystemUiOverlayStyle? style);
+
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
 abstract final class SystemChrome {
@@ -490,12 +495,22 @@ abstract final class SystemChrome {
     );
   }
 
-  static void Function(SystemUiOverlayStyle? style)? _systemUiOverlayStyleCallback;
+  static SystemUiOverlayStyleCallback? _systemUiOverlayStyleCallback;
 
-  /// Sets the callback method for responding to changes in the SystemUiOverlayStyle.
+  /// Sets the callback method for responding to changes in the [SystemUiOverlayStyle].
+  ///
+  /// For execute some logic, exactly after the [SystemChrome.SystemUiOverlayStyle]
+  /// changes, you can set a callback method using this Api.
+  ///
+  /// For example, it can be used for sync desktop custom title-bar with
+  /// SystemUiOverlayStyle for make code-base, more adaptive.
+  ///
+  /// Note: When set a new callback, last setted callback will be lost.
+  ///
+  /// Note: If you set a callback that manipulate a widget's state, don't forget to
+  /// unregister it in dispose lifecycle method by "setSystemUiOverlayStyleCallback(null)".
   // ignore: use_setters_to_change_properties
-  static void setSystemUiOverlayStyleCallback(
-      void Function(SystemUiOverlayStyle? style)? callback) {
+  static void setSystemUiOverlayStyleCallback(SystemUiOverlayStyleCallback? callback) {
     _systemUiOverlayStyleCallback = callback;
   }
 
