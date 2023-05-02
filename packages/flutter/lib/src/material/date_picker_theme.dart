@@ -949,13 +949,13 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.12);
       }
       return null;
     });

@@ -209,13 +209,13 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'pressed')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'pressed')};
       }
       if (states.contains(MaterialState.hovered)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'hover')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'hover')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range.', null, 'focus')};
+        return ${_stateColor('md.comp.date-picker.modal.range-selection.date.in-range', null, 'focus')};
       }
       return null;
     });
