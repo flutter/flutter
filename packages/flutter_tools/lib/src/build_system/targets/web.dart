@@ -28,7 +28,6 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
-import 'common.dart';
 import 'localizations.dart';
 import 'shader_compiler.dart';
 

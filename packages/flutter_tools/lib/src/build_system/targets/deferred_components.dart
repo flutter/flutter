@@ -11,7 +11,6 @@ import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'android.dart';
-import 'common.dart';
 
 /// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and displays the validator
 /// output to the developer if changes are recommended.

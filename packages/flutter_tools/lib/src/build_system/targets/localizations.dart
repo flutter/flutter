@@ -8,7 +8,6 @@ import '../../localizations/gen_l10n.dart';
 import '../../localizations/localizations_utils.dart';
 import '../build_system.dart';
 import '../depfile.dart';
-import 'common.dart';
 
 const String _kDependenciesFileName = 'gen_l10n_inputs_and_outputs.json';
 

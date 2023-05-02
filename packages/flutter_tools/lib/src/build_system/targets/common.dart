@@ -430,10 +430,3 @@ abstract final class Lipo {
     }
   }
 }
-
-extension EnvironmentExtension on Environment {
-  DepfileService get depFileService => DepfileService(
-    logger: logger,
-    fileSystem: fileSystem,
-  );
-}
