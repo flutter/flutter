@@ -9,5 +9,6 @@ framework_shared_headers =
                     "framework/Headers/FlutterChannels.h",
                     "framework/Headers/FlutterCodecs.h",
                     "framework/Headers/FlutterTexture.h",
+                    "framework/Headers/FlutterDartProject.h",
                   ],
                   "abspath")
