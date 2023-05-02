@@ -3222,6 +3222,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(currentRouteSetting.name, '/');
   });
+
+  testWidgets('Popup menu is positioned under the child', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    final Key childKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    const PopupMenuItem<void>(
+                      child: Text('Example'),
+                    ),
+                  ];
+                },
+                child: SizedBox(
+                  key: childKey,
+                  height: 50,
+                  width: 50,
+                )
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    final Offset childBottomLeft = tester.getBottomLeft(find.byKey(childKey));
+    final Offset menuTopLeft = tester.getTopLeft(find.bySemanticsLabel('Popup menu'));
+    expect(childBottomLeft, menuTopLeft);
+  });
 }
 
 class TestApp extends StatelessWidget {
