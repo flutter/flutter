@@ -19,7 +19,7 @@ import '../gradle_utils.dart';
 // Previous versions bundled a Java 11 JDK.
 @visibleForTesting
 final Version androidStudioFlamingo = Version(2022, 2, 0);
-
+@visibleForTesting
 const String gradleVersion7_6_1 = r'7.6.1';
 
 // String that can be placed in the gradle-wrapper.properties to opt out of this
