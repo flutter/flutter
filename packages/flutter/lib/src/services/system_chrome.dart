@@ -505,9 +505,9 @@ abstract final class SystemChrome {
   /// For example, it can be used for sync desktop custom title-bar with
   /// SystemUiOverlayStyle for make code-base, more adaptive.
   ///
-  /// Note: When set a new callback, last setted callback will be lost.
+  /// When set a new callback, last setted callback will be lost.
   ///
-  /// Note: If you set a callback that manipulate a widget's state, don't forget to
+  /// If you set a callback that manipulate a widget's state, don't forget to
   /// unregister it in dispose lifecycle method by "setSystemUiOverlayStyleCallback(null)".
   // ignore: use_setters_to_change_properties
   static void setSystemUiOverlayStyleCallback(SystemUiOverlayStyleCallback? callback) {
