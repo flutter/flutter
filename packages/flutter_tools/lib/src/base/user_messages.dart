@@ -228,7 +228,7 @@ class UserMessages {
   String get windows10SdkNotFound =>
       'Unable to locate a Windows 10 SDK. If building fails, install the Windows 10 SDK in Visual Studio.';
   String visualStudioMissing(String workload) =>
-      'Visual Studio not installed; this is necessary for Windows development.\n'
+      'Visual Studio not installed; this is necessary to develop Windows apps.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
       'Please install the "$workload" workload, including all of its default components';
   String visualStudioTooOld(String minimumVersion, String workload) =>

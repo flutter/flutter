@@ -15,7 +15,7 @@ class VisualStudioValidator extends DoctorValidator {
     required UserMessages userMessages,
   }) : _visualStudio = visualStudio,
        _userMessages = userMessages,
-       super('Visual Studio - develop for Windows');
+       super('Visual Studio - develop Windows apps');
 
   final VisualStudio _visualStudio;
   final UserMessages _userMessages;
