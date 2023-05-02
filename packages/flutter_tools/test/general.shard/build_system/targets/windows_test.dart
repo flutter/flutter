@@ -31,8 +31,7 @@ void main() {
         kBuildMode: 'debug',
       },
     );
-    final DepfileService depfileService = DepfileService(
-      logger: BufferLogger.test(),
+    final DepfileService depfileService = DepfileService.test(
       fileSystem: fileSystem,
     );
     environment.buildDir.createSync(recursive: true);

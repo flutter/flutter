@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -11,8 +13,15 @@ class DepfileService {
   DepfileService({
     required Logger logger,
     required FileSystem fileSystem,
-  }) : _logger = logger,
-       _fileSystem = fileSystem;
+  })  : _logger = logger,
+        _fileSystem = fileSystem;
+
+  @visibleForTesting
+  factory DepfileService.test({required FileSystem fileSystem}) =>
+      DepfileService(
+        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+      );
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -51,7 +60,6 @@ class DepfileService {
     final List<File> outputs = _processList(colonSeparated[0].trim());
     return Depfile(inputs, outputs);
   }
-
 
   /// Parse the output of dart2js's used dependencies.
   ///

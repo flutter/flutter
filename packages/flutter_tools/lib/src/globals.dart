@@ -27,6 +27,7 @@ import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
+import 'build_system/depfile.dart';
 import 'cache.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -111,6 +112,11 @@ Analytics getDefaultAnalytics() {
 FileSystem get fs => ErrorHandlingFileSystem(
   delegate: context.get<FileSystem>() ?? localFileSystem,
   platform: platform,
+);
+
+DepfileService get depFileService => DepfileService(
+  fileSystem: localFileSystem,
+  logger: logger,
 );
 
 FileSystemUtils get fsUtils => context.get<FileSystemUtils>() ?? FileSystemUtils(

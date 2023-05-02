@@ -11,6 +11,7 @@ import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import 'android.dart';
+import 'common.dart';
 
 /// Creates a [DeferredComponentsGenSnapshotValidator], runs the checks, and displays the validator
 /// output to the developer if changes are recommended.
@@ -74,10 +75,6 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
     validator = DeferredComponentsGenSnapshotValidator(
       environment,
       title: title,
@@ -100,7 +97,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
     validator!.handleResults();
 
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       Depfile(validator!.inputs, validator!.outputs),
       environment.buildDir.childFile('flutter_$name.d'),
     );

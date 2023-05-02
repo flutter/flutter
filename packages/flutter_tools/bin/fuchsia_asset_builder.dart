@@ -93,14 +93,10 @@ Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depf
     assets.inputFiles,
     <libfs.File>[globals.fs.file(outputManifest)],
   );
-  final DepfileService depfileService = DepfileService(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-  );
 
   final libfs.File depfile = globals.fs.file(depfilePath);
   await depfile.create(recursive: true);
-  depfileService.writeToFile(depfileContent, depfile);
+  globals.depFileService.writeToFile(depfileContent, depfile);
 }
 
 Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
