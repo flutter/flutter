@@ -97,6 +97,7 @@ Future<void> writeDepfile(AssetBundle assets, String outputManifest, String depf
     fileSystem: globals.fs,
     logger: globals.logger,
   );
+
   final libfs.File depfile = globals.fs.file(depfilePath);
   await depfile.create(recursive: true);
   depfileService.writeToFile(depfileContent, depfile);

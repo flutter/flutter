@@ -11,8 +11,8 @@ class DepfileService {
   DepfileService({
     required Logger logger,
     required FileSystem fileSystem,
-  })  : _logger = logger,
-        _fileSystem = fileSystem;
+  }) : _logger = logger,
+       _fileSystem = fileSystem;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -51,6 +51,7 @@ class DepfileService {
     final List<File> outputs = _processList(colonSeparated[0].trim());
     return Depfile(inputs, outputs);
   }
+
 
   /// Parse the output of dart2js's used dependencies.
   ///
