@@ -38,7 +38,6 @@ _framework_binary_subpath = "Versions/A/$_flutter_framework_name"
 # the Flutter engine source root.
 _flutter_framework_headers = [
   "framework/Headers/FlutterAppDelegate.h",
-  "framework/Headers/FlutterDartProject.h",
   "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterMacOS.h",
   "framework/Headers/FlutterPlatformViews.h",
