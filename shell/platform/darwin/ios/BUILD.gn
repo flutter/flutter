@@ -27,7 +27,6 @@ _flutter_framework_headers = [
   "framework/Headers/Flutter.h",
   "framework/Headers/FlutterAppDelegate.h",
   "framework/Headers/FlutterCallbackCache.h",
-  "framework/Headers/FlutterDartProject.h",
   "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterEngineGroup.h",
   "framework/Headers/FlutterHeadlessDartRunner.h",

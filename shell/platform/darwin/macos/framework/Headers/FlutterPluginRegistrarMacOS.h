@@ -67,6 +67,27 @@ FLUTTER_DARWIN_EXPORT
 - (void)registerViewFactory:(nonnull NSObject<FlutterPlatformViewFactory>*)factory
                      withId:(nonnull NSString*)factoryId;
 
+/**
+ * Returns the file name for the given asset.
+ * The returned file name can be used to access the asset in the application's main bundle.
+ *
+ * @param asset The name of the asset. The name can be hierarchical.
+ * @return the file name to be used for lookup in the main bundle.
+ */
+- (nonnull NSString*)lookupKeyForAsset:(nonnull NSString*)asset;
+
+/**
+ * Returns the file name for the given asset which originates from the specified package.
+ * The returned file name can be used to access the asset in the application's main bundle.
+ *
+ *
+ * @param asset The name of the asset. The name can be hierarchical.
+ * @param package The name of the package from which the asset originates.
+ * @return the file name to be used for lookup in the main bundle.
+ */
+- (nonnull NSString*)lookupKeyForAsset:(nonnull NSString*)asset
+                           fromPackage:(nonnull NSString*)package;
+
 @end
 
 /**
