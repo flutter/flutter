@@ -2139,6 +2139,7 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone_build_test
+    bringup: true # https://github.com/flutter/flutter/issues/1258979
     presubmit: false
     timeout: 60
     properties:
@@ -2151,6 +2152,7 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf_e2e
     recipe: devicelab/devicelab_drone_build_test
+    bringup: true # https://github.com/flutter/flutter/issues/1258979
     presubmit: false
     timeout: 60
     properties:
@@ -2163,6 +2165,7 @@ targets:
 
   - name: Linux_build_test flutter_gallery__transition_perf_hybrid
     recipe: devicelab/devicelab_drone_build_test
+    bringup: true # https://github.com/flutter/flutter/issues/1258979
     presubmit: false
     timeout: 60
     properties:
