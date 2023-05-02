@@ -154,10 +154,14 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
     if (gradleVersionsToUpgradeFrom.contains(existingVersionString)) {
       logger.printStatus('Conflict detected between Android Studio Java version and Gradle version, '
           'upgrading Gradle version from $existingVersionString to $gradleVersion7_6_1.');
-      final String gradleDistributionUrlString = gradleDistributionUrl.group(0)!;
-      final String upgradedDistributionUrl =
-        gradleDistributionUrlString.replaceAll(existingVersionString, gradleVersion7_6_1);
-      fileContents = fileContents.replaceFirst(gradleOrgVersionMatch, upgradedDistributionUrl);
+      final String? gradleDistributionUrlString = gradleDistributionUrl.group(0);
+      if (gradleDistributionUrlString != null) {
+        final String upgradedDistributionUrl =
+          gradleDistributionUrlString.replaceAll(existingVersionString, gradleVersion7_6_1);
+        fileContents = fileContents.replaceFirst(gradleOrgVersionMatch, upgradedDistributionUrl);
+      } else {
+        logger.printTrace(gradleVersionNotFound);
+      }
     }
     return fileContents;
   }
