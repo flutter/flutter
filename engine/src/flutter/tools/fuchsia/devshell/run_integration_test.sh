@@ -34,7 +34,7 @@ then
 fi
 
 # This script currently requires running `fx serve`.
-if [[ -z "$(pgrep -f 'pm serve')" ]]
+if [[ -z "$(pgrep -f 'package-tool')" ]]
 then
   engine-error "This script currently requires running 'fx serve' first."
   exit 1
