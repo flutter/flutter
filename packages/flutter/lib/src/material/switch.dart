@@ -860,9 +860,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color effectiveActiveTrackOutlineColor = widget.trackOutlineColor?.resolve(activeStates)
       ?? switchTheme.trackOutlineColor?.resolve(activeStates)
       ?? Colors.transparent;
-    final double effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates)
+    final double? effectiveActiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(activeStates)
       ?? switchTheme.trackOutlineWidth?.resolve(activeStates)
-      ?? 2.0;
+      ?? defaults.trackOutlineWidth?.resolve(activeStates);
 
     final Color effectiveInactiveTrackColor = widget.trackColor?.resolve(inactiveStates)
       ?? _widgetTrackColor.resolve(inactiveStates)
@@ -871,9 +871,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
     final Color? effectiveInactiveTrackOutlineColor = widget.trackOutlineColor?.resolve(inactiveStates)
       ?? switchTheme.trackOutlineColor?.resolve(inactiveStates)
       ?? defaults.trackOutlineColor?.resolve(inactiveStates);
-    final double effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates)
-        ?? switchTheme.trackOutlineWidth?.resolve(inactiveStates)
-        ?? 2.0;
+    final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates)
+      ?? switchTheme.trackOutlineWidth?.resolve(inactiveStates)
+      ?? defaults.trackOutlineWidth?.resolve(activeStates);
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates)
       ?? switchTheme.thumbIcon?.resolve(activeStates);
@@ -1216,9 +1216,9 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  double get activeTrackOutlineWidth => _activeTrackOutlineWidth!;
+  double? get activeTrackOutlineWidth => _activeTrackOutlineWidth;
   double? _activeTrackOutlineWidth;
-  set activeTrackOutlineWidth(double value) {
+  set activeTrackOutlineWidth(double? value) {
     if (value == _activeTrackOutlineWidth) {
       return;
     }
@@ -1226,9 +1226,9 @@ class _SwitchPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  double get inactiveTrackOutlineWidth => _inactiveTrackOutlineWidth!;
+  double? get inactiveTrackOutlineWidth => _inactiveTrackOutlineWidth;
   double? _inactiveTrackOutlineWidth;
-  set inactiveTrackOutlineWidth(double value) {
+  set inactiveTrackOutlineWidth(double? value) {
     if (value == _inactiveTrackOutlineWidth) {
       return;
     }
