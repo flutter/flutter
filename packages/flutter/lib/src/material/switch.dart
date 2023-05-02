@@ -405,11 +405,11 @@ class Switch extends StatelessWidget {
   /// Switch(
   ///   value: true,
   ///   onChanged: (_) => true,
-  ///   trackOutlineWidth: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+  ///   trackOutlineWidth: MaterialStateProperty.resolveWith<double?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return 5.0;
   ///     }
-  ///     return null; // Use the default color.
+  ///     return null; // Use the default width.
   ///   }),
   /// )
   /// ```
