@@ -11,7 +11,8 @@
                         "out/android_profile/zip_archives/android-arm-profile/linux-x64.zip",
                         "out/android_profile/zip_archives/android-arm-profile/symbols.zip",
                         "out/android_profile/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -47,7 +48,8 @@
                         "out/android_release/zip_archives/android-arm-release/linux-x64.zip",
                         "out/android_release/zip_archives/android-arm-release/symbols.zip",
                         "out/android_release/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -84,7 +86,8 @@
                         "out/android_release_arm64/zip_archives/android-arm64-release/symbols.zip",
                         "out/android_release_arm64/zip_archives/android-arm64-release/analyze-snapshot-linux-x64.zip",
                         "out/android_release_arm64/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -120,7 +123,8 @@
                         "out/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip",
                         "out/android_profile_arm64/zip_archives/android-arm64-profile/analyze-snapshot-linux-x64.zip",
                         "out/android_profile_arm64/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -157,7 +161,8 @@
                         "out/android_profile_x64/zip_archives/android-x64-profile/symbols.zip",
                         "out/android_profile_x64/zip_archives/android-x64-profile/analyze-snapshot-linux-x64.zip",
                         "out/android_profile_x64/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -194,7 +199,8 @@
                         "out/android_release_x64/zip_archives/android-x64-release/symbols.zip",
                         "out/android_release_x64/zip_archives/android-x64-release/analyze-snapshot-linux-x64.zip",
                         "out/android_release_x64/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
