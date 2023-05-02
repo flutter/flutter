@@ -43,6 +43,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.initialValue,
+    this.debounceDuration,
   });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
@@ -77,6 +78,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
+  /// {@macro flutter.widgets.RawAutocomplete.debounceDuration}
+  final Duration? debounceDuration;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -101,6 +105,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
         );
       },
       onSelected: onSelected,
+      debounceDuration: debounceDuration,
     );
   }
 }

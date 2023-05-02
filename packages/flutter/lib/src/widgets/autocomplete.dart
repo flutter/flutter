@@ -134,6 +134,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
+    this.debounceDuration,
   }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
@@ -239,6 +240,12 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
+  /// {@template flutter.widgets.RawAutocomplete.debounceDuration}
+  /// Debounce the options builder for given duration. If null debounce is
+  /// disabled.
+  /// {@endtemplate}
+  final Duration? debounceDuration;
+
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
@@ -297,16 +304,45 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     return !_userHidOptions && _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
   }
 
+
+  Timer? _debounceTimer;
+  // Cache field text to avoid calling optionsBuilder when text is not changed.
+  String? _text;
+
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
-    final Iterable<T> options = await widget.optionsBuilder(
-      value,
-    );
-    _options = options;
+
+    if (_text != value.text) {
+      _text = value.text;
+
+      if (_debounceTimer?.isActive ?? false) {
+        _debounceTimer?.cancel();
+      }
+
+      if (widget.debounceDuration == null) {
+        final Iterable<T> options = await widget.optionsBuilder(
+          value,
+        );
+        _options = options;
+        _update(value);
+      } else {
+        _debounceTimer = Timer(widget.debounceDuration!, () async {
+          final Iterable<T> options = await widget.optionsBuilder(
+            value,
+          );
+          _options = options;
+          _update(value);
+        });
+      }
+    }
+    _update(value);
+  }
+
+  void _update(TextEditingValue value) {
     _updateHighlight(_highlightedOptionIndex.value);
-    if (_selection != null
-        && value.text != widget.displayStringForOption(_selection!)) {
+    if (_selection != null &&
+        value.text != widget.displayStringForOption(_selection!)) {
       _selection = null;
     }
 
