@@ -398,7 +398,7 @@ class Switch extends StatelessWidget {
   ///
   /// {@tool snippet}
   /// This example resolves the [trackOutlineWidth] based on the current
-  /// [MaterialState] of the [Switch], providing a different width when it is
+  /// [MaterialState] of the [Switch], providing a different outline width when it is
   /// [MaterialState.disabled].
   ///
   /// ```dart
@@ -873,7 +873,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
       ?? defaults.trackOutlineColor?.resolve(inactiveStates);
     final double? effectiveInactiveTrackOutlineWidth = widget.trackOutlineWidth?.resolve(inactiveStates)
       ?? switchTheme.trackOutlineWidth?.resolve(inactiveStates)
-      ?? defaults.trackOutlineWidth?.resolve(activeStates);
+      ?? defaults.trackOutlineWidth?.resolve(inactiveStates);
 
     final Icon? effectiveActiveIcon = widget.thumbIcon?.resolve(activeStates)
       ?? switchTheme.thumbIcon?.resolve(activeStates);
