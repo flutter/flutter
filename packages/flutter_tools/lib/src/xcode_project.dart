@@ -279,7 +279,7 @@ class IosProject extends XcodeBasedProject {
     if (productName == null) {
       globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to $hostAppProjectName');
     }
-    return productName ?? '$XcodeBasedProject._defaultHostAppName.app';
+    return productName ?? '${XcodeBasedProject._defaultHostAppName}.app';
   }
 
   /// The build settings for the host app of this project, as a detached map.
