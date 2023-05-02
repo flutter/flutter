@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'material_state.dart';
+import 'slider.dart';
 import 'theme.dart';
 
 /// Applies a slider theme to descendant [Slider] widgets.
@@ -292,6 +293,7 @@ class SliderThemeData with Diagnosticable {
     this.minThumbSeparation,
     this.thumbSelector,
     this.mouseCursor,
+    this.allowedInteraction,
   });
 
   /// Generates a SliderThemeData from three main colors.
@@ -576,6 +578,11 @@ class SliderThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Slider.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
+  /// Allowed way for the user to interact with the [Slider].
+  ///
+  /// If specified, overrides the default value of [Slider.allowedInteraction].
+  final SliderInteraction? allowedInteraction;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -609,6 +616,7 @@ class SliderThemeData with Diagnosticable {
     double? minThumbSeparation,
     RangeThumbSelector? thumbSelector,
     MaterialStateProperty<MouseCursor?>? mouseCursor,
+    SliderInteraction? allowedInteraction,
   }) {
     return SliderThemeData(
       trackHeight: trackHeight ?? this.trackHeight,
@@ -641,6 +649,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation: minThumbSeparation ?? this.minThumbSeparation,
       thumbSelector: thumbSelector ?? this.thumbSelector,
       mouseCursor: mouseCursor ?? this.mouseCursor,
+      allowedInteraction: allowedInteraction ?? this.allowedInteraction,
     );
   }
 
@@ -684,6 +693,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation: lerpDouble(a.minThumbSeparation, b.minThumbSeparation, t),
       thumbSelector: t < 0.5 ? a.thumbSelector : b.thumbSelector,
       mouseCursor: t < 0.5 ? a.mouseCursor : b.mouseCursor,
+      allowedInteraction: t < 0.5 ? a.allowedInteraction : b.allowedInteraction,
     );
   }
 
@@ -720,6 +730,7 @@ class SliderThemeData with Diagnosticable {
       minThumbSeparation,
       thumbSelector,
       mouseCursor,
+      allowedInteraction,
     ),
   );
 
@@ -761,7 +772,8 @@ class SliderThemeData with Diagnosticable {
         && other.valueIndicatorTextStyle == valueIndicatorTextStyle
         && other.minThumbSeparation == minThumbSeparation
         && other.thumbSelector == thumbSelector
-        && other.mouseCursor == mouseCursor;
+        && other.mouseCursor == mouseCursor
+        && other.allowedInteraction == allowedInteraction;
   }
 
   @override
@@ -798,6 +810,7 @@ class SliderThemeData with Diagnosticable {
     properties.add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: defaultData.mouseCursor));
+    properties.add(EnumProperty<SliderInteraction>('allowedInteraction', allowedInteraction, defaultValue: defaultData.allowedInteraction));
   }
 }
 
