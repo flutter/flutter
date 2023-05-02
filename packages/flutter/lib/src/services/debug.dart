@@ -27,6 +27,14 @@ KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 /// Flutter to the host platform, "down" is the host platform to flutter.
 bool debugProfilePlatformChannels = false;
 
+/// Setting to true will cause extensive logging to occur when key events are
+/// received.
+///
+/// Can be used to debug keyboard issues: each time a key event is received on
+/// the framework side, the event details and the current pressed state will
+/// be printed.
+bool debugPrintKeyboardEvents = false;
+
 /// Returns true if none of the widget library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -38,7 +46,7 @@ bool debugAssertAllServicesVarsUnset(String reason) {
     if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);
     }
-    if (debugProfilePlatformChannels) {
+    if (debugProfilePlatformChannels || debugPrintKeyboardEvents) {
       throw FlutterError(reason);
     }
     return true;
