@@ -552,6 +552,16 @@ class AndroidSdk {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
+      final String? javaHome = findJavaHome(
+        androidStudio: globals.androidStudio,
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+      );
+      if (javaHome != null) {
+        _sdkManagerEnv![javaHomeEnvironmentVariable] = javaHome;
+      }
+
       final String? javaBinary = findJavaBinary(
         androidStudio: globals.androidStudio,
         fileSystem: globals.fs,
