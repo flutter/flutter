@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -242,16 +243,18 @@ abstract class BoxBorder extends ShapeBorder {
     }
   }
 
+
   static void _paintNonUniformBorder(
     Canvas canvas,
     Rect rect, {
     required BorderRadius? borderRadius,
     required BoxShape shape,
     required TextDirection? textDirection,
-    required BorderSide left,
-    required BorderSide top,
-    required BorderSide right,
-    required BorderSide bottom,
+    BorderSide left = BorderSide.none,
+    BorderSide top = BorderSide.none,
+    BorderSide right = BorderSide.none,
+    BorderSide bottom = BorderSide.none,
+    required Color color,
   }) {
     final RRect borderRect;
     switch (shape) {
@@ -266,7 +269,7 @@ abstract class BoxBorder extends ShapeBorder {
           Radius.circular(rect.width),
         );
     }
-    final Paint paint = Paint()..color = top.color;
+    final Paint paint = Paint()..color = color;
     final RRect inner = _deflateRRect(borderRect, EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset));
     final RRect outer = _inflateRRect(borderRect, EdgeInsets.fromLTRB(left.strokeOutset, top.strokeOutset, right.strokeOutset, bottom.strokeOutset));
     canvas.drawDRRect(outer, inner, paint);
@@ -489,6 +492,13 @@ class Border extends BoxBorder {
         && right.strokeAlign == topStrokeAlign;
   }
 
+  Set<Color> get _distinctVisibleColors => <Color?>{
+        if (left.style == BorderStyle.none) null else left.color,
+        if (bottom.style == BorderStyle.none) null else bottom.color,
+        if (right.style == BorderStyle.none) null else right.color,
+        if (top.style == BorderStyle.none) null else top.color,
+      }.whereNotNull().toSet();
+
   @override
   Border? add(ShapeBorder other, { bool reversed = false }) {
     if (other is Border &&
@@ -603,31 +613,31 @@ class Border extends BoxBorder {
       }
     }
 
-    // Allow painting non-uniform borders if the color and style are uniform.
-    if (_colorIsUniform && _styleIsUniform) {
-      switch (top.style) {
-        case BorderStyle.none:
-          return;
-        case BorderStyle.solid:
-          BoxBorder._paintNonUniformBorder(canvas, rect,
-              shape: shape,
-              borderRadius: borderRadius,
-              textDirection: textDirection,
-              left: left,
-              top: top,
-              right: right,
-              bottom: bottom);
-          return;
-      }
+    if (_styleIsUniform && top.style == BorderStyle.none) {
+      return;
     }
 
-    assert(() {
+    // Allow painting non-uniform borders if the visible colors are uniform.
+    final Set<Color> visibleColors = _distinctVisibleColors;
+    if (visibleColors.length == 1) {
+      BoxBorder._paintNonUniformBorder(canvas, rect,
+          shape: shape,
+          borderRadius: borderRadius,
+          textDirection: textDirection,
+          left: left.style == BorderStyle.none ? BorderSide.none : left,
+          top: top.style == BorderStyle.none ? BorderSide.none : top,
+          right: right.style == BorderStyle.none ? BorderSide.none : right,
+          bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+          color: visibleColors.first);
+      return;
+    }
+
+     assert(() {
       if (borderRadius != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A borderRadius can only be given on borders with uniform colors and styles.'),
+          ErrorSummary('A borderRadius can only be given on borders with uniform colors.'),
           ErrorDescription('The following is not uniform:'),
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
-          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
         ]);
       }
       return true;
@@ -635,10 +645,9 @@ class Border extends BoxBorder {
     assert(() {
       if (shape != BoxShape.rectangle) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only be drawn as a circle on borders with uniform colors and styles.'),
+          ErrorSummary('A Border can only be drawn as a circle on borders with uniform colors.'),
           ErrorDescription('The following is not uniform:'),
           if (!_colorIsUniform) ErrorDescription('BorderSide.color'),
-          if (!_styleIsUniform) ErrorDescription('BorderSide.style'),
         ]);
       }
       return true;
@@ -646,7 +655,7 @@ class Border extends BoxBorder {
     assert(() {
       if (!_strokeAlignIsUniform || top.strokeAlign != BorderSide.strokeAlignInside) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('A Border can only draw strokeAlign different than BorderSide.strokeAlignInside on borders with uniform colors and styles.'),
+          ErrorSummary('A Border can only draw strokeAlign different than BorderSide.strokeAlignInside on borders with uniform colors.'),
         ]);
       }
       return true;
@@ -806,6 +815,13 @@ class BorderDirectional extends BoxBorder {
         && end.strokeAlign == topStrokeAlign;
   }
 
+  Set<Color> get _distinctVisibleColors => <Color?>{
+        if (start.style == BorderStyle.none) null else start.color,
+        if (bottom.style == BorderStyle.none) null else bottom.color,
+        if (end.style == BorderStyle.none) null else end.color,
+        if (top.style == BorderStyle.none) null else top.color,
+      }.whereNotNull().toSet();
+
   @override
   BoxBorder? add(ShapeBorder other, { bool reversed = false }) {
     if (other is BorderDirectional) {
@@ -951,6 +967,10 @@ class BorderDirectional extends BoxBorder {
       }
     }
 
+    if (_styleIsUniform && top.style == BorderStyle.none) {
+      return;
+    }
+
     final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
     switch (textDirection!) {
@@ -962,27 +982,24 @@ class BorderDirectional extends BoxBorder {
         right = end;
     }
 
-    // Allow painting non-uniform borders if the color and style are uniform.
-    if (_colorIsUniform && _styleIsUniform) {
-      switch (top.style) {
-        case BorderStyle.none:
-          return;
-        case BorderStyle.solid:
-          BoxBorder._paintNonUniformBorder(canvas, rect,
-              shape: shape,
-              borderRadius: borderRadius,
-              textDirection: textDirection,
-              left: left,
-              top: top,
-              right: right,
-              bottom: bottom);
-          return;
-      }
+    // Allow painting non-uniform borders if the visible colors are uniform.
+    final Set<Color> visibleColors = _distinctVisibleColors;
+    if (visibleColors.length == 1) {
+      BoxBorder._paintNonUniformBorder(canvas, rect,
+          shape: shape,
+          borderRadius: borderRadius,
+          textDirection: textDirection,
+          left: left.style == BorderStyle.none ? BorderSide.none : left,
+          top: top.style == BorderStyle.none ? BorderSide.none : top,
+          right: right.style == BorderStyle.none ? BorderSide.none : right,
+          bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+          color: visibleColors.first);
+      return;
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for borders with uniform colors and styles.');
-    assert(shape == BoxShape.rectangle, 'A Border can only be drawn as a circle on borders with uniform colors and styles.');
-    assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on borders with uniform colors and styles.');
+    assert(borderRadius == null, 'A borderRadius can only be given for borders with uniform colors.');
+    assert(shape == BoxShape.rectangle, 'A Border can only be drawn as a circle on borders with uniform colors.');
+    assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on borders with uniform colors.');
 
     paintBorder(canvas, rect, top: top, left: left, bottom: bottom, right: right);
   }

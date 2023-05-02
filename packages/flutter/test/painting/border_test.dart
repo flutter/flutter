@@ -273,7 +273,7 @@ void main() {
     expect(error.diagnostics.length, 1);
     expect(
       error.diagnostics[0].toStringDeep(),
-      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on borders with uniform colors and\nstyles.\n',
+      'A Border can only draw strokeAlign different than\nBorderSide.strokeAlignInside on borders with uniform colors.\n',
     );
   });
 
@@ -364,8 +364,8 @@ void main() {
         borderRadius: BorderRadius.circular(25),
       ),
     );
-    expect(tester.takeException(), isAssertionError,
-        reason: 'Border with non-uniform styles should fail with borderRadius.');
+    expect(tester.takeException(), isNull,
+        reason: 'Border with non-uniform styles should work with borderRadius.');
 
     await tester.pumpWidget(
       buildWidget(
