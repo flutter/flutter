@@ -206,6 +206,7 @@ class DraggableScrollableController extends ChangeNotifier {
     } else {
       _attachedController?.extent._currentSize.removeListener(notifyListeners);
     }
+    _disposeAnimationControllers();
     _attachedController = null;
   }
 
