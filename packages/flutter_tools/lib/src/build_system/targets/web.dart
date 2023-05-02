@@ -163,15 +163,15 @@ class Dart2JSTarget extends Dart2WebTarget {
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final JsCompilerConfig compilerConfig = JsCompilerConfig.fromBuildSystemEnvironment(environment.defines);
-    final Artifacts artifacts = globals.artifacts!;
+    final Artifacts artifacts = environment.artifacts;
     final String platformBinariesPath = getWebPlatformBinariesDirectory(artifacts, webRenderer).path;
     final List<String> sharedCommandOptions = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
       '--disable-dart-dev',
       artifacts.getArtifactPath(Artifact.dart2jsSnapshot, platform: TargetPlatform.web_javascript),
       '--platform-binaries=$platformBinariesPath',
-      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       '--invoker=flutter_tool',
+      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
@@ -214,7 +214,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     final File dart2jsDeps = environment.buildDir
       .childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
-      globals.printWarning('Warning: dart2js did not produced expected deps list at '
+      environment.logger.printWarning('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
       return;
     }
@@ -241,13 +241,12 @@ class Dart2WasmTarget extends Dart2WebTarget {
     }
     final WasmCompilerConfig compilerConfig = WasmCompilerConfig.fromBuildSystemEnvironment(environment.defines);
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final Artifacts artifacts = globals.artifacts!;
+    final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile(
       compilerConfig.runWasmOpt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
     );
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
-    final String dartSdkRoot = environment.fileSystem.directory(dartSdkPath).parent.path;
 
     final List<String> compilationArgs = <String>[
       artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
@@ -268,7 +267,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       '--multi-root',
       artifacts.getHostArtifact(HostArtifact.flutterWebSdk).path,
       '--multi-root',
-      dartSdkRoot,
+      dartSdkPath,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
       if (webRenderer == WebRendererMode.skwasm)
@@ -383,10 +382,10 @@ class WebReleaseBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      final String basename = globals.fs.path.basename(outputFile.path);
+      final String basename = environment.fileSystem.path.basename(outputFile.path);
       if (shouldCopy(basename)) {
         outputFile.copySync(
-          environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
+          environment.outputDir.childFile(environment.fileSystem.path.basename(outputFile.path)).path
         );
       }
     }
@@ -422,9 +421,9 @@ class WebReleaseBundle extends Target {
     // Copy other resource files out of web/ directory.
     final List<File> outputResourcesFiles = <File>[];
     for (final File inputFile in inputResourceFiles) {
-      final File outputFile = globals.fs.file(globals.fs.path.join(
+      final File outputFile = environment.fileSystem.file(environment.fileSystem.path.join(
         environment.outputDir.path,
-        globals.fs.path.relative(inputFile.path, from: webResources.path)));
+        environment.fileSystem.path.relative(inputFile.path, from: webResources.path)));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
@@ -535,7 +534,7 @@ class WebBuiltInAssets extends Target {
     // Write the flutter.js file
     final File flutterJsFile = environment.outputDir.childFile('flutter.js');
     final String fileGeneratorsPath =
-        globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
+        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
     flutterJsFile.writeAsStringSync(
         flutter_js.generateFlutterJsFile(fileGeneratorsPath));
   }
@@ -576,7 +575,7 @@ class WebServiceWorker extends Target {
       .listSync(recursive: true)
       .whereType<File>()
       .where((File file) => !file.path.endsWith('flutter_service_worker.js')
-        && !globals.fs.path.basename(file.path).startsWith('.'))
+        && !environment.fileSystem.path.basename(file.path).startsWith('.'))
       .toList();
 
     final Map<String, String> urlToHash = <String, String>{};
@@ -586,15 +585,15 @@ class WebServiceWorker extends Target {
         file.path.endsWith('.part.js.map')) {
         continue;
       }
-      final String url = globals.fs.path.toUri(
-        globals.fs.path.relative(
+      final String url = environment.fileSystem.path.toUri(
+        environment.fileSystem.path.relative(
           file.path,
           from: environment.outputDir.path),
         ).toString();
       final String hash = md5.convert(await file.readAsBytes()).toString();
       urlToHash[url] = hash;
       // Add an additional entry for the base URL.
-      if (globals.fs.path.basename(url) == 'index.html') {
+      if (environment.fileSystem.path.basename(url) == 'index.html') {
         urlToHash['/'] = hash;
       }
     }
@@ -605,7 +604,7 @@ class WebServiceWorker extends Target {
     final ServiceWorkerStrategy serviceWorkerStrategy =
         ServiceWorkerStrategy.fromCliName(environment.defines[kServiceWorkerStrategy]);
     final String fileGeneratorsPath =
-        globals.artifacts!.getArtifactPath(Artifact.flutterToolsFileGenerators);
+        environment.artifacts.getArtifactPath(Artifact.flutterToolsFileGenerators);
     final String serviceWorker = generateServiceWorker(
       fileGeneratorsPath,
       urlToHash,
