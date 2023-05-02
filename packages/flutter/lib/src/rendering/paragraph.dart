@@ -1497,13 +1497,15 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       localPosition,
       direction: paragraph.textDirection,
     );
-    final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
 
-    final (TextPosition start, TextPosition end) wordBoundary = _getWordBoundaryAtPosition(position);
-    TextPosition targetPosition = isEnd ? wordBoundary.$2 : wordBoundary.$1;
-    if (!_rect.contains(localPosition)) {
-      targetPosition = position;
-    }
+    final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
+    // Check if the original local position is within the rect, if it is not then
+    // we do not need to look up the word boundary for that position. This is to
+    // maintain a selectables selection collapsed at 0 when the local position is
+    // not located inside its rect.
+    final (TextPosition start, TextPosition end)? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
+    final TextPosition targetPosition = _clampTextPosition(wordBoundary != null ? isEnd ? wordBoundary.$2 : wordBoundary.$1 : position);
+
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
       return SelectionResult.next;
@@ -1512,7 +1514,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     if (targetPosition.offset == range.start) {
       return SelectionResult.previous;
     }
-
+    // TODO(chunhtai): The geometry information should not be used to determine
+    // selection result. This is a workaround to RenderParagraph, where it does
+    // not have a way to get accurate text length if its text is truncated due to
+    // layout constraint.
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 

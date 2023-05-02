@@ -376,6 +376,7 @@ class SelectWordSelectionEvent extends SelectionEvent {
 /// The [globalPosition] contains the new offset of the edge.
 ///
 /// The [granularity] contains the granularity that the selection edge should move by.
+/// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
 ///
 /// This event is dispatched when the framework detects [TapDragStartDetails] in
 /// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
@@ -405,6 +406,8 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   final Offset globalPosition;
 
   /// The granularity for which the selection moves.
+  ///
+  /// Only [TextGranularity.character] and [TextGranularity.word] are currently supported.
   ///
   /// Defaults to [TextGranularity.character].
   final TextGranularity granularity;
