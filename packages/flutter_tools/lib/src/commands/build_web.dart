@@ -106,7 +106,7 @@ class BuildWebCommand extends BuildSubCommand {
     argParser.addFlag(
       'wasm-opt',
       help:
-          'Optimize output wasm using the Binaryen tool. (https://github.com/WebAssembly/binaryen)\n'
+          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.\n'
           'Increases the build time, but will yield a smaller, faster output.',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
