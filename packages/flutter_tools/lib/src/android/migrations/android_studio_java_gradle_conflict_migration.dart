@@ -144,7 +144,9 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
       return fileContents;
     }
     final RegExpMatch? gradleDistributionUrl = gradleOrgVersionMatch.firstMatch(fileContents);
-    if (gradleDistributionUrl == null || gradleDistributionUrl.groupCount < 1) {
+    if (gradleDistributionUrl == null
+        || gradleDistributionUrl.groupCount < 1
+        || gradleDistributionUrl[1] == null) {
       logger.printTrace(gradleVersionNotFound);
       return fileContents;
     }
