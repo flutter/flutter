@@ -147,14 +147,16 @@ class WasmCompilerConfig extends WebCompilerConfig {
         runWasmOpt: defines[kRunWasmOpt] == 'true',
       );
 
-  /// Build environment for [omitTypeChecks];
+  /// Build environment for [omitTypeChecks].
   static const String kOmitTypeChecks = 'WasmOmitTypeChecks';
+
+  /// Build environment for [runWasmOpt].
   static const String kRunWasmOpt = 'RunWasmOpt';
 
   /// If `omit-type-checks` should be passed to `dart2wasm`.
   final bool omitTypeChecks;
 
-  // Run wasm-opt on the resulting module.
+  /// Run wasm-opt on the resulting module.
   final bool runWasmOpt;
 
   @override
