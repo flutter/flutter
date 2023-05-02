@@ -187,6 +187,9 @@ void main() {
       '--release',
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stdout:\n${result.stderr}');
+
     expect(result.exitCode, 0);
     expect(tempDir.existsSync(), true);
     expect(tempDir.childFile('snapshot.arm64-v8a.json').existsSync(), true);
