@@ -6250,34 +6250,6 @@ void main() {
     expect(getLabelStyle(tester).color, labelStyle.color);
   });
 
-  testWidgets("InputDecorator's floating label origin no longer depends on ThemeData.fixTextFieldOutlineLabel", (WidgetTester tester) async {
-    Widget buildFrame(bool fixTextFieldOutlineLabel) {
-      return buildInputDecorator(
-        useMaterial3: useMaterial3,
-        isEmpty: true,
-        theme: ThemeData.light().copyWith(
-          fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
-        ),
-        decoration: const InputDecoration(
-          labelText: 'label',
-          enabledBorder: OutlineInputBorder(),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(false));
-    await tester.pumpAndSettle();
-
-    // floatingLabelHeight = 12 (font size 16dps * 0.75 = 12)
-    // labelY = -floatingLabelHeight/2 + borderWidth/2
-    expect(tester.getTopLeft(find.text('label')).dy, -5.5);
-
-    await tester.pumpWidget(buildFrame(true));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, -5.5);
-  });
-
   testWidgets('hint style overflow works', (WidgetTester tester) async {
     final String hintText = 'hint text' * 20;
     const TextStyle hintStyle = TextStyle(
