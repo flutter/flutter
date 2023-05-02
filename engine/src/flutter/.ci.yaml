@@ -81,6 +81,7 @@ platform_properties:
 targets:
   - name: Linux Android AOT Engine
     recipe: engine/engine
+    bringup: true
     properties:
       add_recipes_cq: "true"
       build_android_aot: "true"
