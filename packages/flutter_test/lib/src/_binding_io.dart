@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'binding.dart';
 
