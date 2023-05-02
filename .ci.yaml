@@ -78,7 +78,7 @@ platform_properties:
         ]
       os: Mac-12
       device_type: none
-      xcode: 14c18
+      xcode: 14e222b
   mac_arm64:
     properties:
       dependencies: >-
@@ -88,7 +88,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: arm64
-      xcode: 14c18
+      xcode: 14e222b
   mac_benchmark:
     properties:
       dependencies: >-
@@ -100,7 +100,7 @@ platform_properties:
       os: Mac-12
       tags: >
         ["devicelab", "hostonly", "mac"]
-      xcode: 14c18
+      xcode: 14e222b
   mac_x64:
     properties:
       dependencies: >-
@@ -110,7 +110,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 14c18
+      xcode: 14e222b
   mac_android:
     properties:
       dependencies: >-
@@ -136,26 +136,26 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
       device_os: iOS-16
-      xcode: 14c18
+      xcode: 14e222b
   mac_arm64_ios:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
       cpu: arm64
       device_os: iOS-16
-      xcode: 14c18
+      xcode: 14e222b
   windows:
     properties:
       dependencies: >-
@@ -2523,7 +2523,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
@@ -2535,7 +2535,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: basic_material_app_macos__compile
 
@@ -2545,7 +2545,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2582,7 +2582,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2602,7 +2602,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2622,7 +2622,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2642,7 +2642,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -2658,7 +2658,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_macos__compile
@@ -2670,7 +2670,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_macos__start_up
@@ -2682,7 +2682,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
@@ -2704,7 +2704,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2723,7 +2723,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__compile
@@ -2735,7 +2735,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__start_up
@@ -2771,7 +2771,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: flutter_view_macos__start_up
 
@@ -2809,7 +2809,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "android_sdk", "version": "version:33v6"}
@@ -2881,7 +2881,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: hello_world_macos__compile
 
@@ -2892,7 +2892,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2960,7 +2960,7 @@ targets:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2993,7 +2993,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: platform_view_macos__start_up
 
@@ -3004,7 +3004,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
@@ -3018,7 +3018,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3036,7 +3036,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3090,7 +3090,7 @@ targets:
       cpu: x86 # https://github.com/flutter/flutter/issues/119750
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3109,7 +3109,7 @@ targets:
       cpu: x86 # https://github.com/flutter/flutter/issues/119750
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3127,7 +3127,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -3146,7 +3146,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -3169,7 +3169,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3194,7 +3194,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3219,7 +3219,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3244,7 +3244,7 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
         ]
@@ -3303,7 +3303,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       tags: >
         ["framework", "hostonly", "shard", "mac"]
@@ -3319,7 +3319,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"}
+          {"dependency": "xcode", "version": "14e222b"}
         ]
       tags: >
         ["framework", "hostonly", "shard", "mac"]
@@ -3991,7 +3991,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -4009,7 +4009,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -4027,7 +4027,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -4060,7 +4060,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14c18"},
+          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
