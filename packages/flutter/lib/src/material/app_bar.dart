@@ -1403,11 +1403,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///
 /// {@tool dartpad}
 /// Here is an example of [SliverAppBar] when using [stretch] and [onStretchTrigger]
-/// 
+///
 ///  ** See code in examples/api/lib/material/app_bar/sliver_app_bar.4.dart **
 /// {@end-tool}
 ///
-/// 
+///
 /// {@tool dartpad}
 /// This sample shows a [SliverAppBar] and it's behavior when using the
 /// [pinned], [snap] and [floating] parameters.

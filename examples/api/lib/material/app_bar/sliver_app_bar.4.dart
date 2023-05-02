@@ -32,6 +32,12 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
             onStretchTrigger: () async {
               // Triggers when stretching
             },
+            // [stretchTriggerOffset] describes the amount of overscroll that must occur
+            // to trigger [onStretchTrigger]
+            //
+            // Setting [stretchTriggerOffset] to a value of 300.0 will trigger
+            // [onStretchTrigger] when the user has overscrolled by 300.0 pixels.
+            stretchTriggerOffset: 300.0,
             expandedHeight: 200.0,
             flexibleSpace: const FlexibleSpaceBar(
               title: Text('SliverAppBar'),
