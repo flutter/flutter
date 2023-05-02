@@ -61,7 +61,11 @@ extension LeakTrackerConfig on WidgetTester {
 
 /// Wrapper for [testWidgets] with leak tracking.
 ///
+/// Tracking for non-GCed objects is temporarily disabled.
+///
 /// This method is temporal with the plan:
+///
+/// 0. Enable tracling for non-GCed objects.
 ///
 /// 1. For each occurence of [testWidgets] in flutter framework, do one of three:
 ///
