@@ -188,7 +188,7 @@ void main() {
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
 
     printOnFailure('stdout:\n${result.stdout}');
-    printOnFailure('stdout:\n${result.stderr}');
+    printOnFailure('stderr:\n${result.stderr}');
 
     expect(result.exitCode, 0);
     expect(tempDir.existsSync(), true);
