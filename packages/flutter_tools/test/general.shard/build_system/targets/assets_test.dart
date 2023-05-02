@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 
@@ -67,10 +68,7 @@ flutter:
 
     expect(depfile, exists);
 
-    final DepfileService depfileService = DepfileService.test(
-      fileSystem: fileSystem,
-    );
-    final Depfile dependencies = depfileService.parse(depfile);
+    final Depfile dependencies = environment.depFileService.parse(depfile);
 
     expect(
       dependencies.inputs.firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),
