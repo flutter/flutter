@@ -1574,3 +1574,17 @@ class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
     return RenderSliverCrossAxisGroup();
   }
 }
+
+class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
+  /// Creates a sliver that places sliver children in a linear array along
+  /// the main axis.
+  const SliverMainAxisGroup({
+    super.key,
+    required List<Widget> slivers,
+  }) : super(children: slivers);
+
+  @override
+  RenderSliverMainAxisGroup createRenderObject(BuildContext context) {
+    return RenderSliverMainAxisGroup();
+  }
+}
