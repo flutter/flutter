@@ -23,6 +23,8 @@ import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
 import("//third_party/dart/sdk/lib/js/js_annotations_sources.gni")
 import("//third_party/dart/sdk/lib/js/js_sources.gni")
 import("//third_party/dart/sdk/lib/js_interop/js_interop_sources.gni")
+import(
+    "//third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe_sources.gni")
 import("//third_party/dart/sdk/lib/js_util/js_util_sources.gni")
 import("//third_party/dart/sdk/lib/math/math_sources.gni")
 import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
@@ -148,6 +150,12 @@ copy("js_interop") {
   ]
 }
 
+copy("js_interop_unsafe") {
+  lib_path = rebase_path("js_interop_unsafe", "", dart_sdk_lib_path)
+  sources = rebase_path(js_interop_unsafe_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/js_interop_unsafe/{{source_file_part}}" ]
+}
+
 copy("js_util") {
   lib_path = rebase_path("js_util", "", dart_sdk_lib_path)
   sources = rebase_path(js_util_sdk_sources, "", lib_path)
@@ -207,6 +215,7 @@ group("copy_dart_sdk") {
     ":isolate",
     ":js",
     ":js_interop",
+    ":js_interop_unsafe",
     ":js_util",
     ":math",
     ":typed_data",
@@ -231,6 +240,7 @@ generated_file("_embedder_yaml") {
     "  \"dart:isolate\": \"isolate/isolate.dart\"",
     "  \"dart:js\": \"js/js.dart\"",
     "  \"dart:js_interop\": \"js_interop/js_interop.dart\"",
+    "  \"dart:js_interop_unsafe\": \"js_interop_unsafe/js_interop_unsafe.dart\"",
     "  \"dart:js_util\": \"js_util/js_util.dart\"",
     "  \"dart:math\": \"math/math.dart\"",
     "  \"dart:typed_data\": \"typed_data/typed_data.dart\"",
