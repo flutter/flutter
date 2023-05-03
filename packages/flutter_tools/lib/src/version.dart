@@ -194,7 +194,8 @@ abstract class FlutterVersion {
 
   String? _frameworkAge;
 
-  // TODO
+  // TODO(fujino): calculate this relative to frameworkCommitDate for
+  // _FlutterVersionFromFile so we don't need a git call.
   String get frameworkAge {
     return _frameworkAge ??= _runGit(
       FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
