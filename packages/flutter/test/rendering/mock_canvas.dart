@@ -1287,6 +1287,14 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
       throw 'It called $methodName with a paint whose rect, $rectArgument, was not exactly the expected rect ($rect).';
     }
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (rect != null) {
+      description.add('rect $rect');
+    }
+  }
 }
 
 class _ShadowPredicate extends _PaintPredicate {
