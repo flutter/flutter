@@ -9,7 +9,6 @@ import 'text_editing/text_editing.dart';
 // Applies the required global CSS to an incoming [DomCSSStyleSheet] `sheet`.
 void applyGlobalCssRulesToSheet(
   DomHTMLStyleElement styleElement, {
-  required bool hasAutofillOverlay,
   String cssSelectorPrefix = '',
   required String defaultCssFont,
 }) {
