@@ -163,7 +163,7 @@ class TextLinker {
     return (String text) {
       return _rangesFromText(
         text: text,
-        regExp: _urlRegExp,
+        regExp: regExp,
       );
     };
   }
