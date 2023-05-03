@@ -23,28 +23,111 @@ typedef LinkBuilder = InlineSpan Function(
 /// A widget that displays some text with parts of it made interactive.
 ///
 /// By default, any URLs in the text are made interactive.
+///
+/// See also:
+///
+///  * [InlineLinkedText], which is like this but is an inline TextSpan instead
+///    of a widget.
 class LinkedText extends StatelessWidget {
   /// Creates an instance of [LinkedText] from the given [text], highlighting
   /// any URLs by default.
-  const LinkedText({
+  ///
+  /// {@template flutter.widgets.LinkedText.new}
+  /// By default, highlights URLs in the [text] and makes them tappable with
+  /// [onTap].
+  ///
+  /// If [ranges] is given, then makes those ranges in the text interactive
+  /// instead of URLs.
+  ///
+  /// [linkBuilder] can be used to specify a custom [InlineSpan] for each
+  /// [TextRange] in [ranges].
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [LinkedText.regExp], which automatically finds ranges that match
+  ///    the given [RegExp].
+  ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow
+  ///    specifying an arbitrary number of [ranges] and [linkBuilders].
+  ///  * [InlineLinkedText.new], which is like this, but for inline text.
+  LinkedText({
     super.key,
-    this.onTap,
     required this.text,
-  });
+    this.style,
+    Iterable<TextRange>? ranges,
+    UriStringCallback? onTap,
+    LinkBuilder? linkBuilder,
+  }) : textLinkers = <TextLinker>[
+         TextLinker(
+           rangesFinder: ranges == null
+               ? TextLinker.urlRangesFinder
+               : (String text) => ranges,
+           linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
+         ),
+       ];
 
-  /// Called whenever a link in the [text] is tapped.
-  final UriStringCallback? onTap;
+  /// Create an instance of [LinkedText] where text matched by the given
+  /// [RegExp] is made interactive.
+  ///
+  /// See also:
+  ///
+  ///  * [LinkedText.new], which can be passed [TextRange]s directly or
+  ///    otherwise matches URLs by default.
+  ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow
+  ///    specifying an arbitrary number of [ranges] and [linkBuilders].
+  ///  * [InlineLinkedText.regExp], which is like this, but for inline text.
+  LinkedText.regExp({
+    super.key,
+    required this.text,
+    required RegExp regExp,
+    this.style,
+    UriStringCallback? onTap,
+    LinkBuilder? linkBuilder,
+  }) : textLinkers = <TextLinker>[
+         TextLinker(
+           rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
+           linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
+         ),
+       ];
+
+  /// Create an instance of [LinkedText] where text matched by the given
+  /// [RegExp] is made interactive.
+  ///
+  /// {@template flutter.widgets.LinkedText.textLinkers}
+  /// Useful for independently matching different types of strings with
+  /// different behaviors. For example, highlighting both URLs and Twitter
+  /// handles with different style and/or behavior.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [LinkedText.new], which can be passed [TextRange]s directly or
+  ///    otherwise matches URLs by default.
+  ///  * [LinkedText.regExp], which automatically finds ranges that match
+  ///    the given [RegExp].
+  ///  * [InlineLinkedText.textLinkers], which is like this, but for inline
+  ///    text.
+  const LinkedText.textLinkers({
+    super.key,
+    required this.text,
+    required this.textLinkers,
+    this.style,
+  });
 
   /// The text in which to highlight URLs and to display.
   final String text;
 
+  final List<TextLinker> textLinkers;
+
+  final TextStyle? style;
+
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: InlineLinkedText(
-        onTap: onTap,
-        style: DefaultTextStyle.of(context).style,
+      text: InlineLinkedText.textLinkers(
+        style: style ?? DefaultTextStyle.of(context).style,
         text: text,
+        textLinkers: textLinkers,
       ),
     );
   }
@@ -192,14 +275,7 @@ class TextLinker {
 class InlineLinkedText extends TextSpan {
   /// Create an instance of [InlineLinkedText].
   ///
-  /// By default, highlights URLs in the [text] and makes them tappable with
-  /// [onTap].
-  ///
-  /// If [ranges] is given, then makes those ranges in the text interactive
-  /// instead of URLs.
-  ///
-  /// [linkBuilder] can be used to specify a custom [InlineSpan] for each
-  /// [TextRange] in [ranges].
+  /// {@macro flutter.widgets.LinkedText.new}
   ///
   /// See also:
   ///
@@ -227,7 +303,7 @@ class InlineLinkedText extends TextSpan {
   ///
   /// See also:
   ///
-  ///  * [InlineLinkifier.new], which can be passed [TextRange]s directly or
+  ///  * [InlineLinkedText.new], which can be passed [TextRange]s directly or
   ///    otherwise matches URLs by default.
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
@@ -246,13 +322,11 @@ class InlineLinkedText extends TextSpan {
 
   /// Create an instance of [InlineLinkedText] where
   ///
-  /// Useful for independently matching different types of strings with
-  /// different behaviors. For example, highlighting both URLs and Twitter
-  /// handles with different style and/or behavior.
+  /// {@macro flutter.widgets.LinkedText.textLinkers}
   ///
   /// See also:
   ///
-  ///  * [InlineLinkifier.new], which can be passed [TextRange]s directly or
+  ///  * [InlineLinkedText.new], which can be passed [TextRange]s directly or
   ///    otherwise matches URLs by default.
   ///  * [InlineLinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
