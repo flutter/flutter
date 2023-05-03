@@ -44,7 +44,7 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
-  Java _java;
+  final Java _java;
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
   ///
