@@ -225,6 +225,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
+  ///
+  /// See also:
+  ///
+  ///  * [visitDirectChildren], which preforms `build`-order traversal on the
+  ///    immediate children of this [InlineSpan], regardless of whether they
+  ///    have content.
   bool visitChildren(InlineSpanVisitor visitor);
 
   /// Calls `visitor` for each immediate child of this [InlineSpan].
@@ -237,6 +243,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// `visitor` callback returns `false` on an immediate child. This method
   /// itself returns a `bool` indicating whether the visitor callback returned
   /// `true` on all immediate children.
+  ///
+  /// See also:
+  ///
+  ///  * [visitChildren], which performs preorder traversal on this [InlineSpan]
+  ///    if it has content, and all its descendants with content.
   bool visitDirectChildren(InlineSpanVisitor visitor);
 
   /// Returns the [InlineSpan] that contains the given position in the text.

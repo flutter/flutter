@@ -275,9 +275,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
-    if (text case final String text) {
+    if (text != null) {
       try {
-        builder.addText(text);
+        builder.addText(text!);
       } on ArgumentError catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -289,14 +289,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         builder.addText('\uFFFD');
       }
     }
-    if (children case final List<InlineSpan> children) {
-      for (final InlineSpan child in children) {
-        child.build(
-          builder,
-          textScaleFactor: textScaleFactor,
-          dimensions: dimensions,
-        );
-      }
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      child.build(
+        builder,
+        textScaleFactor: textScaleFactor,
+        dimensions: dimensions,
+      );
     }
     if (hasStyle) {
       builder.pop();
@@ -310,12 +308,26 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// returns false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
-    return (text == null || visitor(this))
-        && !(children?.any((InlineSpan descendant) => !descendant.visitChildren(visitor)) ?? false);
+    if (text != null && !visitor(this)) {
+      return false;
+    }
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      if (!child.visitChildren(visitor)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
-  bool visitDirectChildren(InlineSpanVisitor visitor) => !(children?.any((InlineSpan child) => !visitor(child)) ?? false);
+  bool visitDirectChildren(InlineSpanVisitor visitor) {
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      if (!visitor(child)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /// Returns the text span that contains the given position in the text.
   @override
@@ -381,17 +393,15 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         recognizer: recognizer,
       ));
     }
-    if (children case final List<InlineSpan> nonNullChildren) {
-      for (final InlineSpan child in nonNullChildren) {
-        if (child is TextSpan) {
-          child.computeSemanticsInformation(
-            collector,
-            inheritedLocale: effectiveLocale,
-            inheritedSpellOut: effectiveSpellOut,
-          );
-        } else {
-          child.computeSemanticsInformation(collector);
-        }
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      if (child is TextSpan) {
+        child.computeSemanticsInformation(
+          collector,
+          inheritedLocale: effectiveLocale,
+          inheritedSpellOut: effectiveSpellOut,
+        );
+      } else {
+        child.computeSemanticsInformation(collector);
       }
     }
   }
