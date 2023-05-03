@@ -497,13 +497,11 @@ abstract final class SystemChrome {
 
   static SystemUiOverlayStyleCallback? _systemUiOverlayStyleCallback;
 
-  /// Sets the function that is called when the [SystemUiOverlayStyle] is changed.
+  /// Sets the function that is called when the current [SystemUiOverlayStyle] is changed.
   ///
-  /// This can be used to execute [SystemUiOverlayStyle]-related logic
-  /// when the [SystemChrome.setSystemUiOverlayStyle] method is called and
-  /// it changes the current [SystemUiOverlayStyle].
+  /// This Api can be used to listen current [SystemUiOverlayStyle].
   ///
-  /// For example, can be used for synchronizing the desktop custom title-bar
+  /// For example, set callback for synchronizing the desktop custom title-bar
   /// with the current [SystemUiOverlayStyle] for better adaptability.
   ///
   /// Only one function can be set at a time. Setting a new function
