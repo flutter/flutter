@@ -30,6 +30,10 @@ const List<String> kDart2jsLinuxArgs = <String>[
   '--invoker=flutter_tool',
 ];
 
+/// The result of calling `.parent` on a Memory directory pointing to
+/// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
+const String kDartSdkRoot = '.';
+
 void main() {
   late Testbed testbed;
   late Environment environment;
@@ -758,7 +762,7 @@ void main() {
         '--multi-root',
         'HostArtifact.flutterWebSdk',
         '--multi-root',
-        '.',
+        kDartSdkRoot,
         '--libraries-spec',
         'HostArtifact.flutterWebLibrariesJson',
         '--depfile=${depFile.absolute.path}',
@@ -793,7 +797,7 @@ void main() {
         '--multi-root',
         'HostArtifact.flutterWebSdk',
         '--multi-root',
-        '.',
+        kDartSdkRoot,
         '--libraries-spec',
         'HostArtifact.flutterWebLibrariesJson',
         '--depfile=${depFile.absolute.path}',
@@ -828,7 +832,7 @@ void main() {
         '--multi-root',
         'HostArtifact.flutterWebSdk',
         '--multi-root',
-        '.',
+        kDartSdkRoot,
         '--libraries-spec',
         'HostArtifact.flutterWebLibrariesJson',
         '--depfile=${depFile.absolute.path}',
@@ -880,7 +884,7 @@ void main() {
         '--multi-root',
         'HostArtifact.flutterWebSdk',
         '--multi-root',
-        '.',
+        kDartSdkRoot,
         '--libraries-spec',
         'HostArtifact.flutterWebLibrariesJson',
         '--import-shared-memory',
