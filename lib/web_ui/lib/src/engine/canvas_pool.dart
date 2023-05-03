@@ -541,7 +541,7 @@ class CanvasPool extends _SaveStackTracking {
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
     final DomCanvasRenderingContext2D ctx = context;
     contextHandle.blendMode = blendMode;
-    contextHandle.fillStyle = colorToCssString(color);
+    contextHandle.fillStyle = color.toCssString();
     contextHandle.strokeStyle = '';
     ctx.beginPath();
     // Fill a virtually infinite rect with the color.
@@ -997,7 +997,7 @@ class ContextStateHandle {
         }
       }
     } else {
-      final String? colorString = colorValueToCssString(paint.color);
+      final String colorString = colorValueToCssString(paint.color);
       fillStyle = colorString;
       strokeStyle = colorString;
     }
@@ -1019,7 +1019,7 @@ class ContextStateHandle {
         context.save();
         context.shadowBlur = convertSigmaToRadius(maskFilter.webOnlySigma);
         // Shadow color must be fully opaque.
-        context.shadowColor = colorToCssString(ui.Color(paint.color).withAlpha(255));
+        context.shadowColor = ui.Color(paint.color).withAlpha(255).toCssString();
 
         // On the web a shadow must always be painted together with the shape
         // that casts it. In order to paint just the shadow, we offset the shape
