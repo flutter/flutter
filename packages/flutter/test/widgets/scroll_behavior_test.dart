@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,47 @@ class TestScrollBehavior extends ScrollBehavior {
 }
 
 void main() {
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = ScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(ScrollConfiguration(
+      // Avoid the default ones here.
+      behavior: const ScrollBehavior().copyWith(scrollbars: false),
+      child: SingleChildScrollView(
+        child: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return Container(height: 1000.0);
+          },
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(direction: AxisDirection.down);
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description', contains('details.controller != null')),
+          ),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
+
   // Regression test for https://github.com/flutter/flutter/issues/89681
   testWidgets('_WrappedScrollBehavior shouldNotify test', (WidgetTester tester) async {
     final ScrollBehavior behavior1 = const ScrollBehavior().copyWith();

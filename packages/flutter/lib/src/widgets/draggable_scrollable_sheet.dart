@@ -206,6 +206,7 @@ class DraggableScrollableController extends ChangeNotifier {
     } else {
       _attachedController?.extent._currentSize.removeListener(notifyListeners);
     }
+    _disposeAnimationControllers();
     _attachedController = null;
   }
 
@@ -781,7 +782,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     ScrollPosition? oldPosition,
   ) {
     return _DraggableScrollableSheetScrollPosition(
-      physics: const AlwaysScrollableScrollPhysics().applyTo(physics),
+      physics: physics.applyTo(const AlwaysScrollableScrollPhysics()),
       context: context,
       oldPosition: oldPosition,
       getExtent: () => extent,

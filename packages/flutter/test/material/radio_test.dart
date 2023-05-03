@@ -9,6 +9,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -193,6 +194,40 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
   });
 
+  testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(Theme(
+      data: theme,
+      child: Material(
+        child: Radio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) {},
+        ),
+      ),
+    ));
+    final bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+                         defaultTargetPlatform == TargetPlatform.macOS;
+    expect(
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isInMutuallyExclusiveGroup,
+          SemanticsFlag.hasCheckedState,
+          SemanticsFlag.hasEnabledState,
+          SemanticsFlag.isEnabled,
+          SemanticsFlag.isFocusable,
+          SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.isSelected,
+        ],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+        ],
+      ),
+    );
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Radio semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1371,5 +1406,36 @@ void main() {
         ? (paints..circle(color: colors.primary.withOpacity(0.08))..circle(color: colors.primary.withOpacity(1)))
         : (paints..circle(color: theme.hoverColor)..circle(color: colors.secondary))
     );
+  });
+
+  testWidgets('Radio.adaptive shows the correct platform widget', (WidgetTester tester) async {
+    Widget buildApp(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Material(
+          child: Center(
+            child: Radio<int>.adaptive(
+              value: 1,
+              groupValue: 2,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoRadio<int>), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoRadio<int>), findsNothing);
+    }
   });
 }

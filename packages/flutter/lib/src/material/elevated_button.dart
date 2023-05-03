@@ -207,9 +207,7 @@ class ElevatedButton extends ButtonStyleButton {
     final MaterialStateProperty<double>? elevationValue = (elevation == null)
       ? null
       : _ElevatedButtonDefaultElevation(elevation);
-    final MaterialStateProperty<MouseCursor?>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
+    final MaterialStateProperty<MouseCursor?> mouseCursor = _ElevatedButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
@@ -542,7 +540,7 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _ElevatedButtonDefaultsM3 extends ButtonStyle {
   _ElevatedButtonDefaultsM3(this.context)

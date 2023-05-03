@@ -30,6 +30,9 @@ class PlistParser {
   static const String kCFBundleVersionKey = 'CFBundleVersion';
   static const String kCFBundleDisplayNameKey = 'CFBundleDisplayName';
   static const String kMinimumOSVersionKey = 'MinimumOSVersion';
+  static const String kNSPrincipalClassKey = 'NSPrincipalClass';
+
+  static const String _plutilExecutable = '/usr/bin/plutil';
 
   /// Returns the content, converted to XML, of the plist file located at
   /// [plistFilePath].
@@ -39,12 +42,11 @@ class PlistParser {
   ///
   /// The [plistFilePath] argument must not be null.
   String? plistXmlContent(String plistFilePath) {
-    const String executable = '/usr/bin/plutil';
-    if (!_fileSystem.isFileSync(executable)) {
-      throw const FileNotFoundException(executable);
+    if (!_fileSystem.isFileSync(_plutilExecutable)) {
+      throw const FileNotFoundException(_plutilExecutable);
     }
     final List<String> args = <String>[
-      executable, '-convert', 'xml1', '-o', '-', plistFilePath,
+      _plutilExecutable, '-convert', 'xml1', '-o', '-', plistFilePath,
     ];
     try {
       final String xmlContent = _processUtils.runSync(
@@ -53,9 +55,40 @@ class PlistParser {
       ).stdout.trim();
       return xmlContent;
     } on ProcessException catch (error) {
-      _logger.printTrace('$error');
+      _logger.printError('$error');
       return null;
     }
+  }
+
+  /// Replaces the string key in the given plist file with the given value.
+  ///
+  /// If the value is null, then the key will be removed.
+  ///
+  /// Returns true if successful.
+  bool replaceKey(String plistFilePath, {required String key, String? value }) {
+    if (!_fileSystem.isFileSync(_plutilExecutable)) {
+      throw const FileNotFoundException(_plutilExecutable);
+    }
+    final List<String> args;
+    if (value == null) {
+      args = <String>[
+        _plutilExecutable, '-remove', key, plistFilePath,
+      ];
+    } else {
+      args = <String>[
+        _plutilExecutable, '-replace', key, '-string', value, plistFilePath,
+      ];
+    }
+    try {
+      _processUtils.runSync(
+        args,
+        throwOnError: true,
+      );
+    } on ProcessException catch (error) {
+      _logger.printError('$error');
+      return false;
+    }
+    return true;
   }
 
   /// Parses the plist file located at [plistFilePath] and returns the
@@ -93,7 +126,7 @@ class PlistParser {
     for (final XmlNode child in node.children) {
       if (child is XmlElement) {
         if (child.name.local == 'key') {
-          lastKey = child.text;
+          lastKey = child.innerText;
         } else {
           assert(lastKey != null);
           result[lastKey!] = _parseXmlNode(child)!;
@@ -110,19 +143,19 @@ class PlistParser {
   Object? _parseXmlNode(XmlElement node) {
     switch (node.name.local){
       case 'string':
-        return node.text;
+        return node.innerText;
       case 'real':
-        return double.parse(node.text);
+        return double.parse(node.innerText);
       case 'integer':
-        return int.parse(node.text);
+        return int.parse(node.innerText);
       case 'true':
         return true;
       case 'false':
         return false;
       case 'date':
-        return DateTime.parse(node.text);
+        return DateTime.parse(node.innerText);
       case 'data':
-        return base64.decode(node.text.replaceAll(_nonBase64Pattern, ''));
+        return base64.decode(node.innerText.replaceAll(_nonBase64Pattern, ''));
       case 'array':
         return node.children.whereType<XmlElement>().map<Object?>(_parseXmlNode).whereType<Object>().toList();
       case 'dict':

@@ -1404,22 +1404,21 @@ void main() {
     await tester.pumpWidget(boilerplate);
     expect(controller.isAttached, true);
     expect(controller.size, isNotNull);
-    });
+  });
 
-    testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/102483
-      final DraggableScrollableController controller = DraggableScrollableController();
-      await tester.pumpWidget(boilerplateWidget(() {}, controller: controller));
+  testWidgets('DraggableScrollableController.animateTo after detach', (WidgetTester tester) async {
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(() {}, controller: controller));
 
-      controller.animateTo(0.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
-      await tester.pump();
+    controller.animateTo(0.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+    await tester.pump();
 
-      // Dispose the DraggableScrollableSheet
-      await tester.pumpWidget(const SizedBox.shrink());
-      // Controller should be detached and no exception should be thrown
-      expect(controller.isAttached, false);
-      expect(tester.takeException(), isNull);
-    });
+    // Dispose the DraggableScrollableSheet
+    await tester.pumpWidget(const SizedBox.shrink());
+    // Controller should be detached and no exception should be thrown
+    expect(controller.isAttached, false);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/101114
@@ -1485,6 +1484,51 @@ void main() {
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.6, precisionErrorTolerance),
     );
+  });
+
+  testWidgets('DraggableScrollableSheet should respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/121021
+    final DraggableScrollableController controller = DraggableScrollableController();
+    Widget buildFrame(ScrollPhysics? physics) {
+      return MaterialApp(
+        home: Scaffold(
+          body: DraggableScrollableSheet(
+            controller: controller,
+            initialChildSize: 0.25,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                physics: physics,
+                controller: scrollController,
+                children: <Widget>[
+                  const Text('Drag me!'),
+                  Container(
+                    height: 10000.0,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildFrame(const NeverScrollableScrollPhysics()));
+
+    final double initPixels = controller.pixels;
+
+    await tester.drag(find.text('Drag me!'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
+    //Should not allow user scrolling.
+    expect(controller.pixels, initPixels);
+
+    await tester.pumpWidget(buildFrame(null));
+
+    await tester.drag(find.text('Drag me!'), const Offset(0, -300.0));
+    await tester.pumpAndSettle();
+
+    //Allow user scrolling.
+    expect(controller.pixels, initPixels + 300.0);
   });
 
   testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {
@@ -1590,5 +1634,60 @@ void main() {
     });
     controller2.jumpTo(1.0);
     expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
+  });
+
+  testWidgets('DraggableScrollableSheet controller can be changed while animating', (WidgetTester tester) async {
+    final DraggableScrollableController controller1 = DraggableScrollableController();
+    final DraggableScrollableController controller2 = DraggableScrollableController();
+
+    DraggableScrollableController controller = controller1;
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => Scaffold(
+          body: DraggableScrollableSheet(
+            initialChildSize: 0.25,
+            snap: true,
+            snapSizes: const <double>[0.25, 0.5, 1.0],
+            controller: controller,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return ListView(
+                controller: scrollController,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => setState(() {
+                      controller = controller2;
+                    }),
+                    child: const Text('Switch controller'),
+                  ),
+                  Container(
+                    height: 10000,
+                    color: Colors.blue,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+    expect(controller1.isAttached, true);
+    expect(controller2.isAttached, false);
+
+
+    controller1.animateTo(0.5, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+    await tester.pump();
+
+    await tester.tap(find.text('Switch controller'));
+    await tester.pump();
+
+    expect(controller1.isAttached, false);
+    expect(controller2.isAttached, true);
+
+    controller2.animateTo(1.0, curve: Curves.linear, duration: const Duration(milliseconds: 200));
+    await tester.pump();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(controller1.isAttached, false);
+    expect(controller2.isAttached, false);
   });
 }

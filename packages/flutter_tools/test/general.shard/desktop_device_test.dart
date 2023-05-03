@@ -371,7 +371,7 @@ class FakeDesktopDevice extends DesktopDevice {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return getNameForBuildMode(buildInfo.mode);
+    return buildInfo.mode.cliName;
   }
 }
 

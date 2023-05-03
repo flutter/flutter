@@ -36,25 +36,10 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>(flutterProjectTypeToString),
+      allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: <String, String>{
-        flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
-            'application that follows community best practices.',
-        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
-            'Dart code.',
-        flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation through method channels for Android, iOS, '
-            'Linux, macOS, Windows, web, or any combination of these.',
-        flutterProjectTypeToString(FlutterProjectType.ffiPlugin):
-            'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
-            'Linux, macOS, Windows, or any combination of these.',
-        flutterProjectTypeToString(FlutterProjectType.module): 'Generate a project to add a Flutter module to an '
-            'existing Android or iOS application.',
-      },
+      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.values),
     );
     argParser.addOption(
       'sample',
@@ -95,9 +80,9 @@ class CreateCommand extends CreateBase {
   @override
   Future<CustomDimensions> get usageValues async {
     return CustomDimensions(
-      commandCreateProjectType: stringArgDeprecated('template'),
-      commandCreateAndroidLanguage: stringArgDeprecated('android-language'),
-      commandCreateIosLanguage: stringArgDeprecated('ios-language'),
+      commandCreateProjectType: stringArg('template'),
+      commandCreateAndroidLanguage: stringArg('android-language'),
+      commandCreateIosLanguage: stringArg('ios-language'),
     );
   }
 
@@ -164,7 +149,7 @@ class CreateCommand extends CreateBase {
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     final String? templateArgument = stringArg('template');
     if (templateArgument != null) {
-      template = stringToProjectType(templateArgument);
+      template = FlutterProjectType.fromCliName(templateArgument);
     }
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
@@ -182,8 +167,8 @@ class CreateCommand extends CreateBase {
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${flutterProjectTypeToString(template)}' doesn't match the "
-          "existing template type of '${flutterProjectTypeToString(detectedProjectType)}'.");
+      throwToolExit("The requested template type '${template.cliName}' doesn't match the "
+          "existing template type of '${detectedProjectType.cliName}'.");
     }
     return template;
   }
@@ -207,12 +192,12 @@ class CreateCommand extends CreateBase {
     validateOutputDirectoryArg();
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
-    final bool emptyArgument = boolArg('empty') ?? false;
+    final bool emptyArgument = boolArg('empty');
     if (sampleArgument != null) {
       final String? templateArgument = stringArg('template');
-      if (templateArgument != null && stringToProjectType(templateArgument) != FlutterProjectType.app) {
+      if (templateArgument != null && FlutterProjectType.fromCliName(templateArgument) != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
-          '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
+          '"${FlutterProjectType.app.cliName}"');
       }
       // Fetch the sample from the server.
       sampleCode = await _fetchSampleFromServer(sampleArgument);
@@ -221,7 +206,7 @@ class CreateCommand extends CreateBase {
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
     final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
-    final bool generateFfiPlugin = template == FlutterProjectType.ffiPlugin;
+    final bool generateFfiPlugin = template == FlutterProjectType.pluginFfi;
     final bool generatePackage = template == FlutterProjectType.package;
 
     final List<String> platforms = stringsArg('platforms');
@@ -256,10 +241,10 @@ class CreateCommand extends CreateBase {
 
     final String organization = await getOrganization();
 
-    final bool overwrite = boolArgDeprecated('overwrite');
+    final bool overwrite = boolArg('overwrite');
     validateProjectDir(overwrite: overwrite);
 
-    if (boolArgDeprecated('with-driver-test')) {
+    if (boolArg('with-driver-test')) {
       globals.printWarning(
         'The "--with-driver-test" argument has been deprecated and will no longer add a flutter '
         'driver template. Instead, learn how to use package:integration_test by '
@@ -278,6 +263,14 @@ class CreateCommand extends CreateBase {
       // The module template only supports iOS and Android.
       includeIos = true;
       includeAndroid = true;
+      includeWeb = false;
+      includeLinux = false;
+      includeMacos = false;
+      includeWindows = false;
+    } else if (template == FlutterProjectType.package) {
+      // The package template does not supports any platform.
+      includeIos = false;
+      includeAndroid = false;
       includeWeb = false;
       includeLinux = false;
       includeMacos = false;
@@ -309,13 +302,13 @@ class CreateCommand extends CreateBase {
       organization: organization,
       projectName: projectName,
       titleCaseProjectName: titleCaseProjectName,
-      projectDescription: stringArgDeprecated('description'),
+      projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
       withFfiPluginHook: generateFfiPlugin,
       withEmptyMain: emptyArgument,
-      androidLanguage: stringArgDeprecated('android-language'),
-      iosLanguage: stringArgDeprecated('ios-language'),
+      androidLanguage: stringArg('android-language'),
+      iosLanguage: stringArg('ios-language'),
       iosDevelopmentTeam: developmentTeam,
       ios: includeIos,
       android: includeAndroid,
@@ -324,7 +317,7 @@ class CreateCommand extends CreateBase {
       macos: includeMacos,
       windows: includeWindows,
       dartSdkVersionBounds: "'>=$dartSdk <4.0.0'",
-      implementationTests: boolArgDeprecated('implementation-tests'),
+      implementationTests: boolArg('implementation-tests'),
       agpVersion: gradle.templateAndroidGradlePluginVersion,
       kotlinVersion: gradle.templateKotlinGradlePluginVersion,
       gradleVersion: gradle.templateDefaultGradleVersion,
@@ -356,7 +349,6 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.create;
-        break;
       case FlutterProjectType.skeleton:
         generatedFileCount += await generateApp(
           <String>['skeleton'],
@@ -367,7 +359,6 @@ class CreateCommand extends CreateBase {
           generateMetadata: false,
         );
         pubContext = PubContext.create;
-        break;
       case FlutterProjectType.module:
         generatedFileCount += await _generateModule(
           relativeDir,
@@ -376,7 +367,6 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
         );
         pubContext = PubContext.create;
-        break;
       case FlutterProjectType.package:
         generatedFileCount += await _generatePackage(
           relativeDir,
@@ -385,7 +375,6 @@ class CreateCommand extends CreateBase {
           printStatusWhenWriting: !creatingNewProject,
         );
         pubContext = PubContext.createPackage;
-        break;
       case FlutterProjectType.plugin:
         generatedFileCount += await _generateMethodChannelPlugin(
           relativeDir,
@@ -395,8 +384,7 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
-        break;
-      case FlutterProjectType.ffiPlugin:
+      case FlutterProjectType.pluginFfi:
         generatedFileCount += await _generateFfiPlugin(
           relativeDir,
           templateContext,
@@ -405,15 +393,14 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
-        break;
     }
 
-    if (boolArgDeprecated('pub')) {
+    if (boolArg('pub')) {
       final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
       await pub.get(
         context: pubContext,
         project: project,
-        offline: boolArgDeprecated('offline'),
+        offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
       await project.ensureReadyForPlatformSpecificTooling(
@@ -505,7 +492,7 @@ Your $application code is in $relativeAppMain.
   }) async {
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -526,7 +513,7 @@ Your $application code is in $relativeAppMain.
   }) async {
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
@@ -564,7 +551,7 @@ Your $application code is in $relativeAppMain.
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
@@ -634,7 +621,7 @@ Your $application code is in $relativeAppMain.
     templateContext['no_platforms'] = !willAddPlatforms;
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
-        ? stringArgDeprecated('description')
+        ? stringArg('description')
         : 'A new Flutter FFI plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(

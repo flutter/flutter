@@ -36,6 +36,9 @@ class BottomSheetThemeData with Diagnosticable {
     this.shadowColor,
     this.modalElevation,
     this.shape,
+    this.showDragHandle,
+    this.dragHandleColor,
+    this.dragHandleSize,
     this.clipBehavior,
     this.constraints,
   });
@@ -80,6 +83,15 @@ class BottomSheetThemeData with Diagnosticable {
   /// [BottomSheet] is rectangular.
   final ShapeBorder? shape;
 
+  /// Overrides the default value for [BottomSheet.showDragHandle].
+  final bool? showDragHandle;
+
+  /// Overrides the default value for [BottomSheet.dragHandleColor].
+  final Color? dragHandleColor;
+
+  /// Overrides the default value for [BottomSheet.dragHandleSize].
+  final Size? dragHandleSize;
+
   /// Overrides the default value for [BottomSheet.clipBehavior].
   ///
   /// If null, [BottomSheet] uses [Clip.none].
@@ -101,6 +113,9 @@ class BottomSheetThemeData with Diagnosticable {
     Color? shadowColor,
     double? modalElevation,
     ShapeBorder? shape,
+    bool? showDragHandle,
+    Color? dragHandleColor,
+    Size? dragHandleSize,
     Clip? clipBehavior,
     BoxConstraints? constraints,
   }) {
@@ -113,6 +128,9 @@ class BottomSheetThemeData with Diagnosticable {
       shadowColor: shadowColor ?? this.shadowColor,
       modalElevation: modalElevation ?? this.modalElevation,
       shape: shape ?? this.shape,
+      showDragHandle: showDragHandle ?? this.showDragHandle,
+      dragHandleColor: dragHandleColor ?? this.dragHandleColor,
+      dragHandleSize: dragHandleSize ?? this.dragHandleSize,
       clipBehavior: clipBehavior ?? this.clipBehavior,
       constraints: constraints ?? this.constraints,
     );
@@ -136,6 +154,9 @@ class BottomSheetThemeData with Diagnosticable {
       shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
       modalElevation: lerpDouble(a?.modalElevation, b?.modalElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      showDragHandle: t < 0.5 ? a?.showDragHandle : b?.showDragHandle,
+      dragHandleColor: Color.lerp(a?.dragHandleColor, b?.dragHandleColor, t),
+      dragHandleSize: Size.lerp(a?.dragHandleSize, b?.dragHandleSize, t),
       clipBehavior: t < 0.5 ? a?.clipBehavior : b?.clipBehavior,
       constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
     );
@@ -151,6 +172,9 @@ class BottomSheetThemeData with Diagnosticable {
     shadowColor,
     modalElevation,
     shape,
+    showDragHandle,
+    dragHandleColor,
+    dragHandleSize,
     clipBehavior,
     constraints,
   );
@@ -172,6 +196,9 @@ class BottomSheetThemeData with Diagnosticable {
         && other.modalBarrierColor == modalBarrierColor
         && other.modalElevation == modalElevation
         && other.shape == shape
+        && other.showDragHandle == showDragHandle
+        && other.dragHandleColor == dragHandleColor
+        && other.dragHandleSize == dragHandleSize
         && other.clipBehavior == clipBehavior
         && other.constraints == constraints;
   }
@@ -187,6 +214,9 @@ class BottomSheetThemeData with Diagnosticable {
     properties.add(ColorProperty('modalBarrierColor', modalBarrierColor, defaultValue: null));
     properties.add(DoubleProperty('modalElevation', modalElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showDragHandle', showDragHandle, defaultValue: null));
+    properties.add(ColorProperty('dragHandleColor', dragHandleColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Size>('dragHandleSize', dragHandleSize, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
   }

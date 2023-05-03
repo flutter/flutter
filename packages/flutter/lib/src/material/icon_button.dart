@@ -638,9 +638,7 @@ class IconButton extends StatelessWidget {
     final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null && hoverColor == null && focusColor == null && highlightColor == null)
         ? null
         : _IconButtonDefaultOverlay(foregroundColor, focusColor, hoverColor, highlightColor);
-    final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-        ? null
-        : _IconButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
+    final MaterialStateProperty<MouseCursor?> mouseCursor = _IconButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       backgroundColor: buttonBackgroundColor,
@@ -1061,14 +1059,14 @@ class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
+class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
   _IconButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
-  final MouseCursor enabledCursor;
-  final MouseCursor disabledCursor;
+  final MouseCursor? enabledCursor;
+  final MouseCursor? disabledCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -1083,7 +1081,7 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _IconButtonDefaultsM3 extends ButtonStyle {
   _IconButtonDefaultsM3(this.context, this.toggleable)
@@ -1206,7 +1204,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _FilledIconButtonDefaultsM3 extends ButtonStyle {
   _FilledIconButtonDefaultsM3(this.context, this.toggleable)
@@ -1354,7 +1352,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
   _FilledTonalIconButtonDefaultsM3(this.context, this.toggleable)
@@ -1502,7 +1500,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
   _OutlinedIconButtonDefaultsM3(this.context, this.toggleable)

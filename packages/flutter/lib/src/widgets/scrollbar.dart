@@ -22,6 +22,7 @@ import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_position.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'ticker_provider.dart';
 
 const double _kMinThumbExtent = 18.0;
@@ -566,7 +567,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset + Offset(trackSize.width, 0.0);
         borderEnd = Offset(trackOffset.dx + trackSize.width, trackOffset.dy + _trackExtent);
-        break;
       case ScrollbarOrientation.right:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
@@ -575,7 +575,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(x - crossAxisMargin, _leadingTrackMainAxisOffset);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx, trackOffset.dy + _trackExtent);
-        break;
       case ScrollbarOrientation.top:
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
@@ -584,7 +583,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset + Offset(0.0, trackSize.height);
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy + trackSize.height);
-        break;
       case ScrollbarOrientation.bottom:
         thumbSize = Size(_thumbExtent, thickness);
         trackSize = Size(_trackExtent, thickness + 2 * crossAxisMargin);
@@ -593,7 +591,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         trackOffset = Offset(_leadingTrackMainAxisOffset, y - crossAxisMargin);
         borderStart = trackOffset;
         borderEnd = Offset(trackOffset.dx + _trackExtent, trackOffset.dy);
-        break;
     }
 
     // Whether we paint or not, calculating these rects allows us to hit test
@@ -1090,9 +1087,9 @@ class RawScrollbar extends StatefulWidget {
   ///   * When providing a controller, the same ScrollController must also be
   ///     provided to the associated Scrollable widget.
   ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has an
-  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
-  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
+  ///     that has not been provided a [ScrollController] and that has a
+  ///     [ScrollView.scrollDirection] of [Axis.vertical]. This automatic
+  ///     behavior does not apply to those with [Axis.horizontal]. To explicitly
   ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
   ///
   /// Defaults to false when null.
@@ -1175,9 +1172,9 @@ class RawScrollbar extends StatefulWidget {
   ///   * When providing a controller, the same ScrollController must also be
   ///     provided to the associated Scrollable widget.
   ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has an
-  ///     [Axis.vertical] [ScrollDirection]. This automatic behavior does not
-  ///     apply to those with a ScrollDirection of Axis.horizontal. To explicitly
+  ///     that has not been provided a [ScrollController] and that has a
+  ///     [ScrollView.scrollDirection] of [Axis.vertical]. This automatic
+  ///     behavior does not apply to those with Axis.horizontal. To explicitly
   ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
   ///
   /// Defaults to false when null.
@@ -1579,7 +1576,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
             'ScrollController should be associated with the ScrollView that '
             'the Scrollbar is being applied to.'
             '${tryPrimary
-              ? 'A ScrollView with an Axis.vertical ScrollDirection on mobile '
+              ? 'When ScrollView.scrollDirection is Axis.vertical on mobile '
                 'platforms will automatically use the '
                 'PrimaryScrollController if the user has not provided a '
                 'ScrollController. To use the PrimaryScrollController '
@@ -1686,19 +1683,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       case AxisDirection.up:
         primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - updatedOffset.dy;
         primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - updatedOffset.dy;
-        break;
       case AxisDirection.right:
         primaryDeltaFromDragStart = updatedOffset.dx -_startDragScrollbarAxisOffset!.dx;
         primaryDeltaFromLastDragUpdate = updatedOffset.dx -_lastDragUpdateOffset!.dx;
-        break;
       case AxisDirection.down:
         primaryDeltaFromDragStart = updatedOffset.dy -_startDragScrollbarAxisOffset!.dy;
         primaryDeltaFromLastDragUpdate = updatedOffset.dy -_lastDragUpdateOffset!.dy;
-        break;
       case AxisDirection.left:
         primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - updatedOffset.dx;
         primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - updatedOffset.dx;
-        break;
     }
 
     // Convert primaryDelta, the amount that the scrollbar moved since the last
@@ -1724,7 +1717,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.android:
           // We can only drag the scrollbar into overscroll on mobile
@@ -1849,7 +1841,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         } else {
           scrollDirection = AxisDirection.up;
         }
-        break;
       case AxisDirection.left:
       case AxisDirection.right:
         if (details.localPosition.dx > scrollbarPainter._thumbOffset) {
@@ -2152,7 +2143,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                       if (enableGestures) {
                         handleHoverExit(event);
                       }
-                      break;
                     case PointerDeviceKind.stylus:
                     case PointerDeviceKind.invertedStylus:
                     case PointerDeviceKind.unknown:
@@ -2167,7 +2157,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                       if (enableGestures) {
                         handleHover(event);
                       }
-                      break;
                     case PointerDeviceKind.stylus:
                     case PointerDeviceKind.invertedStylus:
                     case PointerDeviceKind.unknown:

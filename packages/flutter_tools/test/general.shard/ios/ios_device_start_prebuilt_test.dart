@@ -68,7 +68,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 FakeCommand attachDebuggerCommand({
   IOSink? stdin,
   Completer<void>? completer,
-  bool isNetworkDevice = false,
+  bool isWirelessDevice = false,
 }) {
   return FakeCommand(
     command: <String>[
@@ -82,9 +82,9 @@ FakeCommand attachDebuggerCommand({
       '--bundle',
       '/',
       '--debug',
-      if (!isNetworkDevice) '--no-wifi',
+      if (!isWirelessDevice) '--no-wifi',
       '--args',
-      if (isNetworkDevice)
+      if (isWirelessDevice)
         '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
       else
         '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
@@ -244,13 +244,13 @@ void main() {
     final CompleterIOSink stdin = CompleterIOSink();
     final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      attachDebuggerCommand(stdin: stdin, completer: completer, isNetworkDevice: true),
+      attachDebuggerCommand(stdin: stdin, completer: completer, isWirelessDevice: true),
     ]);
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
-      interfaceType: IOSDeviceConnectionInterface.network,
+      interfaceType: DeviceConnectionInterface.wireless,
     );
     final IOSApp iosApp = PrebuiltIOSApp(
       projectBundleId: 'app',
@@ -352,7 +352,7 @@ void main() {
             '--verbose-logging',
             '--cache-sksl',
             '--purge-persistent-cache',
-            '--enable-impeller',
+            '--enable-impeller=false',
             '--enable-embedder-api',
           ].join(' '),
         ],
@@ -404,8 +404,8 @@ void main() {
         cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
+        enableImpeller: ImpellerStatus.disabled,
         nullAssertions: true,
-        enableImpeller: true,
         enableEmbedderApi: true,
       ),
       platformArgs: <String, dynamic>{},
@@ -560,7 +560,7 @@ IOSDevice setUpIOSDevice({
   Logger? logger,
   ProcessManager? processManager,
   IOSDeploy? iosDeploy,
-  IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb,
+  DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
 }) {
   final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
@@ -598,7 +598,8 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     cpuArchitecture: DarwinArch.arm64,
-    interfaceType: interfaceType,
+    connectionInterface: interfaceType,
+    isConnected: true,
   );
 }
 
@@ -619,7 +620,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     bool usesIpv6 = false,
     int? hostVmservicePort,
     required int deviceVmservicePort,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
   }) async {
     return Uri.tryParse('http://0.0.0.0:1234');

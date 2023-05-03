@@ -580,7 +580,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onLongPressUp == null) {
           return false;
         }
-        break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown == null &&
             onSecondaryLongPressCancel == null &&
@@ -591,7 +590,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onSecondaryLongPressUp == null) {
           return false;
         }
-        break;
       case kTertiaryButton:
         if (onTertiaryLongPressDown == null &&
             onTertiaryLongPressCancel == null &&
@@ -602,7 +600,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             onTertiaryLongPressUp == null) {
           return false;
         }
-        break;
       default:
         return false;
     }
@@ -669,17 +666,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPressDown != null) {
           invokeCallback<void>('onLongPressDown', () => onLongPressDown!(details));
         }
-        break;
       case kSecondaryButton:
         if (onSecondaryLongPressDown != null) {
           invokeCallback<void>('onSecondaryLongPressDown', () => onSecondaryLongPressDown!(details));
         }
-        break;
       case kTertiaryButton:
         if (onTertiaryLongPressDown != null) {
           invokeCallback<void>('onTertiaryLongPressDown', () => onTertiaryLongPressDown!(details));
         }
-        break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }
@@ -692,17 +686,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           if (onLongPressCancel != null) {
             invokeCallback<void>('onLongPressCancel', onLongPressCancel!);
           }
-          break;
         case kSecondaryButton:
           if (onSecondaryLongPressCancel != null) {
             invokeCallback<void>('onSecondaryLongPressCancel', onSecondaryLongPressCancel!);
           }
-          break;
         case kTertiaryButton:
           if (onTertiaryLongPressCancel != null) {
             invokeCallback<void>('onTertiaryLongPressCancel', onTertiaryLongPressCancel!);
           }
-          break;
         default:
           assert(false, 'Unhandled button $_initialButtons');
       }
@@ -722,7 +713,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPress != null) {
           invokeCallback<void>('onLongPress', onLongPress!);
         }
-        break;
       case kSecondaryButton:
         if (onSecondaryLongPressStart != null) {
           final LongPressStartDetails details = LongPressStartDetails(
@@ -734,7 +724,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onSecondaryLongPress != null) {
           invokeCallback<void>('onSecondaryLongPress', onSecondaryLongPress!);
         }
-        break;
       case kTertiaryButton:
         if (onTertiaryLongPressStart != null) {
           final LongPressStartDetails details = LongPressStartDetails(
@@ -746,7 +735,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onTertiaryLongPress != null) {
           invokeCallback<void>('onTertiaryLongPress', onTertiaryLongPress!);
         }
-        break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }
@@ -764,17 +752,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPressMoveUpdate != null) {
           invokeCallback<void>('onLongPressMoveUpdate', () => onLongPressMoveUpdate!(details));
         }
-        break;
       case kSecondaryButton:
         if (onSecondaryLongPressMoveUpdate != null) {
           invokeCallback<void>('onSecondaryLongPressMoveUpdate', () => onSecondaryLongPressMoveUpdate!(details));
         }
-        break;
       case kTertiaryButton:
         if (onTertiaryLongPressMoveUpdate != null) {
           invokeCallback<void>('onTertiaryLongPressMoveUpdate', () => onTertiaryLongPressMoveUpdate!(details));
         }
-        break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }
@@ -800,7 +785,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPressUp != null) {
           invokeCallback<void>('onLongPressUp', onLongPressUp!);
         }
-        break;
       case kSecondaryButton:
         if (onSecondaryLongPressEnd != null) {
           invokeCallback<void>('onSecondaryLongPressEnd', () => onSecondaryLongPressEnd!(details));
@@ -808,7 +792,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onSecondaryLongPressUp != null) {
           invokeCallback<void>('onSecondaryLongPressUp', onSecondaryLongPressUp!);
         }
-        break;
       case kTertiaryButton:
         if (onTertiaryLongPressEnd != null) {
           invokeCallback<void>('onTertiaryLongPressEnd', () => onTertiaryLongPressEnd!(details));
@@ -816,7 +799,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onTertiaryLongPressUp != null) {
           invokeCallback<void>('onTertiaryLongPressUp', onTertiaryLongPressUp!);
         }
-        break;
       default:
         assert(false, 'Unhandled button $_initialButtons');
     }

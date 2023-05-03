@@ -900,16 +900,17 @@ void main() {
       ),
     ));
 
-    final Material material = tester.widget<Material>(
-      find.descendant(
-        of: find.byType(BottomSheet),
-        matching: find.byType(Material),
-      ),
+    final Finder finder = find.descendant(
+      of: find.byType(BottomSheet),
+      matching: find.byType(Material),
     );
+    final Material material = tester.widget<Material>(finder);
+
     expect(material.color, surfaceColor);
     expect(material.surfaceTintColor, surfaceTintColor);
     expect(material.elevation, 1.0);
     expect(material.shape, defaultShape);
+    expect(tester.getSize(finder).width, 640);
   });
 
   testWidgets('BottomSheet has transparent shadow in material3', (WidgetTester tester) async {
@@ -1006,6 +1007,138 @@ void main() {
       ],
     ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
     semantics.dispose();
+  });
+
+  testWidgets('modal BottomSheet with drag handle has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light(useMaterial3: true),
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Dialog',
+                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'BottomSheet',
+                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: 'Dismiss',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Scrim',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgets('Drag handle color can take MaterialStateProperty', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const Color defaultColor=Colors.blue;
+    const Color hoveringColor=Colors.green;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData.light(useMaterial3: true).copyWith(
+        bottomSheetTheme:  BottomSheetThemeData(
+          dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.hovered)) {
+              return hoveringColor;
+            }
+            return defaultColor;
+          }),
+        ),
+      ),
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext!,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return const Text('BottomSheet');
+      },
+    );
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    final Finder dragHandle = find.bySemanticsLabel('Dismiss');
+    expect(
+      tester.getSize(dragHandle),
+      const Size(48, 48),
+    );
+    final Offset center = tester.getCenter(dragHandle);
+    final Offset edge = tester.getTopLeft(dragHandle) - const Offset(1, 1);
+
+    // Shows default drag handle color
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: edge);
+    await tester.pump();
+    BoxDecoration boxDecoration=tester.widget<Container>(find.descendant(
+      of: dragHandle,
+      matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
+    )).decoration! as BoxDecoration;
+    expect(boxDecoration.color, defaultColor);
+
+    // Shows hovering drag handle color
+    await gesture.moveTo(center);
+    await tester.pump();
+    boxDecoration = tester.widget<Container>(find.descendant(
+     of: dragHandle,
+     matching: find.byWidgetPredicate((Widget widget) => widget is Container && widget.decoration != null),
+   )).decoration! as BoxDecoration;
+
+    expect(boxDecoration.color, hoveringColor);
   });
 
   testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
@@ -1617,6 +1750,21 @@ void main() {
   });
 
   group('constraints', () {
+      testWidgets('default constraints are max width 640 in material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(useMaterial3: true),
+          home: const MediaQuery(
+            data: MediaQueryData(size: Size(1000, 1000)),
+            child: Scaffold(
+              body: Center(child: Text('body')),
+              bottomSheet: Placeholder(fallbackWidth: 800),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(Placeholder)).width, 640);
+    });
 
     testWidgets('No constraints by default for bottomSheet property', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(

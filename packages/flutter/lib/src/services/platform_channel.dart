@@ -340,10 +340,7 @@ class MethodChannel {
   /// <https://flutter.dev/developing-packages/>:
   ///
   /// ```dart
-  /// class Music {
-  ///   // Class cannot be instantiated.
-  ///   const Music._();
-  ///
+  /// abstract final class Music {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {

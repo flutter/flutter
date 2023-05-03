@@ -58,9 +58,9 @@ class BuildApkCommand extends BuildSubCommand {
   final String name = 'apk';
 
   @override
-  DeprecationBehavior get deprecationBehavior => boolArgDeprecated('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
+  DeprecationBehavior get deprecationBehavior => boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 
-  bool get configOnly => boolArg('config-only') ?? false;
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -80,11 +80,11 @@ class BuildApkCommand extends BuildSubCommand {
   Future<CustomDimensions> get usageValues async {
     String buildMode;
 
-    if (boolArgDeprecated('release')) {
+    if (boolArg('release')) {
       buildMode = 'release';
-    } else if (boolArgDeprecated('debug')) {
+    } else if (boolArg('debug')) {
       buildMode = 'debug';
-    } else if (boolArgDeprecated('profile')) {
+    } else if (boolArg('profile')) {
       buildMode = 'profile';
     } else {
       // The build defaults to release.
@@ -94,7 +94,7 @@ class BuildApkCommand extends BuildSubCommand {
     return CustomDimensions(
       commandBuildApkTargetPlatform: stringsArg('target-platform').join(','),
       commandBuildApkBuildMode: buildMode,
-      commandBuildApkSplitPerAbi: boolArgDeprecated('split-per-abi'),
+      commandBuildApkSplitPerAbi: boolArg('split-per-abi'),
     );
   }
 
@@ -106,9 +106,9 @@ class BuildApkCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
-      splitPerAbi: boolArgDeprecated('split-per-abi'),
+      splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArgDeprecated('multidex'),
+      multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);

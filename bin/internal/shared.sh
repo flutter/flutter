@@ -21,7 +21,7 @@ function pub_upgrade_with_retry {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$DART" --no-analytics pub upgrade) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics) && break
     >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
@@ -149,9 +149,6 @@ function upgrade_flutter () (
       export PUB_SUMMARY_ONLY=1
     fi
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
-    if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then
-      export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
-    fi
     pub_upgrade_with_retry
 
     # Move the old snapshot - we can't just overwrite it as the VM might currently have it
