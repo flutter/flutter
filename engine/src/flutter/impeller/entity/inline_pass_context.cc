@@ -103,24 +103,38 @@ InlinePassContext::RenderPassResult InlinePassContext::GetRenderPass(
       " Count=" + std::to_string(pass_count_));
 
   RenderPassResult result;
-
-  if (pass_count_ > 0) {
-    result.backdrop_texture =
-        pass_target_.Flip(*context_->GetResourceAllocator());
-    if (!result.backdrop_texture) {
-      VALIDATION_LOG << "Could not flip the EntityPass render target.";
+  {
+    // If the pass target has a resolve texture, then we're using MSAA.
+    bool is_msaa = pass_target_.GetRenderTarget()
+                       .GetColorAttachments()
+                       .find(0)
+                       ->second.resolve_texture != nullptr;
+    if (pass_count_ > 0 && is_msaa) {
+      result.backdrop_texture =
+          pass_target_.Flip(*context_->GetResourceAllocator());
+      if (!result.backdrop_texture) {
+        VALIDATION_LOG << "Could not flip the EntityPass render target.";
+      }
     }
   }
 
+  // Find the color attachment a second time, since the target may have just
+  // flipped.
   auto color0 =
       pass_target_.GetRenderTarget().GetColorAttachments().find(0)->second;
+  bool is_msaa = color0.resolve_texture != nullptr;
 
-  color0.load_action =
-      pass_count_ > 0 ? LoadAction::kDontCare : LoadAction::kClear;
+  if (pass_count_ > 0) {
+    // When MSAA is being used, we end up overriding the entire backdrop by
+    // drawing the previous pass texture, and so we don't have to clear it and
+    // can use kDontCare.
+    color0.load_action = is_msaa ? LoadAction::kDontCare : LoadAction::kLoad;
+  } else {
+    color0.load_action = LoadAction::kClear;
+  }
 
-  color0.store_action = color0.resolve_texture
-                            ? StoreAction::kMultisampleResolve
-                            : StoreAction::kStore;
+  color0.store_action =
+      is_msaa ? StoreAction::kMultisampleResolve : StoreAction::kStore;
 
   auto stencil = pass_target_.GetRenderTarget().GetStencilAttachment();
   if (!stencil.has_value()) {
