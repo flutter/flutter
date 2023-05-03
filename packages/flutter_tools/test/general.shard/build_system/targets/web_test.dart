@@ -30,6 +30,22 @@ const List<String> kDart2jsLinuxArgs = <String>[
   '--invoker=flutter_tool',
 ];
 
+const List<String> kDart2WasmLinuxArgs = <String> [
+  'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+  '--disable-dart-dev',
+  'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+  '--packages=.dart_tool/package_config.json',
+  '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
+  '--multi-root-scheme',
+  'org-dartlang-sdk',
+  '--multi-root',
+  'HostArtifact.flutterWebSdk',
+  '--multi-root',
+  '.',
+  '--libraries-spec',
+  'HostArtifact.flutterWebLibrariesJson',
+];
+
 /// The result of calling `.parent` on a Memory directory pointing to
 /// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
 const String kDartSdkRoot = '.';
@@ -615,7 +631,7 @@ void main() {
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.dart_tool/package_config.json',
-       '--cfe-only',
+        '--cfe-only',
         environment.buildDir.childFile('main.dart').absolute.path,
       ]
     ));
@@ -749,22 +765,10 @@ void main() {
 
     processManager.addCommand(FakeCommand(
       command: <String>[
-        'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-        '--disable-dart-dev',
-        'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+        ...kDart2WasmLinuxArgs,
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '--packages=.dart_tool/package_config.json',
-        '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-        '--multi-root-scheme',
-        'org-dartlang-sdk',
-        '--multi-root',
-        'HostArtifact.flutterWebSdk',
-        '--multi-root',
-        kDartSdkRoot,
-        '--libraries-spec',
-        'HostArtifact.flutterWebLibrariesJson',
         '--depfile=${depFile.absolute.path}',
 
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -785,23 +789,10 @@ void main() {
 
     processManager.addCommand(FakeCommand(
       command: <String>[
-        'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-        '--disable-dart-dev',
-        'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+        ...kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
         '--omit-type-checks',
-        '--packages=.dart_tool/package_config.json',
-        '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-        '--multi-root-scheme',
-        'org-dartlang-sdk',
-        '--multi-root',
-        'HostArtifact.flutterWebSdk',
-        '--multi-root',
-        kDartSdkRoot,
-        '--libraries-spec',
-        'HostArtifact.flutterWebLibrariesJson',
         '--depfile=${depFile.absolute.path}',
-
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ])
@@ -821,20 +812,8 @@ void main() {
     final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
-        'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-        '--disable-dart-dev',
-        'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+        ...kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
-        '--packages=.dart_tool/package_config.json',
-        '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-        '--multi-root-scheme',
-        'org-dartlang-sdk',
-        '--multi-root',
-        'HostArtifact.flutterWebSdk',
-        '--multi-root',
-        kDartSdkRoot,
-        '--libraries-spec',
-        'HostArtifact.flutterWebLibrariesJson',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
@@ -873,20 +852,8 @@ void main() {
 
     processManager.addCommand(FakeCommand(
       command: <String>[
-        'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-        '--disable-dart-dev',
-        'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+        ...kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
-        '--packages=.dart_tool/package_config.json',
-        '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-        '--multi-root-scheme',
-        'org-dartlang-sdk',
-        '--multi-root',
-        'HostArtifact.flutterWebSdk',
-        '--multi-root',
-        kDartSdkRoot,
-        '--libraries-spec',
-        'HostArtifact.flutterWebLibrariesJson',
         '--import-shared-memory',
         '--shared-memory-max-pages=32768',
         '--depfile=${depFile.absolute.path}',

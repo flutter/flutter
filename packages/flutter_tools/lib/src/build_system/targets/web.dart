@@ -253,14 +253,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
       artifacts.getArtifactPath(Artifact.engineDartAotRuntime, platform: TargetPlatform.web_javascript),
       '--disable-dart-dev',
       artifacts.getArtifactPath(Artifact.dart2wasmSnapshot, platform: TargetPlatform.web_javascript),
-      if (buildMode == BuildMode.profile)
-        '-Ddart.vm.profile=true'
-      else
-        '-Ddart.vm.product=true',
-      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
-      for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
-        '-D$dartDefine',
-      ...compilerConfig.toCommandOptions(),
       '--packages=.dart_tool/package_config.json',
       '--dart-sdk=$dartSdkPath',
       '--multi-root-scheme',
@@ -271,6 +263,14 @@ class Dart2WasmTarget extends Dart2WebTarget {
       dartSdkRoot,
       '--libraries-spec',
       artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).path,
+      if (buildMode == BuildMode.profile)
+        '-Ddart.vm.profile=true'
+      else
+        '-Ddart.vm.product=true',
+      ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
+      for (final String dartDefine in decodeDartDefines(environment.defines, kDartDefines))
+        '-D$dartDefine',
+      ...compilerConfig.toCommandOptions(),
       if (webRenderer == WebRendererMode.skwasm)
         ...<String>[
           '--import-shared-memory',
