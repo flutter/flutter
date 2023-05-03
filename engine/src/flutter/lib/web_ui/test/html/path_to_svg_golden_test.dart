@@ -194,14 +194,14 @@ DomElement pathToSvgElement(Path path, Paint paint, bool enableFill) {
   root.append(pathElement);
   if (paint.style == PaintingStyle.stroke ||
       paint.strokeWidth != 0.0) {
-    pathElement.setAttribute('stroke', colorToCssString(paint.color)!);
+    pathElement.setAttribute('stroke', paint.color.toCssString());
     pathElement.setAttribute('stroke-width', paint.strokeWidth);
     if (!enableFill) {
       pathElement.setAttribute('fill', 'none');
     }
   }
   if (paint.style == PaintingStyle.fill) {
-    pathElement.setAttribute('fill', colorToCssString(paint.color)!);
+    pathElement.setAttribute('fill', paint.color.toCssString());
   }
   pathElement.setAttribute('d', pathToSvg((path as SurfacePath).pathRef)); // This is what we're testing!
   return root;

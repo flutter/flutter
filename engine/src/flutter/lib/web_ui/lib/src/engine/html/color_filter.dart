@@ -352,7 +352,7 @@ SvgFilter _srcInColorFilterToSvg(ui.Color? color) {
     result: 'destalpha',
   );
   builder.setFeFlood(
-    floodColor: colorToCssString(color) ?? '',
+    floodColor: color?.toCssString() ?? '',
     floodOpacity: '1',
     result: 'flood',
   );
@@ -374,7 +374,7 @@ SvgFilter _srcInColorFilterToSvg(ui.Color? color) {
 SvgFilter _dstATopColorFilterToSvg(ui.Color? color) {
   final SvgFilterBuilder builder = SvgFilterBuilder();
   builder.setFeFlood(
-    floodColor: colorToCssString(color) ?? '',
+    floodColor: color?.toCssString() ?? '',
     floodOpacity: '1',
     result: 'flood',
   );
@@ -390,7 +390,7 @@ SvgFilter _dstATopColorFilterToSvg(ui.Color? color) {
 SvgFilter _srcOutColorFilterToSvg(ui.Color? color) {
   final SvgFilterBuilder builder = SvgFilterBuilder();
   builder.setFeFlood(
-    floodColor: colorToCssString(color) ?? '',
+    floodColor: color?.toCssString() ?? '',
     floodOpacity: '1',
     result: 'flood',
   );
@@ -406,7 +406,7 @@ SvgFilter _srcOutColorFilterToSvg(ui.Color? color) {
 SvgFilter _xorColorFilterToSvg(ui.Color? color) {
   final SvgFilterBuilder builder = SvgFilterBuilder();
   builder.setFeFlood(
-    floodColor: colorToCssString(color) ?? '',
+    floodColor: color?.toCssString() ?? '',
     floodOpacity: '1',
     result: 'flood',
   );
@@ -425,7 +425,7 @@ SvgFilter _compositeColorFilterToSvg(
     ui.Color? color, double k1, double k2, double k3, double k4) {
   final SvgFilterBuilder builder = SvgFilterBuilder();
   builder.setFeFlood(
-    floodColor: colorToCssString(color) ?? '',
+    floodColor: color?.toCssString() ?? '',
     floodOpacity: '1',
     result: 'flood',
   );
@@ -478,7 +478,7 @@ SvgFilter _blendColorFilterToSvg(ui.Color? color, SvgBlendMode svgBlendMode,
     {bool swapLayers = false}) {
   final SvgFilterBuilder builder = SvgFilterBuilder();
   builder.setFeFlood(
-    floodColor: colorToCssString(color) ?? '',
+    floodColor: color?.toCssString() ?? '',
     floodOpacity: '1',
     result: 'flood',
   );

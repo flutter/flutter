@@ -231,7 +231,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
   }
 
   void _applyColor() {
-    rootElement!.style.backgroundColor = colorToCssString(color)!;
+    rootElement!.style.backgroundColor = color.toCssString();
   }
 
   @override
