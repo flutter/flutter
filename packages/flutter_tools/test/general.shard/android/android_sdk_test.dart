@@ -152,7 +152,7 @@ void main() {
         fileSystem.path.join(sdk.directory.path, 'tools/bin/foo')
       ).createSync(recursive: true);
 
-      expect(sdk.getCmdlineToolsPath('foo'), '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/foo');
+      expect(sdk.getCommandLineToolsPath('foo'), '/.tmp_rand0/flutter_mock_android_sdk.rand0/tools/bin/foo');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),

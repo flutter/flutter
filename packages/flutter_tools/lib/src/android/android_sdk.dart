@@ -13,6 +13,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'android_studio.dart';
+import 'java.dart';
 
 // ANDROID_HOME is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
@@ -40,8 +41,6 @@ class AndroidSdk {
     reinitialize();
   }
 
-  static const String javaHomeEnvironmentVariable = 'JAVA_HOME';
-  static const String _javaExecutable = 'java';
 
   /// The Android SDK root directory.
   final Directory directory;
@@ -269,7 +268,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getCmdlineToolsPath(String binaryName, {bool skipOldTools = false}) {
+  String? getCommandLineToolsPath(String binaryName, {bool skipOldTools = false}) {
     // First look for the latest version of the command-line tools
     final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
@@ -321,7 +320,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getAvdManagerPath() => getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
+  String? getAvdManagerPath() => getCommandLineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
   /// Sets up various paths used internally.
   ///
@@ -404,7 +403,7 @@ class AndroidSdk {
     final String executable = globals.platform.isWindows
       ? 'sdkmanager.bat'
       : 'sdkmanager';
-    final String? path = getCmdlineToolsPath(executable, skipOldTools: true);
+    final String? path = getCommandLineToolsPath(executable, skipOldTools: true);
     if (path != null) {
       return path;
     }
@@ -577,7 +576,12 @@ class AndroidSdk {
     }
     final RunResult result = globals.processUtils.runSync(
       <String>[sdkManagerPath!, '--version'],
-      environment: sdkManagerEnv,
+      environment: findJavaEnvironment(
+        androidStudio: globals.androidStudio,
+        fileSystem: globals.fs,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform
+      ),
     );
     if (result.exitCode != 0) {
       globals.printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');

@@ -20,6 +20,7 @@ import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
+import 'java.dart';
 
 const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
@@ -240,7 +241,7 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Finding Java binary';
     // Now check for the JDK.
-    final String? javaBinary = AndroidSdk.findJavaBinary(
+    final String? javaBinary = findJavaBinary(
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
       operatingSystemUtils: _operatingSystemUtils,
@@ -330,7 +331,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String? javaBinary = AndroidSdk.findJavaBinary(
+    final String? javaBinary = findJavaBinary(
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
       operatingSystemUtils: _operatingSystemUtils,
