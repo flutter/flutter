@@ -268,7 +268,7 @@ class InlineLinkedText extends TextSpan {
   /// an [onTap] handler.
   static LinkBuilder getDefaultLinkBuilder([UriStringCallback? onTap]) {
     return (String linkText) {
-      return _InlineLink(
+      return InlineLink(
         onTap: onTap,
         text: linkText,
       );
@@ -277,8 +277,9 @@ class InlineLinkedText extends TextSpan {
 }
 
 /// An inline text link.
-class _InlineLink extends WidgetSpan {
-  _InlineLink({
+class InlineLink extends WidgetSpan {
+  /// Create an instance of [InlineLink].
+  InlineLink({
     required String text,
     // TODO(justinmc): Include these super parameters?
     /*
@@ -286,11 +287,17 @@ class _InlineLink extends WidgetSpan {
     super.baseline,
     super.style,
     */
+    TextStyle style = const TextStyle(
+      // TODO(justinmc): Correct color per-platform. Get it from Theme in
+      // Material somehow?
+      color: Color(0xff0000ff),
+    ),
     UriStringCallback? onTap,
   }) : super(
     child: _TextLink(
       uriString: text,
       onTap: onTap,
+      style: style,
     ),
   );
 }
@@ -300,10 +307,12 @@ class _TextLink extends StatelessWidget {
   const _TextLink({
     required this.uriString,
     this.onTap,
+    this.style,
   });
 
   final UriStringCallback? onTap;
   final String uriString;
+  final TextStyle? style;
 
   void _onTap() {
     if (onTap == null) {
@@ -321,11 +330,7 @@ class _TextLink extends StatelessWidget {
         cursor: SystemMouseCursors.click,
         child: Text(
           uriString,
-          style: const TextStyle(
-            // TODO(justinmc): Correct color per-platform. Get it from Theme in
-            // Material somehow?
-            color: Color(0xff0000ff),
-          ),
+          style: style,
         ),
       ),
     );
