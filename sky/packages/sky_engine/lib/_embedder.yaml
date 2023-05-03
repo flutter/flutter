@@ -13,6 +13,7 @@ embedded_libs:
   "dart:isolate": "../../../../../third_party/dart/sdk/lib/isolate/isolate.dart"
   "dart:js": "../../../../../third_party/dart/sdk/lib/js/js.dart"
   "dart:js_interop": "../../../../../third_party/dart/sdk/lib/js_interop/js_interop.dart"
+  "dart:js_interop_unsafe": "../../../../../third_party/dart/sdk/lib/js_interop_unsafe/js_interop_unsafe.dart"
   "dart:js_util": "../../../../../third_party/dart/sdk/lib/js_util/js_util.dart"
   "dart:math": "../../../../../third_party/dart/sdk/lib/math/math.dart"
   "dart:typed_data": "../../../../../third_party/dart/sdk/lib/typed_data/typed_data.dart"
