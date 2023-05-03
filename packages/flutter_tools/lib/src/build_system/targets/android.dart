@@ -158,8 +158,7 @@ class AndroidAot extends AotElfBase {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
   }
 
   @override
@@ -286,8 +285,7 @@ class AndroidAotBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
   }
 
   @override
@@ -373,8 +371,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getNameForAndroidArch(
-      getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)));
+    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
   }
 
   @override
