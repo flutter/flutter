@@ -9,7 +9,8 @@
                     "include_paths": [
                         "out/android_jit_release_x86/zip_archives/android-x86-jit-release/artifacts.zip",
                         "out/android_jit_release_x86/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -60,7 +61,8 @@
                         "out/android_debug/zip_archives/download.flutter.io",
                         "out/android_debug/zip_archives/sky_engine.zip",
                         "out/android_debug/zip_archives/android-javadoc.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -110,7 +112,8 @@
                         "out/android_debug_arm64/zip_archives/android-arm64/artifacts.zip",
                         "out/android_debug_arm64/zip_archives/android-arm64/symbols.zip",
                         "out/android_debug_arm64/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -141,7 +144,8 @@
                         "out/android_debug_x86/zip_archives/android-x86/artifacts.zip",
                         "out/android_debug_x86/zip_archives/android-x86/symbols.zip",
                         "out/android_debug_x86/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -172,7 +176,8 @@
                         "out/android_debug_x64/zip_archives/android-x64/artifacts.zip",
                         "out/android_debug_x64/zip_archives/android-x64/symbols.zip",
                         "out/android_debug_x64/zip_archives/download.flutter.io"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
