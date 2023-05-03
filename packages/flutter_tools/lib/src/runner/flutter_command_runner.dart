@@ -80,7 +80,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Suppress analytics reporting for the current CLI invocation.');
     argParser.addFlag('disable-telemetry',
         negatable: false,
-        help: 'Disable telemetry reporting when this command runs.');
+        help: 'Disable telemetry reporting each time a flutter or dart '
+              'command runs, until it is re-enabled.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
