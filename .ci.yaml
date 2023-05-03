@@ -2242,7 +2242,6 @@ targets:
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
 
   - name: Linux_android slider_perf_android
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
