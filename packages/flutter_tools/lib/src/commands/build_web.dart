@@ -98,13 +98,16 @@ class BuildWebCommand extends BuildSubCommand {
     );
     argParser.addFlag(
       'omit-type-checks',
-      help: 'Omit type checks in Wasm output.',
+      help: 'Omit type checks in Wasm output.\n'
+          'Reduces code size and improves performance, but may affect runtime correctness. Use with care.',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
     argParser.addFlag(
       'wasm-opt',
-      help: 'Run wasm-opt on the output wasm module.',
+      help:
+          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.\n'
+          'Increases the build time, but will yield a smaller, faster output.',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
