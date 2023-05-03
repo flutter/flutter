@@ -136,10 +136,6 @@ class _${blockName}SecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
-
-  // TODO(tahatesser): Update this when secondary tab bar indicator height token is added
-  // https://github.com/flutter/flutter/issues/124965.
-  static const double indicatorWeight = 2.0;
 }
 ''';
 

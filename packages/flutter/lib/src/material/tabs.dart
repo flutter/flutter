@@ -824,12 +824,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The value of this parameter must be greater than zero.
   ///
-  /// If [ThemeData.useMaterial3] is true and [TabBar] is a primary type,
-  /// the default value is 3.0. If the provided value is less than 3.0, the
-  /// default value is used.
+  /// If [ThemeData.useMaterial3] is true and [TabBar] is used to create a
+  /// primary tab bar, the default value is 3.0. If the provided value is less
+  /// than 3.0, the default value is used.
   ///
-  /// If [ThemeData.useMaterial3] is true and [TabBar] is a secondary type,
-  /// the default value is 2.0.
+  /// If [ThemeData.useMaterial3] is true and [TabBar.secondary] is used to
+  /// create a secondary tab bar, the default value is 2.0.
   ///
   /// If [ThemeData.useMaterial3] is false, the default value is 2.0.
   ///
@@ -1196,8 +1196,8 @@ class _TabBarState extends State<TabBar> {
     }
 
     final bool primaryWithLabelIndicator = widget._isPrimary && indicatorSize == TabBarIndicatorSize.label;
-    final double effectiveIndicatorWeight = theme.useMaterial3
-      ? (primaryWithLabelIndicator ? _TabsPrimaryDefaultsM3.indicatorWeight : _TabsSecondaryDefaultsM3.indicatorWeight)
+    final double effectiveIndicatorWeight = theme.useMaterial3 && primaryWithLabelIndicator
+      ? math.max(widget.indicatorWeight, _TabsPrimaryDefaultsM3.indicatorWeight)
       : widget.indicatorWeight;
     // Only Material 3 primary TabBar with label indicatorSize should be rounded.
     final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
@@ -2287,10 +2287,6 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
-
-  // TODO(tahatesser): Update this when secondary tab bar indicator height token is added
-  // https://github.com/flutter/flutter/issues/124965.
-  static const double indicatorWeight = 2.0;
 }
 
 // END GENERATED TOKEN PROPERTIES - Tabs
