@@ -99,7 +99,7 @@ class SimpleTableViewport extends TwoDimensionalViewport {
       verticalAxisDirection: verticalAxisDirection,
       mainAxis: mainAxis,
       delegate: delegate,
-      childManager: context as RenderObjectElement,
+      childManager: context as TwoDimensionalChildManager,
       cacheExtent: cacheExtent,
       clipBehavior: clipBehavior,
     );
@@ -155,7 +155,10 @@ class RenderSimpleTableViewport extends RenderTwoDimensionalViewport {
       double yLayoutOffset =  (leadingRow * 200) - verticalOffset.pixels;
       for (int row = leadingRow; row <= trailingRow; row++) {
         final RenderBox child = buildOrObtainChildFor(ChildVicinity(xIndex: row, yIndex: column))!;
-        child.layout(constraints, parentUsesSize: useParentSize);
+        child.layout(
+          constraints.tighten(width: 200.0, height: 200.0),
+          parentUsesSize: useParentSize,
+        );
 
         if (setLayoutOffset) {
           parentDataOf(child).layoutOffset = Offset(xLayoutOffset, yLayoutOffset);
