@@ -311,6 +311,23 @@ public interface PluginRegistry {
 
     /**
      * Adds a callback allowing the plugin to take part in handling incoming calls to {@link
+     * Activity#onWindowFocusChanged(boolean)}.
+     *
+     * <p>This registrar is for Flutter's v1 embedding. To listen for leave hints in the v2
+     * embedding, use {@link
+     * ActivityPluginBinding#addOnWindowFocusChangedListener(PluginRegistry.WindowFocusChangedListener)}.
+     *
+     * <p>For instructions on migrating a plugin from Flutter's v1 Android embedding to v2, visit
+     * http://flutter.dev/go/android-plugin-migration
+     *
+     * @param listener a {@link WindowFocusChangedListener} callback.
+     * @return this {@link Registrar}.
+     */
+    @NonNull
+    Registrar addWindowFocusChangedListener(@NonNull WindowFocusChangedListener listener);
+
+    /**
+     * Adds a callback allowing the plugin to take part in handling incoming calls to {@link
      * Activity#onDestroy()}.
      *
      * <p>This registrar is for Flutter's v1 embedding. The concept of {@code View} destruction does
@@ -386,6 +403,14 @@ public interface PluginRegistry {
    */
   interface UserLeaveHintListener {
     void onUserLeaveHint();
+  }
+
+  /**
+   * Delegate interface for handling window focus changes on behalf of the main {@link
+   * android.app.Activity}.
+   */
+  interface WindowFocusChangedListener {
+    void onWindowFocusChanged(boolean hasFocus);
   }
 
   /**
