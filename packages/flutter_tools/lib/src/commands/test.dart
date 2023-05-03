@@ -350,7 +350,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    String? concurrencyString = stringArgDeprecated('concurrency');
+    String? concurrencyString = stringArg('concurrency');
     int? jobs = concurrencyString == null ? null : int.tryParse(concurrencyString);
     if (jobs != null && (jobs <= 0 || !jobs.isFinite)) {
       throwToolExit(
