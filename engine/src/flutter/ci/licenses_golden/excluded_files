@@ -67,7 +67,6 @@
 ../../../flutter/flow/layers/offscreen_surface_unittests.cc
 ../../../flutter/flow/layers/opacity_layer_unittests.cc
 ../../../flutter/flow/layers/performance_overlay_layer_unittests.cc
-../../../flutter/flow/layers/physical_shape_layer_unittests.cc
 ../../../flutter/flow/layers/platform_view_layer_unittests.cc
 ../../../flutter/flow/layers/shader_mask_layer_unittests.cc
 ../../../flutter/flow/layers/texture_layer_unittests.cc

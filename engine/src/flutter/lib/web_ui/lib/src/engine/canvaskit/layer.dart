@@ -12,7 +12,6 @@ import 'painting.dart';
 import 'path.dart';
 import 'picture.dart';
 import 'raster_cache.dart';
-import 'util.dart';
 
 /// A layer to be composed into a scene.
 ///
@@ -479,84 +478,6 @@ class PictureLayer extends Layer {
 
     paintContext.leafNodesCanvas!.drawPicture(picture);
     paintContext.leafNodesCanvas!.restore();
-  }
-}
-
-/// A layer representing a physical shape.
-///
-/// The shape clips its children to a given [Path], and casts a shadow based
-/// on the given elevation.
-class PhysicalShapeEngineLayer extends ContainerLayer
-    implements ui.PhysicalShapeEngineLayer {
-  PhysicalShapeEngineLayer(
-    this._elevation,
-    this._color,
-    this._shadowColor,
-    this._path,
-    this._clipBehavior,
-  );
-
-  final double _elevation;
-  final ui.Color _color;
-  final ui.Color? _shadowColor; // ignore: use_late_for_private_fields_and_variables
-  final CkPath _path;
-  final ui.Clip _clipBehavior;
-
-  @override
-  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    prerollChildren(prerollContext, matrix);
-    paintBounds = computeSkShadowBounds(
-        _path, _elevation, ui.window.devicePixelRatio, matrix);
-  }
-
-  @override
-  void paint(PaintContext paintContext) {
-    assert(needsPainting);
-
-    if (_elevation != 0) {
-      drawShadow(paintContext.leafNodesCanvas!, _path, _shadowColor!,
-          _elevation, _color.alpha != 0xff);
-    }
-
-    final CkPaint paint = CkPaint()..color = _color;
-    if (_clipBehavior != ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.leafNodesCanvas!.drawPath(_path, paint);
-    }
-
-    final int saveCount = paintContext.internalNodesCanvas.save();
-    switch (_clipBehavior) {
-      case ui.Clip.hardEdge:
-        paintContext.internalNodesCanvas.clipPath(_path, false);
-      case ui.Clip.antiAlias:
-        paintContext.internalNodesCanvas.clipPath(_path, true);
-      case ui.Clip.antiAliasWithSaveLayer:
-        paintContext.internalNodesCanvas.clipPath(_path, true);
-        paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
-      case ui.Clip.none:
-        break;
-    }
-
-    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      // If we want to avoid the bleeding edge artifact
-      // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
-      // using saveLayer, we have to call drawPaint instead of drawPath as
-      // anti-aliased drawPath will always have such artifacts.
-      paintContext.leafNodesCanvas!.drawPaint(paint);
-    }
-    paint.dispose();
-
-    paintChildren(paintContext);
-
-    paintContext.internalNodesCanvas.restoreToCount(saveCount);
-  }
-
-  /// Draws a shadow on the given [canvas] for the given [path].
-  ///
-  /// The blur of the shadow is decided by the [elevation], and the
-  /// shadow is painted with the given [color].
-  static void drawShadow(CkCanvas canvas, CkPath path, ui.Color color,
-      double elevation, bool transparentOccluder) {
-    canvas.drawShadow(path, color, elevation, transparentOccluder);
   }
 }
 

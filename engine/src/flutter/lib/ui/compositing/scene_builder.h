@@ -90,13 +90,6 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                       int blendMode,
                       int filterQualityIndex,
                       const fml::RefPtr<EngineLayer>& oldLayer);
-  void pushPhysicalShape(Dart_Handle layer_handle,
-                         const CanvasPath* path,
-                         double elevation,
-                         int color,
-                         int shadowColor,
-                         int clipBehavior,
-                         const fml::RefPtr<EngineLayer>& oldLayer);
 
   void addRetained(const fml::RefPtr<EngineLayer>& retainedLayer);
 

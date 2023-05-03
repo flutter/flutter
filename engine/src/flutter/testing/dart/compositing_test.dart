@@ -403,10 +403,6 @@ void main() {
       );
     });
     testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
-      // ignore: deprecated_member_use
-      return builder.pushPhysicalShape(path: Path(), color: const Color.fromARGB(0, 0, 0, 0), oldLayer: oldLayer as PhysicalShapeEngineLayer?, elevation: 0.0);
-    });
-    testNoSharing((SceneBuilder builder, EngineLayer? oldLayer) {
       return builder.pushColorFilter(
         const ColorFilter.mode(
           Color.fromARGB(0, 0, 0, 0),

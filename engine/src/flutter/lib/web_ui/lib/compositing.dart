@@ -30,8 +30,6 @@ abstract class BackdropFilterEngineLayer implements EngineLayer {}
 
 abstract class ShaderMaskEngineLayer implements EngineLayer {}
 
-abstract class PhysicalShapeEngineLayer implements EngineLayer {}
-
 abstract class SceneBuilder {
   factory SceneBuilder() =>
     engine.renderer.createSceneBuilder();
@@ -85,18 +83,6 @@ abstract class SceneBuilder {
     BlendMode blendMode, {
     ShaderMaskEngineLayer? oldLayer,
     FilterQuality filterQuality = FilterQuality.low,
-  });
-  @Deprecated(
-    'Use a clip and canvas operations directly (See RenderPhysicalModel). '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  PhysicalShapeEngineLayer pushPhysicalShape({
-    required Path path,
-    required double elevation,
-    required Color color,
-    Color? shadowColor,
-    Clip clipBehavior = Clip.none,
-    PhysicalShapeEngineLayer? oldLayer,
   });
   void addRetained(EngineLayer retainedLayer);
   void pop();

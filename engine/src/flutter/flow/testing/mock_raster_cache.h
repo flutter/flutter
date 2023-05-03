@@ -85,7 +85,6 @@ class MockRasterCache : public RasterCache {
       .raster_time                   = raster_time_,
       .ui_time                       = ui_time_,
       .texture_registry              = texture_registry_,
-      .frame_device_pixel_ratio      = 1.0f,
       .has_platform_view             = false,
       .has_texture_layer             = false,
       .raster_cached_entries         = &raster_cache_items_
@@ -103,7 +102,6 @@ class MockRasterCache : public RasterCache {
       .ui_time                       = ui_time_,
       .texture_registry              = texture_registry_,
       .raster_cache                  = nullptr,
-      .frame_device_pixel_ratio      = 1.0f,
       // clang-format on
   };
 };
