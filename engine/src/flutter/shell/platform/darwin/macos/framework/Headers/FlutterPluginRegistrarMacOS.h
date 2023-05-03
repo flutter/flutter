@@ -45,11 +45,6 @@ FLUTTER_DARWIN_EXPORT
 @property(nullable, readonly) NSView* view;
 
 /**
- * The `NSView` associated with the given view ID, if any.
- */
-- (nullable NSView*)viewForId:(uint64_t)viewId;
-
-/**
  * Registers |delegate| to receive handleMethodCall:result: callbacks for the given |channel|.
  */
 - (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
