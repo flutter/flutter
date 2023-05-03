@@ -1627,19 +1627,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: shader_mask_cache_perf__e2e_summary
 
-  - name: Linux_android complex_layout_android__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: complex_layout_android__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
-
   - name: Linux_android complex_layout_android__scroll_smoothness
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2650,18 +2637,6 @@ targets:
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_benchmark complex_layout_macos__compile
-    presubmit: false
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"},
-          {"dependency": "gems", "version": "v3.3.14"}
-        ]
-      task_name: complex_layout_macos__compile
-
   - name: Mac_benchmark complex_layout_macos__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
@@ -3501,15 +3476,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: channels_integration_test_ios
-
-  - name: Mac_ios complex_layout_ios__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: complex_layout_ios__compile
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -4698,19 +4664,6 @@ targets:
         ]
       task_name: flutter_gallery_win_desktop__start_up
 
-  - name: Windows complex_layout_win_desktop__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "hostonly", "windows"]
-      dependencies: >-
-        [
-          {"dependency": "vs_build", "version": "version:vs2019"}
-        ]
-      task_name: complex_layout_win_desktop__compile
-
   - name: Windows complex_layout_win_desktop__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4767,19 +4720,6 @@ targets:
       tags: >
         ["devicelab", "android", "windows"]
       task_name: channels_integration_test_win
-
-  - name: Windows_android complex_layout_win__compile
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "windows"]
-      task_name: complex_layout_win__compile
-      dependencies: >-
-        [
-          {"dependency": "open_jdk", "version": "version:11"}
-        ]
 
   - name: Windows_android flavors_test_win
     recipe: devicelab/devicelab_drone
