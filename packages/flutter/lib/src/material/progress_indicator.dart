@@ -456,6 +456,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
+    // Use the negative operator as intended to keep the exposed constant value
+    // as users are already familiar with.
     final double strokeOffset = strokeWidth / 2 * -strokeAlign;
     final Offset arcBaseOffset = Offset(strokeOffset, strokeOffset);
     final Size arcActualSize = Size(
