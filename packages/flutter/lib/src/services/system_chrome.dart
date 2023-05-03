@@ -508,9 +508,6 @@ abstract final class SystemChrome {
   ///
   /// Only one function can be set at a time. Setting a new function
   /// will override the previous one.
-  ///
-  /// If the function depends on a widget's state, it should be unregistered
-  /// in the dispose() method by calling setSystemUiOverlayStyleCallback(null).
   // ignore: use_setters_to_change_properties
   static void setSystemUiOverlayStyleCallback(SystemUiOverlayStyleCallback? callback) {
     _systemUiOverlayStyleCallback = callback;
