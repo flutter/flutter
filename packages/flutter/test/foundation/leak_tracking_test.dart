@@ -94,7 +94,7 @@ Future<void> main() async {
       tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
     });
 
-    // TODO(polina-c): Re-enable this test when tracking of non GCed objects is enabled.
+    // TODO(polina-c): Re-enable this test when tracking for non-GCed leaks is enabled.
     // group('Leak tracker respects notDisposed allow lists', () {
     //   // These tests cannot run inside other tests because test nesting is forbidden.
     //   // So, `expect` happens outside the tests, in `tearDown`.
