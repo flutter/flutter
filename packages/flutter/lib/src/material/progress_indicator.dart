@@ -604,10 +604,10 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The relative position of the stroke on a [CircularProgressIndicator].
   ///
   /// Values typically range from
-  /// -1.0 ([BorderSide.strokeAlignInside], inside border, default)
+  /// -1.0 ([BorderSide.strokeAlignInside], inside border)
   /// to 1.0 ([BorderSide.strokeAlignOutside], outside border),
   /// without any bound constraints (e.g., a value of -2.0 is not typical, but allowed).
-  /// A value of 0 ([BorderSide.strokeAlignCenter]) will center the border
+  /// A value of 0 ([BorderSide.strokeAlignCenter], default) will center the border
   /// on the edge of the widget.
   ///
   /// When set to [BorderSide.strokeAlignInside], the stroke is drawn completely
