@@ -13,6 +13,16 @@
 
 @interface FlutterViewController () <FlutterKeyboardViewDelegate>
 
+/**
+ * The identifier for this view controller.
+ *
+ * The ID is assigned by FlutterEngine when the view controller is attached.
+ *
+ * If the view controller is unattached (see FlutterViewController#attached),
+ * reading this property throws an assertion.
+ */
+@property(nonatomic, readonly) uint64_t viewId;
+
 // The FlutterView for this view controller.
 @property(nonatomic, readonly, nullable) FlutterView* flutterView;
 

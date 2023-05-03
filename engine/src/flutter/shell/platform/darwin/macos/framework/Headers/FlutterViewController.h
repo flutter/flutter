@@ -54,16 +54,6 @@ FLUTTER_DARWIN_EXPORT
 @property(nonatomic, nonnull, readonly) FlutterEngine* engine;
 
 /**
- * The identifier for this view controller.
- *
- * The ID is assigned by FlutterEngine when the view controller is attached.
- *
- * If the view controller is unattached (see FlutterViewController#attached),
- * reading this property throws an assertion.
- */
-@property(nonatomic, readonly) uint64_t viewId;
-
-/**
  * The style of mouse tracking to use for the view. Defaults to
  * FlutterMouseTrackingModeInKeyWindow.
  */
