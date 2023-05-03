@@ -525,7 +525,7 @@ class Environment {
   /// When [true], the main entrypoint is wrapped and the wrapper becomes
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
-  
+
   late final DepfileService depFileService = DepfileService(
     logger: logger,
     fileSystem: fileSystem,
