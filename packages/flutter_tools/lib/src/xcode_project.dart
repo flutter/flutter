@@ -21,7 +21,36 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
-  static const String _hostAppProjectName = 'Runner';
+  static const String _defaultHostAppName = 'Runner';
+
+  /// The Xcode workspace (.xcworkspace directory) of the host app.
+  Directory? get xcodeWorkspace {
+    if (!hostAppRoot.existsSync()) {
+      return null;
+    }
+    return _xcodeDirectoryWithExtension('.xcworkspace');
+  }
+
+  /// The project name (.xcodeproj basename) of the host app.
+  late final String hostAppProjectName = () {
+    if (!hostAppRoot.existsSync()) {
+      return _defaultHostAppName;
+    }
+    final Directory? xcodeProjectDirectory = _xcodeDirectoryWithExtension('.xcodeproj');
+    return xcodeProjectDirectory != null
+        ? xcodeProjectDirectory.fileSystem.path.basenameWithoutExtension(xcodeProjectDirectory.path)
+        : _defaultHostAppName;
+  }();
+
+  Directory? _xcodeDirectoryWithExtension(String extension) {
+    final List<FileSystemEntity> contents = hostAppRoot.listSync();
+    for (final FileSystemEntity entity in contents) {
+      if (globals.fs.path.extension(entity.path) == extension && !globals.fs.path.basename(entity.path).startsWith('.')) {
+        return hostAppRoot.childDirectory(entity.basename);
+      }
+    }
+    return null;
+  }
 
   /// The parent of this project.
   FlutterProject get parent;
@@ -29,10 +58,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   Directory get hostAppRoot;
 
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
-  File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
+  File get defaultHostInfoPlist => hostAppRoot.childDirectory(_defaultHostAppName).childFile('Info.plist');
 
   /// The Xcode project (.xcodeproj directory) of the host app.
-  Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppProjectName.xcodeproj');
+  Directory get xcodeProject => hostAppRoot.childDirectory('$hostAppProjectName.xcodeproj');
 
   /// The 'project.pbxproj' file of [xcodeProject].
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
@@ -45,22 +74,6 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
       xcodeProject
           .childDirectory('project.xcworkspace')
           .childFile('contents.xcworkspacedata');
-
-  /// The Xcode workspace (.xcworkspace directory) of the host app.
-  Directory? get xcodeWorkspace {
-    if (!hostAppRoot.existsSync()) {
-      return null;
-    }
-    final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    for (final FileSystemEntity entity in contents) {
-      // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
-      // Find the first non-hidden xcworkspace and return the directory.
-      if (globals.fs.path.extension(entity.path) == '.xcworkspace' && !globals.fs.path.basename(entity.path).startsWith('.')) {
-        return hostAppRoot.childDirectory(entity.basename);
-      }
-    }
-    return null;
-  }
 
   /// Xcode workspace shared data directory for the host app.
   Directory? get xcodeWorkspaceSharedData => xcodeWorkspace?.childDirectory('xcshareddata');
@@ -264,9 +277,9 @@ class IosProject extends XcodeBasedProject {
       }
     }
     if (productName == null) {
-      globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to ${XcodeBasedProject._hostAppProjectName}');
+      globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to $hostAppProjectName');
     }
-    return productName ?? '${XcodeBasedProject._hostAppProjectName}.app';
+    return productName ?? '${XcodeBasedProject._defaultHostAppName}.app';
   }
 
   /// The build settings for the host app of this project, as a detached map.
@@ -498,7 +511,7 @@ class IosProject extends XcodeBasedProject {
         ? _flutterLibRoot
             .childDirectory('Flutter')
             .childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(XcodeBasedProject._hostAppProjectName);
+        : hostAppRoot.childDirectory(XcodeBasedProject._defaultHostAppName);
   }
 
   File get pluginRegistrantHeader {
