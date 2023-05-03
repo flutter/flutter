@@ -91,6 +91,7 @@ targets:
 
   - name: Linux Android Debug Engine
     recipe: engine/engine
+    bringup: true
     properties:
       add_recipes_cq: "true"
       build_android_debug: "true"
