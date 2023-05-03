@@ -791,13 +791,13 @@ void applyTextStyleToElement({
     final double adaptedWidth = strokeWidth != null && strokeWidth > 0
         ? strokeWidth
         : 1.0 / ui.window.devicePixelRatio;
-    cssStyle.textStroke = '${adaptedWidth}px ${colorToCssString(color)}';
+    cssStyle.textStroke = '${adaptedWidth}px ${color?.toCssString()}';
   } else if (color != null) {
-    cssStyle.color = colorToCssString(color)!;
+    cssStyle.color = color.toCssString();
   }
   final ui.Color? background = style.background?.color;
   if (background != null) {
-    cssStyle.backgroundColor = colorToCssString(background)!;
+    cssStyle.backgroundColor = background.toCssString();
   }
   final double? fontSize = style.fontSize;
   if (fontSize != null) {
@@ -843,7 +843,7 @@ void applyTextStyleToElement({
         }
         final ui.Color? decorationColor = style.decorationColor;
         if (decorationColor != null) {
-          cssStyle.textDecorationColor = colorToCssString(decorationColor)!;
+          cssStyle.textDecorationColor = decorationColor.toCssString();
         }
       }
     }
@@ -878,7 +878,7 @@ String _shadowListToCss(List<ui.Shadow> shadows) {
     }
     final ui.Shadow shadow = shadows[i];
     sb.write('${shadow.offset.dx}px ${shadow.offset.dy}px '
-        '${shadow.blurRadius}px ${colorToCssString(shadow.color)}');
+        '${shadow.blurRadius}px ${shadow.color.toCssString()}');
   }
   return sb.toString();
 }

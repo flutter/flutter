@@ -44,7 +44,7 @@ void testMain() {
 
       const ui.Color statusBarColor = ui.Color(0xFFF44336);
       sendSetSystemUIOverlayStyle(statusBarColor: statusBarColor);
-      expect(getCssThemeColor(), colorToCssString(statusBarColor));
+      expect(getCssThemeColor(), statusBarColor.toCssString());
 
       sendSetSystemUIOverlayStyle();
       expect(getCssThemeColor(), null);

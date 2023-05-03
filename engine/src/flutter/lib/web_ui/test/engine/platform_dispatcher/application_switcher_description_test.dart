@@ -47,7 +47,7 @@ Future<void> testMain() async {
       const ui.Color expectedPrimaryColor = ui.Color(0xFF00FF00);
 
       expect(domDocument.title, 'Title Test');
-      expect(getCssThemeColor(), colorToCssString(expectedPrimaryColor));
+      expect(getCssThemeColor(), expectedPrimaryColor.toCssString());
 
       ui.window.sendPlatformMessage(
         'flutter/platform',
@@ -64,7 +64,7 @@ Future<void> testMain() async {
       const ui.Color expectedNewPrimaryColor = ui.Color(0xFFFABADA);
 
       expect(domDocument.title, 'Different title');
-      expect(getCssThemeColor(), colorToCssString(expectedNewPrimaryColor));
+      expect(getCssThemeColor(), expectedNewPrimaryColor.toCssString());
     });
 
     test('supports null title and primaryColor', () {
@@ -89,7 +89,7 @@ Future<void> testMain() async {
       );
 
       expect(domDocument.title, '');
-      expect(getCssThemeColor(), colorToCssString(expectedNullColor));
+      expect(getCssThemeColor(), expectedNullColor.toCssString());
 
       domDocument.title = 'Something Else';
       expect(domDocument.title, 'Something Else');
@@ -104,7 +104,7 @@ Future<void> testMain() async {
       );
 
       expect(domDocument.title, '');
-      expect(getCssThemeColor(), colorToCssString(expectedNullColor));
+      expect(getCssThemeColor(), expectedNullColor.toCssString());
     });
   });
 }
