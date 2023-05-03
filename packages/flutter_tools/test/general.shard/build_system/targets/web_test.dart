@@ -39,7 +39,6 @@ void main() {
     operatingSystem: 'windows',
     environment: <String, String>{},
   );
-  late DepfileService depfileService;
 
   setUp(() {
     testbed = Testbed(setup: () {
@@ -61,10 +60,6 @@ void main() {
         logger: globals.logger,
         fileSystem: globals.fs,
       );
-      depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
       environment.buildDir.createSync(recursive: true);
     }, overrides: <Type, Generator>{
       Platform: () => linux,
@@ -573,7 +568,7 @@ void main() {
     await Dart2JSTarget(WebRendererMode.auto).build(environment);
 
     expect(environment.buildDir.childFile('dart2js.d'), exists);
-    final Depfile depfile = depfileService.parse(environment.buildDir.childFile('dart2js.d'));
+    final Depfile depfile = environment.depFileService.parse(environment.buildDir.childFile('dart2js.d'));
 
     expect(depfile.inputs.single.path, globals.fs.path.absolute('a.dart'));
     expect(depfile.outputs.single.path,
