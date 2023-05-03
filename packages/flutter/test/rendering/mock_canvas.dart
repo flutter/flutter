@@ -1283,7 +1283,7 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
     final Rect rectArgument = arguments[0] as Rect;
-    if (rect != null && rect != rectArgument) {
+    if (rect != null && rectArgument != rect) {
       throw 'It called $methodName with a paint whose rect, $rectArgument, was not exactly the expected rect ($rect).';
     }
   }
