@@ -11,6 +11,7 @@
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 #include <cstdlib>
 #include <memory>
@@ -97,8 +98,8 @@ bool EmbedderTestBackingStoreProducer::CreateFramebuffer(
     return false;
   }
 
-  GrBackendRenderTarget render_target = surface->getBackendRenderTarget(
-      SkSurface::BackendHandleAccess::kDiscardWrite_BackendHandleAccess);
+  GrBackendRenderTarget render_target = SkSurfaces::GetBackendRenderTarget(
+      surface.get(), SkSurfaces::BackendHandleAccess::kDiscardWrite);
 
   if (!render_target.isValid()) {
     FML_LOG(ERROR) << "Backend render target was invalid.";
@@ -150,8 +151,8 @@ bool EmbedderTestBackingStoreProducer::CreateTexture(
     return false;
   }
 
-  GrBackendTexture render_texture = surface->getBackendTexture(
-      SkSurface::BackendHandleAccess::kDiscardWrite_BackendHandleAccess);
+  GrBackendTexture render_texture = SkSurfaces::GetBackendTexture(
+      surface.get(), SkSurfaces::BackendHandleAccess::kDiscardWrite);
 
   if (!render_texture.isValid()) {
     FML_LOG(ERROR) << "Backend render texture was invalid.";
