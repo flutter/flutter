@@ -261,6 +261,11 @@ public final class FlutterActivityDelegate
   }
 
   @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+    flutterView.getPluginRegistry().onWindowFocusChanged(hasFocus);
+  }
+
+  @Override
   public void onTrimMemory(int level) {
     // Use a trim level delivered while the application is running so the
     // framework has a chance to react to the notification.
