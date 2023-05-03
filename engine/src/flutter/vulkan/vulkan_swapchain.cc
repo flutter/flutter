@@ -10,6 +10,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 
 #include "vulkan_backbuffer.h"
@@ -476,8 +477,8 @@ VulkanSwapchain::AcquireResult VulkanSwapchain::AcquireSurface() {
     return error;
   }
 
-  GrBackendRenderTarget backendRT = surface->getBackendRenderTarget(
-      SkSurface::kFlushRead_BackendHandleAccess);
+  GrBackendRenderTarget backendRT = SkSurfaces::GetBackendRenderTarget(
+      surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
   if (!backendRT.isValid()) {
     FML_DLOG(INFO) << "Could not get backend render target.";
     return error;
