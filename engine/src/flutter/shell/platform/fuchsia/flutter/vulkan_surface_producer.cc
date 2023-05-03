@@ -18,6 +18,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
@@ -221,9 +222,9 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
     if (!command_buffer->Begin())
       return false;
 
-    GrBackendRenderTarget backendRT =
-        vk_surface->GetSkiaSurface()->getBackendRenderTarget(
-            SkSurface::kFlushRead_BackendHandleAccess);
+    GrBackendRenderTarget backendRT = SkSurfaces::GetBackendRenderTarget(
+        vk_surface->GetSkiaSurface().get(),
+        SkSurfaces::BackendHandleAccess::kFlushRead);
     if (!backendRT.isValid()) {
       return false;
     }
