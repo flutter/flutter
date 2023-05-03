@@ -259,6 +259,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
   /// {@macro flutter.widgets.editableText.onChanged}
   final ValueChanged<String>? onChanged;
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
