@@ -1160,18 +1160,13 @@ class InvalidatedReason {
 
   @override
   String toString() {
-    switch (kind) {
-      case InvalidatedReasonKind.inputMissing:
-        return 'The following inputs were missing: ${data.join(',')}';
-      case InvalidatedReasonKind.inputChanged:
-        return 'The following inputs have updated contents: ${data.join(',')}';
-      case InvalidatedReasonKind.outputChanged:
-        return 'The following outputs have updated contents: ${data.join(',')}';
-      case InvalidatedReasonKind.outputMissing:
-        return 'The following outputs were missing: ${data.join(',')}';
-      case InvalidatedReasonKind.outputSetChanged:
-        return 'The following outputs were removed from the output set: ${data.join(',')}';
-    }
+    return switch (kind) {
+      InvalidatedReasonKind.inputMissing => 'The following inputs were missing: ${data.join(',')}',
+      InvalidatedReasonKind.inputChanged => 'The following inputs have updated contents: ${data.join(',')}',
+      InvalidatedReasonKind.outputChanged => 'The following outputs have updated contents: ${data.join(',')}',
+      InvalidatedReasonKind.outputMissing => 'The following outputs were missing: ${data.join(',')}',
+      InvalidatedReasonKind.outputSetChanged => 'The following outputs were removed from the output set: ${data.join(',')}'
+    };
   }
 }
 
