@@ -11,13 +11,13 @@ import 'dom.dart';
 
 /// How far is the light source from the surface of the UI.
 ///
-/// Must be kept in sync with `flow/layers/physical_shape_layer.cc`.
+/// Originally based on the constant in `flow/layers/physical_shape_layer.cc`.
 const double kLightHeight = 600.0;
 
 /// The radius of the light source. The positive radius creates a penumbra in
 /// the shadow, which we express using a blur effect.
 ///
-/// Must be kept in sync with `flow/layers/physical_shape_layer.cc`.
+/// Originally based on the constant in  `flow/layers/physical_shape_layer.cc`.
 const double kLightRadius = 800.0;
 
 /// The X offset of the list source relative to the center of the shape.

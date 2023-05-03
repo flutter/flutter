@@ -43,7 +43,6 @@ using PaintRegionMap = std::map<uint64_t, PaintRegion>;
 class DiffContext {
  public:
   explicit DiffContext(SkISize frame_size,
-                       double device_pixel_aspect_ratio,
                        PaintRegionMap& this_frame_paint_region_map,
                        const PaintRegionMap& last_frame_paint_region_map,
                        bool has_raster_cache);
@@ -141,8 +140,6 @@ class DiffContext {
                        int horizontal_clip_alignment = 0,
                        int vertical_clip_alignment = 0) const;
 
-  double frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; };
-
   // Adds the region to current damage. Used for removed layers, where instead
   // of diffing the layer its paint region is direcly added to damage.
   void AddDamage(const PaintRegion& damage);
@@ -234,7 +231,6 @@ class DiffContext {
   std::shared_ptr<std::vector<SkRect>> rects_;
   State state_;
   SkISize frame_size_;
-  double frame_device_pixel_ratio_;
   std::vector<State> state_stack_;
   std::vector<FilterBoundsAdjustment> filter_bounds_adjustment_stack_;
 

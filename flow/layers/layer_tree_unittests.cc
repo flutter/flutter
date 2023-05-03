@@ -216,7 +216,6 @@ TEST_F(LayerTreeTest, PrerollContextInitialization) {
     EXPECT_EQ(&context.raster_time, &mock_raster_time);
     EXPECT_EQ(&context.ui_time, &mock_ui_time);
     EXPECT_EQ(context.texture_registry.get(), mock_registry.get());
-    EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
 
     EXPECT_EQ(context.has_platform_view, false);
     EXPECT_EQ(context.has_texture_layer, false);
@@ -252,7 +251,6 @@ TEST_F(LayerTreeTest, PaintContextInitialization) {
     EXPECT_EQ(context.texture_registry.get(), mock_registry.get());
     EXPECT_EQ(context.raster_cache, nullptr);
     EXPECT_EQ(context.state_stack.checkerboard_func(), nullptr);
-    EXPECT_EQ(context.frame_device_pixel_ratio, 1.0f);
 
     EXPECT_EQ(context.enable_leaf_layer_tracing, false);
     EXPECT_EQ(context.layer_snapshot_store, nullptr);

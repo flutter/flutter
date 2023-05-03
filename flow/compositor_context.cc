@@ -16,9 +16,7 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
     bool has_raster_cache) {
   if (layer_tree.root_layer()) {
     PaintRegionMap empty_paint_region_map;
-    DiffContext context(layer_tree.frame_size(),
-                        layer_tree.device_pixel_ratio(),
-                        layer_tree.paint_region_map(),
+    DiffContext context(layer_tree.frame_size(), layer_tree.paint_region_map(),
                         prev_layer_tree_ ? prev_layer_tree_->paint_region_map()
                                          : empty_paint_region_map,
                         has_raster_cache);
