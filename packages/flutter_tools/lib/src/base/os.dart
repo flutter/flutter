@@ -611,16 +611,11 @@ enum HostPlatform {
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'darwin-x64';
-    case HostPlatform.darwin_arm64:
-      return 'darwin-arm64';
-    case HostPlatform.linux_x64:
-      return 'linux-x64';
-    case HostPlatform.linux_arm64:
-      return 'linux-arm64';
-    case HostPlatform.windows_x64:
-      return 'windows-x64';
-  }
+  return switch (platform) {
+    HostPlatform.darwin_x64 => 'darwin-x64',
+    HostPlatform.darwin_arm64 => 'darwin-arm64',
+    HostPlatform.linux_x64 => 'linux-x64',
+    HostPlatform.linux_arm64 => 'linux-arm64',
+    HostPlatform.windows_x64 => 'windows-x64'
+  };
 }

@@ -614,14 +614,11 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
 // instructions are then built into architecture-specific binaries, which are
 // merged into a universal binary using the `lipo` tool.
 String getDartNameForDarwinArch(DarwinArch arch) {
-  switch (arch) {
-    case DarwinArch.armv7:
-      return 'armv7';
-    case DarwinArch.arm64:
-      return 'arm64';
-    case DarwinArch.x86_64:
-      return 'x64';
-  }
+  return switch (arch) {
+    DarwinArch.armv7 => 'armv7',
+    DarwinArch.arm64 => 'arm64',
+    DarwinArch.x86_64 => 'x64'
+  };
 }
 
 // Returns Apple's name for the specified target architecture.
@@ -633,14 +630,11 @@ String getDartNameForDarwinArch(DarwinArch arch) {
 // For consistency with developer expectations, Flutter outputs also use these
 // architecture names in its build products for Darwin target platforms.
 String getNameForDarwinArch(DarwinArch arch) {
-  switch (arch) {
-    case DarwinArch.armv7:
-      return 'armv7';
-    case DarwinArch.arm64:
-      return 'arm64';
-    case DarwinArch.x86_64:
-      return 'x86_64';
-  }
+  return switch (arch) {
+    DarwinArch.armv7 => 'armv7',
+    DarwinArch.arm64 => 'arm64',
+    DarwinArch.x86_64 => 'x86_64'
+  };
 }
 
 DarwinArch getIOSArchForName(String arch) {
@@ -758,29 +752,21 @@ AndroidArch getAndroidArchForName(String platform) {
 }
 
 String getNameForAndroidArch(AndroidArch arch) {
-  switch (arch) {
-    case AndroidArch.armeabi_v7a:
-      return 'armeabi-v7a';
-    case AndroidArch.arm64_v8a:
-      return 'arm64-v8a';
-    case AndroidArch.x86_64:
-      return 'x86_64';
-    case AndroidArch.x86:
-      return 'x86';
-  }
+  return switch (arch) {
+    AndroidArch.armeabi_v7a => 'armeabi-v7a',
+    AndroidArch.arm64_v8a => 'arm64-v8a',
+    AndroidArch.x86_64 => 'x86_64',
+    AndroidArch.x86 => 'x86'
+  };
 }
 
 String getPlatformNameForAndroidArch(AndroidArch arch) {
-  switch (arch) {
-    case AndroidArch.armeabi_v7a:
-      return 'android-arm';
-    case AndroidArch.arm64_v8a:
-      return 'android-arm64';
-    case AndroidArch.x86_64:
-      return 'android-x64';
-    case AndroidArch.x86:
-      return 'android-x86';
-  }
+  return switch (arch) {
+    AndroidArch.armeabi_v7a => 'android-arm',
+    AndroidArch.arm64_v8a => 'android-arm64',
+    AndroidArch.x86_64 => 'android-x64',
+    AndroidArch.x86 => 'android-x86'
+  };
 }
 
 String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
@@ -1059,18 +1045,13 @@ String getNameForTargetPlatformArch(TargetPlatform platform) {
 }
 
 String getNameForHostPlatformArch(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'x64';
-    case HostPlatform.darwin_arm64:
-      return 'arm64';
-    case HostPlatform.linux_x64:
-      return 'x64';
-    case HostPlatform.linux_arm64:
-      return 'arm64';
-    case HostPlatform.windows_x64:
-      return 'x64';
-  }
+  return switch (platform) {
+    HostPlatform.darwin_x64 => 'x64',
+    HostPlatform.darwin_arm64 => 'arm64',
+    HostPlatform.linux_x64 => 'x64',
+    HostPlatform.linux_arm64 => 'arm64',
+    HostPlatform.windows_x64 => 'x64'
+  };
 }
 
 String? _uncapitalize(String? s) {
