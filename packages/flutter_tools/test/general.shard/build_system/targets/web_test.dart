@@ -770,7 +770,6 @@ void main() {
         '-DFOO=bar',
         '-DBAZ=qux',
         '--depfile=${depFile.absolute.path}',
-
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ])
@@ -857,7 +856,6 @@ void main() {
         '--import-shared-memory',
         '--shared-memory-max-pages=32768',
         '--depfile=${depFile.absolute.path}',
-
         environment.buildDir.childFile('main.dart').absolute.path,
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ])
