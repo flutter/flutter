@@ -22,7 +22,7 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
-const List<String> kDart2jsLinuxArgs = <String>[
+const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
    '--disable-dart-dev',
   'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
@@ -30,7 +30,7 @@ const List<String> kDart2jsLinuxArgs = <String>[
   '--invoker=flutter_tool',
 ];
 
-const List<String> kDart2WasmLinuxArgs = <String> [
+const List<String> _kDart2WasmLinuxArgs = <String> [
   'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
   '--disable-dart-dev',
   'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
@@ -41,14 +41,14 @@ const List<String> kDart2WasmLinuxArgs = <String> [
   '--multi-root',
   'HostArtifact.flutterWebSdk',
   '--multi-root',
-  '.',
+  _kDartSdkRoot,
   '--libraries-spec',
   'HostArtifact.flutterWebLibrariesJson',
 ];
 
 /// The result of calling `.parent` on a Memory directory pointing to
 /// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
-const String kDartSdkRoot = '.';
+const String _kDartSdkRoot = '.';
 
 void main() {
   late Testbed testbed;
@@ -350,7 +350,7 @@ void main() {
     environment.defines[JsCompilerConfig.kCspMode] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -362,7 +362,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-minify',
         '--no-source-maps',
@@ -385,7 +385,7 @@ void main() {
     environment.defines[kExtraFrontEndOptions] = '--enable-experiment=non-nullable';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
         '--no-source-maps',
@@ -398,7 +398,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
         '--no-minify',
@@ -419,7 +419,7 @@ void main() {
     environment.defines[kBuildMode] = 'profile';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -431,7 +431,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-minify',
         '--no-source-maps',
@@ -451,7 +451,7 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -463,7 +463,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O4',
@@ -483,7 +483,7 @@ void main() {
     environment.defines[JsCompilerConfig.kNativeNullAssertions] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--native-null-assertions',
         '--no-source-maps',
@@ -496,7 +496,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--native-null-assertions',
         '--no-source-maps',
@@ -517,7 +517,7 @@ void main() {
     environment.defines[JsCompilerConfig.kDart2jsOptimization] = 'O3';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -529,7 +529,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O3',
@@ -548,7 +548,7 @@ void main() {
     environment.defines[kBuildMode] = 'release';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-o',
@@ -563,7 +563,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '--no-source-maps',
         '-O4',
@@ -590,7 +590,7 @@ void main() {
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -604,7 +604,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -626,7 +626,7 @@ void main() {
     environment.defines[JsCompilerConfig.kSourceMapsEnabled] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -637,7 +637,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
         '-O4',
         '-o',
@@ -657,7 +657,7 @@ void main() {
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -671,7 +671,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -694,7 +694,7 @@ void main() {
     environment.defines[JsCompilerConfig.kDart2jsDumpInfo] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -706,7 +706,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-minify',
         '--no-source-maps',
@@ -728,7 +728,7 @@ void main() {
     environment.defines[JsCompilerConfig.kDart2jsNoFrequencyBasedMinification] = 'true';
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-source-maps',
         '-o',
@@ -740,7 +740,7 @@ void main() {
     ));
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2jsLinuxArgs,
+        ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
         '--no-minify',
         '--no-source-maps',
@@ -765,7 +765,7 @@ void main() {
 
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2WasmLinuxArgs,
+        ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
@@ -788,7 +788,7 @@ void main() {
 
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2WasmLinuxArgs,
+        ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
         '--omit-type-checks',
         '--depfile=${depFile.absolute.path}',
@@ -811,7 +811,7 @@ void main() {
     final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2WasmLinuxArgs,
+        ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
@@ -851,7 +851,7 @@ void main() {
 
     processManager.addCommand(FakeCommand(
       command: <String>[
-        ...kDart2WasmLinuxArgs,
+        ..._kDart2WasmLinuxArgs,
         '-Ddart.vm.product=true',
         '--import-shared-memory',
         '--shared-memory-max-pages=32768',
