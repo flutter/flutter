@@ -20,7 +20,6 @@ void testMain() {
     domDocument.body!.append(styleElement);
     applyGlobalCssRulesToSheet(
       styleElement,
-      hasAutofillOverlay: browserHasAutofillOverlay(),
       defaultCssFont: _kDefaultCssFont,
     );
   });

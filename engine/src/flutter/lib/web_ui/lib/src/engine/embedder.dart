@@ -192,7 +192,6 @@ class FlutterViewEmbedder {
     shadowRoot.appendChild(shadowRootStyleElement);
     applyGlobalCssRulesToSheet(
       shadowRootStyleElement,
-      hasAutofillOverlay: browserHasAutofillOverlay(),
       defaultCssFont: defaultCssFont,
     );
 
@@ -433,7 +432,6 @@ DomElement createTextEditingHostNode(DomElement root, String defaultFont) {
   root.appendChild(styleElement);
   applyGlobalCssRulesToSheet(
     styleElement,
-    hasAutofillOverlay: browserHasAutofillOverlay(),
     cssSelectorPrefix: FlutterViewEmbedder.flutterViewTagName,
     defaultCssFont: defaultFont,
   );
