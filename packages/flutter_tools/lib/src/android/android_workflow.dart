@@ -241,7 +241,7 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Finding Java binary';
     // Now check for the JDK.
-    final String? javaBinary = findJavaBinary(
+    final String? javaBinary = _findJavaBinary(
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
       operatingSystemUtils: _operatingSystemUtils,
@@ -331,7 +331,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String? javaBinary = findJavaBinary(
+    final String? javaBinary = _findJavaBinary(
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
       operatingSystemUtils: _operatingSystemUtils,
