@@ -578,12 +578,10 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 enum XcodeBuildAction { build, archive }
 
 String xcodeBuildActionToString(XcodeBuildAction action) {
-    switch (action) {
-      case XcodeBuildAction.build:
-        return 'build';
-      case XcodeBuildAction.archive:
-        return 'archive';
-    }
+    return switch (action) {
+      XcodeBuildAction.build => 'build',
+      XcodeBuildAction.archive => 'archive'
+    };
 }
 
 class XcodeBuildResult {
