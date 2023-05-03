@@ -497,19 +497,18 @@ abstract final class SystemChrome {
 
   static SystemUiOverlayStyleCallback? _systemUiOverlayStyleCallback;
 
-  /// Sets the callback method for responding to changes in the [SystemUiOverlayStyle].
+  /// Sets the function that is called when the [SystemUiOverlayStyle] is changed.
   ///
-  /// For execute [SystemUiOverlayStyle] related logic, 
-  /// when the [SystemChrome.setSystemUiOverlayStyle] method called,
-  /// could set a callback method using this Api.
+  /// This can be used to execute [SystemUiOverlayStyle]-related logic
+  /// when the [SystemChrome.setSystemUiOverlayStyle] method is called,
+  /// such as synchronizing the desktop custom title-bar with
+  /// the current [SystemUiOverlayStyle] for better adaptability.
   ///
-  /// For example, could be used for sync desktop custom title-bar with
-  /// current [SystemUiOverlayStyle] for make code-base more adaptive.
+  /// Only one function can be set at a time. Setting a new function
+  /// will override the previous one.
   ///
-  /// When set a new callback, last setted callback will be lost.
-  ///
-  /// If set a callback that manipulate a widget's state, should unregister
-  /// callback in dispose() method by setSystemUiOverlayStyleCallback(null).
+  /// If the function depends on a widget's state, it should be unregistered
+  /// in the dispose() method by calling setSystemUiOverlayStyleCallback(null).
   // ignore: use_setters_to_change_properties
   static void setSystemUiOverlayStyleCallback(SystemUiOverlayStyleCallback? callback) {
     _systemUiOverlayStyleCallback = callback;
