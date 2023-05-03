@@ -358,7 +358,7 @@ List<String> _stringify(List<dynamic> list) => <String>[
 
 /// Signature for responding to changes in the [SystemUiOverlayStyle].
 ///
-/// used by [SystemChrome.setSystemUIChangeCallback].
+/// used by [SystemChrome.setSystemUiOverlayStyleCallback].
 typedef SystemUiOverlayStyleCallback = void Function(SystemUiOverlayStyle? style);
 
 /// Controls specific aspects of the operating system's graphical interface and
@@ -500,9 +500,11 @@ abstract final class SystemChrome {
   /// Sets the function that is called when the [SystemUiOverlayStyle] is changed.
   ///
   /// This can be used to execute [SystemUiOverlayStyle]-related logic
-  /// when the [SystemChrome.setSystemUiOverlayStyle] method is called,
-  /// such as synchronizing the desktop custom title-bar with
-  /// the current [SystemUiOverlayStyle] for better adaptability.
+  /// when the [SystemChrome.setSystemUiOverlayStyle] method is called and
+  /// it changes the current [SystemUiOverlayStyle].
+  ///
+  /// For example, can be used for synchronizing the desktop custom title-bar
+  /// with the current [SystemUiOverlayStyle] for better adaptability.
   ///
   /// Only one function can be set at a time. Setting a new function
   /// will override the previous one.
