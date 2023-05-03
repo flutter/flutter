@@ -427,7 +427,7 @@ void main() {
             tester.view.devicePixelRatio = 1;
             await mediaQueryBoilerplate(tester, materialType: materialType);
 
-            width = min(timePickerPortraitSize.width + padding.horizontal, 560);
+            width = min(timePickerPortraitSize.width + padding.horizontal, 560); // width is limited to 560
             height = timePickerPortraitSize.height + padding.vertical;
             expect(
               tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
@@ -446,7 +446,7 @@ void main() {
               materialType: materialType,
             );
 
-            width =  timePickerLandscapeSize.width + padding.horizontal;
+            width =  min(timePickerLandscapeSize.width + padding.horizontal, 560); // width is limited to 560
             height = timePickerLandscapeSize.height + padding.vertical;
             expect(
               tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
