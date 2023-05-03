@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
+import 'debug.dart';
 import 'raw_keyboard.dart';
 import 'system_channels.dart';
 
@@ -16,6 +17,41 @@ export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
+
+// When using _keyboardDebug, always call it like so:
+//
+// assert(_keyboardDebug(() => 'Blah $foo'));
+//
+// It needs to be inside the assert in order to be removed in release mode, and
+// it needs to use a closure to generate the string in order to avoid string
+// interpolation when debugPrintKeyboardEvents is false.
+//
+// It will throw a StateError if you try to call it when the app is in release
+// mode.
+bool _keyboardDebug(
+  String Function() messageFunc, [
+  Iterable<Object> Function()? detailsFunc,
+]) {
+  if (kReleaseMode) {
+    throw StateError(
+      '_keyboardDebug was called in Release mode, which means they are called '
+      'without being wrapped in an assert. Always call _keyboardDebug like so:\n'
+      r"  assert(_keyboardDebug(() => 'Blah $foo'));"
+    );
+  }
+  if (!debugPrintKeyboardEvents) {
+    return true;
+  }
+  debugPrint('KEYBOARD: ${messageFunc()}');
+  final Iterable<Object> details = detailsFunc?.call() ?? const <Object>[];
+  if (details.isNotEmpty) {
+    for (final Object detail in details) {
+      debugPrint('    $detail');
+    }
+  }
+  // Return true so that it can be used inside of an assert.
+  return true;
+}
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
 ///
@@ -546,9 +582,22 @@ class HardwareKeyboard {
     return handled;
   }
 
+  List<String> _debugPressedKeysDetails() {
+    if (_pressedKeys.isEmpty) {
+      return <String>['Empty'];
+    }
+    final List<String> details = <String>[];
+    for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys) {
+      details.add('$physicalKey: ${_pressedKeys[physicalKey]}');
+    }
+    return details;
+  }
+
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
   bool handleKeyEvent(KeyEvent event) {
+    assert(_keyboardDebug(() => 'Key event received: $event'));
+    assert(_keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails));
     _assertEventIsRegular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
@@ -568,6 +617,7 @@ class HardwareKeyboard {
       // Empty
     }
 
+    assert(_keyboardDebug(() => 'Pressed state after processing the event:', _debugPressedKeysDetails));
     return _dispatchKeyEvent(event);
   }
 
