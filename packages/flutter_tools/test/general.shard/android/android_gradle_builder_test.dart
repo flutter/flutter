@@ -46,6 +46,7 @@ void main() {
 
     testUsingContext('Can immediately tool exit on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -137,6 +138,7 @@ void main() {
 
     testUsingContext('Verbose mode for APKs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: BufferLogger.test(verbose: true),
         processManager: processManager,
         fileSystem: fileSystem,
@@ -203,6 +205,7 @@ void main() {
 
     testUsingContext('Can retry build on recognized exit code/stderr', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -307,6 +310,7 @@ void main() {
 
     testUsingContext('Converts recognized ProcessExceptions into tools exits', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -398,6 +402,7 @@ void main() {
 
     testUsingContext('rethrows unrecognized ProcessException', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -461,6 +466,7 @@ void main() {
 
     testUsingContext('logs success event after a successful retry', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -563,6 +569,7 @@ void main() {
 
     testUsingContext('performs code size analysis and sends analytics', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -663,6 +670,7 @@ void main() {
 
     testUsingContext('indicates that an APK has been built successfully', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -789,6 +797,7 @@ android {
 
     testUsingContext('can call custom gradle task getBuildOptions and parse the result', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -822,6 +831,7 @@ BuildVariant: paidProfile
 
     testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -851,6 +861,7 @@ Gradle Crashed
 
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -915,6 +926,7 @@ Gradle Crashed
 
     testUsingContext('Verbose mode for AARs includes Gradle stacktrace and sets debug log level', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: BufferLogger.test(verbose: true),
         processManager: processManager,
         fileSystem: fileSystem,
@@ -972,6 +984,7 @@ Gradle Crashed
 
     testUsingContext('gradle exit code and stderr is forwarded to tool exit', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1030,6 +1043,7 @@ Gradle Crashed
 
     testUsingContext('build apk uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1107,6 +1121,7 @@ Gradle Crashed
 
     testUsingContext('build apk uses selected local engine with arm64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1184,6 +1199,7 @@ Gradle Crashed
 
     testUsingContext('build apk uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1261,6 +1277,7 @@ Gradle Crashed
 
     testUsingContext('build apk uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1339,6 +1356,7 @@ Gradle Crashed
 
     testUsingContext('honors --no-android-gradle-daemon setting', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1398,6 +1416,7 @@ Gradle Crashed
 
     testUsingContext('build aar uses selected local engine with arm32 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1484,6 +1503,7 @@ Gradle Crashed
 
     testUsingContext('build aar uses selected local engine with x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1570,6 +1590,7 @@ Gradle Crashed
 
     testUsingContext('build aar uses selected local engine with x86 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -1656,6 +1677,7 @@ Gradle Crashed
 
     testUsingContext('build aar uses selected local engine on x64 ABI', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,

@@ -7,6 +7,7 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -601,4 +602,25 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+}
+
+class FakeJava extends Fake implements Java {
+  @override
+  String get home => 'android-studio/jbr';
+
+  @override
+  String get binary => 'android-studio/jbr/bin/java';
+
+  @override
+  Map<String, String> getJavaEnvironment() {
+    return <String, String>{
+      'JAVA_HOME': home,
+      'PATH': 'android-studio/jbr/bin',
+    };
+  }
+
+  @override
+  String? getVersionString() {
+    return '19.0.2.';
+  }
 }

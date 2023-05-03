@@ -403,7 +403,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
-      ..cmdlineToolsAvailable = true
+      ..commandLineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar');
     final ValidationResult validationResult = await AndroidValidator(
       androidStudio: FakeAndroidStudio(),
@@ -440,7 +440,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..cmdlineToolsAvailable = true
+      ..commandLineToolsAvailable = true
     // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
@@ -497,7 +497,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..cmdlineToolsAvailable = false
+      ..commandLineToolsAvailable = false
       ..directory = fileSystem.directory('/foo/bar');
 
     final AndroidValidator androidValidator = AndroidValidator(
@@ -541,7 +541,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..cmdlineToolsAvailable = true
+      ..commandLineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.latestVersion = sdkVersion;
@@ -607,7 +607,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool platformToolsAvailable = false;
 
   @override
-  bool cmdlineToolsAvailable = false;
+  bool commandLineToolsAvailable = false;
 
   @override
   Directory directory = MemoryFileSystem.test().directory('/foo/bar');

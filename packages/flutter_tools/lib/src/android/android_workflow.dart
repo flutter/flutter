@@ -8,10 +8,8 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
@@ -19,7 +17,6 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
-import 'android_studio.dart';
 import 'java.dart';
 
 const int kAndroidSdkMinVersion = 29;
@@ -77,32 +74,22 @@ class AndroidWorkflow implements Workflow {
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     required AndroidSdk? androidSdk,
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
+    required Java java,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
     required UserMessages userMessages,
   }) : _androidSdk = androidSdk,
-       _androidStudio = androidStudio,
-       _fileSystem = fileSystem,
+       _java = java,
        _logger = logger,
-       _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
        _platform = platform,
        _processManager = processManager,
        _userMessages = userMessages,
        super('Android toolchain - develop for Android devices');
 
   final AndroidSdk? _androidSdk;
-  final AndroidStudio? _androidStudio;
-  final FileSystem _fileSystem;
+  final Java _java;
   final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -185,7 +172,7 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
 
     _task = 'Validating Android SDK command line tools are available';
-    if (!androidSdk.cmdlineToolsAvailable) {
+    if (!androidSdk.commandLineToolsAvailable) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -241,12 +228,7 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Finding Java binary';
     // Now check for the JDK.
-    final String? javaBinary = _findJavaBinary(
-      androidStudio: _androidStudio,
-      fileSystem: _fileSystem,
-      operatingSystemUtils: _operatingSystemUtils,
-      platform: _platform,
-    );
+    final String? javaBinary = _java.binary;
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
@@ -267,32 +249,26 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
+    required Java java,
     required AndroidSdk? androidSdk,
     required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
-    required AndroidStudio? androidStudio,
     required Stdio stdio,
     required UserMessages userMessages,
-  }) : _androidSdk = androidSdk,
+  }) : _java = java,
+       _androidSdk = androidSdk,
        _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils,
-       _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
-       _androidStudio = androidStudio,
        _stdio = stdio,
        _userMessages = userMessages,
        super('Android license subvalidator');
 
+  final Java _java;
   final AndroidSdk? _androidSdk;
-  final AndroidStudio? _androidStudio;
   final Stdio _stdio;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
-  final FileSystem _fileSystem;
   final ProcessManager _processManager;
   final Logger _logger;
   final UserMessages _userMessages;
@@ -331,25 +307,12 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String? javaBinary = _findJavaBinary(
-      androidStudio: _androidStudio,
-      fileSystem: _fileSystem,
-      operatingSystemUtils: _operatingSystemUtils,
-      platform: _platform,
-    );
-    if (javaBinary == null) {
-      return false;
-    }
-    if (!_processManager.canRun(javaBinary)) {
+    if (_java.canRun()) {
       return false;
     }
     String? javaVersion;
     try {
-      final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
-      if (result.exitCode == 0) {
-        final List<String> versionLines = (result.stderr as String).split('\n');
-        javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-      }
+      javaVersion = _java.getVersionString();
     } on Exception catch (error) {
       _logger.printTrace(error.toString());
     }

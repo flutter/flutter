@@ -1,8 +1,10 @@
+import 'package:process/process.dart';
+
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../globals.dart' show printTrace, printWarning;
 import 'android_studio.dart';
 
 const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
@@ -10,18 +12,19 @@ const String _kJavaExecutable = 'java';
 
 class Java {
   Java({
-    required String? home,
-    required String? binary,
+    this.home,
+    this.binary,
+    required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils os,
     required Platform platform,
-    required ProcessUtils processUtils,
-  }): _home = home,
-      _binary = binary,
+    required ProcessManager processManager,
+  }): _logger = logger,
       _fileSystem = fileSystem,
       _os = os,
       _platform = platform,
-      _processUtils = processUtils;
+      _processManager = processManager,
+      _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   /// Finds the Java runtime that should be used for all java-dependent
   /// operations across the tool.
@@ -41,27 +44,49 @@ class Java {
   // See https://github.com/flutter/flutter/issues/124252.
   factory Java.find({
     required AndroidStudio? androidStudio,
+    required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils os,
     required Platform platform,
-    required ProcessUtils processUtils,
+    required ProcessManager processManager,
   }) {
-    final String? home = _findJavaHome(androidStudio: androidStudio, platform: platform);
+    final String? home = _findJavaHome(
+      logger: logger,
+      androidStudio: androidStudio,
+      platform: platform
+    );
     final String? binary = _findJavaBinary(
+      logger: logger,
       javaHome: home,
       fileSystem: fileSystem,
       operatingSystemUtils: os,
       platform: platform
     );
 
-    return Java(home: home, binary: binary, fileSystem: fileSystem, os: os, platform: platform, processUtils: processUtils);
+    return Java(home: home, binary: binary, logger: logger, fileSystem: fileSystem, os: os, platform: platform, processManager: processManager);
   }
 
-  final String? _home;
-  final String? _binary;
+  /// The path of the runtime's home directory.
+  ///
+  /// This should only be used for logging and validation purposes.
+  /// If you need to set JAVA_HOME when starting a process, consider
+  /// using [getJavaEnvironment] instead.
+  /// If you need to inspect the files of the runtime, considering adding
+  /// a new method to this class instead.
+  final String? home;
+
+  /// The path of the runtime's java binary.
+  ///
+  /// This should be only used for logging and validation purposes.
+  /// If you need to invoke the binary directly, consider adding a new method
+  /// to this class instead.
+  final String? binary;
+
+  final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _os;
   final Platform _platform;
+  final ProcessManager _processManager;
   final ProcessUtils _processUtils;
 
   late String? _version;
@@ -74,8 +99,8 @@ class Java {
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
   Map<String, String> getJavaEnvironment() {
     return <String, String>{
-      if (_home != null) _javaHomeEnvironmentVariable: _home!,
-      if (_binary != null) 'PATH': _fileSystem.path.dirname(_binary!) +
+      if (home != null) _javaHomeEnvironmentVariable: home!,
+      if (binary != null) 'PATH': _fileSystem.path.dirname(binary!) +
                         _os.pathVarSeparator +
                         _platform.environment['PATH']!,
     };
@@ -84,71 +109,72 @@ class Java {
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version not found.
   String? getVersionString() {
-    if (_binary == null) {
-      printTrace('Could not find java binary to get version.');
+    if (binary == null) {
+      _logger.printTrace('Could not find java binary to get version.');
       return null;
     }
-    return _version ??= _getJavaVersion(javaBinary: _binary!, javaEnvironment: getJavaEnvironment(), processUtils: _processUtils);
+
+    if (_version == null) {
+      final RunResult result = _processUtils.runSync(
+        <String>[binary!, '--version'],
+        environment: getJavaEnvironment(),
+      );
+      if (result.exitCode != 0) {
+        _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
+          ' stdout: ${result.stdout} stderr: ${result.stderr}');
+      }
+      _version = _parseJavaVersion(result.stdout);
+    }
+
+    return _version;
   }
 
+  /// Extracts JDK version from the output of java --version.
+  String? _parseJavaVersion(String rawVersionOutput) {
+    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
+    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    final Iterable<RegExpMatch> matches =
+        jdkVersionRegex.allMatches(rawVersionOutput);
+    if (matches.isEmpty) {
+      _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+    final String? versionString = matches.first.group(0);
+    if (versionString == null || versionString.split('_').isEmpty) {
+      _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+    // Trim away _d+ from versions 1.8 and below.
+    return versionString.split('_').first;
+  }
+
+  bool canRun() {
+    return _processManager.canRun(binary);
+  }
 }
 
-/// Returns the version of java in the format \d(.\d)+(.\d)+
-/// Returns null if version not found.
-String? _getJavaVersion({
-  required String javaBinary,
-  required Map<String, String> javaEnvironment,
-  required ProcessUtils processUtils,
-}) {
-  final RunResult result = processUtils.runSync(
-    <String>[javaBinary, '--version'],
-    environment: javaEnvironment,
-  );
-  if (result.exitCode != 0) {
-    printTrace('java --version failed: exitCode: ${result.exitCode}'
-      ' stdout: ${result.stdout} stderr: ${result.stderr}');
-    return null;
-  }
-  return _parseJavaVersion(result.stdout);
-}
 
-/// Extracts JDK version from the output of java --version.
-String? _parseJavaVersion(String rawVersionOutput) {
-  // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-  final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
-  final Iterable<RegExpMatch> matches =
-      jdkVersionRegex.allMatches(rawVersionOutput);
-  if (matches.isEmpty) {
-    printWarning(_formatJavaVersionWarning(rawVersionOutput));
-    return null;
-  }
-  final String? versionString = matches.first.group(0);
-  if (versionString == null || versionString.split('_').isEmpty) {
-    printWarning(_formatJavaVersionWarning(rawVersionOutput));
-    return null;
-  }
-  // Trim away _d+ from versions 1.8 and below.
-  return versionString.split('_').first;
-}
 
 String? _findJavaHome({
+  required Logger logger,
   required AndroidStudio? androidStudio,
   required Platform platform,
 }) {
   if (androidStudio?.javaPath != null) {
-    printTrace("Using Android Studio's java.");
+    logger.printTrace("Using Android Studio's java.");
     return androidStudio!.javaPath;
   }
 
   final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
   if (javaHomeEnv != null) {
-    printTrace('Using JAVA_HOME from environment valuables.');
+    logger.printTrace('Using JAVA_HOME from environment valuables.');
     return javaHomeEnv;
   }
   return null;
 }
 
 String? _findJavaBinary({
+  required Logger logger,
   required String? javaHome,
   required FileSystem fileSystem,
   required OperatingSystemUtils operatingSystemUtils,
@@ -161,9 +187,9 @@ String? _findJavaBinary({
   // Fallback to PATH based lookup.
   final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
   if (pathJava != null) {
-    printTrace('Using java from PATH.');
+    logger.printTrace('Using java from PATH.');
   } else {
-    printTrace('Could not find java path.');
+    logger.printTrace('Could not find java path.');
   }
   return pathJava;
 }

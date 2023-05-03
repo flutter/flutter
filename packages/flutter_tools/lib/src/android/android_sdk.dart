@@ -32,7 +32,9 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory) {
+  AndroidSdk(this.directory, {
+    required Java java,
+  }): _java = java {
     reinitialize();
   }
 
@@ -42,12 +44,13 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
+  Java _java;
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
   ///
   /// This is required to use the newest SDK manager which only works with
   /// the newer JDK.
-  bool get cmdlineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
+  bool get commandLineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
 
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
@@ -55,7 +58,7 @@ class AndroidSdk {
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => cmdlineToolsAvailable
+  bool get platformToolsAvailable => commandLineToolsAvailable
      || directory.childDirectory('platform-tools').existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
@@ -67,7 +70,9 @@ class AndroidSdk {
   /// the SDK on demand.
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
-  static AndroidSdk? locateAndroidSdk() {
+  static AndroidSdk? locateAndroidSdk({
+    Java? java,
+  }) {
     String? findAndroidHomeDir() {
       String? androidHomeDir;
       if (globals.config.containsKey('android-sdk')) {
@@ -146,7 +151,16 @@ class AndroidSdk {
       return null;
     }
 
-    return AndroidSdk(globals.fs.directory(androidHomeDir));
+    return AndroidSdk(
+      globals.fs.directory(androidHomeDir),
+      java: java ?? Java.find(
+        logger: globals.logger,
+        androidStudio: globals.androidStudio,
+        fileSystem: globals.fs,
+        os: globals.os,
+        platform: globals.platform,
+        processManager: globals.processManager,
+      ));
   }
 
   static bool validSdkDirectory(String dir) {
@@ -410,13 +424,7 @@ class AndroidSdk {
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
-    return _sdkManagerEnv ??= Java.find(
-        androidStudio: globals.androidStudio,
-        fileSystem: globals.fs,
-        os: globals.os,
-        platform: globals.platform,
-        processUtils: globals.processUtils
-      ).getJavaEnvironment();
+    return _sdkManagerEnv ??= _java.getJavaEnvironment();
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.

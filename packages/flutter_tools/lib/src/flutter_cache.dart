@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
-import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
@@ -426,7 +425,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
         ],
         environment: <String, String>{
           if (javaPath != null)
-            AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
+            'JAVA_HOME': javaPath!,
         },
       );
       if (processResult.exitCode != 0) {

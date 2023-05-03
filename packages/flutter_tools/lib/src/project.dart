@@ -9,6 +9,7 @@ import 'package:yaml/yaml.dart';
 import '../src/convert.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
+import 'android/java.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
@@ -568,14 +569,14 @@ class AndroidProject extends FlutterProjectPlatform {
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = globals.androidSdk?.getJavaVersion(
+    final String? javaVersion = Java.find(
+      logger: globals.logger,
       androidStudio: globals.androidStudio,
       fileSystem: globals.fs,
-      operatingSystemUtils: globals.os,
+      os: globals.os,
       platform: globals.platform,
-      processUtils: globals.processUtils,
-    );
-
+      processManager: globals.processManager
+    ).getVersionString();
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
 

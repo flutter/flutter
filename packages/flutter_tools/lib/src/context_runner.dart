@@ -14,6 +14,7 @@ import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
 import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -68,6 +69,15 @@ import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
+Java _java = Java.find(
+  logger: globals.logger,
+  androidStudio: globals.androidStudio,
+  fileSystem: globals.fs,
+  os: globals.os,
+  platform: globals.platform,
+  processManager: globals.processManager,
+);
+
 Future<T> runInContext<T>(
   FutureOr<T> Function() runner, {
   Map<Type, Generator>? overrides,
@@ -87,6 +97,7 @@ Future<T> runInContext<T>(
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidBuilder: () => AndroidGradleBuilder(
+        java: _java,
         logger: globals.logger,
         processManager: globals.processManager,
         fileSystem: globals.fs,
@@ -96,22 +107,19 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
-        operatingSystemUtils: globals.os,
+        java: _java,
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
-        androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
-        fileSystem: globals.fs,
         stdio: globals.stdio,
       ),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
-        androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
-        fileSystem: globals.fs,
+        java: _java,
         logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
