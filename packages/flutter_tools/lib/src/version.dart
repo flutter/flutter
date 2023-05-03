@@ -231,7 +231,7 @@ abstract class FlutterVersion {
     'engineRevision': engineRevision,
     'dartSdkVersion': dartSdkVersion,
     'devToolsVersion': devToolsVersion,
-    'flutterVersion': frameworkVersion, // TODO what about unknown?
+    'flutterVersion': frameworkVersion,
   };
 
   /// A date String describing the last framework commit.
@@ -336,7 +336,6 @@ abstract class FlutterVersion {
   }
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
-  // TODO does this need to be public?
   String getVersionString({ bool redactUnknownBranches = false }) {
     if (frameworkVersion != _unknownFrameworkVersion) {
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
@@ -587,8 +586,6 @@ class _FlutterVersionGit extends FlutterVersion {
       versionFile.writeAsStringSync(encoder.convert(toJson()));
     }
   }
-
-  // TODO toString()
 }
 
 /// Checks if the provided [version] is tracking a standard remote.
