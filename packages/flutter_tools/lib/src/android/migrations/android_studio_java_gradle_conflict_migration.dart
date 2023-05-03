@@ -134,6 +134,8 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
       processFileLines(_gradleWrapperPropertiesFile);
     } on Exception catch (e) {
       logger.printTrace(errorWhileMigrating + e.toString());
+    } on Error catch (e) {
+      logger.printTrace(errorWhileMigrating + e.toString());
     }
   }
 
