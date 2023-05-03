@@ -937,12 +937,14 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
 
   /// Called to build children on demand.
   ///
-  /// Subclasses can choose to only call the builder for [ChildVicinity] indices
-  /// greater than or equal to zero up to [maxXIndex] and [maxYIndex] if
-  /// non-null.
+  /// Implementors of [RenderTwoDimensionalViewport.layoutChildSequence]
+  /// call this builder to create the children of the viewport. For
+  /// [ChildVicinity] indices greater than [maxXIndex] or [maxYIndex], null will
+  /// be returned by the default [build] implementation. This default behavior
+  /// can be changed by overriding the build method.
   ///
-  /// Must return null if asked to build a widget with a greater index than
-  /// exists in both dimensions.
+  /// Must return null if asked to build a widget with a [ChildVicinity] that
+  /// does not exist.
   ///
   /// The delegate wraps the children returned by this builder in
   /// [RepaintBoundary] widgets if [addRepaintBoundaries] is true.
