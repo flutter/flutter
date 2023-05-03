@@ -583,7 +583,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,
-    this.strokeAlign = strokeAlignCenter,
+    this.strokeAlign = BorderSide.strokeAlignCenter,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -611,19 +611,9 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// on the edge of the widget.
   ///
   /// When set to [BorderSide.strokeAlignInside], the stroke is drawn completely
-  /// inside the widget. For [strokeAlignCenter] and [strokeAlignOutside],
+  /// inside the widget. For [BorderSide.strokeAlignCenter] and [BorderSide.strokeAlignOutside],
   /// a property such as [Container.clipBehavior] can be used in an outside widget
-  /// to clip it. If [Container.decoration] has a border, the container
-  /// may incorporate [width] as additional padding:
-  /// - [BorderSide.strokeAlignInside] provides padding with full [width].
-  /// - [BorderSide.strokeAlignCenter] provides padding with half [width].
-  /// - [BorderSide.strokeAlignOutside] provides zero padding, as stroke
-  ///   is drawn entirely outside.
-  ///
-  /// This property is not honored by [toPaint] (because the [Paint] object
-  /// cannot represent it); it is intended that classes that use
-  /// [CircularProgressIndicator] widgets implement this property
-  /// when painting borders by suitably inflating or deflating their regions.
+  /// to clip it.
   final double strokeAlign;
 
   /// The progress indicator's line ending.
@@ -646,25 +636,6 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// and ends at 270 degrees. With [StrokeCap.square], it could start 85
   /// degrees and end at 275 degrees.
   final StrokeCap? strokeCap;
-
-  /// The border is drawn fully inside of the border path.
-  ///
-  /// This is a constant for use with [strokeAlign].
-  ///
-  /// This is the default value for [strokeAlign].
-  static const double strokeAlignInside = 1.0;
-
-  /// The border is drawn on the center of the border path, with half of the
-  /// [BorderSide.width] on the inside, and the other half on the outside of
-  /// the path.
-  ///
-  /// This is a constant for use with [strokeAlign].
-  static const double strokeAlignCenter = 0.0;
-
-  /// The border is drawn on the outside of the border path.
-  ///
-  /// This is a constant for use with [strokeAlign].
-  static const double strokeAlignOutside = -1.0;
 
   @override
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
