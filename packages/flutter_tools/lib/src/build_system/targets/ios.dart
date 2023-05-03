@@ -526,11 +526,7 @@ abstract class IosAssetBundle extends Target {
         flutterProject.ios.appFrameworkInfoPlist,
       ],
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

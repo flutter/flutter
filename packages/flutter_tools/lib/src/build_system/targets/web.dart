@@ -218,16 +218,13 @@ class Dart2JSTarget extends Dart2WebTarget {
         '${dart2jsDeps.path}');
       return;
     }
-    final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
-    final Depfile depfile = depfileService.parseDart2js(
+    final DepfileService depFileService = environment.depFileService;
+    final Depfile depFile = depFileService.parseDart2js(
       environment.buildDir.childFile('app.dill.deps'),
       outputJSFile,
     );
-    depfileService.writeToFile(
-      depfile,
+    depFileService.writeToFile(
+      depFile,
       environment.buildDir.childFile('dart2js.d'),
     );
   }
@@ -409,10 +406,7 @@ class WebReleaseBundle extends Target {
       targetPlatform: TargetPlatform.web_javascript,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
+    final DepfileService depfileService = environment.depFileService;
     depfileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
@@ -627,11 +621,7 @@ class WebServiceWorker extends Target {
     );
     serviceWorkerFile
       .writeAsStringSync(serviceWorker);
-    final DepfileService depfileService = DepfileService(
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('service_worker.d'),
     );

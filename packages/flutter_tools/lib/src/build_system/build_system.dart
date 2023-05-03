@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../reporting/reporting.dart';
+import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';
 import 'source.dart';
@@ -524,6 +525,11 @@ class Environment {
   /// When [true], the main entrypoint is wrapped and the wrapper becomes
   /// the new entrypoint.
   final bool generateDartPluginRegistry;
+
+  late final DepfileService depFileService = DepfileService(
+    logger: logger,
+    fileSystem: fileSystem,
+  );
 }
 
 /// The result information from the build system.

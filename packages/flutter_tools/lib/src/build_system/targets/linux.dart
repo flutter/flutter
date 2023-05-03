@@ -84,11 +84,7 @@ class UnpackLinux extends Target {
         platform: targetPlatform,
       )
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile(_kLinuxDepfile),
     );
@@ -147,11 +143,7 @@ abstract class BundleLinuxAssets extends Target {
       },
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
