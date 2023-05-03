@@ -289,14 +289,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         builder.addText('\uFFFD');
       }
     }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
-        child.build(
-          builder,
-          textScaleFactor: textScaleFactor,
-          dimensions: dimensions,
-        );
-      }
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      child.build(
+        builder,
+        textScaleFactor: textScaleFactor,
+        dimensions: dimensions,
+      );
     }
     if (hasStyle) {
       builder.pop();
@@ -310,16 +308,22 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// returns false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
-    if (text != null) {
-      if (!visitor(this)) {
+    if (text != null && !visitor(this)) {
+      return false;
+    }
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      if (!child.visitChildren(visitor)) {
         return false;
       }
     }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor)) {
-          return false;
-        }
+    return true;
+  }
+
+  @override
+  bool visitDirectChildren(InlineSpanVisitor visitor) {
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      if (!visitor(child)) {
+        return false;
       }
     }
     return true;
@@ -389,17 +393,15 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         recognizer: recognizer,
       ));
     }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
-        if (child is TextSpan) {
-          child.computeSemanticsInformation(
-            collector,
-            inheritedLocale: effectiveLocale,
-            inheritedSpellOut: effectiveSpellOut,
-          );
-        } else {
-          child.computeSemanticsInformation(collector);
-        }
+    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
+      if (child is TextSpan) {
+        child.computeSemanticsInformation(
+          collector,
+          inheritedLocale: effectiveLocale,
+          inheritedSpellOut: effectiveSpellOut,
+        );
+      } else {
+        child.computeSemanticsInformation(collector);
       }
     }
   }
@@ -426,10 +428,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (
-      recognizer != null &&
-      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
-    ) {
+    if (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer) {
       final int length = semanticsLabel?.length ?? text!.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -573,11 +572,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null) {
-      return const <DiagnosticsNode>[];
-    }
-    return children!.map<DiagnosticsNode>((InlineSpan child) {
+    return children?.map<DiagnosticsNode>((InlineSpan child) {
       return child.toDiagnosticsNode();
-    }).toList();
+    }).toList() ?? const <DiagnosticsNode>[];
   }
 }
