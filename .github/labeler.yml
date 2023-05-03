@@ -74,7 +74,7 @@ framework:
     - packages/flutter_test/**
     - packages/integration_test/**
 
-integration-test:
+integration_test:
   - any:
     - packages/integration_test/**
 
@@ -97,7 +97,7 @@ team:
   - any:
     - examples/flutter_gallery/**
 
-tech_debt:
+tech-debt:
   - any:
     - '**/fix_data.yaml'
     - '**/*.expect'
