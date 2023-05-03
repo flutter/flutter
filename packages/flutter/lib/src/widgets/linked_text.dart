@@ -21,8 +21,11 @@ typedef LinkBuilder = InlineSpan Function(
 
 // TODO(justinmc): Change name to something link-agnostic?
 // TODO(justinmc): Add regexp parameter. No, builder? Both?
-class Linkifier extends StatelessWidget {
-  const Linkifier({
+/// A widget that displays some text with parts of it made interactive.
+///
+/// By default, any URLs in the text are made interactive.
+class LinkedText extends StatelessWidget {
+  const LinkedText({
     super.key,
     this.onTap,
     required this.text,
@@ -34,7 +37,7 @@ class Linkifier extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
-      text: InlineLinkifier(
+      text: InlineLinkedText(
         onTap: onTap,
         style: DefaultTextStyle.of(context).style,
         text: text,
@@ -45,13 +48,15 @@ class Linkifier extends StatelessWidget {
 
 // TODO(justinmc): Make agnostic to URLs, just "links", which could be GitHub PRs, etc.
 /// A [TextSpan] that makes parts of the [text] interactive.
-class InlineLinkifier extends TextSpan {
-  /// Create an instance of [InlineLinkifier].
+class InlineLinkedText extends TextSpan {
+  // TODO(justinmc): Need to support multiple simultaneous types of links. For
+  // example, URLs are blue and do one thing, Twitter handles are red and do another.
+  /// Create an instance of [InlineLinkedText].
   ///
   /// If [ranges] is given, then makes the text indicated by that interactive.
   ///
   /// Otherwise, finds URLs in the text and makes them interactive.
-  InlineLinkifier({
+  InlineLinkedText({
     super.style,
     required String text,
     Iterable<TextRange>? ranges,
@@ -69,7 +74,7 @@ class InlineLinkifier extends TextSpan {
          ),
        );
 
-  /// Create an instance of [InlineLinkifier] where the text matched by the
+  /// Create an instance of [InlineLinkedText] where the text matched by the
   /// given [regExp] is made interactive.
   ///
   /// By default, [regExp] matches URLs.
@@ -77,7 +82,7 @@ class InlineLinkifier extends TextSpan {
   /// See also:
   ///
   ///  * [InlineLinkifier.new], which can be passed [TextRange]s directly.
-  InlineLinkifier.regExp({
+  InlineLinkedText.regExp({
     super.style,
     required String text,
     UriStringCallback ? onTap,
