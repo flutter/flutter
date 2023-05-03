@@ -164,20 +164,6 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
       OpacityLayer(),
       OpacityOperation(alpha, offset),
     );
-
-  @override
-  ui.PhysicalShapeEngineLayer pushPhysicalShape({
-    required ui.Path path,
-    required double elevation,
-    required ui.Color color,
-    ui.Color? shadowColor,
-    ui.Clip clipBehavior = ui.Clip.none,
-    ui.PhysicalShapeEngineLayer? oldLayer
-  }) {
-    // TODO(jacksongardner): implement pushPhysicalShape
-    throw UnimplementedError();
-  }
-
   @override
   ui.ShaderMaskEngineLayer pushShaderMask(
     ui.Shader shader,

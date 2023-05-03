@@ -56,22 +56,6 @@ Future<void> testMain() async {
     builder.addPicture(Offset.zero, recorder.endRecording());
   }
 
-  void paintPhysicalShapeShadow(double elevation, Offset offset) {
-    final SurfacePath path = SurfacePath()
-      ..addRect(const Rect.fromLTRB(0, 0, 20, 20));
-    builder.pushOffset(offset.dx, offset.dy);
-    builder.pushPhysicalShape(
-      path: path,
-      elevation: elevation,
-      shadowColor: _kShadowColor,
-      color: const Color.fromARGB(255, 255, 255, 255),
-    );
-    builder.pop(); // physical shape
-    paintShapeOutline();
-    paintShadowBounds(path, elevation);
-    builder.pop(); // offset
-  }
-
   void paintBitmapCanvasShadow(
       double elevation, Offset offset, bool transparentOccluder) {
     final SurfacePath path = SurfacePath()
@@ -134,10 +118,6 @@ Future<void> testMain() async {
       debugShowClipLayers = false;
 
       builder.pushOffset(10, 20);
-
-      for (int i = 0; i < 10; i++) {
-        paintPhysicalShapeShadow(i.toDouble(), Offset(50.0 * i, 0));
-      }
 
       for (int i = 0; i < 10; i++) {
         paintBitmapCanvasShadow(i.toDouble(), Offset(50.0 * i, 60), false);

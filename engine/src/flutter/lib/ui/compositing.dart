@@ -212,15 +212,6 @@ class ShaderMaskEngineLayer extends _EngineLayerWrapper {
   ShaderMaskEngineLayer._(super.nativeLayer) : super._();
 }
 
-/// An opaque handle to a physical shape engine layer.
-///
-/// Instances of this class are created by [SceneBuilder.pushPhysicalShape].
-///
-/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
-class PhysicalShapeEngineLayer extends _EngineLayerWrapper {
-  PhysicalShapeEngineLayer._(super.nativeLayer) : super._();
-}
-
 /// Builds a [Scene] containing the given visuals.
 ///
 /// A [Scene] can then be rendered using [FlutterView.render].
@@ -602,53 +593,6 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
       double maskRectBottom,
       int blendMode,
       int filterQualityIndex,
-      EngineLayer? oldLayer);
-
-  /// Pushes a physical layer operation for an arbitrary shape onto the
-  /// operation stack.
-  ///
-  /// By default, the layer's content will not be clipped (clip = [Clip.none]).
-  /// If clip equals [Clip.hardEdge], [Clip.antiAlias], or [Clip.antiAliasWithSaveLayer],
-  /// then the content is clipped to the given shape defined by [path].
-  ///
-  /// If [elevation] is greater than 0.0, then a shadow is drawn around the layer.
-  /// [shadowColor] defines the color of the shadow if present and [color] defines the
-  /// color of the layer background.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
-  @Deprecated(
-    'Use a clip and canvas operations directly (See RenderPhysicalModel). '
-    'This feature was deprecated after v3.1.0-0.0.pre.',
-  )
-  PhysicalShapeEngineLayer pushPhysicalShape({
-    required Path path,
-    required double elevation,
-    required Color color,
-    Color? shadowColor,
-    Clip clipBehavior = Clip.none,
-    PhysicalShapeEngineLayer? oldLayer,
-  }) {
-    assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushPhysicalShape'));
-    final EngineLayer engineLayer = EngineLayer._();
-    _pushPhysicalShape(engineLayer, path, elevation, color.value, shadowColor?.value ?? 0xFF000000,
-        clipBehavior.index, oldLayer?._nativeLayer);
-    final PhysicalShapeEngineLayer layer = PhysicalShapeEngineLayer._(engineLayer);
-    assert(_debugPushLayer(layer));
-    return layer;
-  }
-
-  @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Int32, Int32, Int32, Handle)>(symbol: 'SceneBuilder::pushPhysicalShape')
-  external void _pushPhysicalShape(
-      EngineLayer outEngineLayer,
-      Path path,
-      double elevation,
-      int color,
-      int shadowColor,
-      int clipBehavior,
       EngineLayer? oldLayer);
 
   /// Ends the effect of the most recently pushed operation.
