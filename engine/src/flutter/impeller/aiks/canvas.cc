@@ -172,16 +172,6 @@ void Canvas::DrawPath(const Path& path, const Paint& paint) {
 }
 
 void Canvas::DrawPaint(const Paint& paint) {
-  if (xformation_stack_.size() == 1 &&  // If we're recording the root pass,
-      GetCurrentPass().GetElementCount() == 0  // and this is the first item,
-  ) {
-    // Then we can absorb this drawPaint as the clear color of the pass.
-    auto color = Color::BlendColor(
-        paint.color, GetCurrentPass().GetClearColor(), paint.blend_mode);
-    GetCurrentPass().SetClearColor(color);
-    return;
-  }
-
   Entity entity;
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());

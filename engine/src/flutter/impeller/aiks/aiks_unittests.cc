@@ -1818,18 +1818,6 @@ TEST_P(AiksTest, OpacityPeepHoleApplicationTest) {
   ASSERT_TRUE(delegate->CanCollapseIntoParentPass(entity_pass.get()));
 }
 
-TEST_P(AiksTest, DrawPaintAbsorbsClears) {
-  Canvas canvas;
-  canvas.DrawPaint({.color = Color::Red(), .blend_mode = BlendMode::kSource});
-  canvas.DrawPaint(
-      {.color = Color::CornflowerBlue(), .blend_mode = BlendMode::kSource});
-
-  Picture picture = canvas.EndRecordingAsPicture();
-
-  ASSERT_EQ(picture.pass->GetElementCount(), 0u);
-  ASSERT_EQ(picture.pass->GetClearColor(), Color::CornflowerBlue());
-}
-
 TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
   Canvas canvas;
 
