@@ -141,6 +141,29 @@ fetched from CIPD.
 Since the engine code and infra recipes do not live in the same repository
 there are few steps to follow in order to upgrade a browser's version.
 
+### Rolling fallback fonts
+
+To generate new fallback font data and push the fallback fonts into a CIPD
+package for engine unit tests to consume, run the following felt command:
+
+```
+cipd auth-login
+felt roll-fallback-fonts --key=<Google Fonts API key>
+```
+
+This will take the following steps:
+* Fetch a list of fonts from the Google Fonts API
+* Download each font we use for fallbacks and calculate its unicode ranges
+* Generate the `font_fallback_data.dart` file that is used in the engine
+* Push the fonts up to a CIPD package called `flutter/flutter_font_fallbacks`
+* Update the `DEPS` file in the engine to use the new version of the package
+
+To perform all these steps except actually uploading the package to CIPD, pass
+the `--dry-run` flag to the felt command.
+
+NOTE: Because this script uses `fc-config`, this roll step only actually works
+on Linux, not on macOS or Windows.
+
 #### Chromium
 
 Chromium is an independent project that gets rolled into Flutter manually, and as needed.
@@ -221,19 +244,6 @@ Resources:
    hackers-infra on Discord for more information)
 2. LUCI web [recipe][5]
 3. More general reading on CIPD packages [link][6]
-
-### Rolling Noto Font Data
-
-In order to generate new data for the Noto fallback fonts, you will need
-a GoogleFonts API key. Once you have one, run:
-
-```
-./dev/felt generate-fallback-font-data --key=<your GoogleFonts API key>
-```
-
-This will generate the file `lib/src/engine/canvaskit/font_fallback_data.dart` with
-the latest data from GoogleFonts. This generated file should then be rolled in with
-a PR to the engine.
 
 ### Configuration files
 

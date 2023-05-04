@@ -9,6 +9,7 @@ import 'package:http/http.dart';
 import 'package:path/path.dart' as path;
 
 import 'browser_lock.dart';
+import 'cipd.dart';
 import 'common.dart';
 import 'utils.dart';
 
@@ -133,56 +134,6 @@ class _BrowserRoller {
     }
   }
 
-  // Returns the contents for the CIPD config required to publish a new chromium package.
-  String _getCipdChromiumConfig({
-    required String package,
-    required String majorVersion,
-    required String buildId,
-    required String root,
-  }) {
-    return '''
-package: $package
-description: Chromium $majorVersion (build $buildId) used for testing
-preserve_writable: true
-root: $root
-data:
-  - dir: .
-''';
-  }
-
-  // Returns the contents for the CIPD config required to publish a new chromedriver package.
-  String _getCipdChromedriverConfig({
-    required String package,
-    required String majorVersion,
-    required String buildId,
-    required String root,
-  }) {
-    return '''
-package: $package
-description: Chromedriver for Chromium $majorVersion (build $buildId) used for testing
-preserve_writable: true
-root: $root
-data:
-  - dir: .
-''';
-  }
-
-  // Returns the contents for the CIPD config required to publish a new Firefox package.
-  String _getCipdFirefoxConfig({
-    required String package,
-    required String majorVersion,
-    required String root,
-  }) {
-    return '''
-package: $package
-description: Firefox $majorVersion used for testing
-preserve_writable: true
-root: $root
-data:
-  - dir: .
-''';
-  }
-
   // Download a file from the internet, and put it in a temporary location.
   Future<io.File> _downloadTemporaryFile(String url) async {
     // Use the hash of the Url to temporarily store a file under tmp
@@ -233,16 +184,6 @@ data:
     await tarFile.delete();
   }
 
-  // Write String `contents` to a file in `path`.
-  //
-  // This is used to write CIPD config files to disk.
-  Future<io.File> _writeFile(String path, String contents) async {
-    vprint('  Writing file [$path]');
-    final io.File file = io.File(path, );
-    await file.writeAsString(contents);
-    return file;
-  }
-
   // Locate the first subdirectory that contains more than one file under `root`.
   // (or one ".app" bundle for mac)
   //
@@ -265,61 +206,6 @@ data:
     return root;
   }
 
-  // Runs a CIPD command to upload a package defined by its `config` file.
-  Future<int> _uploadToCipd({
-    required io.File config,
-    required String version,
-    required String buildId,
-  }) {
-    final String cipdCommand = dryRun ? 'pkg-build' : 'create';
-    // CIPD won't fully shut up even in 'error' mode
-    final String logLevel = verbose ? 'debug' : 'warning';
-    vprint('  Running CIPD $cipdCommand');
-    return runProcess('cipd', <String>[
-      cipdCommand,
-      '--pkg-def',
-      path.basename(config.path),
-      '--json-output',
-      '${path.basenameWithoutExtension(config.path)}.json',
-      '--log-level',
-      logLevel,
-      if (!dryRun) ...<String>[
-        '--tag',
-        'version:$version',
-        '--ref',
-        buildId,
-      ],
-      if (dryRun) ...<String>[
-        '--out',
-        '${path.basenameWithoutExtension(config.path)}.zip',
-      ],
-    ], workingDirectory: _rollDir.path);
-  }
-
-  // Determine if a `package` tagged with version:`versionTag` already exists in CIPD.
-  Future<bool> _cipdKnowsPackageVersion({
-    required String package,
-    required String versionTag,
-  }) async {
-    // $ cipd search $package -tag version:$versionTag
-    // Instances:
-    //   $package:CIPD_PACKAGE_ID
-    // or:
-    // No matching instances.
-    final String logLevel = verbose ? 'debug' : 'warning';
-    vprint('  Searching for $package version:$versionTag in CIPD');
-    final String stdout = await evalProcess('cipd', <String>[
-      'search',
-      package,
-      '--tag',
-      'version:$versionTag',
-      '--log-level',
-      logLevel,
-    ], workingDirectory: _rollDir.path);
-
-    return stdout.contains('Instances:') && stdout.contains(package);
-  }
-
   // Downloads Chromium from the internet, packs it in the directory structure
   // that the LUCI script wants. The result of this will be then uploaded to CIPD.
   Future<void> _rollChromium(_Platform platform) async {
@@ -330,7 +216,11 @@ data:
     final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
     print('\nRolling Chromium for ${platform.name} (version:$majorVersion, build $chromeBuild)');
     // Bail out if CIPD already has version:$majorVersion for this package!
-    if (!dryRun && await _cipdKnowsPackageVersion(package: cipdPackageName, versionTag: majorVersion)) {
+    if (!dryRun && await cipdKnowsPackageVersion(
+      package: cipdPackageName,
+      versionTag: majorVersion,
+      isVerbose: verbose
+    )) {
       print('  Skipping $cipdPackageName version:$majorVersion. Already uploaded to CIPD!');
       vprint('  Update  browser_lock.yaml  and use a different version value.');
       return;
@@ -353,17 +243,18 @@ data:
       relativePlatformDirPath = path.relative(actualContentRoot!.path, from: _rollDir.path);
     }
 
-    // Create the config manifest to upload to CIPD
-    final io.File cipdConfigFile = await _writeFile(
-        path.join(_rollDir.path, 'cipd.chromium.${platform.name}.yaml'),
-        _getCipdChromiumConfig(
-            package: cipdPackageName,
-            majorVersion: majorVersion,
-            buildId: chromeBuild,
-            root: relativePlatformDirPath,
-        ));
-    // Run CIPD
-    await _uploadToCipd(config: cipdConfigFile, version: majorVersion, buildId: chromeBuild);
+    vprint('  Uploading Chromium (${platform.name}) to CIPD...');
+    await uploadDirectoryToCipd(
+      directory: _rollDir,
+      packageName: cipdPackageName,
+      configFileName: 'cipd.chromium.${platform.name}.yaml',
+      description: 'Chromium $majorVersion (build $chromeBuild) used for testing',
+      version: majorVersion,
+      buildId: chromeBuild,
+      root: relativePlatformDirPath,
+      isDryRun: dryRun,
+      isVerbose: verbose,
+    );
   }
 
   // Downloads Chromedriver from the internet, packs it in the directory structure
@@ -376,7 +267,11 @@ data:
     final io.Directory platformDir = io.Directory(path.join(_rollDir.path, '${platform.name}_driver'));
     print('\nRolling Chromedriver for ${platform.os}-${platform.arch} (version:$majorVersion, build $chromeBuild)');
     // Bail out if CIPD already has version:$majorVersion for this package!
-    if (!dryRun && await _cipdKnowsPackageVersion(package: cipdPackageName, versionTag: majorVersion)) {
+    if (!dryRun && await cipdKnowsPackageVersion(
+      package: cipdPackageName,
+      versionTag: majorVersion,
+      isVerbose: verbose
+    )) {
       print('  Skipping $cipdPackageName version:$majorVersion. Already uploaded to CIPD!');
       vprint('  Update  browser_lock.yaml  and use a different version value.');
       return;
@@ -394,17 +289,18 @@ data:
     assert(actualContentRoot != null);
     final String relativePlatformDirPath = path.relative(actualContentRoot!.path, from: _rollDir.path);
 
-    // Create the config manifest to upload to CIPD
-    final io.File cipdConfigFile = await _writeFile(
-        path.join(_rollDir.path, 'cipd.chromedriver.${platform.name}.yaml'),
-        _getCipdChromedriverConfig(
-            package: cipdPackageName,
-            majorVersion: majorVersion,
-            buildId: chromeBuild,
-            root: relativePlatformDirPath,
-        ));
-    // Run CIPD
-    await _uploadToCipd(config: cipdConfigFile, version: majorVersion, buildId: chromeBuild);
+    vprint('  Uploading Chromedriver (${platform.name}) to CIPD...');
+    await uploadDirectoryToCipd(
+      directory: _rollDir,
+      packageName: cipdPackageName,
+      configFileName: 'cipd.chromedriver.${platform.name}.yaml',
+      description: 'Chromedriver for Chromium $majorVersion (build $chromeBuild) used for testing',
+      version: majorVersion,
+      buildId: chromeBuild,
+      root: relativePlatformDirPath,
+      isDryRun: dryRun,
+      isVerbose: verbose,
+    );
   }
 
 
@@ -417,7 +313,11 @@ data:
     final io.Directory platformDir = io.Directory(path.join(_rollDir.path, platform.name));
     print('\nRolling Firefox for ${platform.name} (version:$version)');
     // Bail out if CIPD already has version:$majorVersion for this package!
-    if (!dryRun && await _cipdKnowsPackageVersion(package: cipdPackageName, versionTag: version)) {
+    if (!dryRun && await cipdKnowsPackageVersion(
+      package: cipdPackageName,
+      versionTag: version,
+      isVerbose: verbose
+    )) {
       print('  Skipping $cipdPackageName version:$version. Already uploaded to CIPD!');
       vprint('  Update  browser_lock.yaml  and use a different version value.');
       return;
@@ -434,15 +334,17 @@ data:
     assert(actualContentRoot != null);
     final String relativePlatformDirPath = path.relative(actualContentRoot!.path, from: _rollDir.path);
 
-    // Create the config manifest to upload to CIPD
-    final io.File cipdConfigFile = await _writeFile(
-        path.join(_rollDir.path, 'cipd.firefox.${platform.name}.yaml'),
-        _getCipdFirefoxConfig(
-            package: cipdPackageName,
-            majorVersion: version,
-            root: relativePlatformDirPath,
-        ));
-    // Run CIPD
-    await _uploadToCipd(config: cipdConfigFile, version: version, buildId: version);
+    vprint('  Uploading Firefox (${platform.name}) to CIPD...');
+    await uploadDirectoryToCipd(
+      directory: _rollDir,
+      packageName: cipdPackageName,
+      configFileName: 'cipd.firefox.${platform.name}.yaml',
+      description: 'Firefox $version used for testing',
+      version: version,
+      buildId: version,
+      root: relativePlatformDirPath,
+      isDryRun: dryRun,
+      isVerbose: verbose,
+    );
   }
 }

@@ -114,6 +114,27 @@ class CopyArtifactsStep implements PipelineStep {
     await fontManifestFile.writeAsString(
       const JsonEncoder.withIndent('  ').convert(fontManifest),
     );
+
+    final io.Directory fallbackFontsSource = io.Directory(pathlib.join(
+      environment.engineSrcDir.path,
+      'third_party',
+      'google_fonts_for_unit_tests',
+    ));
+    final String fallbackFontsDestinationPath = pathlib.join(
+      environment.webTestsArtifactsDir.path,
+      'assets',
+      'fallback_fonts',
+    );
+    for (final io.File file in
+      fallbackFontsSource.listSync(recursive: true).whereType<io.File>()
+    ) {
+      final String relativePath = pathlib.relative(file.path, from: fallbackFontsSource.path);
+      final io.File destinationFile = io.File(pathlib.join(fallbackFontsDestinationPath, relativePath));
+      if (!destinationFile.parent.existsSync()) {
+        destinationFile.parent.createSync(recursive: true);
+      }
+      file.copySync(destinationFile.path);
+    }
   }
 
   Future<void> copySkiaTestImages() async {

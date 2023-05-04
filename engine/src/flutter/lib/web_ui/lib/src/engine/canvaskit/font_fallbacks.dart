@@ -5,21 +5,23 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/canvaskit/renderer.dart';
-
-import '../dom.dart';
-import '../font_change_util.dart';
-import '../initialization.dart';
-import '../renderer.dart';
-import '../util.dart';
-import 'canvaskit_api.dart';
-import 'font_fallback_data.dart';
-import 'fonts.dart';
-import 'interval_tree.dart';
-import 'noto_font.dart';
+import 'package:ui/src/engine.dart';
 
 /// Global static font fallback data.
 class FontFallbackData {
+
+  factory FontFallbackData() =>
+    FontFallbackData._(getFallbackFontData(configuration.useColorEmoji));
+
+  FontFallbackData._(this.fallbackFonts) :
+    _notoSansSC = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans SC'),
+    _notoSansTC = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans TC'),
+    _notoSansHK = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans HK'),
+    _notoSansJP = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans JP'),
+    _notoSansKR = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans KR'),
+    _notoSymbols = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans Symbols'),
+    notoTree = createNotoFontTree(fallbackFonts);
+
   static FontFallbackData get instance => _instance;
   static FontFallbackData _instance = FontFallbackData();
 
@@ -39,10 +41,20 @@ class FontFallbackData {
   /// Code units which are known to be covered by at least one fallback font.
   final Set<int> knownCoveredCodeUnits = <int>{};
 
-  /// Index of all font families by code unit range.
-  final IntervalTree<NotoFont> notoTree = createNotoFontTree();
+  final List<NotoFont> fallbackFonts;
 
-  static IntervalTree<NotoFont> createNotoFontTree() {
+  /// Index of all font families by code unit range.
+  final IntervalTree<NotoFont> notoTree;
+
+  final NotoFont _notoSansSC;
+  final NotoFont _notoSansTC;
+  final NotoFont _notoSansHK;
+  final NotoFont _notoSansJP;
+  final NotoFont _notoSansKR;
+
+  final NotoFont _notoSymbols;
+
+  static IntervalTree<NotoFont> createNotoFontTree(List<NotoFont> fallbackFonts) {
     final Map<NotoFont, List<CodeunitRange>> ranges =
         <NotoFont, List<CodeunitRange>>{};
 
@@ -235,143 +247,140 @@ class FontFallbackData {
       globalFontFallbacks.add(family);
     }
   }
-}
 
-Future<void> findFontsForMissingCodeunits(List<int> codeUnits) async {
-  final FontFallbackData data = FontFallbackData.instance;
+  Future<void> findFontsForMissingCodeunits(List<int> codeUnits) async {
+    final FontFallbackData data = FontFallbackData.instance;
 
-  Set<NotoFont> fonts = <NotoFont>{};
-  final Set<int> coveredCodeUnits = <int>{};
-  final Set<int> missingCodeUnits = <int>{};
-  for (final int codeUnit in codeUnits) {
-    final List<NotoFont> fontsForUnit = data.notoTree.intersections(codeUnit);
-    fonts.addAll(fontsForUnit);
-    if (fontsForUnit.isNotEmpty) {
-      coveredCodeUnits.add(codeUnit);
-    } else {
-      missingCodeUnits.add(codeUnit);
+    Set<NotoFont> fonts = <NotoFont>{};
+    final Set<int> coveredCodeUnits = <int>{};
+    final Set<int> missingCodeUnits = <int>{};
+    for (final int codeUnit in codeUnits) {
+      final List<NotoFont> fontsForUnit = data.notoTree.intersections(codeUnit);
+      fonts.addAll(fontsForUnit);
+      if (fontsForUnit.isNotEmpty) {
+        coveredCodeUnits.add(codeUnit);
+      } else {
+        missingCodeUnits.add(codeUnit);
+      }
+    }
+
+    // The call to `findMinimumFontsForCodeUnits` will remove all code units that
+    // were matched by `fonts` from `unmatchedCodeUnits`.
+    final Set<int> unmatchedCodeUnits = Set<int>.from(coveredCodeUnits);
+    fonts = findMinimumFontsForCodeUnits(unmatchedCodeUnits, fonts);
+
+    fonts.forEach(notoDownloadQueue.add);
+
+    // We looked through the Noto font tree and didn't find any font families
+    // covering some code units.
+    if (missingCodeUnits.isNotEmpty || unmatchedCodeUnits.isNotEmpty) {
+      if (!notoDownloadQueue.isPending) {
+        printWarning('Could not find a set of Noto fonts to display all missing '
+            'characters. Please add a font asset for the missing characters.'
+            ' See: https://flutter.dev/docs/cookbook/design/fonts');
+        data.codeUnitsWithNoKnownFont.addAll(missingCodeUnits);
+      }
     }
   }
 
-  // The call to `findMinimumFontsForCodeUnits` will remove all code units that
-  // were matched by `fonts` from `unmatchedCodeUnits`.
-  final Set<int> unmatchedCodeUnits = Set<int>.from(coveredCodeUnits);
-  fonts = findMinimumFontsForCodeUnits(unmatchedCodeUnits, fonts);
+  /// Finds the minimum set of fonts which covers all of the [codeUnits].
+  ///
+  /// Removes all code units covered by [fonts] from [codeUnits]. The code
+  /// units remaining in the [codeUnits] set after calling this function do not
+  /// have a font that covers them and can be omitted next time to avoid
+  /// searching for fonts unnecessarily.
+  ///
+  /// Since set cover is NP-complete, we approximate using a greedy algorithm
+  /// which finds the font which covers the most code units. If multiple CJK
+  /// fonts match the same number of code units, we choose one based on the user's
+  /// locale.
+  Set<NotoFont> findMinimumFontsForCodeUnits(
+      Set<int> codeUnits, Set<NotoFont> fonts) {
+    assert(fonts.isNotEmpty || codeUnits.isEmpty);
+    final Set<NotoFont> minimumFonts = <NotoFont>{};
+    final List<NotoFont> bestFonts = <NotoFont>[];
 
-  fonts.forEach(notoDownloadQueue.add);
+    final String language = domWindow.navigator.language;
 
-  // We looked through the Noto font tree and didn't find any font families
-  // covering some code units.
-  if (missingCodeUnits.isNotEmpty || unmatchedCodeUnits.isNotEmpty) {
-    if (!notoDownloadQueue.isPending) {
-      printWarning('Could not find a set of Noto fonts to display all missing '
-          'characters. Please add a font asset for the missing characters.'
-          ' See: https://flutter.dev/docs/cookbook/design/fonts');
-      data.codeUnitsWithNoKnownFont.addAll(missingCodeUnits);
-    }
-  }
-}
-
-/// Finds the minimum set of fonts which covers all of the [codeUnits].
-///
-/// Removes all code units covered by [fonts] from [codeUnits]. The code
-/// units remaining in the [codeUnits] set after calling this function do not
-/// have a font that covers them and can be omitted next time to avoid
-/// searching for fonts unnecessarily.
-///
-/// Since set cover is NP-complete, we approximate using a greedy algorithm
-/// which finds the font which covers the most code units. If multiple CJK
-/// fonts match the same number of code units, we choose one based on the user's
-/// locale.
-Set<NotoFont> findMinimumFontsForCodeUnits(
-    Set<int> codeUnits, Set<NotoFont> fonts) {
-  assert(fonts.isNotEmpty || codeUnits.isEmpty);
-  final Set<NotoFont> minimumFonts = <NotoFont>{};
-  final List<NotoFont> bestFonts = <NotoFont>[];
-
-  final String language = domWindow.navigator.language;
-
-  while (codeUnits.isNotEmpty) {
-    int maxCodeUnitsCovered = 0;
-    bestFonts.clear();
-    for (final NotoFont font in fonts) {
-      int codeUnitsCovered = 0;
-      for (final int codeUnit in codeUnits) {
-        if (font.contains(codeUnit)) {
-          codeUnitsCovered++;
+    while (codeUnits.isNotEmpty) {
+      int maxCodeUnitsCovered = 0;
+      bestFonts.clear();
+      for (final NotoFont font in fonts) {
+        int codeUnitsCovered = 0;
+        for (final int codeUnit in codeUnits) {
+          if (font.contains(codeUnit)) {
+            codeUnitsCovered++;
+          }
+        }
+        if (codeUnitsCovered > maxCodeUnitsCovered) {
+          bestFonts.clear();
+          bestFonts.add(font);
+          maxCodeUnitsCovered = codeUnitsCovered;
+        } else if (codeUnitsCovered == maxCodeUnitsCovered) {
+          bestFonts.add(font);
         }
       }
-      if (codeUnitsCovered > maxCodeUnitsCovered) {
-        bestFonts.clear();
-        bestFonts.add(font);
-        maxCodeUnitsCovered = codeUnitsCovered;
-      } else if (codeUnitsCovered == maxCodeUnitsCovered) {
-        bestFonts.add(font);
+      if (maxCodeUnitsCovered == 0) {
+        // Fonts cannot cover remaining unmatched characters.
+        break;
       }
-    }
-    if (maxCodeUnitsCovered == 0) {
-      // Fonts cannot cover remaining unmatched characters.
-      break;
-    }
-    // If the list of best fonts are all CJK fonts, choose the best one based
-    // on locale. Otherwise just choose the first font.
-    NotoFont bestFont = bestFonts.first;
-    if (bestFonts.length > 1) {
-      if (bestFonts.every((NotoFont font) => _cjkFonts.contains(font))) {
-        if (language == 'zh-Hans' ||
-            language == 'zh-CN' ||
-            language == 'zh-SG' ||
-            language == 'zh-MY') {
-          if (bestFonts.contains(_notoSansSC)) {
+      // If the list of best fonts are all CJK fonts, choose the best one based
+      // on locale. Otherwise just choose the first font.
+      NotoFont bestFont = bestFonts.first;
+      if (bestFonts.length > 1) {
+        if (bestFonts.every((NotoFont font) =>
+          font == _notoSansSC ||
+          font == _notoSansTC ||
+          font == _notoSansHK ||
+          font == _notoSansJP ||
+          font == _notoSansKR
+        )) {
+          if (language == 'zh-Hans' ||
+              language == 'zh-CN' ||
+              language == 'zh-SG' ||
+              language == 'zh-MY') {
+            if (bestFonts.contains(_notoSansSC)) {
+              bestFont = _notoSansSC;
+            }
+          } else if (language == 'zh-Hant' ||
+              language == 'zh-TW' ||
+              language == 'zh-MO') {
+            if (bestFonts.contains(_notoSansTC)) {
+              bestFont = _notoSansTC;
+            }
+          } else if (language == 'zh-HK') {
+            if (bestFonts.contains(_notoSansHK)) {
+              bestFont = _notoSansHK;
+            }
+          } else if (language == 'ja') {
+            if (bestFonts.contains(_notoSansJP)) {
+              bestFont = _notoSansJP;
+            }
+          } else if (language == 'ko') {
+            if (bestFonts.contains(_notoSansKR)) {
+              bestFont = _notoSansKR;
+            }
+          } else if (bestFonts.contains(_notoSansSC)) {
             bestFont = _notoSansSC;
           }
-        } else if (language == 'zh-Hant' ||
-            language == 'zh-TW' ||
-            language == 'zh-MO') {
-          if (bestFonts.contains(_notoSansTC)) {
-            bestFont = _notoSansTC;
+        } else {
+          // To be predictable, if there is a tie for best font, choose a font
+          // from this list first, then just choose the first font.
+          if (bestFonts.contains(_notoSymbols)) {
+            bestFont = _notoSymbols;
+          } else if (bestFonts.contains(_notoSansSC)) {
+            bestFont = _notoSansSC;
           }
-        } else if (language == 'zh-HK') {
-          if (bestFonts.contains(_notoSansHK)) {
-            bestFont = _notoSansHK;
-          }
-        } else if (language == 'ja') {
-          if (bestFonts.contains(_notoSansJP)) {
-            bestFont = _notoSansJP;
-          }
-        } else if (language == 'ko') {
-          if (bestFonts.contains(_notoSansKR)) {
-            bestFont = _notoSansKR;
-          }
-        } else if (bestFonts.contains(_notoSansSC)) {
-          bestFont = _notoSansSC;
-        }
-      } else {
-        // To be predictable, if there is a tie for best font, choose a font
-        // from this list first, then just choose the first font.
-        if (bestFonts.contains(_notoSymbols)) {
-          bestFont = _notoSymbols;
-        } else if (bestFonts.contains(_notoSansSC)) {
-          bestFont = _notoSansSC;
         }
       }
+      codeUnits.removeWhere((int codeUnit) {
+        return bestFont.contains(codeUnit);
+      });
+      minimumFonts.add(bestFont);
     }
-    codeUnits.removeWhere((int codeUnit) {
-      return bestFont.contains(codeUnit);
-    });
-    minimumFonts.add(bestFont);
+    return minimumFonts;
   }
-  return minimumFonts;
 }
-
-NotoFont _notoSansSC = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans SC');
-NotoFont _notoSansTC = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans TC');
-NotoFont _notoSansHK = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans HK');
-NotoFont _notoSansJP = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans JP');
-NotoFont _notoSansKR = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans KR');
-List<NotoFont> _cjkFonts = <NotoFont>[_notoSansSC, _notoSansTC, _notoSansHK, _notoSansJP, _notoSansKR];
-
-NotoFont _notoSymbols = fallbackFonts.singleWhere((NotoFont font) => font.name == 'Noto Sans Symbols');
 
 class FallbackFontDownloadQueue {
   NotoDownloader downloader = NotoDownloader();
@@ -462,6 +471,10 @@ class NotoDownloader {
   int get debugActiveDownloadCount => _debugActiveDownloadCount;
   int _debugActiveDownloadCount = 0;
 
+  static const String _defaultFallbackFontsUrlPrefix = 'https://fonts.gstatic.com/s/';
+  String? fallbackFontUrlPrefixOverride;
+  String get fallbackFontUrlPrefix => fallbackFontUrlPrefixOverride ?? _defaultFallbackFontsUrlPrefix;
+
   /// Returns a future that resolves when there are no pending downloads.
   ///
   /// Useful in tests to make sure that fonts are loaded before working with
@@ -492,7 +505,7 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<ByteBuffer> data = httpFetchByteBuffer(url);
+    final Future<ByteBuffer> data = httpFetchByteBuffer('$fallbackFontUrlPrefix$url');
     if (assertionsEnabled) {
       unawaited(data.whenComplete(() {
         _debugActiveDownloadCount -= 1;
@@ -508,7 +521,7 @@ class NotoDownloader {
     if (assertionsEnabled) {
       _debugActiveDownloadCount += 1;
     }
-    final Future<String> data = httpFetchText(url);
+    final Future<String> data = httpFetchText('$fallbackFontUrlPrefix$url');
     if (assertionsEnabled) {
       unawaited(data.whenComplete(() {
         _debugActiveDownloadCount -= 1;

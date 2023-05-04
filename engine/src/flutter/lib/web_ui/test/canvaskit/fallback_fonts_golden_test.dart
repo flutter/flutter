@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -18,7 +19,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 50);
+const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 100);
 
 void testMain() {
   group('Font fallbacks', () {
@@ -28,19 +29,16 @@ void testMain() {
     ui.PlatformMessageCallback? savedCallback;
 
     setUp(() {
+      // We render some color emojis in this test.
+      final FlutterConfiguration config = FlutterConfiguration()
+        ..setUserConfiguration(
+          js_util.jsify(<String, Object?>{
+            'useColorEmoji': true,
+          }) as JsFlutterConfiguration);
+      debugSetConfiguration(config);
+
       FontFallbackData.debugReset();
-      notoDownloadQueue.downloader = TestDownloader();
-      TestDownloader.mockDownloads.clear();
-      final String notoSansArabicUrl = fallbackFonts
-          .singleWhere((NotoFont font) => font.name == 'Noto Sans Arabic')
-          .url;
-      final String notoEmojiUrl = fallbackFonts
-          .singleWhere((NotoFont font) => font.name == 'Noto Emoji')
-          .url;
-      TestDownloader.mockDownloads[notoSansArabicUrl] =
-          '/assets/fonts/NotoNaskhArabic-Regular.ttf';
-      TestDownloader.mockDownloads[notoEmojiUrl] =
-          '/assets/fonts/NotoColorEmoji.ttf';
+      notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
       savedCallback = ui.window.onPlatformMessage;
     });
 
@@ -91,7 +89,7 @@ void testMain() {
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
     }, skip: isSafari || isFirefox);
 
-    test('will put the Noto Emoji font before other fallback fonts in the list',
+    test('will put the Noto Color Emoji font before other fallback fonts in the list',
         () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
@@ -123,12 +121,12 @@ void testMain() {
 
       expect(FontFallbackData.instance.globalFontFallbacks, <String>[
         'Roboto',
-        'Noto Emoji',
+        'Noto Color Emoji',
         'Noto Sans Arabic',
       ]);
     });
 
-    test('will download Noto Emojis and Noto Symbols if no matching Noto Font',
+    test('will download Noto Color Emojis and Noto Symbols if no matching Noto Font',
         () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
@@ -144,7 +142,7 @@ void testMain() {
       await notoDownloadQueue.debugWhenIdle();
 
       expect(FontFallbackData.instance.globalFontFallbacks,
-          contains('Noto Emoji'));
+          contains('Noto Color Emoji'));
 
       final CkPictureRecorder recorder = CkPictureRecorder();
       final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
@@ -235,7 +233,7 @@ void testMain() {
       final Set<int> supportedUniqueCodeUnits = <int>{};
       final IntervalTree<NotoFont> notoTree =
           FontFallbackData.instance.notoTree;
-      for (final NotoFont font in fallbackFonts) {
+      for (final NotoFont font in FontFallbackData.instance.fallbackFonts) {
         testedFonts.add(font.name);
         for (final CodeunitRange range in font.computeUnicodeRanges()) {
           for (int codeUnit = range.start; codeUnit < range.end; codeUnit++) {
@@ -250,7 +248,7 @@ void testMain() {
           testedFonts,
           unorderedEquals(<String>{
             'Noto Sans',
-            'Noto Emoji',
+            'Noto Color Emoji',
             'Noto Sans Symbols',
             'Noto Sans Symbols 2',
             'Noto Sans Adlam',
@@ -419,7 +417,7 @@ void testMain() {
         }
 
         try {
-          findMinimumFontsForCodeUnits(codeUnits, fonts);
+          FontFallbackData.instance.findMinimumFontsForCodeUnits(codeUnits, fonts);
         } catch (e) {
           print(
             'findMinimumFontsForCodeunits failed:\n'
@@ -430,7 +428,9 @@ void testMain() {
         }
       }
     });
-  }, skip: isSafari);
+  },
+  skip: isSafari,
+  timeout: const Timeout.factor(4));
 }
 
 class TestDownloader extends NotoDownloader {
@@ -490,4 +490,14 @@ class LoggingDownloader implements NotoDownloader {
 
   @override
   int get debugActiveDownloadCount => delegate.debugActiveDownloadCount;
+
+  @override
+  String? get fallbackFontUrlPrefixOverride =>
+    delegate.fallbackFontUrlPrefixOverride;
+
+  @override set fallbackFontUrlPrefixOverride(String? override) =>
+    delegate.fallbackFontUrlPrefixOverride;
+
+  @override
+  String get fallbackFontUrlPrefix => delegate.fallbackFontUrlPrefix;
 }

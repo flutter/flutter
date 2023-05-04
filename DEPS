@@ -913,6 +913,16 @@ deps = {
     ],
     'condition': 'download_impeller_cmake_example and host_os == "mac"',
     'dep_type': 'cipd',
+  },
+
+  'src/third_party/google_fonts_for_unit_tests': {
+      'packages': [
+        {
+          'package': 'flutter/flutter_font_fallbacks',
+          'version': 'f7459e412c5cfba5a654e96a5a00fff61e018d16b8b1c41dade17b7c6aa92299'
+        }
+      ],
+      'dep_type': 'cipd',
   }
 }
 
