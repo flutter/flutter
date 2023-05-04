@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'plugin_handler.dart';
 
 /// A registrar for Flutter plugins implemented in Dart.
 ///
@@ -62,7 +61,9 @@ class Registrar extends BinaryMessenger {
   /// the [dart:ui] library. That function is only available when
   /// compiling for the web.
   void registerMessageHandler() {
-    setPluginHandler(handleFrameworkMessage);
+    // The `ui.webOnlySetPluginHandler` function below is only defined in the Web dart:ui.
+    // ignore: undefined_function, avoid_dynamic_calls
+    ui.webOnlySetPluginHandler(handleFrameworkMessage);
   }
 
   /// Receives a platform message from the framework.

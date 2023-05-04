@@ -7,6 +7,9 @@ import 'dart:ui' as ui;
 
 import '../navigation_common/platform_location.dart';
 
+/// Callback that receives the new state of the browser history entry.
+typedef PopStateListener = void Function(Object? state);
+
 /// Represents and reads route state from the browser's URL.
 ///
 /// By default, the [HashUrlStrategy] subclass is used if the app doesn't
@@ -18,29 +21,36 @@ abstract class UrlStrategy {
 
   /// Adds a listener to the `popstate` event and returns a function that, when
   /// invoked, removes the listener.
-  ui.VoidCallback addPopStateListener(EventListener fn);
+  ui.VoidCallback addPopStateListener(PopStateListener fn) {
+    // No-op.
+    return () {};
+  }
 
   /// Returns the active path in the browser.
-  String getPath();
+  String getPath() => '';
 
   /// The state of the current browser history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/state
-  Object? getState();
+  Object? getState() => null;
 
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
-  String prepareExternalUrl(String internalUrl);
+  String prepareExternalUrl(String internalUrl) => '';
 
   /// Push a new history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object? state, String title, String url);
+  void pushState(Object? state, String title, String url) {
+    // No-op.
+  }
 
   /// Replace the currently active history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object? state, String title, String url);
+  void replaceState(Object? state, String title, String url) {
+    // No-op.
+  }
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -53,7 +63,9 @@ abstract class UrlStrategy {
   /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  Future<void> go(int count);
+  Future<void> go(int count) async {
+    // No-op.
+  }
 }
 
 /// Returns the present [UrlStrategy] for handling the browser URL.
@@ -94,36 +106,6 @@ class HashUrlStrategy extends UrlStrategy {
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// integrations.
   const HashUrlStrategy([PlatformLocation? _]);
-
-  @override
-  ui.VoidCallback addPopStateListener(EventListener fn) {
-    // No-op.
-    return () {};
-  }
-
-  @override
-  String getPath() => '';
-
-  @override
-  Object? getState() => null;
-
-  @override
-  String prepareExternalUrl(String internalUrl) => '';
-
-  @override
-  void pushState(Object? state, String title, String url) {
-    // No-op.
-  }
-
-  @override
-  void replaceState(Object? state, String title, String url) {
-    // No-op.
-  }
-
-  @override
-  Future<void> go(int count) async {
-    // No-op.
-  }
 }
 
 /// Uses the browser URL's pathname to represent Flutter's route name.
@@ -141,11 +123,5 @@ class PathUrlStrategy extends HashUrlStrategy {
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// integrations.
-  PathUrlStrategy([super.platformLocation]);
-
-  @override
-  String getPath() => '';
-
-  @override
-  String prepareExternalUrl(String internalUrl) => '';
+  PathUrlStrategy([PlatformLocation? _]);
 }
