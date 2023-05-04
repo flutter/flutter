@@ -470,6 +470,7 @@ class BrowserPlatform extends PlatformPlugin {
     '.json': 'application/json',
     '.map': 'application/json',
     '.ttf': 'font/ttf',
+    '.otf': 'font/otf',
     '.woff': 'font/woff',
     '.woff2': 'font/woff2',
   };
