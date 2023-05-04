@@ -295,6 +295,14 @@ targets:
       release_build: "true"
       config_name: linux_web_engine
 
+  - name: Linux linux_unopt
+    bringup: true
+    recipe: engine_v2/engine_v2
+    timeout: 60
+    properties:
+      release_build: "true"
+      config_name: linux_unopt
+
   - name: Linux Web Framework tests
     recipe: engine/web_engine_framework
     enabled_branches:
