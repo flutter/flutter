@@ -366,6 +366,37 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testUsingContext(
+      'throw error when both flags passed',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        expect(globals.analytics.telemetryEnabled, true);
+        expect(globals.analytics.shouldShowMessage, true);
+
+        final int exitCode = await runner.run(
+          <String>[
+            '--disable-telemetry',
+            '--enable-telemetry',
+          ],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(exitCode, 1,
+            reason: 'Should return 1 due to conflicting options for telemetry');
+        expect(globals.analytics.telemetryEnabled, true,
+            reason: 'Should not have changed from initialization');
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => FakeAnalytics(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 }
 
