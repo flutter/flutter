@@ -11,7 +11,7 @@ For additional samples, see the
 Available examples include:
 
 - **Hello, world** The [hello world app](hello_world) is a minimal Flutter app
-  that shows the text "hello, world."
+  that shows the text "Hello, world!"
 
 - **Flutter gallery** The flutter gallery app no longer lives in this repo.
   Please see the [gallery repo](https://github.com/flutter/gallery).

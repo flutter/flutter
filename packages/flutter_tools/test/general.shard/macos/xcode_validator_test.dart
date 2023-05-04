@@ -56,7 +56,7 @@ void main() {
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
       expect(result.messages.last.type, ValidationMessageType.error);
-      expect(result.messages.last.message, contains('Flutter requires Xcode 13 or higher'));
+      expect(result.messages.last.message, contains('Flutter requires Xcode 14 or higher'));
     });
 
     testWithoutContext('Emits partial status when Xcode below recommended version', () async {
