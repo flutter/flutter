@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
-/// Set of objects, that does not hold the objects from garbafge collection.
+/// Set of objects, that does not hold the objects from garbage collection.
 ///
 /// The objects are referenced by hash codes and can duplicate with low probability.
 @visibleForTesting
@@ -30,42 +30,13 @@ class WeakSet {
   }
 }
 
-@visibleForTesting
-class TestWidgetsConfig {
-  final WeakSet heldObjects = WeakSet();
-}
-
-/// Extension for [WidgetTester] to configure held objects.
-extension LeakTrackerConfig on WidgetTester {
-  static final Expando<TestWidgetsConfig> _configExpando = Expando<TestWidgetsConfig>();
-
-  T addHeldObject<T  extends Object>(T object){
-    _config.heldObjects.add(object);
-    return object;
-  }
-
-  bool isHeld(Object object){
-    return _config.heldObjects.contains(
-      identityHashCode(object),
-      object.runtimeType.toString(),
-    );
-  }
-
-  TestWidgetsConfig get _config {
-    if (_configExpando[this] == null) {
-      _configExpando[this] = TestWidgetsConfig();
-    }
-    return _configExpando[this]!;
-  }
-}
-
 /// Wrapper for [testWidgets] with leak tracking.
 ///
 /// Tracking for non-GCed objects is temporarily disabled.
 ///
 /// This method is temporal with the plan:
 ///
-/// 0. Enable tracling for non-GCed objects.
+/// 0. Enable tracing for non-GCed objects.
 ///
 /// 1. For each occurence of [testWidgets] in flutter framework, do one of three:
 ///
@@ -115,6 +86,8 @@ void testWidgetsWithLeakTracking(
 
 bool _webWarningPrinted = false;
 
+/// Runs [callback] with leak tracking.
+///
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
 /// The method will fail if wrapped code contains memory leaks.
@@ -160,7 +133,7 @@ Future<void> _withFlutterLeakTracking(
         shouldThrowOnLeaks: false,
       );
 
-      leaks = LeakCleaner(config, tester._config).clean(leaks);
+      leaks = LeakCleaner(config).clean(leaks);
 
       if (leaks.total > 0) {
         config.onLeaks?.call(leaks);
@@ -177,35 +150,32 @@ Future<void> _withFlutterLeakTracking(
 /// Cleans leaks that are allowed by [config] and [adjustments].
 @visibleForTesting
 class LeakCleaner {
-  LeakCleaner(this.config, this.adjustments);
+  LeakCleaner(this.config);
 
   final LeakTrackingTestConfig config;
-  final TestWidgetsConfig adjustments;
 
   Leaks clean(Leaks leaks) {
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
       for (LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => !_isLeakAllowed(leakType, leak)).toList()
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
     });
     return result;
   }
 
-  bool _isLeakAllowed(LeakType leakType, LeakReport leak) {
+  /// Returns true if [leak] should be reported as failure.
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak) {
     // Tracking for non-GCed is temporarily disabled.
     // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
-    if (<LeakType>{LeakType.notGCed, LeakType.gcedLate}.contains(leakType)) {
-      return true;
+    if (leakType != LeakType.notDisposed) {
+      return false;
     }
 
     switch (leakType) {
       case LeakType.notDisposed:
-        final bool result = config.notDisposedAllowList.contains(leak.type);
-        return result;
+        return !config.notDisposedAllowList.contains(leak.type);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        final bool result = config.notGCedAllowList.contains(leak.type) ||
-            adjustments.heldObjects.contains(leak.code, leak.type);
-        return result;
+        return !config.notGCedAllowList.contains(leak.type);
     }
   }
 }

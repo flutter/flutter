@@ -18,7 +18,7 @@ Leaks _leaksOfAllTypes() => Leaks(<LeakType, List<LeakReport>> {
 
 Future<void> main() async {
   test('Trivial $LeakCleaner returns only non-disposed leaks.', () {
-    final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig(), TestWidgetsConfig());
+    final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig());
     final Leaks leaks = _leaksOfAllTypes();
     final int leakTotal = leaks.total;
 
@@ -26,38 +26,6 @@ Future<void> main() async {
 
     expect(leaks.total, leakTotal);
     expect(cleanedLeaks.total, 1);
-  });
-
-  test('$LeakCleaner respects held objects for nonGCed leaks.', () {
-    final Leaks leaks = _leaksOfAllTypes();
-
-    final LeakCleaner leakCleaner = LeakCleaner(const LeakTrackingTestConfig(),
-      TestWidgetsConfig()
-        ..heldObjects.addByCode(leaks.notGCed.first.code, leaks.notGCed.first.type)
-        ..heldObjects.addByCode(leaks.gcedLate.first.code, leaks.gcedLate.first.type)
-        ..heldObjects.addByCode(leaks.notDisposed.first.code, leaks.notDisposed.first.type)
-    );
-
-    final int leakTotal = leaks.total;
-
-    final Leaks cleanedLeaks = leakCleaner.clean(leaks);
-
-    expect(leaks.total, leakTotal);
-    expect(cleanedLeaks.total, 1);
-    expect(cleanedLeaks.notDisposed, hasLength(1));
-  });
-
-  testWidgets('$WidgetTester preserves held objects', (WidgetTester tester) async {
-    final DateTime object1 = DateTime(2023);
-    final DateTime object2 = DateTime(2024);
-    final DateTime object3 = DateTime(2025);
-
-    tester.addHeldObject(object1);
-    tester.addHeldObject(object2);
-
-    expect(tester.isHeld(object1), true);
-    expect(tester.isHeld(object2), true);
-    expect(tester.isHeld(object3), false);
   });
 
   group('Leak tracking works for non-web', () {
@@ -93,29 +61,6 @@ Future<void> main() async {
 
       tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
     });
-
-    // TODO(polina-c): Re-enable this test when tracking for non-GCed leaks is enabled.
-    // group('Leak tracker respects notDisposed allow lists', () {
-    //   // These tests cannot run inside other tests because test nesting is forbidden.
-    //   // So, `expect` happens outside the tests, in `tearDown`.
-    //   late Leaks leaks;
-
-    //   testWidgetsWithLeakTracking(
-    //     'when $_StatelessLeakingWidget leaks',
-    //     (WidgetTester tester) async {
-    //       await tester.pumpWidget(_StatelessLeakingWidget());
-    //     },
-    //     leakTrackingConfig: LeakTrackingTestConfig(
-    //       onLeaks: (Leaks theLeaks) {
-    //         leaks = theLeaks;
-    //       },
-    //       failTestOnLeaks: false,
-    //       notDisposedAllowList: <String>{_leakTrackedClassName},
-    //     ),
-    //   );
-
-    //   tearDown(() => _verifyLeaks(leaks, expectedNotGCed: 1));
-    // });
 
     group('Leak tracker catches that', () {
       // These tests cannot run inside other tests because test nesting is forbidden.
