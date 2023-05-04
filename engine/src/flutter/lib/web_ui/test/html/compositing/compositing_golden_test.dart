@@ -11,7 +11,6 @@ import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../../common/matchers.dart';
-import '../../common/test_initialization.dart';
 
 const ui.Rect region = ui.Rect.fromLTWH(0, 0, 500, 100);
 
@@ -20,10 +19,11 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpAll(() async {
+    await ui.webOnlyInitializePlatform();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
+  });
 
   setUp(() async {
     // To debug test failures uncomment the following to visualize clipping

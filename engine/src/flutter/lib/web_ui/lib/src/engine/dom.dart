@@ -1397,7 +1397,7 @@ class DomXMLHttpRequestEventTarget extends DomEventTarget {}
 Future<_DomResponse> _rawHttpGet(String url) =>
     js_util.promiseToFuture<_DomResponse>(domWindow._fetch1(url.toJS));
 
-typedef MockHttpFetchResponseFactory = Future<MockHttpFetchResponse?> Function(
+typedef MockHttpFetchResponseFactory = Future<MockHttpFetchResponse> Function(
     String url);
 
 MockHttpFetchResponseFactory? mockHttpFetchResponseFactory;
@@ -1417,10 +1417,7 @@ MockHttpFetchResponseFactory? mockHttpFetchResponseFactory;
 /// [httpFetchText] instead.
 Future<HttpFetchResponse> httpFetch(String url) async {
   if (mockHttpFetchResponseFactory != null) {
-    final MockHttpFetchResponse? response = await mockHttpFetchResponseFactory!(url);
-    if (response != null) {
-      return response;
-    }
+    return mockHttpFetchResponseFactory!(url);
   }
   try {
     final _DomResponse domResponse = await _rawHttpGet(url);
@@ -1659,36 +1656,31 @@ typedef MockOnRead = Future<void> Function<T>(HttpFetchReader<T> callback);
 
 class MockHttpFetchPayload implements HttpFetchPayload {
   MockHttpFetchPayload({
-    required ByteBuffer byteBuffer,
-    int? chunkSize,
+    ByteBuffer? byteBuffer,
+    Object? json,
+    String? text,
+    MockOnRead? onRead,
   })  : _byteBuffer = byteBuffer,
-        _chunkSize = chunkSize ?? 64;
+        _json = json,
+        _text = text,
+        _onRead = onRead;
 
-  final ByteBuffer _byteBuffer;
-  final int _chunkSize;
-
-  @override
-  Future<void> read<T>(HttpFetchReader<T> callback) async {
-    final int totalLength = _byteBuffer.lengthInBytes;
-    int currentIndex = 0;
-    while (currentIndex < totalLength) {
-      final int chunkSize = math.min(_chunkSize, totalLength - currentIndex);
-      final Uint8List chunk = Uint8List.sublistView(
-        _byteBuffer.asByteData(), currentIndex, currentIndex + chunkSize
-      );
-      callback(chunk.toJS as T);
-      currentIndex += chunkSize;
-    }
-  }
+  final ByteBuffer? _byteBuffer;
+  final Object? _json;
+  final String? _text;
+  final MockOnRead? _onRead;
 
   @override
-  Future<ByteBuffer> asByteBuffer() async => _byteBuffer;
+  Future<void> read<T>(HttpFetchReader<T> callback) => _onRead!(callback);
 
   @override
-  Future<dynamic> json() async => throw AssertionError('json not supported by mock');
+  Future<ByteBuffer> asByteBuffer() async => _byteBuffer!;
 
   @override
-  Future<String> text() async => throw AssertionError('text not supported by mock');
+  Future<dynamic> json() async => _json!;
+
+  @override
+  Future<String> text() async => _text!;
 }
 
 /// Indicates a missing HTTP payload when one was expected, such as when
@@ -1802,7 +1794,9 @@ extension _DomStreamReaderExtension on _DomStreamReader {
 class _DomStreamChunk {}
 
 extension _DomStreamChunkExtension on _DomStreamChunk {
-  external JSAny? get value;
+  @JS('value')
+  external JSAny? get _value;
+  Object? get value => _value?.toObjectShallow;
 
   @JS('done')
   external JSBoolean get _done;
@@ -1924,10 +1918,6 @@ extension DomFontFaceExtension on DomFontFace {
   @JS('weight')
   external JSString? get _weight;
   String? get weight => _weight?.toDart;
-
-  @JS('status')
-  external JSString? get _status;
-  String? get status => _status?.toDart;
 }
 
 @JS()

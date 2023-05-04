@@ -29,22 +29,21 @@ abstract class Renderer {
   factory Renderer._internal() {
     if (FlutterConfiguration.flutterWebUseSkwasm) {
       return SkwasmRenderer();
-    } else {
-      bool useCanvasKit;
-      if (FlutterConfiguration.flutterWebAutoDetect) {
-        if (configuration.requestedRendererType != null) {
-          useCanvasKit = configuration.requestedRendererType == 'canvaskit';
-        } else {
-          // If requestedRendererType is not specified, use CanvasKit for desktop and
-          // html for mobile.
-          useCanvasKit = isDesktop;
-        }
-      } else {
-        useCanvasKit = FlutterConfiguration.useSkia;
-      }
-
-      return useCanvasKit ? CanvasKitRenderer() : HtmlRenderer();
     }
+    bool useCanvasKit;
+    if (FlutterConfiguration.flutterWebAutoDetect) {
+      if (configuration.requestedRendererType != null) {
+        useCanvasKit = configuration.requestedRendererType == 'canvaskit';
+      } else {
+        // If requestedRendererType is not specified, use CanvasKit for desktop and
+        // html for mobile.
+        useCanvasKit = isDesktop;
+      }
+    } else {
+      useCanvasKit = FlutterConfiguration.useSkia;
+    }
+
+    return useCanvasKit ? CanvasKitRenderer() : HtmlRenderer();
   }
 
   String get rendererTag;

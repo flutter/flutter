@@ -7,43 +7,32 @@ import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 
-import '../../common/fake_asset_manager.dart';
-import '../../common/test_initialization.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  group('$HtmlFontCollection', () {
-    setUpUnitTests();
-
+  group('$FontManager', () {
+    late FontManager fontManager;
     const String testFontUrl = '/assets/fonts/ahem.ttf';
 
-    late FakeAssetScope testScope;
     setUp(() {
-      testScope = fakeAssetManager.pushAssetScope();
-      testScope.setAssetPassthrough(testFontUrl);
-
-      // Clear the fonts before the test begins to wipe out the fonts from the
-      // test initialization.
-      domDocument.fonts!.clear();
+      fontManager = FontManager();
     });
 
     tearDown(() {
-      fakeAssetManager.popAssetScope(testScope);
+      domDocument.fonts!.clear();
     });
 
     group('regular special characters', () {
       test('Register Asset with no special characters', () async {
         const String testFontFamily = 'Ahem';
         final List<String> fontFamilyList = <String>[];
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -57,12 +46,10 @@ void testMain() {
         const String testFontFamily = 'Ahem ahem ahem';
         final List<String> fontFamilyList = <String>[];
 
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -78,12 +65,10 @@ void testMain() {
         const String testFontFamily = 'AhEm';
         final List<String> fontFamilyList = <String>[];
 
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -96,15 +81,13 @@ void testMain() {
       test('Register Asset with descriptor', () async {
         const String testFontFamily = 'Ahem';
         final List<String> fontFamilyList = <String>[];
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{
-              'weight': 'bold'
-            })
-          ])
-        ]));
 
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{
+              'weight': 'bold',
+            });
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           expect(f.weight, 'bold');
@@ -122,12 +105,10 @@ void testMain() {
         const String testFontFamily = '/Ahem';
         final List<String> fontFamilyList = <String>[];
 
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -149,12 +130,10 @@ void testMain() {
         const String testFontFamily = 'Ahem!!ahem';
         final List<String> fontFamilyList = <String>[];
 
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -176,12 +155,10 @@ void testMain() {
         const String testFontFamily = 'Ahem ,ahem';
         final List<String> fontFamilyList = <String>[];
 
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);
@@ -204,12 +181,10 @@ void testMain() {
         const String testFontFamily = 'Ahem 1998';
         final List<String> fontFamilyList = <String>[];
 
-        final HtmlFontCollection collection = HtmlFontCollection();
-        await collection.loadAssetFonts(FontManifest(<FontFamily>[
-          FontFamily(testFontFamily, <FontAsset>[
-            FontAsset(testFontUrl, <String, String>{})
-          ])
-        ]));
+        fontManager.downloadAsset(
+            testFontFamily, 'url($testFontUrl)', const <String, String>{});
+        await fontManager.downloadAllFonts();
+        fontManager.registerDownloadedFonts();
         domDocument.fonts!
             .forEach((DomFontFace f, DomFontFace f2, DomFontFaceSet s) {
           fontFamilyList.add(f.family!);

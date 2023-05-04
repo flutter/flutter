@@ -4,6 +4,4 @@
 
 #pragma once
 
-#include <emscripten.h>
-
 #define SKWASM_EXPORT extern "C" EMSCRIPTEN_KEEPALIVE
