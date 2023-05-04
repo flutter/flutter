@@ -1536,13 +1536,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       // always extend to wordBoundary.$2. Instead the selection should expand to
       // wordBoudary.$x that results in the largest selection.
       if (wordBoundary != null) {
-        int selectionEdgeOffset = isEnd ? _textSelectionStart!.offset : _textSelectionEnd!.offset;
-        int lengthWhenExpandingToBegOfWord = (selectionEdgeOffset - wordBoundary!.$1.offset).abs();
-        int lengthWhenExpandingToEndOfWord = (selectionEdgeOffset - wordBoundary!.$2.offset).abs();
+        final int selectionEdgeOffset = isEnd ? _textSelectionStart!.offset : _textSelectionEnd!.offset;
+        final int lengthWhenExpandingToBegOfWord = (selectionEdgeOffset - wordBoundary.$1.offset).abs();
+        final int lengthWhenExpandingToEndOfWord = (selectionEdgeOffset - wordBoundary.$2.offset).abs();
         if (lengthWhenExpandingToBegOfWord > lengthWhenExpandingToEndOfWord) {
-          targetPosition = wordBoundary!.$1;
+          targetPosition = wordBoundary.$1;
         } else {
-          targetPosition = wordBoundary!.$2;
+          targetPosition = wordBoundary.$2;
         }
       }
     }
