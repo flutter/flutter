@@ -16,6 +16,8 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
+  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('correctly records frames using display', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
@@ -52,6 +54,8 @@ void main() {
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
+  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('correctly wraps a row', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
@@ -70,6 +74,8 @@ void main() {
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
+  // TODO(polina-c): fix Picture and Image not disposed and and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('correctly records frames using collate', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
@@ -104,6 +110,8 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
+  // TODO(polina-c): fix Picture and Image not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),

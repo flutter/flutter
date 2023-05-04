@@ -11,12 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   tearDown(() {
     LicenseRegistry.reset();
   });
 
-  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 has sentence case labels', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
       builder: (BuildContext context, Widget? child) {
@@ -56,7 +58,7 @@ void main() {
     expect(find.text('View licenses'), findsOneWidget);
   });
 
-  testWidgets('AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -138,7 +140,7 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         title: 'flutter_tester',
@@ -148,6 +150,8 @@ void main() {
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
+  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('LicensePage control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -199,6 +203,8 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
+  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
@@ -275,7 +281,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  testWidgets('_PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('_PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -322,7 +328,7 @@ void main() {
     expect(subtitle.style, subtitleTextStyle);
   });
 
-  testWidgets('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('_PackageLicensePage title style with AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -372,7 +378,7 @@ void main() {
     expect(title.style, titleTextStyle);
   });
 
-  testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
 
     LicenseRegistry.addLicense(() {
@@ -402,6 +408,8 @@ void main() {
     );
   });
 
+  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
@@ -427,6 +435,8 @@ void main() {
     expect(licenseEntry.packagesCalled, false);
   });
 
+  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
@@ -452,7 +462,7 @@ void main() {
     expect(licenseEntry.packagesCalled, true);
   });
 
-  testWidgets('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         title: 'flutter_tester',
@@ -462,7 +472,7 @@ void main() {
     expect(find.text('flutter_tester'), findsOneWidget);
   });
 
-  testWidgets('AboutListTile dense property is applied', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AboutListTile dense property is applied', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(child: Center(child: AboutListTile())),
     ));
@@ -482,7 +492,7 @@ void main() {
     expect(tileRect.height, 48.0);
   });
 
-  testWidgets('showLicensePage uses nested navigator by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showLicensePage uses nested navigator by default', (WidgetTester tester) async {
     final LicensePageObserver rootObserver = LicensePageObserver();
     final LicensePageObserver nestedObserver = LicensePageObserver();
 
@@ -520,7 +530,7 @@ void main() {
     expect(nestedObserver.licensePageCount, 1);
   });
 
-  testWidgets('showLicensePage uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showLicensePage uses root navigator if useRootNavigator is true', (WidgetTester tester) async {
     final LicensePageObserver rootObserver = LicensePageObserver();
     final LicensePageObserver nestedObserver = LicensePageObserver();
 
@@ -559,7 +569,7 @@ void main() {
     expect(nestedObserver.licensePageCount, 0);
   });
 
-  testWidgets('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
 
@@ -592,7 +602,7 @@ void main() {
     expect(nestedObserver.dialogCount, 0);
   });
 
-  testWidgets('showAboutDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showAboutDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
     final AboutDialogObserver rootObserver = AboutDialogObserver();
     final AboutDialogObserver nestedObserver = AboutDialogObserver();
 
@@ -627,7 +637,7 @@ void main() {
   });
 
   group('showAboutDialog avoids overlapping display features', () {
-    testWidgets('default positioning', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default positioning', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -668,7 +678,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(390.0, 600.0));
     });
 
-    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -710,7 +720,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(AboutDialog)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('positioning using Directionality', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         builder: (BuildContext context, Widget? child) {
           return MediaQuery(
@@ -755,7 +765,7 @@ void main() {
     });
   });
 
-  testWidgets("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AboutListTile's child should not be offset when the icon is not specified.", (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -775,7 +785,7 @@ void main() {
     );
   });
 
-  testWidgets("AboutDialog's contents are scrollable", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AboutDialog's contents are scrollable", (WidgetTester tester) async {
     final Key contentKey = UniqueKey();
     await tester.pumpWidget(MaterialApp(
       home: Navigator(
@@ -823,7 +833,7 @@ void main() {
     expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -20.0)));
   });
 
-  testWidgets("LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("LicensePage's color must be same whether loading or done", (WidgetTester tester) async {
     const Color scaffoldColor = Color(0xFF123456);
     const Color cardColor = Color(0xFF654321);
 
@@ -870,7 +880,7 @@ void main() {
     expect(materialDones[1].color, cardColor);
   });
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -912,7 +922,7 @@ void main() {
 
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('ListView of license entries is primary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView of license entries is primary', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/120710
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
@@ -971,7 +981,7 @@ void main() {
     await tester.pumpAndSettle(); // No exception triggered.
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('LicensePage padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage padding', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -1014,7 +1024,7 @@ void main() {
     expect(appLegaleseBottomPadding, 18.0);
   });
 
-  testWidgets('LicensePage has no extra padding between app icon and app powered text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage has no extra padding between app icon and app powered text', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/99559
 
     const FlutterLogo logo = FlutterLogo();
@@ -1047,7 +1057,7 @@ void main() {
     expect(appIconBottomPadding, 18.0);
   });
 
-  testWidgets('Error handling test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Error handling test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
     await tester.pumpWidget(const MaterialApp(home: Material(child: AboutListTile())));
     await tester.tap(find.byType(ListTile));
@@ -1065,6 +1075,8 @@ void main() {
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
+  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
@@ -1128,6 +1140,8 @@ void main() {
     await tester.binding.setSurfaceSize(defaultSize);
   });
 
+  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
@@ -1191,7 +1205,7 @@ void main() {
     await tester.binding.setSurfaceSize(defaultSize);
   });
 
-  testWidgets('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
     final ThemeData theme = ThemeData(
       appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)),
@@ -1231,7 +1245,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
   });
 
-  testWidgets('License page default title text color in the nested UI', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String title = 'License ABC';
@@ -1271,7 +1285,7 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('License page default title text color in the nested UI', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/108991
       final ThemeData theme = ThemeData(useMaterial3: false);
       const String title = 'License ABC';

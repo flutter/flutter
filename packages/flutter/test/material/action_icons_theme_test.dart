@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('ActionIconThemeData copyWith, ==, hashCode basics', () {
     expect(const ActionIconThemeData(), const ActionIconThemeData().copyWith());
@@ -21,7 +23,7 @@ void main() {
     expect(themeData.endDrawerButtonIconBuilder, null);
   });
 
-  testWidgets('Default ActionIconThemeData debugFillProperties',
+  testWidgetsWithLeakTracking('Default ActionIconThemeData debugFillProperties',
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ActionIconThemeData().debugFillProperties(builder);
@@ -34,7 +36,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ActionIconThemeData implements debugFillProperties',
+  testWidgetsWithLeakTracking('ActionIconThemeData implements debugFillProperties',
       (WidgetTester tester) async {
     Widget actionButtonIconBuilder(BuildContext context) {
       return const Icon(IconData(0));
@@ -62,7 +64,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
@@ -123,7 +125,7 @@ void main() {
   // This test is essentially the same as 'Action buttons use ThemeData action icon theme'. In
   // this case the theme is introduced with the ActionIconTheme widget instead of
   // ThemeData.actionIconTheme.
-  testWidgets('Action buttons use ActionIconTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action buttons use ActionIconTheme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 

@@ -10,6 +10,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 class TestResampleEventFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   SamplingClock? get debugSamplingClock => TestSamplingClock(this.clock);
@@ -29,7 +31,7 @@ class TestSamplingClock implements SamplingClock {
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestResampleEventFlutterBinding();
-  testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PointerEvent resampling on a widget', (WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);
     void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
@@ -124,7 +126,7 @@ void main() {
     expect(events[3], isA<PointerUpEvent>());
   });
 
-  testWidgets('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
     // A timer will be started when event's timeStamp is larger than sampleTime.
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
