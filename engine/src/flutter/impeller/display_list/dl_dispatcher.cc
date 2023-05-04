@@ -893,7 +893,20 @@ void DlDispatcher::drawDRRect(const SkRRect& outer, const SkRRect& inner) {
 
 // |flutter::DlOpReceiver|
 void DlDispatcher::drawPath(const SkPath& path) {
-  canvas_.DrawPath(skia_conversions::ToPath(path), paint_);
+  SkRect rect;
+  SkRRect rrect;
+  SkRect oval;
+  if (path.isRect(&rect)) {
+    canvas_.DrawRect(skia_conversions::ToRect(rect), paint_);
+  } else if (path.isRRect(&rrect) && rrect.isSimple()) {
+    canvas_.DrawRRect(skia_conversions::ToRect(rrect.rect()),
+                      rrect.getSimpleRadii().fX, paint_);
+  } else if (path.isOval(&oval) && oval.width() == oval.height()) {
+    canvas_.DrawCircle(skia_conversions::ToPoint(oval.center()),
+                       oval.width() * 0.5, paint_);
+  } else {
+    canvas_.DrawPath(skia_conversions::ToPath(path), paint_);
+  }
 }
 
 // |flutter::DlOpReceiver|
