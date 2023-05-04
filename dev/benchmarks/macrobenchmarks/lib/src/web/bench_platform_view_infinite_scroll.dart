@@ -18,6 +18,7 @@ const String benchmarkViewType = 'benchmark_element';
 void _registerFactory() {
   platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
     final html.Element htmlElement = html.DivElement();
+    htmlElement.id = '${benchmarkViewType}_$viewId';
     htmlElement.innerText = 'Google';
     htmlElement.style
       ..width = '100%'
