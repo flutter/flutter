@@ -76,7 +76,8 @@
                         "out/host_debug/zip_archives/linux-x64/font-subset.zip",
                         "out/host_debug/zip_archives/flutter_patched_sdk.zip",
                         "out/host_debug/zip_archives/dart-sdk-linux-x64.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -176,7 +177,8 @@
                     "type": "gcs",
                     "include_paths": [
                         "out/host_release/zip_archives/flutter_patched_sdk_product.zip"
-                    ]
+                    ],
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
