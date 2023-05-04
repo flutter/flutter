@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// These tests are flaky on arm64.
-// TODO(dnfield): reenable after fixing https://github.com/flutter/flutter/issues/126013
-#if !defined(__aarch64__) && !defined(__arm64__)
-
 #if !__has_feature(objc_arc)
 #error ARC must be enabled!
 #endif
@@ -14,6 +10,9 @@
 
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
+
+@protocol FlutterTaskQueue <NSObject>
+@end
 
 @interface MockBinaryMessenger : NSObject <FlutterBinaryMessenger>
 @property(nonatomic, copy) NSString* channel;
@@ -218,7 +217,7 @@
   FlutterBinaryMessengerConnection connection = 123;
   id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
-  id taskQueue = OCMClassMock([NSObject class]);
+  id taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
   FlutterBasicMessageChannel* channel =
       [[FlutterBasicMessageChannel alloc] initWithName:channelName
                                        binaryMessenger:binaryMessenger
@@ -246,7 +245,7 @@
     FlutterBinaryMessengerConnection connection = 123;
     id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
     id codec = OCMProtocolMock(@protocol(FlutterMessageCodec));
-    id taskQueue = OCMClassMock([NSObject class]);
+    id taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
     FlutterBasicMessageChannel* channel =
         [[FlutterBasicMessageChannel alloc] initWithName:channelName
                                          binaryMessenger:binaryMessenger
@@ -283,7 +282,7 @@
   @autoreleasepool {
     id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
     id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
-    id taskQueue = OCMClassMock([NSObject class]);
+    id taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
     FlutterMethodChannel* channel = [[FlutterMethodChannel alloc] initWithName:channelName
                                                                binaryMessenger:binaryMessenger
                                                                          codec:codec
@@ -315,7 +314,7 @@
   FlutterBinaryMessengerConnection connection = 123;
   id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
-  id taskQueue = OCMClassMock([NSObject class]);
+  id taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
   FlutterMethodChannel* channel = [[FlutterMethodChannel alloc] initWithName:channelName
                                                              binaryMessenger:binaryMessenger
                                                                        codec:codec
@@ -340,7 +339,7 @@
   FlutterBinaryMessengerConnection connection = 123;
   id binaryMessenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
-  id taskQueue = OCMClassMock([NSObject class]);
+  id taskQueue = OCMProtocolMock(@protocol(FlutterTaskQueue));
   id handler = OCMProtocolMock(@protocol(FlutterStreamHandler));
   FlutterEventChannel* channel = [[FlutterEventChannel alloc] initWithName:channelName
                                                            binaryMessenger:binaryMessenger
@@ -360,5 +359,3 @@
 }
 
 @end
-
-#endif  // !defined(__arch64__) && !defined(__arm64__)
