@@ -357,8 +357,8 @@ void main() {
       ),
     );
 
-    tester.binding.window.physicalSizeTestValue = const Size(2000, 2000);
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    tester.view.physicalSize = const Size(2000, 2000);
+    addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
