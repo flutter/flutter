@@ -220,6 +220,7 @@ class TextLinker {
   final RangesFinder rangesFinder;
 
   // TODO(justinmc): Consider revising this regexp.
+  // TODO(justinmc): Does this highlight a trailing period?
   static final RegExp _urlRegExp = RegExp(r'((http|https|ftp):\/\/)?([a-zA-Z\-]*\.)?[a-zA-Z0-9\-]*\.[a-zA-Z]*');
 
   // Turns all matches from the regExp into a list of TextRanges.
