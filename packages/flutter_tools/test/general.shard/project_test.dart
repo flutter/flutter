@@ -10,8 +10,6 @@ import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -1571,13 +1569,7 @@ class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
   Map<String, String> get sdkManagerEnv => <String, String>{'PATH': _javaPath};
 
   @override
-  String? getJavaVersion({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessUtils processUtils,
-  }) {
+  String? getJavaVersion() {
     return javaVersion;
   }
 }

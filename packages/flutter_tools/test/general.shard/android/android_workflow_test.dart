@@ -130,7 +130,6 @@ void main() {
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -149,7 +148,6 @@ void main() {
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -173,7 +171,6 @@ void main() {
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -202,7 +199,6 @@ All SDK package licenses accepted.
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -232,7 +228,6 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -262,7 +257,6 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -288,7 +282,6 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(await licenseValidator.runLicenseManager(), isTrue);
@@ -307,7 +300,6 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -336,7 +328,6 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     await licenseValidator.runLicenseManager();
@@ -357,7 +348,6 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -384,7 +374,6 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     await expectLater(

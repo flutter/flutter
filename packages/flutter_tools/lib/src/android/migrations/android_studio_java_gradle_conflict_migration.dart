@@ -5,9 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../../base/file_system.dart';
-import '../../base/os.dart';
-import '../../base/platform.dart';
-import '../../base/process.dart';
 import '../../base/project_migrator.dart';
 import '../../base/version.dart';
 import '../../project.dart';
@@ -77,24 +74,12 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
     super.logger,
     {required AndroidProject project,
     AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required ProcessUtils processUtils,
-    required Platform platform,
-    required OperatingSystemUtils os,
     AndroidSdk? androidSdk,
   }) : _gradleWrapperPropertiesFile = getGradleWrapperFile(project.hostAppGradleRoot),
        _androidStudio = androidStudio,
-       _fileSystem = fileSystem,
-       _processUtils = processUtils,
-       _platform = platform,
-       _os = os,
        _androidSdk = androidSdk;
   final File _gradleWrapperPropertiesFile;
   final AndroidStudio? _androidStudio;
-  final FileSystem _fileSystem;
-  final ProcessUtils _processUtils;
-  final Platform _platform;
-  final OperatingSystemUtils _os;
   final AndroidSdk? _androidSdk;
 
   @override
@@ -113,13 +98,7 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
         return;
       }
 
-      final String? javaVersionString = _androidSdk?.getJavaVersion(
-        androidStudio: _androidStudio,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _os,
-        platform: _platform,
-        processUtils: _processUtils,
-      );
+      final String? javaVersionString = _androidSdk?.getJavaVersion();
       final Version? javaVersion = Version.parse(javaVersionString);
       if (javaVersion == null) {
         logger.printTrace(javaVersionNotFound);

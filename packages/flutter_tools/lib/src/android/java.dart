@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
@@ -50,10 +51,15 @@ class Java {
     required AndroidStudio? androidStudio,
     required Logger logger,
     required FileSystem fileSystem,
-    required OperatingSystemUtils os,
     required Platform platform,
     required ProcessManager processManager,
   }) {
+    final OperatingSystemUtils os = OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager
+    );
     final String? home = _findJavaHome(
       logger: logger,
       androidStudio: androidStudio,
@@ -178,6 +184,7 @@ String? _findJavaBinary({
 
     // Fallback to PATH based lookup.
     final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
+    print(pathJava);
     if (pathJava != null) {
       logger.printTrace('Using java from PATH.');
     } else {

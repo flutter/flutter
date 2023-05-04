@@ -139,10 +139,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         migration.migrate();
@@ -155,10 +151,6 @@ tasks.register("clean", Delete) {
         final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
@@ -173,10 +165,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: null),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
@@ -191,10 +179,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeErroringAndroidSdk(),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
@@ -209,10 +193,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
@@ -226,10 +206,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '16'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
@@ -244,10 +220,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(otherGradleVersionWrapper);
@@ -262,10 +234,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
@@ -281,10 +249,6 @@ tasks.register("clean", Delete) {
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
-          fileSystem: FakeFileSystem(),
-          processUtils: FakeProcessUtils(),
-          platform: FakePlatform(),
-          os: FakeOperatingSystemUtils(),
           androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate + optOutFlag);
@@ -322,13 +286,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   late String _javaVersion;
 
   @override
-  String? getJavaVersion({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessUtils processUtils,
-  }) {
+  String? getJavaVersion() {
     return _javaVersion;
   }
 }
@@ -337,13 +295,7 @@ class FakeErroringAndroidSdk extends Fake implements AndroidSdk {
   FakeErroringAndroidSdk();
 
   @override
-  String? getJavaVersion({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessUtils processUtils,
-  }) {
+  String? getJavaVersion() {
     throw const FileSystemException();
   }
 }
