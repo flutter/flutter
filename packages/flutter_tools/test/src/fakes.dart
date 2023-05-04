@@ -7,6 +7,7 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -588,6 +589,7 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
+
   @override
   late bool platformToolsAvailable;
 
@@ -601,4 +603,47 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 class FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'java';
+}
+
+class FakeJava extends Fake implements Java {
+  FakeJava({
+    this.home = 'android-studio/jbr',
+    String binaryPath = 'android-studio/jbr/bin/java',
+    JavaVersion? version,
+    bool canRun = true,
+  }): binary = binaryPath,
+      _version = version ?? JavaVersion(
+       longText: 'openjdk 19.0.2 2023-01-17',
+       shortText: '19.0.2',
+      ),
+      _environment = <String, String>{
+        if (home != null) 'JAVA_HOME': home,
+        'PATH': 'android-studio/jbr/bin',
+      },
+      _canRun = canRun;
+
+  @override
+  String? home;
+
+  @override
+  String binary;
+
+  final Map<String, String> _environment;
+  final JavaVersion? _version;
+  final bool _canRun;
+
+  @override
+  Map<String, String> getJavaEnvironment() {
+    return _environment;
+  }
+
+  @override
+  JavaVersion? getVersion() {
+    return _version;
+  }
+
+  @override
+  bool canRun() {
+    return _canRun;
+  }
 }

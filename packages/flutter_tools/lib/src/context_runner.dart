@@ -97,7 +97,6 @@ Future<T> runInContext<T>(
         androidStudio: globals.androidStudio,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
-        operatingSystemUtils: globals.os,
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
@@ -107,7 +106,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         stdio: globals.stdio,
       ),
-      AndroidSdk: AndroidSdk.locateAndroidSdk,
+      AndroidSdk: () => AndroidSdk.locateAndroidSdk(),
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
         androidStudio: globals.androidStudio,

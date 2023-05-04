@@ -11,7 +11,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
@@ -86,12 +85,6 @@ class AndroidValidator extends DoctorValidator {
        _androidStudio = androidStudio,
        _fileSystem = fileSystem,
        _logger = logger,
-       _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
        _platform = platform,
        _processManager = processManager,
        _userMessages = userMessages,
@@ -101,7 +94,6 @@ class AndroidValidator extends DoctorValidator {
   final AndroidStudio? _androidStudio;
   final FileSystem _fileSystem;
   final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -241,10 +233,11 @@ class AndroidValidator extends DoctorValidator {
     _task = 'Finding Java binary';
     // Now check for the JDK.
     final String? javaBinary = AndroidSdk.findJavaBinary(
+      logger: _logger,
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
-      operatingSystemUtils: _operatingSystemUtils,
       platform: _platform,
+      processManager: _processManager,
     );
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
@@ -268,7 +261,6 @@ class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
     required AndroidSdk? androidSdk,
     required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
     required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
@@ -277,7 +269,6 @@ class AndroidLicenseValidator extends DoctorValidator {
     required UserMessages userMessages,
   }) : _androidSdk = androidSdk,
        _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
@@ -289,7 +280,6 @@ class AndroidLicenseValidator extends DoctorValidator {
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
   final Stdio _stdio;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
@@ -331,10 +321,11 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<bool> _checkJavaVersionNoOutput() async {
     final String? javaBinary = AndroidSdk.findJavaBinary(
+      logger: _logger,
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
-      operatingSystemUtils: _operatingSystemUtils,
       platform: _platform,
+      processManager: _processManager,
     );
     if (javaBinary == null) {
       return false;
