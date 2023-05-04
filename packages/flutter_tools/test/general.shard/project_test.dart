@@ -405,12 +405,20 @@ void main() {
     });
 
     group('java gradle agp compatibility', () {
-      Future<FlutterProject?> configureJavaGradleAgpForTest(
-        FakeAndroidSdkWithDir androidSdk, {
+      Future<FlutterProject?> configureJavaGradleAgpForTest({
+        required AndroidStudio androidStudio,
+        required FakeAndroidSdkWithDir androidSdk,
+        required FakeProcessManager processManager,
+        required FileSystem fileSystem,
         required String javaV,
         required String gradleV,
         required String agpV,
       }) async {
+        processManager.addCommand(FakeCommand(
+          command: <String>[fileSystem.path.join(androidStudio.javaPath!, 'bin', 'java'), '--version'],
+          stdout: javaV,
+        ));
+
         final FlutterProject project = await someProject();
         addRootGradleFile(project.directory, gradleFileContent: () {
           return '''
@@ -443,7 +451,10 @@ dependencies {
           'flamingo values are compatible',
           () async {
             final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
+              androidStudio: androidStudio,
+              androidSdk: androidSdk,
+              processManager: processManager,
+              fileSystem: fileSystem,
               javaV: '17.0.2',
               gradleV: '8.0',
               agpV: '7.4.2',
@@ -473,7 +484,10 @@ dependencies {
           'java 8 era values are compatible',
           () async {
             final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
+              androidStudio: androidStudio,
+              androidSdk: androidSdk,
+              processManager: processManager,
+              fileSystem: fileSystem,
               javaV: '1.8.0_242',
               gradleV: '6.7.1',
               agpV: '4.2.0',
@@ -504,7 +518,10 @@ dependencies {
           'electric eel era values are compatible',
           () async {
             final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
+              androidStudio: androidStudio,
+              androidSdk: androidSdk,
+              processManager: processManager,
+              fileSystem: fileSystem,
               javaV: '11.0.14',
               gradleV: '7.3.3',
               agpV: '7.2.0',
@@ -537,7 +554,10 @@ dependencies {
             const String gradleV = '6.7.3';
             const String agpV = '7.2.0';
             final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
+              androidStudio: androidStudio,
+              androidSdk: androidSdk,
+              processManager: processManager,
+              fileSystem: fileSystem,
               javaV: javaV,
               gradleV: gradleV,
               agpV: agpV,
@@ -585,7 +605,10 @@ dependencies {
             const String gradleV = '6.7.3';
             const String agpV = '4.2.0';
             final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
+              androidStudio: androidStudio,
+              androidSdk: androidSdk,
+              processManager: processManager,
+              fileSystem: fileSystem,
               javaV: javaV,
               gradleV: gradleV,
               agpV: agpV,
@@ -628,7 +651,10 @@ dependencies {
             const String gradleV = '7.0.3';
             const String agpV = '7.1.0';
             final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
+              androidStudio: androidStudio,
+              androidSdk: androidSdk,
+              processManager: processManager,
+              fileSystem: fileSystem,
               javaV: javaV,
               gradleV: gradleV,
               agpV: agpV,
