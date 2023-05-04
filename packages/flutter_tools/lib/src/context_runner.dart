@@ -105,6 +105,7 @@ Future<T> runInContext<T>(
         usage: globals.flutterUsage,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
+        androidStudio: globals.androidStudio,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         java: _java,

@@ -54,6 +54,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -146,6 +147,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -213,6 +215,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
 
       const FakeCommand fakeCmd = FakeCommand(
@@ -318,6 +321,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -410,6 +414,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(FakeCommand(
         command: const <String>[
@@ -474,6 +479,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -581,6 +587,7 @@ void main() {
             'HOME': '/home',
           },
         ),
+        androidStudio: FakeAndroidStudio(),
       );
        processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -678,6 +685,7 @@ void main() {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -805,6 +813,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -839,6 +848,7 @@ BuildVariant: paidProfile
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -869,6 +879,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -934,6 +945,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -992,6 +1004,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1051,6 +1064,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1129,6 +1143,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1207,6 +1222,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1285,6 +1301,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1364,6 +1381,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(
         const FakeCommand(command: <String>[
@@ -1424,6 +1442,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1511,6 +1530,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1598,6 +1618,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -1685,6 +1706,7 @@ Gradle Crashed
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
