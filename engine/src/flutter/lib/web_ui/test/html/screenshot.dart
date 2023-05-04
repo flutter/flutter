@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
@@ -69,15 +68,4 @@ Future<void> sceneScreenshot(SurfaceSceneBuilder sceneBuilder, String fileName,
     // Scuba screenshot.
     sceneElement?.remove();
   }
-}
-
-
-/// Configures the test to use bundled Roboto and Ahem fonts to avoid golden
-/// screenshot differences due to differences in the preinstalled system fonts.
-void setUpStableTestFonts() {
-  setUpAll(() async {
-    await ui.webOnlyInitializePlatform();
-    await renderer.fontCollection.debugDownloadTestFonts();
-    renderer.fontCollection.registerDownloadedFonts();
-  });
 }

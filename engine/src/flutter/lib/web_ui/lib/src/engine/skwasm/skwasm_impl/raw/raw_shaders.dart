@@ -12,12 +12,6 @@ import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 final class RawShader extends Opaque {}
 typedef ShaderHandle = Pointer<RawShader>;
 
-final class RawSkString extends Opaque {}
-typedef SkStringHandle = Pointer<RawSkString>;
-
-final class RawSkData extends Opaque {}
-typedef SkDataHandle = Pointer<RawSkData>;
-
 final class RawRuntimeEffect extends Opaque {}
 typedef RuntimeEffectHandle = Pointer<RawRuntimeEffect>;
 
@@ -106,15 +100,6 @@ external ShaderHandle shaderCreateSweepGradient(
 @Native<Void Function(ShaderHandle)>(symbol: 'shader_dispose', isLeaf: true)
 external void shaderDispose(ShaderHandle handle);
 
-@Native<SkStringHandle Function(Size)>(symbol: 'shaderSource_allocate', isLeaf: true)
-external SkStringHandle shaderSourceAllocate(int size);
-
-@Native<Pointer<Int8> Function(SkStringHandle)>(symbol: 'shaderSource_getData', isLeaf: true)
-external Pointer<Int8> shaderSourceGetData(SkStringHandle handle);
-
-@Native<Void Function(SkStringHandle)>(symbol: 'shaderSource_free', isLeaf: true)
-external void shaderSourceFree(SkStringHandle handle);
-
 @Native<RuntimeEffectHandle Function(SkStringHandle)>(symbol: 'runtimeEffect_create', isLeaf: true)
 external RuntimeEffectHandle runtimeEffectCreate(SkStringHandle source);
 
@@ -123,15 +108,6 @@ external void runtimeEffectDispose(RuntimeEffectHandle handle);
 
 @Native<Size Function(RuntimeEffectHandle)>(symbol: 'runtimeEffect_getUniformSize', isLeaf: true)
 external int runtimeEffectGetUniformSize(RuntimeEffectHandle handle);
-
-@Native<SkDataHandle Function(Size)>(symbol: 'data_create', isLeaf: true)
-external SkDataHandle dataCreate(int size);
-
-@Native<Pointer<Void> Function(SkDataHandle)>(symbol: 'data_getPointer', isLeaf: true)
-external Pointer<Void> dataGetPointer(SkDataHandle handle);
-
-@Native<Void Function(SkDataHandle)>(symbol: 'data_dispose', isLeaf: true)
-external void dataDispose(SkDataHandle handle);
 
 @Native<ShaderHandle Function(
   RuntimeEffectHandle,
