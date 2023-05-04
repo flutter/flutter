@@ -296,8 +296,8 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String?;
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    return _underlyingValues[key] as T?;
   }
 
   @override

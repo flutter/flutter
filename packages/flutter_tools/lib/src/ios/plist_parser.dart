@@ -24,6 +24,7 @@ class PlistParser {
   final Logger _logger;
   final ProcessUtils _processUtils;
 
+  // info.pList keys
   static const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
   static const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
   static const String kCFBundleExecutableKey = 'CFBundleExecutable';
@@ -31,6 +32,9 @@ class PlistParser {
   static const String kCFBundleDisplayNameKey = 'CFBundleDisplayName';
   static const String kMinimumOSVersionKey = 'MinimumOSVersion';
   static const String kNSPrincipalClassKey = 'NSPrincipalClass';
+
+  // entitlement file keys
+  static const String kAssociatedDomainsKey = 'com.apple.developer.associated-domains';
 
   static const String _plutilExecutable = '/usr/bin/plutil';
 
@@ -164,8 +168,8 @@ class PlistParser {
     return null;
   }
 
-  /// Parses the Plist file located at [plistFilePath] and returns the string
-  /// value that's associated with the specified [key] within the property list.
+  /// Parses the Plist file located at [plistFilePath] and returns the value
+  /// that's associated with the specified [key] within the property list.
   ///
   /// If [plistFilePath] points to a non-existent file or a file that's not a
   /// valid property list file, this will return null.
@@ -173,8 +177,8 @@ class PlistParser {
   /// If [key] is not found in the property list, this will return null.
   ///
   /// The [plistFilePath] and [key] arguments must not be null.
-  String? getStringValueFromFile(String plistFilePath, String key) {
+  T? getValueFromFile<T>(String plistFilePath, String key) {
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed[key] as String?;
+    return parsed[key] as T?;
   }
 }

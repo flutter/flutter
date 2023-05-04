@@ -124,8 +124,16 @@ class IosProject extends XcodeBasedProject {
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
 
-  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
-  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
+  // build setting keys
+  static const String kProductBundleIdKey = 'PRODUCT_BUNDLE_IDENTIFIER';
+  static const String kTeamIdKey = 'DEVELOPMENT_TEAM';
+  static const String kEntitlementFilePathKey = 'CODE_SIGN_ENTITLEMENTS';
+  static const String kHostAppBundleNameKey = 'FULL_PRODUCT_NAME';
+
+  static final RegExp _productBundleIdPattern = RegExp('^\\s*$kProductBundleIdKey\\s*=\\s*(["\']?)(.*?)\\1;\\s*\$');
+  static const String _kProductBundleIdVariable = '\$($kProductBundleIdKey)';
+
+  static final RegExp _associatedDomainPattern = RegExp(r'^applinks:(.*)');
 
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -203,24 +211,71 @@ class IosProject extends XcodeBasedProject {
     return parent.isModule || _editableDirectory.existsSync();
   }
 
+  Future<XcodeUniversalLinkSettings> universalLinkSettings({
+    required String configuration,
+    required String scheme,
+    required String target,
+  }) async {
+    final XcodeProjectBuildContext context = XcodeProjectBuildContext(
+      configuration: configuration,
+      scheme: scheme,
+      target: target,
+    );
+
+    return XcodeUniversalLinkSettings(
+      bundleIdentifier: await _productBundleIdentifierWithBuildContext(context),
+      teamIdentifier: await _getTeamIdentifier(context),
+      associatedDomains: await _getAssociatedDomains(context),
+    );
+  }
+
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   Future<String?> productBundleIdentifier(BuildInfo? buildInfo) async {
     if (!existsSync()) {
       return null;
     }
-    return _productBundleIdentifier ??= await _parseProductBundleIdentifier(buildInfo);
-  }
-  String? _productBundleIdentifier;
 
-  Future<String?> _parseProductBundleIdentifier(BuildInfo? buildInfo) async {
+    XcodeProjectBuildContext? buildContext;
+    final XcodeProjectInfo? info = await projectInfo();
+    if (info != null) {
+      final String? scheme = info.schemeFor(buildInfo);
+      if (scheme == null) {
+        info.reportFlavorNotFoundAndExit();
+      }
+      final String? configuration = info.buildConfigurationFor(
+        buildInfo,
+        scheme,
+      );
+      buildContext = XcodeProjectBuildContext(
+        configuration: configuration,
+        scheme: scheme,
+      );
+    }
+    return _productBundleIdentifierWithBuildContext(buildContext);
+  }
+
+  Future<String?> _productBundleIdentifierWithBuildContext(XcodeProjectBuildContext? buildContext) async {
+    if (!existsSync()) {
+      return null;
+    }
+    if (_productBundleIdentifiers.containsKey(buildContext)) {
+      return _productBundleIdentifiers[buildContext];
+    }
+    return _productBundleIdentifiers[buildContext] = await _parseProductBundleIdentifier(buildContext);
+  }
+
+  final Map<XcodeProjectBuildContext?, String?> _productBundleIdentifiers = <XcodeProjectBuildContext?, String?>{};
+
+
+  Future<String?> _parseProductBundleIdentifier(XcodeProjectBuildContext? buildContext) async {
     String? fromPlist;
     final File defaultInfoPlist = defaultHostInfoPlist;
     // Users can change the location of the Info.plist.
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = globals.plistParser.getStringValueFromFile(
+        fromPlist = globals.plistParser.getValueFromFile<String>(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
@@ -232,13 +287,18 @@ class IosProject extends XcodeBasedProject {
         return fromPlist;
       }
     }
-    final Map<String, String>? allBuildSettings = await buildSettingsForBuildInfo(buildInfo);
+    if (buildContext == null) {
+      // Getting build settings to evaluate info.Plist requires a context.
+      return null;
+    }
+
+    final Map<String, String>? allBuildSettings = await _buildSettingsForXcodeProjectBuildContext(buildContext);
     if (allBuildSettings != null) {
       if (fromPlist != null) {
         // Perform variable substitution using build settings.
         return substituteXcodeVariables(fromPlist, allBuildSettings);
       }
-      return allBuildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+      return allBuildSettings[kProductBundleIdKey];
     }
 
     // On non-macOS platforms, parse the first PRODUCT_BUNDLE_IDENTIFIER from
@@ -248,11 +308,46 @@ class IosProject extends XcodeBasedProject {
     // only used for display purposes and to regenerate organization names, so
     // best-effort is probably fine.
     final String? fromPbxproj = firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
-    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
+    if (fromPbxproj != null && (fromPlist == null || fromPlist == _kProductBundleIdVariable)) {
       return fromPbxproj;
     }
-
     return null;
+  }
+
+  Future<String?> _getTeamIdentifier(XcodeProjectBuildContext buildContext) async {
+    final Map<String, String>? buildSettings = await _buildSettingsForXcodeProjectBuildContext(buildContext);
+    if (buildSettings != null) {
+      return buildSettings[kTeamIdKey];
+    }
+    return null;
+  }
+
+  Future<List<String>> _getAssociatedDomains(XcodeProjectBuildContext buildContext) async {
+    final Map<String, String>? buildSettings = await _buildSettingsForXcodeProjectBuildContext(buildContext);
+    if (buildSettings != null) {
+      final String? entitlementPath = buildSettings[kEntitlementFilePathKey];
+      if (entitlementPath != null) {
+        final File entitlement = hostAppRoot.childFile(entitlementPath);
+        if (entitlement.existsSync()) {
+          final List<String>? domains = globals.plistParser.getValueFromFile<List<Object>>(
+            entitlement.path,
+            PlistParser.kAssociatedDomainsKey,
+          )?.cast<String>();
+
+          if (domains != null) {
+            final List<String> result = <String>[];
+            for (final String domain in domains) {
+              final RegExpMatch? match = _associatedDomainPattern.firstMatch(domain);
+              if (match != null) {
+                result.add(match.group(1)!);
+              }
+            }
+            return result;
+          }
+        }
+      }
+    }
+    return const <String>[];
   }
 
   /// The bundle name of the host app, `My App.app`.
@@ -273,11 +368,11 @@ class IosProject extends XcodeBasedProject {
     if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
       final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
-        productName = xcodeBuildSettings['FULL_PRODUCT_NAME'];
+        productName = xcodeBuildSettings[kHostAppBundleNameKey];
       }
     }
     if (productName == null) {
-      globals.printTrace('FULL_PRODUCT_NAME not present, defaulting to $hostAppProjectName');
+      globals.printTrace('$kHostAppBundleNameKey not present, defaulting to $hostAppProjectName');
     }
     return productName ?? '${XcodeBasedProject._defaultHostAppName}.app';
   }
@@ -287,9 +382,11 @@ class IosProject extends XcodeBasedProject {
   /// Returns null, if iOS tooling is unavailable.
   Future<Map<String, String>?> buildSettingsForBuildInfo(
     BuildInfo? buildInfo, {
+    String? scheme,
+    String? configuration,
+    String? target,
     EnvironmentType environmentType = EnvironmentType.physical,
     String? deviceId,
-    String? scheme,
     bool isWatch = false,
   }) async {
     if (!existsSync()) {
@@ -300,24 +397,31 @@ class IosProject extends XcodeBasedProject {
       return null;
     }
 
+    scheme ??= info.schemeFor(buildInfo);
     if (scheme == null) {
-      scheme = info.schemeFor(buildInfo);
-      if (scheme == null) {
-        info.reportFlavorNotFoundAndExit();
-      }
+      info.reportFlavorNotFoundAndExit();
     }
 
-    final String? configuration = (await projectInfo())?.buildConfigurationFor(
+    configuration ??= (await projectInfo())?.buildConfigurationFor(
       buildInfo,
       scheme,
     );
-    final XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
-      environmentType: environmentType,
-      scheme: scheme,
-      configuration: configuration,
-      deviceId: deviceId,
-      isWatch: isWatch,
+    return _buildSettingsForXcodeProjectBuildContext(
+      XcodeProjectBuildContext(
+        environmentType: environmentType,
+        scheme: scheme,
+        configuration: configuration,
+        target: target,
+        deviceId: deviceId,
+        isWatch: isWatch,
+      ),
     );
+  }
+
+  Future<Map<String, String>?> _buildSettingsForXcodeProjectBuildContext(XcodeProjectBuildContext buildContext) async {
+    if (!existsSync()) {
+      return null;
+    }
     final Map<String, String>? currentBuildSettings = _buildSettingsByBuildContext[buildContext];
     if (currentBuildSettings == null) {
       final Map<String, String>? calculatedBuildSettings = await _xcodeProjectBuildSettings(buildContext);
@@ -381,7 +485,7 @@ class IosProject extends XcodeBasedProject {
       // In older versions of Xcode, if the target was a watchOS companion app,
       // the Info.plist file of the target contained the key WKCompanionAppBundleIdentifier.
       if (infoFile.existsSync()) {
-        final String? fromPlist = globals.plistParser.getStringValueFromFile(infoFile.path, 'WKCompanionAppBundleIdentifier');
+        final String? fromPlist = globals.plistParser.getValueFromFile<String>(infoFile.path, 'WKCompanionAppBundleIdentifier');
         if (bundleIdentifier == fromPlist) {
           return true;
         }
