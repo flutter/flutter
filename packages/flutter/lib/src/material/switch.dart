@@ -416,8 +416,7 @@ class Switch extends StatelessWidget {
   /// {@end-tool}
   /// {@endtemplate}
   ///
-  /// In Material 3, the outline width defaults to 2.0. In Material 2,
-  /// the [Switch] track has no outline by default.
+  /// Defaults to 2.0.
   final MaterialStateProperty<double?>? trackOutlineWidth;
 
   /// {@template flutter.material.switch.thumbIcon}
@@ -1527,13 +1526,11 @@ class _SwitchPainter extends ToggleablePainter {
         outlineTrackRect,
         Radius.circular(trackRadius),
       );
-      if (trackOutlineWidth != null) {
-        final Paint outlinePaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = trackOutlineWidth
-          ..color = trackOutlineColor;
-        canvas.drawRRect(outlineTrackRRect, outlinePaint);
-      }
+      final Paint outlinePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = trackOutlineWidth ?? 2.0
+        ..color = trackOutlineColor;
+      canvas.drawRRect(outlineTrackRRect, outlinePaint);
     }
   }
 
