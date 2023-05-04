@@ -1342,7 +1342,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   }
 }
 
-class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ChipSlot> {
+class _ChipRenderWidget extends SlottedMultiChildRenderObjectWidget<_ChipSlot, RenderBox> {
   const _ChipRenderWidget({
     required this.theme,
     this.value,
@@ -1393,7 +1393,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_ChipSlot> createRenderObject(BuildContext context) {
+  SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> createRenderObject(BuildContext context) {
     return _RenderChip(
       theme: theme,
       textDirection: Directionality.of(context),
@@ -1478,7 +1478,7 @@ class _ChipRenderTheme {
   );
 }
 
-class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {
+class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> {
   _RenderChip({
     required _ChipRenderTheme theme,
     required TextDirection textDirection,
