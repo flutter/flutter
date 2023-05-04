@@ -1329,6 +1329,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
 
+  TextPosition? _originWordSelectionStart;
+  TextPosition? _originWordSelectionEnd;
+  bool? _selectableContainsOriginWord;
+
   LayerLink? _startHandleLayerLink;
   LayerLink? _endHandleLayerLink;
 
@@ -1484,9 +1488,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
-  TextPosition? _originWordSelectionStart;
-  TextPosition? _originWordSelectionEnd;
-  bool? _selectableContainsOriginWord;
   SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
     // Cache the boundaries of the origin word. If the origin word is not in the
     // current selectable then the _textSelectionEnd will be null.
@@ -1520,8 +1521,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
     final (TextPosition start, TextPosition end)? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
-    TextPosition targetPosition = _clampTextPosition(wordBoundary != null ? isEnd ? wordBoundary.$2 : wordBoundary.$1 : position);
-
+    TextPosition targetPosition = wordBoundary != null ? isEnd ? wordBoundary.$2 : wordBoundary.$1 : position;
     if (_selectableContainsOriginWord!) {
       // Swap the start and end.
       if (targetPosition.offset >= _originWordSelectionEnd!.offset) {
@@ -1533,18 +1533,19 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       }
     } else {
       // If we are always moving the selection end edge then the selection will
-      // always extend to wordBoundary.$2. Instead it should expand to wordBoudary.$x
-      // that results in the largest selection.
+      // always extend to wordBoundary.$2. Instead the selection should expand to
+      // wordBoudary.$x that results in the largest selection.
       if (wordBoundary != null) {
         int lengthWhenExpandingToBegOfWord = (_textSelectionStart!.offset - wordBoundary!.$1.offset).abs();
         int lengthWhenExpandingToEndOfWord = (_textSelectionStart!.offset - wordBoundary!.$2.offset).abs();
         if (lengthWhenExpandingToBegOfWord > lengthWhenExpandingToEndOfWord) {
-          targetPosition = wordBoundary?.$1 ?? position;
+          targetPosition = wordBoundary!.$1;
         } else {
-          targetPosition = wordBoundary?.$2 ?? position;
+          targetPosition = wordBoundary!.$2;
         }
       }
     }
+    targetPosition = _clampTextPosition(targetPosition);
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
@@ -1584,6 +1585,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _handleClearSelection() {
     _textSelectionStart = null;
     _textSelectionEnd = null;
+    _originWordSelectionStart = null;
+    _originWordSelectionEnd = null;
+    _selectableContainsOriginWord = null;
     return SelectionResult.none;
   }
 
