@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:js_interop';
 
 import 'package:test/test.dart';
 // ignore: implementation_imports
@@ -49,6 +50,14 @@ enum PixelComparison {
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
 Future<void> matchGoldenFile(String filename, {Rect? region}) async {
+  // It is difficult to deterministically tell when rendered content is actually
+  // visible to the user, so we pump 15 frames to make sure that the content is
+  // has reached the screen. This is at the recommendation of the Chrome team,
+  // and they use this same thing in their screenshot unit tests.
+  for (int i = 0; i < 15; i++) {
+    await awaitNextFrame();
+  }
+
   if (!filename.endsWith('.png')) {
     throw ArgumentError('Filename must end in .png or SkiaGold will ignore it.');
   }
@@ -75,4 +84,11 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
     return;
   }
   fail(response);
+}
+
+/// Waits for one frame to complete rendering
+Future<void> awaitNextFrame() {
+  final Completer<void> completer = Completer<void>();
+  domWindow.requestAnimationFrame((JSNumber time) => completer.complete());
+  return completer.future;
 }

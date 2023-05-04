@@ -71,7 +71,15 @@ copy("canvaskit_chromium_group") {
 # This toolchain is only to be used by skwasm_group below.
 wasm_toolchain("skwasm") {
   extra_toolchain_args = {
-    skia_enable_skparagraph = false
+    # In Chromium browsers, we can use the browser's APIs to get the necessary
+    # ICU data.
+    skia_use_icu = false
+    skia_use_client_icu = true
+    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+
+    skia_use_libjpeg_turbo_decode = false
+    skia_use_libpng_decode = false
+    skia_use_libwebp_decode = false
 
     # skwasm is multithreaded
     wasm_use_pthreads = true

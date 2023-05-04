@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
-import '../screenshot.dart';
+import '../../common/test_initialization.dart';
 import 'helper.dart';
 
 const Rect bounds = Rect.fromLTWH(0, 0, 800, 600);
@@ -20,7 +20,10 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpStableTestFonts();
+  setUpUnitTests(
+    emulateTesterEnvironment: false,
+    setUpTestViewDimensions: false,
+  );
 
   test('paints spans and lines correctly', () {
     final BitmapCanvas canvas = BitmapCanvas(bounds, RenderStrategy());

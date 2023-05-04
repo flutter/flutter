@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -116,7 +117,7 @@ Future<void> _testSuccessfulPayloads() async {
       expect(response.url, url);
 
       final List<int> result = <int>[];
-      await response.payload.read<Uint8List>(result.addAll);
+      await response.payload.read<JSUint8Array>((JSUint8Array chunk) => result.addAll(chunk.toDart));
       expect(result, hasLength(length));
       expect(
         result,
