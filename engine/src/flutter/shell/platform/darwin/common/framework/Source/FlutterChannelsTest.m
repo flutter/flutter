@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// These tests are flaky on arm64.
+// TODO(dnfield): reenable after fixing https://github.com/flutter/flutter/issues/126013
+#if !defined(__aarch64__) && !defined(__arm64__)
+
 #if !__has_feature(objc_arc)
 #error ARC must be enabled!
 #endif
@@ -356,3 +360,5 @@
 }
 
 @end
+
+#endif  // !defined(__arch64__) && !defined(__arm64__)
