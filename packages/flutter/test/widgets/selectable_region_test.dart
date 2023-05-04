@@ -749,18 +749,18 @@ void main() {
 
       await gesture.moveTo(textOffsetToPosition(paragraph3, 4));
       await tester.pump();
-      expect(paragraph3.selections[0], const TextSelection(baseOffset: 11, extentOffset: 4));// 4,11
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 11, extentOffset: 4));
 
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
-      expect(paragraph3.selections[0], const TextSelection(baseOffset: 11, extentOffset: 0));// 0,11
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 5));// 5,14
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 11, extentOffset: 0));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 5));
 
       final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
       await gesture.moveTo(textOffsetToPosition(paragraph1, 6));
-      expect(paragraph3.selections[0], const TextSelection(baseOffset: 11, extentOffset: 0));// 0,11
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 0));// 0,14
-      expect(paragraph1.selections[0], const TextSelection(baseOffset: 12, extentOffset: 4));// 4,12
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 11, extentOffset: 0));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 14, extentOffset: 0));
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 12, extentOffset: 4));
 
       await gesture.up();
     });
