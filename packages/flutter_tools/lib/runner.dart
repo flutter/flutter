@@ -69,16 +69,15 @@ Future<int> run(
         // Same functionality as `flutter config --no-analytics` for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-telemetry')) {
-
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
           AnalyticsConfigEvent(enabled: false).send();
-          if (!false) {
-            // Normally, the tool waits for the analytics to all send before the
-            // tool exits, but only when analytics are enabled. When reporting that
-            // analytics have been disable, the wait must be done here instead.
-            await globals.flutterUsage.ensureAnalyticsSent();
-          }
+
+          // Normally, the tool waits for the analytics to all send before the
+          // tool exits, but only when analytics are enabled. When reporting that
+          // analytics have been disable, the wait must be done here instead.
+          await globals.flutterUsage.ensureAnalyticsSent();
+
           globals.flutterUsage.enabled = false;
           globals.printStatus('Analytics reporting disabled.');
 
