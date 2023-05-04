@@ -1,4 +1,4 @@
-Signature: 9153b4cf6bbe888a5d6551b187a85d00
+Signature: 8190ed4f3932a289b756445815ec5d18
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3961,6 +3961,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl + ../../../fuchs
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/restarter.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing/tracing.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.display.singleton/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/clone.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -3985,6 +3987,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/restarter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing/tracing.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.display.singleton/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/clone.h
