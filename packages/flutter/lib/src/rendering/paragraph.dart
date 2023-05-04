@@ -1502,7 +1502,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
 
     _setSelectionPosition(null, isEnd: isEnd);
-
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
@@ -1516,7 +1515,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     );
 
     final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
-
     // Check if the original local position is within the rect, if it is not then
     // we do not need to look up the word boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
