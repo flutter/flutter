@@ -88,6 +88,24 @@ Future<int> run(
           await globals.analytics.setTelemetry(value);
         }
 
+        // Enable analytics if user passes in the `--enable-telemetry` option
+        // `flutter --enable-telemetry`
+        //
+        // Same functionality as `flutter config --analytics` for enabling
+        // except with the `value` hard coded as true
+        if (args.contains('--enable-telemetry')) {
+          const bool value = true;
+          // The tool sends the analytics event *before* toggling the flag
+          // intentionally to be sure that opt-out events are sent correctly.
+          AnalyticsConfigEvent(enabled: value).send();
+
+          globals.flutterUsage.enabled = value;
+          globals.printStatus('Analytics reporting enabled.');
+
+          await globals.analytics.setTelemetry(value);
+        }
+
+
         await runner.run(args);
 
         // Triggering [runZoned]'s error callback does not necessarily mean that

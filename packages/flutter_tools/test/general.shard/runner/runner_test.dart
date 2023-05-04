@@ -317,11 +317,6 @@ void main() {
   });
 
   group('unified_analytics', () {
-    final Usage legacyAnalytics = TestUsage();
-    setUp(() {
-      legacyAnalytics.enabled = false;
-    });
-
     testUsingContext(
       'runner disable telemetry with flag',
       () async {
@@ -342,6 +337,31 @@ void main() {
       },
       overrides: <Type, Generator>{
         Analytics: () => FakeAnalytics(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'runner enabling telemetry with flag',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        expect(globals.analytics.telemetryEnabled, false);
+        expect(globals.analytics.shouldShowMessage, false);
+
+        await runner.run(
+          <String>['--enable-telemetry'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.analytics.telemetryEnabled, true);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => FakeAnalytics(fakeTelemetryStatusOverride: false),
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
       },
@@ -489,8 +509,16 @@ class WaitingCrashReporter implements CrashReporter {
 /// A fake [Analytics] that will be used to test
 /// the --disable-telemetry flag
 class FakeAnalytics extends Fake implements Analytics {
-  bool _fakeTelemetryStatus = true;
-  bool _fakeShowMessage = true;
+
+  FakeAnalytics({bool fakeTelemetryStatusOverride = true})
+      : _fakeTelemetryStatus = fakeTelemetryStatusOverride,
+        _fakeShowMessage = fakeTelemetryStatusOverride;
+
+  // Both of the members below can be initialized with [fakeTelemetryStatusOverride]
+  // because if we pass in false for the status, that means we can also
+  // assume the message has been shown before
+  bool _fakeTelemetryStatus;
+  bool _fakeShowMessage;
 
   @override
   String get getConsentMessage => 'message';
