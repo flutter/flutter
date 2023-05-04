@@ -589,6 +589,7 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
+
   @override
   late bool platformToolsAvailable;
 

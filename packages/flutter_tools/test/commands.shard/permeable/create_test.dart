@@ -7,7 +7,9 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -26,6 +28,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
+import 'package:test/fake.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
@@ -1413,6 +1416,7 @@ void main() {
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
   }, overrides: <Type, Generator>{
+    AndroidSdk: () => _FakeAndroidSdk(MemoryFileSystem.test()),
     FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalMacOSPlatform,
     ProcessManager: () => fakeProcessManager,
@@ -3501,4 +3505,13 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';
+}
+
+class _FakeAndroidSdk extends Fake implements AndroidSdk {
+  _FakeAndroidSdk(FileSystem fs): _directory = fs.directory('android-sdk');
+
+  final Directory _directory;
+
+  @override
+  Directory get directory => _directory;
 }
