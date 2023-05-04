@@ -30,29 +30,15 @@ class WeakSet {
   }
 }
 
-/// Wrapper for [testWidgets] with leak tracking.
+/// Wrapper for [testWidgets] with memory leak tracking.
 ///
-/// Tracking for non-GCed objects is temporarily disabled.
+/// The method will fail if instrumented objects in [callback] are
+/// garbage collected without being disposed.
 ///
-/// This method is temporal with the plan:
+/// More about leak tracking:
+/// https://github.com/dart-lang/leak_tracker.
 ///
-/// 0. Enable tracing for non-GCed objects.
-///
-/// 1. For each occurence of [testWidgets] in flutter framework, do one of three:
-///
-/// * replace [testWidgets] with [testWidgetsWithLeakTracking]
-/// * comment why leak tracking is not needed
-/// * link bug about memory leak
-///
-/// 2. Enable [testWidgets] to track leaks, disabled by default for users,
-/// and may be enabled by default for flutter framework.
-///
-/// 3. Replace [testWidgetsWithLeakTracking] with [testWidgets].
-///
-/// Memory leak troubleshooting tips:
-/// https://github.com/dart-lang/leak_tracker/blob/main/doc/TROUBLESHOOT.md
-///
-/// See https://github.com/flutter/devtools/issues/3951 for more details
+/// See https://github.com/flutter/devtools/issues/3951 for plans
 /// on leak tracking.
 @isTest
 void testWidgetsWithLeakTracking(
@@ -147,7 +133,7 @@ Future<void> _withFlutterLeakTracking(
   });
 }
 
-/// Cleans leaks that are allowed by [config] and [adjustments].
+/// Cleans leaks that are allowed by [config].
 @visibleForTesting
 class LeakCleaner {
   LeakCleaner(this.config);
