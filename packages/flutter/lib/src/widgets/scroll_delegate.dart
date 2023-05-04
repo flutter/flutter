@@ -950,7 +950,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// [RepaintBoundary] widgets if [addRepaintBoundaries] is true.
   final TwoDimensionalIndexedWidgetBuilder builder;
 
-  /// The maximum number of children in the x axis.
+  /// The maximum [ChildVicinity.xIndex] for children in the x axis.
   ///
   /// {@template flutter.widgets.twoDimensionalChildBuilderDelegate.maxIndex}
   /// For each [ChildVicinity], the child's relative location is described in
@@ -996,7 +996,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     notifyListeners();
   }
 
-  /// The maximum number of children in the y axis.
+  /// The maximum [ChildVicinity.yIndex] for children in the y axis.
   ///
   /// {@macro flutter.widgets.twoDimensionalChildBuilderDelegate.maxIndex}
   ///
@@ -1024,10 +1024,10 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   @override
   Widget? build(BuildContext context, ChildVicinity vicinity) {
     // If we have exceeded explicit upper bounds, return null.
-    if (vicinity.xIndex < 0 || (maxXIndex != null && vicinity.xIndex >= maxXIndex!)) {
+    if (vicinity.xIndex < 0 || (maxXIndex != null && vicinity.xIndex > maxXIndex!)) {
       return null;
     }
-    if (vicinity.yIndex < 0 || (maxYIndex != null && vicinity.yIndex >= maxYIndex!)) {
+    if (vicinity.yIndex < 0 || (maxYIndex != null && vicinity.yIndex > maxYIndex!)) {
       return null;
     }
 

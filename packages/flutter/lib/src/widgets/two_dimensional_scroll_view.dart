@@ -127,8 +127,15 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(axisDirectionToAxis(verticalDetails.direction) == Axis.vertical);
-    assert(axisDirectionToAxis(horizontalDetails.direction) == Axis.horizontal);
+    assert(
+      axisDirectionToAxis(verticalDetails.direction) == Axis.vertical,
+      'TwoDimensionalScrollView.verticalDetails are not Axis.vertical.'
+    );
+    assert(
+      axisDirectionToAxis(horizontalDetails.direction) == Axis.horizontal,
+      'TwoDimensionalScrollView.horizontalDetails are not Axis.horizontal.'
+    );
+
     ScrollableDetails mainAxisDetails = switch (mainAxis) {
       Axis.vertical => verticalDetails,
       Axis.horizontal => horizontalDetails,
@@ -142,7 +149,12 @@ abstract class TwoDimensionalScrollView extends StatelessWidget {
 
     if (effectivePrimary) {
       // Using PrimaryScrollController for mainAxis.
-      assert(mainAxisDetails.controller == null);
+      assert(
+        mainAxisDetails.controller == null,
+        'TwoDimensionalScrollView.primary was explicitly set to true, but a '
+        'ScrollController was provided in the ScrollableDetails of the '
+        'TwoDimensionalScrollView.mainAxis.'
+      );
       mainAxisDetails = mainAxisDetails.copyWith(
         controller: PrimaryScrollController.of(context),
       );

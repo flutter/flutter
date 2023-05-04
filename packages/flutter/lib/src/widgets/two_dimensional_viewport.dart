@@ -372,6 +372,15 @@ class TwoDimensionalViewportParentData extends ParentData {
   /// position the children instead of [layoutOffset].
   late Offset paintOffset;
 
+  /// Apply the [paintOffset] to the given [transform].
+  ///
+  /// Used to implement [RenderObject.applyPaintTransform] by children that use
+  /// [TwoDimensionalViewportParentData].
+  void applyPaintTransform(Matrix4 transform) {
+    // Hit test logic relies on this always providing an invertible matrix.
+    transform.translate(paintOffset.dx, paintOffset.dy);
+  }
+
   @override
   String toString() => 'vicinity=$vicinity; layoutOffset=$layoutOffset; '
       '${isVisible ? 'visible; ': ''}paintOffset=$paintOffset; paintExtent=$_paintExtent';
@@ -1230,6 +1239,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   double computeMaxIntrinsicHeight(double width) {
     assert(debugThrowIfNotCheckingIntrinsics());
     return 0.0;
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    // Hit test logic relies on this always providing an invertible matrix.
+    parentDataOf(child).applyPaintTransform(transform);
   }
 
   @override
