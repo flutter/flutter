@@ -1521,15 +1521,18 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
     final (TextPosition start, TextPosition end)? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
-    TextPosition targetPosition = wordBoundary != null ? isEnd ? wordBoundary.$2 : wordBoundary.$1 : position;
+    TextPosition? targetPosition;
     if (_selectableContainsOriginWord!) {
       // Swap the start and end.
-      if (targetPosition.offset >= _originWordSelectionEnd!.offset) {
-        targetPosition = wordBoundary?.$2 ?? position;
+      if (position.offset >= _originWordSelectionEnd!.offset) {
+        targetPosition = wordBoundary?.$2;
         _setSelectionPosition(_originWordSelectionStart, isEnd: !isEnd);
-      } else if (targetPosition.offset <= _originWordSelectionStart!.offset) {
-        targetPosition = wordBoundary?.$1 ?? position;
+      } else if (position.offset <= _originWordSelectionStart!.offset) {
+        targetPosition = wordBoundary?.$1;
         _setSelectionPosition(_originWordSelectionEnd, isEnd: !isEnd);
+      } else {
+        targetPosition = wordBoundary?.$2;
+        _setSelectionPosition(_originWordSelectionStart, isEnd: !isEnd);
       }
     } else {
       // If we are always moving the selection end edge then the selection will
@@ -1546,7 +1549,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         }
       }
     }
-    targetPosition = _clampTextPosition(targetPosition);
+    targetPosition = _clampTextPosition(targetPosition ?? position);
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
