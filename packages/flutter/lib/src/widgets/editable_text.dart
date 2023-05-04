@@ -2669,9 +2669,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _scrollController.addListener(_onEditableScroll);
     }
 
-    if (!_shouldCreateInputConnection) {
-      _closeInputConnectionIfNeeded();
-    } else if (oldWidget.readOnly && _hasFocus) {
+    if (!kIsWeb) {
+      // The reasons of closing input connection:
+      // 1. widget is read only, the keyboard view must be dissmissed.
+      // 2. Needs to update keyboard view when keyboardType has changed.
+      //    To update keyboard view, close current input connection then open a
+      //    new input connection.
+      // Why this only for non-web platforms, please read comments of
+      // _shouldCreateInputConnection for more details.
+
+      if (widget.readOnly || oldWidget.keyboardType != widget.keyboardType) {
+        _closeInputConnectionIfNeeded();
+      }
+    }
+
+    if (_hasFocus && !widget.readOnly && !_hasInputConnection) {
       _openInputConnection();
     }
 
