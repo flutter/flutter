@@ -7,7 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../common/test_initialization.dart';
 import 'paragraph/helper.dart';
 import 'screenshot.dart';
 
@@ -16,10 +15,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpStableTestFonts();
 
   /// Regression test for https://github.com/flutter/flutter/issues/64734.
   test('Clips using difference', () async {

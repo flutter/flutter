@@ -7,8 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../common/test_initialization.dart';
-import '../paragraph/helper.dart';
+import '../html/paragraph/helper.dart';
 import 'layout_service_helper.dart';
 
 const bool skipWordSpacing = true;
@@ -18,7 +17,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  await initializeTestFlutterViewEmbedder();
 
   test('no text', () {
     final CanvasParagraph paragraph = CanvasParagraphBuilder(ahemStyle).build();

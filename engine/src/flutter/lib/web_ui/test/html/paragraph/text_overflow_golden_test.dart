@@ -8,7 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
-import '../../common/test_initialization.dart';
+import '../screenshot.dart';
 import 'text_scuba.dart';
 
 const String threeLines = 'First\nSecond\nThird';
@@ -25,10 +25,7 @@ Future<void> testMain() async {
     viewportSize: const Size(800, 800),
   );
 
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpStableTestFonts();
 
   testEachCanvas('maxLines clipping', (EngineCanvas canvas) {
     Offset offset = Offset.zero;

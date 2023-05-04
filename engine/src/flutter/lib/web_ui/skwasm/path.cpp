@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <emscripten.h>
 #include "export.h"
 #include "helpers.h"
 #include "third_party/skia/include/core/SkPath.h"

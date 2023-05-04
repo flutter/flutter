@@ -7,7 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' hide TextStyle;
 
-import '../common/test_initialization.dart';
 import 'screenshot.dart';
 
 void main() {
@@ -20,9 +19,12 @@ Future<void> testMain() async {
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
-  setUpUnitTests(
-    setUpTestViewDimensions: false,
-  );
+  setUpAll(() async {
+    debugEmulateFlutterTesterEnvironment = true;
+    await webOnlyInitializePlatform();
+    await engine.renderer.fontCollection.debugDownloadTestFonts();
+    engine.renderer.fontCollection.registerDownloadedFonts();
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/49429
   // Should clip with correct transform.

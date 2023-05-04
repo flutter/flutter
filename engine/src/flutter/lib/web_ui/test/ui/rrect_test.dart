@@ -6,14 +6,14 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:ui/ui.dart';
 
-import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUiTest();
   test('RRect.contains()', () {
     final RRect rrect = RRect.fromRectAndCorners(
         const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -24,14 +25,18 @@ void testMain() {
   group('Font fallbacks', () {
     setUpCanvasKitTest();
 
-    setUpAll(() {
-      debugDisableFontFallbacks = false;
-    });
-
     /// Used to save and restore [ui.window.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
 
     setUp(() {
+      // We render some color emojis in this test.
+      final FlutterConfiguration config = FlutterConfiguration()
+        ..setUserConfiguration(
+          js_util.jsify(<String, Object?>{
+            'useColorEmoji': true,
+          }) as JsFlutterConfiguration);
+      debugSetConfiguration(config);
+
       FontFallbackData.debugReset();
       notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
       savedCallback = ui.window.onPlatformMessage;

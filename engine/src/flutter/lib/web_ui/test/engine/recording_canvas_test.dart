@@ -8,16 +8,15 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import '../common/mock_engine_canvas.dart';
-import '../common/test_initialization.dart';
+import '../html/screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 void testMain() {
-  setUpUnitTests(
-    setUpTestViewDimensions: false,
-  );
+  debugEmulateFlutterTesterEnvironment = true;
+  setUpStableTestFonts();
 
   late RecordingCanvas underTest;
   late MockEngineCanvas mockCanvas;

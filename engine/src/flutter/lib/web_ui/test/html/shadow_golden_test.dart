@@ -9,7 +9,7 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../common/test_initialization.dart';
+import 'screenshot.dart';
 
 const Color _kShadowColor = Color.fromARGB(255, 0, 0, 0);
 
@@ -22,10 +22,7 @@ Future<void> testMain() async {
 
   late SurfaceSceneBuilder builder;
 
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpStableTestFonts();
 
   setUp(() {
     builder = SurfaceSceneBuilder();

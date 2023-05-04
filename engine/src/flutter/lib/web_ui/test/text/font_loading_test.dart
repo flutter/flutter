@@ -11,14 +11,12 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../../common/test_initialization.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  await initializeTestFlutterViewEmbedder();
   group('loadFontFromList', () {
     const String testFontUrl = '/assets/fonts/ahem.ttf';
 
@@ -26,11 +24,10 @@ Future<void> testMain() async {
       domDocument.fonts!.clear();
     });
 
-    test('returns normally from invalid font buffer', () async {
+    test('surfaces error from invalid font buffer', () async {
       await expectLater(
-        () async => ui.loadFontFromList(Uint8List(0), fontFamily: 'test-font'),
-        returnsNormally
-      );
+          ui.loadFontFromList(Uint8List(0), fontFamily: 'test-font'),
+          throwsA(const TypeMatcher<Exception>()));
     },
         // TODO(hterkelsen): https://github.com/flutter/flutter/issues/56702
         skip: browserEngine == BrowserEngine.webkit);

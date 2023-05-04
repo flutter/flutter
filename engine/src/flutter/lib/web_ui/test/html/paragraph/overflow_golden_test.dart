@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide window;
 
-import '../../common/test_initialization.dart';
+import '../screenshot.dart';
 import 'helper.dart';
 
 void main() {
@@ -17,10 +17,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpStableTestFonts();
 
   void testEllipsis(EngineCanvas canvas) {
     Offset offset = Offset.zero;

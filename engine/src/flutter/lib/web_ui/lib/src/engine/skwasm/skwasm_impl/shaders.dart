@@ -162,15 +162,15 @@ class SkwasmFragmentProgram implements ui.FragmentProgram {
 
     // TODO(jacksongardner): Can we avoid this copy?
     final List<int> sourceData = utf8.encode(shaderData.source);
-    final SkStringHandle sourceString = skStringAllocate(sourceData.length);
-    final Pointer<Int8> sourceBuffer = skStringGetData(sourceString);
+    final SkStringHandle sourceString = shaderSourceAllocate(sourceData.length);
+    final Pointer<Int8> sourceBuffer = shaderSourceGetData(sourceString);
     int i = 0;
     for (final int byte in sourceData) {
       sourceBuffer[i] = byte;
       i++;
     }
     final RuntimeEffectHandle handle = runtimeEffectCreate(sourceString);
-    skStringFree(sourceString);
+    shaderSourceFree(sourceString);
     return SkwasmFragmentProgram._(name, handle);
   }
 
@@ -193,7 +193,7 @@ class SkwasmFragmentShader extends SkwasmShader implements ui.FragmentShader {
     SkwasmFragmentProgram program, {
     List<SkwasmShader>? childShaders,
   }) : _program = program,
-       _uniformData = skDataCreate(program.uniformSize),
+       _uniformData = dataCreate(program.uniformSize),
        _childShaders = childShaders;
 
   @override
@@ -234,7 +234,7 @@ class SkwasmFragmentShader extends SkwasmShader implements ui.FragmentShader {
       shaderDispose(_handle);
       _handle = nullptr;
     }
-    final Pointer<Float> dataPointer = skDataGetPointer(_uniformData).cast<Float>();
+    final Pointer<Float> dataPointer = dataGetPointer(_uniformData).cast<Float>();
     dataPointer[index] = value;
   }
 
@@ -247,7 +247,7 @@ class SkwasmFragmentShader extends SkwasmShader implements ui.FragmentShader {
   void dispose() {
     super.dispose();
     if (_uniformData != nullptr) {
-      skDataDispose(_uniformData);
+      dataDispose(_uniformData);
       _uniformData = nullptr;
     }
   }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -27,6 +28,15 @@ void testMain() {
     setUp(() {
       expect(notoDownloadQueue.downloader.debugActiveDownloadCount, 0);
       expect(notoDownloadQueue.isPending, isFalse);
+
+      // We render some color emojis in this test.
+      final FlutterConfiguration config = FlutterConfiguration()
+        ..setUserConfiguration(
+        js_util.jsify(<String, Object?>{
+          'useColorEmoji': true,
+        }) as JsFlutterConfiguration);
+      debugSetConfiguration(config);
+
 
       FontFallbackData.debugReset();
       notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';

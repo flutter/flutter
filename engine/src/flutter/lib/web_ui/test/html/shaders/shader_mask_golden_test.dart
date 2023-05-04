@@ -10,8 +10,6 @@ import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../common/test_initialization.dart';
-
 /// To debug compositing failures on browsers, set this flag to true and run
 /// flutter run -d chrome --web-renderer=html
 ///        test/golden_tests/engine/shader_mask_golden_test.dart --profile
@@ -31,13 +29,9 @@ Future<void> main() async {
 // https://github.com/flutter/flutter/issues/86623
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
-
   setUpAll(() async {
     debugShowClipLayers = true;
+    await webOnlyInitializePlatform();
   });
 
   setUp(() async {
@@ -47,6 +41,8 @@ Future<void> testMain() async {
       scene.remove();
     }
     initWebGl();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
   });
 
   /// Should render the picture unmodified.

@@ -9,7 +9,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 
-import '../../common/test_initialization.dart';
 import '../screenshot.dart';
 
 // TODO(yjbanov): unskip Firefox tests when Firefox implements WebGL in headless mode.
@@ -25,9 +24,12 @@ Future<void> testMain() async {
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
   final HtmlImage testImage = createTestImage();
 
-  setUpUnitTests(
-    setUpTestViewDimensions: false,
-  );
+  setUpAll(() async {
+    debugEmulateFlutterTesterEnvironment = true;
+    await webOnlyInitializePlatform();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
+  });
 
   void drawShapes(RecordingCanvas rc, SurfacePaint paint, Rect shaderRect) {
     /// Rect.

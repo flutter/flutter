@@ -8,7 +8,6 @@ import 'dart:js_interop';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:web_test_fonts/web_test_fonts.dart';
 
 /// The mode the app is running in.
 /// Keep these in sync with the same constants on the framework-side under foundation/constants.dart.
@@ -202,6 +201,7 @@ Future<void> initializeEngineServices({
 
   Future<void> initializeRendererCallback () async => renderer.initialize();
   await Future.wait<void>(<Future<void>>[initializeRendererCallback(), _downloadAssetFonts()]);
+  renderer.fontCollection.registerDownloadedFonts();
   _initializationState = DebugEngineInitializationState.initializedServices;
 }
 
@@ -248,17 +248,12 @@ void _setAssetManager(AssetManager assetManager) {
 Future<void> _downloadAssetFonts() async {
   renderer.fontCollection.clear();
 
-  if (ui.debugEmulateFlutterTesterEnvironment) {
-    // Load the embedded test font before loading fonts from the assets so that
-    // the embedded test font is the default (first) font.
-    await renderer.fontCollection.loadFontFromList(
-      EmbeddedTestFont.flutterTest.data,
-      fontFamily: EmbeddedTestFont.flutterTest.fontFamily
-    );
+  if (_assetManager != null) {
+    await renderer.fontCollection.downloadAssetFonts(_assetManager!);
   }
 
-  if (_assetManager != null) {
-    await renderer.fontCollection.loadAssetFonts(await fetchFontManifest(assetManager));
+  if (ui.debugEmulateFlutterTesterEnvironment) {
+    await renderer.fontCollection.debugDownloadTestFonts();
   }
 }
 

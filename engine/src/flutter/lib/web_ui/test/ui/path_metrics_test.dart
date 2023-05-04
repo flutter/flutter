@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
 import '../common/matchers.dart';
-import '../common/test_initialization.dart';
+import 'utils.dart';
 
 const double kTolerance = 0.1;
 
@@ -18,7 +18,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUiTest();
   group('PathMetric length', () {
     test('empty path', () {
       final Path path = Path();

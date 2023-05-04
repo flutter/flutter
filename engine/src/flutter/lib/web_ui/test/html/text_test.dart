@@ -7,11 +7,11 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import '../common/matchers.dart';
-import '../common/test_initialization.dart';
 import 'paragraph/helper.dart';
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 Future<void> testMain() async {
   const double baselineRatio = 1.1662499904632568;
 
-  setUpUnitTests();
+  await initializeTestFlutterViewEmbedder();
 
   late String fallback;
   setUp(() {
