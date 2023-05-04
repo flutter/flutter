@@ -28,6 +28,8 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.VersionNumber
+import org.yaml.snakeyaml.Yaml
 
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
@@ -86,6 +88,7 @@ buildscript {
         //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
         //  * AGP version in dependencies block in packages/flutter_tools/gradle/build.gradle.kts
         classpath("com.android.tools.build:gradle:7.3.0")
+        classpath(group: 'org.yaml', name: 'snakeyaml', version: '2.0')
     }
 }
 
@@ -1181,6 +1184,26 @@ class FlutterPlugin implements Plugin<Project> {
                   return
                 }
                 Task copyFlutterAssetsTask = addFlutterDeps(variant)
+                copyFlutterAssetsTask.doLast {
+                  if (variant.flavorName != null && !variant.flavorName.isEmpty()) {
+                    def outputDir = copyFlutterAssetsTask.destinationDir
+                    def shorebirdYamlFile = new File("${outputDir}/flutter_assets/shorebird.yaml")
+                    def flavor = variant.flavorName
+                    def shorebirdYaml = new Yaml().load(shorebirdYamlFile.text)
+                    def flavorAppId = shorebirdYaml['flavors'][flavor]
+                    if (flavorAppId == null) {
+                        throw new GradleException("Cannot find app_id for ${flavor} in shorebird.yaml")
+                    }
+                    def content = 'app_id: ' + flavorAppId + '\n';
+                    if (shorebirdYaml.containsKey('base_url')) {
+                        content += 'base_url: ' + shorebirdYaml['base_url'] + '\n';
+                    }
+                    if (shorebirdYaml.containsKey('auto_update')) {
+                        content += 'auto_update: ' + shorebirdYaml['auto_update'] + '\n';
+                    }
+                    shorebirdYamlFile.write(content)
+                  }
+                }
                 def variantOutput = variant.outputs.first()
                 def processResources = variantOutput.hasProperty("processResourcesProvider") ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources

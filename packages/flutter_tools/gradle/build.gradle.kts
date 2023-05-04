@@ -32,4 +32,5 @@ dependencies {
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * AGP version in buildscript block in packages/flutter_tools/gradle/src/main/flutter.groovy
     compileOnly("com.android.tools.build:gradle:7.3.0")
+    implementation("org.yaml:snakeyaml:2.0")
 }
