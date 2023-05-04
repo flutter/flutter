@@ -46,7 +46,13 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 
   @override
   TestDefaultBinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+    Future<ByteData?> keyboardHandler(ByteData? message) async {
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{1:1});
+    }
+    return TestDefaultBinaryMessenger(
+      super.createBinaryMessenger(),
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
+    );
   }
 }
 
@@ -144,5 +150,15 @@ void main() {
     expect(receivedReply, isTrue);
     expect(result, isNotNull);
     expect(result!['response'], equals('exit'));
+  });
+
+  test('initInstances synchronizes keyboard state', () async {
+    final Set<PhysicalKeyboardKey> physicalKeys = HardwareKeyboard.instance.physicalKeysPressed;
+    final Set<LogicalKeyboardKey> logicalKeys = HardwareKeyboard.instance.logicalKeysPressed;
+
+    expect(physicalKeys.length, 1);
+    expect(logicalKeys.length, 1);
+    expect(physicalKeys.first, const PhysicalKeyboardKey(1));
+    expect(logicalKeys.first, const LogicalKeyboardKey(1));
   });
 }

@@ -3180,6 +3180,86 @@ void main() {
       paints..rrect(color: const Color(0xff0000ff)),
     );
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
+    late RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute.settings;
+          }),
+        ],
+        home: const Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: null,
+              child: Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+    const RouteSettings exampleSetting = RouteSettings(name: 'simple');
+
+    showMenu<void>(
+      context: context,
+      position: RelativeRect.fill,
+      items: const <PopupMenuItem<void>>[
+        PopupMenuItem<void>(child: Text('foo')),
+      ],
+      routeSettings: exampleSetting,
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('foo'), findsOneWidget);
+    expect(currentRouteSetting, exampleSetting);
+
+    await tester.tap(find.text('foo'));
+    await tester.pumpAndSettle();
+    expect(currentRouteSetting.name, '/');
+  });
+
+  testWidgets('Popup menu is positioned under the child', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    final Key childKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    const PopupMenuItem<void>(
+                      child: Text('Example'),
+                    ),
+                  ];
+                },
+                child: SizedBox(
+                  key: childKey,
+                  height: 50,
+                  width: 50,
+                )
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    final Offset childBottomLeft = tester.getBottomLeft(find.byKey(childKey));
+    final Offset menuTopLeft = tester.getTopLeft(find.bySemanticsLabel('Popup menu'));
+    expect(childBottomLeft, menuTopLeft);
+  });
 }
 
 class TestApp extends StatelessWidget {
@@ -3231,4 +3311,22 @@ class MenuObserver extends NavigatorObserver {
     }
     super.didPush(route, previousRoute);
   }
+}
+
+class _ClosureNavigatorObserver extends NavigatorObserver {
+  _ClosureNavigatorObserver({required this.onDidChange});
+
+  final void Function(Route<dynamic> newRoute) onDidChange;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }

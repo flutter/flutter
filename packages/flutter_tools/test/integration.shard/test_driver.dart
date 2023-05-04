@@ -81,6 +81,8 @@ abstract class FlutterTestDriver {
       // intended only for use in local debugging.
       // ignore: avoid_print
       print('$time$_logPrefix$line');
+    } else {
+      printOnFailure('$time$_logPrefix$line');
     }
   }
 

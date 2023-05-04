@@ -114,6 +114,7 @@ Widget buildFrame({
   Duration? animationDuration,
   EdgeInsetsGeometry? padding,
   TextDirection textDirection = TextDirection.ltr,
+  TabAlignment? tabAlignment,
 }) {
   if (secondaryTabBar) {
     return boilerplate(
@@ -128,6 +129,7 @@ Widget buildFrame({
           isScrollable: isScrollable,
           indicatorColor: indicatorColor,
           padding: padding,
+          tabAlignment: tabAlignment,
         ),
       ),
     );
@@ -145,6 +147,7 @@ Widget buildFrame({
         isScrollable: isScrollable,
         indicatorColor: indicatorColor,
         padding: padding,
+        tabAlignment: tabAlignment,
       ),
     ),
   );
@@ -5717,12 +5720,106 @@ void main() {
     );
   });
 
+  testWidgets('Default TabAlignment', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B'];
+
+    // Test default TabAlignment when isScrollable is false.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B'),
+    ));
+
+    final Rect tabBar = tester.getRect(find.byType(TabBar));
+    Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+    Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should fill the width of the TabBar.
+    double tabOneLeft = ((tabBar.width / 2) - tabOneRect.width) / 2;
+    expect(tabOneRect.left, equals(tabOneLeft));
+    double tabTwoRight = tabBar.width - ((tabBar.width / 2) - tabTwoRect.width) / 2;
+    expect(tabTwoRect.right, equals(tabTwoRight));
+
+    // Test default TabAlignment when isScrollable is true.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true),
+    ));
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be aligned to the start of the TabBar.
+    tabOneLeft = kTabLabelPadding.left;
+    expect(tabOneRect.left, equals(tabOneLeft));
+    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    expect(tabTwoRect.right, equals(tabTwoRight));
+  });
+
+  testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B'];
+
+    // Test TabAlignment.fill with non-scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.fill),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.fill with scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.fill, isScrollable: true),
+    ));
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('TabAlignment.start & TabAlignment.startOffset only supports scrollable tab bar', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B'];
+
+    // Test TabAlignment.start with scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.start, isScrollable: true),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.start with non-scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.start),
+    ));
+
+    expect(tester.takeException(), isAssertionError);
+
+    // Test TabAlignment.startOffset with scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.startOffset, isScrollable: true),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.startOffset with non-scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.startOffset),
+    ));
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
     testWidgets('TabBar default selected/unselected text style', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       final List<String> tabs = <String>['A', 'B', 'C'];
 
       const String selectedValue = 'A';
@@ -5758,7 +5855,10 @@ void main() {
       const Color labelColor = Color(0xff0000ff);
       await tester.pumpWidget(
         Theme(
-          data: ThemeData(tabBarTheme: const TabBarTheme(labelColor: labelColor)),
+          data: ThemeData(
+            tabBarTheme: const TabBarTheme(labelColor: labelColor),
+            useMaterial3: false,
+          ),
           child: buildFrame(tabs: tabs, value: selectedValue),
         ),
       );
@@ -5807,6 +5907,42 @@ void main() {
       final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
       // ignore: avoid_dynamic_calls
       expect((paint.painter as dynamic).dividerColor, dividerColor);
+    });
+
+    testWidgets('Default TabAlignment', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      final List<String> tabs = <String>['A', 'B'];
+
+      // Test default TabAlignment when isScrollable is false.
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs,  value: 'B'),
+      ));
+
+      final Rect tabBar = tester.getRect(find.byType(TabBar));
+      Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+      Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+      // Tabs should fill the width of the TabBar.
+      double tabOneLeft = ((tabBar.width / 2) - tabOneRect.width) / 2;
+      expect(tabOneRect.left, equals(tabOneLeft));
+      double tabTwoRight = tabBar.width - ((tabBar.width / 2) - tabTwoRect.width) / 2;
+      expect(tabTwoRect.right, equals(tabTwoRight));
+
+      // Test default TabAlignment when isScrollable is true.
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true),
+      ));
+
+      tabOneRect = tester.getRect(find.byType(Tab).first);
+      tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+      // Tabs should be aligned to the start of the TabBar.
+      tabOneLeft = kTabLabelPadding.left;
+      expect(tabOneRect.left, equals(tabOneLeft));
+      tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+      expect(tabTwoRect.right, equals(tabTwoRight));
     });
   });
 }
