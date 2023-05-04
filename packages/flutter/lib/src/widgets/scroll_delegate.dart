@@ -1126,5 +1126,7 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
   }
 
   @override
-  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant TwoDimensionalChildListDelegate oldDelegate) {
+    return children != oldDelegate.children;
+  }
 }

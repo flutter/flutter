@@ -146,16 +146,34 @@ class RenderSimpleTableViewport extends RenderTwoDimensionalViewport {
     // Every child is 200x200 square
     final double horizontalPixels = horizontalOffset.pixels;
     final double verticalPixels = verticalOffset.pixels;
+    final int rowCount;
+    if (delegate is TwoDimensionalChildBuilderDelegate) {
+      rowCount = (delegate as TwoDimensionalChildBuilderDelegate).maxYIndex ?? 99;
+    } else {
+      rowCount = (delegate as TwoDimensionalChildListDelegate).children.length - 1;
+    }
+    final int columnCount;
+    if (delegate is TwoDimensionalChildBuilderDelegate) {
+      columnCount = (delegate as TwoDimensionalChildBuilderDelegate).maxXIndex ?? 99;
+    } else {
+      columnCount = (delegate as TwoDimensionalChildListDelegate).children[0].length - 1;
+    }
     final int leadingColumn = math.max((horizontalPixels / 200).floor(), 0);
     final int leadingRow = math.max((verticalPixels / 200).floor(), 0);
-    final int trailingColumn = math.min(((horizontalPixels + viewportDimension.width) / 200).ceil(), 99);
-    final int trailingRow = math.min(((verticalPixels + viewportDimension.height) / 200).ceil(), 99);
+    final int trailingColumn = math.min(
+      ((horizontalPixels + viewportDimension.width) / 200).ceil(),
+      columnCount,
+    );
+    final int trailingRow = math.min(
+      ((verticalPixels + viewportDimension.height) / 200).ceil(),
+      rowCount,
+    );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
     for(int column = leadingColumn; column <= trailingColumn; column++) {
       double yLayoutOffset =  (leadingRow * 200) - verticalOffset.pixels;
       for (int row = leadingRow; row <= trailingRow; row++) {
-        final ChildVicinity vicinity = ChildVicinity(xIndex: row, yIndex: column);
+        final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
         child.layout(
           constraints.tighten(width: 200.0, height: 200.0),

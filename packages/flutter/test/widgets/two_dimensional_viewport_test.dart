@@ -2,51 +2,258 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'two_dimensional_utils.dart';
 
 void main() {
   group('TwoDimensionalChildDelegate', () {
     group('TwoDimensionalChildBuilderDelegate', () {
       testWidgets('repaintBoundaries', (WidgetTester tester) async {
-        // Default
+        // Default - adds repaint boundaries
+        await tester.pumpWidget(buildSimpleTest(
+          delegate: TwoDimensionalChildBuilderDelegate(
+            // Only build 1 child
+            maxXIndex: 0,
+            maxYIndex: 0,
+            builder: (BuildContext context, ChildVicinity vicinity) {
+              return SizedBox(
+                height: 200,
+                width: 200,
+                child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+              );
+            }
+          )
+        ));
+        await tester.pumpAndSettle();
+
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(7));
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            expect(find.byType(RepaintBoundary), findsNWidgets(3));
+        }
 
         // None
+        await tester.pumpWidget(buildSimpleTest(
+          delegate: TwoDimensionalChildBuilderDelegate(
+            // Only build 1 child
+            maxXIndex: 0,
+            maxYIndex: 0,
+            addRepaintBoundaries: false,
+            builder: (BuildContext context, ChildVicinity vicinity) {
+              return SizedBox(
+                height: 200,
+                width: 200,
+                child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+              );
+            }
+          )
+        ));
+        await tester.pumpAndSettle();
 
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(6));
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            expect(find.byType(RepaintBoundary), findsNWidgets(2));
+        }
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('will return null from build for exceeding maxXIndex and maxYIndex', (WidgetTester tester) async {
+        late BuildContext capturedContext;
+        final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+          // Only build 1 child
+          maxXIndex: 0,
+          maxYIndex: 0,
+          addRepaintBoundaries: false,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            capturedContext = context;
+            return SizedBox(
+              height: 200,
+              width: 200,
+              child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+            );
+          }
+        );
+        await tester.pumpWidget(buildSimpleTest(
+          delegate: delegate,
+        ));
+        await tester.pumpAndSettle();
         // maxXIndex
+        expect(
+          delegate.build(capturedContext, const ChildVicinity(xIndex: 1, yIndex: 0)),
+          isNull,
+        );
 
         // maxYIndex
+        expect(
+          delegate.build(capturedContext, const ChildVicinity(xIndex: 0, yIndex: 1)),
+          isNull,
+        );
 
+        // Both
+        expect(
+          delegate.build(capturedContext, const ChildVicinity(xIndex: 1, yIndex: 1)),
+          isNull,
+        );
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('throws an error when builder throws', (WidgetTester tester) async {
+        final List<Object> exceptions = <Object>[];
+        final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          exceptions.add(details.exception);
+        };
+        final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+          // Only build 1 child
+          maxXIndex: 0,
+          maxYIndex: 0,
+          addRepaintBoundaries: false,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            throw 'Builder error!';
+          }
+        );
+        await tester.pumpWidget(buildSimpleTest(
+          delegate: delegate,
+        ));
+        await tester.pumpAndSettle();
+        FlutterError.onError = oldHandler;
 
+        expect(exceptions.isNotEmpty, isTrue);
+        expect(exceptions.length, 1);
+        expect(exceptions[0] as String, contains('Builder error!'));
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('shouldRebuild', (WidgetTester tester) async {
-
+        final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return SizedBox(
+              height: 200,
+              width: 200,
+              child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+            );
+          }
+        );
+        expect(delegate.shouldRebuild(delegate), isTrue);
       }, variant: TargetPlatformVariant.all());
     });
 
     group('TwoDimensionalChildListDelegate', () {
       testWidgets('repaintBoundaries', (WidgetTester tester) async {
-        // Default
+        final List<List<Widget>> children = <List<Widget>>[];
+        children.add(<Widget>[
+          const SizedBox(
+            height: 200,
+            width: 200,
+            child: Center(child: Text('R0:C0')),
+          )
+        ]);
+        // Default - adds repaint boundaries
+        await tester.pumpWidget(buildSimpleTest(
+          delegate: TwoDimensionalChildListDelegate(
+            // Only builds 1 child
+            children: children,
+          )
+        ));
+        await tester.pumpAndSettle();
+
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(7));
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            expect(find.byType(RepaintBoundary), findsNWidgets(3));
+        }
 
         // None
+        await tester.pumpWidget(buildSimpleTest(
+          delegate: TwoDimensionalChildListDelegate(
+            // Different children triggers rebuild
+            children: <List<Widget>>[<Widget>[Container()]],
+            addRepaintBoundaries: false,
+          )
+        ));
+        await tester.pumpAndSettle();
 
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            expect(find.byType(RepaintBoundary), findsNWidgets(6));
+          case TargetPlatform.iOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.macOS:
+          case TargetPlatform.windows:
+            expect(find.byType(RepaintBoundary), findsNWidgets(2));
+        }
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('will return null for a ChildVicinity outside of list bounds', (WidgetTester tester) async {
-        // Default
+        final List<List<Widget>> children = <List<Widget>>[];
+        children.add(<Widget>[
+          const SizedBox(
+            height: 200,
+            width: 200,
+            child: Center(child: Text('R0:C0')),
+          )
+        ]);
+        final TwoDimensionalChildListDelegate delegate = TwoDimensionalChildListDelegate(
+          // Only builds 1 child
+          children: children,
+        );
 
-        // None
+        // X index
+        expect(
+          delegate.build(_NullBuildContext(), const ChildVicinity(xIndex: 1, yIndex: 0)),
+          isNull,
+        );
+        // Y index
+        expect(
+          delegate.build(_NullBuildContext(), const ChildVicinity(xIndex: 0, yIndex: 1)),
+          isNull,
+        );
 
+        // Both
+        expect(
+          delegate.build(_NullBuildContext(), const ChildVicinity(xIndex: 1, yIndex: 1)),
+          isNull,
+        );
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('shouldRebuild', (WidgetTester tester) async {
+        final List<List<Widget>> children = <List<Widget>>[];
+        children.add(<Widget>[
+          const SizedBox(
+            height: 200,
+            width: 200,
+            child: Center(child: Text('R0:C0')),
+          )
+        ]);
+        final TwoDimensionalChildListDelegate delegate = TwoDimensionalChildListDelegate(
+          // Only builds 1 child
+          children: children,
+        );
+        expect(delegate.shouldRebuild(delegate), isFalse);
 
+        final List<List<Widget>> newChildren = <List<Widget>>[];
+        final TwoDimensionalChildListDelegate oldDelegate = TwoDimensionalChildListDelegate(
+          children: newChildren,
+        );
+
+        expect(delegate.shouldRebuild(oldDelegate), isTrue);
       }, variant: TargetPlatformVariant.all());
     });
   });
@@ -285,4 +492,9 @@ void main() {
       // computeMaxIntrinsicHeight
     }, variant: TargetPlatformVariant.all());
   });
+}
+
+class _NullBuildContext implements BuildContext {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
