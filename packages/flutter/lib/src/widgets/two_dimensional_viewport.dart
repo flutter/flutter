@@ -515,7 +515,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     if (attached) {
       _delegate.removeListener(_handleDelegateNotification);
     }
-    final TwoDimensionalChildDelegate oldDelegate = value;
+    final TwoDimensionalChildDelegate oldDelegate = _delegate;
     _delegate = value;
     if (attached) {
       _delegate.addListener(_handleDelegateNotification);
