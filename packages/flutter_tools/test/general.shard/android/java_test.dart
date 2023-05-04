@@ -56,7 +56,6 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
-          os: _FakeOperatingSystemUtilsWithoutJava(),
           platform: platform,
           processManager: processManager,
         )!;
@@ -78,7 +77,6 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
-          os: _FakeOperatingSystemUtilsWithoutJava(),
           platform: FakePlatform(environment: <String, String>{
             'JAVA_HOME': javaHome,
           }),
@@ -93,11 +91,17 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
         final OperatingSystemUtils os = _FakeOperatingSystemUtilsWithJava(fileSystem);
 
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['which', 'java'],
+            stdout: '/fake/which/java/path',
+          ),
+        );
+
         final Java java = Java.find(
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
-          os: os,
           platform: platform,
           processManager: processManager,
         )!;
@@ -108,16 +112,19 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
       testWithoutContext('returns null if no java could be found', () {
         final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
-        final OperatingSystemUtils os = _FakeOperatingSystemUtilsWithoutJava();
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['which', 'java'],
+            exitCode: 1,
+          ),
+        );
         final Java? java = Java.find(
           androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
-          os: os,
           platform: platform,
           processManager: processManager,
         );
-
         expect(java, isNull);
       });
     });
