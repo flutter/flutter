@@ -827,7 +827,6 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
-    final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
@@ -897,10 +896,7 @@ class _AppBarState extends State<AppBar> {
         leading = DrawerButton(
           style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
         );
-        // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
-        // are migrated.
-        // https://github.com/flutter/flutter/issues/80256.
-      } else if ((!hasEndDrawer && canPop) || (parentRoute?.impliesAppBarDismissal ?? false)) {
+      } else if (parentRoute?.impliesAppBarDismissal ?? false) {
         leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
