@@ -3,36 +3,61 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/link.dart';
 
-
+// TODO(mdebbar): flutter/flutter#55000 Remove this conditional import once
+// web-only dart:ui_web APIs are exposed from a dedicated place.
+import 'platform_views/non_web.dart'
+    if (dart.library.html) 'platform_views/web.dart';
 import 'recorder.dart';
+
+const String benchmarkViewType = 'benchmark_element';
+
+void _registerFactory() {
+  platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
+    final html.Element htmlElement = html.DivElement();
+    htmlElement.innerText = 'Google';
+    htmlElement.style
+      ..width = '100%'
+      ..height = '100%'
+      ..color = 'black'
+      ..backgroundColor = 'rgba(0, 255, 0, .5)'
+      ..textAlign = 'center'
+      ..border = '1px solid black';
+    return htmlElement;
+  });
+}
 
 /// Creates an infinite list of Link widgets and scrolls it.
 class BenchLinkInfiniteScroll extends WidgetRecorder {
   BenchLinkInfiniteScroll.forward()
-    : initialOffset = 0.0,
-      finalOffset = 30000.0,
-      super(name: benchmarkName);
+      : initialOffset = 0.0,
+        finalOffset = 30000.0,
+        super(name: benchmarkName) {
+    _registerFactory();
+  }
 
   BenchLinkInfiniteScroll.backward()
-    : initialOffset = 30000.0,
-      finalOffset = 0.0,
-      super(name: benchmarkNameBackward);
+      : initialOffset = 30000.0,
+        finalOffset = 0.0,
+        super(name: benchmarkNameBackward) {
+    _registerFactory();
+  }
 
   static const String benchmarkName = 'bench_link_infinite_scroll';
-  static const String benchmarkNameBackward = 'bench_link_infinite_scroll_backward';
+  static const String benchmarkNameBackward =
+      'bench_link_infinite_scroll_backward';
 
   final double initialOffset;
   final double finalOffset;
 
   @override
   Widget createWidget() => MaterialApp(
-    title: 'Infinite Link Scroll Benchmark',
-    home: _InfiniteScrollLinks(initialOffset, finalOffset),
-  );
+        title: 'Infinite Link Scroll Benchmark',
+        home: _InfiniteScrollLinks(initialOffset, finalOffset),
+      );
 }
 
 class _InfiniteScrollLinks extends StatefulWidget {
@@ -83,15 +108,9 @@ class _InfiniteScrollLinksState extends State<_InfiniteScrollLinks> {
       controller: scrollController,
       itemExtent: 100.0,
       itemBuilder: (BuildContext context, int index) {
-        return SizedBox(
+        return const SizedBox(
           height: 100.0,
-          child: Link(
-            uri: Uri.parse('https://www.google.com'),
-            builder: (BuildContext context, FollowLink? followLink) => ElevatedButton(
-              onPressed: followLink,
-              child: const Text('Google'),
-            ),
-          ),
+          child: HtmlElementView(viewType: benchmarkViewType),
         );
       },
     );
