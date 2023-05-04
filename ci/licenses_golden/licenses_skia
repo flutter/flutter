@@ -1,4 +1,4 @@
-Signature: 76bac5c440fc28395195a84a30f584c3
+Signature: 1a3d33a62c27145137dd8ff238a4a939
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/skimage_methods.md
 FILE: ../../../third_party/skia/relnotes/skimage_subset.md
+FILE: ../../../third_party/skia/relnotes/skimagefilters_magnifier.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_encoded.md
 FILE: ../../../third_party/skia/relnotes/sksurface_backend.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
