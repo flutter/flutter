@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -60,6 +61,16 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 Finder _findButtonBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
+
+// In the case of [AlertDialog], it takes up the entire screen, since it also
+// contains the scrim. The first [Material] child of [AlertDialog] is the actual
+// dialog itself.
+Size _getDialogSize(WidgetTester tester) => tester.getSize(
+  find.descendant(
+    of: find.byType(AlertDialog),
+    matching: find.byType(Material),
+  ).first,
+);
 
 const ShapeBorder _defaultM2DialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
 final ShapeBorder _defaultM3DialogShape =  RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0));
@@ -144,6 +155,8 @@ void main() {
     expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
+    // For some unknown reason, one pixel wider on web (HTML).
+    expect(_getDialogSize(tester),  Size(280.0, isBrowser && !isCanvasKit ? 141.0 : 140.0));
   });
 
   testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
@@ -335,6 +348,26 @@ void main() {
     );
     expect(bottomLeft.dx, 40.0);
     expect(bottomLeft.dy, 576.0);
+  });
+
+  testWidgets('Dialog respects constraints with large content on large screens', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      actions: <Widget>[ ],
+      content: SizedBox(
+        width: 1000.0,
+        height: 1000.0,
+      ),
+    );
+
+    tester.view.physicalSize = const Size(2000, 2000);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(_getDialogSize(tester), const Size(560.0, 560.0));
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
@@ -593,15 +626,8 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    // The [AlertDialog] is the entire screen, since it also contains the scrim.
-    // The first [Material] child of [AlertDialog] is the actual dialog
-    // itself.
-    final Size dialogSize = tester.getSize(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(Material),
-      ).first,
-    );
+
+    final Size dialogSize = _getDialogSize(tester);
     final Size actionsSize = tester.getSize(_findButtonBar());
 
     expect(actionsSize.width, dialogSize.width);
@@ -629,15 +655,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    // The [AlertDialog] is the entire screen, since it also contains the scrim.
-    // The first [Material] child of [AlertDialog] is the actual dialog
-    // itself.
-    final Size dialogSize = tester.getSize(
-      find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(Material),
-      ).first,
-    );
+    final Size dialogSize = _getDialogSize(tester);
     final Size actionsSize = tester.getSize(find.byType(OverflowBar));
 
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
