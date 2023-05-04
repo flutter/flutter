@@ -1,0 +1,43 @@
+name: ci
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    name: 🧪 Test
+
+    env:
+      FLUTTER_STORAGE_BASE_URL: https://download.shorebird.dev
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch all branches and tags to ensure that Flutter can determine its version
+          fetch-depth: 0
+
+      - name: 🎯 Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: 📦 Install Dependencies
+        run: |
+          dart pub get -C ./dev/bots
+          dart pub get -C ./dev/tools
+
+      - name: 🧪 Run Tests
+        run: dart ./dev/bots/test.dart

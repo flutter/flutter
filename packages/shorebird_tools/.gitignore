@@ -1,0 +1,15 @@
+# See https://www.dartlang.org/guides/libraries/private-files
+
+# Files and directories created by pub
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Files generated during tests
+.test_coverage.dart
+coverage/
+.test_runner.dart
+
+# Android studio and IntelliJ
+.idea

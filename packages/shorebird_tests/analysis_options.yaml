@@ -1,0 +1,2 @@
+# This file configures the static analysis results for your project (errors,
+include: package:lints/recommended.yaml

@@ -1,0 +1,24 @@
+name: shorebird_tools
+description: Shorebird tools for Flutter
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: "^3.3.0"
+
+dependencies:
+  archive: ^3.5.1
+  args: ^2.4.2
+  mason_logger: ^0.2.12
+  path: ^1.9.0
+
+dev_dependencies:
+  build_runner: ^2.4.8
+  build_verify: ^3.1.0
+  build_version: ^2.1.1
+  mocktail: ^1.0.3
+  test: ^1.25.2
+  very_good_analysis: ^5.1.0
+
+executables:
+  shorebird_tools:

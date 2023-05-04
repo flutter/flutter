@@ -1,0 +1,61 @@
+name: shorebird_tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/shorebird_tests.yaml"
+      - "packages/shorebird_tests/lib/**"
+      - "packages/shorebird_tests/test/**"
+      - "packages/shorebird_tests/pubspec.yaml"
+      - "packages/flutter_tools/lib/**"
+      - "packages/flutter_tools/test/**"
+      - "packages/flutter_tools/pubspec.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/shorebird_tests.yaml"
+      - "packages/shorebird_tests/lib/**"
+      - "packages/shorebird_tests/test/**"
+      - "packages/shorebird_tests/pubspec.yaml"
+      - "packages/flutter_tools/lib/**"
+      - "packages/flutter_tools/test/**"
+      - "packages/flutter_tools/pubspec.yaml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    name: 🐦 Shorebird Test
+
+    env:
+      FLUTTER_STORAGE_BASE_URL: https://download.shorebird.dev
+
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v4
+        with:
+          # Fetch all branches and tags to ensure that Flutter can determine its version
+          fetch-depth: 0
+
+      - name: 🎯 Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "11"
+
+      - name: 🐦 Run Shorebird Tests
+        run: dart test
+        working-directory: packages/shorebird_tests
