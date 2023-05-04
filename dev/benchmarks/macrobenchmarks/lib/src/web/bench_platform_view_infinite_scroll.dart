@@ -31,46 +31,46 @@ void _registerFactory() {
 }
 
 /// Creates an infinite list of Link widgets and scrolls it.
-class BenchLinkInfiniteScroll extends WidgetRecorder {
-  BenchLinkInfiniteScroll.forward()
+class BenchPlatformViewInfiniteScroll extends WidgetRecorder {
+  BenchPlatformViewInfiniteScroll.forward()
       : initialOffset = 0.0,
         finalOffset = 30000.0,
         super(name: benchmarkName) {
     _registerFactory();
   }
 
-  BenchLinkInfiniteScroll.backward()
+  BenchPlatformViewInfiniteScroll.backward()
       : initialOffset = 30000.0,
         finalOffset = 0.0,
         super(name: benchmarkNameBackward) {
     _registerFactory();
   }
 
-  static const String benchmarkName = 'bench_link_infinite_scroll';
+  static const String benchmarkName = 'bench_platform_view_infinite_scroll';
   static const String benchmarkNameBackward =
-      'bench_link_infinite_scroll_backward';
+      'bench_platform_view_infinite_scroll_backward';
 
   final double initialOffset;
   final double finalOffset;
 
   @override
   Widget createWidget() => MaterialApp(
-        title: 'Infinite Link Scroll Benchmark',
-        home: _InfiniteScrollLinks(initialOffset, finalOffset),
+        title: 'Infinite Platform View Scroll Benchmark',
+        home: _InfiniteScrollPlatformViews(initialOffset, finalOffset),
       );
 }
 
-class _InfiniteScrollLinks extends StatefulWidget {
-  const _InfiniteScrollLinks(this.initialOffset, this.finalOffset);
+class _InfiniteScrollPlatformViews extends StatefulWidget {
+  const _InfiniteScrollPlatformViews(this.initialOffset, this.finalOffset);
 
   final double initialOffset;
   final double finalOffset;
 
   @override
-  State<_InfiniteScrollLinks> createState() => _InfiniteScrollLinksState();
+  State<_InfiniteScrollPlatformViews> createState() => _InfiniteScrollPlatformViewsState();
 }
 
-class _InfiniteScrollLinksState extends State<_InfiniteScrollLinks> {
+class _InfiniteScrollPlatformViewsState extends State<_InfiniteScrollPlatformViews> {
   static const Duration stepDuration = Duration(seconds: 20);
 
   late ScrollController scrollController;
