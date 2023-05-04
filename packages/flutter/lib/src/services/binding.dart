@@ -43,6 +43,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
+    _registerBindingWithEngine();
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
   }
@@ -414,6 +415,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
+  }
+
+  /// Alert the engine that the binding is registered. This instructs the engine to
+  /// register its top level window handler on Windows.
+  Future<void> _registerBindingWithEngine() async {
+    SystemChannels.platform.invokeMethod('System.registerBinding');
   }
 }
 
