@@ -243,7 +243,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile(
-      compilerConfig.wasmOpt.runIt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
+      compilerConfig.runWasmOpt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
     );
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
@@ -286,7 +286,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     if (compileResult.exitCode != 0) {
       throw Exception(_collectOutput(compileResult));
     }
-    if (compilerConfig.wasmOpt.runIt) {
+    if (compilerConfig.runWasmOpt) {
       final String wasmOptBinary = artifacts.getArtifactPath(
         Artifact.wasmOptBinary,
         platform: TargetPlatform.web_javascript

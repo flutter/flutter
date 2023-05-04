@@ -164,6 +164,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   bool get isWasm => true;
 
+  bool get runWasmOpt => wasmOpt == WasmOptLevel.full || wasmOpt == WasmOptLevel.debug;
+
   @override
   Map<String, String> toBuildSystemEnvironment() => <String, String>{
     kOmitTypeChecks: omitTypeChecks.toString(),
@@ -191,8 +193,6 @@ enum WasmOptLevel implements CliEnum {
   none;
 
   static const WasmOptLevel defaultValue = WasmOptLevel.full;
-
-  bool get runIt => this == WasmOptLevel.full || this == WasmOptLevel.debug;
 
   @override
   String get cliName => name;
