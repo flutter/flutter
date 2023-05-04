@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'two_dimensional_viewport_test.dart';
+import 'two_dimensional_utils.dart';
 
 Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
   return SizedBox(
