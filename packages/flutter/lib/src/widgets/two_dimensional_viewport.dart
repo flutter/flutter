@@ -350,7 +350,7 @@ class TwoDimensionalViewportParentData extends ParentData {
   /// The previous sibling in the parent's child list according to the traversal
   /// order specified by [RenderTwoDimensionalViewport.mainAxis].
   RenderBox? _previousSibling;
-  
+
   /// The next sibling in the parent's child list according to the traversal
   /// order specified by [RenderTwoDimensionalViewport.mainAxis].
   RenderBox? _nextSibling;
