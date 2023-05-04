@@ -4,6 +4,8 @@ import 'gesture_detector.dart';
 import 'text.dart';
 import 'widget_span.dart';
 
+// TODO(justinmc): Add SelectableArea to the examples.
+
 /// A callback that passes a [String] representing a URL.
 typedef UriStringCallback = void Function(String urlString);
 
@@ -156,9 +158,16 @@ class _TextLinkerSingle {
   /// Ranges matched by [textLinkerSingles] are built with their respective
   /// [LinkBuilder], and other text is represented with a simple [TextSpan].
   static List<InlineSpan> getSpansForMany(Iterable<_TextLinkerSingle> textLinkerSingles, String text) {
+    // Sort so that overlapping ranges can be detected and ignored.
+    final List<_TextLinkerSingle> textLinkerSinglesList = textLinkerSingles
+        .toList()
+        ..sort((_TextLinkerSingle a, _TextLinkerSingle b) {
+          return a.textRange.start.compareTo(b.textRange.start);
+        });
+
     final List<InlineSpan> spans = <InlineSpan>[];
     int index = 0;
-    for (final _TextLinkerSingle textLinkerSingle in textLinkerSingles) {
+    for (final _TextLinkerSingle textLinkerSingle in textLinkerSinglesList) {
       // Ignore overlapping ranges.
       if (index > textLinkerSingle.textRange.start) {
         continue;
@@ -184,6 +193,11 @@ class _TextLinkerSingle {
     }
 
     return spans;
+  }
+
+  @override
+  String toString() {
+    return '_TextLinkerSingle $textRange, $linkBuilder';
   }
 }
 
@@ -267,6 +281,11 @@ class TextLinker {
       );
     });
     return _TextLinkerSingle.getSpansForMany(textLinkerSingles, text);
+  }
+
+  @override
+  String toString() {
+    return 'TextLinker $rangesFinder, $linkBuilder';
   }
 }
 
