@@ -10,8 +10,8 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
 import 'package:web_engine_tester/golden_tester.dart';
-import '../common/test_initialization.dart';
 import 'paragraph/helper.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -35,10 +35,7 @@ Future<void> testMain() async {
     flutterViewEmbedder.glassPaneShadow.querySelector('flt-scene-host')!.append(testScene);
   }
 
-  setUpUnitTests(
-    emulateTesterEnvironment: false,
-    setUpTestViewDimensions: false,
-  );
+  setUpStableTestFonts();
 
   tearDown(() {
     flutterViewEmbedder.glassPaneShadow.querySelector('flt-scene')?.remove();

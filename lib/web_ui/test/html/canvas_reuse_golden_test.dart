@@ -9,8 +9,6 @@ import 'package:ui/ui.dart' hide TextStyle;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../common/test_initialization.dart';
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -24,7 +22,12 @@ Future<void> testMain() async {
     ..strokeWidth = 2.0
     ..color = const Color(0xFFFF00FF);
 
-  setUpUnitTests();
+  setUp(() async {
+    debugEmulateFlutterTesterEnvironment = true;
+    await webOnlyInitializePlatform();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/51514
   test("Canvas is reused and z-index doesn't leak across paints", () async {

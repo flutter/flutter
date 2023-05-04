@@ -7,7 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
 
-import '../../common/test_initialization.dart';
 import '../screenshot.dart';
 import '../testimage.dart';
 
@@ -18,9 +17,12 @@ void main() {
 SurfacePaint makePaint() => Paint() as SurfacePaint;
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    setUpTestViewDimensions: false,
-  );
+  setUpAll(() async {
+    debugEmulateFlutterTesterEnvironment = true;
+    await webOnlyInitializePlatform();
+    await renderer.fontCollection.debugDownloadTestFonts();
+    renderer.fontCollection.registerDownloadedFonts();
+  });
 
   const Color red = Color(0xFFFF0000);
   const Color green = Color(0xFF00FF00);

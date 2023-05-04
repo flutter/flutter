@@ -8,7 +8,6 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 
-import '../common/test_initialization.dart';
 import 'utils.dart';
 
 void main() {
@@ -16,7 +15,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests();
+  setUpUiTest();
   test('path getBounds', () {
     const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     final Path p = Path()..addRect(r);

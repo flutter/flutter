@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <emscripten.h>
 #include "export.h"
 #include "helpers.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
@@ -101,6 +102,18 @@ SKWASM_EXPORT void shader_dispose(SkShader* shader) {
   shader->unref();
 }
 
+SKWASM_EXPORT SkString* shaderSource_allocate(size_t length) {
+  return new SkString(length);
+}
+
+SKWASM_EXPORT char* shaderSource_getData(SkString* string) {
+  return string->data();
+}
+
+SKWASM_EXPORT void shaderSource_free(SkString* string) {
+  return delete string;
+}
+
 SKWASM_EXPORT SkRuntimeEffect* runtimeEffect_create(SkString* source) {
   auto result = SkRuntimeEffect::MakeForShader(*source);
   if (result.effect == nullptr) {
@@ -118,6 +131,18 @@ SKWASM_EXPORT void runtimeEffect_dispose(SkRuntimeEffect* effect) {
 
 SKWASM_EXPORT size_t runtimeEffect_getUniformSize(SkRuntimeEffect* effect) {
   return effect->uniformSize();
+}
+
+SKWASM_EXPORT SkData* data_create(size_t size) {
+  return SkData::MakeUninitialized(size).release();
+}
+
+SKWASM_EXPORT void* data_getPointer(SkData* data) {
+  return data->writable_data();
+}
+
+SKWASM_EXPORT void data_dispose(SkData* data) {
+  return data->unref();
 }
 
 SKWASM_EXPORT SkShader* shader_createRuntimeEffectShader(

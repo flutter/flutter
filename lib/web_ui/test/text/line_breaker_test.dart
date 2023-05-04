@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../paragraph/helper.dart';
+import '../html/paragraph/helper.dart';
 import 'line_breaker_test_helper.dart';
 import 'line_breaker_test_raw_data.dart';
 

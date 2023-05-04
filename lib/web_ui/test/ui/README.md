@@ -8,5 +8,5 @@ In practice, this means these tests should only use `dart:ui` APIs or
 
 ## Notes
 
-These tests should call `setUpUnitTests()` at the top level to initialize the
+These tests should call `setUpUiTest()` at the top level to initialize the
 renderer they are expected to run.

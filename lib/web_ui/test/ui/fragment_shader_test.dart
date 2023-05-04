@@ -11,8 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../common/fake_asset_manager.dart';
-import '../common/test_initialization.dart';
 import 'utils.dart';
 
 void main() {
@@ -42,9 +40,7 @@ const String kVoronoiShaderSksl = r'''
 ''';
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    setUpTestViewDimensions: false,
-  );
+  setUpUiTest();
 
   const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
 

@@ -12,16 +12,18 @@ import 'package:ui/ui.dart' hide TextStyle;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
-import '../common/test_initialization.dart';
+import 'screenshot.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(
-    setUpTestViewDimensions: false,
-  );
+  setUpAll(() async {
+    debugEmulateFlutterTesterEnvironment = true;
+  });
+
+  setUpStableTestFonts();
 
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
