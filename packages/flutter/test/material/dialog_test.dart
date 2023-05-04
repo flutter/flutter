@@ -155,8 +155,8 @@ void main() {
     expect(material3Widget.color, material3Theme.colorScheme.surface);
     expect(material3Widget.shape, _defaultM3DialogShape);
     expect(material3Widget.elevation, 6.0);
-    // For some unknown reason, one pixel wider on web.
-    expect(_getDialogSize(tester),  const Size(280.0, kIsWeb ? 141.0 : 140.0));
+    // For some unknown reason, one pixel wider on web (HTML).
+    expect(_getDialogSize(tester),  Size(280.0, isBrowser && !isCanvasKit ? 141.0 : 140.0));
   });
 
   testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
