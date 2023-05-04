@@ -622,12 +622,21 @@ def ensure_ios_tests_are_built(ios_out_dir):
   message.append(
       'gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator'
   )
-  message.append('autoninja -C %s ios_test_flutter' % ios_out_dir)
+  message.append('ninja -C %s ios_test_flutter' % ios_out_dir)
   final_message = "%s or %s doesn't exist. Please run the following commands: \n%s" % (
       ios_out_dir, ios_test_lib, '\n'.join(message)
   )
   assert os.path.exists(tmp_out_dir
                        ) and os.path.exists(ios_test_lib), final_message
+
+  ios_test_lib_time = os.path.getmtime(ios_test_lib)
+  flutter_dylib = os.path.join(tmp_out_dir, 'libFlutter.dylib')
+  flutter_dylib_time = os.path.getmtime(flutter_dylib)
+
+  final_message = '%s is older than %s. Please run the following commands: \n%s' % (
+      ios_test_lib, flutter_dylib, '\n'.join(message)
+  )
+  assert flutter_dylib_time <= ios_test_lib_time, final_message
 
 
 def assert_expected_xcode_version():
