@@ -85,7 +85,7 @@ Future<int> run(
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
           //  fully transitioned to using the new package
-          await globals.analytics.setTelemetry(value);
+          await globals.analytics.setTelemetry(false);
         }
 
         // Enable analytics if user passes in the `--enable-telemetry` option
