@@ -73,7 +73,7 @@ void main() {
       ServiceWorkerStrategy.offlineFirst,
       compilerConfig: const WasmCompilerConfig(
         omitTypeChecks: false,
-        runWasmOpt: false
+        wasmOpt: WasmOptLevel.none,
       ),
     );
 

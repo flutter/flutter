@@ -243,7 +243,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Artifacts artifacts = environment.artifacts;
     final File outputWasmFile = environment.buildDir.childFile(
-      compilerConfig.runWasmOpt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
+      compilerConfig.wasmOpt.runIt ? 'main.dart.unopt.wasm' : 'main.dart.wasm'
     );
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
     final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath, platform: TargetPlatform.web_javascript);
@@ -286,7 +286,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
     if (compileResult.exitCode != 0) {
       throw Exception(_collectOutput(compileResult));
     }
-    if (compilerConfig.runWasmOpt) {
+    if (compilerConfig.wasmOpt.runIt) {
       final String wasmOptBinary = artifacts.getArtifactPath(
         Artifact.wasmOptBinary,
         platform: TargetPlatform.web_javascript
@@ -294,14 +294,15 @@ class Dart2WasmTarget extends Dart2WebTarget {
       final File optimizedOutput = environment.buildDir.childFile('main.dart.wasm');
       final List<String> optimizeArgs = <String>[
         wasmOptBinary,
-        '-all',
+        '--all-features',
         '--closed-world',
-        '-tnh',
-        '-O3',
-        '--type-ssa',
         '--gufa',
-        '-O3',
+        '--traps-never-happen',
         '--type-merging',
+        '--type-ssa',
+        '-O3',
+        if (compilerConfig.wasmOpt == WasmOptLevel.debug)
+          '--debuginfo',
         outputWasmFile.path,
         '-o',
         optimizedOutput.path,
