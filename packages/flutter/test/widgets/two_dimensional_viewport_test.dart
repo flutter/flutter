@@ -14,7 +14,7 @@ void main() {
 
       }, variant: TargetPlatformVariant.all());
 
-      testWidgets('will return null form build for exceeding maxXIndex and maxYIndex', (WidgetTester tester) async {
+      testWidgets('will return null from build for exceeding maxXIndex and maxYIndex', (WidgetTester tester) async {
         // maxXIndex
 
         // maxYIndex
