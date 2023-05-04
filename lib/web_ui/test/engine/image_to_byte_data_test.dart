@@ -9,16 +9,14 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import '../common/test_initialization.dart';
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpAll(() async {
-    await webOnlyInitializePlatform();
-    await renderer.fontCollection.debugDownloadTestFonts();
-    renderer.fontCollection.registerDownloadedFonts();
-  });
+  setUpUnitTests();
 
   Future<Image> createTestImageByColor(Color color) async {
     final EnginePictureRecorder recorder = EnginePictureRecorder();

@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 import 'package:ui/ui.dart';
 
-import 'utils.dart';
+import '../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpUiTest();
+  setUpUnitTests();
 
   test('Gradient.radial with no focal point', () {
     expect(
@@ -26,7 +26,7 @@ Future<void> testMain() async {
           TileMode.mirror),
       isNotNull,
     );
-  }, skip: isSkwasm);
+  });
 
   // this is just a radial gradient, focal point is discarded.
   test('radial center and focal == Offset.zero and focalRadius == 0.0 is ok',
@@ -42,7 +42,7 @@ Future<void> testMain() async {
               Offset.zero,
             ),
         isNotNull);
-  }, skip: isSkwasm);
+  });
 
   test('radial center != focal and focalRadius == 0.0 is ok', () {
     expect(
@@ -56,7 +56,7 @@ Future<void> testMain() async {
               const Offset(2.0, 2.0),
             ),
         isNotNull);
-  }, skip: isSkwasm);
+  });
 
   // this would result in div/0 on skia side.
   test('radial center and focal == Offset.zero and focalRadius != 0.0 assert',
@@ -74,5 +74,5 @@ Future<void> testMain() async {
           ),
       throwsA(const TypeMatcher<AssertionError>()),
     );
-  }, skip: isSkwasm);
+  });
 }

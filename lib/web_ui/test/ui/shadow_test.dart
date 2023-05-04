@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/test_initialization.dart';
 import 'utils.dart';
 
 void main() {
@@ -16,7 +17,10 @@ void main() {
 Future<void> testMain() async {
   const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
 
-  setUpUiTest();
+  setUpUnitTests(
+    emulateTesterEnvironment: false,
+    setUpTestViewDimensions: false,
+  );
 
   test('Test drawing a shadow of an opaque object', () async {
     final ui.Picture picture = drawPicture((ui.Canvas canvas) {
