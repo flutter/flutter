@@ -6,6 +6,8 @@ import 'widget_span.dart';
 
 // TODO(justinmc): Add SelectableArea to the examples.
 
+// TODO(justinmc): On some platforms, may want to underline link?
+
 /// A callback that passes a [String] representing a URL.
 typedef UriStringCallback = void Function(String urlString);
 
