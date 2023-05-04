@@ -69,7 +69,7 @@ import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
-Java _java = Java.find(
+Java? _java = Java.find(
   logger: globals.logger,
   androidStudio: globals.androidStudio,
   fileSystem: globals.fs,
@@ -122,7 +122,6 @@ Future<T> runInContext<T>(
         java: _java,
         logger: globals.logger,
         platform: globals.platform,
-        processManager: globals.processManager,
         userMessages: globals.userMessages,
       ),
       AndroidWorkflow: () => AndroidWorkflow(

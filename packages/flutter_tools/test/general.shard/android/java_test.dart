@@ -55,11 +55,11 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           os: _FakeOperatingSystemUtilsWithoutJava(),
           platform: platform,
           processManager: processManager,
-        );
+        )!;
 
         expect(java.home, androidStudioBundledJdkHome);
         expect(java.binary, expectedJavaBinaryPath);
-        expect(java.getVersionString(), '19.0.2');
+        expect(java.getVersion(), '19.0.2');
       });
 
       testWithoutContext('finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
@@ -76,7 +76,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
             'JAVA_HOME': javaHome,
           }),
           processManager: processManager,
-        );
+        )!;
 
         expect(java.home, javaHome);
         expect(java.binary, expectedJavaBinaryPath);
@@ -93,7 +93,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           os: os,
           platform: platform,
           processManager: processManager,
-        );
+        )!;
 
         expect(java.binary, os.which('java')!.path);
         expect(java.home, isNull);
@@ -109,11 +109,11 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           os: os,
           platform: platform,
           processManager: processManager,
-        );
+        )!;
 
         expect(java.binary, isNull);
         expect(java.home, isNull);
-        expect(java.getVersionString(), isNull);
+        expect(java.getVersion(), isNull);
       });
     });
 
@@ -136,7 +136,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
       void addJavaVersionCommand(String output) {
         processManager.addCommand(
           FakeCommand(
-            command: <String>[java.binary!, '--version'],
+            command: <String>[java.binary, '--version'],
             stdout: output,
           ),
         );
@@ -148,7 +148,7 @@ java version "1.8.0_202"
 Java(TM) SE Runtime Environment (build 1.8.0_202-b10)
 Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
 ''');
-        expect(java.getVersionString(), '1.8.0');
+        expect(java.getVersion(), '1.8.0');
       });
       testWithoutContext('parses jdk 11 windows', () {
         addJavaVersionCommand('''
@@ -156,7 +156,7 @@ java version "11.0.14"
 Java(TM) SE Runtime Environment (build 11.0.14+10-b13)
 Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
 ''');
-        expect(java.getVersionString(), '11.0.14');
+        expect(java.getVersion(), '11.0.14');
       });
 
       testWithoutContext('parses jdk 11 mac/linux', () {
@@ -165,7 +165,7 @@ openjdk version "11.0.18" 2023-01-17 LTS
 OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)
 OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
 ''');
-        expect(java.getVersionString(), '11.0.18');
+        expect(java.getVersion(), '11.0.18');
       });
 
       testWithoutContext('parses jdk 17', () {
@@ -174,7 +174,7 @@ openjdk 17.0.6 2023-01-17
 OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)
 OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
 ''');
-        expect(java.getVersionString(), '17.0.6');
+        expect(java.getVersion(), '17.0.6');
       });
 
       testWithoutContext('parses jdk 19', () {
@@ -183,7 +183,7 @@ openjdk 19.0.2 2023-01-17
 OpenJDK Runtime Environment Homebrew (build 19.0.2)
 OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
 ''');
-        expect(java.getVersionString(), '19.0.2');
+        expect(java.getVersion(), '19.0.2');
       });
 
       // https://chrome-infra-packages.appspot.com/p/flutter/java/openjdk/
@@ -193,12 +193,12 @@ openjdk 11.0.2 2019-01-15
 OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
 OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
 ''');
-        expect(java.getVersionString(), '11.0.2');
+        expect(java.getVersion(), '11.0.2');
       });
 
       testWithoutContext('parses jdk two number versions', () {
         addJavaVersionCommand('openjdk 19.0 2023-01-17');
-        expect(java.getVersionString(), '19.0');
+        expect(java.getVersion(), '19.0');
       });
     });
   });

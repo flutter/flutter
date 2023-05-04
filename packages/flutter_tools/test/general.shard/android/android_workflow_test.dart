@@ -159,7 +159,7 @@ void main() {
       command: <String>[
         '/foo/bar/sdkmanager',
         '--licenses',
-      ], stdout: 'asdasassad',
+      ], stdout: 'lorem ipsum',
     ));
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
       java: FakeJava(),
@@ -382,13 +382,12 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
-      ..commandLineToolsAvailable = true
+      ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar');
     final ValidationResult validationResult = await AndroidValidator(
       java: FakeJava(),
       androidSdk: sdk,
       logger: logger,
-      processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
     ).validate();
@@ -405,12 +404,6 @@ Review licenses that have not been accepted (y/N)?
   });
 
   testUsingContext('detects minimum required SDK and buildtools', () async {
-    processManager.addCommand(const FakeCommand(
-      command: <String>[
-        'which',
-        'java',
-      ], exitCode: 1,
-    ));
     final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 28
       ..buildToolsVersion = Version(26, 0, 3);
@@ -418,7 +411,7 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..commandLineToolsAvailable = true
+      ..cmdlineToolsAvailable = true
     // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
@@ -431,10 +424,9 @@ Review licenses that have not been accepted (y/N)?
     );
 
     final AndroidValidator androidValidator = AndroidValidator(
-      java: FakeJava(),
+      java: null,
       androidSdk: sdk,
       logger: logger,
-      processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
     );
@@ -474,14 +466,13 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..commandLineToolsAvailable = false
+      ..cmdlineToolsAvailable = false
       ..directory = fileSystem.directory('/foo/bar');
 
     final AndroidValidator androidValidator = AndroidValidator(
       java: FakeJava(),
       androidSdk: sdk,
       logger: logger,
-      processManager: processManager,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
     );
@@ -503,12 +494,7 @@ Review licenses that have not been accepted (y/N)?
   testUsingContext('detects minimum required java version', () async {
     // Test with older version of JDK
     const String javaVersionText = 'openjdk version "1.7.0_212"';
-    processManager.addCommand(const FakeCommand(
-      command: <String>[
-        'home/java/bin/java',
-        '-version',
-      ], stderr: javaVersionText,
-    ));
+
     final FakeAndroidSdkVersion sdkVersion = FakeAndroidSdkVersion()
       ..sdkLevel = 29
       ..buildToolsVersion = Version(28, 0, 3);
@@ -517,20 +503,21 @@ Review licenses that have not been accepted (y/N)?
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
-      ..commandLineToolsAvailable = true
+      ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.latestVersion = sdkVersion;
 
     final String errorMessage = UserMessages().androidJavaMinimumVersion(javaVersionText);
 
-    final Java java = FakeJava();
+    final Java java = FakeJava(
+      version: JavaVersion(longText: javaVersionText, shortText: '1.7.0'),
+    );
     final ValidationResult validationResult = await AndroidValidator(
       java: java,
       androidSdk: sdk,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': java.home!},
-      processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
     expect(validationResult.type, ValidationType.partial);
@@ -553,7 +540,6 @@ Review licenses that have not been accepted (y/N)?
       androidSdk: null,
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': java.home!},
-      processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
 
@@ -583,7 +569,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   bool platformToolsAvailable = false;
 
   @override
-  bool commandLineToolsAvailable = false;
+  bool cmdlineToolsAvailable = false;
 
   @override
   Directory directory = MemoryFileSystem.test().directory('/foo/bar');

@@ -576,7 +576,7 @@ class AndroidProject extends FlutterProjectPlatform {
       os: globals.os,
       platform: globals.platform,
       processManager: globals.processManager
-    ).getVersionString();
+    )?.getVersion()?.shortText;
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
 

@@ -71,27 +71,26 @@ class AndroidWorkflow implements Workflow {
 /// newer Java compilers can be used to compile the Java application code, the SDK
 /// tools themselves required JDK 1.8. This older JDK is normally bundled with
 /// Android Studio.
+///
+/// Set [java] to null if java could not be found on the host machine.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
     required AndroidSdk? androidSdk,
-    required Java java,
+    required Java? java,
     required Logger logger,
     required Platform platform,
-    required ProcessManager processManager,
     required UserMessages userMessages,
   }) : _androidSdk = androidSdk,
        _java = java,
        _logger = logger,
        _platform = platform,
-       _processManager = processManager,
        _userMessages = userMessages,
        super('Android toolchain - develop for Android devices');
 
   final AndroidSdk? _androidSdk;
-  final Java _java;
+  final Java? _java;
   final Logger _logger;
   final Platform _platform;
-  final ProcessManager _processManager;
   final UserMessages _userMessages;
 
   @override
@@ -117,35 +116,30 @@ class AndroidValidator extends DoctorValidator {
 
   /// Returns false if we cannot determine the Java version or if the version
   /// is older that the minimum allowed version of 1.8.
-  Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
+  Future<bool> _checkJavaVersion(List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
-      if (!_processManager.canRun(javaBinary)) {
-        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(javaBinary)));
+      if (!_java!.canRun()) {
+        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java!.binary)));
         return false;
       }
-      String? javaVersionText;
+      JavaVersion? javaVersion;
       try {
-        _logger.printTrace('java -version');
-        final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
-        if (result.exitCode == 0) {
-          final List<String> versionLines = (result.stderr as String).split('\n');
-          javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        }
+        _logger.printTrace('java --version');
+        javaVersion = _java!.getVersion();
       } on Exception catch (error) {
         _logger.printTrace(error.toString());
       }
-      final Version? javaVersion = Version.parse(_extractJavaVersion(javaVersionText));
-      if (javaVersionText == null || javaVersionText.isEmpty || javaVersion == null) {
+      if (javaVersion == null) {
         // Could not determine the java version.
         messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
         return false;
       }
-      if (javaVersion < kAndroidJavaMinVersion) {
-        messages.add(ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersionText)));
+      if (Version.parse(javaVersion.shortText)! < kAndroidJavaMinVersion) {
+        messages.add(ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersion.longText)));
         return false;
       }
-      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersionText)));
+      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersion.longText)));
       return true;
     } finally {
       _task = null;
@@ -172,7 +166,7 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
 
     _task = 'Validating Android SDK command line tools are available';
-    if (!androidSdk.commandLineToolsAvailable) {
+    if (!androidSdk.cmdlineToolsAvailable) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -228,7 +222,7 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Finding Java binary';
     // Now check for the JDK.
-    final String? javaBinary = _java.binary;
+    final String? javaBinary = _java?.binary;
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
@@ -236,7 +230,7 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidJdkLocation(javaBinary)));
 
     // Check JDK version.
-    if (!await _checkJavaVersion(javaBinary, messages)) {
+    if (!await _checkJavaVersion(messages)) {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
@@ -249,7 +243,7 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
-    required Java java,
+    required Java? java,
     required AndroidSdk? androidSdk,
     required Platform platform,
     required ProcessManager processManager,
@@ -265,7 +259,7 @@ class AndroidLicenseValidator extends DoctorValidator {
        _userMessages = userMessages,
        super('Android license subvalidator');
 
-  final Java _java;
+  final Java? _java;
   final AndroidSdk? _androidSdk;
   final Stdio _stdio;
   final Platform _platform;
@@ -307,12 +301,12 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    if (_java.canRun()) {
+    if (_java == null || _java!.canRun()) {
       return false;
     }
     String? javaVersion;
     try {
-      javaVersion = _java.getVersionString();
+      javaVersion = _java?.getVersion()?.longText;
     } on Exception catch (error) {
       _logger.printTrace(error.toString());
     }

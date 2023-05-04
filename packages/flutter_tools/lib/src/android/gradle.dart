@@ -127,9 +127,11 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
 const Duration kMaxRetryTime = Duration(seconds: 10);
 
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
+///
+/// Set [java] to null if java could not be found on the host machine.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required Java java,
+    required Java? java,
     required Logger logger,
     required ProcessManager processManager,
     required FileSystem fileSystem,
@@ -146,7 +148,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
-  final Java _java;
+  final Java? _java;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
@@ -414,7 +416,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
-      final String? javaHome = _java.home;
+      final String? javaHome = _java?.home;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -684,7 +686,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = _java.home;
+      final String? javaHome = _java?.home;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -737,7 +739,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = _java.home;
+      final String? javaHome = _java?.home;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,

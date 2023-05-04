@@ -32,8 +32,11 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
+  /// Creates an [AndroidSdk].
+  ///
+  /// Set [java] to null if java could not be found on the host machine.
   AndroidSdk(this.directory, {
-    required Java java,
+    required Java? java,
   }): _java = java {
     reinitialize();
   }
@@ -44,13 +47,13 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
-  final Java _java;
+  final Java? _java;
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
   ///
   /// This is required to use the newest SDK manager which only works with
   /// the newer JDK.
-  bool get commandLineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
+  bool get cmdlineToolsAvailable => directory.childDirectory('cmdline-tools').existsSync();
 
   /// Whether the `platform-tools` or `cmdline-tools` directory exists in the Android SDK.
   ///
@@ -58,7 +61,7 @@ class AndroidSdk {
   /// the expectation that it will be downloaded later, e.g. by gradle or the
   /// sdkmanager. The [licensesAvailable] property should be used to determine
   /// whether the licenses are at least possibly accepted.
-  bool get platformToolsAvailable => commandLineToolsAvailable
+  bool get platformToolsAvailable => cmdlineToolsAvailable
      || directory.childDirectory('platform-tools').existsSync();
 
   /// Whether the `licenses` directory exists in the Android SDK.
@@ -424,7 +427,16 @@ class AndroidSdk {
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
-    return _sdkManagerEnv ??= _java.getJavaEnvironment();
+    if (_sdkManagerEnv != null) {
+      return _sdkManagerEnv!;
+    }
+    if (_java == null) {
+      _sdkManagerEnv = <String, String> {};
+    }
+
+    _sdkManagerEnv = _java!.getJavaEnvironment();
+
+    return _sdkManagerEnv!;
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.

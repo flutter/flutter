@@ -12,8 +12,8 @@ const String _kJavaExecutable = 'java';
 
 class Java {
   Java({
-    this.home,
-    this.binary,
+    required this.home,
+    required this.binary,
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils os,
@@ -35,6 +35,7 @@ class Java {
   /// 2. the runtime found in the JAVA_HOME env variable, if set; or
   /// 3. the java binary found on PATH.
   ///
+  /// Returns null if no java binary could be found.
   // TODO(andrewkolos): To prevent confusion when debugging Android-related
   // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
   // this logic should be consistently followed by any Java-dependent operation
@@ -42,7 +43,7 @@ class Java {
   // Currently, this consistency is fragile since the logic used for building
   // Android apps exists independently of this method.
   // See https://github.com/flutter/flutter/issues/124252.
-  factory Java.find({
+  static Java? find({
     required AndroidStudio? androidStudio,
     required Logger logger,
     required FileSystem fileSystem,
@@ -63,7 +64,19 @@ class Java {
       platform: platform
     );
 
-    return Java(home: home, binary: binary, logger: logger, fileSystem: fileSystem, os: os, platform: platform, processManager: processManager);
+    if (binary == null) {
+      return null;
+    }
+
+    return Java(
+      home: home,
+      binary: binary,
+      logger: logger,
+      fileSystem: fileSystem,
+      os: os,
+      platform: platform,
+      processManager: processManager,
+    );
   }
 
   /// The path of the runtime's home directory.
@@ -80,7 +93,7 @@ class Java {
   /// This should be only used for logging and validation purposes.
   /// If you need to invoke the binary directly, consider adding a new method
   /// to this class instead.
-  final String? binary;
+  final String binary;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -89,7 +102,7 @@ class Java {
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
 
-  String? _version;
+  JavaVersion? _version;
 
   /// Returns an environment variable map with
   /// 1. JAVA_HOME set if this object has a known home directory, and
@@ -100,52 +113,28 @@ class Java {
   Map<String, String> getJavaEnvironment() {
     return <String, String>{
       if (home != null) _javaHomeEnvironmentVariable: home!,
-      if (binary != null) 'PATH': _fileSystem.path.dirname(binary!) +
+      'PATH': _fileSystem.path.dirname(binary) +
                         _os.pathVarSeparator +
                         _platform.environment['PATH']!,
     };
   }
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
-  /// Returns null if version not found.
-  String? getVersionString() {
-    if (binary == null) {
-      _logger.printTrace('Could not find java binary to get version.');
-      return null;
-    }
-
+  /// Returns null if version could not be determined.
+  JavaVersion? getVersion() {
     if (_version == null) {
       final RunResult result = _processUtils.runSync(
-        <String>[binary!, '--version'],
+        <String>[binary, '--version'],
         environment: getJavaEnvironment(),
       );
       if (result.exitCode != 0) {
         _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
           ' stdout: ${result.stdout} stderr: ${result.stderr}');
       }
-      _version = _parseJavaVersion(result.stdout);
+      _version = JavaVersion.tryParseFromJavaOutput(result.stdout, logger: _logger);
     }
 
     return _version;
-  }
-
-  /// Extracts JDK version from the output of java --version.
-  String? _parseJavaVersion(String rawVersionOutput) {
-    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
-    final Iterable<RegExpMatch> matches =
-        jdkVersionRegex.allMatches(rawVersionOutput);
-    if (matches.isEmpty) {
-      _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
-      return null;
-    }
-    final String? versionString = matches.first.group(0);
-    if (versionString == null || versionString.split('_').isEmpty) {
-      _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
-      return null;
-    }
-    // Trim away _d+ from versions 1.8 and below.
-    return versionString.split('_').first;
   }
 
   bool canRun() {
@@ -200,4 +189,41 @@ return 'Could not parse java version from: \n'
     'If there is a version please look for an existing bug '
     'https://github.com/flutter/flutter/issues/'
     ' and if one does not exist file a new issue.';
+}
+
+class JavaVersion {
+  JavaVersion({
+    required this.longText,
+    required this.shortText
+  });
+
+  final String longText;
+  final String shortText;
+
+  /// Extracts JDK version from the output of java --version.
+  static JavaVersion? tryParseFromJavaOutput(String rawVersionOutput, {
+    required Logger logger,
+  }) {
+    final List<String> versionLines = rawVersionOutput.split('\n');
+    final String longText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+
+    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
+    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    final Iterable<RegExpMatch> matches =
+        jdkVersionRegex.allMatches(rawVersionOutput);
+    if (matches.isEmpty) {
+      logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+    final String? rawShortText = matches.first.group(0);
+    if (rawShortText == null || rawShortText.split('_').isEmpty) {
+      logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+
+    // Trim away _d+ from versions 1.8 and below.
+    final String shortText = rawShortText.split('_').first;
+
+    return JavaVersion(longText: longText, shortText: shortText);
+  }
 }
