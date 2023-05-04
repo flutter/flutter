@@ -29,6 +29,8 @@ Widget buildSimpleTest({
         diagonalDragBehavior: diagonalDrag ?? DiagonalDragBehavior.none,
         clipBehavior: clipBehavior ?? Clip.hardEdge,
         delegate: delegate ?? TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 99,
+          maxYIndex: 99,
           builder: (BuildContext context, ChildVicinity vicinity) {
             return Container(
               color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
@@ -154,7 +156,8 @@ class RenderSimpleTableViewport extends RenderTwoDimensionalViewport {
     for(int column = leadingColumn; column <= trailingColumn; column++) {
       double yLayoutOffset =  (leadingRow * 200) - verticalOffset.pixels;
       for (int row = leadingRow; row <= trailingRow; row++) {
-        final RenderBox child = buildOrObtainChildFor(ChildVicinity(xIndex: row, yIndex: column))!;
+        final ChildVicinity vicinity = ChildVicinity(xIndex: row, yIndex: column);
+        final RenderBox child = buildOrObtainChildFor(vicinity)!;
         child.layout(
           constraints.tighten(width: 200.0, height: 200.0),
           parentUsesSize: useParentSize,
