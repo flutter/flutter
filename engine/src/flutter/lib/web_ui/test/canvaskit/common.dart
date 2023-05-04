@@ -25,6 +25,9 @@ void setUpCanvasKitTest() {
     HtmlViewEmbedder.instance.debugClear();
     SurfaceFactory.instance.debugClear();
   });
+
+  setUp(() => notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/');
+  tearDown(() => notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = null);
 }
 
 /// Utility function for CanvasKit tests to draw pictures without

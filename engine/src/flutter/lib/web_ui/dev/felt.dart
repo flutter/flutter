@@ -10,8 +10,8 @@ import 'analyze.dart';
 import 'build.dart';
 import 'clean.dart';
 import 'exceptions.dart';
-import 'generate_fallback_font_data.dart';
 import 'licenses.dart';
+import 'roll_fallback_fonts.dart';
 import 'test_runner.dart';
 import 'utils.dart';
 
@@ -22,7 +22,7 @@ CommandRunner<bool> runner = CommandRunner<bool>(
   ..addCommand(AnalyzeCommand())
   ..addCommand(BuildCommand())
   ..addCommand(CleanCommand())
-  ..addCommand(GenerateFallbackFontDataCommand())
+  ..addCommand(RollFallbackFontsCommand())
   ..addCommand(LicensesCommand())
   ..addCommand(TestCommand());
 

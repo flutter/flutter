@@ -1988,6 +1988,7 @@
 ../../../third_party/glfw/examples
 ../../../third_party/glfw/src/CMakeLists.txt
 ../../../third_party/glfw/tests
+../../../third_party/google_fonts_for_unit_tests
 ../../../third_party/googletest
 ../../../third_party/gradle
 ../../../third_party/gtest-parallel/.git

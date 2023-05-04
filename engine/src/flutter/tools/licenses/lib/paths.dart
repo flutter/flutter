@@ -90,6 +90,7 @@ final Set<String> skippedPaths = <String>{
   r'third_party/flatbuffers/python',
   r'third_party/flatbuffers/rust',
   r'third_party/flatbuffers/ts',
+  r'third_party/google_fonts_for_unit_tests', // only used in web unit tests
   r'third_party/fontconfig', // not used in standard configurations
   r'third_party/freetype2/builds',
   r'third_party/freetype2/src/tools',
