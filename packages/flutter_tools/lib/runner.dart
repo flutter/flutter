@@ -69,17 +69,17 @@ Future<int> run(
         // Same functionality as `flutter config --no-analytics` for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-telemetry')) {
-          const bool value = false;
+
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: value).send();
-          if (!value) {
+          AnalyticsConfigEvent(enabled: false).send();
+          if (!false) {
             // Normally, the tool waits for the analytics to all send before the
             // tool exits, but only when analytics are enabled. When reporting that
             // analytics have been disable, the wait must be done here instead.
             await globals.flutterUsage.ensureAnalyticsSent();
           }
-          globals.flutterUsage.enabled = value;
+          globals.flutterUsage.enabled = false;
           globals.printStatus('Analytics reporting disabled.');
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
@@ -94,15 +94,14 @@ Future<int> run(
         // Same functionality as `flutter config --analytics` for enabling
         // except with the `value` hard coded as true
         if (args.contains('--enable-telemetry')) {
-          const bool value = true;
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: value).send();
+          AnalyticsConfigEvent(enabled: true).send();
 
-          globals.flutterUsage.enabled = value;
+          globals.flutterUsage.enabled = true;
           globals.printStatus('Analytics reporting enabled.');
 
-          await globals.analytics.setTelemetry(value);
+          await globals.analytics.setTelemetry(true);
         }
 
 
