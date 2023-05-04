@@ -13,6 +13,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import 'android_studio.dart';
+import 'java.dart';
 
 // ANDROID_HOME is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
@@ -36,7 +37,9 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory) {
+  AndroidSdk(this.directory, {
+    required Java? java,
+  }): _java = java {
     reinitialize();
   }
 
@@ -48,6 +51,7 @@ class AndroidSdk {
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
+  final Java? _java;
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
   ///
@@ -73,7 +77,9 @@ class AndroidSdk {
   /// the SDK on demand.
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
-  static AndroidSdk? locateAndroidSdk() {
+  static AndroidSdk? locateAndroidSdk({
+    Java? java,
+  }) {
     String? findAndroidHomeDir() {
       String? androidHomeDir;
       if (globals.config.containsKey('android-sdk')) {
@@ -152,7 +158,7 @@ class AndroidSdk {
       return null;
     }
 
-    return AndroidSdk(globals.fs.directory(androidHomeDir));
+    return AndroidSdk(globals.fs.directory(androidHomeDir), java: java);
   }
 
   static bool validSdkDirectory(String dir) {
@@ -468,32 +474,15 @@ class AndroidSdk {
   /// * the JDK bundled with Android Studio, if one is found;
   /// * the JAVA_HOME in the ambient environment, if set;
   String? get javaHome {
-    return findJavaHome(
-      androidStudio: globals.androidStudio,
-      fileSystem: globals.fs,
-      operatingSystemUtils: globals.os,
-      platform: globals.platform,
-    );
+    if (_java != null) {
+      return _java!.home;
+    }
+
+    return findJavaHome();
   }
 
-
-  static String? findJavaHome({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-  }) {
-    if (androidStudio?.javaPath != null) {
-      globals.printTrace("Using Android Studio's java.");
-      return androidStudio!.javaPath!;
-    }
-
-    final String? javaHomeEnv = platform.environment[javaHomeEnvironmentVariable];
-    if (javaHomeEnv != null) {
-      globals.printTrace('Using JAVA_HOME from environment valuables.');
-      return javaHomeEnv;
-    }
-    return null;
+  static String? findJavaHome() {
+    return globals.java?.home;
   }
 
   /// Finds the java binary that is used for all operations across the tool.
@@ -513,12 +502,7 @@ class AndroidSdk {
     required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
   }) {
-    final String? javaHome = findJavaHome(
-      androidStudio: androidStudio,
-      fileSystem: fileSystem,
-      operatingSystemUtils: operatingSystemUtils,
-      platform: platform,
-    );
+    final String? javaHome = findJavaHome();
 
     if (javaHome != null) {
       return fileSystem.path.join(javaHome, 'bin', 'java');
@@ -544,27 +528,10 @@ class AndroidSdk {
         ' and if one does not exist file a new issue.';
   }
 
-  Map<String, String>? _sdkManagerEnv;
-
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
-    if (_sdkManagerEnv == null) {
-      // If we can locate Java, then add it to the path used to run the Android SDK manager.
-      _sdkManagerEnv = <String, String>{};
-      final String? javaBinary = findJavaBinary(
-        androidStudio: globals.androidStudio,
-        fileSystem: globals.fs,
-        operatingSystemUtils: globals.os,
-        platform: globals.platform,
-      );
-      if (javaBinary != null && globals.platform.environment['PATH'] != null) {
-        _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(javaBinary) +
-                                  globals.os.pathVarSeparator +
-                                  globals.platform.environment['PATH']!;
-      }
-    }
-    return _sdkManagerEnv!;
+    return _java?.getJavaEnvironment() ?? <String, String>{};
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.
