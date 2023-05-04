@@ -294,14 +294,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
       final File optimizedOutput = environment.buildDir.childFile('main.dart.wasm');
       final List<String> optimizeArgs = <String>[
         wasmOptBinary,
-        '-all',
+        '--all-features',
         '--closed-world',
-        '-tnh',
+        '--traps-never-happen',
         '-O3',
         '--type-ssa',
         '--gufa',
         '-O3',
         '--type-merging',
+        if (compilerConfig.wasmOpt == WasmOptLevel.debug)
+          '--debuginfo',
         outputWasmFile.path,
         '-o',
         optimizedOutput.path,
