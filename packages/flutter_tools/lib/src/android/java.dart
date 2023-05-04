@@ -147,9 +147,10 @@ String? _findJavaHome({
   required AndroidStudio? androidStudio,
   required Platform platform,
 }) {
-  if (androidStudio?.javaPath != null) {
+  final String? androidStudioJavaPath = androidStudio?.javaPath;
+  if (androidStudioJavaPath != null) {
     logger.printTrace("Using Android Studio's java.");
-    return androidStudio!.javaPath;
+    return androidStudioJavaPath;
   }
 
   final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
@@ -167,18 +168,24 @@ String? _findJavaBinary({
   required OperatingSystemUtils operatingSystemUtils,
   required Platform platform,
 }) {
-  if (javaHome != null) {
-    return fileSystem.path.join(javaHome, 'bin', 'java');
-  }
+  try {
+    if (javaHome != null) {
+      return fileSystem.path.join(javaHome, 'bin', 'java');
+    }
 
-  // Fallback to PATH based lookup.
-  final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
-  if (pathJava != null) {
-    logger.printTrace('Using java from PATH.');
-  } else {
-    logger.printTrace('Could not find java path.');
+    // Fallback to PATH based lookup.
+    final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
+    if (pathJava != null) {
+      logger.printTrace('Using java from PATH.');
+    } else {
+      logger.printTrace('Could not find java path.');
+    }
+    return pathJava;
+  } on Exception catch (e) {
+    logger.printTrace('Exception thrown while searching for java:');
+    logger.printTrace(e.toString());
+    return null;
   }
-  return pathJava;
 }
 
 // Returns a user visible String that says the tool failed to parse
