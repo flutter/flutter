@@ -1484,8 +1484,25 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
   }
 
+  TextPosition? _originWordSelectionStart;
+  TextPosition? _originWordSelectionEnd;
+  bool? _selectableContainsOriginWord;
   SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
+    // Cache the boundaries of the origin word. If the origin word is not in the
+    // current selectable then the _textSelectionEnd will be null.
+    if (_selectableContainsOriginWord == null) {
+      _originWordSelectionStart ??= _textSelectionStart;
+      _originWordSelectionEnd ??= _textSelectionEnd;
+    }
+
+    if (_originWordSelectionStart != null && _originWordSelectionEnd != null) {
+      _selectableContainsOriginWord ??= true;
+    } else {
+      _selectableContainsOriginWord ??= false;
+    }
+
     _setSelectionPosition(null, isEnd: isEnd);
+
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
@@ -1499,12 +1516,22 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     );
 
     final TextPosition position = paragraph.getPositionForOffset(adjustedOffset);
+
     // Check if the original local position is within the rect, if it is not then
     // we do not need to look up the word boundary for that position. This is to
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
     final (TextPosition start, TextPosition end)? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
     final TextPosition targetPosition = _clampTextPosition(wordBoundary != null ? isEnd ? wordBoundary.$2 : wordBoundary.$1 : position);
+
+    if (_selectableContainsOriginWord!) {
+      // Swap the start and end.
+      if (targetPosition.offset >= _originWordSelectionEnd!.offset) {
+        _setSelectionPosition(_originWordSelectionStart, isEnd: !isEnd);
+      } else if (targetPosition.offset <= _originWordSelectionStart!.offset) {
+        _setSelectionPosition(_originWordSelectionEnd, isEnd: !isEnd);
+      }
+    }
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
@@ -1554,6 +1581,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
+    _originWordSelectionStart = null;
+    _originWordSelectionEnd = null;
+    _selectableContainsOriginWord = null;
+
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position)) {
       return SelectionResult.end;

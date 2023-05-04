@@ -499,45 +499,18 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
-  SelectionPoint? _initialDragStartSelectionPoint;
-  bool _shouldMoveEndEdge(TapDragUpdateDetails details) {
-    assert(_selectionDelegate.value.startSelectionPoint != null || _initialDragStartSelectionPoint != null);
-    _initialDragStartSelectionPoint = _initialDragStartSelectionPoint ?? _selectionDelegate.value.startSelectionPoint!;
-    final bool isDraggingForwardFromOrigin = details.localOffsetFromOrigin.dx > 0;
-    final bool isPositionAboveStartingBaseline = details.localPosition.dy < _initialDragStartSelectionPoint!.localPosition.dy;
-    final bool isPositionClampedToStartingLine = isPositionAboveStartingBaseline && details.localPosition.dy >= _initialDragStartSelectionPoint!.localPosition.dy - _initialDragStartSelectionPoint!.lineHeight;
-    final bool isPositionAtOrBelowStartingBaseline = details.localPosition.dy >= _initialDragStartSelectionPoint!.localPosition.dy;
-
-    if (isDraggingForwardFromOrigin && isPositionClampedToStartingLine) {
-      return true;
-    } else if (!isDraggingForwardFromOrigin && isPositionClampedToStartingLine) {
-      return false;
-    }
-
-    return isPositionAtOrBelowStartingBaseline;
-  }
-
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         _selectEndTo(offset: details.globalPosition, continuous: true);
       case 2:
-        if (_shouldMoveEndEdge(details)) {
-          // Hold the start edge at the word located at the beginning of the drag.
-          _selectStartTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, textGranularity: TextGranularity.word);
-          _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-        } else {
-          _selectStartTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
-          // Hold the end edge at the word located at the beginning of the drag.
-          _selectEndTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, textGranularity: TextGranularity.word);
-        }
+        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
     }
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
-    _initialDragStartSelectionPoint = null;
   }
 
   void _updateSelectedContentIfNeeded() {
