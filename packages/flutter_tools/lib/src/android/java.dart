@@ -89,7 +89,7 @@ class Java {
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
 
-  late String? _version;
+  String? _version;
 
   /// Returns an environment variable map with
   /// 1. JAVA_HOME set if this object has a known home directory, and
@@ -152,8 +152,6 @@ class Java {
     return _processManager.canRun(binary);
   }
 }
-
-
 
 String? _findJavaHome({
   required Logger logger,

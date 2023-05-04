@@ -23,7 +23,9 @@ void main() {
   setUp(() {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
-    platform = FakePlatform();
+    platform = FakePlatform(environment: <String, String>{
+      'PATH': '',
+    });
     processManager = FakeProcessManager.empty();
   });
 
@@ -62,7 +64,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
       testWithoutContext('finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
         final AndroidStudio androidStudio = _FakeAndroidStudioWithoutJdk();
-        final String expectedJavaBinaryPath = fs.path.join('java-home-path', 'bin', 'java');
+        const String javaHome = '/java/home';
+        final String expectedJavaBinaryPath = fs.path.join(javaHome, 'bin', 'java');
 
         final Java java = Java.find(
           androidStudio: androidStudio,
@@ -70,12 +73,12 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           fileSystem: fs,
           os: _FakeOperatingSystemUtilsWithoutJava(),
           platform: FakePlatform(environment: <String, String>{
-            'JAVA_HOME': '/java/home',
+            'JAVA_HOME': javaHome,
           }),
           processManager: processManager,
         );
 
-        expect(java.home, '/java/home');
+        expect(java.home, javaHome);
         expect(java.binary, expectedJavaBinaryPath);
       });
 
@@ -92,7 +95,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         );
 
-        expect(java.binary, os.which('java'));
+        expect(java.binary, os.which('java')!.path);
         expect(java.home, isNull);
       });
 
@@ -116,15 +119,14 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
     group('getVersionString', () {
       late Java java;
-      late FakeProcessManager processManager;
 
       setUp(() {
         processManager = FakeProcessManager.empty();
         java = Java(
-          fileSystem: MemoryFileSystem.test(),
-          logger: BufferLogger.test(),
+          fileSystem: fs,
+          logger: logger,
           os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
+          platform: platform,
           processManager: processManager,
           binary: 'javaHome/bin/java',
           home: 'javaHome',
@@ -193,9 +195,10 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
 ''');
         expect(java.getVersionString(), '11.0.2');
       });
-      testWithoutContext('parses jdk output from ci', () {
+
+      testWithoutContext('parses jdk two number versions', () {
         addJavaVersionCommand('openjdk 19.0 2023-01-17');
-        expect(java.getVersionString(), '11.0.2');
+        expect(java.getVersionString(), '19.0');
       });
     });
   });
@@ -211,7 +214,7 @@ class _FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
   String? get javaPath => null;
 }
 
-class _FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUtils {
+class _FakeOperatingSystemUtilsWithJava extends FakeOperatingSystemUtils {
   _FakeOperatingSystemUtilsWithJava(this._fileSystem);
 
   final FileSystem _fileSystem;
@@ -224,7 +227,7 @@ class _FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemU
   }
 }
 
-class _FakeOperatingSystemUtilsWithoutJava extends Fake implements OperatingSystemUtils {
+class _FakeOperatingSystemUtilsWithoutJava extends FakeOperatingSystemUtils {
   @override
   File? which(String execName) {
     if (execName == 'java') {

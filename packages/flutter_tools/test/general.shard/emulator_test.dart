@@ -393,4 +393,7 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   String getAvdPath() => 'avd';
+
+  @override
+  Map<String, String> get sdkManagerEnv => <String, String>{};
 }
