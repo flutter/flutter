@@ -50,11 +50,12 @@ const List<String> _kWasmOptLinuxArgrs = <String> [
   'Artifact.wasmOptBinary.TargetPlatform.web_javascript',
   '--all-features',
   '--closed-world',
-  '--gufa',
   '--traps-never-happen',
-  '--type-merging',
-  '--type-ssa',
   '-O3',
+  '--type-ssa',
+  '--gufa',
+  '-O3',
+  '--type-merging',
 ];
 
 /// The result of calling `.parent` on a Memory directory pointing to
