@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -104,10 +106,13 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
+    final ui.Image image = await builder.collate(5);
+
     await expectLater(
-      builder.collate(5),
+      image,
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
+    image.dispose();
   }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
   );
@@ -137,10 +142,13 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
+    final ui.Image image = await builder.collate(5);
+
     await expectLater(
-      builder.collate(5),
+      image,
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
+    image.dispose();
   }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
   );

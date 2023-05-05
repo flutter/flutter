@@ -78,6 +78,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
     }
     Future<ui.Image?> imageFuture;
+    bool disposeImage = false; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image?>) {
       imageFuture = item;
     } else if (item is ui.Image) {
@@ -90,6 +91,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+      disposeImage = true;
     } else {
       throw AssertionError('must provide a Finder, Image, Future<Image>, List<int>, or Future<List<int>>');
     }
@@ -116,7 +118,9 @@ class MatchesGoldenFile extends AsyncMatcher {
           return ex.message;
         }
       } finally {
-        image.dispose();
+        if (disposeImage) {
+          image.dispose();
+        }
       }
     }, additionalTime: const Duration(minutes: 1));
   }
