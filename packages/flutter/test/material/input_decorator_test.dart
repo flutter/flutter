@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1764,6 +1765,40 @@ void main() {
     );
 
     expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
+  });
+
+  testWidgets('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'label',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(TextField));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
