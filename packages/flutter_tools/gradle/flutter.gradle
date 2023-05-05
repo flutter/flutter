@@ -985,7 +985,7 @@ class FlutterPlugin implements Plugin<Project> {
                     def shorebirdYamlFile = new File("${outputDir}/flutter_assets/shorebird.yaml")
                     def flavor = variant.flavorName                        
                     def shorebirdYaml = new Yaml().load(shorebirdYamlFile.text)
-                    def flavorAppId = shorebirdYaml['app_id'][flavor]
+                    def flavorAppId = shorebirdYaml['flavors'][flavor]
                     if (flavorAppId == null) {
                         throw new GradleException("Cannot find app_id for ${flavor} in shorebird.yaml")
                     }
