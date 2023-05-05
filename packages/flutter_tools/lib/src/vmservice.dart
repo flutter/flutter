@@ -41,6 +41,7 @@ const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
 const String kFlutterGetIOSBuildOptionsServiceName = 'flutterGetIOSBuildOptions';
 const String kFlutterGetAndroidBuildVariantsServiceName = 'flutterGetAndroidBuildVariants';
+const String kFlutterGetIOSDeeplinkSettingsServiceName = 'flutterGetIOSDeeplinkSettings';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -336,6 +337,25 @@ Future<vm_service.VmService> setUpVmService({
     });
     registrationRequests.add(
       vmService.registerService(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias),
+    );
+
+    vmService.registerServiceCallback(kFlutterGetIOSDeeplinkSettingsServiceName, (Map<String, Object?> params) async {
+      final XcodeUniversalLinkSettings settings = await flutterProject.ios.universalLinkSettings(
+        configuration: params['configuration']! as String,
+        scheme: params['scheme']! as String,
+        target: params['target']! as String,
+      );
+      return <String, Object>{
+        'result': <String, Object>{
+          kResultType: kResultTypeSuccess,
+          'bundleIdentifier': settings.bundleIdentifier ?? '',
+          'teamIdentifier': settings.teamIdentifier ?? '',
+          'associatedDomains': settings.associatedDomains,
+        },
+      };
+    });
+    registrationRequests.add(
+      vmService.registerService(kFlutterGetIOSDeeplinkSettingsServiceName, 'Flutter Tools'),
     );
   }
 
