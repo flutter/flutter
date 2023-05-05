@@ -155,7 +155,7 @@ void main() {
 
     expect(box.size.width, 16.0);
     expect(containerBox.size.height, 600.0);
-    expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
+    expect(find.byType(VerticalDivider), paints..drrect(strokeWidth: 0.0));
   });
 
   testWidgets('Vertical divider custom indentation', (WidgetTester tester) async {
