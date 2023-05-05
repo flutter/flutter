@@ -40,27 +40,22 @@ Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer,
              uint32_t rasterizerTracingThreshold,
              bool checkerboardRasterCacheImages,
              bool checkerboardOffscreenLayers) {
-  // Currently only supports a single window.
-  auto viewport_metrics = UIDartState::Current()
-                              ->platform_configuration()
-                              ->get_window(0)
-                              ->viewport_metrics();
-
-  layer_tree_ = std::make_shared<LayerTree>(
-      SkISize::Make(viewport_metrics.physical_width,
-                    viewport_metrics.physical_height),
-      static_cast<float>(viewport_metrics.device_pixel_ratio));
-  layer_tree_->set_root_layer(std::move(rootLayer));
-  layer_tree_->set_rasterizer_tracing_threshold(rasterizerTracingThreshold);
-  layer_tree_->set_checkerboard_raster_cache_images(
-      checkerboardRasterCacheImages);
-  layer_tree_->set_checkerboard_offscreen_layers(checkerboardOffscreenLayers);
+  layer_tree_config_.root_layer = std::move(rootLayer);
+  layer_tree_config_.rasterizer_tracing_threshold = rasterizerTracingThreshold;
+  layer_tree_config_.checkerboard_raster_cache_images =
+      checkerboardRasterCacheImages;
+  layer_tree_config_.checkerboard_offscreen_layers =
+      checkerboardOffscreenLayers;
 }
 
 Scene::~Scene() {}
 
+bool Scene::valid() {
+  return layer_tree_config_.root_layer != nullptr;
+}
+
 void Scene::dispose() {
-  layer_tree_.reset();
+  layer_tree_config_.root_layer.reset();
   ClearDartWrapper();
 }
 
@@ -69,8 +64,8 @@ Dart_Handle Scene::toImageSync(uint32_t width,
                                Dart_Handle raw_image_handle) {
   TRACE_EVENT0("flutter", "Scene::toImageSync");
 
-  if (!layer_tree_) {
-    return tonic::ToDart("Scene did not contain a layer tree.");
+  if (!valid()) {
+    return tonic::ToDart("Scene has been disposed.");
   }
 
   Scene::RasterizeToImage(width, height, raw_image_handle);
@@ -82,32 +77,32 @@ Dart_Handle Scene::toImage(uint32_t width,
                            Dart_Handle raw_image_callback) {
   TRACE_EVENT0("flutter", "Scene::toImage");
 
-  if (!layer_tree_) {
-    return tonic::ToDart("Scene did not contain a layer tree.");
+  if (!valid()) {
+    return tonic::ToDart("Scene has been disposed.");
   }
 
-  return Picture::RasterizeLayerTreeToImage(std::move(layer_tree_), width,
-                                            height, raw_image_callback);
+  return Picture::RasterizeLayerTreeToImage(BuildLayerTree(width, height),
+                                            raw_image_callback);
 }
 
 static sk_sp<DlImage> CreateDeferredImage(
     bool impeller,
-    std::shared_ptr<LayerTree> layer_tree,
-    uint32_t width,
-    uint32_t height,
+    std::unique_ptr<LayerTree> layer_tree,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner,
     fml::RefPtr<SkiaUnrefQueue> unref_queue) {
 #if IMPELLER_SUPPORTS_RENDERING
   if (impeller) {
-    return DlDeferredImageGPUImpeller::Make(
-        std::move(layer_tree), SkISize::Make(width, height),
-        std::move(snapshot_delegate), std::move(raster_task_runner));
+    return DlDeferredImageGPUImpeller::Make(std::move(layer_tree),
+                                            std::move(snapshot_delegate),
+                                            std::move(raster_task_runner));
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
-  const SkImageInfo image_info = SkImageInfo::Make(
-      width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+  const auto& frame_size = layer_tree->frame_size();
+  const SkImageInfo image_info =
+      SkImageInfo::Make(frame_size.width(), frame_size.height(),
+                        kRGBA_8888_SkColorType, kPremul_SkAlphaType);
   return DlDeferredImageGPUSkia::MakeFromLayerTree(
       image_info, std::move(layer_tree), std::move(snapshot_delegate),
       raster_task_runner, std::move(unref_queue));
@@ -126,15 +121,25 @@ void Scene::RasterizeToImage(uint32_t width,
 
   auto image = CanvasImage::Create();
   auto dl_image = CreateDeferredImage(
-      dart_state->IsImpellerEnabled(), layer_tree_, width, height,
+      dart_state->IsImpellerEnabled(), BuildLayerTree(width, height),
       std::move(snapshot_delegate), std::move(raster_task_runner),
       std::move(unref_queue));
   image->set_image(dl_image);
   image->AssociateWithDartWrapper(raw_image_handle);
 }
 
-std::shared_ptr<flutter::LayerTree> Scene::takeLayerTree() {
-  return std::move(layer_tree_);
+std::unique_ptr<flutter::LayerTree> Scene::takeLayerTree(uint64_t width,
+                                                         uint64_t height) {
+  return BuildLayerTree(width, height);
+}
+
+std::unique_ptr<LayerTree> Scene::BuildLayerTree(uint32_t width,
+                                                 uint32_t height) {
+  if (!valid()) {
+    return nullptr;
+  }
+  return std::make_unique<LayerTree>(layer_tree_config_,
+                                     SkISize::Make(width, height));
 }
 
 }  // namespace flutter

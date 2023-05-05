@@ -450,18 +450,18 @@ void Engine::ScheduleFrame(bool regenerate_layer_tree) {
   animator_->RequestFrame(regenerate_layer_tree);
 }
 
-void Engine::Render(std::shared_ptr<flutter::LayerTree> layer_tree) {
+void Engine::Render(std::unique_ptr<flutter::LayerTree> layer_tree,
+                    float device_pixel_ratio) {
   if (!layer_tree) {
     return;
   }
 
   // Ensure frame dimensions are sane.
-  if (layer_tree->frame_size().isEmpty() ||
-      layer_tree->device_pixel_ratio() <= 0.0f) {
+  if (layer_tree->frame_size().isEmpty() || device_pixel_ratio <= 0.0f) {
     return;
   }
 
-  animator_->Render(std::move(layer_tree));
+  animator_->Render(std::move(layer_tree), device_pixel_ratio);
 }
 
 void Engine::UpdateSemantics(SemanticsNodeUpdates update,

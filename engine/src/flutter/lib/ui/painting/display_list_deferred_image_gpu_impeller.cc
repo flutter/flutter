@@ -3,20 +3,20 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
-#include "display_list_deferred_image_gpu_impeller.h"
 
 #include <utility>
+
+#include "flutter/fml/make_copyable.h"
 
 namespace flutter {
 
 sk_sp<DlDeferredImageGPUImpeller> DlDeferredImageGPUImpeller::Make(
-    std::shared_ptr<LayerTree> layer_tree,
-    const SkISize& size,
+    std::unique_ptr<LayerTree> layer_tree,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
   return sk_sp<DlDeferredImageGPUImpeller>(new DlDeferredImageGPUImpeller(
       DlDeferredImageGPUImpeller::ImageWrapper::Make(
-          std::move(layer_tree), size, std::move(snapshot_delegate),
+          std::move(layer_tree), std::move(snapshot_delegate),
           std::move(raster_task_runner))));
 }
 
@@ -106,13 +106,12 @@ DlDeferredImageGPUImpeller::ImageWrapper::Make(
 
 std::shared_ptr<DlDeferredImageGPUImpeller::ImageWrapper>
 DlDeferredImageGPUImpeller::ImageWrapper::Make(
-    std::shared_ptr<LayerTree> layer_tree,
-    const SkISize& size,
+    std::unique_ptr<LayerTree> layer_tree,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::RefPtr<fml::TaskRunner> raster_task_runner) {
-  auto wrapper = std::shared_ptr<ImageWrapper>(
-      new ImageWrapper(nullptr, size, std::move(snapshot_delegate),
-                       std::move(raster_task_runner)));
+  auto wrapper = std::shared_ptr<ImageWrapper>(new ImageWrapper(
+      nullptr, layer_tree->frame_size(), std::move(snapshot_delegate),
+      std::move(raster_task_runner)));
   wrapper->SnapshotDisplayList(std::move(layer_tree));
   return wrapper;
 }
@@ -152,10 +151,11 @@ bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
 }
 
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
-    std::shared_ptr<LayerTree> layer_tree) {
+    std::unique_ptr<LayerTree> layer_tree) {
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner_,
-      [weak_this = weak_from_this(), layer_tree = std::move(layer_tree)] {
+      fml::MakeCopyable([weak_this = weak_from_this(),
+                         layer_tree = std::move(layer_tree)]() {
         TRACE_EVENT0("flutter", "SnapshotDisplayList (impeller)");
         auto wrapper = weak_this.lock();
         if (!wrapper) {
@@ -183,7 +183,7 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
           return;
         }
         wrapper->texture_ = snapshot->impeller_texture();
-      });
+      }));
 }
 
 std::optional<std::string>

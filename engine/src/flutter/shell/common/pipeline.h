@@ -252,12 +252,15 @@ class Pipeline {
 };
 
 struct LayerTreeItem {
-  LayerTreeItem(std::shared_ptr<LayerTree> layer_tree,
-                std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder)
+  LayerTreeItem(std::unique_ptr<LayerTree> layer_tree,
+                std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder,
+                float device_pixel_ratio)
       : layer_tree(std::move(layer_tree)),
-        frame_timings_recorder(std::move(frame_timings_recorder)) {}
-  std::shared_ptr<LayerTree> layer_tree;
+        frame_timings_recorder(std::move(frame_timings_recorder)),
+        device_pixel_ratio(device_pixel_ratio) {}
+  std::unique_ptr<LayerTree> layer_tree;
   std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder;
+  float device_pixel_ratio;
 };
 
 using LayerTreePipeline = Pipeline<LayerTreeItem>;
