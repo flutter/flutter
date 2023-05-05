@@ -193,6 +193,7 @@ targets:
     timeout: 60
 
   - name: Linux Unopt
+    bringup: true
     recipe: engine/engine_unopt
     properties:
       add_recipes_cq: "true"
@@ -296,7 +297,6 @@ targets:
       config_name: linux_web_engine
 
   - name: Linux linux_unopt
-    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
