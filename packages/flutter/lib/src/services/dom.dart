@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+
 // For now, we're hiding dart:js_interop's `@JS` to avoid a conflict with
 // package:js' `@JS`. In the future, we should be able to remove package:js
 // altogether and just import dart:js_interop.
@@ -272,6 +274,15 @@ extension DomElementExtension on DomElement {
 
   /// Returns the class list of this element.
   external DomTokenList get classList;
+
+  @JS('setAttribute')
+  external JSVoid _setAttribute(JSString name, JSString value);
+  JSVoid setAttribute(String name, String value) =>
+      _setAttribute(name.toJS, value.toJS);
+
+  @JS('removeAttribute')
+  external JSVoid _removeAttribute(JSString name);
+  void removeAttribute(String name) => _removeAttribute(name.toJS);
 }
 
 /// An HTML element in the DOM.
@@ -370,6 +381,13 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
     priority ??= '';
     _setProperty(propertyName.toJS, value.toJS, priority.toJS);
   }
+
+  @JS('removeProperty')
+  external JSString _removeProperty(JSString property);
+
+  /// Removes a CSS property by name.
+  String removeProperty(String property) =>
+      _removeProperty(property.toJS).toDart;
 }
 
 /// The HTML head element.

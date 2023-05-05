@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_html_element_controller_io.dart'
+    if (dart.library.js_util) '_html_element_controller_web.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -337,7 +339,7 @@ class UiKitView extends StatefulWidget {
 /// may cause difficulty for users trying to enable accessibility.
 ///
 /// {@macro flutter.widgets.AndroidView.lifetime}
-class HtmlElementView extends StatelessWidget {
+class HtmlElementView extends StatefulWidget {
   /// Creates a platform view for Flutter Web.
   ///
   /// `viewType` identifies the type of platform view to create.
@@ -345,6 +347,8 @@ class HtmlElementView extends StatelessWidget {
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
+    this.htmlAttributes,
+    this.cssStyles,
   }) : assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
 
   /// The unique identifier for the HTML view type to be embedded by this widget.
@@ -357,10 +361,46 @@ class HtmlElementView extends StatelessWidget {
   /// May be null.
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
+  /// The HTML attributes to be set on the HTML element.
+  final Map<String, String>? htmlAttributes;
+
+  /// The CSS styles to be applied to the HTML element.
+  final Map<String, String>? cssStyles;
+
+  @override
+  State<HtmlElementView> createState() => _HtmlElementViewState();
+}
+
+Iterable<String> _keysToRemove(Map<String, String>? oldMap, Map<String, String>? newMap) {
+  if (oldMap == null) {
+    return const <String>[];
+  }
+  if (newMap == null) {
+    return oldMap.keys;
+  }
+  return oldMap.keys.where((String key) => !newMap.containsKey(key));
+}
+
+class _HtmlElementViewState extends State<HtmlElementView> {
+  late HtmlElementViewController _controller;
+
+  @override
+  void didUpdateWidget(covariant HtmlElementView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Only update the existing HTML element if it's of the same type.
+    //
+    // If it's a different type, then a new element will be created and it'll
+    // be initialized correctly with all the necessary attributes and styles.
+    if (oldWidget.viewType == widget.viewType) {
+      _updateHtmlElementView(oldWidget: oldWidget);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlatformViewLink(
-      viewType: viewType,
+      viewType: widget.viewType,
       onCreatePlatformView: _createHtmlElementView,
       surfaceFactory: (BuildContext context, PlatformViewController controller) {
         return PlatformViewSurface(
@@ -373,57 +413,34 @@ class HtmlElementView extends StatelessWidget {
   }
 
   /// Creates the controller and kicks off its initialization.
-  _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
-    controller._initialize().then((_) {
+  HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
+    _controller = HtmlElementViewController(params.id, widget.viewType);
+    _controller.initialize().then((_) {
+      _updateHtmlElementView(oldWidget: null);
       params.onPlatformViewCreated(params.id);
-      onPlatformViewCreated?.call(params.id);
+      widget.onPlatformViewCreated?.call(params.id);
     });
-    return controller;
-  }
-}
-
-class _HtmlElementViewController extends PlatformViewController {
-  _HtmlElementViewController(
-    this.viewId,
-    this.viewType,
-  );
-
-  @override
-  final int viewId;
-
-  /// The unique identifier for the HTML view type to be embedded by this widget.
-  ///
-  /// A PlatformViewFactory for this type must have been registered.
-  final String viewType;
-
-  bool _initialized = false;
-
-  Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
-    };
-    await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    _initialized = true;
+    return _controller;
   }
 
-  @override
-  Future<void> clearFocus() async {
-    // Currently this does nothing on Flutter Web.
-    // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
-  }
+  void _updateHtmlElementView({required HtmlElementView? oldWidget}) {
+    // Remove old attributes and styles that don't exist anymore.
+    if (oldWidget != null) {
+      final Iterable<String> attributesToRemove =
+          _keysToRemove(oldWidget.htmlAttributes, widget.htmlAttributes);
+      _controller.removeAttributes(attributesToRemove);
 
-  @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
-    // We do not dispatch pointer events to HTML views because they may contain
-    // cross-origin iframes, which only accept user-generated events.
-  }
+      final Iterable<String> stylesToRemove =
+          _keysToRemove(oldWidget.cssStyles, widget.cssStyles);
+      _controller.removeStyles(stylesToRemove);
+    }
 
-  @override
-  Future<void> dispose() async {
-    if (_initialized) {
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
+    // Add/update new attributes and styles.
+    if (widget.htmlAttributes != null) {
+      _controller.setAttributes(widget.htmlAttributes!);
+    }
+    if (widget.cssStyles != null) {
+      _controller.setStyles(widget.cssStyles!);
     }
   }
 }
