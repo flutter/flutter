@@ -288,7 +288,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (bool value) => true,
+  ///   onChanged: (bool value) { },
   ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -329,7 +329,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (bool value) => true,
+  ///   onChanged: (bool value) { },
   ///   thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -370,7 +370,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (bool value) => true,
+  ///   onChanged: (bool value) { },
   ///   trackOutlineColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return Colors.orange.withOpacity(.48);
@@ -404,7 +404,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (bool value) => true,
+  ///   onChanged: (bool value) { },
   ///   trackOutlineWidth: MaterialStateProperty.resolveWith<double?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return 5.0;
@@ -436,7 +436,7 @@ class Switch extends StatelessWidget {
   /// ```dart
   /// Switch(
   ///   value: true,
-  ///   onChanged: (bool value) => true,
+  ///   onChanged: (bool value) { },
   ///   thumbIcon: MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
   ///     if (states.contains(MaterialState.disabled)) {
   ///       return const Icon(Icons.close);
