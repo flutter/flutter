@@ -64,13 +64,13 @@ class TickerMode extends StatefulWidget {
     return widget?.enabled ?? true;
   }
 
-  /// Obtains a [ValueNotifier] from the [TickerMode] surrounding the `context`,
+  /// Obtains a [ValueListenable] from the [TickerMode] surrounding the `context`,
   /// which indicates whether tickers are enabled in the given subtree.
   ///
-  /// When that [TickerMode] enabled or disabled tickers, the notifier notifies
+  /// When that [TickerMode] enabled or disabled tickers, the listenable notifies
   /// its listeners.
   ///
-  /// While the [ValueNotifier] is stable for the lifetime of the surrounding
+  /// While the [ValueListenable] is stable for the lifetime of the surrounding
   /// [TickerMode], calling this method does not establish a dependency between
   /// the `context` and the [TickerMode] and the widget owning the `context`
   /// does not rebuild when the ticker mode changes from true to false or vice
@@ -79,7 +79,7 @@ class TickerMode extends StatefulWidget {
   /// [Ticker]. Since no dependency is established, the widget owning the
   /// `context` is also not informed when it is moved to a new location in the
   /// tree where it may have a different [TickerMode] ancestor. When this
-  /// happens, the widget must manually unsubscribe from the old notifier,
+  /// happens, the widget must manually unsubscribe from the old listenable,
   /// obtain a new one from the new ancestor [TickerMode] by calling this method
   /// again, and re-subscribe to it. [StatefulWidget]s can, for example, do this
   /// in [State.activate], which is called after the widget has been moved to
@@ -93,7 +93,7 @@ class TickerMode extends StatefulWidget {
   /// potential unnecessary rebuilds.
   ///
   /// In the absence of a [TickerMode] widget, this function returns a
-  /// [ValueNotifier], whose [ValueNotifier.value] is always true.
+  /// [ValueListenable], whose [ValueListenable.value] is always true.
   static ValueListenable<bool> getNotifier(BuildContext context) {
     final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? const _ConstantValueListenable<bool>(true);
