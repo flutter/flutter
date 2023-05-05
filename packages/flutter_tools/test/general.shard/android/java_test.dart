@@ -252,13 +252,3 @@ class _FakeOperatingSystemUtilsWithJava extends FakeOperatingSystemUtils {
     throw const InvalidArgumentException(null, null);
   }
 }
-
-class _FakeOperatingSystemUtilsWithoutJava extends FakeOperatingSystemUtils {
-  @override
-  File? which(String execName) {
-    if (execName == 'java') {
-      return null;
-    }
-    throw const InvalidArgumentException(null, null);
-  }
-}
