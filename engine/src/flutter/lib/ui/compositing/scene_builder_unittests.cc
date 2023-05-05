@@ -59,7 +59,7 @@ TEST_F(ShellTest, SceneBuilderBuildAndSceneDisposeReleasesLayerStack) {
 
   auto validate_scene_has_no_layers =
       [message_latch, &retained_scene](Dart_NativeArguments args) {
-        EXPECT_FALSE(retained_scene->takeLayerTree());
+        EXPECT_FALSE(retained_scene->takeLayerTree(100, 100));
         retained_scene->Release();
         retained_scene = nullptr;
         message_latch->Signal();
