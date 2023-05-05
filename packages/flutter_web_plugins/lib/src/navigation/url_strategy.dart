@@ -5,10 +5,12 @@
 import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
-import '../navigation_common/url_strategy.dart';
-import 'js_url_strategy.dart';
+import '../navigation_common/platform_location.dart';
 import 'utils.dart';
+
+export 'dart:ui_web' show UrlStrategy;
 
 /// Saves the current [UrlStrategy] to be accessed by [urlStrategy] or
 /// [setUrlStrategy].
@@ -20,25 +22,20 @@ import 'utils.dart';
 // Find it at:
 // https://github.com/flutter/engine/blob/master/lib/web_ui/lib/src/engine/window.dart#L360
 //
-UrlStrategy? _urlStrategy = const HashUrlStrategy();
+ui_web.UrlStrategy? _urlStrategy = const HashUrlStrategy();
 
 /// Returns the present [UrlStrategy] for handling the browser URL.
 ///
 /// In case null is returned, the browser integration has been manually
 /// disabled by [setUrlStrategy].
-UrlStrategy? get urlStrategy => _urlStrategy;
+ui_web.UrlStrategy? get urlStrategy => _urlStrategy;
 
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
-void setUrlStrategy(UrlStrategy? strategy) {
+void setUrlStrategy(ui_web.UrlStrategy? strategy) {
   _urlStrategy = strategy;
-
-  JsUrlStrategy? jsUrlStrategy;
-  if (strategy != null) {
-    jsUrlStrategy = convertToJsUrlStrategy(strategy);
-  }
-  jsSetUrlStrategy(jsUrlStrategy);
+  ui_web.urlStrategy = strategy;
 }
 
 /// Use the [PathUrlStrategy] to handle the browser URL.
@@ -60,7 +57,7 @@ void usePathUrlStrategy() {
 /// // Somewhere before calling `runApp()` do:
 /// setUrlStrategy(const HashUrlStrategy());
 /// ```
-class HashUrlStrategy extends UrlStrategy {
+class HashUrlStrategy extends ui_web.UrlStrategy {
   /// Creates an instance of [HashUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
@@ -71,9 +68,13 @@ class HashUrlStrategy extends UrlStrategy {
   final PlatformLocation _platformLocation;
 
   @override
-  ui.VoidCallback addPopStateListener(EventListener fn) {
-    _platformLocation.addPopStateListener(fn);
-    return () => _platformLocation.removePopStateListener(fn);
+  ui.VoidCallback addPopStateListener(ui_web.PopStateListener fn) {
+    void wrappedFn(Object event) {
+      // `fn` expects `event.state`, not a `html.Event`.
+      fn((event as html.PopStateEvent).state);
+    }
+    _platformLocation.addPopStateListener(wrappedFn);
+    return () => _platformLocation.removePopStateListener(wrappedFn);
   }
 
   @override
