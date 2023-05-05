@@ -4153,16 +4153,6 @@ void main() {
       expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
     });
   });
-
-  test('iterableFirstWhereOrNull', () {
-    expect(iterableFirstWhereOrNull(<int>[-5, 5, -10, 10], (int x) => x > 0), 5);
-    expect(iterableFirstWhereOrNull(<int>[-5, -10], (int x) => x > 0), null);
-  });
-
-  test('iterableLastWhereOrNull', () {
-    expect(iterableLastWhereOrNull(<int>[-5, 5, -10, 10], (int x) => x > 0), 10);
-    expect(iterableLastWhereOrNull(<int>[-5, -10], (int x) => x > 0), null);
-  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
