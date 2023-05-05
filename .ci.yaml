@@ -3751,6 +3751,7 @@ targets:
 
   - name: Mac_ios microbenchmarks_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/126164
     presubmit: false
     timeout: 60
     properties:
