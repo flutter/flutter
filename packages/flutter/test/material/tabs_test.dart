@@ -3870,7 +3870,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10)); // start the fling animation
 
     controller1.dispose();
-    await tester.pump(const Duration(milliseconds: 10)); 
+    await tester.pump(const Duration(milliseconds: 10));
 
     await tester.pumpWidget(buildFrame(controller2)); // replace controller
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
