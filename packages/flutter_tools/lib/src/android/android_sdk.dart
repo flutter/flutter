@@ -412,6 +412,9 @@ class AndroidSdk {
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version not found.
+  ///
+  /// TODO(andrewkolos): Callers should instead use the [Java] class.
+  /// See https://github.com/flutter/flutter/issues/126126.
   String? getJavaVersion() {
     return globals.java?.getVersion()?.shortText;
   }
@@ -421,6 +424,9 @@ class AndroidSdk {
   /// This method considers jdk in the following order:
   /// * the JDK bundled with Android Studio, if one is found;
   /// * the JAVA_HOME in the ambient environment, if set;
+  ///
+  /// TODO(andrewkolos): Callers should instead use the [Java] class.
+  /// See https://github.com/flutter/flutter/issues/126126.
   String? get javaHome {
     return findJavaHome();
   }
@@ -430,21 +436,17 @@ class AndroidSdk {
   /// This method considers jdk in the following order:
   /// * the JDK bundled with Android Studio, if one is found;
   /// * the JAVA_HOME in the ambient environment, if set;
+  ///
+  /// TODO(andrewkolos): Callers should instead use the [Java] class.
+  /// See https://github.com/flutter/flutter/issues/126126.
   static String? findJavaHome() {
     return globals.java?.home;
   }
 
   /// Finds the java binary that is used for all operations across the tool.
   ///
-  /// This comes from [findJavaHome] if that method returns non-null;
-  /// otherwise, it gets from searching PATH.
-  // TODO(andrewkolos): To prevent confusion when debugging Android-related
-  // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
-  // this logic should be consistently followed by any Java-dependent operation
-  // across the  the tool (building Android apps, interacting with the Android SDK, etc.).
-  // Currently, this consistency is fragile since the logic used for building
-  // Android apps exists independently of this method.
-  // See https://github.com/flutter/flutter/issues/124252.
+  /// TODO(andrewkolos): Callers should instead use the [Java] class.
+  /// See https://github.com/flutter/flutter/issues/126126.
   static String? findJavaBinary({
     required Logger logger,
     required AndroidStudio? androidStudio,
@@ -464,6 +466,8 @@ class AndroidSdk {
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
+    // TODO(andrewkolos): Inject Java to avoid referencing the global this deep.
+    // See https://github.com/flutter/flutter/issues/126126.
     return globals.java?.getJavaEnvironment() ?? <String, String>{};
   }
 
