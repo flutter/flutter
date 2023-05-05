@@ -123,6 +123,11 @@ vk::UniqueCommandBuffer CommandPoolVK::CreateGraphicsCommandBuffer() {
 void CommandPoolVK::CollectGraphicsCommandBuffer(
     vk::UniqueCommandBuffer buffer) {
   Lock lock(buffers_to_collect_mutex_);
+  if (!graphics_pool_) {
+    // If the command pool has already been destroyed, then its command buffers
+    // have been freed and are now invalid.
+    buffer.release();
+  }
   buffers_to_collect_.insert(MakeSharedVK(std::move(buffer)));
   GarbageCollectBuffersIfAble();
 }
