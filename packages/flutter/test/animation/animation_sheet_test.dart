@@ -55,7 +55,7 @@ void main() {
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
   }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
   );
 
   testWidgetsWithLeakTracking('correctly wraps a row', (WidgetTester tester) async {
@@ -75,7 +75,7 @@ void main() {
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
   }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
   );
 
   testWidgetsWithLeakTracking('correctly records frames using collate', (WidgetTester tester) async {
@@ -114,7 +114,7 @@ void main() {
     );
     image.dispose();
   }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
   );
 
   testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
@@ -150,7 +150,7 @@ void main() {
     );
     image.dispose();
   }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
   );
 }
 
