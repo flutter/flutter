@@ -243,7 +243,6 @@ abstract class BoxBorder extends ShapeBorder {
     }
   }
 
-
   static void _paintNonUniformBorder(
     Canvas canvas,
     Rect rect, {
