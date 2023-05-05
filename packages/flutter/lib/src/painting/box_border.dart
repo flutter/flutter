@@ -249,12 +249,16 @@ abstract class BoxBorder extends ShapeBorder {
     required BorderRadius? borderRadius,
     required BoxShape shape,
     required TextDirection? textDirection,
-    BorderSide left = BorderSide.none,
-    BorderSide top = BorderSide.none,
-    BorderSide right = BorderSide.none,
-    BorderSide bottom = BorderSide.none,
+    BorderSide? left,
+    BorderSide? top,
+    BorderSide? right,
+    BorderSide? bottom,
     required Color color,
   }) {
+    final BorderSide l = left ?? BorderSide.none;
+    final BorderSide t = top ?? BorderSide.none;
+    final BorderSide r = right ?? BorderSide.none;
+    final BorderSide b = bottom ?? BorderSide.none;
     final RRect borderRect;
     switch (shape) {
       case BoxShape.rectangle:
@@ -269,8 +273,8 @@ abstract class BoxBorder extends ShapeBorder {
         );
     }
     final Paint paint = Paint()..color = color;
-    final RRect inner = _deflateRRect(borderRect, EdgeInsets.fromLTRB(left.strokeInset, top.strokeInset, right.strokeInset, bottom.strokeInset));
-    final RRect outer = _inflateRRect(borderRect, EdgeInsets.fromLTRB(left.strokeOutset, top.strokeOutset, right.strokeOutset, bottom.strokeOutset));
+    final RRect inner = _deflateRRect(borderRect, EdgeInsets.fromLTRB(l.strokeInset, t.strokeInset, r.strokeInset, b.strokeInset));
+    final RRect outer = _inflateRRect(borderRect, EdgeInsets.fromLTRB(l.strokeOutset, t.strokeOutset, r.strokeOutset, b.strokeOutset));
     canvas.drawDRRect(outer, inner, paint);
   }
 
@@ -623,10 +627,10 @@ class Border extends BoxBorder {
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
-          left: left.style == BorderStyle.none ? BorderSide.none : left,
-          top: top.style == BorderStyle.none ? BorderSide.none : top,
-          right: right.style == BorderStyle.none ? BorderSide.none : right,
-          bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+          left: left.style == BorderStyle.none ? null : left,
+          top: top.style == BorderStyle.none ? null : top,
+          right: right.style == BorderStyle.none ? null : right,
+          bottom: bottom.style == BorderStyle.none ? null : bottom,
           color: visibleColors.first);
       return;
     }
@@ -988,10 +992,10 @@ class BorderDirectional extends BoxBorder {
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
-          left: left.style == BorderStyle.none ? BorderSide.none : left,
-          top: top.style == BorderStyle.none ? BorderSide.none : top,
-          right: right.style == BorderStyle.none ? BorderSide.none : right,
-          bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+          left: left.style == BorderStyle.none ? null : left,
+          top: top.style == BorderStyle.none ? null : top,
+          right: right.style == BorderStyle.none ? null : right,
+          bottom: bottom.style == BorderStyle.none ? null : bottom,
           color: visibleColors.first);
       return;
     }
