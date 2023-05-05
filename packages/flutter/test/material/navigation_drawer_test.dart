@@ -360,6 +360,29 @@ void main() {
     // Test that InkWell for hover, focus and pressed use custom shape.
     expect(_getInkWell(tester)?.customBorder, shape);
   });
+
+  testWidgets('NavigationDrawer.tilePadding defaults to EdgeInsets.symmetric(horizontal: 12.0)', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    widgetSetup(tester, 3000, viewHeight: 3000);
+    final Widget widget = _buildWidget(
+      scaffoldKey,
+      NavigationDrawer(
+        children: const <Widget>[
+          NavigationDrawerDestination(
+            icon: Icon(Icons.ac_unit),
+            label: Text('AC'),
+          ),
+        ],
+        onDestinationSelected: (int i) {},
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+    scaffoldKey.currentState?.openDrawer();
+    await tester.pump();
+    final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
+    expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child) {

@@ -61,6 +61,7 @@ class NavigationDrawer extends StatelessWidget {
     this.indicatorShape,
     this.onDestinationSelected,
     this.selectedIndex = 0,
+    this.tilePadding = const EdgeInsets.symmetric(horizontal: 12.0),
   });
 
   /// The background color of the [Material] that holds the [NavigationDrawer]'s
@@ -124,6 +125,11 @@ class NavigationDrawer extends StatelessWidget {
   /// Upon updating [selectedIndex], the [NavigationDrawer] will be rebuilt.
   final ValueChanged<int>? onDestinationSelected;
 
+  /// Defines the padding for [NavigationDrawerDestination] widgets (Drawer items).
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 12.0)`.
+  final EdgeInsetsGeometry tilePadding;
+
   @override
   Widget build(BuildContext context) {
     final int totalNumberOfDestinations =
@@ -141,6 +147,7 @@ class NavigationDrawer extends StatelessWidget {
             selectedAnimation: animation,
             indicatorColor: indicatorColor,
             indicatorShape: indicatorShape,
+            tilePadding: tilePadding,
             onTap: () {
               if (onDestinationSelected != null) {
                 onDestinationSelected!(index);
@@ -321,7 +328,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: info.tilePadding,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
@@ -455,6 +462,7 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
     required this.indicatorShape,
     required this.onTap,
     required super.child,
+    required this.tilePadding,
   });
 
   /// Which destination index is this in the navigation drawer.
@@ -513,6 +521,11 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// This is computed by calling [NavigationDrawer.onDestinationSelected]
   /// with [index] passed in.
   final VoidCallback onTap;
+
+  /// Defines the padding for [NavigationDrawerDestination] widgets (Drawer items).
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 12.0)`.
+  final EdgeInsetsGeometry tilePadding;
 
   /// Returns a non null [_NavigationDrawerDestinationInfo].
   ///
