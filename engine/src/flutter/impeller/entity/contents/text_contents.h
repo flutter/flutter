@@ -48,11 +48,6 @@ class TextContents final : public Contents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  // TODO(dnfield): remove this https://github.com/flutter/flutter/issues/111640
-  bool RenderSdf(const ContentContext& renderer,
-                 const Entity& entity,
-                 RenderPass& pass) const;
-
  private:
   TextFrame frame_;
   Color color_;

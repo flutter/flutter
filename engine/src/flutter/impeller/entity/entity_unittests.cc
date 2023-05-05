@@ -2151,34 +2151,6 @@ TEST_P(EntityTest, TTTBlendColor) {
   }
 }
 
-TEST_P(EntityTest, SdfText) {
-  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    SkFont font;
-    font.setSize(30);
-    auto blob = SkTextBlob::MakeFromString(
-        "the quick brown fox jumped over the lazy dog (but with sdf).", font);
-    auto frame = TextFrameFromTextBlob(blob);
-    auto lazy_glyph_atlas = std::make_shared<LazyGlyphAtlas>();
-    lazy_glyph_atlas->AddTextFrame(frame);
-
-    EXPECT_FALSE(lazy_glyph_atlas->HasColor());
-
-    auto text_contents = std::make_shared<TextContents>();
-    text_contents->SetTextFrame(frame);
-    text_contents->SetGlyphAtlas(std::move(lazy_glyph_atlas));
-    text_contents->SetColor(Color(1.0, 0.0, 0.0, 1.0));
-    Entity entity;
-    entity.SetTransformation(
-        Matrix::MakeTranslation(Vector3{200.0, 200.0, 0.0}) *
-        Matrix::MakeScale(GetContentScale()));
-    entity.SetContents(text_contents);
-
-    // Force SDF rendering.
-    return text_contents->RenderSdf(context, entity, pass);
-  };
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
-}
-
 TEST_P(EntityTest, AtlasContentsSubAtlas) {
   auto boston = CreateTextureForFixture("boston.jpg");
 

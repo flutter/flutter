@@ -32,8 +32,6 @@
 #include "impeller/entity/conical_gradient_fill.frag.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
-#include "impeller/entity/glyph_atlas_sdf.frag.h"
-#include "impeller/entity/glyph_atlas_sdf.vert.h"
 #include "impeller/entity/gradient_fill.vert.h"
 #include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/linear_to_srgb_filter.frag.h"
@@ -173,8 +171,6 @@ using SrgbToLinearFilterPipeline =
                     SrgbToLinearFilterFragmentShader>;
 using GlyphAtlasPipeline =
     RenderPipelineT<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
-using GlyphAtlasSdfPipeline =
-    RenderPipelineT<GlyphAtlasSdfVertexShader, GlyphAtlasSdfFragmentShader>;
 using PorterDuffBlendPipeline =
     RenderPipelineT<BlendVertexShader, PorterDuffBlendFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
@@ -473,11 +469,6 @@ class ContentContext {
     return GetPipeline(glyph_atlas_pipelines_, opts);
   }
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGlyphAtlasSdfPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(glyph_atlas_sdf_pipelines_, opts);
-  }
-
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetGeometryColorPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(geometry_color_pipelines_, opts);
@@ -731,7 +722,6 @@ class ContentContext {
   mutable Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
-  mutable Variants<GlyphAtlasSdfPipeline> glyph_atlas_sdf_pipelines_;
   mutable Variants<GeometryColorPipeline> geometry_color_pipelines_;
   mutable Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter_pipelines_;
   mutable Variants<PorterDuffBlendPipeline> porter_duff_blend_pipelines_;

@@ -33,13 +33,6 @@ class GlyphAtlas {
   /// @brief      Describes how the glyphs are represented in the texture.
   enum class Type {
     //--------------------------------------------------------------------------
-    /// The glyphs are represented at a fixed size in an 8-bit grayscale texture
-    /// where the value of each pixel represents a signed-distance field that
-    /// stores the glyph outlines.
-    ///
-    kSignedDistanceField,
-
-    //--------------------------------------------------------------------------
     /// The glyphs are reprsented at their requested size using only an 8-bit
     /// alpha channel.
     ///
