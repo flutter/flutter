@@ -47,7 +47,7 @@ void main() {
         'HasWebPlugins': 'false',
         'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
         'WasmOmitTypeChecks': 'false',
-        'RunWasmOpt': 'false',
+        'RunWasmOpt': 'none',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -73,7 +73,7 @@ void main() {
       ServiceWorkerStrategy.offlineFirst,
       compilerConfig: const WasmCompilerConfig(
         omitTypeChecks: false,
-        runWasmOpt: false
+        wasmOpt: WasmOptLevel.none,
       ),
     );
 
