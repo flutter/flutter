@@ -184,7 +184,6 @@ String? _findJavaBinary({
 
     // Fallback to PATH based lookup.
     final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
-    print(pathJava);
     if (pathJava != null) {
       logger.printTrace('Using java from PATH.');
     } else {
