@@ -644,6 +644,11 @@ abstract class BindingBase {
   /// (which it partially does asynchronously).
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
+  ///
+  /// The [gestures] binding wraps [PlatformDispatcher.onPointerDataPacket] in
+  /// logic that honors this event locking mechanism. Similarly, tasks queued
+  /// using [SchedulerBinding.scheduleTask] will only start when events are not
+  /// [locked].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
     final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
@@ -654,7 +659,16 @@ abstract class BindingBase {
       _lockCount -= 1;
       if (!locked) {
         timelineTask.finish();
-        unlocked();
+        try {
+          unlocked();
+        } catch (error, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: error,
+            stack: stack,
+            library: 'foundation',
+            context: ErrorDescription('while handling pending events'),
+          ));
+        }
       }
     });
     return future;
@@ -816,6 +830,8 @@ abstract class BindingBase {
   /// All events dispatched by a [BindingBase] use this method instead of
   /// calling [developer.postEvent] directly so that tests for [BindingBase]
   /// can track which events were dispatched by overriding this method.
+  ///
+  /// This is unrelated to the events managed by [lockEvents].
   @protected
   void postEvent(String eventKind, Map<String, dynamic> eventData) {
     developer.postEvent(eventKind, eventData);
