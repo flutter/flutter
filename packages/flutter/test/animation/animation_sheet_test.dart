@@ -10,15 +10,15 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   /*
    * Here lies tests for packages/flutter_test/lib/src/animation_sheet.dart
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('correctly records frames using display', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly records frames using display', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -52,11 +52,11 @@ void main() {
     await tester.pumpWidget(display);
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
+     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+  );
 
-  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('correctly wraps a row', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly wraps a row', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     const Duration duration = Duration(seconds: 2);
@@ -72,11 +72,11 @@ void main() {
     await tester.pumpWidget(display);
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
+    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+  );
 
-  // TODO(polina-c): fix Picture and Image not disposed and and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('correctly records frames using collate', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -108,11 +108,11 @@ void main() {
       builder.collate(5),
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
+    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+  );
 
-  // TODO(polina-c): fix Picture and Image not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
@@ -141,8 +141,9 @@ void main() {
       builder.collate(5),
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
+  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
+    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126096.
+  );
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of

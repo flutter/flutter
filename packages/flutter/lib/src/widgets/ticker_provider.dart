@@ -94,9 +94,9 @@ class TickerMode extends StatefulWidget {
   ///
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
-  static ValueNotifier<bool> getNotifier(BuildContext context) {
+  static ValueListenable<bool> getNotifier(BuildContext context) {
     final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
-    return widget?.notifier ?? ValueNotifier<bool>(true);
+    return widget?.notifier ?? const _ConstantValueListenable<bool>(true);
   }
 
   @override
@@ -228,7 +228,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     super.dispose();
   }
 
-  ValueNotifier<bool>? _tickerModeNotifier;
+  ValueListenable<bool>? _tickerModeNotifier;
 
   @override
   void activate() {
@@ -245,7 +245,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   }
 
   void _updateTickerModeNotifier() {
-    final ValueNotifier<bool> newNotifier = TickerMode.getNotifier(context);
+    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
     if (newNotifier == _tickerModeNotifier) {
       return;
     }
@@ -307,7 +307,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     _tickers!.remove(ticker);
   }
 
-  ValueNotifier<bool>? _tickerModeNotifier;
+  ValueListenable<bool>? _tickerModeNotifier;
 
   @override
   void activate() {
@@ -327,7 +327,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   }
 
   void _updateTickerModeNotifier() {
-    final ValueNotifier<bool> newNotifier = TickerMode.getNotifier(context);
+    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
     if (newNotifier == _tickerModeNotifier) {
       return;
     }
@@ -394,4 +394,23 @@ class _WidgetTicker extends Ticker {
     _creator._removeTicker(this);
     super.dispose();
   }
+}
+
+class _ConstantValueListenable<T> implements ValueListenable<T> {
+  const _ConstantValueListenable(this.value);
+
+  @override
+  void addListener(VoidCallback listener) {
+    // Intentionally left empty: Value cannot change, so we never have to
+    // notify registered listeners.
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    // Intentionally left empty: Value cannot change, so we never have to
+    // notify registered listeners.
+  }
+
+  @override
+  final T value;
 }

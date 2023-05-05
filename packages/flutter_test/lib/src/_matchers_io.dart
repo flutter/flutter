@@ -100,19 +100,23 @@ class MatchesGoldenFile extends AsyncMatcher {
       if (image == null) {
         throw AssertionError('Future<Image> completed to null');
       }
-      final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null) {
-        return 'could not encode screenshot.';
-      }
-      if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
-        return null;
-      }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
+        final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (bytes == null) {
+          return 'could not encode screenshot.';
+        }
+        if (autoUpdateGoldenFiles) {
+          await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
+          return null;
+        }
+        try {
+          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
+          return success ? null : 'does not match';
+        } on TestFailure catch (ex) {
+          return ex.message;
+        }
+      } finally {
+        image.dispose();
       }
     }, additionalTime: const Duration(minutes: 1));
   }
