@@ -219,7 +219,7 @@ class TextLinker {
   /// Returns [TextRange]s that should be built with [linkBuilder].
   final RangesFinder rangesFinder;
 
-  static final RegExp _urlRegExp = RegExp(r'((https?|ftp):\/\/)?(([a-zA-Z\-]*\.)?[a-zA-Z0-9\-]+)\.[a-zA-Z]+(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?');
+  static final RegExp _urlRegExp = RegExp(r'(https?:\/\/)?(([a-zA-Z0-9\-]*\.)*[a-zA-Z0-9\-]+(\.[a-zA-Z]+)+)(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?');
 
   // Turns all matches from the regExp into a list of TextRanges.
   static Iterable<TextRange> _rangesFromText({
