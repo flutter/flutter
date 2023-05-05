@@ -1366,7 +1366,7 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x1f000000))
+        ..circle() // Radial reaction
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1387,7 +1387,7 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x1f000000))
+        ..circle()
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
