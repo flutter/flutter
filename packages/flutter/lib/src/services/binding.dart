@@ -420,7 +420,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Alert the engine that the binding is registered. This instructs the engine to
   /// register its top level window handler on Windows.
   Future<void> enableApplicationLifecycle() async {
-    print('ABOUT TO SEND THE ENABLE MESSAGE...');
     SystemChannels.platform.invokeMethod('System.enableApplicationLifecycle');
   }
 }

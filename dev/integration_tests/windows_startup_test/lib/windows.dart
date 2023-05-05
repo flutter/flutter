@@ -56,7 +56,6 @@ Future<String> testStringConversion(Int32List twoByteCodes) async {
 Future<bool> testCanEnableApplicationLifecycle() async {
   final Completer<bool> completer = Completer<bool>();
   SystemChannels.platform.setMethodCallHandler((MethodCall call) async {
-    print('RECEVIED MESSAGE CALL: ${call.method}!');
     if (call.method == 'success') {
       completer.complete(true);
     }
