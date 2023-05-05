@@ -32,4 +32,13 @@ void main() {
 
     await driver.close();
   }, timeout: Timeout.none);
+
+  test('Can enable listening to application lifecycle', () async {
+    final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
+    final String result = await driver.requestData('verifyEnableApplicationLifecycle');
+
+    expect(result, equals('success'));
+
+    await driver.close();
+  });
 }

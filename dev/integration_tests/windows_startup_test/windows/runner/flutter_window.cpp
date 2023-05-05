@@ -68,6 +68,10 @@ bool FlutterWindow::OnCreate() {
       flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",
       &flutter::StandardMethodCodec::GetInstance());
 
+  flutter::MethodChannel<> platform_channel(
+      flutter_controller_->engine()->messenger(), "flutter/platform",
+      &flutter::StandardMethodCodec::GetInstance());
+
   channel.SetMethodCallHandler(
     [&](const flutter::MethodCall<>& call,
        std::unique_ptr<flutter::MethodResult<>> result) {
@@ -120,6 +124,18 @@ bool FlutterWindow::OnCreate() {
       } else {
         result->NotImplemented();
       }
+    });
+
+  platform_channel.SetMethodCallHandler(
+    [&](const flutter::MethodCall<>& call,
+       std::unique_ptr<flutter::MethodResult<>> result) {
+      std::string method = call.method_name();
+      std::cerr << "HANDLING METHOD CALL: " << method << "\n";
+      if (method == "System.enableApplicationLifecycle") {
+        platform_channel.InvokeMethod("success", nullptr);
+        result->Success("Success");
+      }
+      result->NotImplemented();
     });
 
   return true;

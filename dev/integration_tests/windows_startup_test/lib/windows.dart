@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
 const MethodChannel _kMethodChannel =
   MethodChannel('tests.flutter.dev/windows_startup_test');
+
+const MethodChannel _kPlatformChannel =
+  MethodChannel('flutter/platform');
 
 /// Returns true if the application's window is visible.
 Future<bool> isWindowVisible() async {
@@ -47,4 +51,16 @@ Future<String> testStringConversion(Int32List twoByteCodes) async {
   }
 
   return converted;
+}
+
+Future<bool> testCanEnableApplicationLifecycle() async {
+  final Completer<bool> completer = Completer<bool>();
+  SystemChannels.platform.setMethodCallHandler((MethodCall call) async {
+    print('RECEVIED MESSAGE CALL: ${call.method}!');
+    if (call.method == 'success') {
+      completer.complete(true);
+    }
+  });
+  ServicesBinding.instance.enableApplicationLifecycle();
+  return completer.future;
 }
