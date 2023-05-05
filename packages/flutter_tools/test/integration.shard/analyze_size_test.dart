@@ -177,7 +177,7 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
-    final ProcessResult result = await processManager.run(<String>[
+    final List<String> command = <String>[
       flutterBin,
       'build',
       'apk',
@@ -185,7 +185,21 @@ void main() {
       '--code-size-directory=${tempDir.path}',
       '--target-platform=android-arm64',
       '--release',
-    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+    ];
+    final String workingDirectory = fileSystem.path.join(
+      getFlutterRoot(),
+      'examples',
+      'hello_world',
+    );
+    final ProcessResult result = await processManager.run(
+      command,
+      workingDirectory: workingDirectory,
+    );
+
+    printOnFailure('workingDirectory: $workingDirectory');
+    printOnFailure('command:\n${command.join(" ")}');
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
 
     expect(result.exitCode, 0);
     expect(tempDir.existsSync(), true);
