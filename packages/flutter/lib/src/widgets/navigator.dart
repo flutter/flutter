@@ -5200,7 +5200,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
-  /// First route entry satisfying the predicate, or null if not found.
+  /// Gets first route entry satisfying the predicate, or null if not found.
   _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
     for (final _RouteEntry element in _history) {
       if (test(element)) {
