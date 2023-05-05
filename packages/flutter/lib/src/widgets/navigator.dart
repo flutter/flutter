@@ -5210,7 +5210,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return null;
   }
 
-  /// Last route entry satisfying the predicate, or null if not found.
+  /// Gets last route entry satisfying the predicate, or null if not found.
   _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
     _RouteEntry? result;
     for (final _RouteEntry element in _history) {
