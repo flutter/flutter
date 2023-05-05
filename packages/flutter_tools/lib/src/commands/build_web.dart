@@ -103,12 +103,13 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
-    argParser.addFlag(
+    argParser.addOption(
       'wasm-opt',
       help:
-          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.\n'
-          'Increases the build time, but will yield a smaller, faster output.',
-      negatable: false,
+          'Optimize output wasm using the Binaryen (https://github.com/WebAssembly/binaryen) tool.',
+      defaultsTo: WasmOptLevel.defaultValue.cliName,
+      allowed: WasmOptLevel.values.map<String>((WasmOptLevel e) => e.cliName),
+      allowedHelp: CliEnum.allowedHelp(WasmOptLevel.values),
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
   }
@@ -143,7 +144,7 @@ class BuildWebCommand extends BuildSubCommand {
       }
       compilerConfig = WasmCompilerConfig(
         omitTypeChecks: boolArg('omit-type-checks'),
-        runWasmOpt: boolArg('wasm-opt'),
+        wasmOpt: WasmOptLevel.values.byName(stringArg('wasm-opt')!),
       );
     } else {
       compilerConfig = JsCompilerConfig(
