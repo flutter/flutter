@@ -195,7 +195,7 @@ end
           kTargetFile: targetFile,
           kTargetPlatform: getNameForTargetPlatform(TargetPlatform.darwin),
           kDarwinArchs: defaultMacOSArchsForEnvironment(globals.artifacts!)
-              .map(getNameForDarwinArch)
+              .map((DarwinArch e) => e.name)
               .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },

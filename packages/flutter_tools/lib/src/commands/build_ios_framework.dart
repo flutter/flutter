@@ -428,7 +428,7 @@ end
             kTargetFile: targetFile,
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
             kIosArchs: defaultIOSArchsForEnvironment(sdkType, globals.artifacts!)
-                .map(getNameForDarwinArch)
+                .map((DarwinArch e) => e.name)
                 .join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
