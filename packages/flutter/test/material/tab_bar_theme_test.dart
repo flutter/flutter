@@ -507,6 +507,112 @@ void main() {
       expect(tester.takeException(), isAssertionError);
   });
 
+  testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (primary)', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.tab),
+      useMaterial3: true,
+    );
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+
+    const double indicatorWeight = 2.0;
+    const double indicatorY = 48 - (indicatorWeight / 2.0);
+    const double indicatorLeft =  indicatorWeight / 2.0;
+    const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
+
+    expect(
+      tabBarBox,
+      paints
+        // Divider
+        ..line(
+          color: theme.colorScheme.surfaceVariant,
+        )
+        // Tab indicator
+        ..line(
+          color: theme.colorScheme.primary,
+          strokeWidth: indicatorWeight,
+          p1: const Offset(indicatorLeft, indicatorY),
+          p2: const Offset(indicatorRight, indicatorY),
+        ),
+    );
+  });
+
+  testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (secondary)', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.label),
+      useMaterial3: true,
+    );
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar.secondary(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+
+    const double indicatorWeight = 2.0;
+    const double indicatorY = 48 - (indicatorWeight / 2.0);
+
+    expect(
+      tabBarBox,
+      paints
+        // Divider
+        ..line(
+          color: theme.colorScheme.surfaceVariant,
+        )
+        // Tab indicator
+        ..line(
+          color: theme.colorScheme.primary,
+          strokeWidth: indicatorWeight,
+          p1: const Offset(65.5, indicatorY),
+          p2: const Offset(134.5, indicatorY),
+        ),
+    );
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
@@ -597,6 +703,104 @@ void main() {
       await expectLater(
         find.byKey(_painterKey),
         matchesGoldenFile('tab_bar.m2.default.tab_indicator_size.png'),
+      );
+    });
+
+    testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (primary)', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.tab),
+        useMaterial3: false,
+      );
+      final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+        return Tab(text: 'Tab $index');
+      });
+
+      final TabController controller = TabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Container(
+              alignment: Alignment.topLeft,
+              child: TabBar(
+                controller: controller,
+                tabs: tabs,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+      expect(tabBarBox.size.height, 48.0);
+
+      const double indicatorWeight = 2.0;
+      const double indicatorY = 48 - (indicatorWeight / 2.0);
+      const double indicatorLeft =  indicatorWeight / 2.0;
+      const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
+
+      expect(
+        tabBarBox,
+        paints
+          // Tab indicator
+          ..line(
+            color: theme.indicatorColor,
+            strokeWidth: indicatorWeight,
+            p1: const Offset(indicatorLeft, indicatorY),
+            p2: const Offset(indicatorRight, indicatorY),
+          ),
+      );
+    });
+
+    testWidgets('TabBarTheme.indicatorSize provides correct tab indicator (secondary)', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(
+        tabBarTheme: const TabBarTheme(indicatorSize: TabBarIndicatorSize.label),
+        useMaterial3: false,
+      );
+      final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+        return Tab(text: 'Tab $index');
+      });
+
+      final TabController controller = TabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Container(
+              alignment: Alignment.topLeft,
+              child: TabBar.secondary(
+                controller: controller,
+                tabs: tabs,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+      expect(tabBarBox.size.height, 48.0);
+
+      const double indicatorWeight = 2.0;
+      const double indicatorY = 48 - (indicatorWeight / 2.0);
+
+      expect(
+        tabBarBox,
+        paints
+          // Tab indicator
+          ..line(
+            color: theme.indicatorColor,
+            strokeWidth: indicatorWeight,
+            p1: const Offset(66.0, indicatorY),
+            p2: const Offset(134.0, indicatorY),
+          ),
       );
     });
   });

@@ -27,6 +27,7 @@ import 'theme.dart';
 
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
+const double _kStartOffset = 52.0;
 
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
@@ -821,8 +822,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The thickness of the line that appears below the selected tab.
   ///
-  /// The value of this parameter must be greater than zero and its default
-  /// value is 2.0.
+  /// The value of this parameter must be greater than zero.
+  ///
+  /// If [ThemeData.useMaterial3] is true and [TabBar] is used to create a
+  /// primary tab bar, the default value is 3.0. If the provided value is less
+  /// than 3.0, the default value is used.
+  ///
+  /// If [ThemeData.useMaterial3] is true and [TabBar.secondary] is used to
+  /// create a secondary tab bar, the default value is 2.0.
+  ///
+  /// If [ThemeData.useMaterial3] is false, the default value is 2.0.
   ///
   /// If [indicator] is specified or provided from [TabBarTheme],
   /// this property is ignored.
@@ -1152,7 +1161,7 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
-  Decoration _getIndicator() {
+  Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
@@ -1186,19 +1195,25 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
+    final bool primaryWithLabelIndicator = widget._isPrimary && indicatorSize == TabBarIndicatorSize.label;
+    final double effectiveIndicatorWeight = theme.useMaterial3 && primaryWithLabelIndicator
+      ? math.max(widget.indicatorWeight, _TabsPrimaryDefaultsM3.indicatorWeight)
+      : widget.indicatorWeight;
+    // Only Material 3 primary TabBar with label indicatorSize should be rounded.
+    final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
+      ? BorderRadius.only(
+          topLeft: Radius.circular(effectiveIndicatorWeight),
+          topRight: Radius.circular(effectiveIndicatorWeight),
+        )
+      : null;
     return UnderlineTabIndicator(
-      borderRadius: theme.useMaterial3 && widget._isPrimary
+      borderRadius: effectiveBorderRadius,
+      borderSide: BorderSide(
         // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
         // when `preferredSize`and `indicatorWeight` are updated to support Material 3
         // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
         // https://github.com/flutter/flutter/issues/116136
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(3.0),
-            topRight: Radius.circular(3.0),
-          )
-        : null,
-      borderSide: BorderSide(
-        width: widget.indicatorWeight,
+        width: effectiveIndicatorWeight,
         color: color,
       ),
     );
@@ -1243,10 +1258,13 @@ class _TabBarState extends State<TabBar> {
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarIndicatorSize indicatorSize = widget.indicatorSize
+      ?? tabBarTheme.indicatorSize
+      ?? _defaults.indicatorSize!;
 
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
-      indicator: _getIndicator(),
+      indicator: _getIndicator(indicatorSize),
       indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
@@ -1594,7 +1612,7 @@ class _TabBarState extends State<TabBar> {
 
     if (widget.isScrollable) {
       final EdgeInsetsGeometry? effectivePadding = effectiveTabAlignment == TabAlignment.startOffset
-        ? const EdgeInsetsDirectional.only(start: 56.0).add(widget.padding ?? EdgeInsets.zero)
+        ? const EdgeInsetsDirectional.only(start: _kStartOffset).add(widget.padding ?? EdgeInsets.zero)
         : widget.padding;
       _scrollController ??= _TabBarScrollController(this);
       tabBar = ScrollConfiguration(
@@ -2205,6 +2223,8 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
+
+  static double indicatorWeight = 3.0;
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {
