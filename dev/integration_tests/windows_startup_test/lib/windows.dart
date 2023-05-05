@@ -57,6 +57,6 @@ Future<bool> testCanEnableApplicationLifecycle() async {
       completer.complete(true);
     }
   });
-  ServicesBinding.instance.enableApplicationLifecycle();
+  ServicesBinding.instance.initializationComplete();
   return completer.future;
 }

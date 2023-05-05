@@ -72,7 +72,7 @@ bool FlutterWindow::OnCreate() {
 
   messenger->SetMessageHandler("flutter/platform", [=](const uint8_t* message, size_t message_size, flutter::BinaryReply reply){
     std::string call(message, message + message_size);
-    constexpr char needle[] = "\"method\":\"System.enableApplicationLifecycle\"";
+    constexpr char needle[] = "\"method\":\"System.initializationComplete\"";
     if (call.find(needle) != std::string::npos) {
       constexpr char rep_method[] = "{\"method\":\"success\",\"args\":null}";
       size_t len = strlen(rep_method);

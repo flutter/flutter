@@ -45,7 +45,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
-    enableApplicationLifecycle();
+    initializationComplete();
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -419,8 +419,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   /// Alert the engine that the binding is registered. This instructs the engine to
   /// register its top level window handler on Windows.
-  Future<void> enableApplicationLifecycle() async {
-    SystemChannels.platform.invokeMethod('System.enableApplicationLifecycle');
+  Future<void> initializationComplete() async {
+    SystemChannels.platform.invokeMethod('System.initializationComplete');
   }
 }
 
