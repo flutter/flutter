@@ -850,7 +850,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     super.child,
-  }) : assert(borderRadius != null || clipper != null);
+  });
 
   /// The border radius of the rounded corners.
   ///
@@ -858,7 +858,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  final BorderRadiusGeometry? borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect>? clipper;
@@ -871,7 +871,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   RenderClipRRect createRenderObject(BuildContext context) {
     return RenderClipRRect(
-      borderRadius: borderRadius!,
+      borderRadius: borderRadius,
       clipper: clipper,
       clipBehavior: clipBehavior,
       textDirection: Directionality.maybeOf(context),
@@ -881,7 +881,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
-      ..borderRadius = borderRadius!
+      ..borderRadius = borderRadius
       ..clipBehavior = clipBehavior
       ..clipper = clipper
       ..textDirection = Directionality.maybeOf(context);
