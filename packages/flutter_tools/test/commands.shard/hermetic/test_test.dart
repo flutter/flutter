@@ -441,28 +441,6 @@ dev_dependencies:
     ]),
   });
 
-  testUsingContext('Overrides concurrency when running web tests', () async {
-    final FakePackageTest fakePackageTest = FakePackageTest();
-
-    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
-    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
-
-    await commandRunner.run(const <String>[
-      'test',
-      '--no-pub',
-      '--concurrency=100',
-      '--platform=chrome',
-    ]);
-
-    expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fs,
-    ProcessManager: () => FakeProcessManager.any(),
-    DeviceManager: () => _FakeDeviceManager(<Device>[
-      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
-    ]),
-  });
-
   group('Detecting Integration Tests', () {
     testUsingContext('when integration_test is not passed', () async {
       final FakePackageTest fakePackageTest = FakePackageTest();
@@ -617,6 +595,25 @@ dev_dependencies:
       ]);
 
       expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[DevelopmentArtifact.web]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Overrides concurrency when running web tests', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--concurrency=100',
+        '--platform=chrome',
+      ]);
+
+      expect(testRunner.lastConcurrency, 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -874,6 +871,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   late DebuggingOptions lastDebuggingOptionsValue;
   String? lastFileReporterValue;
   String? lastReporterOption;
+  int? lastConcurrency;
 
   @override
   Future<int> runTests(
@@ -912,6 +910,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastDebuggingOptionsValue = debuggingOptions;
     lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
+    lastConcurrency = concurrency;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
