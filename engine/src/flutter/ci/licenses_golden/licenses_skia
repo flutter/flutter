@@ -1,4 +1,4 @@
-Signature: b6ee32fd4cf38571274ccfdf8135a358
+Signature: 27f17a538eb72fc88238f37ed1725e7a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -4566,7 +4566,6 @@ ORIGIN: ../../../third_party/skia/gm/pictureshadercache.cpp + ../../../third_par
 ORIGIN: ../../../third_party/skia/gm/radial_gradient_precision.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/savelayer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/shadowutils.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/gm/simple_magnification.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/srgb.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/testgradient.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/text_scale_skew.cpp + ../../../third_party/skia/LICENSE
@@ -4795,7 +4794,6 @@ FILE: ../../../third_party/skia/gm/pictureshadercache.cpp
 FILE: ../../../third_party/skia/gm/radial_gradient_precision.cpp
 FILE: ../../../third_party/skia/gm/savelayer.cpp
 FILE: ../../../third_party/skia/gm/shadowutils.cpp
-FILE: ../../../third_party/skia/gm/simple_magnification.cpp
 FILE: ../../../third_party/skia/gm/srgb.cpp
 FILE: ../../../third_party/skia/gm/testgradient.cpp
 FILE: ../../../third_party/skia/gm/text_scale_skew.cpp
