@@ -4828,8 +4828,6 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    dimensions:
-      os: "Linux"
     bringup: true
     enabled_branches:
       - beta
