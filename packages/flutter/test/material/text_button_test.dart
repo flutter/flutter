@@ -177,11 +177,6 @@ void main() {
     // Default, not disabled.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    // Focused.
-    focusNode.requestFocus();
-    await tester.pumpAndSettle();
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
-
     // Hovered.
     final Offset center = tester.getCenter(find.byType(TextButton));
     final TestGesture gesture = await tester.createGesture(
@@ -197,8 +192,12 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-
     await gesture.removePointer();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
