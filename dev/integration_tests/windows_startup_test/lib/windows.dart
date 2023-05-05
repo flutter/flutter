@@ -10,9 +10,6 @@ import 'package:flutter/services.dart';
 const MethodChannel _kMethodChannel =
   MethodChannel('tests.flutter.dev/windows_startup_test');
 
-const MethodChannel _kPlatformChannel =
-  MethodChannel('flutter/platform');
-
 /// Returns true if the application's window is visible.
 Future<bool> isWindowVisible() async {
   final bool? visible = await _kMethodChannel.invokeMethod<bool?>('isWindowVisible');

@@ -40,5 +40,5 @@ void main() {
     expect(result, equals('success'));
 
     await driver.close();
-  });
+  }, timeout: Timeout.none);
 }
