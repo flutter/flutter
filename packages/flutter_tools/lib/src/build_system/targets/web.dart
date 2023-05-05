@@ -9,7 +9,7 @@ import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
-import '../../base/io.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../cache.dart';
 import '../../convert.dart';
@@ -100,8 +100,7 @@ class WebEntrypointTarget extends Target {
       pluginRegistrantEntrypoint: generatedImport,
     );
 
-    environment.buildDir.childFile('main.dart')
-      .writeAsStringSync(contents);
+    environment.buildDir.childFile('main.dart').writeAsStringSync(contents);
   }
 }
 
@@ -129,16 +128,6 @@ abstract class Dart2WebTarget extends Target {
 
   @override
   List<Source> get outputs => const <Source>[];
-
-  String _collectOutput(ProcessResult result) {
-    final String stdout = result.stdout is List<int>
-        ? utf8.decode(result.stdout as List<int>)
-        : result.stdout as String;
-    final String stderr = result.stderr is List<int>
-        ? utf8.decode(result.stderr as List<int>)
-        : result.stderr as String;
-    return stdout + stderr;
-  }
 }
 
 class Dart2JSTarget extends Dart2WebTarget {
@@ -189,33 +178,35 @@ class Dart2JSTarget extends Dart2WebTarget {
       '--cfe-only',
       environment.buildDir.childFile('main.dart').path, // dartfile
     ];
-    globals.printTrace('compiling dart code to kernel with command "${compilationArgs.join(' ')}"');
+
+    final ProcessUtils processUtils = ProcessUtils(
+      logger: environment.logger,
+      processManager: environment.processManager,
+    );
 
     // Run the dart2js compilation in two stages, so that icon tree shaking can
     // parse the kernel file for web builds.
-    final ProcessResult kernelResult = await globals.processManager.run(compilationArgs);
-    if (kernelResult.exitCode != 0) {
-      throw Exception(_collectOutput(kernelResult));
-    }
+    await processUtils.run(compilationArgs, throwOnError: true);
 
     final File outputJSFile = environment.buildDir.childFile('main.dart.js');
 
-    final ProcessResult javaScriptResult = await environment.processManager.run(<String>[
-      ...sharedCommandOptions,
-      if (buildMode == BuildMode.profile) '--no-minify',
-      ...compilerConfig.toCommandOptions(),
-      '-o',
-      outputJSFile.path,
-      environment.buildDir.childFile('app.dill').path, // dartfile
-    ]);
-    if (javaScriptResult.exitCode != 0) {
-      throw Exception(_collectOutput(javaScriptResult));
-    }
-    final File dart2jsDeps = environment.buildDir
-      .childFile('app.dill.deps');
+    await processUtils.run(
+      throwOnError: true,
+      <String>[
+        ...sharedCommandOptions,
+        if (buildMode == BuildMode.profile) '--no-minify',
+        ...compilerConfig.toCommandOptions(),
+        '-o',
+        outputJSFile.path,
+        environment.buildDir.childFile('app.dill').path, // dartfile
+      ],
+    );
+    final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
-      environment.logger.printWarning('Warning: dart2js did not produced expected deps list at '
-        '${dart2jsDeps.path}');
+      environment.logger.printWarning(
+        'Warning: dart2js did not produced expected deps list at '
+        '${dart2jsDeps.path}',
+      );
       return;
     }
     final DepfileService depFileService = environment.depFileService;
@@ -281,11 +272,16 @@ class Dart2WasmTarget extends Dart2WebTarget {
       environment.buildDir.childFile('main.dart').path, // dartfile
       outputWasmFile.path,
     ];
-    globals.printTrace('compiling dart code to wasm with command "${compilationArgs.join(' ')}"');
-    final ProcessResult compileResult = await globals.processManager.run(compilationArgs);
-    if (compileResult.exitCode != 0) {
-      throw Exception(_collectOutput(compileResult));
-    }
+
+    final ProcessUtils processUtils = ProcessUtils(
+      logger: environment.logger,
+      processManager: environment.processManager,
+    );
+
+    await processUtils.run(
+      throwOnError: true,
+      compilationArgs,
+    );
     if (compilerConfig.runWasmOpt) {
       final String wasmOptBinary = artifacts.getArtifactPath(
         Artifact.wasmOptBinary,
@@ -308,10 +304,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
         '-o',
         optimizedOutput.path,
       ];
-      final ProcessResult optimizeResult = await globals.processManager.run(optimizeArgs);
-      if (optimizeResult.exitCode != 0) {
-        throw Exception(_collectOutput(optimizeResult));
-      }
+      await processUtils.run(
+        throwOnError: true,
+        optimizeArgs,
+      );
 
       // Rename the .mjs file not to have the `.unopt` bit
       final File jsRuntimeFile = environment.buildDir.childFile('main.dart.unopt.mjs');
