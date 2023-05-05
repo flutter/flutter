@@ -208,16 +208,12 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   @override
   Widget build(BuildContext context) {
-    // A ScrollMetricsNotification allows listeners to be notified for an
-    // initial state, as well as if the content dimensions change without
-    // scrolling.
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (ScrollMetricsNotification notification) {
-        _notifyListeners(_ConvertedScrollMetricsNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ));
+        // A ScrollMetricsNotification allows listeners to be notified for an
+        // initial state, as well as if the content dimensions change without
+        // scrolling.
+        _notifyListeners(notification.asScrollUpdate());
         return false;
       },
       child: NotificationListener<ScrollNotification>(
@@ -239,12 +235,4 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     _listeners = null;
     super.dispose();
   }
-}
-
-class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
-  _ConvertedScrollMetricsNotification({
-    required super.metrics,
-    required super.context,
-    required super.depth,
-  });
 }
