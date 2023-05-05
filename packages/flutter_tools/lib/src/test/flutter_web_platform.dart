@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:package_config/package_config.dart';
-import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -97,10 +96,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
 
-  /// Allows only one test suite (typically one test file) to be loaded and run
-  /// at any given point in time. Loading more than one file at a time is known
-  /// to lead to flaky tests.
-  final Pool _suiteLock = Pool(1);
+  bool _isLoadingSuite = false;
 
   BrowserManager? _browserManager;
   late TestGoldenComparator _testGoldenComparator;
@@ -441,13 +437,18 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (_closed) {
       throw StateError('Load called on a closed FlutterWebPlatform');
     }
-    final PoolResource lockResource = await _suiteLock.request();
+
+    /// We only allow one test suite (typically one test file) to be loaded and
+    /// run at any given point in time. Loading more than one file at a time is
+    /// known to lead to flaky tests.
+    assert(_isLoadingSuite == false);
+    _isLoadingSuite = true;
 
     final Runtime browser = platform.runtime;
     try {
       _browserManager = await _launchBrowser(browser);
     } on Error catch (_) {
-      await _suiteLock.close();
+      _isLoadingSuite = false;
       rethrow;
     }
 
@@ -461,7 +462,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     final RunnerSuite suite = await _browserManager!.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
       await _browserManager!.close();
       _browserManager = null;
-      lockResource.release();
+      _isLoadingSuite = false;
     });
     if (_closed) {
       throw StateError('Load called on a closed FlutterWebPlatform');

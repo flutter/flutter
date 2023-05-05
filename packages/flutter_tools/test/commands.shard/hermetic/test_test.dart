@@ -441,6 +441,28 @@ dev_dependencies:
     ]),
   });
 
+  testUsingContext('Overrides concurrency when running web tests', () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--concurrency=100',
+      '--platform=chrome',
+    ]);
+
+    expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
   group('Detecting Integration Tests', () {
     testUsingContext('when integration_test is not passed', () async {
       final FakePackageTest fakePackageTest = FakePackageTest();

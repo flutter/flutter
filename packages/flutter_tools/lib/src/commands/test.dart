@@ -238,13 +238,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   final Set<Uri> _testFileUris = <Uri>{};
 
+  bool get isWeb => stringArg('platform') == 'chrome';
+
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     final Set<DevelopmentArtifact> results = _isIntegrationTest
         // Use [DeviceBasedDevelopmentArtifacts].
         ? await super.requiredArtifacts
         : <DevelopmentArtifact>{};
-    if (stringArg('platform') == 'chrome') {
+    if (isWeb) {
       results.add(DevelopmentArtifact.web);
     }
     return results;
@@ -357,11 +359,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
       );
     }
-    if (_isIntegrationTest) {
+
+    if (_isIntegrationTest || isWeb) {
       if (argResults!.wasParsed('concurrency')) {
         globals.printStatus(
           '-j/--concurrency was parsed but will be ignored, this option is not '
-          'supported when running Integration Tests.',
+          'supported when running Integration Tests or web tests.',
         );
       }
       // Running with concurrency will result in deploying multiple test apps
@@ -471,7 +474,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       concurrency: jobs,
       testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
-      web: stringArg('platform') == 'chrome',
+      web: isWeb,
       randomSeed: stringArg('test-randomize-ordering-seed'),
       reporter: stringArg('reporter'),
       fileReporter: stringArg('file-reporter'),
