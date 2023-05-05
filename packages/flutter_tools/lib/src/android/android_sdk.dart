@@ -413,8 +413,8 @@ class AndroidSdk {
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version not found.
   ///
-  /// TODO(andrewkolos): Callers should instead use the [Java] class.
-  /// See https://github.com/flutter/flutter/issues/126126.
+  /// Callers should instead use the [Java] class.
+  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
   String? getJavaVersion() {
     return globals.java?.getVersion()?.shortText;
   }
@@ -425,8 +425,8 @@ class AndroidSdk {
   /// * the JDK bundled with Android Studio, if one is found;
   /// * the JAVA_HOME in the ambient environment, if set;
   ///
-  /// TODO(andrewkolos): Callers should instead use the [Java] class.
-  /// See https://github.com/flutter/flutter/issues/126126.
+  /// Callers should instead use the [Java] class.
+  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
   String? get javaHome {
     return findJavaHome();
   }
@@ -437,16 +437,16 @@ class AndroidSdk {
   /// * the JDK bundled with Android Studio, if one is found;
   /// * the JAVA_HOME in the ambient environment, if set;
   ///
-  /// TODO(andrewkolos): Callers should instead use the [Java] class.
-  /// See https://github.com/flutter/flutter/issues/126126.
+  /// Callers should instead use the [Java] class.
+  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
   static String? findJavaHome() {
     return globals.java?.home;
   }
 
   /// Finds the java binary that is used for all operations across the tool.
   ///
-  /// TODO(andrewkolos): Callers should instead use the [Java] class.
-  /// See https://github.com/flutter/flutter/issues/126126.
+  /// Callers should instead use the [Java] class.
+  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
   static String? findJavaBinary({
     required Logger logger,
     required AndroidStudio? androidStudio,
