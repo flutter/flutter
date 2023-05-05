@@ -389,11 +389,6 @@ class FakeDoctor extends Fake implements Doctor {
   }
 }
 
-class FakeAndroidStudio extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => 'android-studio/java';
-}
-
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];
 
