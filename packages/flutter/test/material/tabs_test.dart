@@ -3831,20 +3831,20 @@ void main() {
             bottom: TabBar(
               controller: controller,
               tabs: <Tab>[
-                Tab(text: 'A'),
-                Tab(text: 'B'),
+                const Tab(text: 'A'),
+                const Tab(text: 'B'),
                 if (controller.length == 3)
-                  Tab(text: 'C'),
+                  const Tab(text: 'C'),
               ],
             ),
           ),
           body: TabBarView(
             controller: controller,
             children: <Widget>[
-              Center(child: Text('CHILD A')),
-              Center(child: Text('CHILD B')),
+              const Center(child: Text('CHILD A')),
+              const Center(child: Text('CHILD B')),
               if (controller.length == 3)
-                Center(child: Text('CHILD C')),
+                const Center(child: Text('CHILD C')),
             ],
           ),
         ),
@@ -3865,7 +3865,7 @@ void main() {
     expect(controller2.index, 0);
 
     await tester.pumpWidget(buildFrame(controller1));
-    final flingStart = tester.getCenter(find.text('CHILD A'));
+    final Offset flingStart = tester.getCenter(find.text('CHILD A'));
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
     await tester.pump(const Duration(milliseconds: 10)); // start the fling animation
 
