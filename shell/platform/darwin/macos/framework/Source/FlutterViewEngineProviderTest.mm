@@ -25,9 +25,9 @@ TEST(FlutterViewEngineProviderUnittests, GetViewReturnsTheCorrectView) {
   OCMStub([mockEngine viewControllerForId:0])
       .ignoringNonObjectArgs()
       .andDo(^(NSInvocation* invocation) {
-        uint64_t viewId;
+        FlutterViewId viewId;
         [invocation getArgument:&viewId atIndex:2];
-        if (viewId == 0 /* kFlutterDefaultViewId */) {
+        if (viewId == kFlutterDefaultViewId) {
           if (mockFlutterViewController != nil) {
             [invocation setReturnValue:&mockFlutterViewController];
           }
