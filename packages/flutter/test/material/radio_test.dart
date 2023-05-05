@@ -1029,7 +1029,7 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: theme.useMaterial3 ? theme.colorScheme.primary.withOpacity(0.08) : Colors.black12)
+        ..circle(color: theme.useMaterial3 ? theme.colorScheme.primary.withOpacity(0.08) : theme.hoverColor)
         ..circle(color: hoveredFillColor),
     );
   });
