@@ -49,19 +49,18 @@ class Picture : public RefCountedDartWrappable<Picture> {
                                       Dart_Handle raw_image_callback);
 
   static Dart_Handle RasterizeLayerTreeToImage(
-      std::shared_ptr<LayerTree> layer_tree,
-      uint32_t width,
-      uint32_t height,
+      std::unique_ptr<LayerTree> layer_tree,
       Dart_Handle raw_image_callback);
 
-  // Callers may provide either a display list or a layer tree. If a layer tree
-  // is provided, it will be flattened on the raster thread. In this case the
-  // display list will be ignored.
-  static Dart_Handle RasterizeToImage(const sk_sp<DisplayList>& display_list,
-                                      std::shared_ptr<LayerTree> layer_tree,
-                                      uint32_t width,
-                                      uint32_t height,
-                                      Dart_Handle raw_image_callback);
+  // Callers may provide either a display list or a layer tree, but not both.
+  //
+  // If a layer tree is provided, it will be flattened on the raster thread, and
+  // picture_bounds should be the layer tree's frame_size().
+  static Dart_Handle DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
+                                        std::unique_ptr<LayerTree> layer_tree,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        Dart_Handle raw_image_callback);
 
  private:
   explicit Picture(sk_sp<DisplayList> display_list);
