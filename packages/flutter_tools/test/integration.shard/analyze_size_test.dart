@@ -25,6 +25,7 @@ void main() {
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--target-platform=android-arm64',
     ], workingDirectory: workingDirectory);
@@ -61,6 +62,7 @@ void main() {
       flutterBin,
       'build',
       'ios',
+      '--verbose',
       '--analyze-size',
       '--code-size-directory=${codeSizeDir.path}',
       '--no-codesign',
@@ -99,6 +101,7 @@ void main() {
     final ProcessResult configResult = await processManager.run(<String>[
       flutterBin,
       'config',
+      '--verbose',
       '--enable-macos-desktop',
     ], workingDirectory: workingDirectory);
 
@@ -144,6 +147,7 @@ void main() {
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--target-platform=android-arm64',
       '--debug',
@@ -163,6 +167,7 @@ void main() {
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--target-platform=android-arm64',
       '--split-debug-info=infos',
@@ -181,6 +186,7 @@ void main() {
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--code-size-directory=${tempDir.path}',
       '--target-platform=android-arm64',
