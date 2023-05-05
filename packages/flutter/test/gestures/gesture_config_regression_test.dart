@@ -7,6 +7,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 class TestResult {
   bool dragStarted = false;
   bool dragUpdate = false;
@@ -89,7 +91,7 @@ class NestedDraggableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
@@ -112,6 +114,8 @@ void main() {
    expect(result.dragUpdate, true);
   });
 
+  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
+  // https://github.com/flutter/devtools/issues/3951
   testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
