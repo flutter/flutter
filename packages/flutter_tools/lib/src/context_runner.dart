@@ -106,7 +106,7 @@ Future<T> runInContext<T>(
         fileSystem: globals.fs,
         stdio: globals.stdio,
       ),
-      AndroidSdk: () => AndroidSdk.locateAndroidSdk(),
+      AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
         androidStudio: globals.androidStudio,

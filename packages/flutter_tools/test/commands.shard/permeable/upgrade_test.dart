@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -451,6 +452,7 @@ void main() {
             containsPair('redisplay-welcome-message', true),
           );
         }, overrides: <Type, Generator>{
+          AndroidSdk: () => FakeAndroidSdk(),
           FlutterVersion: () => FakeFlutterVersion(),
           ProcessManager: () => fakeProcessManager,
           PersistentToolState: () => PersistentToolState.test(
