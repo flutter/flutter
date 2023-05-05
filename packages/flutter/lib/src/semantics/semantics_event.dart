@@ -159,3 +159,17 @@ class TapSemanticEvent extends SemanticsEvent {
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
+
+/// An event which triggers focus semantic.
+///
+/// This is generally not recommended to use, it may break the consistency of the
+/// accessibiliy focus of the platform.
+///
+/// Used in android and iOS.
+class FocusSemanticEvent extends SemanticsEvent {
+  /// Constructs an event that triggers a focus change by the platform.
+  const FocusSemanticEvent() : super('focus');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
