@@ -255,10 +255,6 @@ TaskFunction createWebCompileTest() {
   return const WebCompileTest().run;
 }
 
-TaskFunction createComplexLayoutCompileTest() {
-  return CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
-}
-
 TaskFunction createFlutterViewStartupTest() {
   return StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
@@ -936,6 +932,7 @@ class PerfTest {
     this.timelineFileName, {
     this.measureCpuGpu = true,
     this.measureMemory = true,
+    this.measureTotalGCTime = true,
     this.saveTraceFile = false,
     this.testDriver,
     this.needsFullTimeline = true,
@@ -953,6 +950,7 @@ class PerfTest {
     this.testTarget, {
     this.measureCpuGpu = false,
     this.measureMemory = false,
+    this.measureTotalGCTime = false,
     this.testDriver =  'test_driver/e2e_test.dart',
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
@@ -979,6 +977,8 @@ class PerfTest {
   final bool measureCpuGpu;
   /// Whether to collect memory metrics.
   final bool measureMemory;
+  /// Whether to summarize total GC time on the UI thread from the timeline.
+  final bool measureTotalGCTime;
   /// Whether to collect full timeline, meaning if `--trace-startup` flag is needed.
   final bool needsFullTimeline;
   /// Whether to save the trace timeline file `*.timeline.json`.
@@ -1114,6 +1114,7 @@ class PerfTest {
             if (data['90th_percentile_memory_usage'] != null) '90th_percentile_memory_usage',
             if (data['99th_percentile_memory_usage'] != null) '99th_percentile_memory_usage',
           ],
+          if (measureTotalGCTime) 'total_ui_gc_time',
           if (data['30hz_frame_percentage'] != null) '30hz_frame_percentage',
           if (data['60hz_frame_percentage'] != null) '60hz_frame_percentage',
           if (data['80hz_frame_percentage'] != null) '80hz_frame_percentage',

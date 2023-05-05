@@ -168,6 +168,42 @@ tasks.register("clean", Delete) {
             gradleWrapperToMigrate);
       });
 
+      testWithoutContext('skipped if android studio version is null', () {
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
+          bufferLogger,
+          project: project,
+          androidStudio: FakeAndroidStudio(version: null),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
+        migration.migrate();
+        expect(bufferLogger.traceText, contains(androidStudioNotFound));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(),
+            gradleWrapperToMigrate);
+      });
+
+      testWithoutContext('skipped if error is encountered in migrate()', () {
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
+          bufferLogger,
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeErroringAndroidSdk(),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
+        migration.migrate();
+        expect(bufferLogger.traceText, contains(errorWhileMigrating));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(),
+            gradleWrapperToMigrate);
+      });
+
       testWithoutContext('skipped if android studio version is less than flamingo', () {
         final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
@@ -235,8 +271,9 @@ tasks.register("clean", Delete) {
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrateTo);
-        expect(bufferLogger.statusText, contains('Conflict detected between Android Studio Java version and Gradle version, '
-            'upgrading Gradle version from 6.7 to 7.6.1.'));
+        expect(bufferLogger.statusText, contains('Conflict detected between '
+            'Android Studio Java version and Gradle version, upgrading Gradle '
+            'version from 6.7 to $gradleVersion7_6_1.'));
       });
 
       testWithoutContext('change is not made when opt out flag is set', () {
@@ -267,14 +304,14 @@ class FakeAndroidProject extends Fake implements AndroidProject {
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
-  FakeAndroidStudio({required Version version}) {
+  FakeAndroidStudio({required Version? version}) {
     _version = version;
   }
 
-  late Version _version;
+  late Version? _version;
 
   @override
-  Version get version => _version;
+  Version? get version => _version;
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
@@ -293,6 +330,21 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
     required ProcessUtils processUtils,
   }) {
     return _javaVersion;
+  }
+}
+
+class FakeErroringAndroidSdk extends Fake implements AndroidSdk {
+  FakeErroringAndroidSdk();
+
+  @override
+  String? getJavaVersion({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessUtils processUtils,
+  }) {
+    throw const FileSystemException();
   }
 }
 
