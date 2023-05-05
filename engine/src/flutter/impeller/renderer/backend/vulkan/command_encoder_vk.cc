@@ -37,6 +37,8 @@ class TrackedObjectsVK {
     if (!pool) {
       VALIDATION_LOG
           << "Command pool died before a command buffer could be recycled.";
+      // The buffer can not be freed if its command pool has been destroyed.
+      buffer_.release();
       return;
     }
     pool->CollectGraphicsCommandBuffer(std::move(buffer_));
