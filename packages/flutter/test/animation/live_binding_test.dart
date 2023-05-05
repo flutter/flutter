@@ -139,7 +139,5 @@ void main() {
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
     image.dispose();
-  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
-  );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }

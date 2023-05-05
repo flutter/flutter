@@ -21,5 +21,5 @@ void main() {
       find.byKey(logo),
       matchesGoldenFile('flutter_logo.png'),
     );
-  }, leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'})); // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
+  });
 }

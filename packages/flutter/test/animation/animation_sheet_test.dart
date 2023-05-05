@@ -54,9 +54,7 @@ void main() {
     await tester.pumpWidget(display);
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
-  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-     leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
-  );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgetsWithLeakTracking('correctly wraps a row', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
@@ -74,9 +72,7 @@ void main() {
     await tester.pumpWidget(display);
 
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
-  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
-  );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgetsWithLeakTracking('correctly records frames using collate', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
@@ -113,9 +109,7 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
     image.dispose();
-  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
-  );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
   testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
@@ -149,9 +143,7 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
     image.dispose();
-  }, skip: isBrowser, // https://github.com/flutter/flutter/issues/56001
-    leakTrackingConfig: LeakTrackingTestConfig(notDisposedAllowList: <String>{'$Image'}), // TODO(goderbauer): Fix Codec.getNextFrame leak, https://github.com/flutter/flutter/issues/126147.
-  );
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of
