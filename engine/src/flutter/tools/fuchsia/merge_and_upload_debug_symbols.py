@@ -17,6 +17,13 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
+
+# Path to the engine root checkout. This is used to calculate absolute
+# paths if relative ones are passed to the script.
+BUILD_ROOT_DIR = os.path.abspath(
+    os.path.join(os.path.realpath(__file__), '..', '..', '..', '..')
+)
 
 
 def IsLinux():
@@ -145,6 +152,16 @@ def HardlinkContents(dirA, dirB):
   return internal_symbol_dirs
 
 
+def CalculateAbsoluteDirs(dirs):
+  results = []
+  for directory in dirs:
+    if os.path.isabs(directory):
+      results.append(directory)
+    else:
+      results.append(os.path.join(BUILD_ROOT_DIR, directory))
+  return results
+
+
 def main():
   parser = argparse.ArgumentParser()
 
@@ -156,10 +173,13 @@ def main():
   )
   parser.add_argument(
       '--out-dir',
-      required=True,
       action='store',
       dest='out_dir',
-      help='Output directory where the executables will be placed.'
+      default=tempfile.mkdtemp(),
+      help=(
+          'Output directory where the executables will be placed defaults to an '
+          'empty temp directory'
+      )
   )
   parser.add_argument(
       '--target-arch', type=str, choices=['x64', 'arm64'], required=True
@@ -174,7 +194,7 @@ def main():
 
   args = parser.parse_args()
 
-  symbol_dirs = args.symbol_dirs
+  symbol_dirs = CalculateAbsoluteDirs(args.symbol_dirs)
   for symbol_dir in symbol_dirs:
     assert os.path.exists(symbol_dir) and os.path.isdir(symbol_dir)
 
