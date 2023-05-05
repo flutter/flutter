@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:meta/meta.dart';
 
 import '../asset.dart';
@@ -350,7 +348,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    String? concurrencyString = stringArg('concurrency');
+    final String? concurrencyString = stringArg('concurrency');
     int? jobs = concurrencyString == null ? null : int.tryParse(concurrencyString);
     if (jobs != null && (jobs <= 0 || !jobs.isFinite)) {
       throwToolExit(
