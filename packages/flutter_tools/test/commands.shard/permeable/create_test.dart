@@ -3577,12 +3577,3 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';
 }
-
-class _FakeAndroidSdk extends Fake implements AndroidSdk {
-  _FakeAndroidSdk(FileSystem fs): _directory = fs.directory('android-sdk');
-
-  final Directory _directory;
-
-  @override
-  Directory get directory => _directory;
-}
