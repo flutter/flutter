@@ -1416,7 +1416,6 @@ void main() {
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
   }, overrides: <Type, Generator>{
-    AndroidSdk: () => _FakeAndroidSdk(MemoryFileSystem.test()),
     FlutterVersion: () => fakeFlutterVersion,
     Platform: _kNoColorTerminalMacOSPlatform,
     ProcessManager: () => fakeProcessManager,
