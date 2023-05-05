@@ -355,7 +355,7 @@ Future<vm_service.VmService> setUpVmService({
       };
     });
     registrationRequests.add(
-      vmService.registerService(kFlutterGetIOSUniversalLinkSettingsServiceName, 'Flutter Tools'),
+      vmService.registerService(kFlutterGetIOSUniversalLinkSettingsServiceName, kFlutterToolAlias),
     );
   }
 

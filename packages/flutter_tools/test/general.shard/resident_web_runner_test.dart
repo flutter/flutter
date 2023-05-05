@@ -84,7 +84,7 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
     'service': kFlutterGetIOSUniversalLinkSettingsServiceName,
-    'alias': 'Flutter Tools',
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(
     method: 'streamListen',
