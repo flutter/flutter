@@ -37,7 +37,7 @@ bool FlutterCompositor::CreateBackingStore(const FlutterBackingStoreConfig* conf
   return true;
 }
 
-bool FlutterCompositor::Present(uint64_t view_id,
+bool FlutterCompositor::Present(FlutterViewId view_id,
                                 const FlutterLayer** layers,
                                 size_t layers_count) {
   FlutterView* view = [view_provider_ viewForId:view_id];

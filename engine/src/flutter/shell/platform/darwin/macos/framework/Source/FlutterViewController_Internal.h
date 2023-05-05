@@ -21,7 +21,7 @@
  * If the view controller is unattached (see FlutterViewController#attached),
  * reading this property throws an assertion.
  */
-@property(nonatomic, readonly) uint64_t viewId;
+@property(nonatomic, readonly) FlutterViewId viewId;
 
 // The FlutterView for this view controller.
 @property(nonatomic, readonly, nullable) FlutterView* flutterView;
@@ -43,7 +43,7 @@
  *
  * This method is called by FlutterEngine.
  */
-- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(uint64_t)viewId;
+- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(FlutterViewId)viewId;
 
 /**
  * Reset the `engine` and `id` of this controller.
