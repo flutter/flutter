@@ -170,6 +170,12 @@ enum CupertinoDatePickerMode {
   ///
   /// Example: ` Fri Jul 13 | 4 | 14 | PM `
   dateAndTime,
+  /// Mode that shows the date in month and year.
+  /// Name of month is spelled in full.
+  /// Column order is subject to internationalization.
+  ///
+  /// Example: ` July | 2012 `.
+  monthYear,
 }
 
 // Different types of column in CupertinoDatePicker.
@@ -234,7 +240,9 @@ class CupertinoDatePicker extends StatefulWidget {
   /// changes and must not be null. When in [CupertinoDatePickerMode.time] mode,
   /// the year, month and day will be the same as [initialDateTime]. When in
   /// [CupertinoDatePickerMode.date] mode, this callback will always report the
-  /// start time of the currently selected day.
+  /// start time of the currently selected day. When in
+  /// [CupertinoDatePickerMode.monthYear] mode, the day and time will be the
+  /// start time of the first day of the month.
   ///
   /// [initialDateTime] is the initial date time of the picker. Defaults to the
   /// present date and time and must not be null. The present must conform to
@@ -264,7 +272,10 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// [use24hFormat] decides whether 24 hour format is used. Defaults to false.
   ///
-  /// [dateOrder] determines the order of the columns inside [CupertinoDatePicker] in date mode.
+  /// [dateOrder] determines the order of the columns inside [CupertinoDatePicker]
+  /// in [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear]
+  /// mode. When using monthYear mode, both [DatePickerDateOrder.dmy] and
+  /// [DatePickerDateOrder.mdy] will result in the month|year order.
   /// Defaults to the locale's default date format/order.
   CupertinoDatePicker({
     super.key,
@@ -294,19 +305,19 @@ class CupertinoDatePicker extends StatefulWidget {
       'initial date is after maximum date',
     );
     assert(
-      mode != CupertinoDatePickerMode.date || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
       'initial year is not greater than minimum year, or minimum year is not positive',
     );
     assert(
-      mode != CupertinoDatePickerMode.date || maximumYear == null || this.initialDateTime.year <= maximumYear!,
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumYear == null || this.initialDateTime.year <= maximumYear!,
       'initial year is not smaller than maximum year',
     );
     assert(
-      mode != CupertinoDatePickerMode.date || minimumDate == null || !minimumDate!.isAfter(this.initialDateTime),
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || minimumDate == null || !minimumDate!.isAfter(this.initialDateTime),
       'initial date ${this.initialDateTime} is not greater than or equal to minimumDate $minimumDate',
     );
     assert(
-      mode != CupertinoDatePickerMode.date || maximumDate == null || !maximumDate!.isBefore(this.initialDateTime),
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumDate == null || !maximumDate!.isBefore(this.initialDateTime),
       'initial date ${this.initialDateTime} is not less than or equal to maximumDate $maximumDate',
     );
     assert(
@@ -373,7 +384,10 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Whether to use 24 hour format. Defaults to false.
   final bool use24hFormat;
 
-  /// Determines the order of the columns inside [CupertinoDatePicker] in date mode.
+  /// Determines the order of the columns inside [CupertinoDatePicker] in
+  /// [CupertinoDatePickerMode.date] and [CupertinoDatePickerMode.monthYear]
+  /// mode. When using monthYear mode, both [DatePickerDateOrder.dmy] and
+  /// [DatePickerDateOrder.mdy] will result in the month|year order.
   /// Defaults to the locale's default date format/order.
   final DatePickerDateOrder? dateOrder;
 
@@ -404,6 +418,8 @@ class CupertinoDatePicker extends StatefulWidget {
         return _CupertinoDatePickerDateTimeState();
       case CupertinoDatePickerMode.date:
         return _CupertinoDatePickerDateState(dateOrder: dateOrder);
+      case CupertinoDatePickerMode.monthYear:
+        return _CupertinoDatePickerMonthYearState(dateOrder: dateOrder);
     }
   }
 
@@ -515,7 +531,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       case CupertinoDatePickerMode.time:
         return 0;
       case CupertinoDatePickerMode.date:
-        break;
+      case CupertinoDatePickerMode.monthYear:
+      break;
     }
     assert(
       false,
@@ -1477,6 +1494,320 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   }
 }
 
+class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
+  _CupertinoDatePickerMonthYearState({
+    required this.dateOrder,
+  });
+
+  final DatePickerDateOrder? dateOrder;
+
+  late int textDirectionFactor;
+  late CupertinoLocalizations localizations;
+
+  // Alignment based on text direction. The variable name is self descriptive,
+  // however, when text direction is rtl, alignment is reversed.
+  late Alignment alignCenterLeft;
+  late Alignment alignCenterRight;
+
+  // The currently selected values of the picker.
+  late int selectedYear;
+  late int selectedMonth;
+
+  // The controller of the day picker. There are cases where the selected value
+  // of the picker is invalid (e.g. February 30th 2018), and this monthController
+  // is responsible for jumping to a valid value.
+  late FixedExtentScrollController monthController;
+  late FixedExtentScrollController yearController;
+
+  bool isMonthPickerScrolling = false;
+  bool isYearPickerScrolling = false;
+
+  bool get isScrolling => isMonthPickerScrolling || isYearPickerScrolling;
+
+  // Estimated width of columns.
+  Map<int, double> estimatedColumnWidths = <int, double>{};
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMonth = widget.initialDateTime.month;
+    selectedYear = widget.initialDateTime.year;
+
+    monthController = FixedExtentScrollController(initialItem: selectedMonth - 1);
+    yearController = FixedExtentScrollController(initialItem: selectedYear);
+
+    PaintingBinding.instance.systemFonts.addListener(_handleSystemFontsChange);
+  }
+
+  void _handleSystemFontsChange() {
+    setState(() {
+      // System fonts change might cause the text layout width to change.
+      _refreshEstimatedColumnWidths();
+    });
+  }
+
+  @override
+  void dispose() {
+    monthController.dispose();
+    yearController.dispose();
+
+    PaintingBinding.instance.systemFonts.removeListener(_handleSystemFontsChange);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    textDirectionFactor = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+    localizations = CupertinoLocalizations.of(context);
+
+    alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
+    alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
+
+    _refreshEstimatedColumnWidths();
+  }
+
+  void _refreshEstimatedColumnWidths() {
+    estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context, false);
+    estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context, false);
+  }
+
+  Widget _buildMonthPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget selectionOverlay) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isMonthPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isMonthPickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
+
+        return false;
+      },
+      child: CupertinoPicker(
+        scrollController: monthController,
+        offAxisFraction: offAxisFraction,
+        itemExtent: _kItemExtent,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        squeeze: _kSqueeze,
+        onSelectedItemChanged: (int index) {
+          selectedMonth = index + 1;
+          if (_isCurrentDateValid) {
+            widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth));
+          }
+        },
+        looping: true,
+        selectionOverlay: selectionOverlay,
+        children: List<Widget>.generate(12, (int index) {
+          final int month = index + 1;
+          final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month)
+                                   || (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
+
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerMonth(month),
+              style: _themeTextStyle(context, isValid: !isInvalidMonth),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildYearPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget selectionOverlay) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification is ScrollStartNotification) {
+          isYearPickerScrolling = true;
+        } else if (notification is ScrollEndNotification) {
+          isYearPickerScrolling = false;
+          _pickerDidStopScrolling();
+        }
+
+        return false;
+      },
+      child: CupertinoPicker.builder(
+        scrollController: yearController,
+        itemExtent: _kItemExtent,
+        offAxisFraction: offAxisFraction,
+        useMagnifier: _kUseMagnifier,
+        magnification: _kMagnification,
+        backgroundColor: widget.backgroundColor,
+        onSelectedItemChanged: (int index) {
+          selectedYear = index;
+          if (_isCurrentDateValid) {
+            widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth));
+          }
+        },
+        itemBuilder: (BuildContext context, int year) {
+          if (year < widget.minimumYear) {
+            return null;
+          }
+
+          if (widget.maximumYear != null && year > widget.maximumYear!) {
+            return null;
+          }
+
+          final bool isValidYear = (widget.minimumDate == null || widget.minimumDate!.year <= year)
+                                && (widget.maximumDate == null || widget.maximumDate!.year >= year);
+
+          return itemPositioningBuilder(
+            context,
+            Text(
+              localizations.datePickerYear(year),
+              style: _themeTextStyle(context, isValid: isValidYear),
+            ),
+          );
+        },
+        selectionOverlay: selectionOverlay,
+      ),
+    );
+  }
+
+  bool get _isCurrentDateValid {
+    // The current date selection represents a range [minSelectedData, maxSelectDate].
+    final DateTime minSelectedDate = DateTime(selectedYear, selectedMonth);
+    final DateTime maxSelectedDate = DateTime(selectedYear, selectedMonth, widget.initialDateTime.day + 1);
+
+    final bool minCheck = widget.minimumDate?.isBefore(maxSelectedDate) ?? true;
+    final bool maxCheck = widget.maximumDate?.isBefore(minSelectedDate) ?? false;
+
+    return minCheck && !maxCheck;
+  }
+
+  // One or more pickers have just stopped scrolling.
+  void _pickerDidStopScrolling() {
+    // Call setState to update the greyed out days/months/years, as the currently
+    // selected year/month may have changed.
+    setState(() { });
+
+    if (isScrolling) {
+      return;
+    }
+
+    // Whenever scrolling lands on an invalid entry, the picker
+    // automatically scrolls to a valid one.
+    final DateTime minSelectDate = DateTime(selectedYear, selectedMonth);
+    final DateTime maxSelectDate = DateTime(selectedYear, selectedMonth, widget.initialDateTime.day + 1);
+
+    final bool minCheck = widget.minimumDate?.isBefore(maxSelectDate) ?? true;
+    final bool maxCheck = widget.maximumDate?.isBefore(minSelectDate) ?? false;
+
+    if (!minCheck || maxCheck) {
+      // We have minCheck === !maxCheck.
+      final DateTime targetDate = minCheck ? widget.maximumDate! : widget.minimumDate!;
+      _scrollToDate(targetDate);
+      return;
+    }
+  }
+
+  void _scrollToDate(DateTime newDate) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      if (selectedYear != newDate.year) {
+        _animateColumnControllerToItem(yearController, newDate.year);
+      }
+
+      if (selectedMonth != newDate.month) {
+        _animateColumnControllerToItem(monthController, newDate.month - 1);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[];
+    List<double> columnWidths = <double>[];
+
+    final DatePickerDateOrder datePickerDateOrder =
+        dateOrder ?? localizations.datePickerDateOrder;
+
+    switch (datePickerDateOrder) {
+      case DatePickerDateOrder.mdy:
+      case DatePickerDateOrder.dmy:
+        pickerBuilders = <_ColumnBuilder>[_buildMonthPicker, _buildYearPicker];
+        columnWidths = <double>[
+          estimatedColumnWidths[_PickerColumnType.month.index]!,
+          estimatedColumnWidths[_PickerColumnType.year.index]!,
+        ];
+      case DatePickerDateOrder.ymd:
+      case DatePickerDateOrder.ydm:
+        pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildMonthPicker];
+        columnWidths = <double>[
+          estimatedColumnWidths[_PickerColumnType.year.index]!,
+          estimatedColumnWidths[_PickerColumnType.month.index]!,
+        ];
+    }
+
+    final List<Widget> pickers = <Widget>[];
+    double totalColumnWidths = 3 * _kDatePickerPadSize;
+
+    for (int i = 0; i < columnWidths.length; i++) {
+      late final double offAxisFraction;
+      switch (i) {
+        case 0:
+          offAxisFraction = -0.3 * textDirectionFactor;
+        default:
+          offAxisFraction = 0.5 * textDirectionFactor;
+      }
+
+      EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
+      if (textDirectionFactor == -1) {
+        padding = const EdgeInsets.only(left: _kDatePickerPadSize);
+      }
+
+      Widget selectionOverlay = _centerSelectionOverlay;
+      if (i == 0) {
+        selectionOverlay = _startSelectionOverlay;
+      } else if (i == columnWidths.length - 1) {
+        selectionOverlay = _endSelectionOverlay;
+      }
+
+      totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
+
+      pickers.add(LayoutId(
+        id: i,
+        child: pickerBuilders[i](
+          offAxisFraction,
+          (BuildContext context, Widget? child) {
+            return Container(
+              alignment: i == columnWidths.length - 1
+                  ? alignCenterLeft
+                  : alignCenterRight,
+              padding: i == 0 ? null : padding,
+              child: Container(
+                alignment: i == 0 ? alignCenterLeft : alignCenterRight,
+                width: columnWidths[i] + _kDatePickerPadSize,
+                child: child,
+              ),
+            );
+          },
+          selectionOverlay,
+        ),
+      ));
+    }
+
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      child: DefaultTextStyle.merge(
+        style: _kDefaultPickerTextStyle,
+        child: CustomMultiChildLayout(
+          delegate: _DatePickerLayoutDelegate(
+            columnWidths: columnWidths,
+            textDirectionFactor: textDirectionFactor,
+            maxWidth: maxPickerWidth,
+          ),
+          children: pickers,
+        ),
+      ),
+    );
+  }
+}
 
 // The iOS date picker and timer picker has their width fixed to 320.0 in all
 // modes. The only exception is the hms mode (which doesn't have a native counterpart),

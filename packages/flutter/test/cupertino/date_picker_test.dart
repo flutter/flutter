@@ -460,6 +460,27 @@ void main() {
       expect(find.text('AM'), findsOneWidget);
     });
 
+    testWidgets('monthYear picker has expected string', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018, 9),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('September'), findsOneWidget);
+      expect(find.text('2018'), findsOneWidget);
+    });
+
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
@@ -583,6 +604,50 @@ void main() {
       // Distance between the first and the last column should be the same.
       expect(
         tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx,
+        distance,
+      );
+    });
+
+    testWidgets('width of picker in monthYear mode is consistent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first column and the last column.
+      final double distance =
+          tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 800.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first and the last column should be the same.
+      expect(
+        tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx,
         distance,
       );
     });
@@ -912,6 +977,65 @@ void main() {
         expect(
           date,
           DateTime(2019, 11, 11, 3, 30),
+        );
+      },
+    );
+
+    testWidgets(
+      'monthYear picker automatically scrolls away from invalid date, '
+      "and onDateTimeChanged doesn't report these dates",
+      (WidgetTester tester) async {
+        late DateTime date;
+        final DateTime minimum = DateTime(2016, 2);
+        final DateTime maximum = DateTime(2018, 12);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.monthYear,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (DateTime newDate) {
+                    date = newDate;
+                    // Callback doesn't transiently go into invalid dates.
+                    expect(newDate.isAtSameMomentAs(minimum) || newDate.isAfter(minimum), isTrue);
+                    expect(newDate.isAtSameMomentAs(maximum) || newDate.isBefore(maximum), isTrue);
+                  },
+                  initialDateTime: DateTime(2017, 2),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.drag(find.text('2017'), const Offset(0.0, 100.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump();
+        await tester.pumpAndSettle(); // Now the autoscrolling should happen.
+
+        expect(
+          date,
+          DateTime(2016, 2),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, -100.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2018, 12),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2017, 12),
         );
       },
     );
@@ -1273,6 +1397,14 @@ void main() {
         );
       }
 
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthYear));
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.monthyear.initial.png'),
+        );
+      }
+
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
       if (!skipPerspectiveTextGoldens) {
         await expectLater(
@@ -1318,6 +1450,50 @@ void main() {
 
       expect(
         tester.getTopLeft(find.text('14')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+    });
+
+    testWidgets('monthYear DatePicker displays the date in correct order', (WidgetTester tester) async {
+      Widget buildApp(DatePickerDateOrder order) {
+        return CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                key: ValueKey<DatePickerDateOrder>(order),
+                dateOrder: order,
+                mode: CupertinoDatePickerMode.monthYear,
+                onDateTimeChanged: (DateTime newDate) {},
+                initialDateTime: DateTime(2018, 1, 14, 10, 30),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.dmy));
+      expect(
+        tester.getTopLeft(find.text('January')).dx,
+        lessThan(tester.getTopLeft(find.text('2018')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.mdy));
+      expect(
+        tester.getTopLeft(find.text('January')).dx,
+        lessThan(tester.getTopLeft(find.text('2018')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.ydm));
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.ymd));
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
         lessThan(tester.getTopLeft(find.text('January')).dx),
       );
     });
