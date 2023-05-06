@@ -65,6 +65,18 @@ source_set("platform_message_handler") {
   deps = [ "//flutter/fml:fml" ]
 }
 
+source_set("display") {
+  sources = [
+    "display.cc",
+    "display.h",
+    "variable_refresh_rate_display.cc",
+    "variable_refresh_rate_display.h",
+    "variable_refresh_rate_reporter.h",
+  ]
+  public_configs = [ "//flutter:config" ]
+  deps = [ "//flutter/fml:fml" ]
+}
+
 source_set("common") {
   sources = [
     "animator.cc",
@@ -73,8 +85,6 @@ source_set("common") {
     "canvas_spy.h",
     "context_options.cc",
     "context_options.h",
-    "display.cc",
-    "display.h",
     "display_manager.cc",
     "display_manager.h",
     "dl_op_spy.cc",
@@ -110,9 +120,6 @@ source_set("common") {
     "switches.h",
     "thread_host.cc",
     "thread_host.h",
-    "variable_refresh_rate_display.cc",
-    "variable_refresh_rate_display.h",
-    "variable_refresh_rate_reporter.h",
     "vsync_waiter.cc",
     "vsync_waiter.h",
     "vsync_waiter_fallback.cc",
@@ -122,6 +129,7 @@ source_set("common") {
   public_configs = [ "//flutter:config" ]
 
   public_deps = [
+    ":display",
     ":platform_message_handler",
     "//flutter/shell/version",
     "//flutter/third_party/tonic",

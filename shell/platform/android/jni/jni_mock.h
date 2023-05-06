@@ -98,6 +98,9 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (override));
 
   MOCK_METHOD(double, GetDisplayRefreshRate, (), (override));
+  MOCK_METHOD(double, GetDisplayWidth, (), (override));
+  MOCK_METHOD(double, GetDisplayHeight, (), (override));
+  MOCK_METHOD(double, GetDisplayDensity, (), (override));
 
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,

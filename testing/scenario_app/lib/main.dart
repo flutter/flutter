@@ -24,6 +24,15 @@ void main() {
     ..onPointerDataPacket = _onPointerDataPacket
     ..scheduleFrame();
 
+  final FlutterView view = PlatformDispatcher.instance.implicitView!;
+  // Asserting that this is greater than zero since this app runs on different
+  // platforms with different sizes. If it is greater than zero, it has been
+  // initialized to some meaningful value at least.
+  assert(
+    view.display.size > Offset.zero,
+    'Expected ${view.display} to be initialized.',
+  );
+
   final ByteData data = ByteData(1);
   data.setUint8(0, 1);
   PlatformDispatcher.instance.sendPlatformMessage('waiting_for_status', data, null);

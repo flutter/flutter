@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "flutter/lib/ui/window/viewport_metrics.h"
+#include "flutter/shell/common/display.h"
 
 namespace flutter {
 
@@ -42,6 +43,7 @@ struct PlatformData {
   bool semantics_enabled = false;
   bool assistive_technology_enabled = false;
   int32_t accessibility_feature_flags_ = 0;
+  std::vector<DisplayData> displays;
 };
 
 }  // namespace flutter
