@@ -171,6 +171,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = false,
        initialOpenPanelValue = null;
 
@@ -197,6 +198,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
+    this.materialGapSize = 16.0,
   }) : _allowOnlyOnePanelOpen = true;
 
   /// The children of the expansion panel list. They are laid out in a similar
@@ -252,6 +254,12 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// {@macro flutter.material.ExpandIcon.color}
   final Color? expandIconColor;
+
+  /// Defines the [MaterialGap.size] of the [MaterialGap] which is placed
+  /// between the [ExpansionPanelList.children] when they're expanded.
+  ///
+  /// Defaults to `16.0`.
+  final double materialGapSize;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -348,7 +356,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1)) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
+        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1), size: widget.materialGapSize));
       }
 
       final ExpansionPanel child = widget.children[index];
@@ -422,7 +430,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       if (_isChildExpanded(index) && index != widget.children.length - 1) {
-        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
+        items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 + 1), size: widget.materialGapSize));
       }
     }
 
