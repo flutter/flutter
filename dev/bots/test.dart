@@ -543,7 +543,10 @@ Future<void> _runBuildTests() async {
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'hybrid_android_views')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_platform_view_tests')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ios_app_with_extensions')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'platform_interaction')))
+    ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'spell_check')))
     ..add(Directory(path.join(flutterRoot, 'dev', 'integration_tests', 'ui')));
 
   // The tests are randomly distributed into subshards so as to get a uniform

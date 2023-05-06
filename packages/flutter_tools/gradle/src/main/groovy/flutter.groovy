@@ -47,7 +47,7 @@ class FlutterExtension {
     static int compileSdkVersion = 33
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    static int minSdkVersion = 16
+    static int minSdkVersion = 19
 
     /** Sets the targetSdkVersion used by default in Flutter app projects. */
     static int targetSdkVersion = 33
@@ -1081,7 +1081,7 @@ class FlutterPlugin implements Plugin<Project> {
         // Flutter host module project (Add-to-app).
         String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName') : "app"
         Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
-        assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
+        assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To customize the host app project name, set `flutter.hostAppProjectName=<project-name>` in gradle.properties."
         // Wait for the host app project configuration.
         appProject.afterEvaluate {
             assert appProject.android != null

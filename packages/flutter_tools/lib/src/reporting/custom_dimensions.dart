@@ -411,6 +411,3 @@ enum CustomDimensionsEnum {
 
   String get cdKey => 'cd${index + 1}';
 }
-
-// TODO(kevmoo): delete this once Google3 code is migrated
-String cdKey(CustomDimensionsEnum cd) => cd.cdKey;

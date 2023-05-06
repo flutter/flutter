@@ -323,11 +323,7 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

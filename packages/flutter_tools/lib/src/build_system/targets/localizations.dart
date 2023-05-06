@@ -57,10 +57,6 @@ class GenerateLocalizationsTarget extends Target {
       logger: environment.logger,
       defaultArbDir: defaultArbDir,
     );
-    final DepfileService depfileService = DepfileService(
-      logger: environment.logger,
-      fileSystem: environment.fileSystem,
-    );
     generateLocalizations(
       logger: environment.logger,
       options: options,
@@ -87,7 +83,7 @@ class GenerateLocalizationsTarget extends Target {
             environment.fileSystem.file(outputFile),
       ],
     );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('gen_localizations.d'),
     );
