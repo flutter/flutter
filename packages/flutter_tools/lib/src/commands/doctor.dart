@@ -50,7 +50,6 @@ class DoctorCommand extends FlutterCommand {
       androidLicenses: boolArg('android-licenses'),
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
-      version: globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
     ) ?? false;
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }

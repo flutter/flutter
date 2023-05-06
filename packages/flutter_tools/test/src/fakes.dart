@@ -338,17 +338,21 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkCommitDate = '12/01/01',
     this.gitTagVersion = const GitTagVersion.unknown(),
     this.flutterRoot = '/path/to/flutter',
+    this.nextFlutterVersion,
   });
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
+
+  /// Will be returned by [fetchTagsAndGetVersion] if not null.
+  final FlutterVersion? nextFlutterVersion;
 
   @override
     FlutterVersion fetchTagsAndGetVersion({
       SystemClock clock = const SystemClock(),
     }) {
     _didFetchTagsAndUpdate = true;
-    return this;
+    return nextFlutterVersion ?? this;
   }
 
   bool get didCheckFlutterVersionFreshness => _didCheckFlutterVersionFreshness;

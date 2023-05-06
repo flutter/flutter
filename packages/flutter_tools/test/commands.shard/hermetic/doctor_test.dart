@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -33,10 +34,12 @@ import '../../src/fakes.dart';
 void main() {
   late BufferLogger logger;
   late FakeProcessManager fakeProcessManager;
+  late MemoryFileSystem fs;
 
   setUp(() {
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
+    fs = MemoryFileSystem.test();
   });
 
   testWithoutContext('ValidationMessage equality and hashCode includes contextUrl', () {
@@ -755,10 +758,50 @@ void main() {
       contains(isA<CustomDeviceWorkflow>()),
     );
   }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
+    FileSystem: () => fs,
     ProcessManager: () => fakeProcessManager,
   });
 
+  group('FlutterValidator', () {
+    late FakeFlutterVersion initialVersion;
+    late FakeFlutterVersion secondVersion;
+
+    setUp(() {
+      secondVersion = FakeFlutterVersion(frameworkRevisionShort: '222');
+      initialVersion = FakeFlutterVersion(
+        frameworkRevisionShort: '111',
+        nextFlutterVersion: secondVersion,
+      );
+    });
+
+    testUsingContext('FlutterValidator fetches tags and gets fresh version', () async {
+      final Directory devtoolsDir = fs.directory('/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools')
+          ..createSync(recursive: true);
+      devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['chmod', '755', '/path/to/flutter/bin/cache/artifacts']),
+      ]);
+      final List<DoctorValidator> validators = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(),
+        platform: FakePlatform(),
+      ).validators;
+      final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
+      final ValidationResult result = await flutterValidator.validate();
+      expect(
+        result.messages.map((ValidationMessage msg) => msg.message),
+        contains(contains('Framework revision 222')),
+      );
+    }, overrides: <Type, Generator>{
+      Cache: () => Cache.test(
+        rootOverride: fs.directory('/path/to/flutter'),
+        fileSystem: fs,
+        processManager: fakeProcessManager,
+      ),
+      FileSystem: () => fs,
+      FlutterVersion: () => initialVersion,
+      ProcessManager: () => fakeProcessManager,
+    });
+  });
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
     final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
