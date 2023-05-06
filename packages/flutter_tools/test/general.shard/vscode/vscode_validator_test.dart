@@ -5,7 +5,11 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
+import 'package:flutter_tools/src/vscode/vscode_validator.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -20,4 +24,18 @@ void main() {
 
     expect(VsCode.allInstalled(fileSystem, platform, FakeProcessManager.any()), isEmpty);
   });
+
+  group(VsCodeValidator, () {
+    testWithoutContext('Warns if VS Code version could not be found', () async {
+      final VsCodeValidator validator = VsCodeValidator(_FakeVsCode());
+      final ValidationResult result = await validator.validate();
+      expect(result.messages, contains(const ValidationMessage.error('Unable to determine VS Code version.')));
+      expect(result.statusInfo, 'unknown version');
+    });
+  });
+}
+
+class _FakeVsCode extends Fake implements VsCode {
+  @override
+  Version? get version => Version(1, 2, 3);
 }
