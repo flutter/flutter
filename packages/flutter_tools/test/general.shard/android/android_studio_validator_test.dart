@@ -3,14 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_studio_validator.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -80,5 +83,30 @@ void main() {
         platform: linuxPlatform,
       ),
     });
+
+    testWithoutContext('warns if version of Android Studio could not be determined', () async {
+      final AndroidStudio studio = _FakeAndroidStudio();
+      final AndroidStudioValidator validator = AndroidStudioValidator(studio, fileSystem: fileSystem, userMessages: UserMessages());
+      final ValidationResult result = await validator.validate();
+      expect(result.messages.where((ValidationMessage message) {
+        return message.isError && message.message.contains('Unable to determine Android Studio version.');
+      }).isNotEmpty, true);
+      expect(result.statusInfo, 'version unknown');
+    });
   });
+}
+
+class _FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  List<String> get validationMessages => <String>[];
+  @override
+  bool get isValid => true;
+  @override
+  String? get pluginsPath => null;
+  @override
+  String get directory => 'android-studio';
+  @override
+  Version? get version => null;
+  @override
+  String get javaPath => 'android-studio/jbr/bin/java';
 }
