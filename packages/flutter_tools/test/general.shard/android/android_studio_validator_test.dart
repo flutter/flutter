@@ -88,9 +88,7 @@ void main() {
       final AndroidStudio studio = _FakeAndroidStudio();
       final AndroidStudioValidator validator = AndroidStudioValidator(studio, fileSystem: fileSystem, userMessages: UserMessages());
       final ValidationResult result = await validator.validate();
-      expect(result.messages.where((ValidationMessage message) {
-        return message.isError && message.message.contains('Unable to determine Android Studio version.');
-      }).isNotEmpty, true);
+      expect(result.messages, contains(const ValidationMessage.error('Unable to determine Android Studio version.')));
       expect(result.statusInfo, 'version unknown');
     });
   });
