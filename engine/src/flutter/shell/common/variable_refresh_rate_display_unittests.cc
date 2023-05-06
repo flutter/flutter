@@ -13,14 +13,16 @@ namespace testing {
 TEST(VariableRefreshRateDisplayTest, ReportCorrectInitialRefreshRate) {
   auto refresh_rate_reporter = std::make_shared<TestRefreshRateReporter>(60);
   auto display = flutter::VariableRefreshRateDisplay(
-      std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter));
+      0, std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter), 600,
+      800, 60);
   ASSERT_EQ(display.GetRefreshRate(), 60);
 }
 
 TEST(VariableRefreshRateDisplayTest, ReportCorrectRefreshRateWhenUpdated) {
   auto refresh_rate_reporter = std::make_shared<TestRefreshRateReporter>(60);
   auto display = flutter::VariableRefreshRateDisplay(
-      std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter));
+      0, std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter), 600,
+      800, 60);
   refresh_rate_reporter->UpdateRefreshRate(30);
   ASSERT_EQ(display.GetRefreshRate(), 30);
 }
@@ -29,7 +31,8 @@ TEST(VariableRefreshRateDisplayTest,
      Report0IfReporterSharedPointerIsDestroyedAfterDisplayCreation) {
   auto refresh_rate_reporter = std::make_shared<TestRefreshRateReporter>(60);
   auto display = flutter::VariableRefreshRateDisplay(
-      std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter));
+      0, std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter), 600,
+      800, 60);
   refresh_rate_reporter.reset();
   ASSERT_EQ(display.GetRefreshRate(), 0);
 }
@@ -39,7 +42,8 @@ TEST(VariableRefreshRateDisplayTest,
   auto refresh_rate_reporter = std::make_shared<TestRefreshRateReporter>(60);
   refresh_rate_reporter.reset();
   auto display = flutter::VariableRefreshRateDisplay(
-      std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter));
+      0, std::weak_ptr<TestRefreshRateReporter>(refresh_rate_reporter), 600,
+      800, 60);
   ASSERT_EQ(display.GetRefreshRate(), 0);
 }
 

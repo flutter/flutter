@@ -214,6 +214,10 @@ public class FlutterJNI {
    */
   private static float refreshRateFPS = 60.0f;
 
+  private static float displayWidth = -1.0f;
+  private static float displayHeight = -1.0f;
+  private static float displayDensity = -1.0f;
+
   // This is set from native code via JNI.
   @Nullable private static String vmServiceUri;
 
@@ -273,6 +277,18 @@ public class FlutterJNI {
     FlutterJNI.refreshRateFPS = refreshRateFPS;
     updateRefreshRate();
   }
+
+  public void updateDisplayMetrics(int displayId, float width, float height, float density) {
+    FlutterJNI.displayWidth = width;
+    FlutterJNI.displayHeight = height;
+    FlutterJNI.displayDensity = density;
+    if (!FlutterJNI.loadLibraryCalled) {
+      return;
+    }
+    nativeUpdateDisplayMetrics(nativeShellHolderId);
+  }
+
+  private native void nativeUpdateDisplayMetrics(long nativeShellHolderId);
 
   public void updateRefreshRate() {
     if (!FlutterJNI.loadLibraryCalled) {

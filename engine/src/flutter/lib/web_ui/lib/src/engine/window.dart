@@ -45,6 +45,24 @@ set customUrlStrategy(ui_web.UrlStrategy? strategy) {
   _customUrlStrategy = strategy;
 }
 
+class EngineFlutterDisplay extends ui.Display {
+  EngineFlutterDisplay({
+    required this.id,
+    required this.devicePixelRatio,
+    required this.size,
+    required this.refreshRate,
+  });
+
+  @override
+  final int id;
+  @override
+  final double devicePixelRatio;
+  @override
+  final ui.Size size;
+  @override
+  final double refreshRate;
+}
+
 /// The Web implementation of [ui.SingletonFlutterWindow].
 class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   EngineFlutterWindow(this.viewId, this.platformDispatcher) {
@@ -60,6 +78,16 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
       renderer.clearFragmentProgramCache();
       _dimensionsProvider.close();
     });
+  }
+
+  @override
+  ui.Display get display {
+    return EngineFlutterDisplay(
+      id: 0,
+      size: ui.Size(domWindow.screen?.width ?? 0, domWindow.screen?.height ?? 0),
+      devicePixelRatio: domWindow.devicePixelRatio,
+      refreshRate: 60,
+    );
   }
 
   @override

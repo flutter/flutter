@@ -58,6 +58,9 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                std::unique_ptr<std::vector<std::string>>(
                    std::vector<std::string> supported_locales_data));
   MOCK_METHOD0(GetDisplayRefreshRate, double());
+  MOCK_METHOD0(GetDisplayWidth, double());
+  MOCK_METHOD0(GetDisplayHeight, double());
+  MOCK_METHOD0(GetDisplayDensity, double());
   MOCK_METHOD1(RequestDartDeferredLibrary, bool(int loading_unit_id));
 };
 

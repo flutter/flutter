@@ -18,9 +18,10 @@ class VariableRefreshRateDisplay : public Display {
  public:
   explicit VariableRefreshRateDisplay(
       DisplayId display_id,
-      const std::weak_ptr<VariableRefreshRateReporter>& refresh_rate_reporter);
-  explicit VariableRefreshRateDisplay(
-      const std::weak_ptr<VariableRefreshRateReporter>& refresh_rate_reporter);
+      const std::weak_ptr<VariableRefreshRateReporter>& refresh_rate_reporter,
+      double width,
+      double height,
+      double device_pixel_ratio);
   ~VariableRefreshRateDisplay() = default;
 
   // |Display|

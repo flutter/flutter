@@ -79,4 +79,14 @@ void main() {
     final Locale? result = PlatformDispatcher.instance.computePlatformResolvedLocale(supportedLocales);
     expect(result, null);
   });
+
+  test('Display is configured for the implicitView', () {
+    final FlutterView implicitView = PlatformDispatcher.instance.implicitView!;
+    final Display display = implicitView.display;
+
+    expect(display.id, 0);
+    expect(display.devicePixelRatio, implicitView.devicePixelRatio);
+    expect(display.refreshRate, 60);
+    expect(display.size, implicitView.physicalSize);
+  });
 }

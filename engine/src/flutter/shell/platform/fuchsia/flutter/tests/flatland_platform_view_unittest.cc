@@ -660,7 +660,7 @@ TEST_F(FlatlandPlatformViewTests, SetViewportMetrics) {
   RunLoopUntilIdle();
   EXPECT_EQ(delegate.metrics(),
             flutter::ViewportMetrics(kDPR, std::round(width * kDPR),
-                                     std::round(height * kDPR), -1.0));
+                                     std::round(height * kDPR), -1.0, 0));
 }
 
 // This test makes sure that the PlatformView correctly registers semantics
@@ -1496,7 +1496,8 @@ TEST_F(FlatlandPlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
 
   viewport_watcher.SetLayout(width, height);
   RunLoopUntilIdle();
-  EXPECT_EQ(delegate.metrics(), flutter::ViewportMetrics(1, width, height, -1));
+  EXPECT_EQ(delegate.metrics(),
+            flutter::ViewportMetrics(1, width, height, -1, 0));
 
   // Inject
   std::vector<fuchsia::ui::pointer::TouchEvent> events =

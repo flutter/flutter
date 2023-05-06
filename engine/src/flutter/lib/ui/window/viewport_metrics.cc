@@ -13,11 +13,13 @@ ViewportMetrics::ViewportMetrics() = default;
 ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
                                  double p_physical_width,
                                  double p_physical_height,
-                                 double p_physical_touch_slop)
+                                 double p_physical_touch_slop,
+                                 size_t p_display_id)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
-      physical_touch_slop(p_physical_touch_slop) {}
+      physical_touch_slop(p_physical_touch_slop),
+      display_id(p_display_id) {}
 
 ViewportMetrics::ViewportMetrics(
     double p_device_pixel_ratio,
@@ -38,7 +40,8 @@ ViewportMetrics::ViewportMetrics(
     double p_physical_touch_slop,
     const std::vector<double>& p_physical_display_features_bounds,
     const std::vector<int>& p_physical_display_features_type,
-    const std::vector<int>& p_physical_display_features_state)
+    const std::vector<int>& p_physical_display_features_state,
+    size_t p_display_id)
     : device_pixel_ratio(p_device_pixel_ratio),
       physical_width(p_physical_width),
       physical_height(p_physical_height),
@@ -59,7 +62,8 @@ ViewportMetrics::ViewportMetrics(
       physical_touch_slop(p_physical_touch_slop),
       physical_display_features_bounds(p_physical_display_features_bounds),
       physical_display_features_type(p_physical_display_features_type),
-      physical_display_features_state(p_physical_display_features_state) {}
+      physical_display_features_state(p_physical_display_features_state),
+      display_id(p_display_id) {}
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
   return a.device_pixel_ratio == b.device_pixel_ratio &&
@@ -85,7 +89,9 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
          a.physical_display_features_bounds ==
              b.physical_display_features_bounds &&
          a.physical_display_features_type == b.physical_display_features_type &&
-         a.physical_display_features_state == b.physical_display_features_state;
+         a.physical_display_features_state ==
+             b.physical_display_features_state &&
+         a.display_id == b.display_id;
 }
 
 std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
@@ -101,7 +107,8 @@ std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
      << a.physical_system_gesture_inset_right << "R "
      << a.physical_system_gesture_inset_bottom << "B "
      << a.physical_system_gesture_inset_left << "L] "
-     << "Display Features: " << a.physical_display_features_type.size();
+     << "Display Features: " << a.physical_display_features_type.size() << " "
+     << "Display ID: " << a.display_id;
   return os;
 }
 

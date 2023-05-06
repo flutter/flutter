@@ -30,4 +30,5 @@ class ThreadHost;
                          initialRoute:(/*nullable*/ NSString*)initialRoute
                        entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs;
 - (const flutter::ThreadHost&)threadHost;
+- (void)updateDisplays;
 @end

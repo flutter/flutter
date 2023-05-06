@@ -335,9 +335,16 @@ static void SetViewportMetrics(JNIEnv* env,
       displayFeaturesBounds,
       displayFeaturesType,
       displayFeaturesState,
+      0,  // Display ID
   };
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(metrics);
+}
+
+static void UpdateDisplayMetrics(JNIEnv* env,
+                                 jobject jcaller,
+                                 jlong shell_holder) {
+  ANDROID_SHELL_HOLDER->UpdateDisplayMetrics();
 }
 
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -794,6 +801,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeDeferredComponentInstallFailure",
           .signature = "(ILjava/lang/String;Z)V",
           .fnPtr = reinterpret_cast<void*>(&DeferredComponentInstallFailure),
+      },
+      {
+          .name = "nativeUpdateDisplayMetrics",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&UpdateDisplayMetrics),
       },
   };
 
@@ -1619,6 +1631,60 @@ double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
   }
 
   jfieldID fid = env->GetStaticFieldID(clazz.obj(), "refreshRateFPS", "F");
+  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+}
+
+double PlatformViewAndroidJNIImpl::GetDisplayWidth() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return -1;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jclass> clazz(
+      env, env->GetObjectClass(java_object.obj()));
+  if (clazz.is_null()) {
+    return -1;
+  }
+
+  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "displayWidth", "F");
+  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+}
+
+double PlatformViewAndroidJNIImpl::GetDisplayHeight() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return -1;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jclass> clazz(
+      env, env->GetObjectClass(java_object.obj()));
+  if (clazz.is_null()) {
+    return -1;
+  }
+
+  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "displayHeight", "F");
+  return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
+}
+
+double PlatformViewAndroidJNIImpl::GetDisplayDensity() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return -1;
+  }
+
+  fml::jni::ScopedJavaLocalRef<jclass> clazz(
+      env, env->GetObjectClass(java_object.obj()));
+  if (clazz.is_null()) {
+    return -1;
+  }
+
+  jfieldID fid = env->GetStaticFieldID(clazz.obj(), "displayDensity", "F");
   return static_cast<double>(env->GetStaticFloatField(clazz.obj(), fid));
 }
 

@@ -2071,9 +2071,23 @@ void Shell::SetGpuAvailability(GpuAvailability availability) {
   }
 }
 
-void Shell::OnDisplayUpdates(DisplayUpdateType update_type,
-                             std::vector<std::unique_ptr<Display>> displays) {
-  display_manager_->HandleDisplayUpdates(update_type, std::move(displays));
+void Shell::OnDisplayUpdates(std::vector<std::unique_ptr<Display>> displays) {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  std::vector<DisplayData> display_data;
+  for (const auto& display : displays) {
+    display_data.push_back(display->GetDisplayData());
+  }
+  task_runners_.GetUITaskRunner()->PostTask(
+      [engine = engine_->GetWeakPtr(),
+       display_data = std::move(display_data)]() {
+        if (engine) {
+          engine->SetDisplays(display_data);
+        }
+      });
+
+  display_manager_->HandleDisplayUpdates(std::move(displays));
 }
 
 fml::TimePoint Shell::GetCurrentTimePoint() {
@@ -2086,6 +2100,9 @@ Shell::GetPlatformMessageHandler() const {
 }
 
 const std::weak_ptr<VsyncWaiter> Shell::GetVsyncWaiter() const {
+  if (!engine_) {
+    return {};
+  }
   return engine_->GetVsyncWaiter();
 }
 

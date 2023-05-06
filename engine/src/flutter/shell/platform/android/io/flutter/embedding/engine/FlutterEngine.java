@@ -38,6 +38,7 @@ import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.util.ViewUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,7 +77,7 @@ import java.util.Set;
  * {@link DartExecutor} is run. Each Isolate is a self-contained Dart environment and cannot
  * communicate with each other except via Isolate ports.
  */
-public class FlutterEngine {
+public class FlutterEngine implements ViewUtils.DisplayUpdater {
   private static final String TAG = "FlutterEngine";
 
   @NonNull private final FlutterJNI flutterJNI;
@@ -379,6 +380,8 @@ public class FlutterEngine {
     if (automaticallyRegisterPlugins && flutterLoader.automaticallyRegisterPlugins()) {
       GeneratedPluginRegister.registerGeneratedPlugins(this);
     }
+
+    ViewUtils.calculateMaximumDisplayMetrics(context, this);
   }
 
   private void attachToJni() {
@@ -644,5 +647,10 @@ public class FlutterEngine {
      * <p>For the duration of the call, the Flutter engine is still valid.
      */
     void onEngineWillDestroy();
+  }
+
+  @Override
+  public void updateDisplayMetrics(float width, float height, float density) {
+    flutterJNI.updateDisplayMetrics(0 /* display ID */, width, height, density);
   }
 }

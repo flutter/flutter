@@ -12,8 +12,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.layout.WindowMetrics;
+import androidx.window.layout.WindowMetricsCalculator;
 
 public final class ViewUtils {
+  public interface DisplayUpdater {
+    /** Publishes display metrics to Dart code in Flutter. */
+    public void updateDisplayMetrics(float width, float height, float density);
+  }
+
+  /**
+   * Calculates the maximum display metrics for the given context, and pushes the metric data to the
+   * updater.
+   */
+  public static void calculateMaximumDisplayMetrics(
+      @Nullable Context context, @NonNull DisplayUpdater updater) {
+    Activity activity = getActivity(context);
+    if (activity != null) {
+      WindowMetrics metrics =
+          WindowMetricsCalculator.getOrCreate().computeMaximumWindowMetrics(activity);
+      float width = metrics.getBounds().width();
+      float height = metrics.getBounds().height();
+      float density = context.getResources().getDisplayMetrics().density;
+      updater.updateDisplayMetrics(width, height, density);
+    }
+  }
+
   /**
    * Retrieves the {@link Activity} from a given {@link Context}.
    *

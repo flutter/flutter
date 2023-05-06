@@ -3,6 +3,40 @@
 // found in the LICENSE file.
 part of dart.ui;
 
+/// A configurable display that a [FlutterView] renders on.
+///
+/// Use [FlutterView.display] to get the current display for that view.
+class Display {
+  const Display._({
+    required this.id,
+    required this.devicePixelRatio,
+    required this.size,
+    required this.refreshRate,
+  });
+
+  /// A unique identifier for this display.
+  ///
+  /// This identifier is unique among a list of displays the Flutter framework
+  /// is aware of, and is not derived from any platform specific identifiers for
+  /// displays.
+  final int id;
+
+  /// The device pixel ratio of this display.
+  ///
+  /// This value is the same as the value of [FlutterView.devicePixelRatio] for
+  /// all view objects attached to this display.
+  final double devicePixelRatio;
+
+  /// The physical size of this display.
+  final Size size;
+
+  /// The refresh rate in FPS of this display.
+  final double refreshRate;
+
+  @override
+  String toString() => 'Display(id: $id, size: $size, devicePixelRatio: $devicePixelRatio, refreshRate: $refreshRate)';
+}
+
 /// A view into which a Flutter [Scene] is drawn.
 ///
 /// Each [FlutterView] has its own layer tree that is rendered
@@ -67,6 +101,12 @@ class FlutterView {
     return platformDispatcher._viewConfigurations[viewId]!;
   }
 
+  /// The [Display] this view is drawn in.
+  Display get display {
+    assert(platformDispatcher._displays.containsKey(_viewConfiguration.displayId));
+    return platformDispatcher._displays[_viewConfiguration.displayId]!;
+  }
+
   /// The number of device pixels for each logical pixel for the screen this
   /// view is displayed on.
   ///
@@ -92,6 +132,8 @@ class FlutterView {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
+  ///  * [Display.devicePixelRatio], which reports the DPR of the display.
+  ///    The value here is equal to the value on the [display.devicePixelRatio].
   double get devicePixelRatio => _viewConfiguration.devicePixelRatio;
 
   /// The dimensions and location of the rectangle into which the scene rendered

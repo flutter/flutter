@@ -4,6 +4,13 @@
 
 part of ui;
 
+abstract class Display {
+  int get id;
+  double get devicePixelRatio;
+  Size get size;
+  double get refreshRate;
+}
+
 abstract class FlutterView {
   PlatformDispatcher get platformDispatcher;
   Object get viewId;
@@ -16,6 +23,7 @@ abstract class FlutterView {
   ViewPadding get padding;
   GestureSettings get gestureSettings;
   List<DisplayFeature> get displayFeatures;
+  Display get display;
   void render(Scene scene) => platformDispatcher.render(scene, this);
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }

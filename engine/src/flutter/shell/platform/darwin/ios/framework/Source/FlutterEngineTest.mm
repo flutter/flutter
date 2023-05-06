@@ -331,4 +331,14 @@ FLUTTER_ASSERT_ARC
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
+- (void)testFlutterEngineUpdatesDisplays {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  id mockEngine = OCMPartialMock(engine);
+
+  [engine run];
+  OCMVerify(times(1), [mockEngine updateDisplays]);
+  engine.viewController = nil;
+  OCMVerify(times(2), [mockEngine updateDisplays]);
+}
+
 @end

@@ -163,6 +163,7 @@ source_set("ui") {
 
   public_deps = [
     "//flutter/flow",
+    "//flutter/shell/common:display",
     "//flutter/shell/common:platform_message_handler",
     "//flutter/third_party/txt",
   ]

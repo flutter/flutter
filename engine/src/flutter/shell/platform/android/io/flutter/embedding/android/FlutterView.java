@@ -451,6 +451,8 @@ public class FlutterView extends FrameLayout
       Log.v(TAG, "Configuration changed. Sending locales and user settings to Flutter.");
       localizationPlugin.sendLocalesToFlutter(newConfig);
       sendUserSettingsToFlutter();
+
+      ViewUtils.calculateMaximumDisplayMetrics(getContext(), flutterEngine);
     }
   }
 

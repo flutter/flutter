@@ -82,6 +82,12 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   double GetDisplayRefreshRate() override;
 
+  double GetDisplayWidth() override;
+
+  double GetDisplayHeight() override;
+
+  double GetDisplayDensity() override;
+
   bool RequestDartDeferredLibrary(int loading_unit_id) override;
 
  private:
