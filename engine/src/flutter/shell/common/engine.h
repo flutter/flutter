@@ -686,6 +686,14 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   void SetViewportMetrics(const ViewportMetrics& metrics);
 
   //----------------------------------------------------------------------------
+  /// @brief      Updates the display metrics for the currently running Flutter
+  ///             application.
+  ///
+  /// @param[in]  displays  A complete list of displays
+  ///
+  void SetDisplays(const std::vector<DisplayData>& displays);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the engine that the embedder has sent it a message.
   ///             This call originates in the platform view and has been
   ///             forwarded to the engine on the UI task runner here.

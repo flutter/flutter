@@ -339,10 +339,20 @@ int RunTester(const flutter::Settings& settings,
                      }
                    });
 
+  auto device_pixel_ratio = 3.0;
+  auto physical_width = 2400.0;   // 800 at 3x resolution.
+  auto physical_height = 1800.0;  // 600 at 3x resolution.
+
+  std::vector<std::unique_ptr<Display>> displays;
+  displays.push_back(std::make_unique<Display>(
+      0, 60, physical_width, physical_height, device_pixel_ratio));
+  shell->OnDisplayUpdates(std::move(displays));
+
   flutter::ViewportMetrics metrics{};
-  metrics.device_pixel_ratio = 3.0;
-  metrics.physical_width = 2400.0;   // 800 at 3x resolution.
-  metrics.physical_height = 1800.0;  // 600 at 3x resolution.
+  metrics.device_pixel_ratio = device_pixel_ratio;
+  metrics.physical_width = physical_width;
+  metrics.physical_height = physical_height;
+  metrics.display_id = 0;
   shell->GetPlatformView()->SetViewportMetrics(metrics);
 
   // Run the message loop and wait for the script to do its thing.

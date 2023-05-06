@@ -129,7 +129,8 @@ void ShellTest::SetViewportMetrics(Shell* shell, double width, double height) {
       22,                     // physical touch slop
       std::vector<double>(),  // display features bounds
       std::vector<int>(),     // display features type
-      std::vector<int>()      // display features state
+      std::vector<int>(),     // display features state
+      0                       // Display ID
   };
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below
@@ -168,7 +169,7 @@ void ShellTest::PumpOneFrame(Shell* shell,
                              double width,
                              double height,
                              LayerTreeBuilder builder) {
-  PumpOneFrame(shell, {1.0, width, height, 22}, std::move(builder));
+  PumpOneFrame(shell, {1.0, width, height, 22, 0}, std::move(builder));
 }
 
 void ShellTest::PumpOneFrame(Shell* shell,

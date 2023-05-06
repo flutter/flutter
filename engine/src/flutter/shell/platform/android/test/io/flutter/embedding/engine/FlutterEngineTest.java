@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -42,6 +43,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.Robolectric;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
@@ -96,6 +99,21 @@ public class FlutterEngineTest {
     List<FlutterEngine> registeredEngines = GeneratedPluginRegistrant.getRegisteredEngines();
     assertEquals(1, registeredEngines.size());
     assertEquals(flutterEngine, registeredEngines.get(0));
+  }
+
+  @Test
+  public void itUpdatesDisplayMetricsOnConstructionWithActivityContext() {
+    // Needs an activity. ApplicationContext won't work for this.
+    ActivityController<Activity> activityController = Robolectric.buildActivity(Activity.class);
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    when(mockFlutterJNI.isAttached()).thenReturn(true);
+
+    FlutterLoader mockFlutterLoader = mock(FlutterLoader.class);
+    FlutterEngine flutterEngine =
+        new FlutterEngine(activityController.get(), mockFlutterLoader, mockFlutterJNI);
+
+    verify(mockFlutterJNI, times(1))
+        .updateDisplayMetrics(eq(0), any(Float.class), any(Float.class), any(Float.class));
   }
 
   @Test

@@ -103,6 +103,8 @@ class AndroidShellHolder {
     return shell_->GetPlatformMessageHandler();
   }
 
+  void UpdateDisplayMetrics();
+
  private:
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

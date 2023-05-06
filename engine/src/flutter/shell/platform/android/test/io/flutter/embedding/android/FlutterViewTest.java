@@ -227,6 +227,20 @@ public class FlutterViewTest {
     verify(flutterEngine, times(2)).getSettingsChannel();
   }
 
+  @Test
+  public void onConfigurationChanged_notifiesEngineOfDisplaySize() {
+    FlutterView flutterView = new FlutterView(Robolectric.setupActivity(Activity.class));
+    FlutterEngine flutterEngine = spy(new FlutterEngine(ctx, mockFlutterLoader, mockFlutterJni));
+
+    Configuration configuration = ctx.getResources().getConfiguration();
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.onConfigurationChanged(configuration);
+
+    verify(flutterEngine, times(1))
+        .updateDisplayMetrics(any(Float.class), any(Float.class), any(Float.class));
+  }
+
   // TODO(mattcarroll): turn this into an e2e test. GitHub #42990
   @Test
   public void itSendsLightPlatformBrightnessToFlutter() {

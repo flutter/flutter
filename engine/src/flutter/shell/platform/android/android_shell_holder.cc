@@ -117,10 +117,6 @@ AndroidShellHolder::AndroidShellHolder(
             shell.GetSettings().msaa_samples  // msaa sample count
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
-        std::vector<std::unique_ptr<Display>> displays;
-        displays.push_back(std::make_unique<AndroidDisplay>(jni_facade));
-        shell.OnDisplayUpdates(DisplayUpdateType::kStartup,
-                               std::move(displays));
         return platform_view_android;
       };
 
@@ -248,10 +244,6 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
             android_context          // Android context
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
-        std::vector<std::unique_ptr<Display>> displays;
-        displays.push_back(std::make_unique<AndroidDisplay>(jni_facade));
-        shell.OnDisplayUpdates(DisplayUpdateType::kStartup,
-                               std::move(displays));
         return platform_view_android;
       };
 
@@ -291,6 +283,7 @@ void AndroidShellHolder::Launch(
   if (!config) {
     return;
   }
+  UpdateDisplayMetrics();
   shell_->RunEngine(std::move(config.value()));
 }
 
@@ -346,6 +339,12 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
     }
   }
   return config;
+}
+
+void AndroidShellHolder::UpdateDisplayMetrics() {
+  std::vector<std::unique_ptr<Display>> displays;
+  displays.push_back(std::make_unique<AndroidDisplay>(jni_facade_));
+  shell_->OnDisplayUpdates(std::move(displays));
 }
 
 }  // namespace flutter

@@ -29,6 +29,8 @@ abstract class PlatformDispatcher {
   VoidCallback? get onPlatformConfigurationChanged;
   set onPlatformConfigurationChanged(VoidCallback? callback);
 
+  Iterable<Display> get displays;
+
   Iterable<FlutterView> get views;
 
   FlutterView? get implicitView;

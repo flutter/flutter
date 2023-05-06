@@ -231,6 +231,7 @@ void GfxPlatformView::OnScenicEvent(
         {},    // p_physical_display_features_bounds
         {},    // p_physical_display_features_type
         {},    // p_physical_display_features_state
+        0,     // pdisplay_id
     });
   }
 }

@@ -395,6 +395,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
       viewController ? [viewController getWeakPtr] : fml::WeakPtr<FlutterViewController>();
   self.iosPlatformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
+  [self updateDisplays];
   _textInputPlugin.get().viewController = viewController;
   _undoManagerPlugin.get().viewController = viewController;
 
@@ -732,7 +733,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   _shell = std::move(shell);
   [self setupChannels];
   [self onLocaleUpdated:nil];
-  [self initializeDisplays];
+  [self updateDisplays];
   _publisher.reset([[FlutterDartVMServicePublisher alloc]
       initWithEnableVMServicePublication:doesVMServicePublication]);
   [self maybeSetupPlatformViewChannels];
@@ -873,12 +874,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _shell != nullptr;
 }
 
-- (void)initializeDisplays {
-  auto vsync_waiter = std::shared_ptr<flutter::VsyncWaiter>(_shell->GetVsyncWaiter().lock());
+- (void)updateDisplays {
+  if (!_shell) {
+    // Tests may do this.
+    return;
+  }
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
   auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
   std::vector<std::unique_ptr<flutter::Display>> displays;
-  displays.push_back(std::make_unique<flutter::VariableRefreshRateDisplay>(vsync_waiter_ios));
-  _shell->OnDisplayUpdates(flutter::DisplayUpdateType::kStartup, std::move(displays));
+  auto screen_size = UIScreen.mainScreen.nativeBounds.size;
+  auto scale = UIScreen.mainScreen.scale;
+  displays.push_back(std::make_unique<flutter::VariableRefreshRateDisplay>(
+      0, vsync_waiter_ios, screen_size.width, screen_size.height, scale));
+  _shell->OnDisplayUpdates(std::move(displays));
 }
 
 - (BOOL)run {

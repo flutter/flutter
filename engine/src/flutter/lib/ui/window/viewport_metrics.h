@@ -15,7 +15,8 @@ struct ViewportMetrics {
   ViewportMetrics(double p_device_pixel_ratio,
                   double p_physical_width,
                   double p_physical_height,
-                  double p_physical_touch_slop);
+                  double p_physical_touch_slop,
+                  size_t display_id);
   ViewportMetrics(double p_device_pixel_ratio,
                   double p_physical_width,
                   double p_physical_height,
@@ -34,7 +35,8 @@ struct ViewportMetrics {
                   double p_physical_touch_slop,
                   const std::vector<double>& p_physical_display_features_bounds,
                   const std::vector<int>& p_physical_display_features_type,
-                  const std::vector<int>& p_physical_display_features_state);
+                  const std::vector<int>& p_physical_display_features_state,
+                  size_t p_display_id);
 
   double device_pixel_ratio = 1.0;
   double physical_width = 0;
@@ -55,6 +57,7 @@ struct ViewportMetrics {
   std::vector<double> physical_display_features_bounds;
   std::vector<int> physical_display_features_type;
   std::vector<int> physical_display_features_state;
+  size_t display_id = 0;
 };
 
 bool operator==(const ViewportMetrics& a, const ViewportMetrics& b);

@@ -195,6 +195,12 @@ class PlatformViewAndroidJNI {
 
   virtual double GetDisplayRefreshRate() = 0;
 
+  virtual double GetDisplayWidth() = 0;
+
+  virtual double GetDisplayHeight() = 0;
+
+  virtual double GetDisplayDensity() = 0;
+
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 };
 
