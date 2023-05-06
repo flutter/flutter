@@ -23,6 +23,7 @@ final Platform linuxPlatform = FakePlatform(
 );
 
 void main() {
+
   late FileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
 
@@ -31,49 +32,53 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  testWithoutContext('NoAndroidStudioValidator shows Android Studio as "not available" when not available.', () async {
-    final Config config = Config.test();
-    final NoAndroidStudioValidator validator = NoAndroidStudioValidator(
-      config: config,
-      platform: linuxPlatform,
-      userMessages: UserMessages(),
-    );
+  group(NoAndroidStudioValidator, () {
+    testWithoutContext('shows Android Studio as "not available" when not available.', () async {
+      final Config config = Config.test();
+      final NoAndroidStudioValidator validator = NoAndroidStudioValidator(
+        config: config,
+        platform: linuxPlatform,
+        userMessages: UserMessages(),
+      );
 
-    expect((await validator.validate()).type, equals(ValidationType.notAvailable));
+      expect((await validator.validate()).type, equals(ValidationType.notAvailable));
+    });
   });
 
-  testUsingContext('AndroidStudioValidator gives doctor error on java crash', () async {
-    fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>[
-        '/opt/android-studio-with-cheese-5.0/jre/bin/java',
-        '-version',
-      ],
-      exception: ProcessException('java', <String>['-version']),
-    ));
-    const String installPath = '/opt/android-studio-with-cheese-5.0';
-    const String studioHome = '$home/.AndroidStudioWithCheese5.0';
-    const String homeFile = '$studioHome/system/.home';
-    globals.fs.directory(installPath).createSync(recursive: true);
-    globals.fs.file(homeFile).createSync(recursive: true);
-    globals.fs.file(homeFile).writeAsStringSync(installPath);
+  group(AndroidStudioValidator, () {
+    testUsingContext('gives doctor error on java crash', () async {
+      fakeProcessManager.addCommand(const FakeCommand(
+        command: <String>[
+          '/opt/android-studio-with-cheese-5.0/jre/bin/java',
+          '-version',
+        ],
+        exception: ProcessException('java', <String>['-version']),
+      ));
+      const String installPath = '/opt/android-studio-with-cheese-5.0';
+      const String studioHome = '$home/.AndroidStudioWithCheese5.0';
+      const String homeFile = '$studioHome/system/.home';
+      globals.fs.directory(installPath).createSync(recursive: true);
+      globals.fs.file(homeFile).createSync(recursive: true);
+      globals.fs.file(homeFile).writeAsStringSync(installPath);
 
-    // This checks that running the validator doesn't throw an unhandled
-    // exception and that the ProcessException makes it into the error
-    // message list.
-    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
-      final ValidationResult result = await validator.validate();
-      expect(result.messages.where((ValidationMessage message) {
-        return message.isError && message.message.contains('ProcessException');
-      }).isNotEmpty, true);
-    }
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => fakeProcessManager,
-    Platform: () => linuxPlatform,
-    FileSystemUtils: () => FileSystemUtils(
-      fileSystem: fileSystem,
-      platform: linuxPlatform,
-    ),
+      // This checks that running the validator doesn't throw an unhandled
+      // exception and that the ProcessException makes it into the error
+      // message list.
+      for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
+        final ValidationResult result = await validator.validate();
+        expect(result.messages.where((ValidationMessage message) {
+          return message.isError && message.message.contains('ProcessException');
+        }).isNotEmpty, true);
+      }
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => linuxPlatform,
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: fileSystem,
+        platform: linuxPlatform,
+      ),
+    });
   });
 }
