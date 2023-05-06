@@ -1812,8 +1812,16 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 class RequestFocusIntent extends Intent {
   /// Creates an intent used with [RequestFocusAction].
   ///
-  /// The argument must not be null.
-  const RequestFocusIntent(this.focusNode);
+  /// The [focusNode] argument must not be null.
+  /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
+  const RequestFocusIntent(this.focusNode, {
+    TraversalRequestFocusCallback? requestFocusCallback
+  }) : requestFocusCallback = requestFocusCallback ?? FocusTraversalPolicy.defaultTraversalRequestFocusCallback;
+
+  /// The callback used to move the focus to the node [focusNode].
+  /// By default it requests focus on the node and ensures the node is visible
+  /// if it's in a scrollable.
+  final TraversalRequestFocusCallback requestFocusCallback;
 
   /// The [FocusNode] that is to be focused.
   final FocusNode focusNode;
@@ -1844,9 +1852,10 @@ class RequestFocusIntent extends Intent {
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class RequestFocusAction extends Action<RequestFocusIntent> {
+
   @override
   void invoke(RequestFocusIntent intent) {
-    FocusTraversalPolicy.defaultTraversalRequestFocusCallback(intent.focusNode);
+    intent.requestFocusCallback(intent.focusNode);
   }
 }
 

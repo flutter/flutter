@@ -3052,6 +3052,42 @@ void main() {
       KeyEventResult.skipRemainingHandlers,
     );
   });
+
+  testWidgets('RequestFocusAction calls the RequestFocusIntent.requestFocusCallback', (WidgetTester tester) async {
+    bool calledCallback = false;
+    final FocusNode nodeA = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: TextButton(
+            focusNode: nodeA,
+            child: const Text('A'),
+            onPressed: () {},
+          ),
+        )
+      )
+    );
+
+    RequestFocusAction().invoke(RequestFocusIntent(nodeA));
+    await tester.pump();
+    expect(nodeA.hasFocus, isTrue);
+
+    nodeA.unfocus();
+    await tester.pump();
+    expect(nodeA.hasFocus, isFalse);
+
+    final RequestFocusIntent focusIntentWithCallback = RequestFocusIntent(nodeA, requestFocusCallback: (FocusNode node, {
+      double? alignment,
+      ScrollPositionAlignmentPolicy? alignmentPolicy,
+      Curve? curve,
+      Duration? duration
+    }) => calledCallback = true);
+
+    RequestFocusAction().invoke(focusIntentWithCallback);
+    await tester.pump();
+    expect(calledCallback, isTrue);
+  });
 }
 
 class TestRoute extends PageRouteBuilder<void> {
