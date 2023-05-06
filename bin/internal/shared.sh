@@ -144,10 +144,6 @@ function upgrade_flutter () (
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
-    if [ "$(basename $0)" = 'dart' ]; then
-      exit 0
-    fi
-
     >&2 echo Building flutter tool...
 
     # Prepare packages...
