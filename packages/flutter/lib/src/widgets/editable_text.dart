@@ -2681,6 +2681,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    if (_hasInputConnection) {
+      if (oldWidget.obscureText != widget.obscureText) {
+        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
     if (widget.style != oldWidget.style) {
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
