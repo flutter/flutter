@@ -636,7 +636,6 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The indicator stroke is drawn fully inside of the indicator path.
   ///
   /// This is a constant for use with [strokeAlign].
-  ///
   static const double strokeAlignInside = -1.0;
 
   /// The indicator stroke is drawn on the center of the indicator path,
