@@ -2389,14 +2389,19 @@ void main() {
     expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
   });
 
-testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values', (WidgetTester tester) async
-{
-  const Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
+  Map<ShortcutActivator, Intent> setUpKeyShortcuts()
+  {
+    return const <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
       SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
       SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
       SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
     };
+  }
+
+testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values on single event calls', (WidgetTester tester) async
+{
+    final Map<ShortcutActivator, Intent> shortcuts = setUpKeyShortcuts();
 
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double sliderValue = 0.5;
@@ -2458,6 +2463,59 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
     expect(sliderValue, 0.50, reason: 'slider decreased after arrow left');
     expect(onChangeEndVal, 0.50, reason: 'the value onChangeEnd decreased as expected');
 
+});
+
+testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values on multiple event calls', (WidgetTester tester) async
+{
+    final Map<ShortcutActivator, Intent> shortcuts = setUpKeyShortcuts();
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    double sliderValue = 0.5;
+    double onChangeStartVal = 0;
+    double onChangeEndVal = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Shortcuts(
+          shortcuts: shortcuts,
+          child: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return MediaQuery(
+                  data: const MediaQueryData(navigationMode: NavigationMode.directional),
+                  child: Column(
+                    children: <Widget>[
+                      Slider(
+                        value: sliderValue,
+                        onChangeStart: (double newValue)
+                        {
+                          setState(() {
+                            onChangeStartVal = newValue;
+                          });
+                        },
+                        onChangeEnd: (double newValue)
+                        {
+                          setState(() {
+                            onChangeEndVal = newValue;
+                          });
+                        },
+                        onChanged: (double newValue) {
+                          setState(() {
+                            sliderValue = newValue;
+                          });
+                        },
+                        autofocus: true,
+                      ),
+                    ]
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     for(int i =0; i<2; i++)
     {
