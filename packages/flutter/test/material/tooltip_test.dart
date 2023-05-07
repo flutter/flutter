@@ -1906,6 +1906,34 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     }
   });
+  
+  testWidgetsWithLeakTracking('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
+    bool isTapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GestureDetector(
+          onTap: () {
+            isTapped = true;
+          },
+          child: Container(),
+        ),
+      ),
+    );
+
+    // Verify that the widget tree was built.
+    expect(find.byType(GestureDetector), findsOneWidget);
+    expect(find.byType(Container), findsOneWidget);
+
+    // Perform a tap gesture.
+    await tester.tap(find.byType(GestureDetector));
+
+    // Wait for the frame to be rendered.
+    await tester.pumpAndSettle();
+
+    // Verify that the onTap function was called.
+    expect(isTapped, isTrue);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
