@@ -2402,7 +2402,6 @@ void main() {
 testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values on single event calls', (WidgetTester tester) async
 {
     final Map<ShortcutActivator, Intent> shortcuts = setUpKeyShortcuts();
-
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double sliderValue = 0.5;
     double onChangeStartVal = 0;
@@ -2462,13 +2461,11 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
     expect(onChangeStartVal, 0.55, reason: 'the value onChangeStart should be where last change ended');
     expect(sliderValue, 0.50, reason: 'slider decreased after arrow left');
     expect(onChangeEndVal, 0.50, reason: 'the value onChangeEnd decreased as expected');
-
 });
 
 testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values on multiple event calls', (WidgetTester tester) async
 {
     final Map<ShortcutActivator, Intent> shortcuts = setUpKeyShortcuts();
-
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double sliderValue = 0.5;
     double onChangeStartVal = 0;
@@ -2537,7 +2534,6 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
      expect(onChangeStartVal, 0.0, reason: 'the slider should be at furthest left segment and cant move past zero down');
      expect(sliderValue, 0.0, reason: 'slider decreased to zero as expected');
      expect(onChangeEndVal, 0.0,reason: 'the value onChangeEnd decreased to zero as expected');
-
 });
 
   testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
