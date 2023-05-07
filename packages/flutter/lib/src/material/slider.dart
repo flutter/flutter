@@ -711,14 +711,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         renderSlider.decreaseAction();
     }
 
-    if(sliderIncreased)
-    {
-      widget.onChangeEnd?.call(_lerp(clampDouble(renderSlider.value  + renderSlider._semanticActionUnit,0.0,1.0)));
-    }
-    else
-    {
-      widget.onChangeEnd?.call(_lerp(clampDouble(renderSlider.value  - renderSlider._semanticActionUnit,0.0,1.0)));
-    }
+    final double changeUnit = renderSlider._semanticActionUnit;
+    final double sliderAdjustment = renderSlider.value + (sliderIncreased ? changeUnit : -changeUnit);
+    widget.onChangeEnd?.call(_lerp(clampDouble(sliderAdjustment,0.0,1.0)));
   }
 
   bool _focused = false;
