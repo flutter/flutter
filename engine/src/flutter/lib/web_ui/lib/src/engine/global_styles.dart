@@ -18,13 +18,9 @@ void applyGlobalCssRulesToSheet(
   assert(styleElement.sheet != null);
   final DomCSSStyleSheet sheet = styleElement.sheet! as DomCSSStyleSheet;
 
-  // These are intentionally outrageous font parameters to make sure that the
-  // apps fully specify their text styles.
-  //
   // Fixes #115216 by ensuring that our parameters only affect the flt-scene-host children.
   sheet.insertRule('''
     $cssSelectorPrefix flt-scene-host {
-      color: red;
       font: $defaultCssFont;
     }
   ''', sheet.cssRules.length);

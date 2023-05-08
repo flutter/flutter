@@ -107,7 +107,10 @@ class TextPaintService {
     if (foreground != null) {
       paint = foreground as SurfacePaint;
     } else {
-      paint = (ui.Paint()..color = style.color!) as SurfacePaint;
+      paint = ui.Paint() as SurfacePaint;
+      if (style.color != null) {
+        paint.color = style.color!;
+      }
     }
 
     canvas.setCssFont(style.cssFontString, fragment.textDirection!);

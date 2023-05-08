@@ -15,8 +15,6 @@ import 'paint_service.dart';
 import 'paragraph.dart';
 import 'word_breaker.dart';
 
-const ui.Color _defaultTextColor = ui.Color(0xFFFF0000);
-
 final String placeholderChar = String.fromCharCode(0xFFFC);
 
 /// A paragraph made up of a flat list of text spans and placeholders.
@@ -491,7 +489,7 @@ class RootStyleNode extends StyleNode {
   final EngineParagraphStyle paragraphStyle;
 
   @override
-  final ui.Color _color = _defaultTextColor;
+  ui.Color? get _color => null;
 
   @override
   ui.TextDecoration? get _decoration => null;
