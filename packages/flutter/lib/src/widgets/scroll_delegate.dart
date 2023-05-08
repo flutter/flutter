@@ -894,7 +894,8 @@ abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
   ///
   /// The values returned by this method are cached. To indicate that the
   /// widgets have changed, a new delegate must be provided, and the new
-  /// delegate's [shouldRebuild] method must return true.
+  /// delegate's [shouldRebuild] method must return true. Alternatively,
+  /// calling [notifyListeners] will allow the same delegate to be used.
   Widget? build(BuildContext context, ChildVicinity vicinity);
 
   /// Called whenever a new instance of the child delegate class is

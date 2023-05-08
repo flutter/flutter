@@ -13,7 +13,7 @@ void main() {
     group('TwoDimensionalChildBuilderDelegate', () {
       testWidgets('repaintBoundaries', (WidgetTester tester) async {
         // Default - adds repaint boundaries
-        await tester.pumpWidget(buildSimpleTest(
+        await tester.pumpWidget(simpleBuilderTest(
           delegate: TwoDimensionalChildBuilderDelegate(
             // Only build 1 child
             maxXIndex: 0,
@@ -41,7 +41,7 @@ void main() {
         }
 
         // None
-        await tester.pumpWidget(buildSimpleTest(
+        await tester.pumpWidget(simpleBuilderTest(
           delegate: TwoDimensionalChildBuilderDelegate(
             // Only build 1 child
             maxXIndex: 0,
@@ -86,7 +86,7 @@ void main() {
             );
           }
         );
-        await tester.pumpWidget(buildSimpleTest(
+        await tester.pumpWidget(simpleBuilderTest(
           delegate: delegate,
         ));
         await tester.pumpAndSettle();
@@ -124,7 +124,7 @@ void main() {
             throw 'Builder error!';
           }
         );
-        await tester.pumpWidget(buildSimpleTest(
+        await tester.pumpWidget(simpleBuilderTest(
           delegate: delegate,
         ));
         await tester.pumpAndSettle();
@@ -160,7 +160,7 @@ void main() {
           )
         ]);
         // Default - adds repaint boundaries
-        await tester.pumpWidget(buildSimpleTest(
+        await tester.pumpWidget(simpleListTest(
           delegate: TwoDimensionalChildListDelegate(
             // Only builds 1 child
             children: children,
@@ -180,7 +180,7 @@ void main() {
         }
 
         // None
-        await tester.pumpWidget(buildSimpleTest(
+        await tester.pumpWidget(simpleListTest(
           delegate: TwoDimensionalChildListDelegate(
             // Different children triggers rebuild
             children: <List<Widget>>[<Widget>[Container()]],
