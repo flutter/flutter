@@ -133,7 +133,7 @@ class FlutterView {
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
   ///  * [Display.devicePixelRatio], which reports the DPR of the display.
-  ///    The value here is equal to the value on the [display.devicePixelRatio].
+  ///    The value here is equal to the value exposed on [display].
   double get devicePixelRatio => _viewConfiguration.devicePixelRatio;
 
   /// The dimensions and location of the rectangle into which the scene rendered
