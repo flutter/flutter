@@ -517,6 +517,13 @@ targets:
       release_build: "true"
       config_name: windows_arm_host_engine
 
+  - name: Windows windows_unopt
+    bringup: true
+    recipe: engine_v2/builder
+    timeout: 60
+    properties:
+      config_name: windows_unopt
+
   - name: Windows Unopt
     recipe: engine/engine_unopt
     properties:
