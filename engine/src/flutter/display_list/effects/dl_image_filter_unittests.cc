@@ -585,26 +585,18 @@ TEST(DisplayListImageFilter, ComposeBoundsWithUnboundedInnerAndOuter) {
 // See https://github.com/flutter/flutter/issues/108433
 TEST(DisplayListImageFilter, Issue108433) {
   auto input_bounds = SkIRect::MakeLTRB(20, 20, 80, 80);
-
-  auto sk_filter = SkColorFilters::Blend(SK_ColorRED, SkBlendMode::kSrcOver);
-  auto sk_outer = SkImageFilters::Blur(5.0, 6.0, SkTileMode::kRepeat, nullptr);
-  auto sk_inner = SkImageFilters::ColorFilter(sk_filter, nullptr);
-  auto sk_compose = SkImageFilters::Compose(sk_outer, sk_inner);
+  auto expected_bounds = SkIRect::MakeLTRB(5, 2, 95, 98);
 
   DlBlendColorFilter dl_color_filter(DlColor::kRed(), DlBlendMode::kSrcOver);
   auto dl_outer = DlBlurImageFilter(5.0, 6.0, DlTileMode::kRepeat);
   auto dl_inner = DlColorFilterImageFilter(dl_color_filter.shared());
   auto dl_compose = DlComposeImageFilter(dl_outer, dl_inner);
 
-  auto sk_bounds = sk_compose->filterBounds(
-      input_bounds, SkMatrix::I(),
-      SkImageFilter::MapDirection::kForward_MapDirection);
-
   SkIRect dl_bounds;
-  EXPECT_EQ(
+  ASSERT_EQ(
       dl_compose.map_device_bounds(input_bounds, SkMatrix::I(), dl_bounds),
       nullptr);
-  ASSERT_EQ(dl_bounds, sk_bounds);
+  ASSERT_EQ(dl_bounds, expected_bounds);
 }
 
 TEST(DisplayListImageFilter, ColorFilterConstructor) {
@@ -725,6 +717,9 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
   for (unsigned i = 0; i < sk_filters.size(); i++) {
     for (unsigned j = 0; j < matrices.size(); j++) {
       for (unsigned k = 0; k < bounds_matrices.size(); k++) {
+        auto desc = "filter " + std::to_string(i + 1)             //
+                    + ", filter matrix " + std::to_string(j + 1)  //
+                    + ", bounds matrix " + std::to_string(k + 1);
         auto& m = matrices[j];
         auto& bounds_matrix = bounds_matrices[k];
         auto sk_local_filter = sk_filters[i]->makeWithLocalMatrix(m);
@@ -734,7 +729,7 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
           // their behavior. Once the Skia fixes are rolled in, the
           // DlImageFilter should adapt  to the new rules.
           // See https://github.com/flutter/flutter/issues/114723
-          ASSERT_TRUE(sk_local_filter || !dl_local_filter);
+          ASSERT_TRUE(sk_local_filter || !dl_local_filter) << desc;
           continue;
         }
         {
@@ -743,9 +738,13 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
           sk_rect = sk_local_filter->filterBounds(
               input_bounds, bounds_matrix,
               SkImageFilter::MapDirection::kForward_MapDirection);
-          dl_local_filter->map_device_bounds(input_bounds, bounds_matrix,
-                                             dl_rect);
-          ASSERT_EQ(sk_rect, dl_rect);
+          if (dl_local_filter->map_device_bounds(input_bounds, bounds_matrix,
+                                                 dl_rect)) {
+            ASSERT_EQ(sk_rect, dl_rect) << desc;
+          } else {
+            ASSERT_TRUE(dl_local_filter->modifies_transparent_black()) << desc;
+            ASSERT_FALSE(sk_local_filter->canComputeFastBounds()) << desc;
+          }
         }
         {
           // Test for: Know the outset bounds to get the inset bounds
@@ -761,9 +760,13 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
           sk_rect = sk_local_filter->filterBounds(
               outset_bounds, bounds_matrix,
               SkImageFilter::MapDirection::kReverse_MapDirection);
-          dl_local_filter->get_input_device_bounds(outset_bounds, bounds_matrix,
-                                                   dl_rect);
-          ASSERT_EQ(sk_rect, dl_rect);
+          if (dl_local_filter->get_input_device_bounds(
+                  outset_bounds, bounds_matrix, dl_rect)) {
+            ASSERT_EQ(sk_rect, dl_rect) << desc;
+          } else {
+            ASSERT_TRUE(dl_local_filter->modifies_transparent_black());
+            ASSERT_FALSE(sk_local_filter->canComputeFastBounds());
+          }
         }
       }
     }
