@@ -2210,6 +2210,7 @@ class TextSelectionGestureDetectorBuilder {
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
+          break;
           // On desktop platforms the selection is set on tap down.
         case TargetPlatform.android:
           if (isShiftPressedValid) {
