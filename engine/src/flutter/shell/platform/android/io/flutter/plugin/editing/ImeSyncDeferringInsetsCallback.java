@@ -51,9 +51,7 @@ import java.util.List;
 @SuppressLint({"NewApi", "Override"})
 @Keep
 class ImeSyncDeferringInsetsCallback {
-  private int overlayInsetTypes;
-  private int deferredInsetTypes;
-
+  private final int deferredInsetTypes = WindowInsets.Type.ime();
   private View view;
   private WindowInsets lastWindowInsets;
   private AnimationCallback animationCallback;
@@ -72,10 +70,7 @@ class ImeSyncDeferringInsetsCallback {
   // initial WindowInset.
   private boolean needsSave = false;
 
-  ImeSyncDeferringInsetsCallback(
-      @NonNull View view, int overlayInsetTypes, int deferredInsetTypes) {
-    this.overlayInsetTypes = overlayInsetTypes;
-    this.deferredInsetTypes = deferredInsetTypes;
+  ImeSyncDeferringInsetsCallback(@NonNull View view) {
     this.view = view;
     this.animationCallback = new AnimationCallback();
     this.insetsListener = new InsetsListener();
@@ -160,24 +155,24 @@ class ImeSyncDeferringInsetsCallback {
       if (!matching) {
         return insets;
       }
+
+      // The IME insets include the height of the navigation bar. If the app isn't laid out behind
+      // the navigation bar, this causes the IME insets to be too large during the animation.
+      // To fix this, we subtract the navigationBars bottom inset if the system UI flags for laying
+      // out behind the navigation bar aren't present.
+      int excludedInsets = 0;
+      int systemUiFlags = view.getWindowSystemUiVisibility();
+      if ((systemUiFlags & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
+          && (systemUiFlags & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0) {
+        excludedInsets = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+      }
+
       WindowInsets.Builder builder = new WindowInsets.Builder(lastWindowInsets);
-      // Overlay the ime-only insets with the full insets.
-      //
-      // The IME insets passed in by onProgress assumes that the entire animation
-      // occurs above any present navigation and status bars. This causes the
-      // IME inset to be too large for the animation. To remedy this, we merge the
-      // IME inset with other insets present via a subtract + reLu, which causes the
-      // IME inset to be overlaid with any bars present.
       Insets newImeInsets =
           Insets.of(
-              0,
-              0,
-              0,
-              Math.max(
-                  insets.getInsets(deferredInsetTypes).bottom
-                      - insets.getInsets(overlayInsetTypes).bottom,
-                  0));
+              0, 0, 0, Math.max(insets.getInsets(deferredInsetTypes).bottom - excludedInsets, 0));
       builder.setInsets(deferredInsetTypes, newImeInsets);
+
       // Directly call onApplyWindowInsets of the view as we do not want to pass through
       // the onApplyWindowInsets defined in this class, which would consume the insets
       // as if they were a non-animation inset change and cache it for re-dispatch in
