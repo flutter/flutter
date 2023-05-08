@@ -156,7 +156,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// {@template flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
   /// The `requestFocusCallback` can be used to override the default behavior
   /// of the focus requests. If `requestFocusCallback`
-  /// is null, it defaults to [defaultTraversalRequestFocusCallback].
+  /// is null, it defaults to [FocusTraversalPolicy.defaultTraversalRequestFocusCallback].
   /// {@endtemplate}
   const FocusTraversalPolicy({
     TraversalRequestFocusCallback? requestFocusCallback
