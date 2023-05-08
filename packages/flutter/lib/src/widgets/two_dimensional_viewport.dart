@@ -483,8 +483,8 @@ class TwoDimensionalViewportParentData extends ParentData {
 /// Subclasses should not override [performLayout], as it handles housekeeping
 /// on either side of the call to [layoutChildSequence].
 // TODO(Piinks): Two follow up changes:
-//  - Keep alive <BUG>
-//  - ensureVisible <BUG>
+//  - Keep alive https://github.com/flutter/flutter/issues/126297
+//  - ensureVisible https://github.com/flutter/flutter/issues/126299
 abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
@@ -877,7 +877,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {
-    // TODO(Piinks): Add this back in follow up change (ensureVisible). <BUG>
+    // TODO(Piinks): Add this back in follow up change (ensureVisible), https://github.com/flutter/flutter/issues/126299
     return const RevealedOffset(offset: 0.0, rect: Rect.zero);
   }
 

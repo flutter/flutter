@@ -1625,7 +1625,7 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
 
 /// Specifies how to configure the [DragGestureRecognizer]s of a
 /// [TwoDimensionalScrollable].
-// TODO(Piinks): Add sample code, <BUG>
+// TODO(Piinks): Add sample code, https://github.com/flutter/flutter/issues/126298
 enum DiagonalDragBehavior {
   /// This behavior will not allow for any diagonal scrolling.
   ///
