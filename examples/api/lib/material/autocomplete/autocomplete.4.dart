@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const AutocompleteExampleApp());
 
+const Duration fakeAPIDuration = Duration(seconds: 1);
+const Duration debounceDuration = Duration(milliseconds: 500);
+
 class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
@@ -87,23 +90,18 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              _networkEnabled
-                  ? 'Network is on, turn this off to induce network errors.'
-                  : 'Network is off, turn this on to allow requests to go through.',
-            ),
-            Switch(
-              value: _networkEnabled,
-              onChanged: (bool? value) {
-                setState(() {
-                  _networkEnabled = !_networkEnabled;
-                });
-              },
-            ),
-          ],
+        Text(
+          _networkEnabled
+              ? 'Network is on, toggle to induce network errors.'
+              : 'Network is off, toggle to allow requests to go through.',
+        ),
+        Switch(
+          value: _networkEnabled,
+          onChanged: (bool? value) {
+            setState(() {
+              _networkEnabled = !_networkEnabled;
+            });
+          },
         ),
         const SizedBox(
           height: 32.0,
@@ -151,7 +149,7 @@ class _FakeAPI {
 
   // Searches the options, but injects a fake "network" delay.
   static Future<Iterable<String>> search(String query, bool networkEnabled) async {
-    await Future.delayed(const Duration(seconds: 1)); // Fake 1 second delay.
+    await Future<void>.delayed(fakeAPIDuration); // Fake 1 second delay.
     if (!networkEnabled) {
       throw const _NetworkException();
     }
@@ -194,13 +192,11 @@ _Debounceable<S, T> _debounce<S, T>(_Debounceable<S?, T> function) {
 class _DebounceTimer {
   _DebounceTimer(
   ) {
-    _timer = Timer(_debounceDuration, _onComplete);
+    _timer = Timer(debounceDuration, _onComplete);
   }
 
-  static const Duration _debounceDuration = Duration(milliseconds: 500);
-
   late final Timer _timer;
-  final Completer _completer = Completer();
+  final Completer<void> _completer = Completer<void>();
 
   void _onComplete() {
     _completer.complete();

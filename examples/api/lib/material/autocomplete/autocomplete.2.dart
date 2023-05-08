@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Autocomplete] that shows how to fetch the options
 /// from a remote API.
 
+const Duration fakeAPIDuration = Duration(seconds: 1);
+
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
@@ -36,7 +38,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
   String? _searchingWithQuery;
 
   // The most recent options received from the API.
-  late Iterable<String> _lastOptions;
+  late Iterable<String> _lastOptions = <String>[];
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +74,7 @@ class _FakeAPI {
 
   // Searches the options, but injects a fake "network" delay.
   static Future<Iterable<String>> search(String query) async {
-    await Future.delayed(const Duration(seconds: 1)); // Fake 1 second delay.
+    await Future<void>.delayed(fakeAPIDuration); // Fake 1 second delay.
     if (query == '') {
       return const Iterable<String>.empty();
     }
@@ -81,4 +83,3 @@ class _FakeAPI {
     });
   }
 }
-

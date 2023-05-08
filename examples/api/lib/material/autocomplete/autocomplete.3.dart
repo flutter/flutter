@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Autocomplete] that demonstrates fetching the
 /// options asynchronously and debouncing the network calls.
 
+const Duration fakeAPIDuration = Duration(seconds: 1);
+const Duration debounceDuration = Duration(milliseconds: 500);
+
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
@@ -94,7 +97,7 @@ class _FakeAPI {
 
   // Searches the options, but injects a fake "network" delay.
   static Future<Iterable<String>> search(String query) async {
-    await Future.delayed(const Duration(seconds: 1)); // Fake 1 second delay.
+    await Future<void>.delayed(fakeAPIDuration); // Fake 1 second delay.
     if (query == '') {
       return const Iterable<String>.empty();
     }
@@ -134,13 +137,11 @@ _Debounceable<S, T> _debounce<S, T>(_Debounceable<S?, T> function) {
 class _DebounceTimer {
   _DebounceTimer(
   ) {
-    _timer = Timer(_debounceDuration, _onComplete);
+    _timer = Timer(debounceDuration, _onComplete);
   }
 
-  static const Duration _debounceDuration = Duration(milliseconds: 500);
-
   late final Timer _timer;
-  final Completer _completer = Completer();
+  final Completer<void> _completer = Completer<void>();
 
   void _onComplete() {
     _completer.complete();
