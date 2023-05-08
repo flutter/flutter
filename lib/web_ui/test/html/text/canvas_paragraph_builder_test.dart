@@ -514,7 +514,6 @@ String spanStyle({
   num? letterSpacing,
 }) {
   return <String>[
-    'color: rgb(255, 0, 0);',
     'font-size: ${fontSize}px;',
     if (fontWeight != null) 'font-weight: $fontWeight;',
     if (fontStyle != null) 'font-style: $fontStyle;',
@@ -529,7 +528,6 @@ String spanStyle({
 }
 
 TextStyle styleWithDefaults({
-  Color color = const Color(0xFFFF0000),
   String fontFamily = FlutterViewEmbedder.defaultFontFamily,
   double fontSize = FlutterViewEmbedder.defaultFontSize,
   FontWeight? fontWeight,
@@ -538,7 +536,6 @@ TextStyle styleWithDefaults({
   double? letterSpacing,
 }) {
   return TextStyle(
-    color: color,
     fontFamily: fontFamily,
     fontSize: fontSize,
     fontWeight: fontWeight,
