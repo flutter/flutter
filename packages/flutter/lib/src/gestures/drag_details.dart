@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset;
-
 import 'package:flutter/foundation.dart';
 
 import 'velocity_tracker.dart';
+
+export 'dart:ui' show Offset, PointerDeviceKind;
+
+export 'velocity_tracker.dart' show Velocity;
 
 /// Details object for callbacks that use [GestureDragDownCallback].
 ///
@@ -22,9 +24,8 @@ class DragDownDetails {
   /// The [globalPosition] argument must not be null.
   DragDownDetails({
     this.globalPosition = Offset.zero,
-    Offset localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+    Offset? localPosition,
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -69,15 +70,15 @@ class DragStartDetails {
   DragStartDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
-    Offset localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+    Offset? localPosition,
+    this.kind,
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
   ///
   /// Could be null if triggered from proxied events such as accessibility.
-  final Duration sourceTimeStamp;
+  final Duration? sourceTimeStamp;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -95,6 +96,9 @@ class DragStartDetails {
   /// Defaults to [globalPosition] if not specified in the constructor.
   final Offset localPosition;
 
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind? kind;
+
   // TODO(ianh): Expose the current position, so that you can have a no-jump
   // drag even when disambiguating (though of course it would lag the finger
   // instead).
@@ -103,10 +107,12 @@ class DragStartDetails {
   String toString() => '${objectRuntimeType(this, 'DragStartDetails')}($globalPosition)';
 }
 
+/// {@template flutter.gestures.dragdetails.GestureDragStartCallback}
 /// Signature for when a pointer has contacted the screen and has begun to move.
 ///
 /// The `details` object provides the position of the touch when it first
 /// touched the surface.
+/// {@endtemplate}
 ///
 /// See [DragGestureRecognizer.onStart].
 typedef GestureDragStartCallback = void Function(DragStartDetails details);
@@ -120,7 +126,7 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragUpdateDetails {
-  /// Creates details for a [DragUpdateDetails].
+  /// Creates details for a [GestureDragUpdateCallback].
   ///
   /// The [delta] argument must not be null.
   ///
@@ -132,19 +138,20 @@ class DragUpdateDetails {
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    @required this.globalPosition,
-    Offset localPosition,
-  }) : assert(delta != null),
-       assert(primaryDelta == null
+    required this.globalPosition,
+    Offset? localPosition,
+  }) : assert(
+         primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
-           || (primaryDelta == delta.dy && delta.dx == 0.0)),
+           || (primaryDelta == delta.dy && delta.dx == 0.0),
+       ),
        localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
   ///
   /// Could be null if triggered from proxied events such as accessibility.
-  final Duration sourceTimeStamp;
+  final Duration? sourceTimeStamp;
 
   /// The amount the pointer has moved in the coordinate space of the event
   /// receiver since the previous update.
@@ -167,7 +174,7 @@ class DragUpdateDetails {
   /// two-dimensional drag (e.g., a pan), then this value is null.
   ///
   /// Defaults to null if not specified in the constructor.
-  final double primaryDelta;
+  final double? primaryDelta;
 
   /// The pointer's global position when it triggered this update.
   ///
@@ -187,11 +194,13 @@ class DragUpdateDetails {
   String toString() => '${objectRuntimeType(this, 'DragUpdateDetails')}($delta)';
 }
 
+/// {@template flutter.gestures.dragdetails.GestureDragUpdateCallback}
 /// Signature for when a pointer that is in contact with the screen and moving
 /// has moved again.
 ///
 /// The `details` object provides the position of the touch and the distance it
 /// has traveled since the last update.
+/// {@endtemplate}
 ///
 /// See [DragGestureRecognizer.onUpdate].
 typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
@@ -207,14 +216,19 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
+  /// If [primaryVelocity] is non-null, its value must match one of the
+  /// coordinates of `velocity.pixelsPerSecond` and the other coordinate
+  /// must be zero.
+  ///
   /// The [velocity] argument must not be null.
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-  }) : assert(velocity != null),
-       assert(primaryVelocity == null
-           || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy);
+  }) : assert(
+         primaryVelocity == null
+           || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
+           || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
+       );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -231,7 +245,7 @@ class DragEndDetails {
   /// two-dimensional drag (e.g., a pan), then this value is null.
   ///
   /// Defaults to null if not specified in the constructor.
-  final double primaryVelocity;
+  final double? primaryVelocity;
 
   @override
   String toString() => '${objectRuntimeType(this, 'DragEndDetails')}($velocity)';

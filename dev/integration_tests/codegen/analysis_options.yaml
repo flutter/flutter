@@ -1,9 +1,0 @@
-# Take our settings from the repo's main analysis_options.yaml file, but add
-# an exclude for the lib/main.dart file, which requires a code-generated file,
-# in order to be properly analyzed.
-
-include: ../../../analysis_options.yaml
-
-analyzer:
-  exclude:
-    - lib/main.dart

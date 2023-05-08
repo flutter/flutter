@@ -6,10 +6,9 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'theme.dart';
-import 'theme_data.dart';
 
 // Examples can assume:
-// String userAvatarUrl;
+// late String userAvatarUrl;
 
 /// A circle that represents a user.
 ///
@@ -17,7 +16,12 @@ import 'theme_data.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
+/// If [foregroundImage] fails then [backgroundImage] is used. If
+/// [backgroundImage] fails too, [backgroundColor] is used.
+///
 /// The [onBackgroundImageError] parameter must be null if the [backgroundImage]
+/// is null.
+/// The [onForegroundImageError] parameter must be null if the [foregroundImage]
 /// is null.
 ///
 /// {@tool snippet}
@@ -42,7 +46,7 @@ import 'theme_data.dart';
 /// ```dart
 /// CircleAvatar(
 ///   backgroundColor: Colors.brown.shade800,
-///   child: Text('AH'),
+///   child: const Text('AH'),
 /// )
 /// ```
 /// {@end-tool}
@@ -56,51 +60,67 @@ import 'theme_data.dart';
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.
   const CircleAvatar({
-    Key key,
+    super.key,
     this.child,
     this.backgroundColor,
     this.backgroundImage,
+    this.foregroundImage,
     this.onBackgroundImageError,
+    this.onForegroundImageError,
     this.foregroundColor,
     this.radius,
     this.minRadius,
     this.maxRadius,
   }) : assert(radius == null || (minRadius == null && maxRadius == null)),
        assert(backgroundImage != null || onBackgroundImageError == null),
-       super(key: key);
+       assert(foregroundImage != null || onForegroundImageError== null);
 
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget. If the [CircleAvatar] is to have an image, use
   /// [backgroundImage] instead.
-  final Widget child;
+  final Widget? child;
 
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
   ///
-  /// If a [backgroundColor] is not specified, the theme's
+  /// If a [backgroundColor] is not specified and [ThemeData.useMaterial3] is true,
+  /// [ColorScheme.primaryContainer] will be used, otherwise the theme's
   /// [ThemeData.primaryColorLight] is used with dark foreground colors, and
   /// [ThemeData.primaryColorDark] with light foreground colors.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The default text color for text in the circle.
   ///
   /// Defaults to the primary text theme color if no [backgroundColor] is
   /// specified.
   ///
-  /// Defaults to [ThemeData.primaryColorLight] for dark background colors, and
+  /// If a [foregroundColor] is not specified and [ThemeData.useMaterial3] is true,
+  /// [ColorScheme.onPrimaryContainer] will be used, otherwise the theme's
+  /// [ThemeData.primaryColorLight] for dark background colors, and
   /// [ThemeData.primaryColorDark] for light background colors.
-  final Color foregroundColor;
+  final Color? foregroundColor;
 
   /// The background image of the circle. Changing the background
   /// image will cause the avatar to animate to the new image.
   ///
+  /// Typically used as a fallback image for [foregroundImage].
+  ///
   /// If the [CircleAvatar] is to have the user's initials, use [child] instead.
-  final ImageProvider backgroundImage;
+  final ImageProvider? backgroundImage;
+
+  /// The foreground image of the circle.
+  ///
+  /// Typically used as profile image. For fallback use [backgroundImage].
+  final ImageProvider? foregroundImage;
 
   /// An optional error callback for errors emitted when loading
   /// [backgroundImage].
-  final ImageErrorListener onBackgroundImageError;
+  final ImageErrorListener? onBackgroundImageError;
+
+  /// An optional error callback for errors emitted when loading
+  /// [foregroundImage].
+  final ImageErrorListener? onForegroundImageError;
 
   /// The size of the avatar, expressed as the radius (half the diameter).
   ///
@@ -114,7 +134,7 @@ class CircleAvatar extends StatelessWidget {
   ///
   /// Changes to the [radius] are animated (including changing from an explicit
   /// [radius] to a [minRadius]/[maxRadius] pair or vice versa).
-  final double radius;
+  final double? radius;
 
   /// The minimum size of the avatar, expressed as the radius (half the
   /// diameter).
@@ -130,7 +150,7 @@ class CircleAvatar extends StatelessWidget {
   /// However, if the [minRadius] is 40 and the [CircleAvatar] has a parent
   /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
   /// the size will snap to 40 pixels instantly.
-  final double minRadius;
+  final double? minRadius;
 
   /// The maximum size of the avatar, expressed as the radius (half the
   /// diameter).
@@ -146,7 +166,7 @@ class CircleAvatar extends StatelessWidget {
   /// However, if the [maxRadius] is 40 and the [CircleAvatar] has a parent
   /// [SizedBox] whose size changes instantaneously from 20 pixels to 40 pixels,
   /// the size will snap to 40 pixels instantly.
-  final double maxRadius;
+  final double? maxRadius;
 
   // The default radius if nothing is specified.
   static const double _defaultRadius = 20.0;
@@ -175,25 +195,27 @@ class CircleAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.subtitle1.copyWith(color: foregroundColor);
-    Color effectiveBackgroundColor = backgroundColor;
+    final Color? effectiveForegroundColor = foregroundColor
+      ?? (theme.useMaterial3 ? theme.colorScheme.onPrimaryContainer : null);
+    final TextStyle effectiveTextStyle = theme.useMaterial3
+      ? theme.textTheme.titleMedium!
+      : theme.primaryTextTheme.titleMedium!;
+    TextStyle textStyle = effectiveTextStyle.copyWith(color: effectiveForegroundColor);
+    Color? effectiveBackgroundColor = backgroundColor
+      ?? (theme.useMaterial3 ? theme.colorScheme.primaryContainer : null);
     if (effectiveBackgroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
+      switch (ThemeData.estimateBrightnessForColor(textStyle.color!)) {
         case Brightness.dark:
           effectiveBackgroundColor = theme.primaryColorLight;
-          break;
         case Brightness.light:
           effectiveBackgroundColor = theme.primaryColorDark;
-          break;
       }
-    } else if (foregroundColor == null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+    } else if (effectiveForegroundColor == null) {
+      switch (ThemeData.estimateBrightnessForColor(backgroundColor!)) {
         case Brightness.dark:
           textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-          break;
         case Brightness.light:
           textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-          break;
       }
     }
     final double minDiameter = _minDiameter;
@@ -210,13 +232,23 @@ class CircleAvatar extends StatelessWidget {
         color: effectiveBackgroundColor,
         image: backgroundImage != null
           ? DecorationImage(
-              image: backgroundImage,
+              image: backgroundImage!,
               onError: onBackgroundImageError,
               fit: BoxFit.cover,
             )
           : null,
         shape: BoxShape.circle,
       ),
+      foregroundDecoration: foregroundImage != null
+          ? BoxDecoration(
+              image: DecorationImage(
+                image: foregroundImage!,
+                onError: onForegroundImageError,
+                fit: BoxFit.cover,
+              ),
+              shape: BoxShape.circle,
+            )
+          : null,
       child: child == null
           ? null
           : Center(
@@ -228,7 +260,7 @@ class CircleAvatar extends StatelessWidget {
                   data: theme.iconTheme.copyWith(color: textStyle.color),
                   child: DefaultTextStyle(
                     style: textStyle,
-                    child: child,
+                    child: child!,
                   ),
                 ),
               ),

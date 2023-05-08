@@ -41,6 +41,17 @@ void main() {
       expect(waitForCondition.condition, equals(const NoTransientCallbacks()));
       expect(waitForCondition.timeout, equals(const Duration(milliseconds: 10)));
     });
+
+    test('WaitForCondition requiresRootWidget', () {
+        expect(
+            const WaitForCondition(NoTransientCallbacks())
+                .requiresRootWidgetAttached,
+            isTrue);
+        expect(
+            const WaitForCondition(FirstFrameRasterized())
+                .requiresRootWidgetAttached,
+            isFalse);
+      });
   });
 
   group('NoTransientCallbacksCondition', () {
@@ -113,6 +124,10 @@ void main() {
           throwsA(predicate<SerializationException>((SerializationException e) =>
               e.message == 'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}')));
     });
+
+    test('FirstFrameRasterizedCondition requiresRootWidget', () {
+      expect(const FirstFrameRasterized().requiresRootWidgetAttached, isFalse);
+    });
   });
 
   group('CombinedCondition', () {
@@ -120,7 +135,7 @@ void main() {
       const CombinedCondition combinedCondition =
           CombinedCondition(<SerializableWaitCondition>[
         NoTransientCallbacks(),
-        NoPendingFrame()
+        NoPendingFrame(),
       ]);
 
       expect(combinedCondition.serialize(), <String, String>{

@@ -2,12 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -42,14 +48,48 @@ void main() {
     expect(value, isTrue);
   });
 
+  testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoSwitch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+  });
+
   testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -88,8 +128,9 @@ void main() {
     bool value2 = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -155,8 +196,9 @@ void main() {
     bool value = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -193,8 +235,9 @@ void main() {
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(
@@ -328,7 +371,6 @@ void main() {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                dragStartBehavior: DragStartBehavior.start,
                 onChanged: (bool newValue) {
                   setState(() {
                     value = newValue;
@@ -450,6 +492,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(value, isFalse);
+    // ignore: avoid_dynamic_calls
     final CurvedAnimation position = (tester.state(find.byType(CupertinoSwitch)) as dynamic).position as CurvedAnimation;
     expect(position.value, lessThan(0.5));
     await tester.pump();
@@ -524,6 +567,60 @@ void main() {
     expect(find.byType(CupertinoSwitch), findsOneWidget);
     expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).trackColor, trackColor);
     expect(find.byType(CupertinoSwitch), paints..rrect(color: trackColor));
+  });
+
+  testWidgets('Switch is using default thumb color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            onChanged: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, null);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: CupertinoColors.white),
+    );
+  });
+
+  testWidgets('Switch is using thumb color when set', (WidgetTester tester) async {
+    const Color thumbColor = Color(0xFF000000);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            thumbColor: thumbColor,
+            onChanged: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).thumbColor, thumbColor);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect()
+        ..rrect(color: thumbColor),
+    );
   });
 
   testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
@@ -698,6 +795,122 @@ void main() {
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile('switch.tap.on.dark.png'),
+    );
+  });
+
+  testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoTheme(
+        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: Column(
+                    children: <Widget>[
+                      CupertinoSwitch(
+                        key: switchKey,
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: true,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                      CupertinoSwitch(
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: false,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.off.themed.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.on.themed.png'),
+    );
+  });
+
+  testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
+    const bool value = false;
+    // Disabled CupertinoSwitch does not update cursor on Web.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return const Center(
+              child: CupertinoSwitch(
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: null,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    final Offset cupertinoSwitch = tester.getCenter(find.byType(CupertinoSwitch));
+    await gesture.addPointer(location: cupertinoSwitch);
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Enabled CupertinoSwitch updates cursor when hovering on Web.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: (bool newValue) { },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await gesture.moveTo(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    await gesture.moveTo(cupertinoSwitch);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 }

@@ -5,25 +5,23 @@
 import 'package:flutter/physics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double _kEpsilon = .00001;
-
 void main() {
   test('Friction simulation positive velocity', () {
     final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, 100.0);
 
-    expect(friction.x(0.0), closeTo(100.0, _kEpsilon));
-    expect(friction.dx(0.0), closeTo(100.0, _kEpsilon));
+    expect(friction.x(0.0), moreOrLessEquals(100.0));
+    expect(friction.dx(0.0), moreOrLessEquals(100.0));
 
-    expect(friction.x(0.1), closeTo(110.0, 1.0));
-    expect(friction.x(0.5), closeTo(131.0, 1.0));
-    expect(friction.x(2.0), closeTo(149.0, 1.0));
+    expect(friction.x(0.1), moreOrLessEquals(110.0, epsilon: 1.0));
+    expect(friction.x(0.5), moreOrLessEquals(131.0, epsilon: 1.0));
+    expect(friction.x(2.0), moreOrLessEquals(149.0, epsilon: 1.0));
 
-    expect(friction.finalX, closeTo(149.0, 1.0));
+    expect(friction.finalX, moreOrLessEquals(149.0, epsilon: 1.0));
 
     expect(friction.timeAtX(100.0), 0.0);
-    expect(friction.timeAtX(friction.x(0.1)), closeTo(0.1, _kEpsilon));
-    expect(friction.timeAtX(friction.x(0.5)), closeTo(0.5, _kEpsilon));
-    expect(friction.timeAtX(friction.x(2.0)), closeTo(2.0, _kEpsilon));
+    expect(friction.timeAtX(friction.x(0.1)), moreOrLessEquals(0.1));
+    expect(friction.timeAtX(friction.x(0.5)), moreOrLessEquals(0.5));
+    expect(friction.timeAtX(friction.x(2.0)), moreOrLessEquals(2.0));
 
     expect(friction.timeAtX(-1.0), double.infinity);
     expect(friction.timeAtX(200.0), double.infinity);
@@ -32,19 +30,40 @@ void main() {
   test('Friction simulation negative velocity', () {
     final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, -100.0);
 
-    expect(friction.x(0.0), closeTo(100.0, _kEpsilon));
-    expect(friction.dx(0.0), closeTo(-100.0, _kEpsilon));
+    expect(friction.x(0.0), moreOrLessEquals(100.0));
+    expect(friction.dx(0.0), moreOrLessEquals(-100.0));
 
-    expect(friction.x(0.1), closeTo(91.0, 1.0));
-    expect(friction.x(0.5), closeTo(68.0, 1.0));
-    expect(friction.x(2.0), closeTo(51.0, 1.0));
+    expect(friction.x(0.1), moreOrLessEquals(91.0, epsilon: 1.0));
+    expect(friction.x(0.5), moreOrLessEquals(68.0, epsilon: 1.0));
+    expect(friction.x(2.0), moreOrLessEquals(51.0, epsilon: 1.0));
 
-    expect(friction.finalX, closeTo(50, 1.0));
+    expect(friction.finalX, moreOrLessEquals(50, epsilon: 1.0));
 
     expect(friction.timeAtX(100.0), 0.0);
-    expect(friction.timeAtX(friction.x(0.1)), closeTo(0.1, _kEpsilon));
-    expect(friction.timeAtX(friction.x(0.5)), closeTo(0.5, _kEpsilon));
-    expect(friction.timeAtX(friction.x(2.0)), closeTo(2.0, _kEpsilon));
+    expect(friction.timeAtX(friction.x(0.1)), moreOrLessEquals(0.1));
+    expect(friction.timeAtX(friction.x(0.5)), moreOrLessEquals(0.5));
+    expect(friction.timeAtX(friction.x(2.0)), moreOrLessEquals(2.0));
+
+    expect(friction.timeAtX(101.0), double.infinity);
+    expect(friction.timeAtX(40.0), double.infinity);
+  });
+
+  test('Friction simulation constant deceleration', () {
+    final FrictionSimulation friction = FrictionSimulation(0.135, 100.0, -100.0, constantDeceleration: 100);
+
+    expect(friction.x(0.0), moreOrLessEquals(100.0));
+    expect(friction.dx(0.0), moreOrLessEquals(-100.0));
+
+    expect(friction.x(0.1), moreOrLessEquals(91.0, epsilon: 1.0));
+    expect(friction.x(0.5), moreOrLessEquals(80.0, epsilon: 1.0));
+    expect(friction.x(2.0), moreOrLessEquals(80.0, epsilon: 1.0));
+
+    expect(friction.finalX, moreOrLessEquals(80.0, epsilon: 1.0));
+
+    expect(friction.timeAtX(100.0), 0.0);
+    expect(friction.timeAtX(friction.x(0.1)), moreOrLessEquals(0.1));
+    expect(friction.timeAtX(friction.x(0.2)), moreOrLessEquals(0.2));
+    expect(friction.timeAtX(friction.x(0.3)), moreOrLessEquals(0.3));
 
     expect(friction.timeAtX(101.0), double.infinity);
     expect(friction.timeAtX(40.0), double.infinity);

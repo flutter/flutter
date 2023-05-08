@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -18,8 +16,7 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
+      driver.close();
     });
 
     Future<void> testScrollPerf(String listKey, String summaryName) async {
@@ -36,22 +33,23 @@ void main() {
         final SerializableFinder list = find.byValueKey(listKey);
         expect(list, isNotNull);
 
-        // Scroll down
-        for (int i = 0; i < 5; i += 1) {
-          await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
-          await Future<void>.delayed(const Duration(milliseconds: 500));
-        }
+        for (int j = 0; j < 5; j ++) {
+          // Scroll down
+          for (int i = 0; i < 5; i += 1) {
+            await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+          }
 
-        // Scroll up
-        for (int i = 0; i < 5; i += 1) {
-          await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
-          await Future<void>.delayed(const Duration(milliseconds: 500));
+          // Scroll up
+          for (int i = 0; i < 5; i += 1) {
+            await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+          }
         }
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile(summaryName, pretty: true);
-      summary.writeTimelineToFile(summaryName, pretty: true);
+      await summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
     test('platform_views_scroll_perf', () async {
@@ -59,6 +57,6 @@ void main() {
       await driver.runUnsynchronized(() async {
         await testScrollPerf('platform-views-scroll', 'platform_views_scroll_perf');
       });
-    });
+    }, timeout: Timeout.none);
   });
 }

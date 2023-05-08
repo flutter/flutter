@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -35,18 +34,42 @@ import 'object.dart';
 ///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class TextureBox extends RenderBox {
-  /// Creates a box backed by the texture identified by [textureId].
-  TextureBox({ @required int textureId })
-    : assert(textureId != null),
-      _textureId = textureId;
+  /// Creates a box backed by the texture identified by [textureId], and use
+  /// [filterQuality] to set texture's [FilterQuality].
+  TextureBox({
+    required int textureId,
+    bool freeze = false,
+    FilterQuality filterQuality = FilterQuality.low,
+  }) : _textureId = textureId,
+      _freeze = freeze,
+      _filterQuality = filterQuality;
 
   /// The identity of the backend texture.
   int get textureId => _textureId;
   int _textureId;
   set textureId(int value) {
-    assert(value != null);
     if (value != _textureId) {
       _textureId = value;
+      markNeedsPaint();
+    }
+  }
+
+  /// When true the texture will not be updated with new frames.
+  bool get freeze => _freeze;
+  bool _freeze;
+  set freeze(bool value) {
+    if (value != _freeze) {
+      _freeze = value;
+      markNeedsPaint();
+    }
+  }
+
+  /// {@macro flutter.widgets.Texture.filterQuality}
+  FilterQuality get filterQuality => _filterQuality;
+  FilterQuality _filterQuality;
+  set filterQuality(FilterQuality value) {
+    if (value != _filterQuality) {
+      _filterQuality = value;
       markNeedsPaint();
     }
   }
@@ -61,8 +84,8 @@ class TextureBox extends RenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  void performResize() {
-    size = constraints.biggest;
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
   }
 
   @override
@@ -70,11 +93,11 @@ class TextureBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_textureId == null)
-      return;
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,
+      freeze: freeze,
+      filterQuality: _filterQuality,
     ));
   }
 }

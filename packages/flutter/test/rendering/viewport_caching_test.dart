@@ -13,10 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   const double width = 800;
   const double height = 600;
   Rect rectExpandedOnAxis(double value) => Rect.fromLTRB(0.0, 0.0 - value, width, height + value);
-  List<RenderSliver> children;
+  late List<RenderSliver> children;
 
   setUp(() {
     children = <RenderSliver>[
@@ -62,14 +64,14 @@ void main() {
   });
 
   test('Cache extent - nullx viewport', () async {
-    await expectLater(() => RenderViewport(
+    await expectLater(
+      () => RenderViewport(
         crossAxisDirection: AxisDirection.left,
         offset: ViewportOffset.zero(),
-        cacheExtent: null,
         cacheExtentStyle: CacheExtentStyle.viewport,
         children: children,
       ),
-      throwsAssertionError
+      throwsAssertionError,
     );
   });
 
@@ -159,7 +161,7 @@ class CustomConstraintsRenderSliver extends RenderSliver {
   CustomConstraintsRenderSliver(this.constraints);
 
   @override
-  SliverGeometry get geometry => const SliverGeometry();
+  SliverGeometry get geometry => SliverGeometry.zero;
 
   @override
   final SliverConstraints constraints;

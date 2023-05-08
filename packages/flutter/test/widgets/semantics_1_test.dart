@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,13 +16,11 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        child: Container(
-          child: Semantics(
-            label: 'test1',
-            textDirection: TextDirection.ltr,
-            child: Container(),
-            selected: true,
-          ),
+        child: Semantics(
+          label: 'test1',
+          textDirection: TextDirection.ltr,
+          selected: true,
+          child: Container(),
         ),
       ),
     );
@@ -46,7 +43,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -54,10 +51,9 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
-                ignoring: true,
                 child: Semantics(
                   label: 'child1',
                   textDirection: TextDirection.ltr,
@@ -88,7 +84,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -96,7 +92,7 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
                 ignoring: false,
@@ -142,7 +138,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -150,10 +146,9 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
-                ignoring: true,
                 child: Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
@@ -184,7 +179,7 @@ void main() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Container(
+            SizedBox(
               height: 10.0,
               child: Semantics(
                 label: 'child1',
@@ -192,7 +187,7 @@ void main() {
                 selected: true,
               ),
             ),
-            Container(
+            SizedBox(
               height: 10.0,
               child: IgnorePointer(
                 ignoring: false,

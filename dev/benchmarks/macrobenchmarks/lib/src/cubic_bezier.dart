@@ -4,18 +4,18 @@
 
 import 'dart:math';
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 
 // Based on https://github.com/eseidelGoogle/bezier_perf/blob/master/lib/main.dart
 class CubicBezierPage extends StatelessWidget {
+  const CubicBezierPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const <Widget>[
+        children: <Widget>[
           Bezier(Colors.amber, 1.0),
         ],
       ),
@@ -24,7 +24,7 @@ class CubicBezierPage extends StatelessWidget {
 }
 
 class Bezier extends StatelessWidget {
-  const Bezier(this.color, this.scale, {this.blur = 0.0, this.delay = 0.0});
+  const Bezier(this.color, this.scale, {super.key, this.blur = 0.0, this.delay = 0.0});
 
   final Color color;
   final double scale;
@@ -79,7 +79,7 @@ class Bezier extends StatelessWidget {
         BezierPainter(Colors.grey, 0.0, _getLogoPath(), false),
         size: const Size(100.0, 100.0),
       ),
-      AnimatedBezier(color, scale, blur: blur, delay: delay),
+      AnimatedBezier(color, scale, blur: blur),
     ]);
   }
 }
@@ -88,17 +88,16 @@ class PathDetail {
   PathDetail(this.path, {this.translate, this.rotation});
 
   Path path;
-  List<double> translate = <double>[];
-  double rotation;
+  List<double>? translate = <double>[];
+  double? rotation;
 }
 
 class AnimatedBezier extends StatefulWidget {
-  const AnimatedBezier(this.color, this.scale, {this.blur = 0.0, this.delay});
+  const AnimatedBezier(this.color, this.scale, {super.key, this.blur = 0.0});
 
   final Color color;
   final double scale;
   final double blur;
-  final double delay;
 
   @override
   State createState() => AnimatedBezierState();
@@ -113,9 +112,8 @@ class Point {
 
 class AnimatedBezierState extends State<AnimatedBezier>
     with SingleTickerProviderStateMixin {
-  double scale;
-  AnimationController controller;
-  CurvedAnimation curve;
+  late AnimationController controller;
+  late CurvedAnimation curve;
   bool isPlaying = false;
   List<List<Point>> pointList = <List<Point>>[
     <Point>[],
@@ -312,6 +310,10 @@ class AnimatedBezierState extends State<AnimatedBezier>
     super.initState();
     controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1000));
+    // Animations are typically implemented using the AnimatedBuilder widget.
+    // This code uses a manual listener for historical reasons and will remain
+    // in order to preserve compatibility with the history of measurements for
+    // this benchmark.
     curve = CurvedAnimation(parent: controller, curve: Curves.linear)
       ..addListener(() {
         setState(() {});
@@ -361,11 +363,11 @@ class BezierPainter extends CustomPainter {
 
     for (int i = 0; i < path.length; i++) {
       if (path[i].translate != null) {
-        canvas.translate(path[i].translate[0], path[i].translate[1]);
+        canvas.translate(path[i].translate![0], path[i].translate![1]);
       }
 
       if (path[i].rotation != null) {
-        canvas.rotate(path[i].rotation);
+        canvas.rotate(path[i].rotation!);
       }
 
       if (blur > 0) {

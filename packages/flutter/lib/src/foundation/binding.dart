@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+import 'dart:ui' as ui show Brightness, PlatformDispatcher, SingletonFlutterWindow, window; // ignore: deprecated_member_use
+
 // Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
@@ -18,6 +19,14 @@ import 'debug.dart';
 import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
+import 'service_extensions.dart';
+
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
+
+export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
+
+// Examples can assume:
+// mixin BarBinding on BindingBase { }
 
 /// Signature for service extensions.
 ///
@@ -28,34 +37,119 @@ import 'print.dart';
 /// "method" key will be set to the full name of the method.
 typedef ServiceExtensionCallback = Future<Map<String, dynamic>> Function(Map<String, String> parameters);
 
-/// Base class for mixins that provide singleton services (also known as
-/// "bindings").
+/// Base class for mixins that provide singleton services.
 ///
-/// To use this class in an `on` clause of a mixin, inherit from it and implement
-/// [initInstances()]. The mixin is guaranteed to only be constructed once in
-/// the lifetime of the app (more precisely, it will assert if constructed twice
-/// in checked mode).
+/// The Flutter engine ([dart:ui]) exposes some low-level services,
+/// but these are typically not suitable for direct use, for example
+/// because they only provide a single callback which an application
+/// may wish to multiplex to allow multiple listeners.
 ///
-/// The top-most layer used to write the application will have a concrete class
-/// that inherits from [BindingBase] and uses all the various [BindingBase]
-/// mixins (such as [ServicesBinding]). For example, the Widgets library in
-/// Flutter introduces a binding called [WidgetsFlutterBinding]. The relevant
-/// library defines how to create the binding. It could be implied (for example,
-/// [WidgetsFlutterBinding] is automatically started from [runApp]), or the
-/// application might be required to explicitly call the constructor.
+/// Bindings provide the glue between these low-level APIs and the
+/// higher-level framework APIs. They _bind_ the two together, whence
+/// the name.
+///
+/// ## Implementing a binding mixin
+///
+/// A library would typically create a new binding mixin to expose a
+/// feature in [dart:ui]. This is rare in general, but it is something
+/// that an alternative framework would do, e.g. if a framework were
+/// to replace the [widgets] library with an alternative API but still
+/// wished to leverage the [services] and [foundation] libraries.
+///
+/// To create a binding mixin, declare a mixin `on` the [BindingBase] class
+/// and whatever other bindings the concrete binding must implement for
+/// this binding mixin to be useful.
+///
+/// The mixin is guaranteed to only be constructed once in the
+/// lifetime of the app; this is handled by [initInstances].
+///
+/// A binding mixin must at a minimum implement the following features:
+///
+/// * The [initInstances] method, which must call `super.initInstances` and
+///   set an `_instance` static field to `this`.
+/// * An `instance` static getter, which must return that field using [checkInstance].
+///
+/// In addition, it should implement whatever singleton features the library needs.
+///
+/// As a general rule, the less can be placed in the binding, the
+/// better. Prefer having APIs that takes objects rather than having
+/// them refer to global singletons. Bindings are best limited to
+/// exposing features that literally only exist once, for example, the
+/// APIs in [dart:ui].
+///
+/// {@tool snippet}
+///
+/// Here is a basic example of a binding that implements these features. It relies on
+/// another fictional binding called `BarBinding`.
+///
+/// ```dart
+/// mixin FooBinding on BindingBase, BarBinding {
+///   @override
+///   void initInstances() {
+///     super.initInstances();
+///     _instance = this;
+///     // ...binding initialization...
+///   }
+///
+///   static FooBinding get instance => BindingBase.checkInstance(_instance);
+///   static FooBinding? _instance;
+///
+///   // ...binding features...
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## Implementing a binding class
+///
+/// The top-most layer used to write the application (e.g. the Flutter
+/// [widgets] library) will have a concrete class that inherits from
+/// [BindingBase] and uses all the various [BindingBase] mixins (such
+/// as [ServicesBinding]). The [widgets] library in Flutter introduces
+/// a binding called [WidgetsFlutterBinding].
+///
+/// A binding _class_ should mix in the relevant bindings from each
+/// layer that it wishes to expose, and should have an
+/// `ensureInitialized` method that constructs the class if that
+/// layer's mixin's `_instance` field is null. This allows the binding
+/// to be overridden by developers who have more specific needs, while
+/// still allowing other code to call `ensureInitialized` when a binding
+/// is needed.
+///
+/// {@tool snippet}
+///
+/// A typical binding class is shown below. The `ensureInitialized` method's
+/// return type is the library's binding mixin, rather than the concrete
+/// class.
+///
+/// ```dart
+/// // continuing from previous example...
+/// class FooLibraryBinding extends BindingBase with BarBinding, FooBinding {
+///   static FooBinding ensureInitialized() {
+///     if (FooBinding._instance == null) {
+///       FooLibraryBinding();
+///     }
+///     return FooBinding.instance;
+///   }
+/// }
+/// ```
+/// {@end-tool}
 abstract class BindingBase {
   /// Default abstract constructor for bindings.
   ///
   /// First calls [initInstances] to have bindings initialize their
   /// instance pointers and other state, then calls
   /// [initServiceExtensions] to have bindings initialize their
-  /// observatory service extensions, if any.
+  /// VM service extensions, if any.
   BindingBase() {
     developer.Timeline.startSync('Framework initialization');
+    assert(() {
+      _debugConstructed = true;
+      return true;
+    }());
 
-    assert(!_debugInitialized);
+    assert(_debugInitializedType == null, 'Binding is already initialized to $_debugInitializedType');
     initInstances();
-    assert(_debugInitialized);
+    assert(_debugInitializedType != null);
 
     assert(!_debugServiceExtensionsRegistered);
     initServiceExtensions();
@@ -66,43 +160,347 @@ abstract class BindingBase {
     developer.Timeline.finishSync();
   }
 
-  static bool _debugInitialized = false;
+  bool _debugConstructed = false;
+  static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// The window to which this binding is bound.
+  /// Additional configuration used by the framework during hot reload.
   ///
-  /// A number of additional bindings are defined as extensions of [BindingBase],
-  /// e.g., [ServicesBinding], [RendererBinding], and [WidgetsBinding]. Each of
-  /// these bindings define behaviors that interact with a [ui.Window], e.g.,
-  /// [ServicesBinding] registers a [ui.Window.onPlatformMessage] handler, and
-  /// [RendererBinding] registers [ui.Window.onMetricsChanged],
-  /// [ui.Window.onTextScaleFactorChanged], [ui.Window.onSemanticsEnabledChanged],
-  /// and [ui.Window.onSemanticsAction] handlers.
+  /// See also:
   ///
-  /// Each of these other bindings could individually access a [Window] statically,
-  /// but that would preclude the ability to test these behaviors with a fake
-  /// window for verification purposes.  Therefore, [BindingBase] exposes this
-  /// [Window] for use by other bindings.  A subclass of [BindingBase], such as
+  ///  * [DebugReassembleConfig], which describes the configuration.
+  static DebugReassembleConfig? debugReassembleConfig;
+
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// It represents the main view for applications where there is only one
+  /// view, such as applications designed for single-display mobile devices.
+  /// If the embedder supports multiple views, it points to the first view
+  /// created which is assumed to be the main view. It throws if no view has
+  /// been created yet or if the first view has been removed again.
+  ///
+  /// The following options exists to migrate code that relies on accessing
+  /// this deprecated property:
+  ///
+  /// If a [BuildContext] is available, consider looking up the current
+  /// [FlutterView] associated with that context via [View.of]. It gives access
+  /// to the same functionality as this deprecated property. However, the
+  /// platform-specific functionality has moved to the [PlatformDispatcher],
+  /// which may be accessed from the view returned by [View.of] via
+  /// [FlutterView.platformDispatcher]. Using [View.of] with a [BuildContext] is
+  /// the preferred option to migrate away from this deprecated [window]
+  /// property.
+  ///
+  /// If no context is available to look up a [FlutterView], the
+  /// [platformDispatcher] exposed by this binding can be used directly for
+  /// platform-specific functionality. It also maintains a list of all available
+  /// [FlutterView]s in [PlatformDispatcher.views] to access view-specific
+  /// functionality without a context.
+  ///
+  /// See also:
+  ///
+  /// * [View.of] to access view-specific functionality on the [FlutterView]
+  ///   associated with the provided [BuildContext].
+  /// * [FlutterView.platformDispatcher] to access platform-specific
+  ///   functionality from a given [FlutterView].
+  /// * [platformDispatcher] on this binding to access the [PlatformDispatcher],
+  ///   which provides platform-specific functionality.
+  @Deprecated(
+    'Look up the current FlutterView from the context via View.of(context) or consult the PlatformDispatcher directly instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
+  ui.SingletonFlutterWindow get window => ui.window;
+
+  /// The [ui.PlatformDispatcher] to which this binding is bound.
+  ///
+  /// A number of additional bindings are defined as extensions of
+  /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
+  /// [WidgetsBinding]. Each of these bindings define behaviors that interact
+  /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
+  /// listeners with the [ChannelBuffers], and [RendererBinding]
+  /// registers [ui.PlatformDispatcher.onMetricsChanged],
+  /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
+  /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
+  /// [ui.PlatformDispatcher.onSemanticsAction] handlers.
+  ///
+  /// Each of these other bindings could individually access a
+  /// [ui.PlatformDispatcher] statically, but that would preclude the ability to
+  /// test these behaviors with a fake platform dispatcher for verification
+  /// purposes. Therefore, [BindingBase] exposes this [ui.PlatformDispatcher]
+  /// for use by other bindings. A subclass of [BindingBase], such as
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
-  /// different [Window] implementation, such as a [TestWindow].
-  ui.Window get window => ui.window;
+  /// different [ui.PlatformDispatcher] implementation.
+  ui.PlatformDispatcher get platformDispatcher => ui.PlatformDispatcher.instance;
 
   /// The initialization method. Subclasses override this method to hook into
   /// the platform and otherwise configure their services. Subclasses must call
   /// "super.initInstances()".
   ///
-  /// By convention, if the service is to be provided as a singleton, it should
-  /// be exposed as `MixinClassName.instance`, a static getter that returns
+  /// The binding is not fully initialized when this method runs (for
+  /// example, other binding mixins may not yet have run their
+  /// [initInstances] method). For this reason, code in this method
+  /// should avoid invoking callbacks or synchronously triggering any
+  /// code that would normally assume that the bindings are ready.
+  ///
+  /// {@tool snippet}
+  ///
+  /// By convention, if the service is to be provided as a singleton,
+  /// it should be exposed as `MixinClassName.instance`, a static
+  /// getter with a non-nullable return type that returns
   /// `MixinClassName._instance`, a static field that is set by
-  /// `initInstances()`.
+  /// `initInstances()`. To improve the developer experience, the
+  /// return value should actually be
+  /// `BindingBase.checkInstance(_instance)` (see [checkInstance]), as
+  /// in the example below.
+  ///
+  /// ```dart
+  /// mixin BazBinding on BindingBase {
+  ///   @override
+  ///   void initInstances() {
+  ///     super.initInstances();
+  ///     _instance = this;
+  ///     // ...binding initialization...
+  ///   }
+  ///
+  ///   static BazBinding get instance => BindingBase.checkInstance(_instance);
+  ///   static BazBinding? _instance;
+  ///
+  ///   // ...binding features...
+  /// }
+  /// ```
+  /// {@end-tool}
   @protected
   @mustCallSuper
   void initInstances() {
-    assert(!_debugInitialized);
+    assert(_debugInitializedType == null);
     assert(() {
-      _debugInitialized = true;
+      _debugInitializedType = runtimeType;
+      _debugBindingZone = Zone.current;
       return true;
     }());
+  }
+
+  /// A method that shows a useful error message if the given binding
+  /// instance is not initialized.
+  ///
+  /// See [initInstances] for advice on using this method.
+  ///
+  /// This method either returns the argument or throws an exception.
+  /// In release mode it always returns the argument.
+  ///
+  /// The type argument `T` should be the kind of binding mixin (e.g.
+  /// `SchedulerBinding`) that is calling the method. It is used in
+  /// error messages.
+  @protected
+  static T checkInstance<T extends BindingBase>(T? instance) {
+    assert(() {
+      if (_debugInitializedType == null && instance == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Binding has not yet been initialized.'),
+          ErrorDescription('The "instance" getter on the $T binding mixin is only available once that binding has been initialized.'),
+          ErrorHint(
+            'Typically, this is done by calling "WidgetsFlutterBinding.ensureInitialized()" or "runApp()" (the '
+            'latter calls the former). Typically this call is done in the "void main()" method. The "ensureInitialized" method '
+            'is idempotent; calling it multiple times is not harmful. After calling that method, the "instance" getter will '
+            'return the binding.',
+          ),
+          ErrorHint(
+            'In a test, one can call "TestWidgetsFlutterBinding.ensureInitialized()" as the first line in the test\'s "main()" method '
+            'to initialize the binding.',
+          ),
+          ErrorHint(
+            'If $T is a custom binding mixin, there must also be a custom binding class, like WidgetsFlutterBinding, '
+            'but that mixes in the selected binding, and that is the class that must be constructed before using the "instance" getter.',
+          ),
+        ]);
+      }
+      if (instance == null) {
+        assert(_debugInitializedType == null);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Binding mixin instance is null but bindings are already initialized.'),
+          ErrorDescription(
+            'The "instance" property of the $T binding mixin was accessed, but that binding was not initialized when '
+            'the "initInstances()" method was called.',
+          ),
+          ErrorHint(
+            'This probably indicates that the $T mixin was not mixed into the class that was used to initialize the binding. '
+            'If this is a custom binding mixin, there must also be a custom binding class, like WidgetsFlutterBinding, '
+            'but that mixes in the selected binding. If this is a test binding, check that the binding being initialized '
+            'is the same as the one into which the test binding is mixed.',
+          ),
+          ErrorHint(
+            'It is also possible that $T does not implement "initInstances()" to assign a value to "instance". See the '
+            'documentation of the BindingBase class for more details.',
+          ),
+          ErrorHint(
+            'The binding that was initialized was of the type "$_debugInitializedType". '
+          ),
+        ]);
+      }
+      try {
+        if (instance._debugConstructed && _debugInitializedType == null) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Binding initialized without calling initInstances.'),
+            ErrorDescription('An instance of $T is non-null, but BindingBase.initInstances() has not yet been called.'),
+            ErrorHint(
+              'This could happen because a binding mixin was somehow used outside of the normal binding mechanisms, or because '
+              'the binding\'s initInstances() method did not call "super.initInstances()".',
+            ),
+            ErrorHint(
+              'This could also happen if some code was invoked that used the binding while the binding was initializing, '
+              'for example if the "initInstances" method invokes a callback. Bindings should not invoke callbacks before '
+              '"initInstances" has completed.',
+            ),
+          ]);
+        }
+        if (!instance._debugConstructed) {
+          // The state of _debugInitializedType doesn't matter in this failure mode.
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Binding did not complete initialization.'),
+            ErrorDescription('An instance of $T is non-null, but the BindingBase() constructor has not yet been called.'),
+            ErrorHint(
+              'This could also happen if some code was invoked that used the binding while the binding was initializing, '
+              "for example if the binding's constructor itself invokes a callback. Bindings should not invoke callbacks "
+              'before "initInstances" has completed.',
+            ),
+          ]);
+        }
+      } on NoSuchMethodError {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Binding does not extend BindingBase'),
+          ErrorDescription('An instance of $T was created but the BindingBase constructor was not called.'),
+          ErrorHint(
+            'This could happen because the binding was implemented using "implements" rather than "extends" or "with". '
+            'Concrete binding classes must extend or mix in BindingBase.',
+          ),
+        ]);
+      }
+      return true;
+    }());
+    return instance!;
+  }
+
+  /// In debug builds, the type of the current binding, if any, or else null.
+  ///
+  /// This may be useful in asserts to verify that the binding has not been initialized
+  /// before the point in the application code that wants to initialize the binding, or
+  /// to verify that the binding is the one that is expected.
+  ///
+  /// For example, if an application uses [Zone]s to report uncaught exceptions, it may
+  /// need to ensure that `ensureInitialized()` has not yet been invoked on any binding
+  /// at the point where it configures the zone and initializes the binding.
+  ///
+  /// If this returns null, the binding has not been initialized.
+  ///
+  /// If this returns a non-null value, it returns the type of the binding instance.
+  ///
+  /// To obtain the binding itself, consider the `instance` getter on the [BindingBase]
+  /// subclass or mixin.
+  ///
+  /// This method only returns a useful value in debug builds. In release builds, the
+  /// return value is always null; to improve startup performance, the type of the
+  /// binding is not tracked in release builds.
+  ///
+  /// See also:
+  ///
+  ///  * [BindingBase], whose class documentation describes the conventions for dealing
+  ///    with bindings.
+  ///  * [initInstances], whose documentation details how to create a binding mixin.
+  static Type? debugBindingType() {
+    return _debugInitializedType;
+  }
+
+  Zone? _debugBindingZone;
+
+  /// Whether [debugCheckZone] should throw (true) or just report the error (false).
+  ///
+  /// Setting this to true makes it easier to catch cases where the zones are
+  /// misconfigured, by allowing debuggers to stop at the point of error.
+  ///
+  /// Currently this defaults to false, to avoid suddenly breaking applications
+  /// that are affected by this check but appear to be working today. Applications
+  /// are encouraged to resolve any issues that cause the [debugCheckZone] message
+  /// to appear, as even if they appear to be working today, they are likely to be
+  /// hiding hard-to-find bugs, and are more brittle (likely to collect bugs in
+  /// the future).
+  ///
+  /// To silence the message displayed by [debugCheckZone], ensure that the same
+  /// zone is used when calling `ensureInitialized()` as when calling the framework
+  /// in any other context (e.g. via [runApp]).
+  static bool debugZoneErrorsAreFatal = false;
+
+  /// Checks that the current [Zone] is the same as that which was used
+  /// to initialize the binding.
+  ///
+  /// If the current zone ([Zone.current]) is not the zone that was active when
+  /// the binding was initialized, then this method generates a [FlutterError]
+  /// exception with detailed information. The exception is either thrown
+  /// directly, or reported via [FlutterError.reportError], depending on the
+  /// value of [BindingBase.debugZoneErrorsAreFatal].
+  ///
+  /// To silence the message displayed by [debugCheckZone], ensure that the same
+  /// zone is used when calling `ensureInitialized()` as when calling the
+  /// framework in any other context (e.g. via [runApp]). For example, consider
+  /// keeping a reference to the zone used to initialize the binding, and using
+  /// [Zone.run] to use it again when calling into the framework.
+  ///
+  /// ## Usage
+  ///
+  /// The binding is considered initialized once [BindingBase.initInstances] has
+  /// run; if this is called before then, it will throw an [AssertionError].
+  ///
+  /// The `entryPoint` parameter is the name of the API that is checking the
+  /// zones are consistent, for example, `'runApp'`.
+  ///
+  /// This function always returns true (if it does not throw). It is expected
+  /// to be invoked via the binding instance, e.g.:
+  ///
+  /// ```dart
+  /// void startup() {
+  ///   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  ///   assert(binding.debugCheckZone('startup'));
+  ///   // ...
+  /// }
+  /// ```
+  ///
+  /// If the binding expects to be used with multiple zones, it should override
+  /// this method to return true always without throwing. (For example, the
+  /// bindings used with [flutter_test] do this as they make heavy use of zones
+  /// to drive the framework with an artificial clock and to catch errors and
+  /// report them as test failures.)
+  bool debugCheckZone(String entryPoint) {
+    assert(() {
+      assert(_debugBindingZone != null, 'debugCheckZone can only be used after the binding is fully initialized.');
+      if (Zone.current != _debugBindingZone) {
+        final Error message = FlutterError(
+          'Zone mismatch.\n'
+          'The Flutter bindings were initialized in a different zone than is now being used. '
+          'This will likely cause confusion and bugs as any zone-specific configuration will '
+          'inconsistently use the configuration of the original binding initialization zone '
+          'or this zone based on hard-to-predict factors such as which zone was active when '
+          'a particular callback was set.\n'
+          'It is important to use the same zone when calling `ensureInitialized` on the binding '
+          'as when calling `$entryPoint` later.\n'
+          'To make this ${ debugZoneErrorsAreFatal ? 'error non-fatal' : 'warning fatal' }, '
+          'set BindingBase.debugZoneErrorsAreFatal to ${!debugZoneErrorsAreFatal} before the '
+          'bindings are initialized (i.e. as the first statement in `void main() { }`).',
+        );
+        if (debugZoneErrorsAreFatal) {
+          throw message;
+        }
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: message,
+          stack: StackTrace.current,
+          context: ErrorDescription('during $entryPoint'),
+        ));
+      }
+      return true;
+    }());
+    return true;
   }
 
   /// Called when the binding is initialized, to register service
@@ -118,11 +516,11 @@ abstract class BindingBase {
   /// Implementations of this method must call their superclass
   /// implementation.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   ///
   /// See also:
   ///
-  ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  ///  * <https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md#rpcs-requests-and-responses>
   @protected
   @mustCallSuper
   void initServiceExtensions() {
@@ -130,58 +528,60 @@ abstract class BindingBase {
 
     assert(() {
       registerSignalServiceExtension(
-        name: 'reassemble',
+        name: FoundationServiceExtensions.reassemble.name,
         callback: reassembleApplication,
       );
       return true;
     }());
 
-    if (!kReleaseMode && !kIsWeb) {
-      registerSignalServiceExtension(
-        name: 'exit',
-        callback: _exitApplication,
+    if (!kReleaseMode) {
+      if (!kIsWeb) {
+        registerSignalServiceExtension(
+          name: FoundationServiceExtensions.exit.name,
+          callback: _exitApplication,
+        );
+      }
+      // These service extensions are used in profile mode applications.
+      registerStringServiceExtension(
+        name: FoundationServiceExtensions.connectedVmServiceUri.name,
+        getter: () async => connectedVmServiceUri ?? '',
+        setter: (String uri) async {
+          connectedVmServiceUri = uri;
+        },
       );
-      registerServiceExtension(
-        name: 'saveCompilationTrace',
-        callback: (Map<String, String> parameters) async {
-          return <String, dynamic>{
-            'value': ui.saveCompilationTrace(),
-          };
+      registerStringServiceExtension(
+        name: FoundationServiceExtensions.activeDevToolsServerAddress.name,
+        getter: () async => activeDevToolsServerAddress ?? '',
+        setter: (String serverAddress) async {
+          activeDevToolsServerAddress = serverAddress;
         },
       );
     }
 
     assert(() {
-      const String platformOverrideExtensionName = 'platformOverride';
       registerServiceExtension(
-        name: platformOverrideExtensionName,
+        name: FoundationServiceExtensions.platformOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
               case 'android':
                 debugDefaultTargetPlatformOverride = TargetPlatform.android;
-                break;
               case 'fuchsia':
                 debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-                break;
               case 'iOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-                break;
               case 'linux':
                 debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-                break;
               case 'macOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-                break;
               case 'windows':
                 debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-                break;
               case 'default':
               default:
                 debugDefaultTargetPlatformOverride = null;
             }
             _postExtensionStateChangedEvent(
-              platformOverrideExtensionName,
+              FoundationServiceExtensions.platformOverride.name,
               defaultTargetPlatform.toString().substring('$TargetPlatform.'.length),
             );
             await reassembleApplication();
@@ -190,6 +590,30 @@ abstract class BindingBase {
             'value': defaultTargetPlatform
                      .toString()
                      .substring('$TargetPlatform.'.length),
+          };
+        },
+      );
+
+      registerServiceExtension(
+        name: FoundationServiceExtensions.brightnessOverride.name,
+        callback: (Map<String, String> parameters) async {
+          if (parameters.containsKey('value')) {
+            switch (parameters['value']) {
+              case 'Brightness.light':
+                debugBrightnessOverride = ui.Brightness.light;
+              case 'Brightness.dark':
+                debugBrightnessOverride = ui.Brightness.dark;
+              default:
+                debugBrightnessOverride = null;
+            }
+            _postExtensionStateChangedEvent(
+              FoundationServiceExtensions.brightnessOverride.name,
+              (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
+            );
+            await reassembleApplication();
+          }
+          return <String, dynamic>{
+            'value': (debugBrightnessOverride ?? platformDispatcher.platformBrightness).toString(),
           };
         },
       );
@@ -221,17 +645,15 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<void> lockEvents(Future<void> callback()) {
-    developer.Timeline.startSync('Lock events');
+  Future<void> lockEvents(Future<void> Function() callback) {
+    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
 
-    assert(callback != null);
     _lockCount += 1;
     final Future<void> future = callback();
-    assert(future != null, 'The lockEvents() callback returned null; it should return a Future<void> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        developer.Timeline.finishSync();
+        timelineTask.finish();
         unlocked();
       }
     });
@@ -292,14 +714,12 @@ abstract class BindingBase {
   ///
   /// Calls the `callback` callback when the service extension is called.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
-    @required String name,
-    @required AsyncCallback callback,
+    required String name,
+    required AsyncCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -322,16 +742,13 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<bool> getter,
-    @required AsyncValueSetter<bool> setter,
+    required String name,
+    required AsyncValueGetter<bool> getter,
+    required AsyncValueSetter<bool> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
@@ -356,21 +773,18 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<double> getter,
-    @required AsyncValueSetter<double> setter,
+    required String name,
+    required AsyncValueGetter<double> getter,
+    required AsyncValueSetter<double> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey(name)) {
-          await setter(double.parse(parameters[name]));
+          await setter(double.parse(parameters[name]!));
           _postExtensionStateChangedEvent(name, (await getter()).toString());
         }
         return <String, dynamic>{name: (await getter()).toString()};
@@ -418,21 +832,18 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
-    @required String name,
-    @required AsyncValueGetter<String> getter,
-    @required AsyncValueSetter<String> setter,
+    required String name,
+    required AsyncValueGetter<String> getter,
+    required AsyncValueSetter<String> setter,
   }) {
-    assert(name != null);
-    assert(getter != null);
-    assert(setter != null);
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('value')) {
-          await setter(parameters['value']);
+          await setter(parameters['value']!);
           _postExtensionStateChangedEvent(name, await getter());
         }
         return <String, dynamic>{'value': await getter()};
@@ -452,7 +863,7 @@ abstract class BindingBase {
   ///
   /// The returned map will be mutated.
   ///
-  /// {@template flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@template flutter.foundation.BindingBase.registerServiceExtension}
   /// A registered service extension can only be activated if the vm-service
   /// is included in the build, which only happens in debug and profile mode.
   /// Although a service extension cannot be used in release mode its code may
@@ -479,7 +890,7 @@ abstract class BindingBase {
   /// available in debug and profile mode.
   ///
   /// ```dart
-  /// void myRegistrationFunction() {
+  /// void myOtherRegistrationFunction() {
   ///   // kReleaseMode is defined in the 'flutter/foundation.dart' package.
   ///   if (!kReleaseMode) {
   ///     // Register your service extension here.
@@ -493,17 +904,16 @@ abstract class BindingBase {
   /// {@endtemplate}
   @protected
   void registerServiceExtension({
-    @required String name,
-    @required ServiceExtensionCallback callback,
+    required String name,
+    required ServiceExtensionCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
     final String methodName = 'ext.flutter.$name';
     developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
-        if (debugInstrumentationEnabled)
+        if (debugInstrumentationEnabled) {
           debugPrint('service extension method received: $method($parameters)');
+        }
         return true;
       }());
 
@@ -521,34 +931,27 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      dynamic caughtException;
-      StackTrace caughtStack;
-      Map<String, dynamic> result;
+      late Map<String, dynamic> result;
       try {
         result = await callback(parameters);
       } catch (exception, stack) {
-        caughtException = exception;
-        caughtStack = stack;
-      }
-      if (caughtException == null) {
-        result['type'] = '_extensionType';
-        result['method'] = method;
-        return developer.ServiceExtensionResponse.result(json.encode(result));
-      } else {
         FlutterError.reportError(FlutterErrorDetails(
-          exception: caughtException,
-          stack: caughtStack,
+          exception: exception,
+          stack: stack,
           context: ErrorDescription('during a service extension callback for "$method"'),
         ));
         return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
           json.encode(<String, String>{
-            'exception': caughtException.toString(),
-            'stack': caughtStack.toString(),
+            'exception': exception.toString(),
+            'stack': stack.toString(),
             'method': method,
           }),
         );
       }
+      result['type'] = '_extensionType';
+      result['method'] = method;
+      return developer.ServiceExtensionResponse.result(json.encode(result));
     });
   }
 
@@ -559,4 +962,24 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
+}
+
+/// Additional configuration used for hot reload reassemble optimizations.
+///
+/// Do not extend, implement, or mixin this class. This may only be instantiated
+/// in debug mode.
+class DebugReassembleConfig {
+  /// Create a new [DebugReassembleConfig].
+  ///
+  /// Throws a [FlutterError] if this is called in profile or release mode.
+  DebugReassembleConfig({
+    this.widgetName,
+  }) {
+    if (!kDebugMode) {
+      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
+    }
+  }
+
+  /// The name of the widget that was modified, or `null` if the change was elsewhere.
+  final String? widgetName;
 }

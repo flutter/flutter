@@ -6,9 +6,11 @@ import 'dart:io';
 import 'assertions.dart';
 import 'platform.dart' as platform;
 
+export 'platform.dart' show TargetPlatform;
+
 /// The dart:io implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
-  platform.TargetPlatform result;
+  platform.TargetPlatform? result;
   if (Platform.isAndroid) {
     result = platform.TargetPlatform.android;
   } else if (Platform.isIOS) {
@@ -23,18 +25,20 @@ platform.TargetPlatform get defaultTargetPlatform {
     result = platform.TargetPlatform.windows;
   }
   assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
       result = platform.TargetPlatform.android;
+    }
     return true;
   }());
-  if (platform.debugDefaultTargetPlatformOverride != null)
+  if (platform.debugDefaultTargetPlatformOverride != null) {
     result = platform.debugDefaultTargetPlatformOverride;
+  }
   if (result == null) {
     throw FlutterError(
       'Unknown platform.\n'
       '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
+      'Consider updating the list of TargetPlatforms to include this platform.',
     );
   }
-  return result;
+  return result!;
 }

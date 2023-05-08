@@ -28,5 +28,9 @@
   "cutButtonLabel": "Wytnij",
   "copyButtonLabel": "Kopiuj",
   "pasteButtonLabel": "Wklej",
-  "selectAllButtonLabel": "Wybierz wszystkie"
+  "selectAllButtonLabel": "Wybierz wszystkie",
+  "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
+  "modalBarrierDismissLabel": "Zamknij",
+  "searchTextFieldPlaceholderLabel": "Szukaj",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

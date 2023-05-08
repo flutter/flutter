@@ -12,7 +12,6 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
 import 'src/tests/headings_page.dart';
-import 'src/tests/popup_constants.dart';
 import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
 
@@ -24,34 +23,51 @@ void main() {
 
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
-Future<String> dataHandler(String message) async {
-  if (message.contains('getSemanticsNode')) {
+Future<String> dataHandler(String? message) async {
+  if (message != null && message.contains('getSemanticsNode')) {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
-    Future<void> completeSemantics([Object _]) async {
+    Future<void> completeSemantics([Object? _]) async {
       final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
         'id': id,
       });
       completer.complete(json.encode(result));
     }
-    if (SchedulerBinding.instance.hasScheduledFrame)
+    if (SchedulerBinding.instance.hasScheduledFrame) {
       SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
-    else
+    } else {
       completeSemantics();
+    }
+    return completer.future;
+  }
+  if (message != null && message.contains('setClipboard')) {
+    final Completer<String> completer = Completer<String>();
+    final String str = message.split('#')[1];
+    Future<void> completeSetClipboard([Object? _]) async {
+      await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
+        'message': str,
+      });
+      completer.complete('');
+    }
+    if (SchedulerBinding.instance.hasScheduledFrame) {
+      SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
+    } else {
+      completeSetClipboard();
+    }
     return completer.future;
   }
   throw UnimplementedError();
 }
 
 Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  selectionControlsRoute : (BuildContext context) => SelectionControlsPage(),
-  popupControlsRoute : (BuildContext context) => PopupControlsPage(),
-  textFieldRoute : (BuildContext context) => TextFieldPage(),
-  headingsRoute: (BuildContext context) => HeadingsPage(),
+  selectionControlsRoute : (BuildContext context) => const SelectionControlsPage(),
+  popupControlsRoute : (BuildContext context) => const PopupControlsPage(),
+  textFieldRoute : (BuildContext context) => const TextFieldPage(),
+  headingsRoute: (BuildContext context) => const HeadingsPage(),
 };
 
 class TestApp extends StatelessWidget {
-  const TestApp();
+  const TestApp({super.key});
 
   @override
   Widget build(BuildContext context) {

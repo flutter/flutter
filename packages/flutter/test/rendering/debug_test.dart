@@ -4,13 +4,15 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import '../flutter_test_alternative.dart';
 import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('Describe transform control test', () {
     final Matrix4 identity = Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
@@ -95,8 +97,16 @@ void main() {
     layout(root);
     expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..rect(color: const Color(0x90909090)));
     expect(b.debugPaint, isNot(paints..path()));
-    expect(s.debugPaint, paints..circle(hasMaskFilter: true)..line(hasMaskFilter: true)..path(hasMaskFilter: true)..path(hasMaskFilter: true)
-                               ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
+    expect(
+      s.debugPaint,
+      paints
+        ..circle(hasMaskFilter: true)
+        ..line(hasMaskFilter: true)
+        ..path(hasMaskFilter: true)
+        ..path(hasMaskFilter: true)
+        ..path(color: const Color(0x900090FF))
+        ..path(color: const Color(0xFF0090FF)),
+    );
     expect(s.debugPaint, isNot(paints..rect()));
     debugPaintSizeEnabled = false;
   });
@@ -118,8 +128,18 @@ void main() {
     );
     layout(b);
     expect(s.debugPaint, paints..rect(color: const Color(0x90909090)));
-    expect(s.debugPaint, isNot(paints..circle(hasMaskFilter: true)..line(hasMaskFilter: true)..path(hasMaskFilter: true)..path(hasMaskFilter: true)
-                                     ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF))));
+    expect(
+      s.debugPaint,
+      isNot(
+        paints
+          ..circle(hasMaskFilter: true)
+          ..line(hasMaskFilter: true)
+          ..path(hasMaskFilter: true)
+          ..path(hasMaskFilter: true)
+          ..path(color: const Color(0x900090FF))
+          ..path(color: const Color(0xFF0090FF)),
+      ),
+    );
     expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
     debugPaintSizeEnabled = false;
@@ -145,10 +165,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(
-          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -178,10 +198,10 @@ void main() {
     );
     layout(root);
     dynamic error;
+    final PaintingContext context = PaintingContext(ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0));
     try {
       s.debugPaint(
-        PaintingContext(
-          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        context,
         const Offset(0.0, 500),
       );
     } catch (e) {
@@ -189,5 +209,67 @@ void main() {
     }
     expect(error, isNull);
     debugPaintSizeEnabled = false;
+  });
+
+  test('debugDisableOpacity keeps things in the right spot', () {
+    debugDisableOpacityLayers = true;
+
+    final RenderDecoratedBox blackBox = RenderDecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xff000000)),
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size.square(20.0)),
+      ),
+    );
+    final RenderOpacity root = RenderOpacity(
+      opacity: .5,
+      child: RenderRepaintBoundary(child: blackBox),
+    );
+    layout(root, phase: EnginePhase.compositingBits);
+
+    final OffsetLayer rootLayer = OffsetLayer();
+    final PaintingContext context = PaintingContext(
+      rootLayer,
+      const Rect.fromLTWH(0, 0, 500, 500),
+    );
+    context.paintChild(root, const Offset(40, 40));
+
+    final OpacityLayer opacityLayer = rootLayer.firstChild! as OpacityLayer;
+    expect(opacityLayer.offset, const Offset(40, 40));
+    debugDisableOpacityLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugProfileLayoutsEnabled set', () {
+    debugProfileLayoutsEnabled = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugProfileLayoutsEnabled = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisableClipLayers set', () {
+    debugDisableClipLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisableClipLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisablePhysicalShapeLayers set', () {
+    debugDisablePhysicalShapeLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisablePhysicalShapeLayers = false;
+  });
+
+  test('debugAssertAllRenderVarsUnset warns when debugDisableOpacityLayers set', () {
+    debugDisableOpacityLayers = true;
+    expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
+    debugDisableOpacityLayers = false;
+  });
+
+  test('debugCheckHasBoundedAxis warns for vertical and horizontal axis', () {
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.vertical, const BoxConstraints()),
+      throwsFlutterError,
+    );
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.horizontal, const BoxConstraints()),
+      throwsFlutterError,
+    );
   });
 }

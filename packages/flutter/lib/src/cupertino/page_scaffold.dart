@@ -12,6 +12,20 @@ import 'theme.dart';
 /// The scaffold lays out the navigation bar on top and the content between or
 /// behind the navigation bar.
 ///
+/// When tapping a status bar at the top of the CupertinoPageScaffold, an
+/// animation will complete for the current primary [ScrollView], scrolling to
+/// the beginning. This is done using the [PrimaryScrollController] that
+/// encloses the [ScrollView]. The [ScrollView.primary] flag is used to connect
+/// a [ScrollView] to the enclosing [PrimaryScrollController].
+///
+/// {@tool dartpad}
+/// This example shows a [CupertinoPageScaffold] with a [ListView] as a [child].
+/// The [CupertinoButton] is connected to a callback that increments a counter.
+/// The [backgroundColor] can be changed.
+///
+/// ** See code in examples/api/lib/cupertino/page_scaffold/cupertino_page_scaffold.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a similar widget for tabbed applications.
@@ -20,14 +34,12 @@ import 'theme.dart';
 class CupertinoPageScaffold extends StatefulWidget {
   /// Creates a layout for pages with a navigation bar at the top.
   const CupertinoPageScaffold({
-    Key key,
+    super.key,
     this.navigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
-    @required this.child,
-  }) : assert(child != null),
-       assert(resizeToAvoidBottomInset != null),
-       super(key: key);
+    required this.child,
+  });
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
@@ -38,15 +50,15 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// The scaffold assumes the navigation bar will account for the [MediaQuery]
   /// top padding, also consume it if the navigation bar is opaque.
   ///
-  /// By default `navigationBar` has its text scale factor set to 1.0 and does
+  /// By default [navigationBar] has its text scale factor set to 1.0 and does
   /// not respond to text scale factor changes from the operating system, to match
-  /// the native iOS behavior. To override such behavior, wrap each of the `navigationBar`'s
+  /// the native iOS behavior. To override such behavior, wrap each of the [navigationBar]'s
   /// components inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
   /// value. The text scale factor value from the operating system can be retrieved
   /// in many ways, such as querying [MediaQuery.textScaleFactorOf] against
   /// [CupertinoApp]'s [BuildContext].
   // TODO(xster): document its page transition animation when ready
-  final ObstructingPreferredSizeWidget navigationBar;
+  final ObstructingPreferredSizeWidget? navigationBar;
 
   /// Widget to show in the main content area.
   ///
@@ -59,7 +71,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   /// The color of the widget that underlies the entire scaffold.
   ///
   /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// Whether the [child] should size itself to avoid the window's bottom inset.
   ///
@@ -71,16 +83,16 @@ class CupertinoPageScaffold extends StatefulWidget {
   final bool resizeToAvoidBottomInset;
 
   @override
-  _CupertinoPageScaffoldState createState() => _CupertinoPageScaffoldState();
+  State<CupertinoPageScaffold> createState() => _CupertinoPageScaffoldState();
 }
 
 class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
-  final ScrollController _primaryScrollController = ScrollController();
 
   void _handleStatusBarTap() {
+    final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(context);
     // Only act on the scroll controller if it has any attached scroll positions.
-    if (_primaryScrollController.hasClients) {
-      _primaryScrollController.animateTo(
+    if (primaryScrollController != null && primaryScrollController.hasClients) {
+      primaryScrollController.animateTo(
         0.0,
         // Eyeballed from iOS.
         duration: const Duration(milliseconds: 500),
@@ -98,7 +110,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double topPadding =
-          widget.navigationBar.preferredSize.height + existingMediaQuery.padding.top;
+          widget.navigationBar!.preferredSize.height + existingMediaQuery.padding.top;
 
       // Propagate bottom padding and include viewInsets if appropriate
       final double bottomPadding = widget.resizeToAvoidBottomInset
@@ -111,7 +123,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           ? existingMediaQuery.viewInsets.copyWith(bottom: 0.0)
           : existingMediaQuery.viewInsets;
 
-      final bool fullObstruction = widget.navigationBar.shouldFullyObstruct(context);
+      final bool fullObstruction = widget.navigationBar!.shouldFullyObstruct(context);
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
@@ -157,16 +169,13 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(widget.backgroundColor, context)
+        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
             ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
         children: <Widget>[
           // The main content being at the bottom is added to the stack first.
-          PrimaryScrollController(
-            controller: _primaryScrollController,
-            child: paddedContent,
-          ),
+          paddedContent,
           if (widget.navigationBar != null)
             Positioned(
               top: 0.0,
@@ -174,7 +183,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
               right: 0.0,
               child: MediaQuery(
                 data: existingMediaQuery.copyWith(textScaleFactor: 1),
-                child: widget.navigationBar,
+                child: widget.navigationBar!,
               ),
             ),
           // Add a touch handler the size of the status bar on top of all contents

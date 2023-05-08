@@ -1,25 +1,18 @@
 {@inject-html}
 <a name="{{id}}"></a>
-<div class="anchor-container">
+<div class="snippet snippet-container anchor-container">
+  {{description}}
   <a class="anchor-button-overlay anchor-button" title="Copy link to clipboard"
-     onmouseenter="fixHref(this, '{{id}}');"
-     onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);"
-     href="#">
-    <i class="material-icons copy-image">link</i>
+    onmouseenter="fixHref(this, '{{id}}');" onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);"
+    href="#">
+    <i class="material-icons anchor-image">link</i>
   </a>
-</div>
-<div class="snippet-buttons">
-  <button id="shortSnippet{{serial}}Button" selected>Sample</button>
-</div>
-<div class="snippet-container">
-  <div class="snippet">{{description}}
-    <div class="copyable-container">
-      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard(findSiblingWithId(this, 'sample-code'));">
-        <i class="material-icons copy-image">assignment</i>
-      </button>
-      <pre class="language-{{language}}" id="sample-code"><code class="language-{{language}}">{{code}}</code></pre>
-    </div>
+  <div class="copyable-container">
+    <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+      onclick="copyTextToClipboard(findSiblingWithId(this, 'sample-code'));">
+      <i class="material-icons copy-image">assignment</i>
+    </button>
+    <pre class="language-{{language}}" id="sample-code"><code class="language-{{language}}">{{code}}</code></pre>
   </div>
 </div>
 {@end-inject-html}

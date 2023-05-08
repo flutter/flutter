@@ -10,20 +10,19 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/downgrade.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
-import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
+import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
-  FileSystem fileSystem;
-  BufferLogger bufferLogger;
-  AnsiTerminal terminal;
-  ProcessManager processManager;
-  MockStdio mockStdio;
-  FlutterVersion flutterVersion;
+  late FileSystem fileSystem;
+  late BufferLogger bufferLogger;
+  late FakeTerminal terminal;
+  late ProcessManager processManager;
+  late FakeStdio stdio;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -34,33 +33,32 @@ void main() {
   });
 
   setUp(() {
-    flutterVersion = MockFlutterVersion();
-    mockStdio = MockStdio();
+    stdio = FakeStdio();
     processManager = FakeProcessManager.any();
-    terminal = MockTerminal();
+    terminal = FakeTerminal();
     fileSystem = MemoryFileSystem.test();
     bufferLogger = BufferLogger.test(terminal: terminal);
   });
 
   testUsingContext('Downgrade exits on unknown channel', () async {
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion();
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message: 'Flutter is not currently on a known channel.'));
   });
 
   testUsingContext('Downgrade exits on no recorded version', () async {
-    when(flutterVersion.channel).thenReturn('dev');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'beta');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"abcd"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -68,29 +66,27 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'abcd'
+            'git', 'describe', '--tags', 'abcd',
           ],
-          exitCode: 0,
-          stdout: 'v1.2.3'
-        )
+          stdout: 'v1.2.3',
+        ),
       ]),
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message:
-        'There is no previously recorded version for channel "dev".\n'
+        'There is no previously recorded version for channel "beta".\n'
         'Channel "master" was previously on: v1.2.3.'
       ),
     );
   });
 
   testUsingContext('Downgrade exits on unknown recorded version', () async {
-    when(flutterVersion.channel).thenReturn('master');
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -98,87 +94,66 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'invalid'
+            'git', 'describe', '--tags', 'invalid',
           ],
           exitCode: 1,
-        )
+        ),
       ]),
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     expect(createTestCommandRunner(command).run(const <String>['downgrade']),
       throwsToolExit(message: 'Failed to parse version for downgrade'));
   });
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
-    when(flutterVersion.channel).thenReturn('master');
-    when(mockStdio.hasTerminal).thenReturn(true);
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
+    stdio.hasTerminal = true;
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
-    when(terminal.promptForCharInput(
-      const <String>['y', 'n'],
-      prompt: anyNamed('prompt'),
-      logger: anyNamed('logger'),
-    )).thenAnswer((Invocation invocation) async => 'y');
+    terminal.addPrompt(const <String>['y', 'n'], 'y');
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
-    verify(terminal.promptForCharInput(
-      const <String>['y', 'n'],
-      prompt: anyNamed('prompt'),
-      logger: anyNamed('logger'),
-    )).called(1);
     expect(bufferLogger.statusText, contains('Success'));
   });
 
    testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
-    when(flutterVersion.channel).thenReturn('master');
-    when(mockStdio.hasTerminal).thenReturn(true);
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
+    stdio.hasTerminal = true;
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
       persistentToolState: PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
       processManager: processManager,
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
-    when(terminal.promptForCharInput(
-      const <String>['y', 'n'],
-      prompt: anyNamed('prompt'),
-      logger: anyNamed('logger'),
-    )).thenAnswer((Invocation invocation) async => 'n');
+    terminal.addPrompt(const <String>['y', 'n'], 'n');
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
-    verify(terminal.promptForCharInput(
-      const <String>['y', 'n'],
-      prompt: anyNamed('prompt'),
-      logger: anyNamed('logger'),
-    )).called(1);
     expect(bufferLogger.statusText, isNot(contains('Success')));
   });
 
   testUsingContext('Downgrade does not prompt when there is no terminal', () async {
-    when(flutterVersion.channel).thenReturn('master');
-    when(mockStdio.hasTerminal).thenReturn(false);
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
+    stdio.hasTerminal = false;
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -188,25 +163,19 @@ void main() {
       ),
       processManager: processManager,
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
-    verifyNever(terminal.promptForCharInput(
-      const <String>['y', 'n'],
-      prompt: anyNamed('prompt'),
-      logger: anyNamed('logger'),
-    ));
     expect(bufferLogger.statusText, contains('Success'));
   });
 
   testUsingContext('Downgrade performs correct git commands', () async {
-    when(flutterVersion.channel).thenReturn('master');
-    when(mockStdio.hasTerminal).thenReturn(false);
+    final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(channel: 'master');
+    stdio.hasTerminal = false;
     fileSystem.currentDirectory.childFile('.flutter_tool_state')
       .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
     final DowngradeCommand command = DowngradeCommand(
@@ -217,27 +186,26 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
           command: <String>[
-            'git', 'describe', '--tags', 'g6b00b5e88'
+            'git', 'describe', '--tags', 'g6b00b5e88',
           ],
           stdout: 'v1.2.3',
         ),
         const FakeCommand(
           command: <String>[
-            'git', 'reset', '--hard', 'g6b00b5e88'
+            'git', 'reset', '--hard', 'g6b00b5e88',
           ],
         ),
         const FakeCommand(
           command: <String>[
-            'git', 'checkout', 'master', '--'
-          ]
+            'git', 'checkout', 'master', '--',
+          ],
         ),
       ]),
       terminal: terminal,
-      stdio: mockStdio,
-      flutterVersion: flutterVersion,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
       logger: bufferLogger,
     );
-    applyMocksToCommand(command);
 
     await createTestCommandRunner(command).run(const <String>['downgrade']);
 
@@ -245,5 +213,26 @@ void main() {
   });
 }
 
-class MockTerminal extends Mock implements AnsiTerminal {}
-class MockStdio extends Mock implements Stdio {}
+class FakeTerminal extends Fake implements Terminal {
+  @override
+  bool usesTerminalUi = false;
+
+  void addPrompt(List<String> characters, String selected) {
+    _characters = characters;
+    _selected = selected;
+  }
+
+  List<String>? _characters;
+  late String _selected;
+
+  @override
+  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger? logger, String? prompt, int? defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
+    expect(acceptedCharacters, _characters);
+    return _selected;
+  }
+}
+
+class FakeStdio extends Fake implements Stdio {
+  @override
+  bool hasTerminal = true;
+}

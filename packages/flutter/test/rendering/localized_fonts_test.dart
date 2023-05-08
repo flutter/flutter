@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,7 +28,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.headline2;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -67,7 +72,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.headline2;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -103,7 +108,6 @@ void main() {
         matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
       );
     },
-    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
   testWidgets(
@@ -119,7 +123,7 @@ void main() {
           home: Builder(
             builder: (BuildContext context) {
               const String character = '骨';
-              final TextStyle style = Theme.of(context).textTheme.headline2;
+              final TextStyle style = Theme.of(context).textTheme.displayMedium!;
               return Scaffold(
                 body: Container(
                   padding: const EdgeInsets.all(48.0),
@@ -147,7 +151,6 @@ void main() {
         matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
       );
     },
-    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
 }

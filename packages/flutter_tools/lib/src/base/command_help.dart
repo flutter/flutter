@@ -4,13 +4,9 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
-
 import 'logger.dart';
+import 'platform.dart';
 import 'terminal.dart';
-
-// ignore_for_file: non_constant_identifier_names
 
 const String fire = '🔥';
 const int maxLineWidth = 84;
@@ -18,10 +14,10 @@ const int maxLineWidth = 84;
 /// Encapsulates the help text construction and printing.
 class CommandHelp {
   CommandHelp({
-    @required Logger logger,
-    @required AnsiTerminal terminal,
-    @required Platform platform,
-    @required OutputPreferences outputPreferences,
+    required Logger logger,
+    required AnsiTerminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
   }) : _logger = logger,
        _terminal = terminal,
        _platform = platform,
@@ -35,129 +31,155 @@ class CommandHelp {
 
   final OutputPreferences _outputPreferences;
 
-  CommandHelpOption _L;
-  CommandHelpOption get L => _L ??= _makeOption(
+  // COMMANDS IN ALPHABETICAL ORDER.
+  // Uppercase first, then lowercase.
+  // When updating this, update all the tests in command_help_test.dart accordingly.
+
+  late final CommandHelpOption I = _makeOption(
+    'I',
+    'Toggle oversized image inversion.',
+    'debugInvertOversizedImages',
+  );
+
+  late final CommandHelpOption L = _makeOption(
     'L',
     'Dump layer tree to the console.',
     'debugDumpLayerTree',
   );
 
-  CommandHelpOption _P;
-  CommandHelpOption get P => _P ??= _makeOption(
+  late final CommandHelpOption M = _makeOption(
+    'M',
+    'Write SkSL shaders to a unique file in the project directory.',
+  );
+
+  late final CommandHelpOption P = _makeOption(
     'P',
     'Toggle performance overlay.',
     'WidgetsApp.showPerformanceOverlay',
   );
 
-  CommandHelpOption _R;
-  CommandHelpOption get R => _R ??= _makeOption(
+  late final CommandHelpOption R = _makeOption(
     'R',
     'Hot restart.',
   );
 
-  CommandHelpOption _S;
-  CommandHelpOption get S => _S ??= _makeOption(
+  late final CommandHelpOption S = _makeOption(
     'S',
     'Dump accessibility tree in traversal order.',
     'debugDumpSemantics',
   );
 
-  CommandHelpOption _U;
-  CommandHelpOption get U => _U ??= _makeOption(
+  late final CommandHelpOption U = _makeOption(
     'U',
     'Dump accessibility tree in inverse hit test order.',
     'debugDumpSemantics',
   );
 
-  CommandHelpOption _a;
-  CommandHelpOption get a => _a ??= _makeOption(
+  late final CommandHelpOption a = _makeOption(
     'a',
     'Toggle timeline events for all widget build methods.',
     'debugProfileWidgetBuilds',
   );
 
-  CommandHelpOption _c;
-  CommandHelpOption get c => _c ??= _makeOption(
+  late final CommandHelpOption b = _makeOption(
+    'b',
+    'Toggle platform brightness (dark and light mode).',
+    'debugBrightnessOverride',
+  );
+
+  late final CommandHelpOption c = _makeOption(
     'c',
     'Clear the screen',
   );
 
-  CommandHelpOption _d;
-  CommandHelpOption get d => _d ??= _makeOption(
+  late final CommandHelpOption d = _makeOption(
     'd',
     'Detach (terminate "flutter run" but leave application running).',
   );
 
-  CommandHelpOption _h;
-  CommandHelpOption get h => _h ??= _makeOption(
+  late final CommandHelpOption f = _makeOption(
+    'f',
+    'Dump focus tree to the console.',
+    'debugDumpFocusTree',
+  );
+
+  late final CommandHelpOption g = _makeOption(
+    'g',
+    'Run source code generators.'
+  );
+
+  late final CommandHelpOption hWithDetails = _makeOption(
     'h',
     'Repeat this help message.',
   );
 
-  CommandHelpOption _i;
-  CommandHelpOption get i => _i ??= _makeOption(
+  late final CommandHelpOption hWithoutDetails = _makeOption(
+    'h',
+    'List all available interactive commands.',
+  );
+
+  late final CommandHelpOption i = _makeOption(
     'i',
     'Toggle widget inspector.',
     'WidgetsApp.showWidgetInspectorOverride',
   );
 
-  CommandHelpOption _o;
-  CommandHelpOption get o => _o ??= _makeOption(
+  late final CommandHelpOption j = _makeOption(
+    'j',
+    'Dump frame raster stats for the current frame. (Unsupported for web)',
+  );
+
+  late final CommandHelpOption k = _makeOption(
+    'k',
+    'Toggle CanvasKit rendering.',
+  );
+
+  late final CommandHelpOption o = _makeOption(
     'o',
     'Simulate different operating systems.',
     'defaultTargetPlatform',
   );
 
-  CommandHelpOption _p;
-  CommandHelpOption get p => _p ??= _makeOption(
+  late final CommandHelpOption p = _makeOption(
     'p',
     'Toggle the display of construction lines.',
     'debugPaintSizeEnabled',
   );
 
-  CommandHelpOption _q;
-  CommandHelpOption get q => _q ??= _makeOption(
+  late final CommandHelpOption q = _makeOption(
     'q',
     'Quit (terminate the application on the device).',
   );
 
-  CommandHelpOption _r;
-  CommandHelpOption get r => _r ??= _makeOption(
+  late final CommandHelpOption r = _makeOption(
     'r',
     'Hot reload. $fire$fire$fire',
   );
 
-  CommandHelpOption _s;
-  CommandHelpOption get s => _s ??= _makeOption(
+  late final CommandHelpOption s = _makeOption(
     's',
     'Save a screenshot to flutter.png.',
   );
 
-  CommandHelpOption _t;
-  CommandHelpOption get t => _t ??= _makeOption(
+  late final CommandHelpOption t = _makeOption(
     't',
     'Dump rendering tree to the console.',
     'debugDumpRenderTree',
   );
 
-  CommandHelpOption _w;
-  CommandHelpOption get w => _w ??= _makeOption(
+  late final CommandHelpOption v = _makeOption(
+    'v',
+    'Open Flutter DevTools.',
+  );
+
+  late final CommandHelpOption w = _makeOption(
     'w',
     'Dump widget hierarchy to the console.',
     'debugDumpApp',
   );
 
-  CommandHelpOption _z;
-  CommandHelpOption get z => _z ??= _makeOption(
-    'z',
-    'Toggle elevation checker.',
-  );
-
-  CommandHelpOption _k;
-  CommandHelpOption get k => _k ??= _makeOption(
-    'k',
-    'Toggle CanvasKit rendering.',
-  );
+  // When updating the list above, see the notes above the list regarding order
+  // and tests.
 
   CommandHelpOption _makeOption(String key, String description, [
     String inParenthesis = '',
@@ -180,10 +202,10 @@ class CommandHelpOption {
     this.key,
     this.description, {
     this.inParenthesis = '',
-    @required Logger logger,
-    @required Terminal terminal,
-    @required Platform platform,
-    @required OutputPreferences outputPreferences,
+    required Logger logger,
+    required Terminal terminal,
+    required Platform platform,
+    required OutputPreferences outputPreferences,
   }) : _logger = logger,
        _terminal = terminal,
        _platform = platform,
@@ -197,14 +219,14 @@ class CommandHelpOption {
 
   final OutputPreferences _outputPreferences;
 
-  /// The key associated with this command
+  /// The key associated with this command.
   final String key;
-  /// A description of what this command does
+  /// A description of what this command does.
   final String description;
-  /// Text shown in parenthesis to give the context
+  /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
-  bool get _hasTextInParenthesis => inParenthesis != null && inParenthesis.isNotEmpty;
+  bool get _hasTextInParenthesis => inParenthesis.isNotEmpty;
 
   int get _rawMessageLength => key.length + description.length;
 
@@ -218,7 +240,7 @@ class CommandHelpOption {
 
     bool wrap = false;
     final int maxWidth = math.max(
-      _outputPreferences.wrapColumn ?? 0,
+      _outputPreferences.wrapColumn,
       maxLineWidth,
     );
     final int adjustedMessageLength = _platform.stdoutSupportsAnsi
@@ -236,6 +258,13 @@ class CommandHelpOption {
     // pad according to the raw text
     message.write(''.padLeft(width - parentheticalText.length));
     message.write(_terminal.color(parentheticalText, TerminalColor.grey));
+
+    // Terminals seem to require this because we have both bolded and colored
+    // a line. Otherwise the next line comes out bold until a reset bold.
+    if (_terminal.supportsColor) {
+      message.write(AnsiTerminal.resetBold);
+    }
+
     return message.toString();
   }
 

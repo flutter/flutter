@@ -4,14 +4,14 @@
 
 import 'dart:math';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('MatrixUtils.transformRect handles very large finite values', () {
     const Rect evilRect = Rect.fromLTRB(0.0, -1.7976931348623157e+308, 800.0, 1.7976931348623157e+308);
-    final Matrix4 transform = Matrix4.identity()..translate(10.0, 0.0);
+    final Matrix4 transform = Matrix4.identity()..translate(10.0);
     final Rect transformedRect = MatrixUtils.transformRect(transform, evilRect);
     expect(transformedRect.isFinite, true);
   });
@@ -83,7 +83,6 @@ void main() {
     final Matrix4 actual = MatrixUtils.createCylindricalProjectionTransform(
       radius: 100.0,
       angle: pi / 3.0,
-      perspective: 0.001,
     );
 
     expect(actual.storage, <dynamic>[

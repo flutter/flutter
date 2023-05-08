@@ -1,0 +1,10 @@
+{
+  "version": "v0_162",
+
+  "md.comp.menu.container.color": "surface",
+  "md.comp.menu.container.elevation": "md.sys.elevation.level2",
+  "md.comp.menu.container.shadow-color": "shadow",
+  "md.comp.menu.container.shape": "md.sys.shape.corner.extra-small",
+  "md.comp.menu.container.surface-tint-layer.color": "surfaceTint",
+  "md.comp.menu.list-item.selected.container.color": "surfaceVariant"
+}

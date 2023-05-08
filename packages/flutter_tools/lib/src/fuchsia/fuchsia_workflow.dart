@@ -3,29 +3,42 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../doctor.dart';
-import '../globals.dart' as globals;
+import '../base/platform.dart';
+import '../doctor_validator.dart';
+import '../features.dart';
+import 'fuchsia_sdk.dart';
 
 /// The [FuchsiaWorkflow] instance.
-FuchsiaWorkflow get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
+FuchsiaWorkflow? get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
 
 /// The Fuchsia-specific implementation of a [Workflow].
 ///
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaWorkflow implements Workflow {
+  FuchsiaWorkflow({
+    required Platform platform,
+    required FeatureFlags featureFlags,
+    required FuchsiaArtifacts fuchsiaArtifacts,
+  }) : _platform = platform,
+       _featureFlags = featureFlags,
+       _fuchsiaArtifacts = fuchsiaArtifacts;
+
+  final Platform _platform;
+  final FeatureFlags _featureFlags;
+  final FuchsiaArtifacts _fuchsiaArtifacts;
 
   @override
-  bool get appliesToHostPlatform => globals.platform.isLinux || globals.platform.isMacOS;
+  bool get appliesToHostPlatform => _featureFlags.isFuchsiaEnabled && (_platform.isLinux || _platform.isMacOS);
 
   @override
   bool get canListDevices {
-    return globals.fuchsiaArtifacts.devFinder != null;
+    return _fuchsiaArtifacts.ffx != null;
   }
 
   @override
   bool get canLaunchDevices {
-    return globals.fuchsiaArtifacts.devFinder != null && globals.fuchsiaArtifacts.sshConfig != null;
+    return _fuchsiaArtifacts.ffx != null && _fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

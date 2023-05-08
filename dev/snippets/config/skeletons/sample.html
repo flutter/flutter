@@ -1,43 +1,23 @@
 {@inject-html}
 <a name="{{id}}"></a>
-<div class="anchor-container">
-  <a class="anchor-button-overlay anchor-button" title="Copy link to clipboard"
-     onmouseenter="fixHref(this, '{{id}}');"
-     onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);"
-     href="#">
-    <i class="material-icons copy-image">link</i>
+<div class="snippet snippet-container anchor-container">
+  {{description}}
+  <a class="anchor-button-overlay anchor-button" title="Copy link to clipboard" onmouseenter="fixHref(this, '{{id}}');"
+    onclick="fixHref(this, '{{id}}'); copyStringToClipboard(this.href);" href="#">
+    <i class="material-icons anchor-image">link</i>
   </a>
-</div>
-<div class="snippet-buttons">
-  <script>var visibleSnippet{{serial}} = "shortSnippet{{serial}}";</script>
-  <button id="shortSnippet{{serial}}Button"
-          onclick="visibleSnippet{{serial}} = showSnippet('shortSnippet{{serial}}', visibleSnippet{{serial}});"
-          selected>Sample</button>
-  <button id="longSnippet{{serial}}Button"
-          onclick="visibleSnippet{{serial}} = showSnippet('longSnippet{{serial}}', visibleSnippet{{serial}});">Sample in an App</button>
-</div>
-<div class="snippet-container">
-  <div class="snippet" id="shortSnippet{{serial}}">
-    {{description}}
-    <div class="copyable-container">
-      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard(visibleSnippet{{serial}});">
-        <i class="material-icons copy-image">assignment</i>
-      </button>
-      <pre class="language-{{language}}"><code class="language-{{language}}">{{code}}</code></pre>
-    </div>
-  </div>
-  <div class="snippet" id="longSnippet{{serial}}" hidden>
-    <div class="snippet-description">To create a local project with this code sample, run:<br/>
+  <div class="snippet-description">
+    <p>To create a local project with this code sample, run:<br />
       <span class="snippet-create-command">flutter create --sample={{id}} mysample</span>
-    </div>
-    <div class="copyable-container">
-      <button class="copy-button-overlay copy-button" title="Copy to clipboard"
-              onclick="copyTextToClipboard(visibleSnippet{{serial}});">
-        <i class="material-icons copy-image">assignment</i>
-      </button>
-      <pre class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>
-    </div>
+    </p>
+  </div>
+  <div class="copyable-container">
+    <button class="copy-button-overlay copy-button" title="Copy to clipboard"
+      onclick="copyTextToClipboard(longSnippet{{serial}});">
+      <i class="material-icons copy-image">assignment</i>
+    </button>
+    <pre id="longSnippet{{serial}}"
+      class="language-{{language}}"><code class="language-{{language}}">{{app}}</code></pre>
   </div>
 </div>
 {@end-inject-html}

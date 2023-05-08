@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/physics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   TestSliverPersistentHeaderDelegate(this._maxExtent);
@@ -33,41 +32,28 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
 }
 
 class TestBehavior extends ScrollBehavior {
+  const TestBehavior();
+
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return GlowingOverscrollIndicator(
-      child: child,
-      axisDirection: axisDirection,
+      axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
+      child: child,
     );
   }
 }
 
 class TestScrollPhysics extends ClampingScrollPhysics {
-  const TestScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const TestScrollPhysics({ super.parent });
 
   @override
-  TestScrollPhysics applyTo(ScrollPhysics ancestor) {
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return TestScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
   }
 
   @override
-  Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
-}
-
-class TestViewportScrollPosition extends ScrollPositionWithSingleContext {
-  TestViewportScrollPosition({
-    ScrollPhysics physics,
-    ScrollContext context,
-    ScrollPosition oldPosition,
-  }) : super(physics: physics, context: context, oldPosition: oldPosition);
-
-  @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    expect(minScrollExtent, moreOrLessEquals(-3895.0));
-    expect(maxScrollExtent, moreOrLessEquals(8575.0));
-    return super.applyContentDimensions(minScrollExtent, maxScrollExtent);
-  }
+  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
 void main() {
@@ -79,14 +65,12 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: ScrollConfiguration(
-            behavior: TestBehavior(),
+            behavior: const TestBehavior(),
             child: Scrollbar(
               child: Scrollable(
-                axisDirection: AxisDirection.down,
                 physics: const TestScrollPhysics(),
                 viewportBuilder: (BuildContext context, ViewportOffset offset) {
                   return Viewport(
-                    axisDirection: AxisDirection.down,
                     anchor: 0.25,
                     offset: offset,
                     center: centerKey,
@@ -209,7 +193,7 @@ void main() {
             itemExtent: 100.0,
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                return Container(
+                return ColoredBox(
                   color: Colors.blue,
                   child: Text(index.toString()),
                 );
@@ -225,8 +209,8 @@ void main() {
     await tester.pump();
 
     // Screen is 600px high. Moved bottom item 500px up. It's now at the top.
-    expect(tester.getTopLeft(find.widgetWithText(Container, '5')).dy, 0.0);
-    expect(tester.getBottomLeft(find.widgetWithText(Container, '10')).dy, 600.0);
+    expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '5')).dy, 0.0);
+    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '10')).dy, 600.0);
 
     // Stop returning the first 3 items.
     await tester.pumpWidget(MaterialApp(
@@ -238,7 +222,7 @@ void main() {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 if (index > 3) {
-                  return Container(
+                  return ColoredBox(
                     color: Colors.blue,
                     child: Text(index.toString()),
                   );
@@ -258,10 +242,10 @@ void main() {
     // Move up by 4 items, meaning item 1 would have been at the top but
     // 0 through 3 no longer exist, so item 4, 3 items down, is the first one.
     // Item 4 is also shifted to the top.
-    expect(tester.getTopLeft(find.widgetWithText(Container, '4')).dy, 0.0);
+    expect(tester.getTopLeft(find.widgetWithText(ColoredBox, '4')).dy, 0.0);
 
     // Because the screen is still 600px, item 9 is now visible at the bottom instead
     // of what's supposed to be item 6 had we not re-shifted.
-    expect(tester.getBottomLeft(find.widgetWithText(Container, '9')).dy, 600.0);
+    expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '9')).dy, 600.0);
   });
 }

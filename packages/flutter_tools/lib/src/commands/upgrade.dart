@@ -2,24 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
-import '../base/time.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
+import '../persistent_tool_state.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
 
+// The official docs to install Flutter.
+const String _flutterInstallDocs = 'https://flutter.dev/docs/get-started/install';
+
 class UpgradeCommand extends FlutterCommand {
-  UpgradeCommand([UpgradeCommandRunner commandRunner])
+  UpgradeCommand({
+    required bool verboseHelp,
+    UpgradeCommandRunner? commandRunner,
+  })
     : _commandRunner = commandRunner ?? UpgradeCommandRunner() {
     argParser
       ..addFlag(
@@ -30,16 +35,23 @@ class UpgradeCommand extends FlutterCommand {
       )
       ..addFlag(
         'continue',
-        hide: true,
+        hide: !verboseHelp,
         negatable: false,
-        help: 'For the second half of the upgrade flow requiring the new '
-              'version of Flutter. Should not be invoked manually, but '
-              're-entrantly by the standard upgrade command.',
+        help: 'Trigger the second half of the upgrade flow. This should not be invoked '
+              'manually. It is used re-entrantly by the standard upgrade command after '
+              'the new version of Flutter is available, to hand off the upgrade process '
+              'from the old version to the new version.',
       )
       ..addOption(
         'working-directory',
-        hide: true,
-        help: 'Override the upgrade working directoy for integration testing.'
+        hide: !verboseHelp,
+        help: 'Override the upgrade working directory. '
+              'This is only intended to enable integration testing of the tool itself.'
+      )
+      ..addFlag(
+        'verify-only',
+        help: 'Checks for any new Flutter updates, without actually fetching them.',
+        negatable: false,
       );
   }
 
@@ -52,19 +64,23 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
   bool get shouldUpdateCache => false;
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot;
+    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
       force: boolArg('force'),
       continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
-      gitTagVersion: GitTagVersion.determine(processUtils),
+      gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
-        : FlutterVersion(const SystemClock(), _commandRunner.workingDirectory),
+        : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
+      verifyOnly: boolArg('verify-only'),
     );
   }
 }
@@ -72,14 +88,15 @@ class UpgradeCommand extends FlutterCommand {
 @visibleForTesting
 class UpgradeCommandRunner {
 
-  String workingDirectory;
+  String? workingDirectory;
 
   Future<FlutterCommandResult> runCommand({
-    @required bool force,
-    @required bool continueFlow,
-    @required bool testFlow,
-    @required GitTagVersion gitTagVersion,
-    @required FlutterVersion flutterVersion,
+    required bool force,
+    required bool continueFlow,
+    required bool testFlow,
+    required GitTagVersion gitTagVersion,
+    required FlutterVersion flutterVersion,
+    required bool verifyOnly,
   }) async {
     if (!continueFlow) {
       await runCommandFirstHalf(
@@ -87,6 +104,7 @@ class UpgradeCommandRunner {
         gitTagVersion: gitTagVersion,
         flutterVersion: flutterVersion,
         testFlow: testFlow,
+        verifyOnly: verifyOnly,
       );
     } else {
       await runCommandSecondHalf(flutterVersion);
@@ -95,16 +113,32 @@ class UpgradeCommandRunner {
   }
 
   Future<void> runCommandFirstHalf({
-    @required bool force,
-    @required GitTagVersion gitTagVersion,
-    @required FlutterVersion flutterVersion,
-    @required bool testFlow,
+    required bool force,
+    required GitTagVersion gitTagVersion,
+    required FlutterVersion flutterVersion,
+    required bool testFlow,
+    required bool verifyOnly,
   }) async {
-    await verifyUpstreamConfigured();
+    final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
+    if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
+      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      globals.printStatus('$flutterVersion');
+      return;
+    } else if (verifyOnly) {
+      globals.printStatus('A new version of Flutter is available on channel ${flutterVersion.channel}\n');
+      globals.printStatus('The latest version: ${upstreamVersion.frameworkVersion} (revision ${upstreamVersion.frameworkRevisionShort})', emphasis: true);
+      globals.printStatus('Your current version: ${flutterVersion.frameworkVersion} (revision ${flutterVersion.frameworkRevisionShort})\n');
+      globals.printStatus('To upgrade now, run "flutter upgrade".');
+      if (flutterVersion.channel == 'stable') {
+        globals.printStatus('\nSee the announcement and release notes:');
+        globals.printStatus('https://flutter.dev/docs/development/tools/sdk/release-notes');
+      }
+      return;
+    }
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
-      if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
+      if (flutterVersion.channel != 'master' && kOfficialChannels.contains(flutterVersion.channel)) {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
           'changes. It is recommended to use git directly if not working on '
@@ -115,44 +149,40 @@ class UpgradeCommandRunner {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
           'changes. If it is okay to remove local changes, then re-run this '
-          'command with --force.'
+          'command with "--force".'
         );
       }
     }
     // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
-    if (!force && await hasUncomittedChanges()) {
+    if (!force && await hasUncommittedChanges()) {
       throwToolExit(
         'Your flutter checkout has local changes that would be erased by '
         'upgrading. If you want to keep these changes, it is recommended that '
         'you stash them via "git stash" or else commit the changes to a local '
         'branch. If it is okay to remove local changes, then re-run this '
-        'command with --force.'
+        'command with "--force".'
       );
     }
     recordState(flutterVersion);
-    await resetChanges(gitTagVersion);
-    await upgradeChannel(flutterVersion);
-    final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
-    if (alreadyUpToDate) {
-      // If the upgrade was a no op, then do not continue with the second half.
-      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
-      globals.printStatus('$flutterVersion');
-    } else if (!testFlow) {
+    await ChannelCommand.upgradeChannel(flutterVersion);
+    globals.printStatus('Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...');
+    await attemptReset(upstreamVersion.frameworkRevision);
+    if (!testFlow) {
       await flutterUpgradeContinue();
     }
   }
 
   void recordState(FlutterVersion flutterVersion) {
-    final Channel channel = getChannelForName(flutterVersion.channel);
+    final Channel? channel = getChannelForName(flutterVersion.channel);
     if (channel == null) {
       return;
     }
-    globals.persistentToolState.updateLastActiveVersion(flutterVersion.frameworkRevision, channel);
+    globals.persistentToolState!.updateLastActiveVersion(flutterVersion.frameworkRevision, channel);
   }
 
   Future<void> flutterUpgradeContinue() async {
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'),
         'upgrade',
@@ -172,17 +202,18 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    globals.persistentToolState.redisplayWelcomeMessage = false;
+    final PersistentToolState persistentToolState = globals.persistentToolState!;
+    persistentToolState.setShouldRedisplayWelcomeMessage(false);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    globals.persistentToolState.redisplayWelcomeMessage = true;
+    persistentToolState.setShouldRedisplayWelcomeMessage(true);
   }
 
-  Future<bool> hasUncomittedChanges() async {
+  Future<bool> hasUncommittedChanges() async {
     try {
-      final RunResult result = await processUtils.run(
+      final RunResult result = await globals.processUtils.run(
         <String>['git', 'status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -193,107 +224,92 @@ class UpgradeCommandRunner {
         'The tool could not verify the status of the current flutter checkout. '
         'This might be due to git not being installed or an internal error. '
         'If it is okay to ignore potential local changes, then re-run this '
-        'command with --force.'
-        '\nError: $error.'
+        'command with "--force".\n'
+        'Error: $error.'
       );
     }
-    return false;
   }
 
-  /// Check if there is an upstream repository configured.
+  /// Returns the remote HEAD flutter version.
   ///
-  /// Exits tool if there is no upstream.
-  Future<void> verifyUpstreamConfigured() async {
+  /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
+  Future<FlutterVersion> fetchLatestVersion({
+    required FlutterVersion localVersion,
+  }) async {
+    String revision;
     try {
-      await processUtils.run(
-        <String>[ 'git', 'rev-parse', '@{u}'],
+      // Fetch upstream branch's commits and tags
+      await globals.processUtils.run(
+        <String>['git', 'fetch', '--tags'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-    } on Exception {
-      throwToolExit(
-        'Unable to upgrade Flutter: no origin repository configured. '
-        "Run 'git remote add origin "
-        "https://github.com/flutter/flutter' in $workingDirectory",
+      // Get the latest commit revision of the upstream
+      final RunResult result = await globals.processUtils.run(
+          <String>['git', 'rev-parse', '--verify', kGitTrackingUpstream],
+          throwOnError: true,
+          workingDirectory: workingDirectory,
       );
-    }
-  }
-
-  /// Attempts to reset to the last non-hotfix tag.
-  ///
-  /// If the git history is on a hotfix, doing a fast forward will not pick up
-  /// major or minor version upgrades. By resetting to the point before the
-  /// hotfix, doing a git fast forward should succeed.
-  Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    String tag;
-    if (gitTagVersion == const GitTagVersion.unknown()) {
-      tag = 'v0.0.0';
-    } else {
-      tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
-    }
-    try {
-      await processUtils.run(
-        <String>['git', 'reset', '--hard', tag],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
-    } on ProcessException catch (error) {
-      throwToolExit(
-        'Unable to upgrade Flutter: The tool could not update to the version $tag. '
-        'This may be due to git not being installed or an internal error. '
-        'Please ensure that git is installed on your computer and retry again.'
-        '\nError: $error.'
-      );
-    }
-  }
-
-  /// Attempts to upgrade the channel.
-  ///
-  /// If the user is on a deprecated channel, attempts to migrate them off of
-  /// it.
-  Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
-    globals.printStatus('Upgrading Flutter from $workingDirectory...');
-    await ChannelCommand.upgradeChannel();
-  }
-
-  /// Attempts to rebase the upstream onto the local branch.
-  ///
-  /// If there haven't been any hot fixes or local changes, this is equivalent
-  /// to a fast-forward.
-  ///
-  /// If the fast forward lands us on the same channel and revision, then
-  /// returns true, otherwise returns false.
-  Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
-    final int code = await processUtils.stream(
-      <String>['git', 'pull', '--ff'],
-      workingDirectory: workingDirectory,
-      mapFunction: (String line) => matchesGitLine(line) ? null : line,
-    );
-    if (code != 0) {
-      throwToolExit(null, exitCode: code);
-    }
-
-    // Check if the upgrade did anything.
-    bool alreadyUpToDate = false;
-    try {
-      final FlutterVersion newFlutterVersion = FlutterVersion(const SystemClock(), workingDirectory);
-      alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
-        newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
+      revision = result.stdout.trim();
     } on Exception catch (e) {
-      globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
+      final String errorString = e.toString();
+      if (errorString.contains('fatal: HEAD does not point to a branch')) {
+        throwToolExit(
+          'Unable to upgrade Flutter: Your Flutter checkout is currently not '
+          'on a release branch.\n'
+          'Use "flutter channel" to switch to an official channel, and retry. '
+          'Alternatively, re-install Flutter by going to $_flutterInstallDocs.'
+        );
+      } else if (errorString.contains('fatal: no upstream configured for branch')) {
+        throwToolExit(
+          'Unable to upgrade Flutter: The current Flutter branch/channel is '
+          'not tracking any remote repository.\n'
+          'Re-install Flutter by going to $_flutterInstallDocs.'
+        );
+      } else {
+        throwToolExit(errorString);
+      }
     }
-    return alreadyUpToDate;
+    // At this point the current checkout should be on HEAD of a branch having
+    // an upstream. Check whether this upstream is "standard".
+    final VersionCheckError? error = VersionUpstreamValidator(version: localVersion, platform: globals.platform).run();
+    if (error != null) {
+      throwToolExit(
+        'Unable to upgrade Flutter: '
+        '${error.message}\n'
+        'Reinstalling Flutter may fix this issue. Visit $_flutterInstallDocs '
+        'for instructions.'
+      );
+    }
+    return FlutterVersion(workingDirectory: workingDirectory, frameworkRevision: revision);
+  }
+
+  /// Attempts a hard reset to the given revision.
+  ///
+  /// This is a reset instead of fast forward because if we are on a release
+  /// branch with cherry picks, there may not be a direct fast-forward route
+  /// to the next release.
+  Future<void> attemptReset(String newRevision) async {
+    try {
+      await globals.processUtils.run(
+        <String>['git', 'reset', '--hard', newRevision],
+        throwOnError: true,
+        workingDirectory: workingDirectory,
+      );
+    } on ProcessException catch (e) {
+      throwToolExit(e.message, exitCode: e.errorCode);
+    }
   }
 
   /// Update the engine repository and precache all artifacts.
   ///
   /// Check for and download any engine and pkg/ updates. We run the 'flutter'
-  /// shell script re-entrantly here so that it will download the updated
+  /// shell script reentrantly here so that it will download the updated
   /// Dart and so forth if necessary.
   Future<void> precacheArtifacts() async {
     globals.printStatus('');
     globals.printStatus('Upgrading engine...');
-    final int code = await processUtils.stream(
+    final int code = await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
@@ -310,10 +326,14 @@ class UpgradeCommandRunner {
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
     globals.printStatus('');
     globals.printStatus(flutterVersion.toString());
-    final String projectRoot = findProjectRoot();
+    final String? projectRoot = findProjectRoot(globals.fs);
     if (projectRoot != null) {
       globals.printStatus('');
-      await pub.get(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
+      await pub.get(
+        context: PubContext.pubUpgrade,
+        project: FlutterProject.fromDirectory(globals.fs.directory(projectRoot)),
+        upgrade: true,
+      );
     }
   }
 
@@ -321,26 +341,12 @@ class UpgradeCommandRunner {
   Future<void> runDoctor() async {
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
-    await processUtils.stream(
+    await globals.processUtils.stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],
       workingDirectory: workingDirectory,
       allowReentrantFlutter: true,
     );
-  }
-
-  //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
-  static final RegExp _gitDiffRegex = RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
-
-  //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
-  //  delete mode 100644 doc/index.html
-  //  create mode 100644 dev/integration_tests/flutter_gallery/lib/gallery/demo.dart
-  static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
-
-  static bool matchesGitLine(String line) {
-    return _gitDiffRegex.hasMatch(line)
-      || _gitChangedRegex.hasMatch(line)
-      || line == 'Fast-forward';
   }
 }

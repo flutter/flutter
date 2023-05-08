@@ -9,6 +9,36 @@ import '../rendering/mock_canvas.dart';
 import 'common_matchers.dart';
 
 void main() {
+  test('CircleBorder defaults', () {
+    const CircleBorder border = CircleBorder();
+    expect(border.side, BorderSide.none);
+    expect(border.eccentricity, 0.0);
+  });
+
+  test('CircleBorder getInnerPath and getOuterPath', () {
+    const Rect circleRect = Rect.fromLTWH(50, 0, 100, 100);
+    const Rect rect = Rect.fromLTWH(0, 0, 200, 100);
+
+    expect(const CircleBorder().getInnerPath(rect).getBounds(), circleRect);
+    expect(const CircleBorder().getOuterPath(rect).getBounds(), circleRect);
+
+    const CircleBorder oval = CircleBorder(eccentricity: 1.0);
+    expect(oval.getOuterPath(rect).getBounds(), rect);
+    expect(oval.getInnerPath(rect).getBounds(), rect);
+
+    const CircleBorder o10 = CircleBorder(side: BorderSide(width: 10.0), eccentricity: 1.0);
+    expect(o10.getOuterPath(rect).getBounds(), Offset.zero & const Size(200, 100));
+    expect(o10.getInnerPath(rect).getBounds(), const Offset(10, 10) & const Size(180, 80));
+  });
+
+  test('CircleBorder copyWith, ==, hashCode', () {
+    expect(const CircleBorder(), const CircleBorder().copyWith());
+    expect(const CircleBorder().hashCode, const CircleBorder().copyWith().hashCode);
+    expect(const CircleBorder(eccentricity: 0.5).hashCode, const CircleBorder().copyWith(eccentricity: 0.5).hashCode);
+    const BorderSide side = BorderSide(width: 10.0, color: Color(0xff123456));
+    expect(const CircleBorder().copyWith(side: side), const CircleBorder(side: side));
+  });
+
   test('CircleBorder', () {
     const CircleBorder c10 = CircleBorder(side: BorderSide(width: 10.0));
     const CircleBorder c15 = CircleBorder(side: BorderSide(width: 15.0));
@@ -26,5 +56,5 @@ void main() {
       paints
         ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
-  }, skip: isBrowser);
+  });
 }

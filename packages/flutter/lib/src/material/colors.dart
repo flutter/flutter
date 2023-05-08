@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color;
-
 import 'package:flutter/painting.dart';
 
 /// Defines a single color as well a color swatch with ten shades of the color.
@@ -19,40 +17,40 @@ class MaterialColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades.
   ///
   /// The `primary` argument should be the 32 bit ARGB value of one of the
-  /// values in the swatch, as would be passed to the [new Color] constructor
+  /// values in the swatch, as would be passed to the [Color.new] constructor
   /// for that same color, and as is exposed by [value]. (This is distinct from
   /// the specific index of the color in the swatch.)
-  const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  const MaterialColor(super.primary, super.swatch);
 
   /// The lightest shade.
-  Color get shade50 => this[50];
+  Color get shade50 => this[50]!;
 
   /// The second lightest shade.
-  Color get shade100 => this[100];
+  Color get shade100 => this[100]!;
 
   /// The third lightest shade.
-  Color get shade200 => this[200];
+  Color get shade200 => this[200]!;
 
   /// The fourth lightest shade.
-  Color get shade300 => this[300];
+  Color get shade300 => this[300]!;
 
   /// The fifth lightest shade.
-  Color get shade400 => this[400];
+  Color get shade400 => this[400]!;
 
   /// The default shade.
-  Color get shade500 => this[500];
+  Color get shade500 => this[500]!;
 
   /// The fourth darkest shade.
-  Color get shade600 => this[600];
+  Color get shade600 => this[600]!;
 
   /// The third darkest shade.
-  Color get shade700 => this[700];
+  Color get shade700 => this[700]!;
 
   /// The second darkest shade.
-  Color get shade800 => this[800];
+  Color get shade800 => this[800]!;
 
   /// The darkest shade.
-  Color get shade900 => this[900];
+  Color get shade900 => this[900]!;
 }
 
 /// Defines a single accent color as well a swatch of four shades of the
@@ -70,31 +68,28 @@ class MaterialColor extends ColorSwatch<int> {
 class MaterialAccentColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades appropriate for accent
   /// colors.
-  const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  const MaterialAccentColor(super.primary, super.swatch);
 
   /// The lightest shade.
-  Color get shade50 => this[50];
-
-  /// The second lightest shade.
-  Color get shade100 => this[100];
+  Color get shade100 => this[100]!;
 
   /// The default shade.
-  Color get shade200 => this[200];
+  Color get shade200 => this[200]!;
 
   /// The second darkest shade.
-  Color get shade400 => this[400];
+  Color get shade400 => this[400]!;
 
   /// The darkest shade.
-  Color get shade700 => this[700];
+  Color get shade700 => this[700]!;
 }
 
 /// [Color] and [ColorSwatch] constants which represent Material design's
 /// [color palette](https://material.io/design/color/).
 ///
 /// Instead of using an absolute color from these palettes, consider using
-/// [Theme.of] to obtain the local [ThemeData] structure, which exposes the
-/// colors selected for the current theme, such as [ThemeData.primaryColor] and
-/// [ThemeData.accentColor] (among many others).
+/// [Theme.of] to obtain the local [ThemeData.colorScheme], which defines
+/// the colors that most of the Material components use by default.
+///
 ///
 /// Most swatches have colors from 100 to 900 in increments of one hundred, plus
 /// the color 50. The smaller the number, the more pale the color. The greater
@@ -110,7 +105,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// using an integer for the specific color desired, as follows:
 ///
 /// ```dart
-/// Color selection = Colors.green[400]; // Selects a mid-range green.
+/// Color selection = Colors.green[400]!; // Selects a mid-range green.
 /// ```
 /// {@end-tool}
 /// {@tool snippet}
@@ -191,12 +186,11 @@ class MaterialAccentColor extends ColorSwatch<int> {
 ///
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
-class Colors {
-  // This class is not meant to be instatiated or extended; this constructor
-  // prevents instantiation and extension.
-  // ignore: unused_element
-  Colors._();
-
+///
+/// See also:
+///
+///  * Cookbook: [Use themes to share colors and font styles](https://flutter.dev/docs/cookbook/design/themes)
+abstract final class Colors {
   /// Completely invisible.
   static const Color transparent = Color(0x00000000);
 
@@ -306,8 +300,9 @@ class Colors {
   ///  * [Typography.white], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white70, white60, white54, white38, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white70], [white60], [white54], [white38], [white30], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   ///  * [black], a solid black color.
   ///  * [transparent], a fully-transparent color.
   static const Color white = Color(0xFFFFFFFF);
@@ -323,13 +318,14 @@ class Colors {
   ///  * [Typography.white], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white54, white38, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white38], [white30], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white70 = Color(0xB3FFFFFF);
 
   /// White with 60% opacity.
   ///
-  /// Used for medium-emphasis text and hint text when [Theme.brightness] is
+  /// Used for medium-emphasis text and hint text when [ThemeData.brightness] is
   /// set to [Brightness.dark].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
@@ -339,8 +335,8 @@ class Colors {
   ///  * [ExpandIcon], which uses this color for dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white54, white30, white38, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white54], [white30], [white38], [white12], [white10], which
+  ///    are variants on this color but with different opacities.
   static const Color white60 = Color(0x99FFFFFF);
 
   /// White with 54% opacity.
@@ -351,8 +347,8 @@ class Colors {
   ///
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white38, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white38], [white30], [white12], [white10], which
+  ///    are variants on this color but with different opacities.
   static const Color white54 = Color(0x8AFFFFFF);
 
   /// White with 38% opacity.
@@ -366,8 +362,9 @@ class Colors {
   ///  * [ThemeData.disabledColor], which uses this color by default in dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white54, white70, white30, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white70], [white30], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white38 = Color(0x62FFFFFF);
 
   /// White with 30% opacity.
@@ -378,8 +375,9 @@ class Colors {
   ///
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white60, white54, white70, white38, white12, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white70], [white38], [white12],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white30 = Color(0x4DFFFFFF);
 
   /// White with 24% opacity.
@@ -390,7 +388,8 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white60, white54, white70, white38, white30, white10], which are variants on this color
+  ///  * [white], [white60], [white54], [white70], [white38], [white30],
+  ///    [white10], which are variants on this color
   ///    but with different opacities.
   static const Color white24 = Color(0x3DFFFFFF);
 
@@ -402,8 +401,9 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white60, white54, white70, white38, white30, white10], which are variants on this color
-  ///    but with different opacities.
+  ///  * [white], [white60], [white54], [white70], [white38], [white30],
+  ///    [white10], which are variants on this color but with different
+  ///    opacities.
   static const Color white12 = Color(0x1FFFFFFF);
 
   /// White with 10% opacity.
@@ -412,7 +412,8 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white60, white54, white70, white38, white30, white12], which are variants on this color
+  ///  * [white], [white60], [white54], [white70], [white38], [white30],
+  ///    [white12], which are variants on this color
   ///    but with different opacities.
   ///  * [transparent], a fully-transparent color, not far from this one.
   static const Color white10 = Color(0x1AFFFFFF);
@@ -1880,7 +1881,7 @@ class Colors {
   );
   static const int _blueGreyPrimaryValue = 0xFF607D8B;
 
-  /// The material design primary color swatches, excluding grey.
+  /// The Material Design primary color swatches, excluding grey.
   static const List<MaterialColor> primaries = <MaterialColor>[
     red,
     pink,
@@ -1905,7 +1906,7 @@ class Colors {
     blueGrey,
   ];
 
-  /// The material design accent color swatches.
+  /// The Material Design accent color swatches.
   static const List<MaterialAccentColor> accents = <MaterialAccentColor>[
     redAccent,
     pinkAccent,

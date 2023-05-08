@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderBaseline', () {
     RenderBaseline parent;
     RenderSizedBox child;
@@ -20,33 +21,33 @@ void main() {
         child: child = RenderSizedBox(const Size(100.0, 100.0)),
       ),
     );
-    final BoxParentData childParentData = child.parentData as BoxParentData;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
 
-    layout(root, phase: EnginePhase.layout);
+    layout(root);
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(-100.0));
     expect(parent.size, equals(const Size(100.0, 0.0)));
 
     parent.baseline = 25.0;
-    pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(-75.0));
     expect(parent.size, equals(const Size(100.0, 25.0)));
 
     parent.baseline = 90.0;
-    pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(-10.0));
     expect(parent.size, equals(const Size(100.0, 90.0)));
 
     parent.baseline = 100.0;
-    pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(0.0));
     expect(parent.size, equals(const Size(100.0, 100.0)));
 
     parent.baseline = 110.0;
-    pumpFrame(phase: EnginePhase.layout);
+    pumpFrame();
     expect(childParentData.offset.dx, equals(0.0));
     expect(childParentData.offset.dy, equals(10.0));
     expect(parent.size, equals(const Size(100.0, 110.0)));

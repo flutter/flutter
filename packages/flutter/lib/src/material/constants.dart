@@ -4,6 +4,8 @@
 
 import 'package:flutter/painting.dart';
 
+import 'colors.dart';
+
 /// The minimum dimension of any interactive region according to Material
 /// guidelines.
 ///
@@ -30,7 +32,7 @@ const double kTextTabBarHeight = kMinInteractiveDimension;
 /// The amount of time theme change animations should last.
 const Duration kThemeChangeDuration = Duration(milliseconds: 200);
 
-/// The radius of a circular material ink response in logical pixels.
+/// The default radius of a circular material ink response in logical pixels.
 const double kRadialReactionRadius = 20.0;
 
 /// The amount of time a circular material ink response should take to expand to its full size.
@@ -47,3 +49,13 @@ const EdgeInsets kTabLabelPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
 /// The padding added around material list items.
 const EdgeInsets kMaterialListPadding = EdgeInsets.symmetric(vertical: 8.0);
+
+/// The default color for [ThemeData.iconTheme] when [ThemeData.brightness] is
+/// [Brightness.light]. This color is used in [IconButton] to detect whether
+/// [IconTheme.of(context).color] is the same as the default color of [ThemeData.iconTheme].
+const Color kDefaultIconLightColor = Colors.white;
+
+/// The default color for [ThemeData.iconTheme] when [ThemeData.brightness] is
+/// [Brightness.dark]. This color is used in [IconButton] to detect whether
+/// [IconTheme.of(context).color] is the same as the default color of [ThemeData.iconTheme].
+const Color kDefaultIconDarkColor = Colors.black87;

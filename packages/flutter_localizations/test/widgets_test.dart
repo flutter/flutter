@@ -2,30 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestLocalizations {
   TestLocalizations(this.locale, this.prefix);
 
   final Locale locale;
-  final String prefix;
+  final String? prefix;
 
-  static Future<TestLocalizations> loadSync(Locale locale, String prefix) {
+  static Future<TestLocalizations> loadSync(Locale locale, String? prefix) {
     return SynchronousFuture<TestLocalizations>(TestLocalizations(locale, prefix));
   }
 
-  static Future<TestLocalizations> loadAsync(Locale locale, String prefix) {
-    return Future<TestLocalizations>.delayed(const Duration(milliseconds: 100))
-      .then((_) => TestLocalizations(locale, prefix));
+  static Future<TestLocalizations> loadAsync(Locale locale, String? prefix) {
+    return Future<TestLocalizations>.delayed(
+      const Duration(milliseconds: 100),
+      () => TestLocalizations(locale, prefix)
+    );
   }
 
   static TestLocalizations of(BuildContext context) {
-    return Localizations.of<TestLocalizations>(context, TestLocalizations);
+    return Localizations.of<TestLocalizations>(context, TestLocalizations)!;
   }
 
   String get message => '${prefix ?? ""}$locale';
@@ -34,7 +34,7 @@ class TestLocalizations {
 class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
   SyncTestLocalizationsDelegate([this.prefix]);
 
-  final String prefix; // Changing this value triggers a rebuild
+  final String? prefix; // Changing this value triggers a rebuild
   final List<bool> shouldReloadValues = <bool>[];
 
   @override
@@ -50,13 +50,13 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
   }
 
   @override
-  String toString() => '$runtimeType($prefix)';
+  String toString() => '${objectRuntimeType(this, 'SyncTestLocalizationsDelegate')}($prefix)';
 }
 
 class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
   AsyncTestLocalizationsDelegate([this.prefix]);
 
-  final String prefix; // Changing this value triggers a rebuild
+  final String? prefix; // Changing this value triggers a rebuild
   final List<bool> shouldReloadValues = <bool>[];
 
   @override
@@ -72,7 +72,7 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
   }
 
   @override
-  String toString() => '$runtimeType($prefix)';
+  String toString() => '${objectRuntimeType(this, 'AsyncTestLocalizationsDelegate')}($prefix)';
 }
 
 class MoreLocalizations {
@@ -85,12 +85,14 @@ class MoreLocalizations {
   }
 
   static Future<MoreLocalizations> loadAsync(Locale locale) {
-    return Future<MoreLocalizations>.delayed(const Duration(milliseconds: 100))
-      .then((_) => MoreLocalizations(locale));
+    return Future<MoreLocalizations>.delayed(
+      const Duration(milliseconds: 100),
+      () => MoreLocalizations(locale)
+    );
   }
 
   static MoreLocalizations of(BuildContext context) {
-    return Localizations.of<MoreLocalizations>(context, MoreLocalizations);
+    return Localizations.of<MoreLocalizations>(context, MoreLocalizations)!;
   }
 
   String get message => '$locale';
@@ -139,10 +141,10 @@ class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<W
 }
 
 Widget buildFrame({
-  Locale locale,
-  Iterable<LocalizationsDelegate<dynamic>> delegates,
-  WidgetBuilder buildContent,
-  LocaleResolutionCallback localeResolutionCallback,
+  Locale? locale,
+  Iterable<LocalizationsDelegate<dynamic>>? delegates,
+  required WidgetBuilder buildContent,
+  LocaleResolutionCallback? localeResolutionCallback,
   List<Locale> supportedLocales = const <Locale>[
     Locale('en', 'US'),
     Locale('en', 'GB'),
@@ -165,7 +167,7 @@ Widget buildFrame({
 }
 
 class SyncLoadTest extends StatefulWidget {
-  const SyncLoadTest();
+  const SyncLoadTest({super.key});
 
   @override
   SyncLoadTestState createState() => SyncLoadTestState();
@@ -183,7 +185,7 @@ class SyncLoadTestState extends State<SyncLoadTest> {
 
 void main() {
   testWidgets('Localizations.localeFor in a WidgetsApp with system locale', (WidgetTester tester) async {
-    BuildContext pageContext;
+    late BuildContext pageContext;
 
     await tester.pumpWidget(
       buildFrame(
@@ -205,7 +207,7 @@ void main() {
 
   testWidgets('Localizations.localeFor in a WidgetsApp with an explicit locale', (WidgetTester tester) async {
     const Locale locale = Locale('en', 'US');
-    BuildContext pageContext;
+    late BuildContext pageContext;
 
     await tester.pumpWidget(
       buildFrame(
@@ -477,7 +479,7 @@ void main() {
   });
 
   testWidgets('Directionality tracks system locale', (WidgetTester tester) async {
-    BuildContext pageContext;
+    late BuildContext pageContext;
 
     await tester.pumpWidget(
       buildFrame(
@@ -507,7 +509,7 @@ void main() {
   testWidgets('localeResolutionCallback override', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
-        localeResolutionCallback: (Locale newLocale, Iterable<Locale> supportedLocales) {
+        localeResolutionCallback: (Locale? newLocale, Iterable<Locale> supportedLocales) {
           return const Locale('foo', 'BAR');
         },
         buildContent: (BuildContext context) {
@@ -562,7 +564,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given
-        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => locale,
         delegates: const <LocalizationsDelegate<dynamic>>[
           GlobalWidgetsLocalizations.delegate,
         ],
@@ -602,7 +604,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given
-        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => locale,
         buildContent: (BuildContext context) {
           return Localizations.override(
             context: context,
@@ -643,7 +645,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given
-        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => locale,
         delegates: <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
           const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
         ],
@@ -680,13 +682,13 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         // Accept whatever locale we're given
-        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) => locale,
         delegates: <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
           const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
         ],
         buildContent: (BuildContext context) {
-          final Locale locale1 = ui.window.locales.first;
-          final Locale locale2 = ui.window.locales[1];
+          final Locale locale1 = WidgetsBinding.instance.platformDispatcher.locales.first;
+          final Locale locale2 = WidgetsBinding.instance.platformDispatcher.locales[1];
           return Text('$locale1 $locale2');
         },
       )
@@ -1425,9 +1427,10 @@ void main() {
           Locale('en', 'AU'),
           Locale('de', 'DE'),
         ],
-        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) {
-          if (locale == null)
+        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) {
+          if (locale == null) {
             return const Locale('und', 'US');
+          }
           return const Locale('en', 'US');
         },
         buildContent: (BuildContext context) {
@@ -1442,10 +1445,6 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('en_US'), findsOneWidget);
-
-    await tester.binding.setLocales(null);
-    await tester.pumpAndSettle();
-    expect(find.text('und_US'), findsOneWidget);
 
     await tester.binding.setLocales(const <Locale>[]);
     await tester.pumpAndSettle();

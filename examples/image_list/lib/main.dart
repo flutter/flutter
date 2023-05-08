@@ -5,9 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 
 /// An example that sets up local http server for serving single
@@ -16,28 +14,36 @@ import 'package:flutter/services.dart';
 ///
 /// This is used in [$FH/flutter/devicelab/bin/tasks/image_list_reported_duration.dart] test.
 ///
+///
+/// To generate new certificate:
+///
+/// $ openssl req -new -out image_list.csr
+///   Generating a 2048 bit RSA private key
+///   Enter PEM pass phrase: <random string>
+///   ...
+///   Common Name (eg, fully qualified host name) []:localhost
+///
+/// Copy content of the privateKey below into image_list.key file, then
+/// $ openssl x509 -req -sha256 -days 3650 -in image_list.csr -signkey image_list.key -out image_list.crt
+///
+/// Copy content of the image_list.crt into certificate string below.
 String certificate = '''
 -----BEGIN CERTIFICATE-----
-MIIDlTCCAn2gAwIBAgIUNfw2s1D9qwYw8bMEZ1rdNVQXi9YwDQYJKoZIhvcNAQEL
-BQAwcjELMAkGA1UEBhMCVVMxETAPBgNVBAgMCE5ldyBZb3JrMRIwEAYDVQQHDAlS
-b2NoZXN0ZXIxEjAQBgNVBAoMCWxvY2FsaG9zdDEUMBIGA1UECwwLRGV2ZWxvcG1l
-bnQxEjAQBgNVBAMMCWxvY2FsaG9zdDAeFw0xOTA4MjIyMzMwMjdaFw0yMDA4MjEy
-MzMwMjdaMHIxCzAJBgNVBAYTAlVTMREwDwYDVQQIDAhOZXcgWW9yazESMBAGA1UE
-BwwJUm9jaGVzdGVyMRIwEAYDVQQKDAlsb2NhbGhvc3QxFDASBgNVBAsMC0RldmVs
-b3BtZW50MRIwEAYDVQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IB
-DwAwggEKAoIBAQCi/fmozdYuCIZbJS7y4zYPp2NRboLXrpUcUzzvzz+24k/TYUPN
-eRvf6wiNXHvr1ijMg1j3wQP72RphxI7cY7XCwzRiM5QeQy3EtRz4ETYBzOev3mHL
-LEgZ9RnSq/u42siSS9CNjoz97liPyQUq8h37/09qhYG0hR/2pRN+YB9g7sNYoGe2
-B7zkh3azRS0/LtgltXwHUId7QzJc15W9Q7adsNVTpOCo7dOj2KWz6sEtFGkYfwLV
-5uiTslRdWCCOUD9iZjCtlPqALkGnWyhNiFJESLbVNC6MURyMngcALW0JTMwc2oDj
-MxtdNkMl0cdzPlhXMDKIKpY9bWbRKUUdsfOnAgMBAAGjIzAhMB8GA1UdEQQYMBaC
-CWxvY2FsaG9zdIIJMTI3LjAuMC4xMA0GCSqGSIb3DQEBCwUAA4IBAQAOYegYQ05v
-S/220FvmwH2X+/r0rcjJ5ZyOGq/MTNMhqXZKHgcNELpOLpDMZVvseXHeUKDrqZFi
-4aemMT5zbuYy3yRkQ/X39GEsksi2/Ii6Xk2zw6IJGL6hvneJEbUP3LN1POy2JLJ/
-Wt7Uda8CWa+H9+0sognT6+/86Q2fWMYnFFnAQk5wW4pYDlgInupoXzjcG0kmPgOO
-ijFsQ67xa0nUn1Llviy3pHX50IU2C+cwlWKNgxfmj6HKG9XIlu8gC/R+Ruf4aSUZ
-QT170jY8Lf6PzqLmbIW86tcKftbkP5RiEp8ESg9jDdNjhwZjxlF13aAVE8uJxP0j
-I12tWIG+68AM
+MIICpDCCAYwCCQD1kfAz8IhbazANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls
+b2NhbGhvc3QwHhcNMjAwODI0MjE1MTUwWhcNMzAwODIyMjE1MTUwWjAUMRIwEAYD
+VQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCi
+/fmozdYuCIZbJS7y4zYPp2NRboLXrpUcUzzvzz+24k/TYUPNeRvf6wiNXHvr1ijM
+g1j3wQP72RphxI7cY7XCwzRiM5QeQy3EtRz4ETYBzOev3mHLLEgZ9RnSq/u42siS
+S9CNjoz97liPyQUq8h37/09qhYG0hR/2pRN+YB9g7sNYoGe2B7zkh3azRS0/Ltgl
+tXwHUId7QzJc15W9Q7adsNVTpOCo7dOj2KWz6sEtFGkYfwLV5uiTslRdWCCOUD9i
+ZjCtlPqALkGnWyhNiFJESLbVNC6MURyMngcALW0JTMwc2oDjMxtdNkMl0cdzPlhX
+MDKIKpY9bWbRKUUdsfOnAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAHZo/Io7hE9P
+jDhSSP+4iSwx6xjnkRjBHReoea+XwSCv1s9Alwe1Nub6u5jUBhCpGCyU4diKFV1W
+zhunXKY+zRGGtr09nYoN9UVizS5fAFb+h2x3Tw8lsxs4JpPQeWTbGK9Ci+jyfuZu
+xPvdU8I8oxiTRPoWa1KpPm6UVvcrjyftvbqJ4l7cZ8KZN4JNSZlphX8lIM14xR4H
+12sFFTcYWPNDTqO1A9MSflG4OkG59LDHV36JAEqB61pP8hipowVp48+rzD2DVpqb
+r/Mw+0x0HENUTMVExSA5rj/3fxNMggUSl2YsujVJjkb1LiQNPORX7rBndcjknAMt
+TvaTkrwwZA4=
 -----END CERTIFICATE-----
 ''';
 
@@ -74,9 +80,9 @@ mhBKvYQc85gja0s1c+1VXA==
 
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(
-        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits)
+        (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits),
     );
   }
 }
@@ -91,7 +97,7 @@ Future<void> main() async {
   final HttpServer httpServer =
       await HttpServer.bindSecure('localhost', 0, serverContext);
   final int port = httpServer.port;
-  print('Listening on port $port.');
+  debugPrint('Listening on port $port.');
 
   // Initializes bindings before using any platform channels.
   WidgetsFlutterBinding.ensureInitialized();
@@ -105,7 +111,7 @@ Future<void> main() async {
       offset += length;
       request.response.add(bytes);
       // Let other isolates and microtasks to run.
-      await Future<void>.delayed(const Duration());
+      await Future<void>.delayed(Duration.zero);
     }
     request.response.close();
   });
@@ -117,7 +123,7 @@ const int IMAGES = 50;
 
 @immutable
 class MyApp extends StatelessWidget {
-  const MyApp(this.port);
+  const MyApp(this.port, {super.key});
 
   final int port;
 
@@ -134,12 +140,12 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title, this.port}) : super(key: key);
+  const MyHomePage({super.key, required this.title, required this.port});
   final String title;
   final int port;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
@@ -157,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         frameBuilder: (
           BuildContext context,
           Widget child,
-          int frame,
+          int? frame,
           bool wasSynchronouslyLoaded,
         ) {
           if (frame == 0 && !completer.isCompleted) {
@@ -170,23 +176,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final List<AnimationController> controllers = List<AnimationController>(IMAGES);
-    for (int i = 0; i < IMAGES; i++) {
-      controllers[i] = AnimationController(
-        duration: const Duration(milliseconds: 3600),
-        vsync: this,
-      )..repeat();
-    }
-    final List<Completer<bool>> completers = List<Completer<bool>>(IMAGES);
-    for (int i = 0; i < IMAGES; i++) {
-      completers[i] = Completer<bool>();
-    }
+    final List<AnimationController> controllers = <AnimationController>[
+      for (int i = 0; i < IMAGES; i++)
+        AnimationController(
+          duration: const Duration(milliseconds: 3600),
+          vsync: this,
+        )..repeat(),
+    ];
+    final List<Completer<bool>> completers = <Completer<bool>>[
+      for (int i = 0; i < IMAGES; i++)
+        Completer<bool>(),
+    ];
     final List<Future<bool>> futures = completers.map(
-        (Completer<bool> completer) => completer.future).toList();
+      (Completer<bool> completer) => completer.future,
+    ).toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
-      print(
-          '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.');
+      debugPrint(
+        '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.',
+      );
     });
     return Scaffold(
       appBar: AppBar(
@@ -202,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),
@@ -210,21 +218,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  List<Widget> createImageList(int count, List<Completer<bool>> completers,
-      List<AnimationController> controllers) {
+  List<Widget> createImageList(
+    int count,
+    List<Completer<bool>> completers,
+    List<AnimationController> controllers,
+  ) {
     final List<Widget> list = <Widget>[];
     for (int i = 0; i < count; i++) {
       list.add(Flexible(
-          fit: FlexFit.tight,
-          flex: i + 1,
-          child: RotationTransition(
-              turns: controllers[i],
-              child: createImage(i + 1, completers[i]))));
+        fit: FlexFit.tight,
+        flex: i + 1,
+        child: RotationTransition(
+          turns: controllers[i],
+          child: createImage(i + 1, completers[i]),
+        ),
+      ));
     }
     return list;
   }

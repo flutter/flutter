@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -47,19 +46,67 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
+  testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    const Color defaultSelectionColor = Color(0x11111111);
+    const Color defaultCursorColor = Color(0x22222222);
+    const Color themeSelectionColor = Color(0x33333333);
+    const Color themeCursorColor = Color(0x44444444);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(brightness: Brightness.dark),
+        home: Scaffold(
+          body: DefaultSelectionStyle(
+            selectionColor: defaultSelectionColor,
+            cursorColor: defaultCursorColor,
+            child: Theme(
+              data: ThemeData(
+                textSelectionTheme: const TextSelectionThemeData(
+                  selectionColor: themeSelectionColor,
+                  cursorColor: themeCursorColor,
+                ),
+              ),
+              child: TextField(
+                key: key,
+              ),
+            )
+          ),
+        ),
+      ),
+    );
+    // Finds RenderEditable.
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    late RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+
+    // Focus text field so it has a selection color. The selection color is null
+    // on an unfocused text field.
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(renderEditable.selectionColor, themeSelectionColor);
+    expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
+  });
+
   testWidgets('Fallback theme', (WidgetTester tester) async {
-    BuildContext capturedContext;
+    late BuildContext capturedContext;
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
           capturedContext = context;
           return Container();
-        }
-      )
+        },
+      ),
     );
 
     expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
-    expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
   testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
@@ -83,6 +130,12 @@ void main() {
       ThemeData.localize(light, defaultGeometryTheme),
       isNot(same(ThemeData.localize(dark, defaultGeometryTheme))),
     );
+  });
+
+  testWidgets('ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
+    expect(ThemeData().typography, Typography.material2014());
+    final ThemeData m3Theme = ThemeData(useMaterial3: true);
+    expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
@@ -129,7 +182,7 @@ void main() {
               actions: <Widget>[
                 DropdownButton<String>(
                   key: dropdownMenuButtonKey,
-                  onChanged: (String newValue) { },
+                  onChanged: (String? newValue) { },
                   value: 'menuItem',
                   items: const <DropdownMenuItem<String>>[
                     DropdownMenuItem<String>(
@@ -148,8 +201,9 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (final Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem'))) {
       expect(Theme.of(item).brightness, equals(Brightness.light));
+    }
   });
 
   testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {
@@ -162,7 +216,7 @@ void main() {
             body: Center(
               child: Builder(
                 builder: (BuildContext context) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     onPressed: () {
                       showModalBottomSheet<void>(
                         context: context,
@@ -171,7 +225,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -180,11 +234,9 @@ void main() {
     );
 
     await tester.tap(find.text('SHOW'));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
     expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
-
-    await tester.tap(find.text('bottomSheet')); // dismiss the bottom sheet
-    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
@@ -199,7 +251,7 @@ void main() {
             body: Center(
               child: Builder(
                 builder: (BuildContext context) {
-                  return RaisedButton(
+                  return ElevatedButton(
                     onPressed: () {
                       showDialog<void>(
                         context: context,
@@ -208,7 +260,7 @@ void main() {
                     },
                     child: const Text('SHOW'),
                   );
-                }
+                },
               ),
             ),
           ),
@@ -273,8 +325,8 @@ void main() {
 
     RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
 
-    expect(glyphText.text.style.color, Colors.green);
-    expect(glyphText.text.style.fontSize, 10.0);
+    expect(glyphText.text.style!.color, Colors.green);
+    expect(glyphText.text.style!.fontSize, 10.0);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -286,14 +338,14 @@ void main() {
 
     glyphText = tester.renderObject(find.byType(RichText));
 
-    expect(glyphText.text.style.color, Color.lerp(Colors.green, Colors.orange, 0.5));
-    expect(glyphText.text.style.fontSize, 15.0);
+    expect(glyphText.text.style!.color, Color.lerp(Colors.green, Colors.orange, 0.5));
+    expect(glyphText.text.style!.fontSize, 15.0);
 
     await tester.pump(const Duration(milliseconds: 100)); // Finish the transition
     glyphText = tester.renderObject(find.byType(RichText));
 
-    expect(glyphText.text.style.color, Colors.orange);
-    expect(glyphText.text.style.fontSize, 20.0);
+    expect(glyphText.text.style!.color, Colors.orange);
+    expect(glyphText.text.style!.fontSize, 20.0);
   });
 
   testWidgets(
@@ -332,38 +384,38 @@ void main() {
   );
 
   testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
-    const double _kMagicFontSize = 4321.0;
+    const double kMagicFontSize = 4321.0;
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
       primaryTextTheme: fallback.primaryTextTheme.copyWith(
-        bodyText2: fallback.primaryTextTheme.bodyText2.copyWith(
-          fontSize: _kMagicFontSize,
+        bodyMedium: fallback.primaryTextTheme.bodyMedium!.copyWith(
+          fontSize: kMagicFontSize,
         ),
       ),
     );
-    expect(customTheme.primaryTextTheme.bodyText2.fontSize, _kMagicFontSize);
+    expect(customTheme.primaryTextTheme.bodyMedium!.fontSize, kMagicFontSize);
 
-    double actualFontSize;
+    late double actualFontSize;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Theme(
         data: customTheme,
         child: Builder(builder: (BuildContext context) {
           final ThemeData theme = Theme.of(context);
-          actualFontSize = theme.primaryTextTheme.bodyText2.fontSize;
+          actualFontSize = theme.primaryTextTheme.bodyMedium!.fontSize!;
           return Text(
             'A',
-            style: theme.primaryTextTheme.bodyText2,
+            style: theme.primaryTextTheme.bodyMedium,
           );
         }),
       ),
     ));
 
-    expect(actualFontSize, _kMagicFontSize);
+    expect(actualFontSize, kMagicFontSize);
   });
 
   testWidgets('Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {
-    ThemeData theme;
+    late ThemeData theme;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Builder(
@@ -376,21 +428,23 @@ void main() {
 
     List<TextStyle> extractStyles(TextTheme textTheme) {
       return <TextStyle>[
-        textTheme.headline1,
-        textTheme.headline2,
-        textTheme.headline3,
-        textTheme.headline4,
-        textTheme.headline5,
-        textTheme.headline6,
-        textTheme.subtitle1,
-        textTheme.bodyText1,
-        textTheme.bodyText2,
-        textTheme.caption,
-        textTheme.button,
+        textTheme.displayLarge!,
+        textTheme.displayMedium!,
+        textTheme.displaySmall!,
+        textTheme.headlineLarge!,
+        textTheme.headlineMedium!,
+        textTheme.headlineSmall!,
+        textTheme.titleLarge!,
+        textTheme.titleMedium!,
+        textTheme.bodyLarge!,
+        textTheme.bodyMedium!,
+        textTheme.bodySmall!,
+        textTheme.labelLarge!,
+        textTheme.labelMedium!,
       ];
     }
 
-    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
       for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
@@ -411,14 +465,14 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.headline1.debugLabel, '(englishLike display4 2014).merge(blackMountainView headline1)');
+    expect(theme.textTheme.displayLarge!.debugLabel, '(englishLike displayLarge 2014).merge(blackMountainView displayLarge)');
   });
 
   group('Cupertino theme', () {
-    int buildCount;
-    CupertinoThemeData actualTheme;
-    IconThemeData actualIconTheme;
-    BuildContext context;
+    late int buildCount;
+    CupertinoThemeData? actualTheme;
+    IconThemeData? actualIconTheme;
+    BuildContext? context;
 
     final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext localContext) {
@@ -432,7 +486,7 @@ void main() {
 
     Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
       await tester.pumpWidget(Theme(data: theme, child: singletonThemeSubtree));
-      return actualTheme;
+      return actualTheme!;
     }
 
     setUp(() {
@@ -466,23 +520,23 @@ void main() {
 
     testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
       await testTheme(tester, ThemeData.dark());
-      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
+      expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
       await testTheme(tester, ThemeData.light());
-      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
+      expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
 
       // Overridable by cupertinoOverrideTheme.
       await testTheme(tester, ThemeData(
         brightness: Brightness.light,
         cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
       ));
-      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
+      expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
       await testTheme(tester, ThemeData(
         brightness: Brightness.dark,
         cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
       ));
-      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
+      expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
     });
 
     testWidgets('Can override material theme', (WidgetTester tester) async {
@@ -531,7 +585,8 @@ void main() {
       expect(theme.primaryColor, Colors.orange);
     });
 
-    testWidgets("CupertinoThemeData does not override material theme's icon theme",
+    testWidgets(
+      "CupertinoThemeData does not override material theme's icon theme",
       (WidgetTester tester) async {
         const Color materialIconColor = Colors.blue;
         const Color cupertinoIconColor = Colors.black;
@@ -542,8 +597,9 @@ void main() {
         ));
 
         expect(buildCount, 1);
-        expect(actualIconTheme.color, materialIconColor);
-    });
+        expect(actualIconTheme!.color, materialIconColor);
+      },
+    );
 
     testWidgets(
       'Changing cupertino theme override triggers rebuilds',
@@ -588,12 +644,12 @@ void main() {
           primarySwatch: Colors.blue,
           cupertinoOverrideTheme: const CupertinoThemeData(
             // But the primary material color is preempted by the override.
-            primaryColor: CupertinoColors.activeOrange,
+            primaryColor: CupertinoColors.systemRed,
           ),
         ));
 
         expect(buildCount, 2);
-        expect(theme.primaryColor, CupertinoColors.activeOrange);
+        expect(theme.primaryColor, CupertinoColors.systemRed);
       },
     );
 
@@ -672,15 +728,10 @@ void main() {
   });
 }
 
-int testBuildCalled;
-class Test extends StatefulWidget {
-  const Test({ Key key }) : super(key: key);
+int testBuildCalled = 0;
+class Test extends StatelessWidget {
+  const Test({ super.key });
 
-  @override
-  _TestState createState() => _TestState();
-}
-
-class _TestState extends State<Test> {
   @override
   Widget build(BuildContext context) {
     testBuildCalled += 1;
@@ -695,6 +746,7 @@ class _TestState extends State<Test> {
 /// This class exists only to make sure that we test all the properties of the
 /// [TextStyle] class. If a property is added/removed/renamed, the analyzer will
 /// complain that this class has incorrect overrides.
+// ignore: avoid_implementing_value_types
 class _TextStyleProxy implements TextStyle {
   _TextStyleProxy(this._delegate);
 
@@ -702,56 +754,62 @@ class _TextStyleProxy implements TextStyle {
 
   // Do make sure that all the properties correctly forward to the _delegate.
   @override
-  Color get color => _delegate.color;
+  Color? get color => _delegate.color;
   @override
-  Color get backgroundColor => _delegate.backgroundColor;
+  Color? get backgroundColor => _delegate.backgroundColor;
   @override
-  String get debugLabel => _delegate.debugLabel;
+  String? get debugLabel => _delegate.debugLabel;
   @override
-  TextDecoration get decoration => _delegate.decoration;
+  TextDecoration? get decoration => _delegate.decoration;
   @override
-  Color get decorationColor => _delegate.decorationColor;
+  Color? get decorationColor => _delegate.decorationColor;
   @override
-  TextDecorationStyle get decorationStyle => _delegate.decorationStyle;
+  TextDecorationStyle? get decorationStyle => _delegate.decorationStyle;
   @override
-  double get decorationThickness => _delegate.decorationThickness;
+  double? get decorationThickness => _delegate.decorationThickness;
   @override
-  String get fontFamily => _delegate.fontFamily;
+  String? get fontFamily => _delegate.fontFamily;
   @override
-  List<String> get fontFamilyFallback => _delegate.fontFamilyFallback;
+  List<String>? get fontFamilyFallback => _delegate.fontFamilyFallback;
   @override
-  double get fontSize => _delegate.fontSize;
+  double? get fontSize => _delegate.fontSize;
   @override
-  FontStyle get fontStyle => _delegate.fontStyle;
+  FontStyle? get fontStyle => _delegate.fontStyle;
   @override
-  FontWeight get fontWeight => _delegate.fontWeight;
+  FontWeight? get fontWeight => _delegate.fontWeight;
   @override
-  double get height => _delegate.height;
+  double? get height => _delegate.height;
   @override
-  Locale get locale => _delegate.locale;
+  TextLeadingDistribution? get leadingDistribution => _delegate.leadingDistribution;
   @override
-  ui.Paint get foreground => _delegate.foreground;
+  Locale? get locale => _delegate.locale;
   @override
-  ui.Paint get background => _delegate.background;
+  ui.Paint? get foreground => _delegate.foreground;
+  @override
+  ui.Paint? get background => _delegate.background;
   @override
   bool get inherit => _delegate.inherit;
   @override
-  double get letterSpacing => _delegate.letterSpacing;
+  double? get letterSpacing => _delegate.letterSpacing;
   @override
-  TextBaseline get textBaseline => _delegate.textBaseline;
+  TextBaseline? get textBaseline => _delegate.textBaseline;
   @override
-  double get wordSpacing => _delegate.wordSpacing;
+  double? get wordSpacing => _delegate.wordSpacing;
   @override
-  List<Shadow> get shadows => _delegate.shadows;
+  List<Shadow>? get shadows => _delegate.shadows;
   @override
-  List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
+  List<ui.FontFeature>? get fontFeatures => _delegate.fontFeatures;
+  @override
+  List<ui.FontVariation>? get fontVariations => _delegate.fontVariations;
+  @override
+  TextOverflow? get overflow => _delegate.overflow;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
       super.toString();
 
   @override
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+  DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
     throw UnimplementedError();
   }
 
@@ -762,24 +820,33 @@ class _TextStyleProxy implements TextStyle {
 
   @override
   TextStyle apply({
-    Color color,
-    Color backgroundColor,
-    TextDecoration decoration,
-    Color decorationColor,
-    TextDecorationStyle decorationStyle,
+    Color? color,
+    Color? backgroundColor,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    TextDecorationStyle? decorationStyle,
     double decorationThicknessFactor = 1.0,
     double decorationThicknessDelta = 0.0,
-    String fontFamily,
-    List<String> fontFamilyFallback,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     int fontWeightDelta = 0,
+    FontStyle? fontStyle,
     double letterSpacingFactor = 1.0,
     double letterSpacingDelta = 0.0,
     double wordSpacingFactor = 1.0,
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
     double heightDelta = 0.0,
+    TextLeadingDistribution? leadingDistribution,
+    TextBaseline? textBaseline,
+    Locale? locale,
+    List<ui.Shadow>? shadows,
+    List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
+    TextOverflow? overflow,
+    String? package,
   }) {
     throw UnimplementedError();
   }
@@ -791,28 +858,32 @@ class _TextStyleProxy implements TextStyle {
 
   @override
   TextStyle copyWith({
-    bool inherit,
-    Color color,
-    Color backgroundColor,
-    String fontFamily,
-    List<String> fontFamilyFallback,
-    double fontSize,
-    FontWeight fontWeight,
-    FontStyle fontStyle,
-    double letterSpacing,
-    double wordSpacing,
-    TextBaseline textBaseline,
-    double height,
-    Locale locale,
-    ui.Paint foreground,
-    ui.Paint background,
-    List<Shadow> shadows,
-    List<ui.FontFeature> fontFeatures,
-    TextDecoration decoration,
-    Color decorationColor,
-    TextDecorationStyle decorationStyle,
-    double decorationThickness,
-    String debugLabel,
+    bool? inherit,
+    Color? color,
+    Color? backgroundColor,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+    double? fontSize,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    double? letterSpacing,
+    double? wordSpacing,
+    TextBaseline? textBaseline,
+    double? height,
+    TextLeadingDistribution? leadingDistribution,
+    Locale? locale,
+    ui.Paint? foreground,
+    ui.Paint? background,
+    List<Shadow>? shadows,
+    List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
+    TextDecoration? decoration,
+    Color? decorationColor,
+    TextDecorationStyle? decorationStyle,
+    double? decorationThickness,
+    String? debugLabel,
+    TextOverflow? overflow,
+    String? package,
   }) {
     throw UnimplementedError();
   }
@@ -824,19 +895,19 @@ class _TextStyleProxy implements TextStyle {
 
   @override
   ui.ParagraphStyle getParagraphStyle({
-    TextAlign textAlign,
-    TextDirection textDirection,
+    TextAlign? textAlign,
+    TextDirection? textDirection,
     double textScaleFactor = 1.0,
-    String ellipsis,
-    int maxLines,
-    ui.TextHeightBehavior textHeightBehavior,
-    Locale locale,
-    String fontFamily,
-    double fontSize,
-    FontWeight fontWeight,
-    FontStyle fontStyle,
-    double height,
-    StrutStyle strutStyle,
+    String? ellipsis,
+    int? maxLines,
+    ui.TextHeightBehavior? textHeightBehavior,
+    Locale? locale,
+    String? fontFamily,
+    double? fontSize,
+    FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    double? height,
+    StrutStyle? strutStyle,
   }) {
     throw UnimplementedError();
   }
@@ -847,7 +918,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle merge(TextStyle other) {
+  TextStyle merge(TextStyle? other) {
     throw UnimplementedError();
   }
 }

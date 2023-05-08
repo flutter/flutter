@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestTree extends Object with DiagnosticableTreeMixin {
   TestTree({
-    this.name,
+    this.name = '',
     this.style,
     this.children = const <TestTree>[],
     this.properties = const <DiagnosticsNode>[],
@@ -19,7 +19,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   final String name;
   final List<TestTree> children;
   final List<DiagnosticsNode> properties;
-  final DiagnosticsTreeStyle style;
+  final DiagnosticsTreeStyle? style;
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
@@ -33,9 +33,9 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (style != null)
-      properties.defaultDiagnosticsTreeStyle = style;
-
+    if (style != null) {
+      properties.defaultDiagnosticsTreeStyle = style!;
+    }
     this.properties.forEach(properties.add);
   }
 }
@@ -48,38 +48,38 @@ enum ExampleEnum {
 
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
-Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object>;
+Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
   validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
 }
 
-void validateNodeJsonSerializationHelper(Map<String, Object> json, DiagnosticsNode node) {
+void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
   expect(json['name'], equals(node.name));
   expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
-  expect(json['level'] ?? describeEnum(DiagnosticLevel.info), equals(describeEnum(node.level)));
+  expect(json['level'] ?? DiagnosticLevel.info.name, equals(node.level.name));
   expect(json['showName'] ?? true, equals(node.showName));
   expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
-  expect(json['style'] ?? describeEnum(DiagnosticsTreeStyle.sparse), equals(describeEnum(node.style)));
+  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name, equals(node.style!.name));
   expect(json['type'], equals(node.runtimeType.toString()));
   expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
 
-void validatePropertyJsonSerialization(DiagnosticsProperty<Object> property) {
+void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
   validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
 }
 
 void validateStringPropertyJsonSerialization(StringProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['quoted'], equals(property.quoted));
   validatePropertyJsonSerializationHelper(json, property);
 }
 
 void validateFlagPropertyJsonSerialization(FlagProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['ifTrue'], equals(property.ifTrue));
 
   if (property.ifTrue != null) {
@@ -97,7 +97,7 @@ void validateFlagPropertyJsonSerialization(FlagProperty property) {
 }
 
 void validateDoublePropertyJsonSerialization(DoubleProperty property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.unit != null) {
     expect(json['unit'], equals(property.unit));
   } else {
@@ -110,7 +110,7 @@ void validateDoublePropertyJsonSerialization(DoubleProperty property) {
 }
 
 void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.ifPresent != null) {
     expect(json['ifPresent'], equals(property.ifPresent));
   } else {
@@ -120,13 +120,13 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value.isNotEmpty) {
     expect(json['values'], equals(
       property.value.entries
-        .where((MapEntry<String, Object> entry) => entry.value != null)
-        .map((MapEntry<String, Object> entry) => entry.key).toList(),
+        .where((MapEntry<String, Object?> entry) => entry.value != null)
+        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
     ));
   } else {
     expect(json.containsKey('values'), isFalse);
@@ -136,10 +136,10 @@ void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object> propert
 }
 
 void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
-  final Map<String, Object> json = simulateJsonSerialization(property);
+  final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value != null) {
-    final List<Object> valuesJson = json['values'] as List<Object>;
-    final List<String> expectedValues = property.value.map<String>((Object value) => value.toString()).toList();
+    final List<Object?> valuesJson = json['values']! as List<Object?>;
+    final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
     expect(json.containsKey('values'), isFalse);
@@ -148,7 +148,7 @@ void validateIterablePropertyJsonSerialization(IterableProperty<Object> property
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validatePropertyJsonSerializationHelper(final Map<String, Object> json, DiagnosticsProperty<Object> property) {
+void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
   if (property.defaultValue != kNoDefaultValue) {
     expect(json['defaultValue'], equals(property.defaultValue.toString()));
   } else {
@@ -192,8 +192,8 @@ void main() {
   test('TreeDiagnosticsMixin control test', () async {
     void goldenStyleTest(
       String description, {
-      DiagnosticsTreeStyle style,
-      DiagnosticsTreeStyle lastChildStyle,
+      DiagnosticsTreeStyle? style,
+      DiagnosticsTreeStyle? lastChildStyle,
       String golden = '',
     }) {
       final TestTree tree = TestTree(children: <TestTree>[
@@ -365,11 +365,11 @@ void main() {
   test('TreeDiagnosticsMixin tree with properties test', () async {
     void goldenStyleTest(
       String description, {
-      String name,
-      DiagnosticsTreeStyle style,
-      DiagnosticsTreeStyle lastChildStyle,
+      String? name,
+      DiagnosticsTreeStyle? style,
+      DiagnosticsTreeStyle? lastChildStyle,
       DiagnosticsTreeStyle propertyStyle = DiagnosticsTreeStyle.singleLine,
-      @required String golden,
+      required String golden,
     }) {
       final TestTree tree = TestTree(
         properties: <DiagnosticsNode>[
@@ -492,7 +492,8 @@ void main() {
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000\n'
       ' │     <leaf node>\n'
-      ' │     foo: 42\n'
+      ' │     foo:\n'
+      ' │       42\n'
       ' │\n'
       ' └─child node C: TestTree#00000\n'
       '     foo:\n'
@@ -901,6 +902,14 @@ void main() {
     expect(describeEnum(ExampleEnum.hello), equals('hello'));
     expect(describeEnum(ExampleEnum.world), equals('world'));
     expect(describeEnum(ExampleEnum.deferToChild), equals('deferToChild'));
+    expect(
+      () => describeEnum('Hello World'),
+      throwsA(isAssertionError.having(
+        (AssertionError e) => e.message,
+        'message',
+        'The provided object "Hello World" is not an enum.',
+      )),
+    );
   });
 
   test('string property test', () {
@@ -951,7 +960,6 @@ void main() {
     final StringProperty quoted = StringProperty(
       'name',
       'value',
-      quoted: true,
     );
     expect(quoted.toString(), equals('name: "value"'));
     validateStringPropertyJsonSerialization(quoted);
@@ -966,7 +974,6 @@ void main() {
         'name',
         null,
         showName: false,
-        quoted: true,
       ).toString(),
       equals('null'),
     );
@@ -1190,7 +1197,7 @@ void main() {
   });
 
   test('callback property test', () {
-    final Function onClick = () { };
+    void onClick() { }
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -1232,7 +1239,7 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
     validateObjectFlagPropertyJsonSerialization(present);
     validateObjectFlagPropertyJsonSerialization(missing);
-  }, skip: isBrowser);
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/54221
 
   test('describe bool property', () {
     final FlagProperty yes = FlagProperty(
@@ -1624,7 +1631,7 @@ void main() {
   });
 
   test('has property test', () {
-    final Function onClick = () { };
+    void onClick() { }
     final ObjectFlagProperty<Function> has = ObjectFlagProperty<Function>.has(
       'onClick',
       onClick,
@@ -1649,8 +1656,8 @@ void main() {
   test('iterable flags property test', () {
     // Normal property
     {
-      final Function onClick = () { };
-      final Function onMove = () { };
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'click': onClick,
         'move': onMove,
@@ -1668,8 +1675,8 @@ void main() {
 
     // Reversed-order property
     {
-      final Function onClick = () { };
-      final Function onMove = () { };
+      void onClick() { }
+      void onMove() { }
       final Map<String, Function> value = <String, Function>{
         'move': onMove,
         'click': onClick,
@@ -1685,8 +1692,8 @@ void main() {
 
     // Partially empty property
     {
-      final Function onClick = () { };
-      final Map<String, Function> value = <String, Function>{
+      void onClick() { }
+      final Map<String, Function?> value = <String, Function?>{
         'move': null,
         'click': onClick,
       };
@@ -1701,7 +1708,7 @@ void main() {
 
     // Empty property (without ifEmpty)
     {
-      final Map<String, Function> value = <String, Function>{
+      final Map<String, Function?> value = <String, Function?>{
         'enter': null,
       };
       final FlagsSummary<Function> flags = FlagsSummary<Function>(
@@ -1714,7 +1721,7 @@ void main() {
 
     // Empty property (without ifEmpty)
     {
-      final Map<String, Function> value = <String, Function>{
+      final Map<String, Function?> value = <String, Function?>{
         'enter': null,
       };
       final FlagsSummary<Function> flags = FlagsSummary<Function>(
@@ -1875,7 +1882,7 @@ void main() {
     final StackTrace stack = StackTrace.fromString(
       '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
       '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
-      '#2      someMethod3  (file:///foo.dart:4:1)\n'
+      '#2      someMethod3  (file:///foo.dart:4:1)\n',
     );
 
     expect(
@@ -1884,7 +1891,7 @@ void main() {
         'Stack trace:\n'
         '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
         '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
-        '#2      someMethod3  (file:///foo.dart:4:1)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n',
       ),
     );
 
@@ -1894,7 +1901,7 @@ void main() {
         '-- callback 2 --\n'
         '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
         '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
-        '#2      someMethod3  (file:///foo.dart:4:1)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n',
       ),
     );
   });
@@ -1912,14 +1919,14 @@ void main() {
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-    validatePropertyJsonSerialization(messageProperty as MessageProperty);
+    validatePropertyJsonSerialization(messageProperty as DiagnosticsProperty<Object?>);
   });
 
   test('error message style wrap test', () {
     // This tests wrapping of properties with styles typical for error messages.
     DiagnosticsNode createTreeWithWrappingNodes({
-      DiagnosticsTreeStyle rootStyle,
-      DiagnosticsTreeStyle propertyStyle,
+      DiagnosticsTreeStyle? rootStyle,
+      required DiagnosticsTreeStyle propertyStyle,
     }) {
       return TestTree(
         name: 'Test tree',
@@ -2157,89 +2164,89 @@ void main() {
         '   [1.0, 0.0, 0.0, 1.0]\n'
         '   --- example property at max length --\n'
         '   diagnosis: insufficient data to draw\n'
-        '   conclusion (less than five repaints)\n'
+        '   conclusion (less than five repaints)\n',
       ),
     );
 
     // This case matches the styles that should generally be used for error
     // messages
     expect(
-        renderer.render(createTreeWithWrappingNodes(
-          rootStyle: DiagnosticsTreeStyle.error,
-          propertyStyle: DiagnosticsTreeStyle.errorProperty,
-        )),
-        equalsIgnoringHashCodes(
-          '══╡ TESTTREE#00000 ╞════════════════════\n'
-          '--- example property at max length --\n'
-          'This is a very long message that must\n'
-          'wrap as it cannot fit on one line. This\n'
-          'is a very long message that must wrap as\n'
-          'it cannot fit on one line. This is a\n'
-          'very long message that must wrap as it\n'
-          'cannot fit on one line.\n'
-          '--- example property at max length --\n'
-          'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
-          '--- example property at max length --\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  https://goo.gl/\n'
-          'Click on the following url:\n'
-          '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
-          'Click on the following url\n'
-          '  https://goo.gl/\n'
-          '--- example property at max length --\n'
-          'multi-line value:\n'
-          '  [1.0, 0.0, 0.0, 0.0]\n'
-          '  [1.0, 1.0, 0.0, 0.0]\n'
-          '  [1.0, 0.0, 1.0, 0.0]\n'
-          '  [1.0, 0.0, 0.0, 1.0]\n'
-          '--- example property at max length --\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  This is a very long message that must\n'
-          '  wrap as it cannot fit on one line.\n'
-          '  This is a very long message that must\n'
-          '  wrap as it cannot fit on one line.\n'
-          '  This is a very long message that must\n'
-          '  wrap as it cannot fit on one line.\n'
-          '--- example property at max length --\n'
-          'This property has a very long property\n'
-          'name that will be allowed to wrap unlike\n'
-          'most property names. This property has a\n'
-          'very long property name that will be\n'
-          'allowed to wrap unlike most property\n'
-          'names:\n'
-          '  [1.0, 0.0, 0.0, 0.0]\n'
-          '  [1.0, 1.0, 0.0, 0.0]\n'
-          '  [1.0, 0.0, 1.0, 0.0]\n'
-          '  [1.0, 0.0, 0.0, 1.0]\n'
-          '--- example property at max length --\n'
-          'diagnosis:\n'
-          '  insufficient data to draw conclusion\n'
-          '  (less than five repaints)\n'
-          '════════════════════════════════════════\n'
-        ),
+      renderer.render(createTreeWithWrappingNodes(
+        rootStyle: DiagnosticsTreeStyle.error,
+        propertyStyle: DiagnosticsTreeStyle.errorProperty,
+      )),
+      equalsIgnoringHashCodes(
+        '══╡ TESTTREE#00000 ╞════════════════════\n'
+        '--- example property at max length --\n'
+        'This is a very long message that must\n'
+        'wrap as it cannot fit on one line. This\n'
+        'is a very long message that must wrap as\n'
+        'it cannot fit on one line. This is a\n'
+        'very long message that must wrap as it\n'
+        'cannot fit on one line.\n'
+        '--- example property at max length --\n'
+        'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  https://goo.gl/\n'
+        'Click on the following url:\n'
+        '  http://someverylongurl.com/that-might-be-tempting-to-wrap-even-though-it-is-a-url-so-should-not-wrap.html\n'
+        'Click on the following url\n'
+        '  https://goo.gl/\n'
+        '--- example property at max length --\n'
+        'multi-line value:\n'
+        '  [1.0, 0.0, 0.0, 0.0]\n'
+        '  [1.0, 1.0, 0.0, 0.0]\n'
+        '  [1.0, 0.0, 1.0, 0.0]\n'
+        '  [1.0, 0.0, 0.0, 1.0]\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '  This is a very long message that must\n'
+        '  wrap as it cannot fit on one line.\n'
+        '--- example property at max length --\n'
+        'This property has a very long property\n'
+        'name that will be allowed to wrap unlike\n'
+        'most property names. This property has a\n'
+        'very long property name that will be\n'
+        'allowed to wrap unlike most property\n'
+        'names:\n'
+        '  [1.0, 0.0, 0.0, 0.0]\n'
+        '  [1.0, 1.0, 0.0, 0.0]\n'
+        '  [1.0, 0.0, 1.0, 0.0]\n'
+        '  [1.0, 0.0, 0.0, 1.0]\n'
+        '--- example property at max length --\n'
+        'diagnosis:\n'
+        '  insufficient data to draw conclusion\n'
+        '  (less than five repaints)\n'
+        '════════════════════════════════════════\n',
+      ),
     );
   });
 
   test('DiagnosticsProperty for basic types has value in json', () {
     DiagnosticsProperty<int> intProperty = DiagnosticsProperty<int>('int1', 10);
-    Map<String, Object> json = simulateJsonSerialization(intProperty);
+    Map<String, Object?> json = simulateJsonSerialization(intProperty);
     expect(json['name'], 'int1');
     expect(json['value'], 10);
 
@@ -2272,5 +2279,23 @@ void main() {
     json = simulateJsonSerialization(stringProperty);
     expect(json['name'], 'string2');
     expect(json['value'], 'world');
+  });
+
+  test('IntProperty arguments passed to super', () {
+    final DiagnosticsProperty<num> property = IntProperty(
+      'Example',
+      0,
+      ifNull: 'is null',
+      showName: false,
+      defaultValue: 1,
+      style: DiagnosticsTreeStyle.none,
+      level: DiagnosticLevel.off,
+    );
+    expect(property.value, equals(0));
+    expect(property.ifNull, equals('is null'));
+    expect(property.showName, equals(false));
+    expect(property.defaultValue, equals(1));
+    expect(property.style, equals(DiagnosticsTreeStyle.none));
+    expect(property.level, equals(DiagnosticLevel.off));
   });
 }

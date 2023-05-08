@@ -20,7 +20,7 @@ class NonStopVSync implements TickerProvider {
 void main() {
   // We first create a render object that represents a green box.
   final RenderBox green = RenderDecoratedBox(
-    decoration: const BoxDecoration(color: Color(0xFF00FF00))
+    decoration: const BoxDecoration(color: Color(0xFF00FF00)),
   );
   // Second, we wrap that green box in a render object that forces the green box
   // to have a specific size.
@@ -39,7 +39,6 @@ void main() {
   );
   // Finally, we center the spinning green square...
   final RenderBox root = RenderPositionedBox(
-    alignment: Alignment.center,
     child: spin,
   );
   // and attach it to the window.

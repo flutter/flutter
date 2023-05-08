@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import 'binding.dart';
 import 'finders.dart';
@@ -19,6 +17,15 @@ import 'goldens.dart';
 Future<ui.Image> captureImage(Element element) {
   throw UnsupportedError('captureImage is not supported on the web.');
 }
+
+/// Whether or not [captureImage] is supported.
+///
+/// This can be used to skip tests on platforms that don't support
+/// capturing images.
+///
+/// Currently this is true except when tests are running in the context of a web
+/// browser (`flutter test --platform chrome`).
+const bool canCaptureImage = false;
 
 /// The matcher created by [matchesGoldenFile]. This class is enabled when the
 /// test is running in a web browser using conditional import.
@@ -33,15 +40,14 @@ class MatchesGoldenFile extends AsyncMatcher {
   final Uri key;
 
   /// The [version] of the golden image.
-  final int version;
+  final int? version;
 
   @override
-  Future<String> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(dynamic item) async {
     if (item is! Finder) {
       return 'web goldens only supports matching finders.';
     }
-    final Finder finder = item as Finder;
-    final Iterable<Element> elements = finder.evaluate();
+    final Iterable<Element> elements = item.evaluate();
     if (elements.isEmpty) {
       return 'could not be rendered because no widget was found';
     } else if (elements.length > 1) {
@@ -50,15 +56,16 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Element element = elements.single;
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    final Element e = binding.renderViewElement;
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+    final Element e = binding.rootElement!;
+    final ui.FlutterView view = binding.platformDispatcher.implicitView!;
 
     // Unlike `flutter_tester`, we don't have the ability to render an element
     // to an image directly. Instead, we will use `window.render()` to render
     // only the element being requested, and send a request to the test server
     // requesting it to take a screenshot through the browser's debug interface.
-    _renderElement(binding.window, renderObject);
-    final String result = await binding.runAsync<String>(() async {
+    _renderElement(view, renderObject);
+    final String? result = await binding.runAsync<String?>(() async {
       if (autoUpdateGoldenFiles) {
         await webGoldenComparator.update(size.width, size.height, key);
         return null;
@@ -70,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
         return ex.message;
       }
     }, additionalTime: const Duration(seconds: 22));
-    _renderElement(binding.window, _findRepaintBoundary(e));
+    _renderElement(view, _findRepaintBoundary(e));
     return result;
   }
 
@@ -82,16 +89,17 @@ class MatchesGoldenFile extends AsyncMatcher {
 }
 
 RenderObject _findRepaintBoundary(Element element) {
-  RenderObject renderObject = element.renderObject;
+  assert(element.renderObject != null);
+  RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent as RenderObject;
-    assert(renderObject != null);
+    renderObject = renderObject.parent! as RenderObject;
   }
   return renderObject;
 }
 
-void _renderElement(ui.Window window, RenderObject renderObject) {
-  final Layer layer = renderObject.debugLayer;
+void _renderElement(ui.FlutterView window, RenderObject renderObject) {
+  assert(renderObject.debugLayer != null);
+  final Layer layer = renderObject.debugLayer!;
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
   if (layer is OffsetLayer) {
     sceneBuilder.pushOffset(-layer.offset.dx, -layer.offset.dy);

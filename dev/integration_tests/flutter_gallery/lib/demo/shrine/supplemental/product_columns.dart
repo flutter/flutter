@@ -4,16 +4,17 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gallery/demo/shrine/model/product.dart';
-import 'package:flutter_gallery/demo/shrine/supplemental/product_card.dart';
+import '../model/product.dart';
+import 'product_card.dart';
 
 class TwoProductCardColumn extends StatelessWidget {
   const TwoProductCardColumn({
-    @required this.bottom,
+    super.key,
+    required this.bottom,
     this.top,
-  }) : assert(bottom != null);
+  });
 
-  final Product bottom, top;
+  final Product? bottom, top;
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +58,9 @@ class TwoProductCardColumn extends StatelessWidget {
 }
 
 class OneProductCardColumn extends StatelessWidget {
-  const OneProductCardColumn({this.product});
+  const OneProductCardColumn({super.key, this.product});
 
-  final Product product;
+  final Product? product;
 
   @override
   Widget build(BuildContext context) {

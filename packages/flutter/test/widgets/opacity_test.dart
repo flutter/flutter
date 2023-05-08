@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -17,8 +21,8 @@ void main() {
     // Opacity 1.0: Semantics and painting
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 1.0,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -38,8 +42,8 @@ void main() {
     // Opacity 0.0: Nothing
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 0.0,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -50,9 +54,9 @@ void main() {
     // Opacity 0.0 with semantics: Just semantics
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 0.0,
         alwaysIncludeSemantics: true,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -72,9 +76,8 @@ void main() {
     // Opacity 0.0 without semantics: Nothing
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 0.0,
-        alwaysIncludeSemantics: false,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -85,8 +88,8 @@ void main() {
     // Opacity 0.1: Semantics and painting
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 0.1,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -106,9 +109,8 @@ void main() {
     // Opacity 0.1 without semantics: Still has semantics and painting
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 0.1,
-        alwaysIncludeSemantics: false,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -128,9 +130,9 @@ void main() {
     // Opacity 0.1 with semantics: Semantics and painting
     await tester.pumpWidget(
       const Opacity(
-        child: Text('a', textDirection: TextDirection.rtl),
         opacity: 0.1,
         alwaysIncludeSemantics: true,
+        child: Text('a', textDirection: TextDirection.rtl),
       ),
     );
     expect(semantics, hasSemantics(
@@ -189,7 +191,38 @@ void main() {
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
-    final OffsetLayer offsetLayer = element.renderObject.debugLayer as OffsetLayer;
+    final OffsetLayer offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/52856
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+
+  testWidgets('Child shows up in the right spot when opacity is disabled', (WidgetTester tester) async {
+    debugDisableOpacityLayers = true;
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Positioned(
+                top: 40,
+                left: 140,
+                child: Opacity(
+                  opacity: .5,
+                  child: Container(height: 100, width: 100, color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('opacity_disabled_with_child.png'),
+    );
+    debugDisableOpacityLayers = false;
+  });
 }

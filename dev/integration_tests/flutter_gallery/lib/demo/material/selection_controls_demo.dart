@@ -28,10 +28,12 @@ const String _switchText =
 const String _switchCode = 'selectioncontrols_switch';
 
 class SelectionControlsDemo extends StatefulWidget {
+  const SelectionControlsDemo({super.key});
+
   static const String routeName = '/material/selection-controls';
 
   @override
-  _SelectionControlsDemoState createState() => _SelectionControlsDemoState();
+  State<SelectionControlsDemo> createState() => _SelectionControlsDemoState();
 }
 
 class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
@@ -43,21 +45,21 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         description: _checkboxText,
         demoWidget: buildCheckbox(),
         exampleCodeTag: _checkboxCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Checkbox-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/Checkbox-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'RADIO',
         description: _radioText,
         demoWidget: buildRadio(),
         exampleCodeTag: _radioCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Radio-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/Radio-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'SWITCH',
         description: _switchText,
         demoWidget: buildSwitch(),
         exampleCodeTag: _switchCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Switch-class.html',
+        documentationUrl: 'https://api.flutter.dev/flutter/material/Switch-class.html',
       ),
     ];
 
@@ -67,13 +69,13 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
     );
   }
 
-  bool checkboxValueA = true;
-  bool checkboxValueB = false;
-  bool checkboxValueC;
-  int radioValue = 0;
+  bool? checkboxValueA = true;
+  bool? checkboxValueB = false;
+  bool? checkboxValueC;
+  int? radioValue = 0;
   bool switchValue = false;
 
-  void handleRadioValueChanged(int value) {
+  void handleRadioValueChanged(int? value) {
     setState(() {
       radioValue = value;
     });
@@ -88,36 +90,45 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Checkbox(
-                value: checkboxValueA,
-                onChanged: (bool value) {
-                  setState(() {
-                    checkboxValueA = value;
-                  });
-                },
+              Semantics(
+                label: 'Checkbox A',
+                child: Checkbox(
+                  value: checkboxValueA,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      checkboxValueA = value;
+                    });
+                  },
+                ),
               ),
-              Checkbox(
-                value: checkboxValueB,
-                onChanged: (bool value) {
-                  setState(() {
-                    checkboxValueB = value;
-                  });
-                },
+              Semantics(
+                label: 'Checkbox B',
+                child: Checkbox(
+                  value: checkboxValueB,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      checkboxValueB = value;
+                    });
+                  },
+                ),
               ),
-              Checkbox(
-                value: checkboxValueC,
-                tristate: true,
-                onChanged: (bool value) {
-                  setState(() {
-                    checkboxValueC = value;
-                  });
-                },
+              Semantics(
+                label: 'Checkbox C',
+                child: Checkbox(
+                  value: checkboxValueC,
+                  tristate: true,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      checkboxValueC = value;
+                    });
+                  },
+                ),
               ),
             ],
           ),
-          Row(
+          const Row(
             mainAxisSize: MainAxisSize.min,
-            children: const <Widget>[
+            children: <Widget>[
               // Disabled checkboxes
               Checkbox(value: true, onChanged: null),
               Checkbox(value: false, onChanged: null),
@@ -156,9 +167,9 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
             ],
           ),
           // Disabled radio buttons
-          Row(
+          const Row(
             mainAxisSize: MainAxisSize.min,
-            children: const <Widget>[
+            children: <Widget>[
               Radio<int>(
                 value: 0,
                 groupValue: 0,

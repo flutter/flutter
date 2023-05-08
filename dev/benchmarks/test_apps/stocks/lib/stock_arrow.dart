@@ -7,7 +7,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class StockArrowPainter extends CustomPainter {
-  StockArrowPainter({ this.color, this.percentChange });
+  StockArrowPainter({
+    required this.color,
+    required this.percentChange,
+  });
 
   final Color color;
   final double percentChange;
@@ -53,7 +56,7 @@ class StockArrowPainter extends CustomPainter {
 }
 
 class StockArrow extends StatelessWidget {
-  const StockArrow({ Key key, this.percentChange }) : super(key: key);
+  const StockArrow({ super.key, required this.percentChange });
 
   final double percentChange;
 
@@ -64,9 +67,10 @@ class StockArrow extends StatelessWidget {
   }
 
   Color _colorForPercentChange(double percentChange) {
-    if (percentChange > 0)
-      return Colors.green[_colorIndexForPercentChange(percentChange)];
-    return Colors.red[_colorIndexForPercentChange(percentChange)];
+    if (percentChange > 0) {
+      return Colors.green[_colorIndexForPercentChange(percentChange)]!;
+    }
+    return Colors.red[_colorIndexForPercentChange(percentChange)]!;
   }
 
   @override

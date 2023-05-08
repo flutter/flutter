@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
-    Size layoutBuilderSize;
+    late Size layoutBuilderSize;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
 
@@ -39,8 +39,8 @@ void main() {
   });
 
   testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
-    SliverConstraints parentConstraints1;
-    SliverConstraints parentConstraints2;
+    late SliverConstraints parentConstraints1;
+    late SliverConstraints parentConstraints2;
     final Key childKey1 = UniqueKey();
     final Key parentKey1 = UniqueKey();
     final Key childKey2 = UniqueKey();
@@ -79,8 +79,8 @@ void main() {
     final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
 
     // scrollExtent == top + bottom.
-    expect(parentSliver1.geometry.scrollExtent, 2 + 4);
-    expect(parentSliver2.geometry.scrollExtent, 7 + 13);
+    expect(parentSliver1.geometry!.scrollExtent, 2 + 4);
+    expect(parentSliver2.geometry!.scrollExtent, 7 + 13);
 
     final RenderSliver childSliver1 = tester.renderObject(find.byKey(childKey1));
     final RenderSliver childSliver2 = tester.renderObject(find.byKey(childKey2));
@@ -89,8 +89,8 @@ void main() {
   });
 
   testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
-    Size layoutBuilderSize;
-    StateSetter setState;
+    late Size layoutBuilderSize;
+    late StateSetter setState;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
     double childWidth = 10.0;
@@ -110,7 +110,7 @@ void main() {
                   width: childWidth,
                   height: childHeight,
                 );
-              }
+              },
             );
           },
         ),
@@ -135,7 +135,7 @@ void main() {
   });
 
   testWidgets('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
-    StateSetter setState;
+    late StateSetter setState;
     double childWidth = 10.0;
     double childHeight = 20.0;
     final Key parentKey = UniqueKey();
@@ -172,8 +172,8 @@ void main() {
     RenderSliver parentSliver = tester.renderObject(find.byKey(parentKey));
     expect(childBox.size.width, 800);
     expect(childBox.size.height, childHeight);
-    expect(parentSliver.geometry.scrollExtent, childHeight);
-    expect(parentSliver.geometry.paintExtent, childHeight);
+    expect(parentSliver.geometry!.scrollExtent, childHeight);
+    expect(parentSliver.geometry!.paintExtent, childHeight);
 
     setState(() {
       childWidth = 100.0;
@@ -185,8 +185,8 @@ void main() {
     parentSliver = tester.renderObject(find.byKey(parentKey));
     expect(childBox.size.width, 800);
     expect(childBox.size.height, childHeight);
-    expect(parentSliver.geometry.scrollExtent, childHeight);
-    expect(parentSliver.geometry.paintExtent, childHeight);
+    expect(parentSliver.geometry!.scrollExtent, childHeight);
+    expect(parentSliver.geometry!.paintExtent, childHeight);
 
     // Make child wider and higher than the viewport.
     setState(() {
@@ -199,13 +199,13 @@ void main() {
     parentSliver = tester.renderObject(find.byKey(parentKey));
     expect(childBox.size.width, 800);
     expect(childBox.size.height, childHeight);
-    expect(parentSliver.geometry.scrollExtent, childHeight);
-    expect(parentSliver.geometry.paintExtent, 600);
+    expect(parentSliver.geometry!.scrollExtent, childHeight);
+    expect(parentSliver.geometry!.paintExtent, 600);
   });
 
   testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
-    Size layoutBuilderSize;
-    StateSetter setState;
+    late Size layoutBuilderSize;
+    late StateSetter setState;
     final Key childKey = UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
@@ -226,10 +226,10 @@ void main() {
                     width: layoutBuilderSize.width,
                     height: layoutBuilderSize.height,
                   );
-                }
+                },
               ),
             );
-          }
+          },
         ),
       ),
     );
@@ -253,7 +253,7 @@ void main() {
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         return Container();
-      }
+      },
     );
     expect(built, 0);
 
@@ -277,7 +277,7 @@ void main() {
         built += 1;
         MediaQuery.of(context);
         return Container();
-      }
+      },
     );
     expect(built, 0);
 
@@ -325,9 +325,9 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
+  testWidgets(
+    'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
     (WidgetTester tester) async {
-
       int built = 0;
       final Widget target = Directionality(
         textDirection: TextDirection.ltr,
@@ -357,11 +357,12 @@ void main() {
           child: target,
       ));
       expect(built, 2);
-  });
+    },
+  );
 
   testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
-    SliverConstraints parentConstraints1;
-    SliverConstraints parentConstraints2;
+    late SliverConstraints parentConstraints1;
+    late SliverConstraints parentConstraints2;
     final Key childKey = UniqueKey();
     final Key parentKey1 = UniqueKey();
     final Key parentKey2 = UniqueKey();
@@ -397,7 +398,7 @@ void main() {
     final RenderSliver parentSliver1 = tester.renderObject(find.byKey(parentKey1));
     final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
     // scrollExtent == top + bottom.
-    expect(parentSliver1.geometry.scrollExtent, 2 + 4);
+    expect(parentSliver1.geometry!.scrollExtent, 2 + 4);
 
     final RenderSliver childSliver = tester.renderObject(find.byKey(childKey));
     expect(childSliver.geometry, parentSliver1.geometry);
@@ -587,4 +588,150 @@ void main() {
     await tester.pump();
     expect(hitCounts, const <int> [0, 0, 0]);
   });
+
+  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+    int builderInvocationCount = 0;
+
+    Future<void> pumpTestWidget(Size size) async {
+      await tester.pumpWidget(
+        // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
+        Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              builderInvocationCount += 1;
+              return const _LayoutSpy();
+            }),
+          ),
+        ),
+      );
+    }
+
+    await pumpTestWidget(const Size(10, 10));
+
+    final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
+
+    // The child is laid out once the first time.
+    expect(spy.performLayoutCount, 1);
+    expect(spy.performResizeCount, 1);
+
+    // The initial `pumpWidget` will trigger `performRebuild`, asking for
+    // builder invocation.
+    expect(builderInvocationCount, 1);
+
+    // Invalidate the layout without changing the constraints.
+    tester.renderObject(find.byType(LayoutBuilder)).markNeedsLayout();
+
+    // The second pump will not go through the `performRebuild` or `update`, and
+    // only judge the need for builder invocation based on constraints, which
+    // didn't change, so we don't expect any counters to go up.
+    await tester.pump();
+    expect(builderInvocationCount, 1);
+    expect(spy.performLayoutCount, 1);
+    expect(spy.performResizeCount, 1);
+
+    // Cause the `update` to be called (but not `performRebuild`), triggering
+    // builder invocation.
+    await pumpTestWidget(const Size(10, 10));
+    expect(builderInvocationCount, 2);
+
+    // The spy does not invalidate its layout on widget update, so no
+    // layout-related methods should be called.
+    expect(spy.performLayoutCount, 1);
+    expect(spy.performResizeCount, 1);
+
+    // Have the child request layout and verify that the child gets laid out
+    // despite layout constraints remaining constant.
+    spy.markNeedsLayout();
+    await tester.pump();
+
+    // Builder is not invoked. This was a layout-only pump with the same parent
+    // constraints.
+    expect(builderInvocationCount, 2);
+
+    // Expect performLayout to be called.
+    expect(spy.performLayoutCount, 2);
+
+    // performResize should not be called because the spy sets sizedByParent,
+    // and the constraints did not change.
+    expect(spy.performResizeCount, 1);
+
+    // Change the parent size, triggering constraint change.
+    await pumpTestWidget(const Size(20, 20));
+
+    // We should see everything invoked once.
+    expect(builderInvocationCount, 3);
+    expect(spy.performLayoutCount, 3);
+    expect(spy.performResizeCount, 2);
+  });
+
+  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
+    Size? childSize;
+    int buildCount = 0;
+
+    Future<void> pumpTestWidget(Size size) async {
+      await tester.pumpWidget(
+        // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
+        Center(
+          child: SizedBox.fromSize(
+            size: size,
+            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              buildCount++;
+              if (buildCount > 1) {
+                final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
+                childSize = spy.size;
+              }
+              return const ColoredBox(
+                color: Color(0xffffffff),
+                child: _LayoutSpy(),
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await pumpTestWidget(const Size(10.0, 10.0));
+    expect(childSize, isNull);
+    await pumpTestWidget(const Size(10.0, 10.0));
+    expect(childSize, const Size(10.0, 10.0));
+  });
+}
+
+class _LayoutSpy extends LeafRenderObjectWidget {
+  const _LayoutSpy();
+
+  @override
+  LeafRenderObjectElement createElement() => _LayoutSpyElement(this);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderLayoutSpy();
+}
+
+class _LayoutSpyElement extends LeafRenderObjectElement {
+  _LayoutSpyElement(super.widget);
+}
+
+class _RenderLayoutSpy extends RenderBox {
+  int performLayoutCount = 0;
+  int performResizeCount = 0;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() {
+    performResizeCount += 1;
+    size = constraints.biggest;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    performLayoutCount += 1;
+  }
 }

@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Should route pointers', () {
@@ -134,7 +133,7 @@ void main() {
       log.add('per-pointer 3');
     });
 
-    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       log.add('error report');
     };
@@ -151,6 +150,17 @@ void main() {
     FlutterError.onError = previousErrorHandler;
   });
 
+  test('Exceptions include router, route & event', () {
+    try {
+      final PointerRouter router = PointerRouter();
+      router.addRoute(2, (PointerEvent event) => throw 'Pointer exception');
+    } catch (e) {
+      expect(e, contains("router: Instance of 'PointerRouter'"));
+      expect(e, contains('route: Closure: (PointerEvent) => Null'));
+      expect(e, contains('event: PointerDownEvent#[a-zA-Z0-9]{5}(position: Offset(0.0, 0.0))'));
+    }
+  });
+
   test('Should transform events', () {
     final List<PointerEvent> events = <PointerEvent>[];
     final List<PointerEvent> globalEvents = <PointerEvent>[];
@@ -165,7 +175,7 @@ void main() {
       globalEvents.add(event);
     }, transform);
 
-    final TestPointer pointer1 = TestPointer(1);
+    final TestPointer pointer1 = TestPointer();
     const Offset firstPosition = Offset(16, 36);
     router.route(pointer1.down(firstPosition));
 

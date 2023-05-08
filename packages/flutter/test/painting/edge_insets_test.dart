@@ -6,6 +6,64 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('EdgeInsets constructors', () {
+    // fromLTRB
+    final EdgeInsets ltrbLtr = const EdgeInsets.fromLTRB(10, 20, 30, 40).resolve(TextDirection.ltr);
+    expect(ltrbLtr.left, 10);
+    expect(ltrbLtr.top, 20);
+    expect(ltrbLtr.right, 30);
+    expect(ltrbLtr.bottom, 40);
+    final EdgeInsets ltrbRtl = const EdgeInsets.fromLTRB(10, 20, 30, 40).resolve(TextDirection.rtl);
+    expect(ltrbRtl.left, 10);
+    expect(ltrbRtl.top, 20);
+    expect(ltrbRtl.right, 30);
+    expect(ltrbRtl.bottom, 40);
+
+    // all
+    const EdgeInsets all = EdgeInsets.all(10);
+    expect(all.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
+    expect(all.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
+
+    // only
+    const EdgeInsets only = EdgeInsets.only(left: 10, top: 20, right: 30, bottom: 40);
+    expect(only.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 30, 40)));
+    expect(only.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 30, 40)));
+
+    // symmetric
+    const EdgeInsets symmetric = EdgeInsets.symmetric(horizontal: 10, vertical: 20);
+    expect(symmetric.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
+    expect(symmetric.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
+  });
+
+  test('EdgeInsetsDirectional constructors', () {
+    // fromSTEB
+    final EdgeInsets stebLtr = const EdgeInsetsDirectional.fromSTEB(10, 20, 30, 40).resolve(TextDirection.ltr);
+    expect(stebLtr.left, 10);
+    expect(stebLtr.top, 20);
+    expect(stebLtr.right, 30);
+    expect(stebLtr.bottom, 40);
+    final EdgeInsets stebRtl = const EdgeInsetsDirectional.fromSTEB(10, 20, 30, 40).resolve(TextDirection.rtl);
+    expect(stebRtl.left, 30);
+    expect(stebRtl.top, 20);
+    expect(stebRtl.right, 10);
+    expect(stebRtl.bottom, 40);
+
+    // all
+    const EdgeInsetsDirectional all = EdgeInsetsDirectional.all(10);
+    expect(all.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
+    expect(all.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 10, 10, 10)));
+
+    // only
+    const EdgeInsetsDirectional directional = EdgeInsetsDirectional.only(start: 10, top: 20, end: 30, bottom: 40);
+    expect(directional.resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10, 20, 30, 40));
+    expect(directional.resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(30, 20, 10, 40));
+
+    // symmetric
+    const EdgeInsetsDirectional symmetric = EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 20);
+    expect(symmetric.resolve(TextDirection.ltr), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
+    expect(symmetric.resolve(TextDirection.rtl), equals(const EdgeInsets.fromLTRB(10, 20, 10, 20)));
+  });
+
   test('EdgeInsets control test', () {
     const EdgeInsets insets = EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0);
 
@@ -23,11 +81,15 @@ void main() {
     expect(insets.along(Axis.horizontal), equals(16.0));
     expect(insets.along(Axis.vertical), equals(20.0));
 
-    expect(insets.inflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
+    expect(
+      insets.inflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+      const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0),
+    );
 
-    expect(insets.deflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0));
+    expect(
+      insets.deflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+      const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0),
+    );
 
     expect(insets.inflateSize(const Size(100.0, 125.0)), const Size(116.0, 145.0));
     expect(insets.deflateSize(const Size(100.0, 125.0)), const Size(84.0, 105.0));
@@ -51,9 +113,17 @@ void main() {
     expect(EdgeInsets.lerp(a, null, 0.25), equals(a * 0.75));
   });
 
+  test('EdgeInsets.lerp identical a,b', () {
+    expect(EdgeInsets.lerp(null, null, 0), null);
+    const EdgeInsets insets = EdgeInsets.zero;
+    expect(identical(EdgeInsets.lerp(insets, insets, 0.5), insets), true);
+  });
+
   test('EdgeInsets.resolve()', () {
     expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
     expect(const EdgeInsetsDirectional.fromSTEB(99.0, 98.0, 97.0, 96.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(97.0, 98.0, 99.0, 96.0));
+    expect(const EdgeInsetsDirectional.all(50.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(50.0, 50.0, 50.0, 50.0));
+    expect(const EdgeInsetsDirectional.all(50.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(50.0, 50.0, 50.0, 50.0));
     expect(const EdgeInsetsDirectional.only(start: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(963.25, 0.0, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(top: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 963.25, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(end: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 0.0, 963.25, 0.0));
@@ -64,12 +134,18 @@ void main() {
     expect(const EdgeInsetsDirectional.only(bottom: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 963.25));
     expect(EdgeInsetsDirectional.only(), EdgeInsetsDirectional.only()); // ignore: prefer_const_constructors
     expect(const EdgeInsetsDirectional.only(top: 1.0), isNot(const EdgeInsetsDirectional.only(bottom: 1.0)));
-    expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
-           const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.rtl));
-    expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
-     isNot(const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.ltr)));
-    expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
-     isNot(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.rtl)));
+    expect(
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.rtl),
+    );
+    expect(
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+      isNot(const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.ltr)),
+    );
+    expect(
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+      isNot(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.rtl)),
+    );
   });
 
   test('EdgeInsets equality', () {
@@ -88,8 +164,6 @@ void main() {
     expect(EdgeInsets.only(right: $5), EdgeInsets.only(right: $5));
     expect(const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(right: 5.0)), const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(right: 5.0)));
     expect(const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(right: 5.0)), isNot(const EdgeInsetsDirectional.only(end: 5.0).add(const EdgeInsets.only(left: 5.0))));
-    expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsetsDirectional.only(top: 3.0).add(const EdgeInsets.only(top: 0.0)));
-    expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsets.only(top: 3.0).add(const EdgeInsetsDirectional.only(top: 0.0)));
     expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsetsDirectional.only(top: 3.0));
     expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsets.only(top: 3.0));
   });
@@ -108,8 +182,20 @@ void main() {
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 10.0), EdgeInsetsDirectional.zero, 0.5), const EdgeInsetsDirectional.only(bottom: 5.0));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 10.0), EdgeInsets.zero, 0.5), const EdgeInsetsDirectional.only(bottom: 5.0));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(start: 10.0), const EdgeInsets.only(left: 20.0), 0.5), const EdgeInsetsDirectional.only(start: 5.0).add(const EdgeInsets.only(left: 10.0)));
-    expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(start: 0.0, bottom: 1.0), const EdgeInsetsDirectional.only(start: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0, bottom: 0.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
-    expect(EdgeInsetsGeometry.lerp(const EdgeInsets.only(left: 0.0, bottom: 1.0), const EdgeInsetsDirectional.only(end: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0, bottom: 0.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.0, end: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
+    expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(bottom: 1.0), const EdgeInsetsDirectional.only(start: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0)), 0.5), const EdgeInsetsDirectional.only(start: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
+    expect(EdgeInsetsGeometry.lerp(const EdgeInsets.only(bottom: 1.0), const EdgeInsetsDirectional.only(end: 1.0, bottom: 1.0).add(const EdgeInsets.only(right: 2.0)), 0.5), const EdgeInsetsDirectional.only(end: 0.5).add(const EdgeInsets.only(right: 1.0, bottom: 1.0)));
+  });
+
+  test('EdgeInsetsGeometry.lerp identical a,b', () {
+    expect(EdgeInsetsGeometry.lerp(null, null, 0), null);
+    const EdgeInsetsGeometry insets = EdgeInsets.zero;
+    expect(identical(EdgeInsetsGeometry.lerp(insets, insets, 0.5), insets), true);
+  });
+
+  test('EdgeInsetsDirectional.lerp identical a,b', () {
+    expect(EdgeInsetsDirectional.lerp(null, null, 0), null);
+    const EdgeInsetsDirectional insets = EdgeInsetsDirectional.zero;
+    expect(identical(EdgeInsetsDirectional.lerp(insets, insets, 0.5), insets), true);
   });
 
   test('EdgeInsetsGeometry.lerp(normal, ...)', () {
@@ -186,12 +272,11 @@ void main() {
   });
 
   test('EdgeInsetsGeometry toString', () {
-    expect(const EdgeInsets.only().toString(), 'EdgeInsets.zero');
+    expect(EdgeInsets.zero.toString(), 'EdgeInsets.zero');
     expect(const EdgeInsets.only(top: 1.01, left: 1.01, right: 1.01, bottom: 1.01).toString(), 'EdgeInsets.all(1.0)');
-    expect(const EdgeInsetsDirectional.only().toString(), 'EdgeInsets.zero');
     expect(const EdgeInsetsDirectional.only(start: 1.01, end: 1.01, top: 1.01, bottom: 1.01).toString(), 'EdgeInsetsDirectional(1.0, 1.0, 1.0, 1.0)');
-    expect((const EdgeInsetsDirectional.only(start: 4.0).add(const EdgeInsets.only(top: 3.0))).toString(), 'EdgeInsetsDirectional(4.0, 3.0, 0.0, 0.0)');
-    expect((const EdgeInsetsDirectional.only(top: 4.0).add(const EdgeInsets.only(right: 3.0))).toString(), 'EdgeInsets(0.0, 4.0, 3.0, 0.0)');
-    expect((const EdgeInsetsDirectional.only(start: 4.0).add(const EdgeInsets.only(left: 3.0))).toString(), 'EdgeInsets(3.0, 0.0, 0.0, 0.0) + EdgeInsetsDirectional(4.0, 0.0, 0.0, 0.0)');
+    expect(const EdgeInsetsDirectional.only(start: 4.0).add(const EdgeInsets.only(top: 3.0)).toString(), 'EdgeInsetsDirectional(4.0, 3.0, 0.0, 0.0)');
+    expect(const EdgeInsetsDirectional.only(top: 4.0).add(const EdgeInsets.only(right: 3.0)).toString(), 'EdgeInsets(0.0, 4.0, 3.0, 0.0)');
+    expect(const EdgeInsetsDirectional.only(start: 4.0).add(const EdgeInsets.only(left: 3.0)).toString(), 'EdgeInsets(3.0, 0.0, 0.0, 0.0) + EdgeInsetsDirectional(4.0, 0.0, 0.0, 0.0)');
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
@@ -12,30 +10,27 @@ import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
-  IdeConfigCommand({this.hidden = false}) {
+  IdeConfigCommand() {
     argParser.addFlag(
       'overwrite',
-      negatable: true,
-      defaultsTo: false,
       help: 'When performing operations, overwrite existing files.',
     );
     argParser.addFlag(
       'update-templates',
       negatable: false,
       help: 'Update the templates in the template directory from the current '
-          'configuration files. This is the opposite of what $name usually does. '
-          'Will search the flutter tree for .iml files and copy any missing ones '
-          'into the template directory. If --overwrite is also specified, it will '
-          'update any out-of-date files, and remove any deleted files from the '
-          'template directory.',
+            'configuration files. This is the opposite of what $name usually does. '
+            'Will search the flutter tree for *.iml files and copy any missing ones '
+            'into the template directory. If "--overwrite" is also specified, it will '
+            'update any out-of-date files, and remove any deleted files from the '
+            'template directory.',
     );
     argParser.addFlag(
       'with-root-module',
-      negatable: true,
       defaultsTo: true,
       help: 'Also create module that corresponds to the root of Flutter tree. '
-          'This makes the entire Flutter tree browsable and searchable in IDE. '
-          'Without this flag, only the child modules will be visible in IDE.',
+            'This makes the entire Flutter tree browsable and searchable in IDE. '
+            'Without this flag, only the child modules will be visible in IDE.',
     );
   }
 
@@ -57,15 +52,15 @@ class IdeConfigCommand extends FlutterCommand {
       'Currently, IntelliJ is the default (and only) IDE that may be configured.';
 
   @override
-  final bool hidden;
+  final bool hidden = true;
 
   @override
-  String get invocation => '${runner.executableName} $name';
+  String get invocation => '${runner?.executableName} $name';
 
   static const String _ideName = 'intellij';
   Directory get _templateDirectory {
     return globals.fs.directory(globals.fs.path.join(
-      Cache.flutterRoot,
+      Cache.flutterRoot!,
       'packages',
       'flutter_tools',
       'ide_templates',
@@ -75,14 +70,14 @@ class IdeConfigCommand extends FlutterCommand {
 
   Directory get _createTemplatesDirectory {
     return globals.fs.directory(globals.fs.path.join(
-      Cache.flutterRoot,
+      Cache.flutterRoot!,
       'packages',
       'flutter_tools',
       'templates',
     ));
   }
 
-  Directory get _flutterRoot => globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot));
+  Directory get _flutterRoot => globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot!));
 
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
@@ -137,11 +132,11 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final RegExp _trackedIdeaFileRegExp = RegExp(
+      final RegExp trackedIdeaFileRegExp = RegExp(
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
-          (_trackedIdeaFileRegExp.hasMatch(relativePath) ||
+          (trackedIdeaFileRegExp.hasMatch(relativePath) ||
               _hasDirectoryInPath(srcFile, 'runConfigurations'));
       final bool isAnImlOutsideIdea = !isATrackedIdeaFile && srcFile.path.endsWith('.iml');
       if (!isATrackedIdeaFile && !isAnImlOutsideIdea) {
@@ -213,7 +208,8 @@ class IdeConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.isNotEmpty) {
+    final List<String> rest = argResults?.rest ?? <String>[];
+    if (rest.isNotEmpty) {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
 
@@ -222,20 +218,21 @@ class IdeConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
+    final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot!);
     final String dirPath = globals.fs.path.normalize(
-      globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot)).absolute.path,
+      globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot!)).absolute.path,
     );
 
-    final String error = _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
+    final String? error = _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
     if (error != null) {
       throwToolExit(error);
     }
 
     globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
+    generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
+      'android': true,
     });
 
     globals.printStatus('Wrote $generatedCount files.');
@@ -246,8 +243,14 @@ class IdeConfigCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = Template(_templateDirectory, _templateDirectory, null, fileSystem: globals.fs);
+  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
+    final Template template = Template(
+      _templateDirectory,
+      null,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+    );
     return template.render(
       globals.fs.directory(dirPath),
       context,
@@ -258,16 +261,18 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String _validateFlutterDir(String dirPath, { String flutterRoot }) {
+String? _validateFlutterDir(String dirPath, { String? flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.notFound) {
-    switch (type) {
-      case FileSystemEntityType.link:
-        // Do not overwrite links.
-        return "Invalid project root dir: '$dirPath' - refers to a link.";
-    }
+  switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
+    case FileSystemEntityType.link:
+      // Do not overwrite links.
+      return "Invalid project root dir: '$dirPath' - refers to a link.";
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.directory:
+    case FileSystemEntityType.notFound:
+      return null;
   }
-
+  // In the case of any other [FileSystemEntityType]s, like the deprecated ones, return null.
   return null;
 }

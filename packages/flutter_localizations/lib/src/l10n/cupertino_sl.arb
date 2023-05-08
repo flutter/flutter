@@ -28,5 +28,9 @@
   "cutButtonLabel": "Izreži",
   "copyButtonLabel": "Kopiraj",
   "pasteButtonLabel": "Prilepi",
-  "selectAllButtonLabel": "Izberi vse"
+  "selectAllButtonLabel": "Izberi vse",
+  "tabSemanticsLabel": "Zavihek $tabIndex od $tabCount",
+  "modalBarrierDismissLabel": "Opusti",
+  "searchTextFieldPlaceholderLabel": "Iskanje",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

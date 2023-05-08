@@ -4,13 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-  if (binding is LiveTestWidgetsFlutterBinding)
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding) {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  }
 
   testWidgets('Flutter Gallery drawer item test', (WidgetTester tester) async {
     bool hasFeedback = false;
@@ -32,8 +33,8 @@ void main() {
 
     // Verify theme settings
     MaterialApp app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
-    expect(app.theme.brightness, equals(Brightness.light));
-    expect(app.darkTheme.brightness, equals(Brightness.dark));
+    expect(app.theme!.brightness, equals(Brightness.light));
+    expect(app.darkTheme!.brightness, equals(Brightness.dark));
 
     // Switch to the dark theme: first menu button, choose 'Dark'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
@@ -63,7 +64,7 @@ void main() {
     expect(app.themeMode, ThemeMode.system);
 
     // Verify density settings
-    expect(app.theme.visualDensity, equals(const VisualDensity()));
+    expect(app.theme!.visualDensity, equals(VisualDensity.standard));
 
     // Popup the density menu: third menu button, choose 'Compact'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
@@ -71,7 +72,7 @@ void main() {
     await tester.tap(find.text('Compact'));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
-    expect(app.theme.visualDensity, equals(VisualDensity.compact));
+    expect(app.theme!.visualDensity, equals(VisualDensity.compact));
 
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
     await tester.pumpAndSettle();
@@ -81,10 +82,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
-    expect(app.theme.visualDensity, equals(const VisualDensity()));
+    expect(app.theme!.visualDensity, equals(VisualDensity.standard));
 
     // Verify platform settings
-    expect(app.theme.platform, equals(TargetPlatform.android));
+    expect(app.theme!.platform, equals(TargetPlatform.android));
 
     // Popup the platform menu: fourth menu button, choose 'Cupertino'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(3));
@@ -92,7 +93,7 @@ void main() {
     await tester.tap(find.text('Cupertino').at(1));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
-    expect(app.theme.platform, equals(TargetPlatform.iOS));
+    expect(app.theme!.platform, equals(TargetPlatform.iOS));
 
     // Verify the font scale.
     final Size origTextSize = tester.getSize(find.text('Text size'));

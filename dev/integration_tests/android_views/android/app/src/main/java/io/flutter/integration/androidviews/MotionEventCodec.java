@@ -17,6 +17,8 @@ import static android.view.MotionEvent.PointerProperties;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MotionEventCodec {
+    private static long MOTION_EVENT_ID = 1;
+
     public static HashMap<String, Object> encode(MotionEvent event) {
         ArrayList<HashMap<String,Object>> pointerProperties = new ArrayList<>();
         ArrayList<HashMap<String,Object>> pointerCoords = new ArrayList<>();
@@ -46,6 +48,7 @@ public class MotionEventCodec {
         eventMap.put("edgeFlags", event.getEdgeFlags());
         eventMap.put("source", event.getSource());
         eventMap.put("flags", event.getFlags());
+        eventMap.put("motionEventId", MOTION_EVENT_ID++);
 
         return eventMap;
     }

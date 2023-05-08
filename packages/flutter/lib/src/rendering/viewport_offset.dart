@@ -2,36 +2,64 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 /// The direction of a scroll, relative to the positive scroll offset axis given
 /// by an [AxisDirection] and a [GrowthDirection].
 ///
-/// This contrasts to [GrowthDirection] in that it has a third value, [idle],
-/// for the case where no scroll is occurring.
+/// This is similar to [GrowthDirection], but contrasts in that it has a third
+/// value, [idle], for the case where no scroll is occurring.
 ///
 /// This is used by [RenderSliverFloatingPersistentHeader] to only expand when
 /// the user is scrolling in the same direction as the detected scroll offset
 /// change.
+///
+/// {@template flutter.rendering.ScrollDirection.sample}
+/// {@tool dartpad}
+/// This sample shows a [CustomScrollView], with [Radio] buttons in the
+/// [AppBar.bottom] that change the [AxisDirection] to illustrate different
+/// configurations. With a [NotificationListener] to listen to
+/// [UserScrollNotification]s, which occur when the [ScrollDirection] changes
+/// or stops.
+///
+/// ** See code in examples/api/lib/rendering/scroll_direction/scroll_direction.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+///
+/// See also:
+///
+///  * [AxisDirection], which is a directional version of this enum (with values
+///    like left and right, rather than just horizontal).
+///  * [GrowthDirection], the direction in which slivers and their content are
+///    ordered, relative to the scroll offset axis as specified by
+///    [AxisDirection].
+///  * [UserScrollNotification], which will notify listeners when the
+///    [ScrollDirection] changes.
 enum ScrollDirection {
   /// No scrolling is underway.
   idle,
 
-  /// Scrolling is happening in the positive scroll offset direction.
-  ///
-  /// For example, for the [GrowthDirection.forward] part of a vertical
-  /// [AxisDirection.down] list, this means the content is moving up, exposing
-  /// lower content.
-  forward,
-
   /// Scrolling is happening in the negative scroll offset direction.
   ///
   /// For example, for the [GrowthDirection.forward] part of a vertical
-  /// [AxisDirection.down] list, this means the content is moving down, exposing
-  /// earlier content.
+  /// [AxisDirection.down] list, which is the default directional configuration
+  /// of all scroll views, this means the content is going down, exposing
+  /// earlier content as it approaches the zero position.
+  ///
+  /// An anecdote for this most common case is 'forward is toward' the zero
+  /// position.
+  forward,
+
+  /// Scrolling is happening in the positive scroll offset direction.
+  ///
+  /// For example, for the [GrowthDirection.forward] part of a vertical
+  /// [AxisDirection.down] list, which is the default directional configuration
+  /// of all scroll views, this means the content is moving up, exposing
+  /// lower content.
+  ///
+  /// An anecdote for this most common case is reversing, or backing away, from
+  /// the zero position.
   reverse,
 }
 
@@ -49,7 +77,6 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
     case ScrollDirection.reverse:
       return ScrollDirection.forward;
   }
-  return null;
 }
 
 /// Which part of the content inside the viewport should be visible.
@@ -94,6 +121,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// This object notifies its listeners when this value changes (except when
   /// the value changes due to [correctBy]).
   double get pixels;
+
+  /// Whether the [pixels] property is available.
+  bool get hasPixels;
 
   /// Called when the viewport's extents are established.
   ///
@@ -179,8 +209,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// animation, use [jumpTo].
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -192,11 +222,10 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// underscroll.
   Future<void> moveTo(
     double to, {
-    Duration duration,
-    Curve curve,
-    bool clamp,
+    Duration? duration,
+    Curve? curve,
+    bool? clamp,
   }) {
-    assert(to != null);
     if (duration == null || duration == Duration.zero) {
       jumpTo(to);
       return Future<void>.value();
@@ -206,7 +235,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   }
 
   /// The direction in which the user is trying to change [pixels], relative to
-  /// the viewport's [RenderViewport.axisDirection].
+  /// the viewport's [RenderViewportBase.axisDirection].
   ///
   /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
   /// even if there is (for example) a [ScrollActivity] currently animating the
@@ -217,6 +246,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// For example, [RenderSliverFloatingPersistentHeader] will only expand a
   /// floating app bar when the [userScrollDirection] is in the positive scroll
   /// offset direction.
+  ///
+  /// {@macro flutter.rendering.ScrollDirection.sample}
   ScrollDirection get userScrollDirection;
 
   /// Whether a viewport is allowed to change [pixels] implicitly to respond to
@@ -242,11 +273,13 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// the [State] base class calls [debugFillDescription] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    description.add('offset: ${pixels?.toStringAsFixed(1)}');
+    if (hasPixels) {
+      description.add('offset: ${pixels.toStringAsFixed(1)}');
+    }
   }
 }
 
@@ -258,6 +291,9 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   double get pixels => _pixels;
+
+  @override
+  bool get hasPixels => true;
 
   @override
   bool applyViewportDimension(double viewportDimension) => true;
@@ -278,8 +314,8 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   Future<void> animateTo(
     double to, {
-    @required Duration duration,
-    @required Curve curve,
+    required Duration duration,
+    required Curve curve,
   }) async { }
 
   @override

@@ -5,8 +5,10 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -18,6 +20,8 @@ import 'thumb_painter.dart';
 // void setState(VoidCallback fn) { }
 
 /// An iOS-style slider.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ufb4gIPDmEs}
 ///
 /// Used to select from a range of values.
 ///
@@ -32,6 +36,12 @@ import 'thumb_painter.dart';
 /// the slider changes, the widget calls the [onChanged] callback. Most widgets
 /// that use a slider will listen for the [onChanged] callback and rebuild the
 /// slider with a new [value] to update the visual appearance of the slider.
+///
+/// {@tool dartpad}
+/// This example shows how to show the current slider value as it changes.
+///
+/// ** See code in examples/api/lib/cupertino/slider/cupertino_slider.0.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -51,9 +61,9 @@ class CupertinoSlider extends StatefulWidget {
   /// * [onChangeEnd] is called when the user is done selecting a new value for
   ///   the slider.
   const CupertinoSlider({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    super.key,
+    required this.value,
+    required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
     this.min = 0.0,
@@ -61,13 +71,8 @@ class CupertinoSlider extends StatefulWidget {
     this.divisions,
     this.activeColor,
     this.thumbColor = CupertinoColors.white,
-  }) : assert(value != null),
-       assert(min != null),
-       assert(max != null),
-       assert(value >= min && value <= max),
-       assert(divisions == null || divisions > 0),
-       assert(thumbColor != null),
-       super(key: key);
+  }) : assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0);
 
   /// The currently selected value for this slider.
   ///
@@ -106,7 +111,7 @@ class CupertinoSlider extends StatefulWidget {
   ///    changing the value.
   ///  * [onChangeEnd] for a callback that is called when the user stops
   ///    changing the value.
-  final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChanged;
 
   /// Called when the user starts selecting a new value for the slider.
   ///
@@ -141,7 +146,7 @@ class CupertinoSlider extends StatefulWidget {
   ///
   ///  * [onChangeEnd] for a callback that is called when the value change is
   ///    complete.
-  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double>? onChangeStart;
 
   /// Called when the user is done selecting a new value for the slider.
   ///
@@ -173,7 +178,7 @@ class CupertinoSlider extends StatefulWidget {
   ///
   ///  * [onChangeStart] for a callback that is called when a value change
   ///    begins.
-  final ValueChanged<double> onChangeEnd;
+  final ValueChanged<double>? onChangeEnd;
 
   /// The minimum value the user can select.
   ///
@@ -188,12 +193,12 @@ class CupertinoSlider extends StatefulWidget {
   /// The number of discrete divisions.
   ///
   /// If null, the slider is continuous.
-  final int divisions;
+  final int? divisions;
 
   /// The color to use for the portion of the slider that has been selected.
   ///
   /// Defaults to the [CupertinoTheme]'s primary color if null.
-  final Color activeColor;
+  final Color? activeColor;
 
   /// The color to use for the thumb of the slider.
   ///
@@ -203,7 +208,7 @@ class CupertinoSlider extends StatefulWidget {
   final Color thumbColor;
 
   @override
-  _CupertinoSliderState createState() => _CupertinoSliderState();
+  State<CupertinoSlider> createState() => _CupertinoSliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -217,20 +222,20 @@ class CupertinoSlider extends StatefulWidget {
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    final double lerpValue = lerpDouble(widget.min, widget.max, value);
+    final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
     if (lerpValue != widget.value) {
-      widget.onChanged(lerpValue);
+      widget.onChanged!(lerpValue);
     }
   }
 
   void _handleDragStart(double value) {
     assert(widget.onChangeStart != null);
-    widget.onChangeStart(lerpDouble(widget.min, widget.max, value));
+    widget.onChangeStart!(lerpDouble(widget.min, widget.max, value)!);
   }
 
   void _handleDragEnd(double value) {
     assert(widget.onChangeEnd != null);
-    widget.onChangeEnd(lerpDouble(widget.min, widget.max, value));
+    widget.onChangeEnd!(lerpDouble(widget.min, widget.max, value)!);
   }
 
   @override
@@ -253,28 +258,28 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
 
 class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSliderRenderObjectWidget({
-    Key key,
-    this.value,
+    required this.value,
     this.divisions,
-    this.activeColor,
-    this.thumbColor,
+    required this.activeColor,
+    required this.thumbColor,
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
-    this.vsync,
-  }) : super(key: key);
+    required this.vsync,
+  });
 
   final double value;
-  final int divisions;
+  final int? divisions;
   final Color activeColor;
   final Color thumbColor;
-  final ValueChanged<double> onChanged;
-  final ValueChanged<double> onChangeStart;
-  final ValueChanged<double> onChangeEnd;
+  final ValueChanged<double>? onChanged;
+  final ValueChanged<double>? onChangeStart;
+  final ValueChanged<double>? onChangeEnd;
   final TickerProvider vsync;
 
   @override
   _RenderCupertinoSlider createRenderObject(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     return _RenderCupertinoSlider(
       value: value,
       divisions: divisions,
@@ -286,11 +291,13 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChangeEnd: onChangeEnd,
       vsync: vsync,
       textDirection: Directionality.of(context),
+      cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoSlider renderObject) {
+    assert(debugCheckHasDirectionality(context));
     renderObject
       ..value = value
       ..divisions = divisions
@@ -313,20 +320,21 @@ const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
 
 const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
-class _RenderCupertinoSlider extends RenderConstrainedBox {
+class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTrackerAnnotation {
   _RenderCupertinoSlider({
-    @required double value,
-    int divisions,
-    Color activeColor,
-    Color thumbColor,
-    Color trackColor,
-    ValueChanged<double> onChanged,
+    required double value,
+    int? divisions,
+    required Color activeColor,
+    required Color thumbColor,
+    required Color trackColor,
+    ValueChanged<double>? onChanged,
     this.onChangeStart,
     this.onChangeEnd,
-    TickerProvider vsync,
-    @required TextDirection textDirection,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
-       assert(textDirection != null),
+    required TickerProvider vsync,
+    required TextDirection textDirection,
+    MouseCursor cursor = MouseCursor.defer,
+  }) : assert(value >= 0.0 && value <= 1.0),
+       _cursor = cursor,
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
@@ -349,22 +357,25 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double get value => _value;
   double _value;
   set value(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
-    if (newValue == _value)
+    assert(newValue >= 0.0 && newValue <= 1.0);
+    if (newValue == _value) {
       return;
+    }
     _value = newValue;
-    if (divisions != null)
+    if (divisions != null) {
       _position.animateTo(newValue, curve: Curves.fastOutSlowIn);
-    else
+    } else {
       _position.value = newValue;
+    }
     markNeedsSemanticsUpdate();
   }
 
-  int get divisions => _divisions;
-  int _divisions;
-  set divisions(int value) {
-    if (value == _divisions)
+  int? get divisions => _divisions;
+  int? _divisions;
+  set divisions(int? value) {
+    if (value == _divisions) {
       return;
+    }
     _divisions = value;
     markNeedsPaint();
   }
@@ -372,8 +383,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color get activeColor => _activeColor;
   Color _activeColor;
   set activeColor(Color value) {
-    if (value == _activeColor)
+    if (value == _activeColor) {
       return;
+    }
     _activeColor = value;
     markNeedsPaint();
   }
@@ -381,8 +393,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color get thumbColor => _thumbColor;
   Color _thumbColor;
   set thumbColor(Color value) {
-    if (value == _thumbColor)
+    if (value == _thumbColor) {
       return;
+    }
     _thumbColor = value;
     markNeedsPaint();
   }
@@ -390,61 +403,63 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    if (value == _trackColor)
+    if (value == _trackColor) {
       return;
+    }
     _trackColor = value;
     markNeedsPaint();
   }
 
-  ValueChanged<double> get onChanged => _onChanged;
-  ValueChanged<double> _onChanged;
-  set onChanged(ValueChanged<double> value) {
-    if (value == _onChanged)
+  ValueChanged<double>? get onChanged => _onChanged;
+  ValueChanged<double>? _onChanged;
+  set onChanged(ValueChanged<double>? value) {
+    if (value == _onChanged) {
       return;
+    }
     final bool wasInteractive = isInteractive;
     _onChanged = value;
-    if (wasInteractive != isInteractive)
+    if (wasInteractive != isInteractive) {
       markNeedsSemanticsUpdate();
+    }
   }
 
-  ValueChanged<double> onChangeStart;
-  ValueChanged<double> onChangeEnd;
+  ValueChanged<double>? onChangeStart;
+  ValueChanged<double>? onChangeEnd;
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
-    if (_textDirection == value)
+    if (_textDirection == value) {
       return;
+    }
     _textDirection = value;
     markNeedsPaint();
   }
 
-  AnimationController _position;
+  late AnimationController _position;
 
-  HorizontalDragGestureRecognizer _drag;
+  late HorizontalDragGestureRecognizer _drag;
   double _currentDragValue = 0.0;
 
   double get _discretizedCurrentDragValue {
-    double dragValue = _currentDragValue.clamp(0.0, 1.0) as double;
-    if (divisions != null)
-      dragValue = (dragValue * divisions).round() / divisions;
+    double dragValue = clampDouble(_currentDragValue, 0.0, 1.0);
+    if (divisions != null) {
+      dragValue = (dragValue * divisions!).round() / divisions!;
+    }
     return dragValue;
   }
 
   double get _trackLeft => _kPadding;
   double get _trackRight => size.width - _kPadding;
   double get _thumbCenter {
-    double visualPosition;
+    final double visualPosition;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _value;
-        break;
       case TextDirection.ltr:
         visualPosition = _value;
-        break;
     }
-    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition);
+    return lerpDouble(_trackLeft + CupertinoThumbPainter.radius, _trackRight - CupertinoThumbPainter.radius, visualPosition)!;
   }
 
   bool get isInteractive => onChanged != null;
@@ -454,16 +469,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
       final double extent = math.max(_kPadding, size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
-      final double valueDelta = details.primaryDelta / extent;
+      final double valueDelta = details.primaryDelta! / extent;
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
-          break;
         case TextDirection.ltr:
           _currentDragValue += valueDelta;
-          break;
       }
-      onChanged(_discretizedCurrentDragValue);
+      onChanged!(_discretizedCurrentDragValue);
     }
   }
 
@@ -471,18 +484,14 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _startInteraction(Offset globalPosition) {
     if (isInteractive) {
-      if (onChangeStart != null) {
-        onChangeStart(_discretizedCurrentDragValue);
-      }
+      onChangeStart?.call(_discretizedCurrentDragValue);
       _currentDragValue = _value;
-      onChanged(_discretizedCurrentDragValue);
+      onChanged!(_discretizedCurrentDragValue);
     }
   }
 
   void _endInteraction() {
-    if (onChangeEnd != null) {
-      onChangeEnd(_discretizedCurrentDragValue);
-    }
+    onChangeEnd?.call(_discretizedCurrentDragValue);
     _currentDragValue = 0.0;
   }
 
@@ -494,26 +503,25 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent && isInteractive)
+    if (event is PointerDownEvent && isInteractive) {
       _drag.addPointer(event);
+    }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    double visualPosition;
-    Color leftColor;
-    Color rightColor;
+    final double visualPosition;
+    final Color leftColor;
+    final Color rightColor;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
         leftColor = _activeColor;
         rightColor = trackColor;
-        break;
       case TextDirection.ltr:
         visualPosition = _position.value;
         leftColor = trackColor;
         rightColor = _activeColor;
-        break;
     }
 
     final double trackCenter = offset.dy + size.height / 2.0;
@@ -544,25 +552,51 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isInteractive;
+    config.isSlider = true;
     if (isInteractive) {
       config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
       config.value = '${(value * 100).round()}%';
-      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
-      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.increasedValue = '${(clampDouble(value + _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${(clampDouble(value - _semanticActionUnit, 0.0, 1.0) * 100).round()}%';
     }
   }
 
-  double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
+  double get _semanticActionUnit => divisions != null ? 1.0 / divisions! : _kAdjustmentUnit;
 
   void _increaseAction() {
-    if (isInteractive)
-      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0) as double);
+    if (isInteractive) {
+      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
+    }
   }
 
   void _decreaseAction() {
-    if (isInteractive)
-      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
+    if (isInteractive) {
+      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
+    }
   }
+
+  @override
+  MouseCursor get cursor => _cursor;
+  MouseCursor _cursor;
+  set cursor(MouseCursor value) {
+    if (_cursor != value) {
+      _cursor = value;
+      // A repaint is needed in order to trigger a device update of
+      // [MouseTracker] so that this new value can be found.
+      markNeedsPaint();
+    }
+  }
+
+  @override
+  PointerEnterEventListener? onEnter;
+
+  PointerHoverEventListener? onHover;
+
+  @override
+  PointerExitEventListener? onExit;
+
+  @override
+  bool get validForMouseTracker => false;
 }

@@ -90,16 +90,16 @@ void main() {
       const Key child2Key = Key('child2');
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Center(
             child: ButtonBar(
               key: buttonBarKey,
               // buttonPadding set to zero to simplify test calculations.
               buttonPadding: EdgeInsets.zero,
               children: <Widget>[
-                Container(key: child0Key, width: 100.0, height: 100.0),
-                Container(key: child1Key, width: 100.0, height: 100.0),
-                Container(key: child2Key, width: 100.0, height: 100.0),
+                SizedBox(key: child0Key, width: 100.0, height: 100.0),
+                SizedBox(key: child1Key, width: 100.0, height: 100.0),
+                SizedBox(key: child2Key, width: 100.0, height: 100.0),
               ],
             ),
           ),
@@ -111,7 +111,7 @@ void main() {
       expect(buttonBarRect.size.width, equals(800.0));
       expect(buttonBarRect.size.height, equals(100.0));
 
-      // The children of [ButtonBar] are aligned by [MainAxisAligment.end] by
+      // The children of [ButtonBar] are aligned by [MainAxisAlignment.end] by
       // default.
       Rect childRect;
       childRect = tester.getRect(find.byKey(child0Key));
@@ -136,9 +136,9 @@ void main() {
       const Key child1Key = Key('child1');
       const Key child2Key = Key('child2');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: ButtonBarTheme(
-            data: const ButtonBarThemeData(
+            data: ButtonBarThemeData(
               mainAxisSize: MainAxisSize.min,
             ),
             child: Center(
@@ -147,9 +147,9 @@ void main() {
                 // buttonPadding set to zero to simplify test calculations.
                 buttonPadding: EdgeInsets.zero,
                 children: <Widget>[
-                  Container(key: child0Key, width: 100.0, height: 100.0),
-                  Container(key: child1Key, width: 100.0, height: 100.0),
-                  Container(key: child2Key, width: 100.0, height: 100.0),
+                  SizedBox(key: child0Key, width: 100.0, height: 100.0),
+                  SizedBox(key: child1Key, width: 100.0, height: 100.0),
+                  SizedBox(key: child2Key, width: 100.0, height: 100.0),
                 ],
               ),
             ),
@@ -191,9 +191,9 @@ void main() {
       const Key child1Key = Key('child1');
       const Key child2Key = Key('child2');
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: ButtonBarTheme(
-            data: const ButtonBarThemeData(
+            data: ButtonBarThemeData(
               mainAxisSize: MainAxisSize.min,
             ),
             child: Center(
@@ -203,9 +203,9 @@ void main() {
                 buttonPadding: EdgeInsets.zero,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Container(key: child0Key, width: 100.0, height: 100.0),
-                  Container(key: child1Key, width: 100.0, height: 100.0),
-                  Container(key: child2Key, width: 100.0, height: 100.0),
+                  SizedBox(key: child0Key, width: 100.0, height: 100.0),
+                  SizedBox(key: child1Key, width: 100.0, height: 100.0),
+                  SizedBox(key: child2Key, width: 100.0, height: 100.0),
                 ],
               ),
             ),
@@ -218,7 +218,7 @@ void main() {
       expect(buttonBarRect.size.width, equals(800.0));
       expect(buttonBarRect.size.height, equals(100.0));
 
-      // The children of [ButtonBar] are aligned by [MainAxisAligment.end] by
+      // The children of [ButtonBar] are aligned by [MainAxisAlignment.end] by
       // default.
       Rect childRect;
       childRect = tester.getRect(find.byKey(child0Key));
@@ -238,10 +238,10 @@ void main() {
     });
   });
 
-  group('button properies override ButtonTheme', () {
+  group('button properties override ButtonTheme', () {
 
     testWidgets('default button properties override ButtonTheme properties', (WidgetTester tester) async {
-      BuildContext capturedContext;
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBar(
@@ -264,7 +264,7 @@ void main() {
     });
 
     testWidgets('ButtonBarTheme button properties override defaults and ButtonTheme properties', (WidgetTester tester) async {
-      BuildContext capturedContext;
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBarTheme(
@@ -297,7 +297,7 @@ void main() {
     });
 
     testWidgets('ButtonBar button properties override ButtonBarTheme, defaults and ButtonTheme properties', (WidgetTester tester) async {
-      BuildContext capturedContext;
+      late BuildContext capturedContext;
       await tester.pumpWidget(
         MaterialApp(
           home: ButtonBarTheme(
@@ -341,9 +341,9 @@ void main() {
 
     testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SingleChildScrollView(
+        const SingleChildScrollView(
           child: ListBody(
-            children: const <Widget>[
+            children: <Widget>[
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: ButtonBar(
@@ -364,9 +364,9 @@ void main() {
 
     testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
       await tester.pumpWidget(
-        SingleChildScrollView(
+        const SingleChildScrollView(
           child: ListBody(
-            children: const <Widget>[
+            children: <Widget>[
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: ButtonBar(
@@ -394,8 +394,8 @@ void main() {
         MaterialApp(
           home: ButtonBar(
             children: <Widget>[
-              Container(key: keyOne, height: 50.0, width: 800.0),
-              Container(key: keyTwo, height: 50.0, width: 800.0),
+              SizedBox(key: keyOne, height: 50.0, width: 800.0),
+              SizedBox(key: keyTwo, height: 50.0, width: 800.0),
             ],
           ),
         ),
@@ -419,8 +419,8 @@ void main() {
               // Set padding to zero to align buttons with edge of button bar.
               buttonPadding: EdgeInsets.zero,
               children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
+                SizedBox(key: keyOne, height: 50.0, width: 500.0),
+                SizedBox(key: keyTwo, height: 50.0, width: 500.0),
               ],
             ),
           ),
@@ -447,8 +447,8 @@ void main() {
             // Set padding to zero to align buttons with edge of button bar.
             buttonPadding: EdgeInsets.zero,
             children: <Widget>[
-              Container(key: keyOne, height: 50.0, width: 500.0),
-              Container(key: keyTwo, height: 50.0, width: 500.0),
+              SizedBox(key: keyOne, height: 50.0, width: 500.0),
+              SizedBox(key: keyTwo, height: 50.0, width: 500.0),
             ],
           ),
         ),
@@ -474,8 +474,8 @@ void main() {
             // Set padding to zero to align buttons with edge of button bar.
             buttonPadding: EdgeInsets.zero,
             children: <Widget>[
-              Container(key: keyOne, height: 50.0, width: 500.0),
-              Container(key: keyTwo, height: 50.0, width: 500.0),
+              SizedBox(key: keyOne, height: 50.0, width: 500.0),
+              SizedBox(key: keyTwo, height: 50.0, width: 500.0),
             ],
           ),
         ),
@@ -504,8 +504,8 @@ void main() {
               // Set padding to zero to align buttons with edge of button bar.
               buttonPadding: EdgeInsets.zero,
               children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
+                SizedBox(key: keyOne, height: 50.0, width: 500.0),
+                SizedBox(key: keyTwo, height: 50.0, width: 500.0),
               ],
             ),
           ),
@@ -527,8 +527,8 @@ void main() {
               // Set padding to zero to align buttons with edge of button bar.
               buttonPadding: EdgeInsets.zero,
               children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
+                SizedBox(key: keyOne, height: 50.0, width: 500.0),
+                SizedBox(key: keyTwo, height: 50.0, width: 500.0),
               ],
             ),
           ),
@@ -560,8 +560,8 @@ void main() {
               // out upwards.
               overflowDirection: VerticalDirection.up,
               children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
+                SizedBox(key: keyOne, height: 50.0, width: 500.0),
+                SizedBox(key: keyTwo, height: 50.0, width: 500.0),
               ],
             ),
           ),
@@ -586,8 +586,8 @@ void main() {
               // Set padding to zero to align buttons with edge of button bar.
               buttonPadding: EdgeInsets.zero,
               children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
+                SizedBox(key: keyOne, height: 50.0, width: 500.0),
+                SizedBox(key: keyTwo, height: 50.0, width: 500.0),
               ],
             ),
           ),
@@ -614,8 +614,8 @@ void main() {
               // buttons in an overflow case.
               overflowButtonSpacing: 10.0,
               children: <Widget>[
-                Container(key: keyOne, height: 50.0, width: 500.0),
-                Container(key: keyTwo, height: 50.0, width: 500.0),
+                SizedBox(key: keyOne, height: 50.0, width: 500.0),
+                SizedBox(key: keyTwo, height: 50.0, width: 500.0),
               ],
             ),
           ),
@@ -626,5 +626,19 @@ void main() {
         expect(containerOneRect.bottom, containerTwoRect.top - 10.0);
       },
     );
+  });
+
+  testWidgets('_RenderButtonBarRow.constraints does not work before layout', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: ButtonBar()),
+      Duration.zero,
+      EnginePhase.build,
+    );
+
+    final Finder buttonBar = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ButtonBarRow');
+    final RenderBox renderButtonBar = tester.renderObject(buttonBar) as RenderBox;
+
+    expect(renderButtonBar.debugNeedsLayout, isTrue);
+    expect(() => renderButtonBar.constraints, throwsStateError);
   });
 }

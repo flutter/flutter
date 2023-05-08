@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:archive/archive.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
 
@@ -16,20 +16,20 @@ const String kDocRoot = 'dev/docs/doc';
 Future<void> main(List<String> args) async {
   final String engineVersion = File('bin/internal/engine.version').readAsStringSync().trim();
 
-  final String javadocUrl = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/android-javadoc.zip';
+  final String javadocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
   generateDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html');
 
-  final String objcdocUrl = 'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/ios-objcdoc.zip';
+  final String objcdocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/ios-objcdoc.zip';
   generateDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
 /// Fetches the zip archive at the specified url.
 ///
 /// Returns null if the archive fails to download after [maxTries] attempts.
-Future<Archive> fetchArchive(String url, int maxTries) async {
-  List<int> responseBytes;
+Future<Archive?> fetchArchive(String url, int maxTries) async {
+  List<int>? responseBytes;
   for (int i = 0; i < maxTries; i++) {
-    final http.Response response = await http.get(url);
+    final http.Response response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       responseBytes = response.bodyBytes;
       break;
@@ -38,7 +38,7 @@ Future<Archive> fetchArchive(String url, int maxTries) async {
 
     // On failure print a short snipped from the body in case it's helpful.
     final int bodyLength = min(1024, response.body.length);
-    stderr.writeln('Response status code ${response.statusCode}. Body: ' + response.body.substring(0, bodyLength));
+    stderr.writeln('Response status code ${response.statusCode}. Body: ${response.body.substring(0, bodyLength)}');
     sleep(const Duration(seconds: 1));
   }
   return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
@@ -46,7 +46,7 @@ Future<Archive> fetchArchive(String url, int maxTries) async {
 
 Future<void> generateDocs(String url, String docName, String checkFile) async {
   const int maxTries = 5;
-  final Archive archive = await fetchArchive(url, maxTries);
+  final Archive? archive = await fetchArchive(url, maxTries);
   if (archive == null) {
     stderr.writeln('Failed to fetch zip archive from: $url after $maxTries attempts. Giving up.');
     exit(1);
@@ -64,10 +64,30 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
     }
   }
 
+  /// If object then copy files to old location if the archive is using the new location.
+  final bool exists = Directory('$kDocRoot/$docName/objectc_docs').existsSync();
+  if (exists) {
+    copyFolder(Directory('$kDocRoot/$docName/objectc_docs'), Directory('$kDocRoot/$docName/'));
+  }
+
   final File testFile = File('${output.path}/$checkFile');
   if (!testFile.existsSync()) {
     print('Expected file ${testFile.path} not found');
     exit(1);
   }
   print('$docName ready to go!');
+}
+
+/// Copies the files in a directory recursively to a new location.
+void copyFolder(Directory source, Directory destination) {
+  source.listSync()
+  .forEach((FileSystemEntity entity) {
+    if (entity is Directory) {
+      final Directory newDirectory = Directory(path.join(destination.absolute.path, path.basename(entity.path)));
+      newDirectory.createSync();
+      copyFolder(entity.absolute, newDirectory);
+    } else if (entity is File) {
+      entity.copySync(path.join(destination.path, path.basename(entity.path)));
+    }
+  });
 }

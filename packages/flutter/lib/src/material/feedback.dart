@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +32,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithWrappedHandler extends StatelessWidget {
+///   const WidgetWithWrappedHandler({super.key});
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(
@@ -60,6 +60,8 @@ import 'theme.dart';
 ///
 /// ```dart
 /// class WidgetWithExplicitCall extends StatelessWidget {
+///   const WidgetWithExplicitCall({super.key});
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return GestureDetector(
@@ -79,12 +81,7 @@ import 'theme.dart';
 /// }
 /// ```
 /// {@end-tool}
-class Feedback {
-  // This class is not meant to be instatiated or extended; this constructor
-  // prevents instantiation and extension.
-  // ignore: unused_element
-  Feedback._();
-
+abstract final class Feedback {
   /// Provides platform-specific feedback for a tap.
   ///
   /// On Android the click system sound is played. On iOS this is a no-op.
@@ -94,7 +91,7 @@ class Feedback {
   ///  * [wrapForTap] to trigger platform-specific feedback before executing a
   ///    [GestureTapCallback].
   static Future<void> forTap(BuildContext context) async {
-    context.findRenderObject().sendSemanticsEvent(const TapSemanticEvent());
+    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -104,10 +101,7 @@ class Feedback {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return Future<void>.value();
-        break;
     }
-    assert(false, 'Unhandled TargetPlatform ${_platform(context)}');
-    return Future<void>.value();
   }
 
   /// Wraps a [GestureTapCallback] to provide platform specific feedback for a
@@ -120,9 +114,10 @@ class Feedback {
   ///
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
-  static GestureTapCallback wrapForTap(GestureTapCallback callback, BuildContext context) {
-    if (callback == null)
+  static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
+    if (callback == null) {
       return null;
+    }
     return () {
       Feedback.forTap(context);
       callback();
@@ -139,7 +134,7 @@ class Feedback {
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
   static Future<void> forLongPress(BuildContext context) {
-    context.findRenderObject().sendSemanticsEvent(const LongPressSemanticsEvent());
+    context.findRenderObject()!.sendSemanticsEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -149,10 +144,7 @@ class Feedback {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         return Future<void>.value();
-        break;
     }
-    assert(false, 'Unhandled TargetPlatform ${_platform(context)}');
-    return Future<void>.value();
   }
 
   /// Wraps a [GestureLongPressCallback] to provide platform specific feedback
@@ -166,9 +158,10 @@ class Feedback {
   ///
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
-  static GestureLongPressCallback wrapForLongPress(GestureLongPressCallback callback, BuildContext context) {
-    if (callback == null)
+  static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
+    if (callback == null) {
       return null;
+    }
     return () {
       Feedback.forLongPress(context);
       callback();

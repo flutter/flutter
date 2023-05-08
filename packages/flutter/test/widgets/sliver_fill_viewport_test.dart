@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
-      return Container(child: Text('$i', textDirection: TextDirection.ltr));
+      return ColoredBox(color: Colors.green, child: Text('$i', textDirection: TextDirection.ltr));
     });
 
     await tester.pumpWidget(
@@ -25,7 +25,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box.size.height, equals(600.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -52,7 +52,7 @@ void main() {
     await tester.drag(find.byType(Scrollable), const Offset(0.0, 700.0));
     await tester.pump();
 
-    final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(ColoredBox).first);
     expect(box2.size.height, equals(600.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -102,21 +102,27 @@ void main() {
         '   │ │ diagnosis: insufficient data to draw conclusion (less than five\n'
         '   │ │   repaints)\n'
         '   │ │\n'
-        '   │ └─child: RenderParagraph#00000\n'
+        '   │ └─child: _RenderColoredBox#00000\n'
         '   │   │ parentData: <none> (can use size)\n'
         '   │   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        '   │   │ semantics node: SemanticsNode#2\n'
         '   │   │ size: Size(800.0, 600.0)\n'
-        '   │   │ textAlign: start\n'
-        '   │   │ textDirection: ltr\n'
-        '   │   │ softWrap: wrapping at box width\n'
-        '   │   │ overflow: clip\n'
-        '   │   │ maxLines: unlimited\n'
-        '   │   ╘═╦══ text ═══\n'
-        '   │     ║ TextSpan:\n'
-        '   │     ║   <all styles inherited>\n'
-        '   │     ║   "0"\n'
-        '   │     ╚═══════════\n'
+        '   │   │ behavior: opaque\n'
+        '   │   │\n'
+        '   │   └─child: RenderParagraph#00000\n'
+        '   │     │ parentData: <none> (can use size)\n'
+        '   │     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '   │     │ semantics node: SemanticsNode#2\n'
+        '   │     │ size: Size(800.0, 600.0)\n'
+        '   │     │ textAlign: start\n'
+        '   │     │ textDirection: ltr\n'
+        '   │     │ softWrap: wrapping at box width\n'
+        '   │     │ overflow: clip\n'
+        '   │     │ maxLines: unlimited\n'
+        '   │     ╘═╦══ text ═══\n'
+        '   │       ║ TextSpan:\n'
+        '   │       ║   <all styles inherited>\n'
+        '   │       ║   "0"\n'
+        '   │       ╚═══════════\n'
         '   └─child with index 1: RenderRepaintBoundary#00000\n'
         '     │ needs compositing\n'
         '     │ parentData: index=1; layoutOffset=600.0\n'
@@ -127,22 +133,27 @@ void main() {
         '     │ diagnosis: insufficient data to draw conclusion (less than five\n'
         '     │   repaints)\n'
         '     │\n'
-        '     └─child: RenderParagraph#00000\n'
+        '     └─child: _RenderColoredBox#00000\n'
         '       │ parentData: <none> (can use size)\n'
         '       │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        '       │ semantics node: SemanticsNode#3\n'
         '       │ size: Size(800.0, 600.0)\n'
-        '       │ textAlign: start\n'
-        '       │ textDirection: ltr\n'
-        '       │ softWrap: wrapping at box width\n'
-        '       │ overflow: clip\n'
-        '       │ maxLines: unlimited\n'
-        '       ╘═╦══ text ═══\n'
-        '         ║ TextSpan:\n'
-        '         ║   <all styles inherited>\n'
-        '         ║   "1"\n'
-        '         ╚═══════════\n'
-        ''
+        '       │ behavior: opaque\n'
+        '       │\n'
+        '       └─child: RenderParagraph#00000\n'
+        '         │ parentData: <none> (can use size)\n'
+        '         │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '         │ semantics node: SemanticsNode#3\n'
+        '         │ size: Size(800.0, 600.0)\n'
+        '         │ textAlign: start\n'
+        '         │ textDirection: ltr\n'
+        '         │ softWrap: wrapping at box width\n'
+        '         │ overflow: clip\n'
+        '         │ maxLines: unlimited\n'
+        '         ╘═╦══ text ═══\n'
+        '           ║ TextSpan:\n'
+        '           ║   <all styles inherited>\n'
+        '           ║   "1"\n'
+        '           ╚═══════════\n',
       ),
     );
   });
@@ -150,7 +161,7 @@ void main() {
   testWidgets('SliverFillViewport padding test', (WidgetTester tester) async {
     final SliverChildListDelegate delegate = SliverChildListDelegate(
       <Widget>[
-        Container(child: const Text('0')),
+        const Text('0'),
       ],
       addAutomaticKeepAlives: false,
       addSemanticIndexes: false,
@@ -162,7 +173,6 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverFillViewport(
-              padEnds: true,
               viewportFraction: 0.5,
               delegate: delegate,
             ),
@@ -172,7 +182,7 @@ void main() {
     );
 
     final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
-    expect(boxWithPadding.geometry.paintExtent, equals(600.0));
+    expect(boxWithPadding.geometry!.paintExtent, equals(600.0));
 
     await tester.pumpWidget(
       Directionality(
@@ -190,6 +200,6 @@ void main() {
     );
 
     final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
-    expect(boxWithoutPadding.geometry.paintExtent, equals(300.0));
+    expect(boxWithoutPadding.geometry!.paintExtent, equals(300.0));
   });
 }

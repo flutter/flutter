@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show hashValues;
-
 import 'package:flutter/foundation.dart';
 
 /// A description of an icon fulfilled by a font glyph.
@@ -30,7 +28,7 @@ class IconData {
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
-  final String fontFamily;
+  final String? fontFamily;
 
   /// The name of the package from which the font family is included.
   ///
@@ -40,7 +38,7 @@ class IconData {
   /// See also:
   ///
   ///  * [TextStyle], which describes how to use fonts from other packages.
-  final String fontPackage;
+  final String? fontPackage;
 
   /// Whether this icon should be automatically mirrored in right-to-left
   /// environments.
@@ -51,8 +49,9 @@ class IconData {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is IconData
         && other.codePoint == codePoint
         && other.fontFamily == fontFamily
@@ -61,7 +60,7 @@ class IconData {
   }
 
   @override
-  int get hashCode => hashValues(codePoint, fontFamily, fontPackage, matchTextDirection);
+  int get hashCode => Object.hash(codePoint, fontFamily, fontPackage, matchTextDirection);
 
   @override
   String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
@@ -73,30 +72,33 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   ///
   /// The [showName], [style], and [level] arguments must not be null.
   IconDataProperty(
-    String name,
-    IconData value, {
-    String ifNull,
-    bool showName = true,
-    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-    DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null),
-       super(name, value,
-         showName: showName,
-         ifNull: ifNull,
-         style: style,
-         level: level,
-       );
+    String super.name,
+    super.value, {
+    super.ifNull,
+    super.showName,
+    super.style,
+    super.level,
+  });
 
   @override
-  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final Map<String, Object> json = super.toJsonMap(delegate);
+  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
       json['valueProperties'] = <String, Object>{
-        'codePoint': value.codePoint,
+        'codePoint': value!.codePoint,
       };
     }
     return json;
   }
 }
+
+class _StaticIconProvider {
+  const _StaticIconProvider();
+}
+
+/// Annotation for classes that only provide static const [IconData] instances.
+///
+/// This is a hint to the font tree shaker to ignore the constant instances
+/// of [IconData] appearing in the class when tracking which code points
+/// should be retained in the bundled font.
+const Object staticIconProvider = _StaticIconProvider();

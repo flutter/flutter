@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ElevationDemo extends StatefulWidget {
+  const ElevationDemo({super.key});
+
   static const String routeName = '/material/elevation';
 
   @override
@@ -54,6 +56,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
         actions: <Widget>[
           MaterialDemoDocumentationButton(ElevationDemo.routeName),
           IconButton(
+            tooltip: 'Toggle elevation',
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() => _showElevation = !_showElevation);
@@ -61,7 +64,12 @@ class _ElevationDemoState extends State<ElevationDemo> {
           ),
         ],
       ),
-      body: Scrollbar(child: ListView(children: buildCards())),
+      body: Scrollbar(
+        child: ListView(
+          primary: true,
+          children: buildCards(),
+        ),
+      ),
     );
   }
 }

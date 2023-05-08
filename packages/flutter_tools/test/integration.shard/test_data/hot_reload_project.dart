@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import '../test_utils.dart';
 import 'project.dart';
 
 class HotReloadProject extends Project {
+  HotReloadProject({super.indexHtml});
+
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -25,12 +25,21 @@ class HotReloadProject extends Project {
   import 'package:flutter/scheduler.dart';
   import 'package:flutter/services.dart';
   import 'package:flutter/widgets.dart';
+  import 'package:flutter/foundation.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    runApp(MyApp());
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    // See https://github.com/flutter/flutter/issues/86202
+    if (kIsWeb) {
+      while (true) {
+        runApp(MyApp());
+        await Future.delayed(const Duration(seconds: 1));
+      }
+    } else {
+     runApp(MyApp());
+    }
   }
 
   int count = 1;
@@ -53,8 +62,8 @@ class HotReloadProject extends Project {
       // breakpoint.
       // tick 3 = second hot reload warmup reassemble frame (pre breakpoint)
       if (count == 2) {
-        SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
-          SchedulerBinding.instance.scheduleFrameCallback((Duration timestamp) {
+        SchedulerBinding.instance!.scheduleFrameCallback((Duration timestamp) {
+          SchedulerBinding.instance!.scheduleFrameCallback((Duration timestamp) {
             print('breakpoint line'); // SCHEDULED BREAKPOINT
           });
         });
@@ -86,6 +95,10 @@ class HotReloadProject extends Project {
       '// printHotReloadWorked();',
       'printHotReloadWorked();',
     );
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }

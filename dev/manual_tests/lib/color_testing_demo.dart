@@ -3,18 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-
-class ColorTestingDemo extends StatelessWidget {
-  const ColorTestingDemo({ Key key }) : super(key: key);
-
-  static const String routeName = '/color_demo';
-
-  @override
-  Widget build(BuildContext context) => ColorDemoHome();
-}
 
 class ColorDemoHome extends StatelessWidget {
+  const ColorDemoHome({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +43,7 @@ class ColorDemoHome extends StatelessWidget {
 }
 
 class GradientRow extends StatelessWidget {
-  const GradientRow({ Key key, this.rightColor, this.leftColor }) : super(key: key);
+  const GradientRow({ super.key, required this.rightColor, required this.leftColor });
 
   final Color leftColor;
   final Color rightColor;
@@ -72,7 +64,7 @@ class GradientRow extends StatelessWidget {
 }
 
 class ColorRow extends StatelessWidget {
-  const ColorRow({ Key key, this.color }) : super(key: key);
+  const ColorRow({ super.key, required this.color });
 
   final Color color;
 
@@ -86,7 +78,7 @@ class ColorRow extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     title: 'Color Testing Demo',
     home: ColorDemoHome(),
   ));

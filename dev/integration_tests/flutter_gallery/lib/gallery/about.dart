@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
 class _LinkTextSpan extends TextSpan {
@@ -23,19 +22,18 @@ class _LinkTextSpan extends TextSpan {
   // manage the recognizer from outside the TextSpan, e.g. in the State of a
   // stateful widget that then hands the recognizer to the TextSpan.
 
-  _LinkTextSpan({ TextStyle style, String url, String text }) : super(
-    style: style,
+  _LinkTextSpan({ super.style, required String url, String? text }) : super(
     text: text ?? url,
     recognizer: TapGestureRecognizer()..onTap = () {
-      launch(url, forceSafariVC: false);
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
   );
 }
 
 void showGalleryAboutDialog(BuildContext context) {
   final ThemeData themeData = Theme.of(context);
-  final TextStyle aboutTextStyle = themeData.textTheme.bodyText1;
-  final TextStyle linkStyle = themeData.textTheme.bodyText1.copyWith(color: themeData.accentColor);
+  final TextStyle? aboutTextStyle = themeData.textTheme.bodyLarge;
+  final TextStyle linkStyle = themeData.textTheme.bodyLarge!.copyWith(color: themeData.colorScheme.primary);
 
   showAboutDialog(
     context: context,

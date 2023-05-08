@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
+# TODO(zanderso): refactor this and xcode_backend.sh into one script
 # once iOS is using 'assemble'.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
@@ -17,75 +17,147 @@ EchoError() {
   echo "$@" 1>&2
 }
 
-# Set the working directory to the project root
-project_path="${SOURCE_ROOT}/.."
-RunCommand pushd "${project_path}" > /dev/null
+ParseFlutterBuildMode() {
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
-# Set the verbose flag.
-verbose_flag=""
-if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
-    verbose_flag="--verbose"
-fi
+  case "$build_mode" in
+    *release*) build_mode="release";;
+    *profile*) build_mode="profile";;
+    *debug*) build_mode="debug";;
+    *)
+      EchoError "========================================================================"
+      EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
+      EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
+      EchoError "If that is not set, the CONFIGURATION environment variable is used."
+      EchoError ""
+      EchoError "You can fix this by either adding an appropriately named build"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
+      EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
+      EchoError "========================================================================"
+      exit -1;;
+  esac
+  echo "${build_mode}"
+}
 
-# Set the target file.
-target_path="lib/main.dart"
-if [[ -n "$FLUTTER_TARGET" ]]; then
-    target_path="${FLUTTER_TARGET}"
-fi
+BuildApp() {
+  # Set the working directory to the project root
+  local project_path="${SOURCE_ROOT}/.."
+  RunCommand pushd "${project_path}" > /dev/null
 
-if [[ -n "$FLUTTER_ENGINE" ]]; then
-  flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
-fi
-
-# Set the build mode
-build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
-
-if [[ -n "$LOCAL_ENGINE" ]]; then
-  if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
-    EchoError "========================================================================"
-    EchoError "ERROR: Requested build with Flutter local engine at '${LOCAL_ENGINE}'"
-    EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
-    EchoError "You can fix this by updating the LOCAL_ENGINE environment variable, or"
-    EchoError "by running:"
-    EchoError "  flutter build macos --local-engine=host_${build_mode}"
-    EchoError "or"
-    EchoError "  flutter build macos --local-engine=host_${build_mode}_unopt"
-    EchoError "========================================================================"
-    exit -1
+  # Set the target file.
+  local target_path="lib/main.dart"
+  if [[ -n "$FLUTTER_TARGET" ]]; then
+      target_path="${FLUTTER_TARGET}"
   fi
-  local_engine_flag="--local-engine=${LOCAL_ENGINE}"
+
+  # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
+  # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
+  # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+  local build_mode="$(ParseFlutterBuildMode)"
+
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
+      EchoError "========================================================================"
+      EchoError "ERROR: Requested build with Flutter local engine at '${LOCAL_ENGINE}'"
+      EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
+      EchoError "You can fix this by updating the LOCAL_ENGINE environment variable, or"
+      EchoError "by running:"
+      EchoError "  flutter build macos --local-engine=host_${build_mode}"
+      EchoError "or"
+      EchoError "  flutter build macos --local-engine=host_${build_mode}_unopt"
+      EchoError "========================================================================"
+      exit -1
+    fi
+  fi
+
+  # The path where the input/output xcfilelists are stored. These are used by xcode
+  # to conditionally skip this script phase if neither have changed.
+  local ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
+  local build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
+  local build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
+
+  # Construct the "flutter assemble" argument array. Arguments should be added
+  # as quoted string elements of the flutter_args array, otherwise an argument
+  # (like a path) with spaces in it might be interpreted as two separate
+  # arguments.
+  local flutter_args=("${FLUTTER_ROOT}/bin/flutter")
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    flutter_args+=('--verbose')
+  fi
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
+    flutter_args+=("--local-engine-src-path=${FLUTTER_ENGINE}")
+  fi
+  if [[ -n "$LOCAL_ENGINE" ]]; then
+    flutter_args+=("--local-engine=${LOCAL_ENGINE}")
+  fi
+  flutter_args+=(
+    "assemble"
+    "--no-version-check"
+    "-dTargetPlatform=darwin"
+    "-dDarwinArchs=${ARCHS}"
+    "-dTargetFile=${target_path}"
+    "-dBuildMode=${build_mode}"
+    "-dTreeShakeIcons=${TREE_SHAKE_ICONS}"
+    "-dDartObfuscation=${DART_OBFUSCATION}"
+    "-dSplitDebugInfo=${SPLIT_DEBUG_INFO}"
+    "-dTrackWidgetCreation=${TRACK_WIDGET_CREATION}"
+    "-dAction=${ACTION}"
+    "--DartDefines=${DART_DEFINES}"
+    "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
+    "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"
+    "--build-inputs=${build_inputs_path}"
+    "--build-outputs=${build_outputs_path}"
+    "--output=${BUILT_PRODUCTS_DIR}"
+  )
+  if [[ -n "$PERFORMANCE_MEASUREMENT_FILE" ]]; then
+    flutter_args+=("--performance-measurement-file=${PERFORMANCE_MEASUREMENT_FILE}")
+  fi
+  if [[ -n "$BUNDLE_SKSL_PATH" ]]; then
+    flutter_args+=("-dBundleSkSLPath=${BUNDLE_SKSL_PATH}")
+  fi
+  if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
+    flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
+  fi
+  flutter_args+=("${build_mode}_macos_bundle_flutter_assets")
+
+  RunCommand "${flutter_args[@]}"
+}
+
+# Adds the App.framework as an embedded binary and the flutter_assets as
+# resources.
+EmbedFrameworks() {
+  # Embed App.framework from Flutter into the app (after creating the Frameworks directory
+  # if it doesn't already exist).
+  local xcode_frameworks_dir="${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+  RunCommand mkdir -p -- "${xcode_frameworks_dir}"
+  RunCommand rsync -av --delete --filter "- .DS_Store" "${BUILT_PRODUCTS_DIR}/App.framework" "${xcode_frameworks_dir}"
+
+  # Embed the actual FlutterMacOS.framework that the Flutter app expects to run against,
+  # which could be a local build or an arch/type specific build.
+
+  # Copy Xcode behavior and don't copy over headers or modules.
+  RunCommand rsync -av --delete --filter "- .DS_Store" --filter "- Headers" --filter "- Modules" "${BUILT_PRODUCTS_DIR}/FlutterMacOS.framework" "${xcode_frameworks_dir}/"
+
+  # Sign the binaries we moved.
+  if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
+    RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/FlutterMacOS.framework/FlutterMacOS"
+  fi
+}
+
+# Main entry point.
+if [[ $# == 0 ]]; then
+  # Unnamed entry point defaults to build.
+  BuildApp
+else
+  case $1 in
+    "build")
+      BuildApp ;;
+    "embed")
+      EmbedFrameworks ;;
+  esac
 fi
-
-# The path where the input/output xcfilelists are stored. These are used by xcode
-# to conditionally skip this script phase if neither have changed.
-ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
-build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
-build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
-
-icon_tree_shaker_flag="false"
-if [[ -n "$TREE_SHAKE_ICONS" ]]; then
-  icon_tree_shaker_flag="true"
-fi
-
-dart_obfuscation_flag="false"
-if [[ -n "$DART_OBFUSCATION" ]]; then
-  dart_obfuscation_flag="true"
-fi
-
-RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
-    ${verbose_flag}                                                         \
-    ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}                                                    \
-    assemble                                                                \
-    -dTargetPlatform=darwin-x64                                             \
-    -dTargetFile="${target_path}"                                           \
-    -dBuildMode="${build_mode}"                                             \
-    -dTreeShakeIcons="${icon_tree_shaker_flag}"                             \
-    -dDartObfuscation="${dart_obfuscation_flag}"                            \
-    -dSplitDebugInfo="${SPLIT_DEBUG_INFO}"                                  \
-    -dDartDefines="${DART_DEFINES}"                                         \
-    -dExtraFrontEndOptions="${EXTRA_FRONT_END_OPTIONS}"                     \
-    --build-inputs="${build_inputs_path}"                                   \
-    --build-outputs="${build_outputs_path}"                                 \
-    --output="${ephemeral_dir}"                                             \
-   "${build_mode}_macos_bundle_flutter_assets"

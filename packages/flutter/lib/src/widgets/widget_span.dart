@@ -8,6 +8,9 @@ import 'package:flutter/painting.dart';
 
 import 'framework.dart';
 
+// Examples can assume:
+// late WidgetSpan myWidgetSpan;
+
 /// An immutable widget that is embedded inline within text.
 ///
 /// The [child] property is the widget that will be embedded. Children are
@@ -27,7 +30,7 @@ import 'framework.dart';
 /// A card with `Hello World!` embedded inline within a TextSpan tree.
 ///
 /// ```dart
-/// Text.rich(
+/// const Text.rich(
 ///   TextSpan(
 ///     children: <InlineSpan>[
 ///       TextSpan(text: 'Flutter is'),
@@ -70,21 +73,17 @@ class WidgetSpan extends PlaceholderSpan {
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
-    @required this.child,
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline baseline,
-    TextStyle style,
-  }) : assert(child != null),
-       assert(baseline != null || !(
-         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.baseline)
-       )),
-       super(
-         alignment: alignment,
-         baseline: baseline,
-         style: style,
-       );
+    required this.child,
+    super.alignment,
+    super.baseline,
+    super.style,
+  }) : assert(
+         baseline != null || !(
+          identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+          identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+          identical(alignment, ui.PlaceholderAlignment.baseline)
+        ),
+      );
 
   /// The widget to embed inline within text.
   final Widget child;
@@ -98,15 +97,15 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, @required List<PlaceholderDimensions> dimensions }) {
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
-    assert(builder.placeholderCount < dimensions.length);
-    final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
+    assert(builder.placeholderCount < dimensions!.length);
+    final PlaceholderDimensions currentDimensions = dimensions![builder.placeholderCount];
     builder.addPlaceholder(
       currentDimensions.size.width,
       currentDimensions.size.height,
@@ -127,7 +126,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
     if (position.offset == offset.value) {
       return this;
     }
@@ -136,41 +135,52 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  int codeUnitAtVisitor(int index, Accumulator offset) {
-    return null;
+  int? codeUnitAtVisitor(int index, Accumulator offset) {
+    final int localOffset = index - offset.value;
+    assert(localOffset >= 0);
+    offset.increment(1);
+    return localOffset == 0 ? PlaceholderSpan.placeholderCodeUnit : null;
   }
 
   @override
   RenderComparison compareTo(InlineSpan other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return RenderComparison.identical;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return RenderComparison.layout;
-    if ((style == null) != (other.style == null))
+    }
+    if ((style == null) != (other.style == null)) {
       return RenderComparison.layout;
+    }
     final WidgetSpan typedOther = other as WidgetSpan;
     if (child != typedOther.child || alignment != typedOther.alignment) {
       return RenderComparison.layout;
     }
     RenderComparison result = RenderComparison.identical;
     if (style != null) {
-      final RenderComparison candidate = style.compareTo(other.style);
-      if (candidate.index > result.index)
+      final RenderComparison candidate = style!.compareTo(other.style!);
+      if (candidate.index > result.index) {
         result = candidate;
-      if (result == RenderComparison.layout)
+      }
+      if (result == RenderComparison.layout) {
         return result;
+      }
     }
     return result;
   }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
+    if (identical(this, other)) {
       return true;
-    if (other.runtimeType != runtimeType)
+    }
+    if (other.runtimeType != runtimeType) {
       return false;
-    if (super != other)
+    }
+    if (super != other) {
       return false;
+    }
     return other is WidgetSpan
         && other.child == child
         && other.alignment == alignment
@@ -178,11 +188,11 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  int get hashCode => hashValues(super.hashCode, child, alignment, baseline);
+  int get hashCode => Object.hash(super.hashCode, child, alignment, baseline);
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan getSpanForPosition(TextPosition position) {
+  InlineSpan? getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     return null;
   }

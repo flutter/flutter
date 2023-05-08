@@ -7,31 +7,33 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoAlertDemo extends StatefulWidget {
+  const CupertinoAlertDemo({super.key});
+
   static const String routeName = '/cupertino/alert';
 
   @override
-  _CupertinoAlertDemoState createState() => _CupertinoAlertDemoState();
+  State<CupertinoAlertDemo> createState() => _CupertinoAlertDemoState();
 }
 
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
-  String lastSelectedValue;
+  String? lastSelectedValue;
 
-  void showDemoDialog({BuildContext context, Widget child}) {
+  void showDemoDialog({required BuildContext context, Widget? child}) {
     showCupertinoDialog<String>(
       context: context,
-      builder: (BuildContext context) => child,
-    ).then((String value) {
+      builder: (BuildContext context) => child!,
+    ).then((String? value) {
       if (value != null) {
         setState(() { lastSelectedValue = value; });
       }
     });
   }
 
-  void showDemoActionSheet({BuildContext context, Widget child}) {
+  void showDemoActionSheet({required BuildContext context, Widget? child}) {
     showCupertinoModalPopup<String>(
       context: context,
-      builder: (BuildContext context) => child,
-    ).then((String value) {
+      builder: (BuildContext context) => child!,
+    ).then((String? value) {
       if (value != null) {
         setState(() { lastSelectedValue = value; });
       }
@@ -58,6 +60,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
               children: <Widget>[
                 CupertinoScrollbar(
                   child: ListView(
+                    primary: true,
                     // Add more padding to the normal safe area.
                     padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
                         + MediaQuery.of(context).padding,
@@ -68,20 +71,20 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Alert with Title'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Alert with Title'),
                         onPressed: () => _onAlertWithTitlePress(context),
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Alert with Buttons'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Alert with Buttons'),
                         onPressed: () => _onAlertWithButtonsPress(context),
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Alert Buttons Only'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Alert Buttons Only'),
                         onPressed: () {
                           showDemoDialog(
                             context: context,
@@ -91,8 +94,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                       ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       CupertinoButton.filled(
-                        child: const Text('Action Sheet'),
                         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+                        child: const Text('Action Sheet'),
                         onPressed: () => _onActionSheetPress(context),
                       ),
                     ],
@@ -118,13 +121,13 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
         title: const Text('Discard draft?'),
         actions: <Widget>[
           CupertinoDialogAction(
-            child: const Text('Discard'),
             isDestructiveAction: true,
+            child: const Text('Discard'),
             onPressed: () => Navigator.pop(context, 'Discard'),
           ),
           CupertinoDialogAction(
-            child: const Text('Cancel'),
             isDefaultAction: true,
+            child: const Text('Cancel'),
             onPressed: () => Navigator.pop(context, 'Cancel'),
           ),
         ],
@@ -186,8 +189,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
           isDefaultAction: true,
+          child: const Text('Cancel'),
           onPressed: () => Navigator.pop(context, 'Cancel'),
         ),
       ),
@@ -196,10 +199,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
 }
 
 class CupertinoDessertDialog extends StatelessWidget {
-  const CupertinoDessertDialog({Key key, this.title, this.content}) : super(key: key);
+  const CupertinoDessertDialog({super.key, this.title, this.content});
 
-  final Widget title;
-  final Widget content;
+  final Widget? title;
+  final Widget? content;
 
   @override
   Widget build(BuildContext context) {
@@ -250,8 +253,8 @@ class CupertinoDessertDialog extends StatelessWidget {
           },
         ),
         CupertinoDialogAction(
-          child: const Text('Cancel'),
           isDestructiveAction: true,
+          child: const Text('Cancel'),
           onPressed: () {
             Navigator.pop(context, 'Cancel');
           },

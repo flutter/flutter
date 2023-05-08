@@ -18,5 +18,9 @@
   "cutButtonLabel": "Prit",
   "copyButtonLabel": "Kopjo",
   "pasteButtonLabel": "Ngjit",
-  "selectAllButtonLabel": "Zgjidhi të gjitha"
+  "selectAllButtonLabel": "Zgjidhi të gjitha",
+  "tabSemanticsLabel": "Skeda $tabIndex nga $tabCount",
+  "modalBarrierDismissLabel": "Hiq",
+  "searchTextFieldPlaceholderLabel": "Kërko",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

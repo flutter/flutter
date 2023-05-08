@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:complex_layout/main.dart';
+import 'package:complex_layout/src/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,16 +27,15 @@ Future<void> main() async {
       ready.complete();
     },
     behavior: HitTestBehavior.opaque,
-    child: IgnorePointer(
-      ignoring: true,
+    child: const IgnorePointer(
       child: ComplexLayoutApp(),
     ),
   ));
   await SchedulerBinding.instance.endOfFrame;
 
-  /// Wait 50ms to allow the GPU thread to actually put up the frame. (The
-  /// endOfFrame future ends when we send the data to the engine, before the GPU
-  /// thread has had a chance to rasterize, etc.)
+  /// Wait 50ms to allow the raster thread to actually put up the frame. (The
+  /// endOfFrame future ends when we send the data to the engine, before
+  /// the raster thread has had a chance to rasterize, etc.)
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
@@ -45,7 +44,7 @@ Future<void> main() async {
 
   // remove onTap handler, enable pointer events for app
   runApp(GestureDetector(
-    child: IgnorePointer(
+    child: const IgnorePointer(
       ignoring: false,
       child: ComplexLayoutApp(),
     ),

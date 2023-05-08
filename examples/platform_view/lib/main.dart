@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(PlatformView());
+  runApp(const PlatformView());
 }
 
 class PlatformView extends StatelessWidget {
+  const PlatformView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,12 +27,12 @@ class PlatformView extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -45,11 +47,27 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  static Widget get _buttonText {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return const Text('Continue in Android view');
+      case TargetPlatform.iOS:
+        return const Text('Continue in iOS view');
+      case TargetPlatform.windows:
+        return const Text('Continue in Windows view');
+      case TargetPlatform.macOS:
+        return const Text('Continue in macOS view');
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+        throw UnimplementedError('Platform not yet implemented');
+    }
+  }
+
   Future<void> _launchPlatformCount() async {
-    final int platformCounter =
+    final int? platformCounter =
         await _methodChannel.invokeMethod('switchView', _counter);
     setState(() {
-      _counter = platformCounter;
+      _counter = platformCounter!;
     });
   }
 
@@ -72,11 +90,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(18.0),
-                      child: RaisedButton(
-                          child: Platform.isIOS
-                              ? const Text('Continue in iOS view')
-                              : const Text('Continue in Android view'),
-                          onPressed: _launchPlatformCount),
+                      child: ElevatedButton(
+                        onPressed: _launchPlatformCount,
+                        child: _buttonText,
+                      ),
                     ),
                   ],
                 ),
@@ -86,8 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
               child: Row(
                 children: <Widget>[
-                  Image.asset('assets/flutter-mark-square-64.png',
-                      scale: 1.5),
+                  Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
                   const Text(
                     'Flutter',
                     style: TextStyle(fontSize: 30.0),

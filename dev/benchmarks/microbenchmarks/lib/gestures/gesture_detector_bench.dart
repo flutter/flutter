@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../common.dart';
 import './apps/button_matrix_app.dart' as button_matrix;
+import '../common.dart';
 
 const int _kNumWarmUpIters = 20;
 const int _kNumIters = 300;
 
 Future<void> main() async {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final Stopwatch watch = Stopwatch();
   print('GestureDetector semantics benchmark...');
 

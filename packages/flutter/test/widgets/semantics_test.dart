@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,7 +17,7 @@ void main() {
   });
 
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
-    SemanticsTester semantics = SemanticsTester(tester);
+    SemanticsTester? semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -31,12 +29,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Container(
-        child: Semantics(
-          label: 'test1',
-          textDirection: TextDirection.ltr,
-          child: Container(),
-        ),
+      Semantics(
+        label: 'test1',
+        textDirection: TextDirection.ltr,
+        child: Container(),
       ),
     );
 
@@ -64,21 +60,83 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
+  testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListView(
+              children: <Widget>[
+                SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      Container(padding: const EdgeInsets.only(top: 20.0)),
+                      const Text('label'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ),
+    );
+
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    await tester.pump();
+    // Semantics should stay the same after a frame update.
+    expect(semantics, isNot(includesNodeWith(
+      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+      tags: <SemanticsTag>{RenderViewport.useTwoPaneSemantics},
+    )));
+
+    semantics.dispose();
+  }, semanticsEnabled: false);
+
+  testWidgets('Semantics tooltip', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          tooltip: 'test1',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      Semantics(
+        tooltip: 'test1',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
+    semantics.dispose();
+  });
+
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
-          child: Semantics(
-            key: key,
-            container: true,
-            label: 'test2a',
-            child: Container(),
-          ),
+          key: key,
+          container: true,
+          label: 'test2a',
+          child: Container(),
         ),
       ),
     ));
@@ -103,18 +161,16 @@ void main() {
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: Container(
+      child: Semantics(
+        label: 'test1',
         child: Semantics(
-          label: 'test1',
+          container: true,
+          label: 'middle',
           child: Semantics(
+            key: key,
             container: true,
-            label: 'middle',
-            child: Semantics(
-              key: key,
-              container: true,
-              label: 'test2b',
-              child: Container(),
-            ),
+            label: 'test2b',
+            child: Container(),
           ),
         ),
       ),
@@ -312,14 +368,14 @@ void main() {
             children: <Widget>[
               Semantics(
                 value: 'value one',
-                child: Container(
+                child: const SizedBox(
                   height: 10.0,
                   width: 10.0,
                 ),
               ),
               Semantics(
                 value: 'value two',
-                child: Container(
+                child: const SizedBox(
                   height: 10.0,
                   width: 10.0,
                 ),
@@ -387,6 +443,54 @@ void main() {
     semantics.dispose();
   });
 
+    testWidgets('Semantics tagForChildren works', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          tagForChildren: const SemanticsTag('custom tag'),
+          child: Column(
+            children: <Widget>[
+              Semantics(
+                container: true,
+                child: const Text('child 1'),
+              ),
+              Semantics(
+                container: true,
+                child: const Text('child 2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'child 1',
+              tags: <SemanticsTag>[const SemanticsTag('custom tag')],
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'child 2',
+              tags: <SemanticsTag>[const SemanticsTag('custom tag')],
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
   testWidgets('Semantics widget supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
@@ -410,12 +514,14 @@ void main() {
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onSetText: (String _) => performedActions.add(SemanticsAction.setText),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
       ),
     );
 
-    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+    // ignore: deprecated_member_use
+    final Set<SemanticsAction> allActions = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList.toSet()
       ..remove(SemanticsAction.moveCursorForwardByWord)
       ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
@@ -434,21 +540,38 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     // Do the actions work?
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     int expectedLength = 1;
     for (final SemanticsAction action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
           semanticsOwner.performAction(expectedId, action, true);
-          break;
         case SemanticsAction.setSelection:
           semanticsOwner.performAction(expectedId, action, <dynamic, dynamic>{
             'base': 4,
             'extent': 5,
           });
-          break;
-        default:
+        case SemanticsAction.setText:
+          semanticsOwner.performAction(expectedId, action, 'text');
+        case SemanticsAction.copy:
+        case SemanticsAction.customAction:
+        case SemanticsAction.cut:
+        case SemanticsAction.decrease:
+        case SemanticsAction.didGainAccessibilityFocus:
+        case SemanticsAction.didLoseAccessibilityFocus:
+        case SemanticsAction.dismiss:
+        case SemanticsAction.increase:
+        case SemanticsAction.longPress:
+        case SemanticsAction.moveCursorBackwardByWord:
+        case SemanticsAction.moveCursorForwardByWord:
+        case SemanticsAction.paste:
+        case SemanticsAction.scrollDown:
+        case SemanticsAction.scrollLeft:
+        case SemanticsAction.scrollRight:
+        case SemanticsAction.scrollUp:
+        case SemanticsAction.showOnScreen:
+        case SemanticsAction.tap:
           semanticsOwner.performAction(expectedId, action);
       }
       expect(performedActions.length, expectedLength);
@@ -461,7 +584,7 @@ void main() {
 
   testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    // Note: checked state and toggled state are mutually exclusive.
+    // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
         Semantics(
           key: const Key('a'),
@@ -473,6 +596,8 @@ void main() {
           checked: true,
           selected: true,
           button: true,
+          slider: true,
+          keyboardKey: true,
           link: true,
           textField: true,
           readOnly: true,
@@ -488,11 +613,13 @@ void main() {
           liveRegion: true,
         ),
     );
-    final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    // ignore: deprecated_member_use
+    final List<SemanticsFlag> flags = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isCheckStateMixed);
 
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -539,7 +666,49 @@ void main() {
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    await tester.pumpWidget(
+        Semantics(
+          key: const Key('a'),
+          container: true,
+          explicitChildNodes: true,
+          // flags
+          enabled: true,
+          hidden: true,
+          checked: false,
+          mixed: true,
+          selected: true,
+          button: true,
+          slider: true,
+          keyboardKey: true,
+          link: true,
+          textField: true,
+          readOnly: true,
+          focused: true,
+          focusable: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+          obscured: true,
+          multiline: true,
+          scopesRoute: true,
+          namesRoute: true,
+          image: true,
+          liveRegion: true,
+        ),
+    );
+    flags
+      ..remove(SemanticsFlag.isChecked)
+      ..add(SemanticsFlag.isCheckStateMixed);
     semantics.dispose();
+    expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: flags,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
   });
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
@@ -548,7 +717,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
 
     final List<String> performedActions = <String>[];
@@ -571,7 +740,7 @@ void main() {
       ],
     );
 
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
 
     expect(semantics, hasSemantics(expectedSemantics));
     semanticsOwner.performAction(expectedId, SemanticsAction.tap);
@@ -722,7 +891,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -790,8 +959,10 @@ void main() {
             ],
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -803,7 +974,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -846,7 +1017,10 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true));
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -858,17 +1032,17 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
-            const Text('Label 1'),
-            const Text('Label 2'),
+            Text('Label 1'),
+            Text('Label 2'),
             Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Label 3'),
                 Text('Label 4'),
                 Text('Label 5'),
@@ -903,8 +1077,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -916,7 +1093,7 @@ void main() {
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
         semanticsUpdateCount += 1;
-      }
+      },
     );
     await tester.pumpWidget(
       Directionality(
@@ -927,8 +1104,8 @@ void main() {
             const Text('Label 2'),
             Transform.rotate(
               angle: pi / 2.0,
-              child: Row(
-                children: const <Widget>[
+              child: const Row(
+                children: <Widget>[
                   Text('Label 3'),
                   Text('Label 4'),
                   Text('Label 5'),
@@ -964,8 +1141,11 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
-    );
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     handle.dispose();
     semantics.dispose();
@@ -1064,7 +1244,8 @@ void main() {
         ),
         ignoreTransform: true,
         ignoreRect: true,
-        ignoreId: true),
+        ignoreId: true,
+      ),
     );
 
     handle.dispose();
@@ -1091,12 +1272,429 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreId: true, ignoreRect: true, ignoreTransform: true),
-    );
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
     semantics.dispose();
+  });
+
+  testWidgets('Can change handlers', (WidgetTester tester) async {
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onTap: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasTapAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDismiss: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDismissAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onLongPress: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasLongPressAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollLeft: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollLeftAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollRight: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollRightAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollUp: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollUpAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onScrollDown: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasScrollDownAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onIncrease: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasIncreaseAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDecrease: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDecreaseAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onCopy: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasCopyAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onCut: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasCutAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onPaste: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasPasteAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onSetSelection: (TextSelection _) {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasSetSelectionAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDidGainAccessibilityFocus: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDidGainAccessibilityFocusAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+      onDidLoseAccessibilityFocus: () {},
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      hasDidLoseAccessibilityFocusAction: true,
+      textDirection: TextDirection.ltr,
+    ));
+
+    await tester.pumpWidget(Semantics(
+      container: true,
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+
+    expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
+      label: 'foo',
+      textDirection: TextDirection.ltr,
+    ));
+  });
+
+  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110671.
+    // Construct a widget tree that will end up with a fitted box that applies
+    // a zero transform because it does not actually draw its children.
+    // Assert that this subtree gets dropped (the root node has no children).
+    await tester.pumpWidget(const Column(
+      children: <Widget>[
+        SizedBox(
+          height: 0,
+          width: 500,
+          child: FittedBox(
+            child: SizedBox(
+              height: 55,
+              width: 266,
+              child: SingleChildScrollView(child: Column()),
+            ),
+          ),
+        ),
+      ],
+    ));
+
+    final SemanticsNode node = RendererBinding.instance.renderView.debugSemantics!;
+
+    expect(node.transform, null); // Make sure the zero transform didn't end up on the root somehow.
+    expect(node.childrenCount, 0);
   });
 }
 
 class CustomSortKey extends OrdinalSortKey {
-  const CustomSortKey(double order, {String name}) : super(order, name: name);
+  const CustomSortKey(super.order, {super.name});
 }

@@ -1,0 +1,12 @@
+#include "include/{{projectName}}/{{pluginClassSnakeCase}}_c_api.h"
+
+#include <flutter/plugin_registrar_windows.h>
+
+#include "{{pluginClassSnakeCase}}.h"
+
+void {{pluginClass}}CApiRegisterWithRegistrar(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  {{projectName}}::{{pluginClass}}::RegisterWithRegistrar(
+      flutter::PluginRegistrarManager::GetInstance()
+          ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
+}

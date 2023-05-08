@@ -7,10 +7,12 @@ import 'package:flutter/cupertino.dart';
 import '../../gallery/demo.dart';
 
 class CupertinoSwitchDemo extends StatefulWidget {
+  const CupertinoSwitchDemo({super.key});
+
   static const String routeName = '/cupertino/switch';
 
   @override
-  _CupertinoSwitchDemoState createState() => _CupertinoSwitchDemoState();
+  State<CupertinoSwitchDemo> createState() => _CupertinoSwitchDemoState();
 }
 
 class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
@@ -55,8 +57,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                 ),
                 Semantics(
                   container: true,
-                  child: Column(
-                    children: const <Widget>[
+                  child: const Column(
+                    children: <Widget>[
                       CupertinoSwitch(
                         value: true,
                         onChanged: null,
@@ -69,8 +71,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                 ),
                 Semantics(
                   container: true,
-                  child: Column(
-                    children: const <Widget>[
+                  child: const Column(
+                    children: <Widget>[
                       CupertinoSwitch(
                         value: false,
                         onChanged: null,

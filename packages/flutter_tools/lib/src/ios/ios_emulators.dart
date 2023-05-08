@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
+import '../base/common.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -15,14 +14,17 @@ class IOSEmulators extends EmulatorDiscovery {
   bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
-  bool get canListAnything => globals.iosWorkflow.canListEmulators;
+  bool get canListAnything => globals.iosWorkflow?.canListEmulators ?? false;
 
   @override
   Future<List<Emulator>> get emulators async => getEmulators();
+
+  @override
+  bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id) : super(id, true);
+  const IOSEmulator(String id) : super(id, true);
 
   @override
   String get name => 'iOS Simulator';
@@ -37,16 +39,20 @@ class IOSEmulator extends Emulator {
   PlatformType get platformType => PlatformType.ios;
 
   @override
-  Future<void> launch() async {
+  Future<void> launch({bool coldBoot = false}) async {
+    final String? simulatorPath = globals.xcode?.getSimulatorPath();
+    if (simulatorPath == null) {
+      throwToolExit('Could not find Simulator app');
+    }
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>[
         'open',
         ...additionalArgs,
         '-a',
-        globals.xcode.getSimulatorPath(),
+        simulatorPath,
       ];
 
-      final RunResult launchResult = await processUtils.run(args);
+      final RunResult launchResult = await globals.processUtils.run(args);
       if (launchResult.exitCode != 0) {
         globals.printError('$launchResult');
         return false;
@@ -67,10 +73,10 @@ class IOSEmulator extends Emulator {
 
 /// Return the list of iOS Simulators (there can only be zero or one).
 List<IOSEmulator> getEmulators() {
-  final String simulatorPath = globals.xcode.getSimulatorPath();
+  final String? simulatorPath = globals.xcode?.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator(iosSimulatorId)];
+  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
 }

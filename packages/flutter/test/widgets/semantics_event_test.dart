@@ -52,16 +52,18 @@ void main() {
 class TestSemanticsEvent extends SemanticsEvent {
   TestSemanticsEvent({ this.text, this.number }) : super('TestEvent');
 
-  final String text;
-  final int number;
+  final String? text;
+  final int? number;
 
   @override
   Map<String, dynamic> getDataMap() {
     final Map<String, dynamic> result = <String, dynamic>{};
-    if (text != null)
+    if (text != null) {
       result['text'] = text;
-    if (number != null)
+    }
+    if (number != null) {
       result['number'] = number;
+    }
     return result;
   }
 }

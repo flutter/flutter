@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -15,31 +13,25 @@ void main() {
 }
 
 class DemoButton extends StatefulWidget {
-  const DemoButton({this.name, this.canRequestFocus = true, this.autofocus = false});
+  const DemoButton({super.key, required this.name, this.canRequestFocus = true, this.autofocus = false});
 
   final String name;
   final bool canRequestFocus;
   final bool autofocus;
 
   @override
-  _DemoButtonState createState() => _DemoButtonState();
+  State<DemoButton> createState() => _DemoButtonState();
 }
 
 class _DemoButtonState extends State<DemoButton> {
-  FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    focusNode = FocusNode(
+  late final FocusNode focusNode = FocusNode(
       debugLabel: widget.name,
       canRequestFocus: widget.canRequestFocus,
-    );
-  }
+  );
 
   @override
   void dispose() {
-    focusNode?.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
@@ -57,11 +49,20 @@ class _DemoButtonState extends State<DemoButton> {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
+    return TextButton(
       focusNode: focusNode,
       autofocus: widget.autofocus,
-      focusColor: Colors.red,
-      hoverColor: Colors.blue,
+      style: ButtonStyle(
+        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+          if (states.contains(MaterialState.focused)) {
+            return Colors.red.withOpacity(0.25);
+          }
+          if (states.contains(MaterialState.hovered)) {
+            return Colors.blue.withOpacity(0.25);
+          }
+          return Colors.transparent;
+        }),
+      ),
       onPressed: () => _handleOnPressed(),
       child: Text(widget.name),
     );
@@ -69,14 +70,14 @@ class _DemoButtonState extends State<DemoButton> {
 }
 
 class FocusDemo extends StatefulWidget {
-  const FocusDemo({Key key}) : super(key: key);
+  const FocusDemo({super.key});
 
   @override
-  _FocusDemoState createState() => _FocusDemoState();
+  State<FocusDemo> createState() => _FocusDemoState();
 }
 
 class _FocusDemoState extends State<FocusDemo> {
-  FocusNode outlineFocus;
+  FocusNode? outlineFocus;
 
   @override
   void initState() {
@@ -86,11 +87,11 @@ class _FocusDemoState extends State<FocusDemo> {
 
   @override
   void dispose() {
-    outlineFocus.dispose();
+    outlineFocus?.dispose();
     super.dispose();
   }
 
-  bool _handleKeyPress(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       print('Scope got key event: ${event.logicalKey}, $node');
       print('Keys down: ${RawKeyboard.instance.keysPressed}');
@@ -99,31 +100,31 @@ class _FocusDemoState extends State<FocusDemo> {
         if (event.isShiftPressed) {
           print('Moving to previous.');
           node.previousFocus();
-          return true;
+          return KeyEventResult.handled;
         } else {
           print('Moving to next.');
           node.nextFocus();
-          return true;
+          return KeyEventResult.handled;
         }
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
         node.focusInDirection(TraversalDirection.left);
-        return true;
+        return KeyEventResult.handled;
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
         node.focusInDirection(TraversalDirection.right);
-        return true;
+        return KeyEventResult.handled;
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         node.focusInDirection(TraversalDirection.up);
-        return true;
+        return KeyEventResult.handled;
       }
       if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
         node.focusInDirection(TraversalDirection.down);
-        return true;
+        return KeyEventResult.handled;
       }
     }
-    return false;
+    return KeyEventResult.ignored;
   }
 
   @override
@@ -137,7 +138,7 @@ class _FocusDemoState extends State<FocusDemo> {
         onKey: _handleKeyPress,
         autofocus: true,
         child: DefaultTextStyle(
-          style: textTheme.headline4,
+          style: textTheme.headlineMedium!,
           child: Scaffold(
             appBar: AppBar(
               title: const Text('Focus Demo'),
@@ -151,18 +152,18 @@ class _FocusDemoState extends State<FocusDemo> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         DemoButton(
                           name: 'One',
                           autofocus: true,
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         DemoButton(name: 'Two'),
                         DemoButton(
                           name: 'Three',
@@ -170,15 +171,15 @@ class _FocusDemoState extends State<FocusDemo> {
                         ),
                       ],
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const <Widget>[
+                      children: <Widget>[
                         DemoButton(name: 'Four'),
                         DemoButton(name: 'Five'),
                         DemoButton(name: 'Six'),
                       ],
                     ),
-                    OutlineButton(onPressed: () => print('pressed'), child: const Text('PRESS ME')),
+                    OutlinedButton(onPressed: () => print('pressed'), child: const Text('PRESS ME')),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: TextField(

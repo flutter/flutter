@@ -4,28 +4,26 @@
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/source.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:mockito/mockito.dart';
-import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+);
+
 void main() {
-  Testbed testbed;
-  SourceVisitor visitor;
-  Environment environment;
-  MockPlatform mockPlatform;
+  late Testbed testbed;
+  late SourceVisitor visitor;
+  late Environment environment;
 
   setUp(() {
-    mockPlatform = MockPlatform();
-    when(mockPlatform.isWindows).thenReturn(true);
     testbed = Testbed(setup: () {
       globals.fs.directory('cache').createSync();
       final Directory outputs = globals.fs.directory('outputs')
@@ -33,9 +31,10 @@ void main() {
       environment = Environment.test(
         globals.fs.currentDirectory,
         outputDir: outputs,
-        artifacts: globals.artifacts, // using real artifacts
+        artifacts: globals.artifacts!, // using real artifacts
         processManager: FakeProcessManager.any(),
         fileSystem: globals.fs,
+        // engineVersion being null simulates a local engine.
         logger: globals.logger,
       );
       visitor = SourceVisitor(environment);
@@ -43,7 +42,7 @@ void main() {
     });
   });
 
-  test('configures implicit vs explict correctly', () => testbed.run(() {
+  test('configures implicit vs explicit correctly', () => testbed.run(() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
   }));
@@ -203,7 +202,7 @@ void main() {
     expect(visitor.sources.single.path, r'C:\foo\bar.txt');
     expect(visitor.containsNewDepfile, false);
   }, overrides: <Type, Generator>{
-    Platform: () => mockPlatform,
+    Platform: () => windowsPlatform,
   }));
 
   test('can parse depfile with spaces in paths', () => testbed.run(() {
@@ -214,7 +213,22 @@ void main() {
     expect(visitor.sources.single.path, r'foo bar.txt');
     expect(visitor.containsNewDepfile, false);
   }));
-}
 
-class MockPlatform extends Mock implements Platform {}
-class MockArtifacts extends Mock implements Artifacts {}
+  test('Non-local engine builds use the engine.version file as an Artifact dependency', () => testbed.run(() {
+    final Artifacts artifacts = Artifacts.test();
+    final Environment environment = Environment.test(
+      globals.fs.currentDirectory,
+      artifacts: artifacts,
+      processManager: FakeProcessManager.any(),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      engineVersion: 'abcdefghijklmon' // Use a versioned engine.
+    );
+    visitor = SourceVisitor(environment);
+
+    const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
+    fizzSource.accept(visitor);
+
+    expect(visitor.sources.single.path, contains('engine.version'));
+  }));
+}

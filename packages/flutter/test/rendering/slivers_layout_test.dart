@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
 int layouts = 0;
 
 class RenderLayoutWatcher extends RenderProxyBox {
-  RenderLayoutWatcher(RenderBox child) : super(child);
+  RenderLayoutWatcher(RenderBox super.child);
   @override
   void performLayout() {
     layouts += 1;
@@ -19,6 +19,8 @@ class RenderLayoutWatcher extends RenderProxyBox {
 }
 
 void main() {
+  TestRenderingFlutterBinding.ensureInitialized();
+
   test('RenderViewport basic test - impact of layout', () {
     RenderSliverToBoxAdapter sliver;
     RenderViewport viewport;

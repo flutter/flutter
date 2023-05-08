@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -14,6 +13,7 @@ import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'material_state_mixin.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -25,8 +25,18 @@ import 'theme_data.dart';
 /// be used for custom Material buttons that optionally incorporate defaults
 /// from the themes or from app-specific sources.
 ///
-/// [RaisedButton] and [FlatButton] configure a [RawMaterialButton] based
-/// on the current [Theme] and [ButtonTheme].
+/// This class is planned to be deprecated in a future release, see
+/// [ButtonStyleButton], the base class of [ElevatedButton], [FilledButton],
+/// [OutlinedButton] and [TextButton].
+///
+/// See also:
+///
+///  * [ElevatedButton], a filled button whose material elevates when pressed.
+///  * [FilledButton], a filled button that doesn't elevate when pressed.
+///  * [FilledButton.tonal], a filled button variant that uses a secondary fill color.
+///  * [OutlinedButton], a button with an outlined border and no fill color.
+///  * [TextButton], a button with no outline or fill color.
+@Category(<String>['Material', 'Button'])
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
@@ -36,10 +46,11 @@ class RawMaterialButton extends StatefulWidget {
   /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
-    Key key,
-    @required this.onPressed,
+    super.key,
+    required this.onPressed,
     this.onLongPress,
     this.onHighlightChanged,
+    this.mouseCursor,
     this.textStyle,
     this.fillColor,
     this.focusColor,
@@ -52,29 +63,22 @@ class RawMaterialButton extends StatefulWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.padding = EdgeInsets.zero,
-    this.visualDensity = const VisualDensity(),
+    this.visualDensity = VisualDensity.standard,
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    MaterialTapTargetSize materialTapTargetSize,
+    MaterialTapTargetSize? materialTapTargetSize,
     this.child,
     this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
-       assert(shape != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(focusElevation != null && focusElevation >= 0.0),
-       assert(hoverElevation != null && hoverElevation >= 0.0),
-       assert(highlightElevation != null && highlightElevation >= 0.0),
-       assert(disabledElevation != null && disabledElevation >= 0.0),
-       assert(padding != null),
-       assert(constraints != null),
-       assert(animationDuration != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       super(key: key);
+       assert(elevation >= 0.0),
+       assert(focusElevation >= 0.0),
+       assert(hoverElevation >= 0.0),
+       assert(highlightElevation >= 0.0),
+       assert(disabledElevation >= 0.0);
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -83,7 +87,7 @@ class RawMaterialButton extends StatefulWidget {
   /// See also:
   ///
   ///  * [enabled], which is true if the button is enabled.
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   /// Called when the button is long-pressed.
   ///
@@ -92,7 +96,7 @@ class RawMaterialButton extends StatefulWidget {
   /// See also:
   ///
   ///  * [enabled], which is true if the button is enabled.
-  final VoidCallback onLongPress;
+  final VoidCallback? onLongPress;
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
@@ -100,34 +104,50 @@ class RawMaterialButton extends StatefulWidget {
   /// If [onPressed] changes from null to non-null while a gesture is ongoing,
   /// this can fire during the build phase (in which case calling
   /// [State.setState] is not allowed).
-  final ValueChanged<bool> onHighlightChanged;
+  final ValueChanged<bool>? onHighlightChanged;
+
+  /// {@template flutter.material.RawMaterialButton.mouseCursor}
+  /// The cursor for a mouse pointer when it enters or is hovering over the
+  /// button.
+  ///
+  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
+  /// {@endtemplate}
+  ///
+  /// If this property is null, [MaterialStateMouseCursor.clickable] will be used.
+  final MouseCursor? mouseCursor;
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [textStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
   ///  * [MaterialState.disabled].
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
 
   /// The color of the button's [Material].
-  final Color fillColor;
+  final Color? fillColor;
 
   /// The color for the button's [Material] when it has the input focus.
-  final Color focusColor;
+  final Color? focusColor;
 
   /// The color for the button's [Material] when a pointer is hovering over it.
-  final Color hoverColor;
+  final Color? hoverColor;
 
   /// The highlight color for the button's [InkWell].
-  final Color highlightColor;
+  final Color? highlightColor;
 
   /// The splash color for the button's [InkWell].
-  final Color splashColor;
+  final Color? splashColor;
 
   /// The elevation for the button's [Material] when the button
   /// is [enabled] but not pressed.
@@ -243,7 +263,7 @@ class RawMaterialButton extends StatefulWidget {
   final Duration animationDuration;
 
   /// Typically the button's label.
-  final Widget child;
+  final Widget? child;
 
   /// Whether the button is enabled or disabled.
   ///
@@ -261,12 +281,12 @@ class RawMaterialButton extends StatefulWidget {
   final MaterialTapTargetSize materialTapTargetSize;
 
   /// {@macro flutter.widgets.Focus.focusNode}
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// {@macro flutter.widgets.Clip}
+  /// {@macro flutter.material.Material.clipBehavior}
   ///
   /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
@@ -282,80 +302,43 @@ class RawMaterialButton extends StatefulWidget {
   final bool enableFeedback;
 
   @override
-  _RawMaterialButtonState createState() => _RawMaterialButtonState();
+  State<RawMaterialButton> createState() => _RawMaterialButtonState();
 }
 
-class _RawMaterialButtonState extends State<RawMaterialButton> {
-  final Set<MaterialState> _states = <MaterialState>{};
-
-  bool get _hovered => _states.contains(MaterialState.hovered);
-  bool get _focused => _states.contains(MaterialState.focused);
-  bool get _pressed => _states.contains(MaterialState.pressed);
-  bool get _disabled => _states.contains(MaterialState.disabled);
-
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
-
-  void _handleHighlightChanged(bool value) {
-    if (_pressed != value) {
-      setState(() {
-        _updateState(MaterialState.pressed, value);
-        if (widget.onHighlightChanged != null) {
-          widget.onHighlightChanged(value);
-        }
-      });
-    }
-  }
-
-  void _handleHoveredChanged(bool value) {
-    if (_hovered != value) {
-      setState(() {
-        _updateState(MaterialState.hovered, value);
-      });
-    }
-  }
-
-  void _handleFocusedChanged(bool value) {
-    if (_focused != value) {
-      setState(() {
-        _updateState(MaterialState.focused, value);
-      });
-    }
-  }
+class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStateMixin {
 
   @override
   void initState() {
     super.initState();
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
   }
 
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateState(MaterialState.disabled, !widget.enabled);
+    setMaterialState(MaterialState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
     // InkWell makes a call to handleHighlightChanged. This causes an exception
     // because it calls setState in the middle of a build. To preempt this, we
     // manually update pressed to false when this situation occurs.
-    if (_disabled && _pressed) {
-      _handleHighlightChanged(false);
+    if (isDisabled && isPressed) {
+      removeMaterialState(MaterialState.pressed);
     }
   }
 
   double get _effectiveElevation {
     // These conditionals are in order of precedence, so be careful about
     // reorganizing them.
-    if (_disabled) {
+    if (isDisabled) {
       return widget.disabledElevation;
     }
-    if (_pressed) {
+    if (isPressed) {
       return widget.highlightElevation;
     }
-    if (_hovered) {
+    if (isHovered) {
       return widget.hoverElevation;
     }
-    if (_focused) {
+    if (isFocused) {
       return widget.focusElevation;
     }
     return widget.elevation;
@@ -363,10 +346,14 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
-    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
+    final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
+    final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
     final BoxConstraints effectiveConstraints = widget.visualDensity.effectiveConstraints(widget.constraints);
+    final MouseCursor? effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor?>(
+      widget.mouseCursor ?? MaterialStateMouseCursor.clickable,
+      materialStates,
+    );
     final EdgeInsetsGeometry padding = widget.padding.add(
       EdgeInsets.only(
         left: densityAdjustment.dx,
@@ -374,7 +361,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         right: densityAdjustment.dx,
         bottom: densityAdjustment.dy,
       ),
-    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity);
+    ).clamp(EdgeInsets.zero, EdgeInsetsGeometry.infinity); // ignore_clamp_double_lint
+
 
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
@@ -383,24 +371,27 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
         shape: effectiveShape,
         color: widget.fillColor,
+        // For compatibility during the M3 migration the default shadow needs to be passed.
+        shadowColor: Theme.of(context).useMaterial3 ? Theme.of(context).shadowColor : null,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
         child: InkWell(
           focusNode: widget.focusNode,
           canRequestFocus: widget.enabled,
-          onFocusChange: _handleFocusedChanged,
+          onFocusChange: updateMaterialState(MaterialState.focused),
           autofocus: widget.autofocus,
-          onHighlightChanged: _handleHighlightChanged,
+          onHighlightChanged: updateMaterialState(MaterialState.pressed, onChanged: widget.onHighlightChanged),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           focusColor: widget.focusColor,
           hoverColor: widget.hoverColor,
-          onHover: _handleHoveredChanged,
+          onHover: updateMaterialState(MaterialState.hovered),
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
           enableFeedback: widget.enableFeedback,
           customBorder: effectiveShape,
+          mouseCursor: effectiveMouseCursor,
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),
             child: Container(
@@ -415,7 +406,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         ),
       ),
     );
-    Size minSize;
+    final Size minSize;
     switch (widget.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
         minSize = Size(
@@ -424,10 +415,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         );
         assert(minSize.width >= 0.0);
         assert(minSize.height >= 0.0);
-        break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;
-        break;
     }
 
     return Semantics(
@@ -449,10 +438,9 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 /// "tap target", but not its material or its ink splashes.
 class _InputPadding extends SingleChildRenderObjectWidget {
   const _InputPadding({
-    Key key,
-    Widget child,
-    this.minSize,
-  }) : super(key: key, child: child);
+    super.child,
+    required this.minSize,
+  });
 
   final Size minSize;
 
@@ -468,72 +456,92 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, [RenderBox child]) : super(child);
+  _RenderInputPadding(this._minSize, [RenderBox? child]) : super(child);
 
   Size get minSize => _minSize;
   Size _minSize;
   set minSize(Size value) {
-    if (_minSize == value)
+    if (_minSize == value) {
       return;
+    }
     _minSize = value;
     markNeedsLayout();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (child != null)
-      return math.max(child.getMinIntrinsicWidth(height), minSize.width);
+    if (child != null) {
+      return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (child != null)
-      return math.max(child.getMinIntrinsicHeight(width), minSize.height);
+    if (child != null) {
+      return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (child != null)
-      return math.max(child.getMaxIntrinsicWidth(height), minSize.width);
+    if (child != null) {
+      return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
+    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (child != null)
-      return math.max(child.getMaxIntrinsicHeight(width), minSize.height);
+    if (child != null) {
+      return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
+    }
     return 0.0;
+  }
+
+  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    if (child != null) {
+      final Size childSize = layoutChild(child!, constraints);
+      final double height = math.max(childSize.width, minSize.width);
+      final double width = math.max(childSize.height, minSize.height);
+      return constraints.constrain(Size(height, width));
+    }
+    return Size.zero;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+    );
   }
 
   @override
   void performLayout() {
-    final BoxConstraints constraints = this.constraints;
+    size = _computeSize(
+      constraints: constraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+    );
     if (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      final double height = math.max(child.size.width, minSize.width);
-      final double width = math.max(child.size.height, minSize.height);
-      size = constraints.constrain(Size(height, width));
-      final BoxParentData childParentData = child.parentData as BoxParentData;
-      childParentData.offset = Alignment.center.alongOffset(size - child.size as Offset);
-    } else {
-      size = Size.zero;
+      final BoxParentData childParentData = child!.parentData! as BoxParentData;
+      childParentData.offset = Alignment.center.alongOffset(size - child!.size as Offset);
     }
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { required Offset position }) {
     if (super.hitTest(result, position: position)) {
       return true;
     }
-    final Offset center = child.size.center(Offset.zero);
+    final Offset center = child!.size.center(Offset.zero);
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
       hitTest: (BoxHitTestResult result, Offset position) {
         assert(position == center);
-        return child.hitTest(result, position: center);
+        return child!.hitTest(result, position: center);
       },
     );
   }

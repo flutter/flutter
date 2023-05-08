@@ -6,20 +6,23 @@ library reporting;
 
 import 'dart:async';
 
-import 'package:http/http.dart' as http;
+import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:usage/usage_io.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/time.dart';
-import '../doctor.dart';
+import '../build_info.dart';
+import '../dart/language_version.dart';
+import '../doctor_validator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
-import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'first_run.dart';
 
-part 'crash_reporting.dart';
 part 'disabled_usage.dart';
 part 'events.dart';
 part 'usage.dart';
+part 'custom_dimensions.dart';

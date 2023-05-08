@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -34,7 +34,11 @@ void main() {
   });
 }
 
-Widget buildTestWidgets({ bool excludeSemantics, String label, bool isSemanticsBoundary }) {
+Widget buildTestWidgets({
+  required bool excludeSemantics,
+  required String label,
+  required bool isSemanticsBoundary,
+}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Semantics(
@@ -63,11 +67,11 @@ Widget buildTestWidgets({ bool excludeSemantics, String label, bool isSemanticsB
 
 class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({
-    Key key,
-    Widget child,
-    this.label,
-    this.isSemanticBoundary,
-  }) : super(key: key, child: child);
+    super.key,
+    required Widget super.child,
+    required this.label,
+    required this.isSemanticBoundary,
+  });
 
   final String label;
   final bool isSemanticBoundary;
@@ -88,13 +92,13 @@ class TestWidget extends SingleChildRenderObjectWidget {
 }
 
 class RenderTest extends RenderProxyBox {
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (!_isSemanticBoundary)
+    if (!_isSemanticBoundary) {
       return;
+    }
 
     config
       ..isSemanticBoundary = _isSemanticBoundary
@@ -103,19 +107,23 @@ class RenderTest extends RenderProxyBox {
 
   }
 
+  String get label => _label;
   String _label = '<>';
   set label(String value) {
-    if (value == _label)
+    if (value == _label) {
       return;
+    }
     _label = value;
     markNeedsSemanticsUpdate();
   }
 
 
+  bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    if (_isSemanticBoundary == value)
+    if (_isSemanticBoundary == value) {
       return;
+    }
     _isSemanticBoundary = value;
     markNeedsSemanticsUpdate();
   }

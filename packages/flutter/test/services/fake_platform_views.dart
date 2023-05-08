@@ -3,33 +3,27 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Used in internal testing.
 class FakePlatformViewController extends PlatformViewController {
-
-  FakePlatformViewController(int id) {
-    _id = id;
-  }
+  FakePlatformViewController(this.viewId);
 
   bool disposed = false;
   bool focusCleared = false;
 
-  /// Events that are dispatched;
+  /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
 
-  int _id;
+  @override
+  final int viewId;
 
   @override
-  int get viewId => _id;
-
-  @override
-  void dispatchPointerEvent(PointerEvent event) {
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
     dispatchedPointerEvents.add(event);
   }
 
@@ -40,21 +34,125 @@ class FakePlatformViewController extends PlatformViewController {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposed = true;
   }
 
   @override
-  void clearFocus() {
+  Future<void> clearFocus() async {
     focusCleared = true;
   }
 }
 
-class FakeAndroidPlatformViewsController {
-  FakeAndroidPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+class FakeAndroidViewController implements AndroidViewController {
+  FakeAndroidViewController(
+    this.viewId, {
+    this.requiresSize = false,
+    this.requiresViewComposition = false,
+  });
+
+  bool disposed = false;
+  bool focusCleared = false;
+  bool created = false;
+  // If true, [create] won't be considered to have been called successfully
+  // unless it includes a size.
+  bool requiresSize;
+
+  bool _createCalledSuccessfully = false;
+
+  Offset? createPosition;
+
+  final List<PlatformViewCreatedCallback> _createdCallbacks = <PlatformViewCreatedCallback>[];
+
+  /// Events that are dispatched.
+  List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
+
+  @override
+  final int viewId;
+
+  @override
+  late PointTransformer pointTransformer;
+
+  @override
+  Future<void> dispatchPointerEvent(PointerEvent event) async {
+    dispatchedPointerEvents.add(event);
   }
 
+  void clearTestingVariables() {
+    dispatchedPointerEvents.clear();
+    disposed = false;
+    focusCleared = false;
+  }
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+  }
+
+  @override
+  Future<void> clearFocus() async {
+    focusCleared = true;
+  }
+
+  @override
+  Future<Size> setSize(Size size) {
+    return Future<Size>.value(size);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) async {}
+
+  @override
+  int get textureId => 0;
+
+  @override
+  bool get awaitingCreation => !_createCalledSuccessfully;
+
+  @override
+  bool get isCreated => created;
+
+  @override
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    created = true;
+    createdCallbacks.add(listener);
+  }
+
+  @override
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    createdCallbacks.remove(listener);
+  }
+
+  @override
+  Future<void> sendMotionEvent(AndroidMotionEvent event) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setLayoutDirection(TextDirection layoutDirection) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> create({Size? size, Offset? position}) async {
+    assert(!_createCalledSuccessfully);
+    if (requiresSize && size != null) {
+      assert(!size.isEmpty);
+    }
+    _createCalledSuccessfully = size != null && position != null || !requiresSize;
+    createPosition = position;
+  }
+
+  @override
+  List<PlatformViewCreatedCallback> get createdCallbacks => _createdCallbacks;
+
+  @override
+  bool requiresViewComposition;
+}
+
+class FakeAndroidPlatformViewsController {
+  FakeAndroidPlatformViewsController() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+  }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
   final Map<int, FakeAndroidPlatformView> _views = <int, FakeAndroidPlatformView>{};
@@ -65,11 +163,18 @@ class FakeAndroidPlatformViewsController {
 
   int _textureCounter = 0;
 
-  Completer<void> resizeCompleter;
+  Completer<void>? resizeCompleter;
 
-  Completer<void> createCompleter;
+  Completer<void>? createCompleter;
 
-  int lastClearedFocusViewId;
+  int? lastClearedFocusViewId;
+
+  Map<int, Offset> offsets = <int, Offset>{};
+
+  /// True if Texture Layer Hybrid Composition mode should be enabled.
+  ///
+  /// When false, `create` will simulate the engine's fallback mode.
+  bool allowTextureLayerMode = true;
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -78,7 +183,8 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
+    ServicesBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -95,6 +201,8 @@ class FakeAndroidPlatformViewsController {
         return _setDirection(call);
       case 'clearFocus':
         return _clearFocus(call);
+      case 'offset':
+        return _offset(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -103,40 +211,73 @@ class FakeAndroidPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
-    final double width = args['width'] as double;
-    final double height = args['height'] as double;
+    final double? width = args['width'] as double?;
+    final double? height = args['height'] as double?;
     final int layoutDirection = args['direction'] as int;
-    final Uint8List creationParams = args['params'] as Uint8List;
+    final bool? hybrid = args['hybrid'] as bool?;
+    final bool? hybridFallback = args['hybridFallback'] as bool?;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
+    final double? top = args['top'] as double?;
+    final double? left = args['left'] as double?;
 
-    if (_views.containsKey(id))
+    if (_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to create an already created platform view, view id: $id',
       );
+    }
 
-    if (!_registeredViewTypes.contains(viewType))
+    if (!_registeredViewTypes.contains(viewType)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
-
-    if (createCompleter != null) {
-      await createCompleter.future;
     }
 
-    _views[id] = FakeAndroidPlatformView(id, viewType, Size(width, height), layoutDirection, creationParams);
+    if (createCompleter != null) {
+      await createCompleter!.future;
+    }
+
+    _views[id] = FakeAndroidPlatformView(id, viewType,
+        width != null && height != null ? Size(width, height) : null,
+        layoutDirection,
+        hybrid: hybrid,
+        hybridFallback: hybridFallback,
+        creationParams: creationParams,
+        position: left != null && top != null ? Offset(left, top) : null,
+    );
+    // Return a hybrid result (null rather than a texture ID) if:
+    final bool hybridResult =
+      // hybrid was explicitly requested, or
+      (hybrid ?? false) ||
+      // hybrid fallback was requested and simulated.
+      (!allowTextureLayerMode && (hybridFallback ?? false));
+    if (hybridResult) {
+      return Future<void>.value();
+    }
     final int textureId = _textureCounter++;
-    return Future<int>.sync(() => textureId);
+    return Future<int>.value(textureId);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
+    assert(call.arguments is Map);
+    final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
 
-    if (!_views.containsKey(id))
+    final int id = arguments['id']! as int;
+    final bool hybrid = arguments['hybrid']! as bool;
+
+    if (hybrid && !_views[id]!.hybrid!) {
+      throw ArgumentError('An $AndroidViewController using hybrid composition must pass `hybrid: true`');
+    } else if (!hybrid && (_views[id]!.hybrid ?? false)) {
+      throw ArgumentError('An $AndroidViewController not using hybrid composition must pass `hybrid: false`');
+    }
+
+    if (!_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to dispose a platform view with unknown id: $id',
       );
+    }
 
     _views.remove(id);
     return Future<dynamic>.sync(() => null);
@@ -148,17 +289,27 @@ class FakeAndroidPlatformViewsController {
     final double width = args['width'] as double;
     final double height = args['height'] as double;
 
-    if (!_views.containsKey(id))
+    if (!_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to resize a platform view with unknown id: $id',
       );
+    }
 
     if (resizeCompleter != null) {
-      await resizeCompleter.future;
+      await resizeCompleter!.future;
     }
-    _views[id].size = Size(width, height);
+    _views[id] = _views[id]!.copyWith(size: Size(width, height));
 
+    return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
+  }
+
+  Future<dynamic> _offset(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final double top = args['top'] as double;
+    final double left = args['left'] as double;
+    offsets[id] = Offset(left, top);
     return Future<dynamic>.sync(() => null);
   }
 
@@ -177,10 +328,11 @@ class FakeAndroidPlatformViewsController {
       pointerOffsets.add(Offset(x, y));
     }
 
-    if (!motionEvents.containsKey(id))
+    if (!motionEvents.containsKey(id)) {
       motionEvents[id] = <FakeAndroidMotionEvent> [];
+    }
 
-    motionEvents[id].add(FakeAndroidMotionEvent(action, pointerIds, pointerOffsets));
+    motionEvents[id]!.add(FakeAndroidMotionEvent(action, pointerIds, pointerOffsets));
     return Future<dynamic>.sync(() => null);
   }
 
@@ -189,13 +341,14 @@ class FakeAndroidPlatformViewsController {
     final int id = args['id'] as int;
     final int layoutDirection = args['direction'] as int;
 
-    if (!_views.containsKey(id))
+    if (!_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to resize a platform view with unknown id: $id',
       );
+    }
 
-    _views[id].layoutDirection = layoutDirection;
+    _views[id] = _views[id]!.copyWith(layoutDirection: layoutDirection);
 
     return Future<dynamic>.sync(() => null);
   }
@@ -203,11 +356,12 @@ class FakeAndroidPlatformViewsController {
   Future<dynamic> _clearFocus(MethodCall call) {
     final int id = call.arguments as int;
 
-    if (!_views.containsKey(id))
+    if (!_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to clear the focus on a platform view with unknown id: $id',
       );
+    }
 
     lastClearedFocusViewId = id;
     return Future<dynamic>.sync(() => null);
@@ -216,9 +370,8 @@ class FakeAndroidPlatformViewsController {
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
-
 
   Iterable<FakeUiKitView> get views => _views.values;
   final Map<int, FakeUiKitView> _views = <int, FakeUiKitView>{};
@@ -227,7 +380,7 @@ class FakeIosPlatformViewsController {
 
   // When this completer is non null, the 'create' method channel call will be
   // delayed until it completes.
-  Completer<void> creationDelay;
+  Completer<void>? creationDelay;
 
   // Maps a view id to the number of gestures it accepted so far.
   final Map<int, int> gesturesAccepted = <int, int>{};
@@ -237,6 +390,13 @@ class FakeIosPlatformViewsController {
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
+  }
+
+  void invokeViewFocused(int viewId) {
+    final MethodCodec codec = SystemChannels.platform_views.codec;
+    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    ServicesBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -254,12 +414,13 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    if (creationDelay != null)
-      await creationDelay.future;
+    if (creationDelay != null) {
+      await creationDelay!.future;
+    }
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
-    final Uint8List creationParams = args['params'] as Uint8List;
+    final Uint8List? creationParams = args['params'] as Uint8List?;
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -278,21 +439,21 @@ class FakeIosPlatformViewsController {
     _views[id] = FakeUiKitView(id, viewType, creationParams);
     gesturesAccepted[id] = 0;
     gesturesRejected[id] = 0;
-    return Future<int>.sync(() => null);
+    return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _acceptGesture(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
-    gesturesAccepted[id] += 1;
-    return Future<int>.sync(() => null);
+    gesturesAccepted[id] = gesturesAccepted[id]! + 1;
+    return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _rejectGesture(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
-    gesturesRejected[id] += 1;
-    return Future<int>.sync(() => null);
+    gesturesRejected[id] = gesturesRejected[id]! + 1;
+    return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
@@ -312,7 +473,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-    SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;
@@ -320,9 +481,9 @@ class FakeHtmlPlatformViewsController {
 
   final Set<String> _registeredViewTypes = <String>{};
 
-  Completer<void> resizeCompleter;
+  late Completer<void> resizeCompleter;
 
-  Completer<void> createCompleter;
+  Completer<void>? createCompleter;
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -343,69 +504,105 @@ class FakeHtmlPlatformViewsController {
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
 
-    if (_views.containsKey(id))
+    if (_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to create an already created platform view, view id: $id',
       );
+    }
 
-    if (!_registeredViewTypes.contains(viewType))
+    if (!_registeredViewTypes.contains(viewType)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
+    }
 
     if (createCompleter != null) {
-      await createCompleter.future;
+      await createCompleter!.future;
     }
 
     _views[id] = FakeHtmlPlatformView(id, viewType);
-    return Future<int>.sync(() => null);
+    return Future<int?>.sync(() => null);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
     final int id = call.arguments as int;
 
-    if (!_views.containsKey(id))
+    if (!_views.containsKey(id)) {
       throw PlatformException(
         code: 'error',
         message: 'Trying to dispose a platform view with unknown id: $id',
       );
+    }
 
     _views.remove(id);
     return Future<dynamic>.sync(() => null);
   }
 }
 
+@immutable
 class FakeAndroidPlatformView {
-  FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection, [this.creationParams]);
+  const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection,
+    {this.hybrid, this.hybridFallback, this.creationParams, this.position});
 
   final int id;
   final String type;
-  final Uint8List creationParams;
-  Size size;
-  int layoutDirection;
+  final Uint8List? creationParams;
+  final Size? size;
+  final int layoutDirection;
+  final bool? hybrid;
+  final bool? hybridFallback;
+  final Offset? position;
+
+  FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) => FakeAndroidPlatformView(
+    id,
+    type,
+    size ?? this.size,
+    layoutDirection ?? this.layoutDirection,
+    hybrid: hybrid,
+    hybridFallback: hybridFallback,
+    creationParams: creationParams,
+    position: position,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FakeAndroidPlatformView
         && other.id == id
         && other.type == type
-        && other.creationParams == creationParams
-        && other.size == size;
+        && listEquals<int>(other.creationParams, creationParams)
+        && other.size == size
+        && other.hybrid == hybrid
+        && other.hybridFallback == hybridFallback
+        && other.layoutDirection == layoutDirection
+        && other.position == position;
   }
 
   @override
-  int get hashCode => hashValues(id, type, size, layoutDirection);
+  int get hashCode => Object.hash(
+    id,
+    type,
+    creationParams == null ? null : Object.hashAll(creationParams!),
+    size,
+    layoutDirection,
+    hybrid,
+    hybridFallback,
+    position,
+  );
 
   @override
   String toString() {
-    return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, layoutDirection: $layoutDirection, creationParams: $creationParams)';
+    return 'FakeAndroidPlatformView(id: $id, type: $type, size: $size, '
+      'layoutDirection: $layoutDirection, hybrid: $hybrid, '
+      'hybridFallback: $hybridFallback, creationParams: $creationParams, position: $position)';
   }
 }
 
+@immutable
 class FakeAndroidMotionEvent {
   const FakeAndroidMotionEvent(this.action, this.pointerIds, this.pointers);
 
@@ -423,7 +620,7 @@ class FakeAndroidMotionEvent {
   }
 
   @override
-  int get hashCode => hashValues(action, hashList(pointers), hashList(pointerIds));
+  int get hashCode => Object.hash(action, Object.hashAll(pointers), Object.hashAll(pointerIds));
 
   @override
   String toString() {
@@ -431,17 +628,19 @@ class FakeAndroidMotionEvent {
   }
 }
 
+@immutable
 class FakeUiKitView {
-  FakeUiKitView(this.id, this.type, [this.creationParams]);
+  const FakeUiKitView(this.id, this.type, [this.creationParams]);
 
   final int id;
   final String type;
-  final Uint8List creationParams;
+  final Uint8List? creationParams;
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FakeUiKitView
         && other.id == id
         && other.type == type
@@ -449,7 +648,7 @@ class FakeUiKitView {
   }
 
   @override
-  int get hashCode => hashValues(id, type);
+  int get hashCode => Object.hash(id, type);
 
   @override
   String toString() {
@@ -457,23 +656,25 @@ class FakeUiKitView {
   }
 }
 
+@immutable
 class FakeHtmlPlatformView {
-  FakeHtmlPlatformView(this.id, this.type);
+  const FakeHtmlPlatformView(this.id, this.type);
 
   final int id;
   final String type;
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is FakeHtmlPlatformView
         && other.id == id
         && other.type == type;
   }
 
   @override
-  int get hashCode => hashValues(id, type);
+  int get hashCode => Object.hash(id, type);
 
   @override
   String toString() {

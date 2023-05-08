@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 int seed = 0;
@@ -27,10 +26,10 @@ void main() {
 }
 
 class Home extends StatefulWidget {
-  const Home({ Key key }) : super(key: key);
+  const Home({ super.key });
 
   @override
-  _HomeState createState() => _HomeState();
+  State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
@@ -43,41 +42,53 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                FlatButton(
-                  child: const Text('Test Underlines'),
-                  color: Colors.red.shade800,
-                  textColor: Colors.white,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red.shade800,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'underlines'); },
+                  child: const Text('Test Underlines'),
                 ),
-                FlatButton(
-                  child: const Text('Test Font Fallback'),
-                  color: Colors.orange.shade700,
-                  textColor: Colors.white,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.orange.shade700,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'fallback'); },
+                  child: const Text('Test Font Fallback'),
                 ),
-                FlatButton(
-                  child: const Text('Test Bidi Formatting'),
-                  color: Colors.yellow.shade700,
-                  textColor: Colors.black,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.yellow.shade700,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'bidi'); },
+                  child: const Text('Test Bidi Formatting'),
                 ),
-                FlatButton(
-                  child: const Text('TextSpan Fuzzer'),
-                  color: Colors.green.shade400,
-                  textColor: Colors.black,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.green.shade400,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
+                  child: const Text('TextSpan Fuzzer'),
                 ),
-                FlatButton(
-                  child: const Text('Diacritics Fuzzer'),
-                  color: Colors.blue.shade400,
-                  textColor: Colors.white,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue.shade400,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
+                  child: const Text('Diacritics Fuzzer'),
                 ),
-                FlatButton(
-                  child: const Text('Painting Fuzzer'),
-                  color: Colors.purple.shade200,
-                  textColor: Colors.black,
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.purple.shade200,
+                  ),
                   onPressed: () { Navigator.pushNamed(context, 'painting'); },
+                  child: const Text('Painting Fuzzer'),
                 ),
               ],
             ),
@@ -85,10 +96,9 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Slider(
-              min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
-              label: '${seed.round()}',
+              label: '$seed',
               divisions: 1025,
               onChanged: (double value) {
                 setState(() {
@@ -108,24 +118,22 @@ class _HomeState extends State<Home> {
 }
 
 class Fuzzer extends StatefulWidget {
-  const Fuzzer({ Key key, this.seed }) : super(key: key);
+  const Fuzzer({ super.key, required this.seed });
 
   final int seed;
 
   @override
-  _FuzzerState createState() => _FuzzerState();
+  State<Fuzzer> createState() => _FuzzerState();
 }
 
 class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   TextSpan _textSpan = const TextSpan(text: 'Welcome to the Flutter text fuzzer.');
-  Ticker _ticker;
-  math.Random _random;
+  late final Ticker _ticker = createTicker(_updateTextSpan)..start();
+  late final math.Random _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
 
   @override
   void initState() {
     super.initState();
-    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_updateTextSpan)..start();
     _updateTextSpan(null);
   }
 
@@ -135,7 +143,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _updateTextSpan(Duration duration) {
+  void _updateTextSpan(Duration? duration) {
     setState(() {
       _textSpan = _fiddleWith(_textSpan);
     });
@@ -145,30 +153,31 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan)).toList() ?? <TextSpan>[]),
     );
   }
 
-  String _fiddleWithText(String text) {
-    if (_random.nextInt(10) > 0)
+  String? _fiddleWithText(String? text) {
+    if (_random.nextInt(10) > 0) {
       return text;
+    }
     return _createRandomText();
   }
 
-  TextStyle _fiddleWithStyle(TextStyle style) {
+  TextStyle? _fiddleWithStyle(TextStyle? style) {
     if (style == null) {
       switch (_random.nextInt(20)) {
         case 0:
           return const TextStyle();
         case 1:
-          style = const TextStyle();
-          break; // and mutate it below
+          style = const TextStyle(); // is mutated below
         default:
           return null;
       }
     }
-    if (_random.nextInt(200) == 0)
+    if (_random.nextInt(200) == 0) {
       return null;
+    }
     return TextStyle(
       color: _fiddleWithColor(style.color),
       decoration: _fiddleWithDecoration(style.decoration),
@@ -185,11 +194,12 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     );
   }
 
-  Color _fiddleWithColor(Color value) {
+  Color? _fiddleWithColor(Color? value) {
     switch (_random.nextInt(10)) {
       case 0:
-        if (value == null)
+        if (value == null) {
           return pickFromList<MaterialColor>(_random, Colors.primaries)[(_random.nextInt(9) + 1) * 100];
+        }
         switch (_random.nextInt(4)) {
           case 0:
             return value.withAlpha(value.alpha + _random.nextInt(10) - 5);
@@ -200,16 +210,16 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
           case 3:
             return value.withBlue(value.blue + _random.nextInt(10) - 5);
         }
-        break;
       case 1:
         return null;
     }
     return value;
   }
 
-  TextDecoration _fiddleWithDecoration(TextDecoration value) {
-    if (_random.nextInt(10) > 0)
+  TextDecoration? _fiddleWithDecoration(TextDecoration? value) {
+    if (_random.nextInt(10) > 0) {
       return value;
+    }
     switch (_random.nextInt(100)) {
       case 10:
         return TextDecoration.underline;
@@ -235,7 +245,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return null;
   }
 
-  TextDecorationStyle _fiddleWithDecorationStyle(TextDecorationStyle value) {
+  TextDecorationStyle? _fiddleWithDecorationStyle(TextDecorationStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -245,7 +255,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontWeight _fiddleWithFontWeight(FontWeight value) {
+  FontWeight? _fiddleWithFontWeight(FontWeight? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -255,7 +265,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontStyle _fiddleWithFontStyle(FontStyle value) {
+  FontStyle? _fiddleWithFontStyle(FontStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -265,7 +275,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  String _fiddleWithFontFamily(String value) {
+  String? _fiddleWithFontFamily(String? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -289,11 +299,12 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  double _fiddleWithDouble(double value, double defaultValue, double max) {
+  double? _fiddleWithDouble(double? value, double defaultValue, double max) {
     switch (_random.nextInt(10)) {
       case 0:
-        if (value == null)
+        if (value == null) {
           return math.min(defaultValue * (0.95 + _random.nextDouble() * 0.1), max);
+        }
         return math.min(value * (0.51 + _random.nextDouble()), max);
       case 1:
         return null;
@@ -301,7 +312,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  List<TextSpan> _fiddleWithChildren(List<TextSpan> children) {
+  List<TextSpan>? _fiddleWithChildren(List<TextSpan> children) {
     switch (_random.nextInt(100)) {
       case 0:
       case 1:
@@ -309,31 +320,34 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 3:
       case 4:
         children.insert(_random.nextInt(children.length + 1), _createRandomTextSpan());
-        break;
       case 10:
         children = children.reversed.toList();
-        break;
       case 20:
-        if (children.isEmpty)
+        if (children.isEmpty) {
           break;
-        if (_random.nextInt(10) > 0)
+        }
+        if (_random.nextInt(10) > 0) {
           break;
+        }
         final int index = _random.nextInt(children.length);
-        if (depthOf(children[index]) < 3)
+        if (depthOf(children[index]) < 3) {
           children.removeAt(index);
-        break;
+        }
     }
-    if (children.isEmpty && _random.nextBool())
+    if (children.isEmpty && _random.nextBool()) {
       return null;
+    }
     return children;
   }
 
   int depthOf(TextSpan node) {
-    if (node.children == null || node.children.isEmpty)
+    if (node.children == null || (node.children?.isEmpty ?? false)) {
       return 0;
+    }
     int result = 0;
-    for (final TextSpan child in node.children.cast<TextSpan>())
+    for (final TextSpan child in node.children!.cast<TextSpan>()) {
       result = math.max(result, depthOf(child));
+    }
     return result;
   }
 
@@ -343,7 +357,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     );
   }
 
-  String _createRandomText() {
+  String? _createRandomText() {
     switch (_random.nextInt(90)) {
       case 0:
       case 1:
@@ -448,7 +462,8 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 65: // random emoji
         return String.fromCharCode(0x1F000 + _random.nextInt(0x9FF));
       case 66:
-        return 'Z{' + zalgo(_random, _random.nextInt(4) + 2) + '}Z';
+        final String value = zalgo(_random, _random.nextInt(4) + 2);
+        return 'Z{$value}Z';
       case 67:
         return 'Οὐχὶ ταὐτὰ παρίσταταί μοι γιγνώσκειν';
       case 68:
@@ -488,7 +503,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -525,10 +540,10 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 }
 
 class Underlines extends StatefulWidget {
-  const Underlines({ Key key }) : super(key: key);
+  const Underlines({ super.key });
 
   @override
-  _UnderlinesState createState() => _UnderlinesState();
+  State<Underlines> createState() => _UnderlinesState();
 }
 
 class _UnderlinesState extends State<Underlines> {
@@ -543,7 +558,7 @@ class _UnderlinesState extends State<Underlines> {
     decorationColor: Colors.yellow.shade500,
   );
 
-  Widget _wrap(TextDecorationStyle style) {
+  Widget _wrap(TextDecorationStyle? style) {
     return Align(
       alignment: Alignment.centerLeft,
       heightFactor: 1.0,
@@ -557,9 +572,10 @@ class _UnderlinesState extends State<Underlines> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
@@ -578,37 +594,48 @@ class _UnderlinesState extends State<Underlines> {
             ),
           ),
           Material(
-            child: ButtonBar(
-              children: <Widget>[
-                FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      _text += 'i';
-                    });
-                  },
-                  color: Colors.yellow,
-                  child: const Text('ADD i'),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      _text += 'w';
-                    });
-                  },
-                  color: Colors.yellow,
-                  child: const Text('ADD w'),
-                ),
-                FlatButton(
-                  onPressed: _text == '' ? null : () {
-                    setState(() {
-                      _text = _text.substring(0, _text.length - 1);
-                    });
-                  },
-                  color: Colors.red,
-                  textColor: Colors.white,
-                  child: const Text('REMOVE'),
-                ),
-              ],
+            child: Container(
+              alignment: AlignmentDirectional.centerEnd,
+              padding: const EdgeInsets.all(8),
+              child: OverflowBar(
+                spacing: 8,
+                children: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _text += 'i';
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                    ),
+                    child: const Text('ADD i'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _text += 'w';
+                      });
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.yellow,
+                    ),
+                    child: const Text('ADD w'),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: _text == '' ? null : () {
+                      setState(() {
+                        _text = _text.substring(0, _text.length - 1);
+                      });
+                    },
+                    child: const Text('REMOVE'),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -618,10 +645,10 @@ class _UnderlinesState extends State<Underlines> {
 }
 
 class Fallback extends StatefulWidget {
-  const Fallback({ Key key }) : super(key: key);
+  const Fallback({ super.key });
 
   @override
-  _FallbackState createState() => _FallbackState();
+  State<Fallback> createState() => _FallbackState();
 }
 
 class _FallbackState extends State<Fallback> {
@@ -648,7 +675,7 @@ class _FallbackState extends State<Fallback> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -713,16 +740,16 @@ class _FallbackState extends State<Fallback> {
 }
 
 class Bidi extends StatefulWidget {
-  const Bidi({ Key key }) : super(key: key);
+  const Bidi({ super.key });
 
   @override
-  _BidiState createState() => _BidiState();
+  State<Bidi> createState() => _BidiState();
 }
 
 class _BidiState extends State<Bidi> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
@@ -788,24 +815,23 @@ class _BidiState extends State<Bidi> {
 }
 
 class Zalgo extends StatefulWidget {
-  const Zalgo({ Key key, this.seed }) : super(key: key);
+  const Zalgo({ super.key, required this.seed });
 
   final int seed;
 
   @override
-  _ZalgoState createState() => _ZalgoState();
+  State<Zalgo> createState() => _ZalgoState();
 }
 
 class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
-  String _text;
-  Ticker _ticker;
-  math.Random _random;
+  String? _text;
+  late final Ticker _ticker = createTicker(_update)..start();
+  math.Random _random = math.Random();
 
   @override
   void initState() {
     super.initState();
-    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_update)..start();
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
     _update(null);
   }
 
@@ -818,7 +844,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   bool _allowSpacing = false;
   bool _varyBase = false;
 
-  void _update(Duration duration) {
+  void _update(Duration? duration) {
     setState(() {
       _text = zalgo(
         _random,
@@ -831,7 +857,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         children: <Widget>[
@@ -895,24 +921,23 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 }
 
 class Painting extends StatefulWidget {
-  const Painting({ Key key, this.seed }) : super(key: key);
+  const Painting({ super.key, required this.seed });
 
   final int seed;
 
   @override
-  _PaintingState createState() => _PaintingState();
+  State<Painting> createState() => _PaintingState();
 }
 
 class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {
-  String _text;
-  Ticker _ticker;
-  math.Random _random;
+  String? _text;
+  late final Ticker _ticker = createTicker(_update)..start();
+  math.Random _random = math.Random();
 
   @override
   void initState() {
     super.initState();
-    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
-    _ticker = createTicker(_update)..start();
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility;
     _update(null);
   }
 
@@ -927,7 +952,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
 
   bool _ellipsize = false;
 
-  void _update(Duration duration) {
+  void _update(Duration? duration) {
     setState(() {
       final StringBuffer buffer = StringBuffer();
       final int targetLength = _random.nextInt(20) + (_ellipsize ? MediaQuery.of(context).size.width.round() : 1);
@@ -941,10 +966,13 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       _text = buffer.toString();
     });
     SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-      if (mounted && intrinsicKey.currentContext.size.height != controlKey.currentContext.size.height) {
+      if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
-        debugPrint(_text.runes.map<String>((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
+        debugPrint(_text?.runes.map<String>((int index) {
+          final String hexa = index.toRadixString(16).padLeft(4, '0');
+          return 'U+$hexa';
+        }).join(' '));
         setState(() {
           _ticker.stop();
         });
@@ -955,7 +983,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Container(
+    return ColoredBox(
       color: Colors.black,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1013,6 +1041,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
           ),
           Material(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 SwitchListTile(
                   title: const Text('Enable Fuzzer'),
@@ -1034,28 +1063,35 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                     setState(() {
                       _ellipsize = value;
                       _random = math.Random(widget.seed); // reset for reproducibility
-                      if (!_ticker.isActive)
+                      if (!_ticker.isActive) {
                         _update(null);
+                      }
                     });
                   },
                 ),
                 const ListTile(
                   title: Text('There should be no red visible.'),
                 ),
-                ButtonBar(
-                  children: <Widget>[
-                    FlatButton(
-                      onPressed: _ticker.isActive ? null : () => _update(null),
-                      child: const Text('ITERATE'),
-                    ),
-                    FlatButton(
-                      onPressed: _ticker.isActive ? null : () {
-                        print('The currently visible text is: $_text');
-                        print(_text.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
-                      },
-                      child: const Text('DUMP TEXT TO LOGS'),
-                    ),
-                  ],
+
+                Container(
+                  alignment: AlignmentDirectional.centerEnd,
+                  padding: const EdgeInsets.all(8),
+                  child: OverflowBar(
+                    spacing: 8,
+                    children: <Widget>[
+                      TextButton(
+                        onPressed: _ticker.isActive ? null : () => _update(null),
+                        child: const Text('ITERATE'),
+                      ),
+                      TextButton(
+                        onPressed: _ticker.isActive ? null : () {
+                          print('The currently visible text is: $_text');
+                          print(_text?.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
+                        },
+                        child: const Text('DUMP TEXT TO LOGS'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1066,7 +1102,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   }
 }
 
-String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks = false, String base }) {
+String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks = false, String? base }) {
   // The following three tables are derived from UnicodeData.txt:
   //   http://unicode.org/Public/UNIDATA/UnicodeData.txt
   // There are three groups, character classes Mc, Me, and Mn.
@@ -1390,8 +1426,9 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
   ];
   final Set<int> these = <int>{};
   int combiningCount = enclosingCombiningMarks.length + nonspacingCombiningMarks.length;
-  if (includeSpacingCombiningMarks)
+  if (includeSpacingCombiningMarks) {
     combiningCount += spacingCombiningMarks.length;
+  }
   for (int count = 0; count < targetLength; count += 1) {
     int characterCode = random.nextInt(combiningCount);
     if (characterCode < enclosingCombiningMarks.length) {
@@ -2115,7 +2152,8 @@ int randomCharacter(math.Random random) {
     Range(0x2f800, 0x2fa1d),
   ];
   final Range range = pickFromList<Range>(random, characterRanges);
-  if (range.start == range.end)
+  if (range.start == range.end) {
     return range.start;
+  }
   return range.start + random.nextInt(range.end - range.start);
 }

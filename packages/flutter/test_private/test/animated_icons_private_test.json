@@ -1,0 +1,25 @@
+{
+  "tests": [
+    "animated_icons_private_test.dart.tmpl"
+  ],
+  "pubspec": "pubspec.yaml",
+  "test_deps": [],
+  "deps": [
+    "lib/src/material/animated_icons/animated_icons.dart",
+    "lib/src/material/animated_icons/animated_icons_data.dart",
+    "lib/src/material/animated_icons/data/add_event.g.dart",
+    "lib/src/material/animated_icons/data/arrow_menu.g.dart",
+    "lib/src/material/animated_icons/data/close_menu.g.dart",
+    "lib/src/material/animated_icons/data/ellipsis_search.g.dart",
+    "lib/src/material/animated_icons/data/event_add.g.dart",
+    "lib/src/material/animated_icons/data/home_menu.g.dart",
+    "lib/src/material/animated_icons/data/list_view.g.dart",
+    "lib/src/material/animated_icons/data/menu_arrow.g.dart",
+    "lib/src/material/animated_icons/data/menu_close.g.dart",
+    "lib/src/material/animated_icons/data/menu_home.g.dart",
+    "lib/src/material/animated_icons/data/pause_play.g.dart",
+    "lib/src/material/animated_icons/data/play_pause.g.dart",
+    "lib/src/material/animated_icons/data/search_ellipsis.g.dart",
+    "lib/src/material/animated_icons/data/view_list.g.dart"
+  ]
+}

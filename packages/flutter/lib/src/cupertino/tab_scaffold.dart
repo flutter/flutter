@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+
 import 'bottom_tab_bar.dart';
 import 'colors.dart';
 import 'theme.dart';
@@ -16,51 +16,18 @@ import 'theme.dart';
 /// its [CupertinoTabBar].
 ///
 /// {@tool snippet}
+/// This samples shows how [CupertinoTabController] can be used to switch tabs in
+/// [CupertinoTabScaffold].
 ///
-/// [CupertinoTabController] can be used to switch tabs:
-///
-/// ```dart
-/// class MyCupertinoTabScaffoldPage extends StatefulWidget {
-///   @override
-///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
-/// }
-///
-/// class _CupertinoTabScaffoldPageState extends State<MyCupertinoTabScaffoldPage> {
-///   final CupertinoTabController _controller = CupertinoTabController();
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return CupertinoTabScaffold(
-///       tabBar: CupertinoTabBar(
-///         items: <BottomNavigationBarItem> [
-///           // ...
-///         ],
-///       ),
-///       controller: _controller,
-///       tabBuilder: (BuildContext context, int index) {
-///         return Center(
-///           child: CupertinoButton(
-///             child: const Text('Go to first tab'),
-///             onPressed: () => _controller.index = 0,
-///           )
-///         );
-///       }
-///     );
-///   }
-///
-///   @override
-///   void dispose() {
-///     _controller.dispose();
-///     super.dispose();
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/cupertino/tab_scaffold/cupertino_tab_controller.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a tabbed application root layout that can be
 ///    controlled by a [CupertinoTabController].
+///  * [RestorableCupertinoTabController], which is a restorable version
+///    of this controller.
 class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
@@ -69,7 +36,6 @@ class CupertinoTabController extends ChangeNotifier {
   /// greater than or equal to 0, and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
     : _index = initialIndex,
-      assert(initialIndex != null),
       assert(initialIndex >= 0);
 
   bool _isDisposed = false;
@@ -85,7 +51,6 @@ class CupertinoTabController extends ChangeNotifier {
   int get index => _index;
   int _index;
   set index(int value) {
-    assert(value != null);
     assert(value >= 0);
     if (_index == value) {
       return;
@@ -135,54 +100,10 @@ class CupertinoTabController extends ChangeNotifier {
 /// (via [State.setState], for instance) from its descendant rather than from
 /// its ancestor.
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
-/// ```dart
-/// CupertinoTabScaffold(
-///   tabBar: CupertinoTabBar(
-///     items: <BottomNavigationBarItem> [
-///       // ...
-///     ],
-///   ),
-///   tabBuilder: (BuildContext context, int index) {
-///     return CupertinoTabView(
-///       builder: (BuildContext context) {
-///         return CupertinoPageScaffold(
-///           navigationBar: CupertinoNavigationBar(
-///             middle: Text('Page 1 of tab $index'),
-///           ),
-///           child: Center(
-///             child: CupertinoButton(
-///               child: const Text('Next page'),
-///               onPressed: () {
-///                 Navigator.of(context).push(
-///                   CupertinoPageRoute<void>(
-///                     builder: (BuildContext context) {
-///                       return CupertinoPageScaffold(
-///                         navigationBar: CupertinoNavigationBar(
-///                           middle: Text('Page 2 of tab $index'),
-///                         ),
-///                         child: Center(
-///                           child: CupertinoButton(
-///                             child: const Text('Back'),
-///                             onPressed: () { Navigator.of(context).pop(); },
-///                           ),
-///                         ),
-///                       );
-///                     },
-///                   ),
-///                 );
-///               },
-///             ),
-///           ),
-///         );
-///       },
-///     );
-///   },
-/// )
-/// ```
+/// ** See code in examples/api/lib/cupertino/tab_scaffold/cupertino_tab_scaffold.0.dart **
 /// {@end-tool}
 ///
 /// To push a route above all tabs instead of inside the currently selected one
@@ -193,7 +114,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
-///  * [CupertinoTabController], the selection state of this widget
+///  * [CupertinoTabController], the selection state of this widget.
 ///  * [CupertinoTabView], the typical root content of each tab that holds its own
 ///    [Navigator] stack.
 ///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.
@@ -205,20 +126,18 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   /// The [tabBar] and [tabBuilder] arguments must not be null.
   CupertinoTabScaffold({
-    Key key,
-    @required this.tabBar,
-    @required this.tabBuilder,
+    super.key,
+    required this.tabBar,
+    required this.tabBuilder,
     this.controller,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
-  }) : assert(tabBar != null),
-       assert(tabBuilder != null),
-       assert(
+    this.restorationId,
+  }) : assert(
          controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
-         'out of bounds for the tab bar with ${tabBar.items.length} tabs'
-       ),
-       super(key: key);
+         'out of bounds for the tab bar with ${tabBar.items.length} tabs',
+       );
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
   /// that lets the user switch between different tabs in the main content area
@@ -239,9 +158,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
   ///
-  /// By default `tabBar` has its text scale factor set to 1.0 and does not
+  /// By default [tabBar] has its text scale factor set to 1.0 and does not
   /// respond to text scale factor changes from the operating system, to match
-  /// the native iOS behavior. To override this behavior, wrap each of the `tabBar`'s
+  /// the native iOS behavior. To override this behavior, wrap each of the [tabBar]'s
   /// items inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
   /// value. The text scale factor value from the operating system can be retrieved
   /// int many ways, such as querying [MediaQuery.textScaleFactorOf] against
@@ -256,7 +175,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// index value.
   ///
   /// Defaults to null.
-  final CupertinoTabController controller;
+  final CupertinoTabController? controller;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
@@ -278,7 +197,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// The color of the widget that underlies the entire scaffold.
   ///
   /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// Whether the body should size itself to avoid the window's bottom inset.
   ///
@@ -289,12 +208,46 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
+  /// Restoration ID to save and restore the state of the [CupertinoTabScaffold].
+  ///
+  /// This property only has an effect when no [controller] has been provided:
+  /// If it is non-null (and no [controller] has been provided), the scaffold
+  /// will persist and restore the currently selected tab index. If a
+  /// [controller] has been provided, it is the responsibility of the owner of
+  /// that controller to persist and restore it, e.g. by using a
+  /// [RestorableCupertinoTabController].
+  ///
+  /// The state of this widget is persisted in a [RestorationBucket] claimed
+  /// from the surrounding [RestorationScope] using the provided restoration ID.
+  ///
+  /// See also:
+  ///
+  ///  * [RestorationManager], which explains how state restoration works in
+  ///    Flutter.
+  final String? restorationId;
+
   @override
-  _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
+  State<CupertinoTabScaffold> createState() => _CupertinoTabScaffoldState();
 }
 
-class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  CupertinoTabController _controller;
+class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with RestorationMixin {
+  RestorableCupertinoTabController? _internalController;
+  CupertinoTabController get _controller =>  widget.controller ?? _internalController!.value;
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    _restoreInternalController();
+  }
+
+  void _restoreInternalController() {
+    if (_internalController != null) {
+      registerForRestoration(_internalController!, 'controller');
+      _internalController!.value.addListener(_onCurrentIndexChange);
+    }
+  }
 
   @override
   void initState() {
@@ -302,31 +255,34 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     _updateTabController();
   }
 
-  void _updateTabController({ bool shouldDisposeOldController = false }) {
-    final CupertinoTabController newController =
-      // User provided a new controller, update `_controller` with it.
-      widget.controller
-      ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
-
-    if (newController == _controller) {
-      return;
+  void _updateTabController([CupertinoTabController? oldWidgetController]) {
+    if (widget.controller == null && _internalController == null) {
+      // No widget-provided controller: create an internal controller.
+      _internalController = RestorableCupertinoTabController(initialIndex: widget.tabBar.currentIndex);
+      if (!restorePending) {
+        _restoreInternalController(); // Also adds the listener to the controller.
+      }
     }
-
-    if (shouldDisposeOldController) {
-      _controller?.dispose();
-    } else if (_controller?._isDisposed == false) {
-      _controller.removeListener(_onCurrentIndexChange);
+    if (widget.controller != null && _internalController != null) {
+      // Use the widget-provided controller.
+      unregisterFromRestoration(_internalController!);
+      _internalController!.dispose();
+      _internalController = null;
     }
-
-    newController.addListener(_onCurrentIndexChange);
-    _controller = newController;
+    if (oldWidgetController != widget.controller) {
+      // The widget-provided controller has changed: move listeners.
+      if (oldWidgetController?._isDisposed == false) {
+        oldWidgetController!.removeListener(_onCurrentIndexChange);
+      }
+      widget.controller?.addListener(_onCurrentIndexChange);
+    }
   }
 
   void _onCurrentIndexChange() {
     assert(
       _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
       "The $runtimeType's current index ${_controller.index} is "
-      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
+      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs',
     );
 
     // The value of `_controller.index` has already been updated at this point.
@@ -338,7 +294,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      _updateTabController(shouldDisposeOldController: oldWidget.controller == null);
+      _updateTabController(oldWidget.controller);
     } else if (_controller.index >= widget.tabBar.items.length) {
       // If a new [tabBar] with less than (_controller.index + 1) items is provided,
       // clamp the current index.
@@ -364,12 +320,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       contentPadding = EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom);
     }
 
-    if (widget.tabBar != null &&
-        // Only pad the content with the height of the tab bar if the tab
-        // isn't already entirely obstructed by a keyboard or other view insets.
-        // Don't double pad.
-        (!widget.resizeToAvoidBottomInset ||
-            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
+    // Only pad the content with the height of the tab bar if the tab
+    // isn't already entirely obstructed by a keyboard or other view insets.
+    // Don't double pad.
+    if (!widget.resizeToAvoidBottomInset || widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding =
@@ -400,7 +354,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(widget.backgroundColor, context)
+        color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)
             ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
@@ -419,8 +373,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
                 onTap: (int newIndex) {
                   _controller.index = newIndex;
                   // Chain the user's original callback.
-                  if (widget.tabBar.onTap != null)
-                    widget.tabBar.onTap(newIndex);
+                  widget.tabBar.onTap?.call(newIndex);
                 },
               ),
             ),
@@ -432,13 +385,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   @override
   void dispose() {
-    // Only dispose `_controller` when the state instance owns it.
-    if (widget.controller == null) {
-      _controller?.dispose();
-    } else if (_controller?._isDisposed == false) {
+    if (widget.controller?._isDisposed == false) {
       _controller.removeListener(_onCurrentIndexChange);
     }
-
+    _internalController?.dispose();
     super.dispose();
   }
 }
@@ -447,12 +397,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 /// at a time and on stage. Off stage tabs' animations are stopped.
 class _TabSwitchingView extends StatefulWidget {
   const _TabSwitchingView({
-    @required this.currentTabIndex,
-    @required this.tabCount,
-    @required this.tabBuilder,
-  }) : assert(currentTabIndex != null),
-       assert(tabCount != null && tabCount > 0),
-       assert(tabBuilder != null);
+    required this.currentTabIndex,
+    required this.tabCount,
+    required this.tabBuilder,
+  }) : assert(tabCount > 0);
 
   final int currentTabIndex;
   final int tabCount;
@@ -502,7 +450,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     _focusActiveTab();
   }
 
-  // Will focus the active tab if the FocusScope above it has focus already.  If
+  // Will focus the active tab if the FocusScope above it has focus already. If
   // not, then it will just mark it as the preferred focus for that scope.
   void _focusActiveTab() {
     if (tabFocusNodes.length != widget.tabCount) {
@@ -540,19 +488,58 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         final bool active = index == widget.currentTabIndex;
         shouldBuildTab[index] = active || shouldBuildTab[index];
 
-        return Offstage(
-          offstage: !active,
-          child: TickerMode(
-            enabled: active,
-            child: FocusScope(
-              node: tabFocusNodes[index],
-              child: Builder(builder: (BuildContext context) {
-                return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
-              }),
+        return HeroMode(
+          enabled: active,
+          child: Offstage(
+            offstage: !active,
+            child: TickerMode(
+              enabled: active,
+              child: FocusScope(
+                node: tabFocusNodes[index],
+                child: Builder(builder: (BuildContext context) {
+                  return shouldBuildTab[index] ? widget.tabBuilder(context, index) : const SizedBox.shrink();
+                }),
+              ),
             ),
           ),
         );
       }),
     );
+  }
+}
+
+/// A [RestorableProperty] that knows how to store and restore a
+/// [CupertinoTabController].
+///
+/// The [CupertinoTabController] is accessible via the [value] getter. During
+/// state restoration, the property will restore [CupertinoTabController.index]
+/// to the value it had when the restoration data it is getting restored from
+/// was collected.
+class RestorableCupertinoTabController extends RestorableChangeNotifier<CupertinoTabController> {
+  /// Creates a [RestorableCupertinoTabController] to control the tab index of
+  /// [CupertinoTabScaffold] and [CupertinoTabBar].
+  ///
+  /// The `initialIndex` must not be null and defaults to 0. The value must be
+  /// greater than or equal to 0, and less than the total number of tabs.
+  RestorableCupertinoTabController({ int initialIndex = 0 })
+    : assert(initialIndex >= 0),
+      _initialIndex = initialIndex;
+
+  final int _initialIndex;
+
+  @override
+  CupertinoTabController createDefaultValue() {
+    return CupertinoTabController(initialIndex: _initialIndex);
+  }
+
+  @override
+  CupertinoTabController fromPrimitives(Object? data) {
+    assert(data != null);
+    return CupertinoTabController(initialIndex: data! as int);
+  }
+
+  @override
+  Object? toPrimitives() {
+    return value.index;
   }
 }

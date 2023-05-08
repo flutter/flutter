@@ -31,7 +31,7 @@ import 'package:flutter/rendering.dart';
 ///
 ///  * [FixedScrollMetrics], which is an immutable object that implements this
 ///    interface.
-abstract class ScrollMetrics {
+mixin ScrollMetrics {
   /// Creates a [ScrollMetrics] that has the same properties as this object.
   ///
   /// This is useful if this object is mutable, but you want to get a snapshot
@@ -41,18 +41,20 @@ abstract class ScrollMetrics {
   /// is useful to examine hypothetical situations, for example "would applying
   /// this delta unmodified take the position [outOfRange]?".
   ScrollMetrics copyWith({
-    double minScrollExtent,
-    double maxScrollExtent,
-    double pixels,
-    double viewportDimension,
-    AxisDirection axisDirection,
+    double? minScrollExtent,
+    double? maxScrollExtent,
+    double? pixels,
+    double? viewportDimension,
+    AxisDirection? axisDirection,
+    double? devicePixelRatio,
   }) {
     return FixedScrollMetrics(
-      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
-      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
-      pixels: pixels ?? this.pixels,
-      viewportDimension: viewportDimension ?? this.viewportDimension,
+      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+      pixels: pixels ?? (hasPixels ? this.pixels : null),
+      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
 
@@ -60,7 +62,7 @@ abstract class ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value should typically be non-null and less than or equal to
+  /// This value is typically less than or equal to
   /// [maxScrollExtent]. It can be negative infinity, if the scroll is unbounded.
   double get minScrollExtent;
 
@@ -68,15 +70,24 @@ abstract class ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value should typically be non-null and greater than or equal to
+  /// This value is typically greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
+
+  /// Whether the [minScrollExtent] and the [maxScrollExtent] properties are available.
+  bool get hasContentDimensions;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
 
+  /// Whether the [pixels] property is available.
+  bool get hasPixels;
+
   /// The extent of the viewport along the [axisDirection].
   double get viewportDimension;
+
+  /// Whether the [viewportDimension] property is available.
+  bool get hasViewportDimension;
 
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
@@ -107,43 +118,67 @@ abstract class ScrollMetrics {
     assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
       // "above" overscroll value
-      - (minScrollExtent - pixels).clamp(0, viewportDimension)
+      - clampDouble(minScrollExtent - pixels, 0, viewportDimension)
       // "below" overscroll value
-      - (pixels - maxScrollExtent).clamp(0, viewportDimension);
+      - clampDouble(pixels - maxScrollExtent, 0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
   /// This is the content below the content described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
+
+  /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable]
+  /// associated with this metrics object is drawn into.
+  double get devicePixelRatio;
 }
 
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
 ///
 /// For details, see [ScrollMetrics], which defines this object's interfaces.
-class FixedScrollMetrics extends ScrollMetrics {
+class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
-    @required this.minScrollExtent,
-    @required this.maxScrollExtent,
-    @required this.pixels,
-    @required this.viewportDimension,
-    @required this.axisDirection,
-  });
+    required double? minScrollExtent,
+    required double? maxScrollExtent,
+    required double? pixels,
+    required double? viewportDimension,
+    required this.axisDirection,
+    required this.devicePixelRatio,
+  }) : _minScrollExtent = minScrollExtent,
+       _maxScrollExtent = maxScrollExtent,
+       _pixels = pixels,
+       _viewportDimension = viewportDimension;
 
   @override
-  final double minScrollExtent;
+  double get minScrollExtent => _minScrollExtent!;
+  final double? _minScrollExtent;
 
   @override
-  final double maxScrollExtent;
+  double get maxScrollExtent => _maxScrollExtent!;
+  final double? _maxScrollExtent;
 
   @override
-  final double pixels;
+  bool get hasContentDimensions => _minScrollExtent != null && _maxScrollExtent != null;
 
   @override
-  final double viewportDimension;
+  double get pixels => _pixels!;
+  final double? _pixels;
+
+  @override
+  bool get hasPixels => _pixels != null;
+
+  @override
+  double get viewportDimension => _viewportDimension!;
+  final double? _viewportDimension;
+
+  @override
+  bool get hasViewportDimension => _viewportDimension != null;
 
   @override
   final AxisDirection axisDirection;
+
+  @override
+  final double devicePixelRatio;
 
   @override
   String toString() {

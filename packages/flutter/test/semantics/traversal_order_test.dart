@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -39,52 +38,57 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 2,
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 TestSemantics(
                   id: 3,
-                  label: '0 - 0',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 4,
-                  label: '0 - 1',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 5,
-                  label: '0 - 2',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 6,
-                  label: '1 - 0',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 7,
-                  label: '1 - 1',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 8,
-                  label: '1 - 2',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 9,
-                  label: '2 - 0',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 10,
-                  label: '2 - 1',
-                  textDirection: TextDirection.ltr,
-                ),
-                TestSemantics(
-                  id: 11,
-                  label: '2 - 2',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 4,
+                      label: '0 - 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 5,
+                      label: '0 - 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 6,
+                      label: '0 - 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 7,
+                      label: '1 - 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 8,
+                      label: '1 - 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 9,
+                      label: '1 - 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 10,
+                      label: '2 - 0',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 11,
+                      label: '2 - 1',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    TestSemantics(
+                      id: 12,
+                      label: '2 - 2',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),

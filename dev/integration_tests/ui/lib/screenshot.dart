@@ -6,16 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 /// This sample application creates a hard to render frame, causing the
-/// driver script to race the GPU thread. If the driver script wins the
-/// race, it will screenshot the previous frame. If the GPU thread wins
+/// driver script to race the raster thread. If the driver script wins the
+/// race, it will screenshot the previous frame. If the raster thread wins
 /// it, it will screenshot the latest frame.
 void main() {
   enableFlutterDriverExtension();
 
-  runApp(Toggler());
+  runApp(const Toggler());
 }
 
 class Toggler extends StatefulWidget {
+  const Toggler({super.key});
+
   @override
   State<Toggler> createState() => TogglerState();
 }
@@ -33,7 +35,7 @@ class TogglerState extends State<Toggler> {
         body: Material(
           child: Column(
             children: <Widget>[
-              FlatButton(
+              TextButton(
                 key: const ValueKey<String>('toggle'),
                 child: const Text('Toggle visibility'),
                 onPressed: () {
@@ -64,7 +66,7 @@ List<Widget> _buildRows(int count) {
 }
 
 /// Builds cells that are known to take time to render causing a delay on the
-/// GPU thread.
+/// raster thread.
 List<Widget> _buildCells(double epsilon) {
   return List<Widget>.generate(15, (int i) {
     return Expanded(

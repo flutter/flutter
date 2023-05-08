@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' show Description, TestFailure;
 
@@ -20,17 +19,17 @@ class _BufferGoldenMatcher extends AsyncMatcher {
   final Uri key;
 
   /// The [version] of the golden image.
-  final int version;
+  final int? version;
 
   @override
-  Future<String> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(dynamic item) async {
     Uint8List buffer;
     if (item is List<int>) {
       buffer = Uint8List.fromList(item);
     } else if (item is Future<List<int>>) {
       buffer = Uint8List.fromList(await item);
     } else {
-      throw 'Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}';
+      throw AssertionError('Expected `List<int>` or `Future<List<int>>`, instead found: ${item.runtimeType}');
     }
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
     if (autoUpdateGoldenFiles) {
@@ -61,15 +60,15 @@ class _BufferGoldenMatcher extends AsyncMatcher {
 /// golden files. This parameter is optional.
 ///
 /// {@tool snippet}
-/// Sample invocations of [matchesGoldenFile].
+/// Sample invocations of [bufferMatchesGoldenFile].
 ///
 /// ```dart
 /// await expectLater(
-///   const <int>[],
+///   const <int>[ /* bytes... */ ],
 ///   bufferMatchesGoldenFile('sample.png'),
 /// );
 /// ```
 /// {@end-tool}
-AsyncMatcher bufferMatchesGoldenFile(String key, {int version}) {
+AsyncMatcher bufferMatchesGoldenFile(String key, {int? version}) {
    return _BufferGoldenMatcher(Uri.parse(key), version);
 }

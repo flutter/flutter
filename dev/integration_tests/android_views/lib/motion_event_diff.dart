@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 
 // Android MotionEvent actions for which a pointer index is encoded in the
 // unmasked action code.
@@ -14,7 +13,7 @@ const List<int> kPointerActions = <int>[
   6, // POINTER_UP
 ];
 
-const double kDoubleErrorMargin = precisionErrorTolerance;
+const double kDoubleErrorMargin = 1e-4;
 
 String diffMotionEvents(
   Map<String, dynamic> originalEvent,
@@ -28,6 +27,7 @@ String diffMotionEvents(
     'source', // Unused by Flutter.
     'deviceId', // Android documentation says that's an arbitrary number that shouldn't be depended on.
     'action', // Compared separately.
+    'motionEventId', // TODO(kaushikiska): add support for motion event diffing, https://github.com/flutter/flutter/issues/61022.
   ]);
 
   diffActions(diff, originalEvent, synthesizedEvent);
@@ -47,17 +47,19 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
   final String originalActionName =
       getActionName(originalActionMasked, originalEvent['action'] as int);
 
-  if (synthesizedActionMasked != originalActionMasked)
+  if (synthesizedActionMasked != originalActionMasked) {
     diffBuffer.write(
         'action (expected: $originalActionName actual: $synthesizedActionName) ');
+  }
 
   if (kPointerActions.contains(originalActionMasked) &&
       originalActionMasked == synthesizedActionMasked) {
     final int originalPointer = getPointerIdx(originalEvent['action'] as int);
     final int synthesizedPointer = getPointerIdx(synthesizedEvent['action'] as int);
-    if (originalPointer != synthesizedPointer)
+    if (originalPointer != synthesizedPointer) {
       diffBuffer.write(
           'pointerIdx (expected: $originalPointer actual: $synthesizedPointer action: $originalActionName ');
+    }
   }
 }
 
@@ -123,10 +125,12 @@ void diffMaps(
     return;
   }
   for (final String key in expected.keys) {
-    if (excludeKeys.contains(key))
+    if (excludeKeys.contains(key)) {
       continue;
-    if (doublesApproximatelyMatch(expected[key], actual[key]))
+    }
+    if (doublesApproximatelyMatch(expected[key], actual[key])) {
       continue;
+    }
 
     if (expected[key] != actual[key]) {
       diffBuffer.write(
@@ -155,10 +159,11 @@ String getActionName(int actionMasked, int action) {
     'BUTTON_PRESS',
     'BUTTON_RELEASE',
   ];
-  if (actionMasked < actionNames.length)
+  if (actionMasked < actionNames.length) {
     return '${actionNames[actionMasked]}($action)';
-  else
+  } else {
     return 'ACTION_$actionMasked';
+  }
 }
 
 bool doublesApproximatelyMatch(dynamic a, dynamic b) =>

@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:isolate';
+
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
+
 import 'pair.dart';
 import 'test_step.dart';
 
@@ -41,22 +42,22 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   }
 }
 
-Future<TestStepResult> basicBinaryHandshake(ByteData message) async {
-  const BasicMessageChannel<ByteData> channel =
-      BasicMessageChannel<ByteData>(
+Future<TestStepResult> basicBinaryHandshake(ByteData? message) async {
+  const BasicMessageChannel<ByteData?> channel =
+      BasicMessageChannel<ByteData?>(
     'binary-msg',
     BinaryCodec(),
   );
-  return _basicMessageHandshake<ByteData>(
+  return _basicMessageHandshake<ByteData?>(
       'Binary >${toString(message)}<', channel, message);
 }
 
-Future<TestStepResult> basicStringHandshake(String message) async {
-  const BasicMessageChannel<String> channel = BasicMessageChannel<String>(
+Future<TestStepResult> basicStringHandshake(String? message) async {
+  const BasicMessageChannel<String?> channel = BasicMessageChannel<String?>(
     'string-msg',
     StringCodec(),
   );
-  return _basicMessageHandshake<String>('String >$message<', channel, message);
+  return _basicMessageHandshake<String?>('String >$message<', channel, message);
 }
 
 Future<TestStepResult> basicJsonHandshake(dynamic message) async {
@@ -78,9 +79,44 @@ Future<TestStepResult> basicStandardHandshake(dynamic message) async {
       'Standard >${toString(message)}<', channel, message);
 }
 
+Future<void> _basicBackgroundStandardEchoMain(List<Object> args) async {
+  final SendPort sendPort = args[2] as SendPort;
+  final Object message = args[1];
+  final String name = 'Background Echo >${toString(message)}<';
+  const String description =
+      'Uses a platform channel from a background isolate.';
+  try {
+    BackgroundIsolateBinaryMessenger.ensureInitialized(
+        args[0] as RootIsolateToken);
+    const BasicMessageChannel<dynamic> channel = BasicMessageChannel<dynamic>(
+      'std-echo',
+      ExtendedStandardMessageCodec(),
+    );
+    final Object response = await channel.send(message) as Object;
+
+    final TestStatus testStatus = TestStepResult.deepEquals(message, response)
+        ? TestStatus.ok
+        : TestStatus.failed;
+    sendPort.send(TestStepResult(name, description, testStatus));
+  } catch (ex) {
+    sendPort.send(TestStepResult(name, description, TestStatus.failed,
+        error: ex.toString()));
+  }
+}
+
+Future<TestStepResult> basicBackgroundStandardEcho(Object message) async {
+  final ReceivePort receivePort = ReceivePort();
+  Isolate.spawn(_basicBackgroundStandardEchoMain, <Object>[
+    ServicesBinding.rootIsolateToken!,
+    message,
+    receivePort.sendPort,
+  ]);
+  return await receivePort.first as TestStepResult;
+}
+
 Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {
-  const BasicMessageChannel<ByteData> channel =
-      BasicMessageChannel<ByteData>(
+  const BasicMessageChannel<ByteData?> channel =
+      BasicMessageChannel<ByteData?>(
     'binary-unknown',
     BinaryCodec(),
   );
@@ -88,7 +124,7 @@ Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {
 }
 
 Future<TestStepResult> basicStringMessageToUnknownChannel() async {
-  const BasicMessageChannel<String> channel = BasicMessageChannel<String>(
+  const BasicMessageChannel<String?> channel = BasicMessageChannel<String?>(
     'string-unknown',
     StringCodec(),
   );
@@ -121,11 +157,11 @@ Future<TestStepResult> basicStandardMessageToUnknownChannel() async {
 /// the original message.
 Future<TestStepResult> _basicMessageHandshake<T>(
   String description,
-  BasicMessageChannel<T> channel,
+  BasicMessageChannel<T?> channel,
   T message,
 ) async {
   final List<dynamic> received = <dynamic>[];
-  channel.setMessageHandler((T message) async {
+  channel.setMessageHandler((T? message) async {
     received.add(message);
     return message;
   });
@@ -149,7 +185,7 @@ Future<TestStepResult> _basicMessageHandshake<T>(
 /// Sends a message on a channel that no one listens on.
 Future<TestStepResult> _basicMessageToUnknownChannel<T>(
   String description,
-  BasicMessageChannel<T> channel,
+  BasicMessageChannel<T?> channel,
 ) async {
   dynamic messageEcho = nothing;
   dynamic error = nothing;
@@ -169,10 +205,11 @@ Future<TestStepResult> _basicMessageToUnknownChannel<T>(
 }
 
 String toString(dynamic message) {
-  if (message is ByteData)
+  if (message is ByteData) {
     return message.buffer
         .asUint8List(message.offsetInBytes, message.lengthInBytes)
         .toString();
-  else
+  } else {
     return '$message';
+  }
 }

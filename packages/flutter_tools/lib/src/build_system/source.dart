@@ -74,7 +74,7 @@ class SourceVisitor implements ResolvedFiles {
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
     // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim())
         .where((String path) => path.isNotEmpty)
         .toSet()
         .map(environment.fileSystem.file);
@@ -91,7 +91,7 @@ class SourceVisitor implements ResolvedFiles {
     final List<String> segments = <String>[];
     final List<String> rawParts = pattern.split('/');
     final bool hasWildcard = rawParts.last.contains('*');
-    String wildcardFile;
+    String? wildcardFile;
     if (hasWildcard) {
       wildcardFile = rawParts.removeLast();
     }
@@ -101,24 +101,19 @@ class SourceVisitor implements ResolvedFiles {
       case Environment.kProjectDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.projectDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kBuildDirectory:
         segments.addAll(environment.fileSystem.path.split(
           environment.buildDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kCacheDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
-        break;
       case Environment.kFlutterRootDirectory:
         // flutter root will not contain a symbolic link.
         segments.addAll(
           environment.fileSystem.path.split(environment.flutterRootDir.absolute.path));
-        break;
       case Environment.kOutputDirectory:
         segments.addAll(
           environment.fileSystem.path.split(environment.outputDir.resolveSymbolicLinksSync()));
-        break;
       default:
         throw InvalidPatternException(pattern);
     }
@@ -139,12 +134,12 @@ class SourceVisitor implements ResolvedFiles {
     // example, `foo_*_.dart`. We want to match `foo_b_.dart` but not
     // `foo_.dart`. To do so, we first subtract the first section from the
     // string if the first segment matches.
-    final List<String> wildcardSegments = wildcardFile.split('*');
+    final List<String> wildcardSegments = wildcardFile?.split('*') ?? <String>[];
     if (wildcardSegments.length > 2) {
       throw InvalidPatternException(pattern);
     }
     if (!environment.fileSystem.directory(filePath).existsSync()) {
-      throw Exception('$filePath does not exist!');
+      environment.fileSystem.directory(filePath).createSync(recursive: true);
     }
     for (final FileSystemEntity entity in environment.fileSystem.directory(filePath).listSync()) {
       final String filename = environment.fileSystem.path.basename(entity.path);
@@ -166,7 +161,19 @@ class SourceVisitor implements ResolvedFiles {
   /// Visit a [Source] which is defined by an [Artifact] from the flutter cache.
   ///
   /// If the [Artifact] points to a directory then all child files are included.
-  void visitArtifact(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+  /// To increase the performance of builds that use a known revision of Flutter,
+  /// these are updated to point towards the engine.version file instead of
+  /// the artifact itself.
+  void visitArtifact(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
+    // This is not a local engine.
+    if (environment.engineVersion != null) {
+      sources.add(environment.flutterRootDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version'),
+      );
+      return;
+    }
     final String path = environment.artifacts
       .getArtifactPath(artifact, platform: platform, mode: mode);
     if (environment.fileSystem.isDirectorySync(path)) {
@@ -175,9 +182,37 @@ class SourceVisitor implements ResolvedFiles {
           if (entity is File)
             entity,
       ]);
-    } else {
-      sources.add(environment.fileSystem.file(path));
+      return;
     }
+    sources.add(environment.fileSystem.file(path));
+  }
+
+  /// Visit a [Source] which is defined by an [HostArtifact] from the flutter cache.
+  ///
+  /// If the [Artifact] points to a directory then all child files are included.
+  /// To increase the performance of builds that use a known revision of Flutter,
+  /// these are updated to point towards the engine.version file instead of
+  /// the artifact itself.
+  void visitHostArtifact(HostArtifact artifact) {
+    // This is not a local engine.
+    if (environment.engineVersion != null) {
+      sources.add(environment.flutterRootDir
+        .childDirectory('bin')
+        .childDirectory('internal')
+        .childFile('engine.version'),
+      );
+      return;
+    }
+    final FileSystemEntity entity = environment.artifacts.getHostArtifact(artifact);
+    if (entity is Directory) {
+      sources.addAll(<File>[
+        for (FileSystemEntity entity in entity.listSync(recursive: true))
+          if (entity is File)
+            entity,
+      ]);
+      return;
+    }
+    sources.add(entity as File);
   }
 }
 
@@ -186,10 +221,16 @@ abstract class Source {
   /// This source is a file URL which contains some references to magic
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
+
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
-  const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
+  const factory Source.artifact(Artifact artifact, {TargetPlatform? platform, BuildMode? mode}) = _ArtifactSource;
+
+  /// The source is provided by an [HostArtifact].
+  ///
+  /// If [artifact] points to a directory then all child files are included.
+  const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -221,11 +262,23 @@ class _ArtifactSource implements Source {
   const _ArtifactSource(this.artifact, { this.platform, this.mode });
 
   final Artifact artifact;
-  final TargetPlatform platform;
-  final BuildMode mode;
+  final TargetPlatform? platform;
+  final BuildMode? mode;
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
+
+  @override
+  bool get implicit => false;
+}
+
+class _HostArtifactSource implements Source {
+  const _HostArtifactSource(this.artifact);
+
+  final HostArtifact artifact;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
 
   @override
   bool get implicit => false;

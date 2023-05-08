@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
@@ -13,11 +13,11 @@ void main() {
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
-        expect(child, isA<Navigator>());
+        expect(child, isA<FocusScope>());
         return const Placeholder();
       },
     );
@@ -52,10 +52,10 @@ void main() {
             return const Placeholder();
           },
         ),
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Directionality(
             textDirection: TextDirection.rtl,
-            child: child,
+            child: child!,
           );
         },
       ),

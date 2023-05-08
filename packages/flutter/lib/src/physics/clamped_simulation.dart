@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'simulation.dart';
+
+export 'simulation.dart' show Simulation;
 
 /// A simulation that applies limits to another simulation.
 ///
@@ -15,8 +19,13 @@ import 'simulation.dart';
 /// difference would just be that the position would be reported as pinned to
 /// the maximum value for the times that it would otherwise have been reported
 /// as higher.
+///
+/// Similarly, this means that the [x] value will change at a rate that does not
+/// match the reported [dx] value while one or the other is being clamped.
+///
+/// The [isDone] logic is unaffected by the clamping; it reflects the logic of
+/// the underlying simulation.
 class ClampedSimulation extends Simulation {
-
   /// Creates a [ClampedSimulation] that clamps the given simulation.
   ///
   /// The named arguments specify the ranges for the clamping behavior, as
@@ -27,8 +36,7 @@ class ClampedSimulation extends Simulation {
     this.xMax = double.infinity,
     this.dxMin = double.negativeInfinity,
     this.dxMax = double.infinity,
-  }) : assert(simulation != null),
-       assert(xMax >= xMin),
+  }) : assert(xMax >= xMin),
        assert(dxMax >= dxMin);
 
   /// The simulation being clamped. Calls to [x], [dx], and [isDone] are
@@ -48,11 +56,14 @@ class ClampedSimulation extends Simulation {
   final double dxMax;
 
   @override
-  double x(double time) => simulation.x(time).clamp(xMin, xMax) as double;
+  double x(double time) => clampDouble(simulation.x(time), xMin, xMax);
 
   @override
-  double dx(double time) => simulation.dx(time).clamp(dxMin, dxMax) as double;
+  double dx(double time) => clampDouble(simulation.dx(time), dxMin, dxMax);
 
   @override
   bool isDone(double time) => simulation.isDone(time);
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'ClampedSimulation')}(simulation: $simulation, x: ${xMin.toStringAsFixed(1)}..${xMax.toStringAsFixed(1)}, dx: ${dxMin.toStringAsFixed(1)}..${dxMax.toStringAsFixed(1)})';
 }

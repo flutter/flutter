@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:archive/archive.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cmake.dart';
+import '../cmake_project.dart';
 import '../globals.dart' as globals;
-import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
-  WindowsApp({@required String projectBundleId}) : super(id: projectBundleId);
+  WindowsApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [WindowsApp] from a windows sub project.
   factory WindowsApp.fromWindowsProject(WindowsProject project) {
@@ -22,12 +22,56 @@ abstract class WindowsApp extends ApplicationPackage {
     );
   }
 
-  /// Creates a new [WindowsApp] from an existing executable.
+  /// Creates a new [WindowsApp] from an existing executable or a zip archive.
   ///
-  /// `applicationBinary` is the path to the executable.
-  factory WindowsApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
+  /// `applicationBinary` is the path to the executable or the zipped archive.
+  static WindowsApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
+    if (!applicationBinary.existsSync()) {
+      globals.printError('File "${applicationBinary.path}" does not exist.');
+      return null;
+    }
+
+    if (applicationBinary.path.endsWith('.exe')) {
+      return PrebuiltWindowsApp(
+        executable: applicationBinary.path,
+        applicationPackage: applicationBinary,
+      );
+    }
+
+    if (!applicationBinary.path.endsWith('.zip')) {
+      // Unknown file type
+      globals.printError('Unknown windows application type.');
+      return null;
+    }
+
+    // Try to unpack as a zip.
+    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
+    try {
+      globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
+    } on ArchiveException {
+      globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
+      return null;
+    }
+    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[];
+    for (final FileSystemEntity file in tempDir.listSync()) {
+      if (file.basename.endsWith('.exe')) {
+        exeFilesFound.add(file);
+      }
+    }
+
+    if (exeFilesFound.isEmpty) {
+      globals.printError('Cannot find .exe files in the zip archive.');
+      return null;
+    }
+
+    if (exeFilesFound.length > 1) {
+      globals.printError('Archive "${applicationBinary.path}" contains more than one .exe files.');
+      return null;
+    }
+
     return PrebuiltWindowsApp(
-      executable: applicationBinary.path,
+      executable: exeFilesFound.single.path,
+      applicationPackage: applicationBinary,
     );
   }
 
@@ -37,9 +81,10 @@ abstract class WindowsApp extends ApplicationPackage {
   String executable(BuildMode buildMode);
 }
 
-class PrebuiltWindowsApp extends WindowsApp {
+class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
   PrebuiltWindowsApp({
-    @required String executable,
+    required String executable,
+    required this.applicationPackage,
   }) : _executable = executable,
        super(projectBundleId: executable);
 
@@ -50,29 +95,29 @@ class PrebuiltWindowsApp extends WindowsApp {
 
   @override
   String get name => _executable;
+
+  @override
+  final FileSystemEntity applicationPackage;
 }
 
 class BuildableWindowsApp extends WindowsApp {
   BuildableWindowsApp({
-    @required this.project,
-  }) : super(projectBundleId: project.project.manifest.appName);
+    required this.project,
+  }) : super(projectBundleId: project.parent.manifest.appName);
 
   final WindowsProject project;
 
   @override
   String executable(BuildMode buildMode) {
-    final File exeNameFile = project.nameFile;
-    if (!exeNameFile.existsSync()) {
-      throwToolExit('Failed to find Windows executable name');
-    }
+    final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
         getWindowsBuildDirectory(),
-        'x64',
-        toTitleCase(getNameForBuildMode(buildMode)),
-        'Runner',
-        exeNameFile.readAsStringSync().trim());
+        'runner',
+        sentenceCase(getNameForBuildMode(buildMode)),
+        '$binaryName.exe',
+    );
   }
 
   @override
-  String get name => project.project.manifest.appName;
+  String get name => project.parent.manifest.appName;
 }

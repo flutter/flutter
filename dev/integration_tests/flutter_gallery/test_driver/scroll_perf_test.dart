@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
-    FlutterDriver driver;
+    late FlutterDriver driver;
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
@@ -18,7 +16,6 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
         driver.close();
     });
 
@@ -43,9 +40,8 @@ void main() {
         }
       });
 
-      TimelineSummary.summarize(timeline)
-        ..writeSummaryToFile('home_scroll_perf', pretty: true)
-        ..writeTimelineToFile('home_scroll_perf', pretty: true);
-    });
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      await summary.writeTimelineToFile('home_scroll_perf', pretty: true);
+    }, timeout: Timeout.none);
   });
 }

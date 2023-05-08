@@ -8,6 +8,9 @@ import 'basic_types.dart';
 import 'edge_insets.dart';
 import 'image_provider.dart';
 
+// Examples can assume:
+// late Decoration myDecoration;
+
 // This group of classes is intended for painting in cartesian coordinates.
 
 /// A description of a box decoration (a decoration applied to a [Rect]).
@@ -28,7 +31,7 @@ abstract class Decoration with Diagnosticable {
   @override
   String toStringShort() => objectRuntimeType(this, 'Decoration');
 
-  /// In checked mode, throws an exception if the object is not in a
+  /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:
@@ -66,7 +69,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// When implementing this method in subclasses, return null if this class
   /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
-  /// method instead.
+  /// method instead. Classes should implement both [lerpFrom] and [lerpTo].
   ///
   /// Supporting interpolating from null is recommended as the [Decoration.lerp]
   /// method uses this as a fallback when two classes can't interpolate between
@@ -87,16 +90,16 @@ abstract class Decoration with Diagnosticable {
   ///
   /// Instead of calling this directly, use [Decoration.lerp].
   @protected
-  Decoration lerpFrom(Decoration a, double t) => null;
+  Decoration? lerpFrom(Decoration? a, double t) => null;
 
   /// Linearly interpolates from `this` to another [Decoration] (which may be of
   /// a different class).
   ///
-  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
+  /// This is called if `b`'s [lerpFrom] did not know how to handle this class.
   ///
   /// When implementing this method in subclasses, return null if this class
   /// cannot interpolate from `b`. In that case, [lerp] will apply a default
-  /// behavior instead.
+  /// behavior instead. Classes should implement both [lerpFrom] and [lerpTo].
   ///
   /// Supporting interpolating to null is recommended as the [Decoration.lerp]
   /// method uses this as a fallback when two classes can't interpolate between
@@ -116,7 +119,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// Instead of calling this directly, use [Decoration.lerp].
   @protected
-  Decoration lerpTo(Decoration b, double t) => null;
+  Decoration? lerpTo(Decoration? b, double t) => null;
 
   /// Linearly interpolates between two [Decoration]s.
   ///
@@ -125,18 +128,22 @@ abstract class Decoration with Diagnosticable {
   /// interpolated, then the interpolation is done via null (at `t == 0.5`).
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Decoration lerp(Decoration a, Decoration b, double t) {
-    assert(t != null);
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b.lerpFrom(null, t) ?? b;
-    if (b == null)
-      return a.lerpTo(null, t) ?? a;
-    if (t == 0.0)
+  static Decoration? lerp(Decoration? a, Decoration? b, double t) {
+    if (identical(a, b)) {
       return a;
-    if (t == 1.0)
+    }
+    if (a == null) {
+      return b!.lerpFrom(null, t) ?? b;
+    }
+    if (b == null) {
+      return a.lerpTo(null, t) ?? a;
+    }
+    if (t == 0.0) {
+      return a;
+    }
+    if (t == 1.0) {
       return b;
+    }
     return b.lerpFrom(a, t)
         ?? a.lerpTo(b, t)
         ?? (t < 0.5 ? (a.lerpTo(null, t * 2.0) ?? a) : (b.lerpFrom(null, (t - 0.5) * 2.0) ?? b));
@@ -157,17 +164,29 @@ abstract class Decoration with Diagnosticable {
   /// is what [Container] uses), the `textDirection` parameter will be populated
   /// based on the ambient [Directionality] (by way of the [RenderDecoratedBox]
   /// renderer).
-  bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
+  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///
   /// The `onChanged` argument configures [BoxPainter.onChanged]. It can be
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
+  @factory
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 
   /// Returns a closed [Path] that describes the outer edge of this decoration.
-  Path getClipPath(Rect rect, TextDirection textDirection) => null;
+  ///
+  /// The default implementation throws. Subclasses must override this implementation
+  /// to describe the clip path that should be applied to the decoration when it is
+  /// used in a [Container] with an explicit [Clip] behavior.
+  ///
+  /// See also:
+  ///
+  ///  * [Container.clipBehavior], which, if set, uses this method to determine
+  ///    the clip path to use.
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    throw UnsupportedError('${objectRuntimeType(this, 'This Decoration subclass')} does not expect to be used for clipping.');
+  }
 }
 
 /// A stateful class that can paint a particular [Decoration].
@@ -217,7 +236,7 @@ abstract class BoxPainter {
   ///
   /// Resources might not start to load until after [paint] has been called,
   /// because they might depend on the configuration.
-  final VoidCallback onChanged;
+  final VoidCallback? onChanged;
 
   /// Discard any resources being held by the object.
   ///

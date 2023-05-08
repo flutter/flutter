@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -19,6 +18,7 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 /// The [SliverLayoutBuilder]'s final [SliverGeometry] will match the [SliverGeometry]
 /// of its child.
 ///
+/// {@macro flutter.widgets.ConstrainedLayoutBuilder}
 ///
 /// See also:
 ///
@@ -28,38 +28,30 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   ///
   /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
-    Key key,
-    SliverLayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
-
-  /// Called at layout time to construct the widget tree.
-  ///
-  /// The builder must return a non-null sliver widget.
-  @override
-  SliverLayoutWidgetBuilder get builder => super.builder;
+    super.key,
+    required super.builder,
+  });
 
   @override
-  _RenderSliverLayoutBuilder createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
-    assert(child != null);
     assert(child == this.child);
     return 0;
   }
 
   @override
   void performLayout() {
-    layoutAndBuildChild();
+    rebuildIfNecessary();
     child?.layout(constraints, parentUsesSize: true);
     geometry = child?.geometry ?? SliverGeometry.zero;
   }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     assert(child == this.child);
     // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }
@@ -67,14 +59,15 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   @override
   void paint(PaintingContext context, Offset offset) {
     // This renderObject does not introduce additional offset to child's position.
-    if (child?.geometry?.visible == true)
-      context.paintChild(child, offset);
+    if (child?.geometry?.visible ?? false) {
+      context.paintChild(child!, offset);
+    }
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
     return child != null
-        && child.geometry.hitTestExtent > 0
-        && child.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
+        && child!.geometry!.hitTestExtent > 0
+        && child!.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
   }
 }

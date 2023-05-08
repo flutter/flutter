@@ -9,30 +9,30 @@ import 'framework.dart';
 import 'icon_theme_data.dart';
 import 'inherited_theme.dart';
 
-/// Controls the default color, opacity, and size of icons in a widget subtree.
+// Examples can assume:
+// late BuildContext context;
+
+/// Controls the default properties of icons in a widget subtree.
 ///
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.
 class IconTheme extends InheritedTheme {
-  /// Creates an icon theme that controls the color, opacity, and size of
-  /// descendant widgets.
+  /// Creates an icon theme that controls properties of descendant widgets.
   ///
   /// Both [data] and [child] arguments must not be null.
   const IconTheme({
-    Key key,
-    @required this.data,
-    @required Widget child,
-  }) : assert(data != null),
-       assert(child != null),
-       super(key: key, child: child);
+    super.key,
+    required this.data,
+    required super.child,
+  });
 
-  /// Creates an icon theme that controls the color, opacity, and size of
+  /// Creates an icon theme that controls the properties of
   /// descendant widgets, and merges in the current icon theme, if any.
   ///
   /// The [data] and [child] arguments must not be null.
   static Widget merge({
-    Key key,
-    @required IconThemeData data,
-    @required Widget child,
+    Key? key,
+    required IconThemeData data,
+    required Widget child,
   }) {
     return Builder(
       builder: (BuildContext context) {
@@ -45,13 +45,22 @@ class IconTheme extends InheritedTheme {
     );
   }
 
-  /// The color, opacity, and size to use for icons in this subtree.
+  /// The set of properties to use for icons in this subtree.
   final IconThemeData data;
 
   /// The data from the closest instance of this class that encloses the given
-  /// context.
+  /// context, if any.
   ///
-  /// Defaults to the current [ThemeData.iconTheme].
+  /// If there is no ambient icon theme, defaults to [IconThemeData.fallback].
+  /// The returned [IconThemeData] is concrete (all values are non-null; see
+  /// [IconThemeData.isConcrete]). Any properties on the ambient icon theme that
+  /// are null get defaulted to the values specified on
+  /// [IconThemeData.fallback].
+  ///
+  /// The [Theme] widget from the `material` library introduces an [IconTheme]
+  /// widget set to the [ThemeData.iconTheme], so in a Material Design
+  /// application, this will typically default to the icon theme from the
+  /// ambient [Theme].
   ///
   /// Typical usage is as follows:
   ///
@@ -64,13 +73,18 @@ class IconTheme extends InheritedTheme {
       ? iconThemeData
       : iconThemeData.copyWith(
         size: iconThemeData.size ?? const IconThemeData.fallback().size,
+        fill: iconThemeData.fill ?? const IconThemeData.fallback().fill,
+        weight: iconThemeData.weight ?? const IconThemeData.fallback().weight,
+        grade: iconThemeData.grade ?? const IconThemeData.fallback().grade,
+        opticalSize: iconThemeData.opticalSize ?? const IconThemeData.fallback().opticalSize,
         color: iconThemeData.color ?? const IconThemeData.fallback().color,
         opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
+        shadows: iconThemeData.shadows ?? const IconThemeData.fallback().shadows,
       );
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
-    final IconTheme iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
+    final IconTheme? iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
@@ -79,8 +93,7 @@ class IconTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final IconTheme iconTheme = context.findAncestorWidgetOfExactType<IconTheme>();
-    return identical(this, iconTheme) ? child : IconTheme(data: data, child: child);
+    return IconTheme(data: data, child: child);
   }
 
   @override

@@ -18,5 +18,9 @@
   "cutButtonLabel": "Кесүү",
   "copyButtonLabel": "Көчүрүү",
   "pasteButtonLabel": "Чаптоо",
-  "selectAllButtonLabel": "Баарын тандоо"
+  "selectAllButtonLabel": "Баарын тандоо",
+  "tabSemanticsLabel": "$tabCount ичинен $tabIndex-өтмөк",
+  "modalBarrierDismissLabel": "Жабуу",
+  "searchTextFieldPlaceholderLabel": "Издөө",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

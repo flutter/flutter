@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('test web_extension', () {
-    Future<Map<String, dynamic>> Function(Map<String, String>) call;
+    late Future<Map<String, dynamic>> Function(Map<String, String>) call;
 
     setUp(() {
       call = (Map<String, String> args) async {
@@ -20,7 +20,12 @@ void main() {
     test('web_extension should register a function', () {
       expect(() => registerWebServiceExtension(call),
           returnsNormally);
+
       expect(js.context.hasProperty(r'$flutterDriver'), true);
+      expect(js.context[r'$flutterDriver'], isNotNull);
+
+      expect(js.context.hasProperty(r'$flutterDriverResult'), true);
+      expect(js.context[r'$flutterDriverResult'], isNull);
     });
   });
 }

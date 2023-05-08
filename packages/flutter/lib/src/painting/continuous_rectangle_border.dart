@@ -32,22 +32,18 @@ import 'edge_insets.dart';
 ///    however its straight sides change into a rounded corner with a circular
 ///    radius in a step function instead of gradually like the
 ///    [ContinuousRectangleBorder].
-class ContinuousRectangleBorder extends ShapeBorder {
+class ContinuousRectangleBorder extends OutlinedBorder {
   /// The arguments must not be null.
   const ContinuousRectangleBorder({
-    this.side = BorderSide.none,
+    super.side,
     this.borderRadius = BorderRadius.zero,
-  }) : assert(side != null),
-       assert(borderRadius != null);
+  });
 
   /// The radius for each corner.
   ///
   /// Negative radius values are clamped to 0.0 by [getInnerPath] and
   /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
-
-  /// The style of this border.
-  final BorderSide side;
 
   @override
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
@@ -61,24 +57,22 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    assert(t != null);
+  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
       );
     }
     return super.lerpFrom(a, t);
   }
 
   @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
-    assert(t != null);
+  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
       );
     }
     return super.lerpTo(b, t);
@@ -94,7 +88,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
     final double top = rrect.top;
     final double bottom = rrect.bottom;
     //  Radii will be clamped to the value of the shortest side
-    /// of [rrect] to avoid strange tie-fighter shapes.
+    // of rrect to avoid strange tie-fighter shapes.
     final double tlRadiusX =
       math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
     final double tlRadiusY =
@@ -125,41 +119,51 @@ class ContinuousRectangleBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    if (rect.isEmpty)
+  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
+    return ContinuousRectangleBorder(
+      side: side ?? this.side,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+    if (rect.isEmpty) {
       return;
+    }
     switch (side.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        final Path path = getOuterPath(rect, textDirection: textDirection);
-        final Paint paint = side.toPaint();
-        canvas.drawPath(path, paint);
-        break;
+        canvas.drawPath(
+          getOuterPath(rect, textDirection: textDirection),
+          side.toPaint(),
+        );
     }
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ContinuousRectangleBorder
         && other.side == side
         && other.borderRadius == borderRadius;
   }
 
   @override
-  int get hashCode => hashValues(side, borderRadius);
+  int get hashCode => Object.hash(side, borderRadius);
 
   @override
   String toString() {

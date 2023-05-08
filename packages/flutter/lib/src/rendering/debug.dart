@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-
+import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
@@ -39,7 +37,7 @@ bool debugPaintLayerBordersEnabled = false;
 /// [RenderBox.debugHandleEvent].
 bool debugPaintPointersEnabled = false;
 
-/// Overlay a rotating set of colors when repainting layers in checked mode.
+/// Overlay a rotating set of colors when repainting layers in debug mode.
 ///
 /// See also:
 ///
@@ -47,46 +45,8 @@ bool debugPaintPointersEnabled = false;
 ///    areas are being excessively repainted.
 bool debugRepaintRainbowEnabled = false;
 
-/// Overlay a rotating set of colors when repainting text in checked mode.
+/// Overlay a rotating set of colors when repainting text in debug mode.
 bool debugRepaintTextRainbowEnabled = false;
-
-/// Causes [PhysicalModelLayer]s to paint a red rectangle around themselves if
-/// they are overlapping and painted out of order with regard to their elevation.
-///
-/// Android and iOS will show the last painted layer on top, whereas Fuchsia
-/// will show the layer with the highest elevation on top.
-///
-/// For example, a rectangular elevation at 3.0 that is painted before an
-/// overlapping rectangular elevation at 2.0 would render this way on Android
-/// and iOS (with fake shadows):
-/// ```
-/// ┌───────────────────┐
-/// │                   │
-/// │      3.0          │
-/// │            ┌───────────────────┐
-/// │            │                   │
-/// └────────────│                   │
-///              │        2.0        │
-///              │                   │
-///              └───────────────────┘
-/// ```
-///
-/// But this way on Fuchsia (with real shadows):
-/// ```
-/// ┌───────────────────┐
-/// │                   │
-/// │      3.0          │
-/// │                   │────────────┐
-/// │                   │            │
-/// └───────────────────┘            │
-///              │         2.0       │
-///              │                   │
-///              └───────────────────┘
-/// ```
-///
-/// This check helps developers that want a consistent look and feel detect
-/// where this inconsistency would occur.
-bool debugCheckElevationsEnabled = false;
 
 /// The current color to overlay when repainting a layer.
 ///
@@ -119,8 +79,10 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 /// See also:
 ///
-///  * [debugProfilePaintsEnabled], which does something similar for
-///    painting but using the timeline view.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout
+///    but using the timeline view.
+///  * [debugProfilePaintsEnabled], which does something similar for painting
+///    but using the timeline view.
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
 ///  * The discussion at [RendererBinding.drawFrame].
@@ -128,31 +90,107 @@ bool debugPrintLayouts = false;
 
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 ///
-/// By default this is turned off since these checks are expensive, but it is
-/// enabled by the test framework.
+/// By default this is turned off since these checks are expensive. If you are
+/// implementing your own children of [RenderBox] with custom intrinsics, turn
+/// this on in your unit tests for additional validations.
 bool debugCheckIntrinsicSizes = false;
 
-/// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
+/// Adds [Timeline] events for every [RenderObject] layout.
 ///
-/// This is only enabled in debug builds. The timing information this exposes is
-/// not representative of actual paints. However, it can expose unexpected
-/// painting in the timeline.
+/// The timing information this flag exposes is not representative of the actual
+/// cost of layout, because the overhead of adding timeline events is
+/// significant relative to the time each object takes to lay out. However, it
+/// can expose unexpected layout behavior in the timeline.
 ///
-/// For details on how to use [dart:developer.Timeline] events in the Dart
-/// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
+/// In debug builds, additional information is included in the trace (such as
+/// the properties of render objects being laid out). Collecting this data is
+/// expensive and further makes these traces non-representative of actual
+/// performance. This data is omitted in profile builds.
+///
+/// For more information about performance debugging in Flutter, see
+/// <https://flutter.dev/docs/perf/rendering>.
 ///
 /// See also:
 ///
 ///  * [debugPrintLayouts], which does something similar for layout but using
 ///    console output.
 ///  * [debugProfileBuildsEnabled], which does something similar for widgets
+///    being rebuilt.
+///  * [debugProfilePaintsEnabled], which does something similar for painting.
+///  * [debugEnhanceLayoutTimelineArguments], which enhances the trace with
+///    debugging information related to [RenderObject] layouts.
+bool debugProfileLayoutsEnabled = false;
+
+/// Adds [Timeline] events for every [RenderObject] painted.
+///
+/// The timing information this flag exposes is not representative of actual
+/// paints, because the overhead of adding timeline events is significant
+/// relative to the time each object takes to paint. However, it can expose
+/// unexpected painting in the timeline.
+///
+/// In debug builds, additional information is included in the trace (such as
+/// the properties of render objects being painted). Collecting this data is
+/// expensive and further makes these traces non-representative of actual
+/// performance. This data is omitted in profile builds.
+///
+/// For more information about performance debugging in Flutter, see
+/// <https://flutter.dev/docs/perf/rendering>.
+///
+/// See also:
+///
+///  * [debugProfileBuildsEnabled], which does something similar for widgets
 ///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
 ///    equivalent.
+///  * [debugProfileLayoutsEnabled], which does something similar for layout,
+///    and [debugPrintLayouts], its console equivalent.
 ///  * The discussion at [RendererBinding.drawFrame].
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
+///  * [debugEnhancePaintTimelineArguments], which enhances the trace with
+///    debugging information related to [RenderObject] paints.
 bool debugProfilePaintsEnabled = false;
+
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// layouts.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "LAYOUT" timeline event and for
+/// all [RenderObject] layout [Timeline] events, which are the events that are
+/// added when [debugProfileLayoutsEnabled] is true. The debugging information
+/// that will be added in trace arguments includes stats around [RenderObject]
+/// dirty states and [RenderObject] diagnostic information (i.e. [RenderObject]
+/// properties).
+///
+/// See also:
+///
+///  * [debugProfileLayoutsEnabled], which adds [Timeline] events for every
+///    [RenderObject] layout.
+///  * [debugEnhancePaintTimelineArguments], which does something similar for
+///    events related to [RenderObject] paints.
+///  * [debugEnhanceBuildTimelineArguments], which does something similar for
+///    events related to [Widget] builds.
+bool debugEnhanceLayoutTimelineArguments = false;
+
+/// Adds debugging information to [Timeline] events related to [RenderObject]
+/// paints.
+///
+/// This flag will only add [Timeline] event arguments for debug builds.
+/// Additional arguments will be added for the "PAINT" timeline event and for
+/// all [RenderObject] paint [Timeline] events, which are the [Timeline] events
+/// that are added when [debugProfilePaintsEnabled] is true. The debugging
+/// information that will be added in trace arguments includes stats around
+/// [RenderObject] dirty states and [RenderObject] diagnostic information
+/// (i.e. [RenderObject] properties).
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which adds [Timeline] events for every
+///    [RenderObject] paint.
+///  * [debugEnhanceLayoutTimelineArguments], which does something similar for
+///    events related to [RenderObject] layouts.
+///  * [debugEnhanceBuildTimelineArguments], which does something similar for
+///    events related to [Widget] builds.
+bool debugEnhancePaintTimelineArguments = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
 typedef ProfilePaintCallback = void Function(RenderObject renderObject);
@@ -171,7 +209,7 @@ typedef ProfilePaintCallback = void Function(RenderObject renderObject);
 ///    callback to generate aggregate profile statistics describing what paints
 ///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
 ///    extension is enabled.
-ProfilePaintCallback debugOnProfilePaint;
+ProfilePaintCallback? debugOnProfilePaint;
 
 /// Setting to true will cause all clipping effects from the layer tree to be
 /// ignored.
@@ -224,7 +262,7 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double outlineWidth = 2.0 }) {
+void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
@@ -262,9 +300,88 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
+        debugProfileLayoutsEnabled ||
         debugProfilePaintsEnabled ||
-        debugOnProfilePaint != null) {
+        debugOnProfilePaint != null ||
+        debugDisableClipLayers ||
+        debugDisablePhysicalShapeLayers ||
+        debugDisableOpacityLayers) {
       throw FlutterError(reason);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Returns true if the given [Axis] is bounded within the given
+/// [BoxConstraints] in both the main and cross axis, throwing an exception
+/// otherwise.
+///
+/// This is used by viewports during `performLayout` and `computeDryLayout`
+/// because bounded constraints are required in order to layout their children.
+bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
+  assert(() {
+    if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Vertical viewport was given unbounded height.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'vertical space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'vertical space for the children. In this case, consider using a '
+                'Column or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical viewport was given an unlimited amount of '
+              'horizontal space in which to expand.',
+            );
+          }
+        case Axis.horizontal:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Horizontal viewport was given unbounded width.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'horizontal space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'horizontal space for the children. In this case, consider using a '
+                'Row or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal viewport was given an unlimited amount of '
+              'vertical space in which to expand.',
+            );
+          }
+      }
     }
     return true;
   }());

@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
-
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'io.dart' as io;
 import 'logger.dart';
+import 'platform.dart';
 
 enum TerminalColor {
   red,
@@ -22,30 +17,24 @@ enum TerminalColor {
   grey,
 }
 
-/// Warning mark to use in stdout or stderr.
-String get warningMark {
-  return globals.terminal.bolden(globals.terminal.color('[!]', TerminalColor.red));
-}
-
-/// Success mark to use in stdout.
-String get successMark {
-  return globals.terminal.bolden(globals.terminal.color('✓', TerminalColor.green));
-}
-
 /// A class that contains the context settings for command text output to the
 /// console.
 class OutputPreferences {
   OutputPreferences({
-    bool wrapText,
-    int wrapColumn,
-    bool showColor,
-  }) : wrapText = wrapText ?? globals.stdio.hasTerminal,
+    bool? wrapText,
+    int? wrapColumn,
+    bool? showColor,
+    io.Stdio? stdio,
+  }) : _stdio = stdio,
+       wrapText = wrapText ?? stdio?.hasTerminal ?? false,
        _overrideWrapColumn = wrapColumn,
-       showColor = showColor ?? globals.platform.stdoutSupportsAnsi ?? false;
+       showColor = showColor ?? false;
 
   /// A version of this class for use in tests.
   OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
-    : _overrideWrapColumn = wrapColumn;
+    : _overrideWrapColumn = wrapColumn, _stdio = null;
+
+  final io.Stdio? _stdio;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
@@ -63,9 +52,9 @@ class OutputPreferences {
   /// (e.g. from the [printError] or [printStatus] functions) will be wrapped.
   /// Ignored if [wrapText] is false. Defaults to the width of the output
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
-  final int _overrideWrapColumn;
+  final int? _overrideWrapColumn;
   int get wrapColumn {
-    return _overrideWrapColumn ?? globals.stdio.terminalColumns ?? kDefaultTerminalColumns;
+    return _overrideWrapColumn ?? _stdio?.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -81,7 +70,10 @@ class OutputPreferences {
 
 /// The command line terminal, if available.
 abstract class Terminal {
-  factory Terminal.test() = _TestTerminal;
+  /// Create a new test [Terminal].
+  ///
+  /// If not specified, [supportsColor] defaults to `false`.
+  factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
   bool get supportsColor;
@@ -89,11 +81,29 @@ abstract class Terminal {
   /// Whether the current terminal can display emoji.
   bool get supportsEmoji;
 
+  /// When we have a choice of styles (e.g. animated spinners), this selects the
+  /// style to use.
+  int get preferredStyle;
+
   /// Whether we are interacting with the flutter tool via the terminal.
   ///
   /// If not set, defaults to false.
   bool get usesTerminalUi;
   set usesTerminalUi(bool value);
+
+  /// Whether there is a terminal attached to stdin.
+  ///
+  /// If true, this usually indicates that a user is using the CLI as
+  /// opposed to using an IDE. This can be used to determine
+  /// whether it is appropriate to show a terminal prompt,
+  /// or whether an automatic selection should be made instead.
+  bool get stdinHasTerminal;
+
+  /// Warning mark to use in stdout or stderr.
+  String get warningMark;
+
+  /// Success mark to use in stdout.
+  String get successMark;
 
   String bolden(String message);
 
@@ -101,9 +111,13 @@ abstract class Terminal {
 
   String clearScreen();
 
+  bool get singleCharMode;
   set singleCharMode(bool value);
 
   /// Return keystrokes from the console.
+  ///
+  /// This is a single-subscription stream. This stream may be closed before
+  /// the application exits.
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes;
@@ -120,26 +134,32 @@ abstract class Terminal {
   /// will be the character in `acceptedCharacters` at the index given by
   /// `defaultChoiceIndex`.
   ///
+  /// The accepted characters must be a String with a length of 1, excluding any
+  /// whitespace characters such as `\t`, `\n`, or ` `.
+  ///
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    @required Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   });
 }
 
 class AnsiTerminal implements Terminal {
   AnsiTerminal({
-    @required io.Stdio stdio,
-    @required Platform platform,
+    required io.Stdio stdio,
+    required Platform platform,
+    DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
   })
     : _stdio = stdio,
-      _platform = platform;
+      _platform = platform,
+      _now = now ?? DateTime(1);
 
   final io.Stdio _stdio;
   final Platform _platform;
+  final DateTime _now;
 
   static const String bold = '\u001B[1m';
   static const String resetAll = '\u001B[0m';
@@ -153,7 +173,16 @@ class AnsiTerminal implements Terminal {
   static const String cyan = '\u001b[36m';
   static const String magenta = '\u001b[35m';
   static const String yellow = '\u001b[33m';
-  static const String grey = '\u001b[1;30m';
+  static const String grey = '\u001b[90m';
+
+  // Moves cursor up 1 line.
+  static const String cursorUpLineCode = '\u001b[1A';
+
+  // Moves cursor to the beginning of the line.
+  static const String cursorBeginningOfLineCode = '\u001b[1G';
+
+  // Clear the entire line, cursor position does not change.
+  static const String clearEntireLineCode = '\u001b[2K';
 
   static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
     TerminalColor.red: red,
@@ -165,10 +194,10 @@ class AnsiTerminal implements Terminal {
     TerminalColor.grey: grey,
   };
 
-  static String colorCode(TerminalColor color) => _colorMap[color];
+  static String colorCode(TerminalColor color) => _colorMap[color]!;
 
   @override
-  bool get supportsColor => _platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => _platform.stdoutSupportsAnsi;
 
   // Assume unicode emojis are supported when not on Windows.
   // If we are on Windows, unicode emojis are supported in Windows Terminal,
@@ -178,6 +207,15 @@ class AnsiTerminal implements Terminal {
   bool get supportsEmoji => !_platform.isWindows
     || _platform.environment.containsKey('WT_SESSION');
 
+  @override
+  int get preferredStyle {
+    const int workdays = DateTime.friday;
+    if (_now.weekday <= workdays) {
+      return _now.weekday - 1;
+    }
+    return _now.hour + workdays;
+  }
+
   final RegExp _boldControls = RegExp(
     '(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})',
   );
@@ -186,8 +224,17 @@ class AnsiTerminal implements Terminal {
   bool usesTerminalUi = false;
 
   @override
+  String get warningMark {
+    return bolden(color('[!]', TerminalColor.red));
+  }
+
+  @override
+  String get successMark {
+    return bolden(color('✓', TerminalColor.green));
+  }
+
+  @override
   String bolden(String message) {
-    assert(message != null);
     if (!supportsColor || message.isEmpty) {
       return message;
     }
@@ -208,12 +255,11 @@ class AnsiTerminal implements Terminal {
 
   @override
   String color(String message, TerminalColor color) {
-    assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty) {
+    if (!supportsColor || message.isEmpty) {
       return message;
     }
     final StringBuffer buffer = StringBuffer();
-    final String colorCodes = _colorMap[color];
+    final String colorCodes = _colorMap[color]!;
     for (String line in message.split('\n')) {
       // If there were resets in the string before, then keep them, but
       // restart the color right after. This prevents embedded resets from
@@ -231,6 +277,27 @@ class AnsiTerminal implements Terminal {
   @override
   String clearScreen() => supportsColor ? clear : '\n\n';
 
+  /// Returns ANSI codes to clear [numberOfLines] lines starting with the line
+  /// the cursor is on.
+  ///
+  /// If the terminal does not support ANSI codes, returns an empty string.
+  String clearLines(int numberOfLines) {
+    if (!supportsColor) {
+      return '';
+    }
+    return cursorBeginningOfLineCode +
+        clearEntireLineCode +
+        (cursorUpLineCode + clearEntireLineCode) * (numberOfLines - 1);
+  }
+
+  @override
+  bool get singleCharMode {
+    if (!_stdio.stdinHasTerminal) {
+      return false;
+    }
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
+    return stdin.lineMode && stdin.echoMode;
+  }
   @override
   set singleCharMode(bool value) {
     if (!_stdio.stdinHasTerminal) {
@@ -247,37 +314,37 @@ class AnsiTerminal implements Terminal {
     }
   }
 
-  Stream<String> _broadcastStdInString;
+  @override
+  bool get stdinHasTerminal => _stdio.stdinHasTerminal;
+
+  Stream<String>? _broadcastStdInString;
 
   @override
   Stream<String> get keystrokes {
-    _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
-    return _broadcastStdInString;
+    return _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
   }
 
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
-    @required Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) async {
-    assert(acceptedCharacters != null);
     assert(acceptedCharacters.isNotEmpty);
     assert(prompt == null || prompt.isNotEmpty);
-    assert(displayAcceptedCharacters != null);
     if (!usesTerminalUi) {
       throw StateError('cannot prompt without a terminal ui');
     }
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
-      charactersToDisplay = List<String>.from(charactersToDisplay);
+      charactersToDisplay = List<String>.of(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
-      acceptedCharacters.add('\n');
+      acceptedCharacters.add('');
     }
-    String choice;
+    String? choice;
     singleCharMode = true;
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
@@ -285,13 +352,14 @@ class AnsiTerminal implements Terminal {
         if (displayAcceptedCharacters) {
           logger.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
+        // prompt ends with ': '
         logger.printStatus(': ', emphasis: true, newline: false);
       }
-      choice = await keystrokes.first;
+      choice = (await keystrokes.first).trim();
       logger.printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '\n') {
+    if (defaultChoiceIndex != null && choice == '') {
       choice = acceptedCharacters[defaultChoiceIndex];
     }
     return choice;
@@ -299,8 +367,10 @@ class AnsiTerminal implements Terminal {
 }
 
 class _TestTerminal implements Terminal {
+  _TestTerminal({this.supportsColor = false, this.supportsEmoji = false});
+
   @override
-  bool usesTerminalUi;
+  bool usesTerminalUi = false;
 
   @override
   String bolden(String message) => message;
@@ -316,20 +386,34 @@ class _TestTerminal implements Terminal {
 
   @override
   Future<String> promptForCharInput(List<String> acceptedCharacters, {
-    @required Logger logger,
-    String prompt,
-    int defaultChoiceIndex,
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
   }) {
     throw UnsupportedError('promptForCharInput not supported in the test terminal.');
   }
 
   @override
+  bool get singleCharMode => false;
+  @override
   set singleCharMode(bool value) { }
 
   @override
-  bool get supportsColor => false;
+  final bool supportsColor;
 
   @override
-  bool get supportsEmoji => false;
+  final bool supportsEmoji;
+
+  @override
+  int get preferredStyle => 0;
+
+  @override
+  bool get stdinHasTerminal => false;
+
+  @override
+  String get successMark => '✓';
+
+  @override
+  String get warningMark => '[!]';
 }

@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -18,9 +17,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          explicitChildNodes: false,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text('Michael Goderbauer'),
               Text('goderbauer@google.com'),
             ],
@@ -53,8 +51,8 @@ void main() {
         child: Semantics(
           container: true,
           explicitChildNodes: true,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text('Michael Goderbauer'),
               Text('goderbauer@google.com'),
             ],
@@ -100,8 +98,8 @@ void main() {
           explicitChildNodes: true,
           child: Semantics(
             label: 'Signed in as',
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('Michael Goderbauer'),
                 Text('goderbauer@google.com'),
               ],
@@ -140,11 +138,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          explicitChildNodes: false,
           child: Semantics(
             label: 'Signed in as',
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('Michael Goderbauer'),
                 Text('goderbauer@google.com'),
               ],
@@ -183,13 +180,12 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Semantics(
           container: true,
-          explicitChildNodes: false,
           child: Column(
             children: <Widget>[
               Semantics(
                 label: 'node 1',
                 selected: true,
-                child: Container(
+                child: const SizedBox(
                   width: 10.0,
                   height: 10.0,
                 ),
@@ -197,7 +193,7 @@ void main() {
               Semantics(
                 label: 'node 2',
                 selected: true,
-                child: Container(
+                child: const SizedBox(
                   width: 10.0,
                   height: 10.0,
                 ),
@@ -205,7 +201,7 @@ void main() {
               Semantics(
                 label: 'node 3',
                 selected: true,
-                child: Container(
+                child: const SizedBox(
                   width: 10.0,
                   height: 10.0,
                 ),

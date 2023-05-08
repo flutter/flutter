@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';
@@ -13,35 +10,35 @@ import 'test_driver.dart';
 import 'test_utils.dart';
 
 /// This duration is arbitrary but is ideally:
-/// a) long enough to ensure that if the app is crashing at startup, we notice
-/// b) as short as possible, to avoid inflating build times
+/// a) Long enough to ensure that if the app is crashing at startup, we notice.
+/// b) As short as possible, to avoid inflating build times.
 const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
-  final BasicProject _project = BasicProject();
-  FlutterRunTestDriver _flutter;
-  Directory tempDir;
+  final BasicProject project = BasicProject();
+  late FlutterRunTestDriver flutter;
+  late Directory tempDir;
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('lifetime_test.');
-    await _project.setUpIn(tempDir);
-    _flutter = FlutterRunTestDriver(tempDir);
+    await project.setUpIn(tempDir);
+    flutter = FlutterRunTestDriver(tempDir);
   });
 
   tearDown(() async {
-    await _flutter.stop();
+    await flutter.stop();
     tryToDelete(tempDir);
   });
 
-  test('flutter run does not terminate when a debugger is attached', () async {
-    await _flutter.run(withDebugger: true);
+  testWithoutContext('flutter run does not terminate when a debugger is attached', () async {
+    await flutter.run(withDebugger: true);
     await Future<void>.delayed(requiredLifespan);
-    expect(_flutter.hasExited, equals(false));
+    expect(flutter.hasExited, equals(false));
   });
 
-  test('fluter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
-    await _flutter.run(withDebugger: true, pauseOnExceptions: true);
+  testWithoutContext('flutter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
+    await flutter.run(withDebugger: true, pauseOnExceptions: true);
     await Future<void>.delayed(requiredLifespan);
-    expect(_flutter.hasExited, equals(false));
+    expect(flutter.hasExited, equals(false));
   });
 }

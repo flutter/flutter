@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
@@ -16,11 +19,23 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice() : super(
-      'Linux',
-      platformType: PlatformType.linux,
-      ephemeral: false,
-  );
+  LinuxDevice({
+    required ProcessManager processManager,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+  })  : _operatingSystemUtils = operatingSystemUtils,
+        super(
+          'linux',
+          platformType: PlatformType.linux,
+          ephemeral: false,
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          operatingSystemUtils: operatingSystemUtils,
+        );
+
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool isSupported() => true;
@@ -29,7 +44,12 @@ class LinuxDevice extends DesktopDevice {
   String get name => 'Linux';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
+  late final Future<TargetPlatform> targetPlatform = () async {
+    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
+      return TargetPlatform.linux_x64;
+    }
+    return TargetPlatform.linux_arm64;
+  }();
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -37,37 +57,49 @@ class LinuxDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant LinuxApp package, {
-    String mainPath,
-    BuildInfo buildInfo,
+  Future<void> buildForDevice({
+    String? mainPath,
+    required BuildInfo buildInfo,
   }) async {
     await buildLinux(
       FlutterProject.current().linux,
       buildInfo,
       target: mainPath,
+      targetPlatform: await targetPlatform,
     );
   }
 
   @override
-  String executablePathForDevice(covariant LinuxApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo.mode);
   }
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
-    @required Platform platform,
-    @required FeatureFlags featureFlags,
+    required Platform platform,
+    required FeatureFlags featureFlags,
+    required OperatingSystemUtils operatingSystemUtils,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
+    required Logger logger,
   }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(
           platform: platform,
           featureFlags: featureFlags,
        ),
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _processManager = processManager,
+       _operatingSystemUtils = operatingSystemUtils,
        super('linux devices');
 
   final Platform _platform;
   final LinuxWorkflow _linuxWorkflow;
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get supportsPlatform => _platform.isLinux;
@@ -76,15 +108,23 @@ class LinuxDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _linuxWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }
     return <Device>[
-      LinuxDevice(),
+      LinuxDevice(
+        logger: _logger,
+        processManager: _processManager,
+        fileSystem: _fileSystem,
+        operatingSystemUtils: _operatingSystemUtils,
+      ),
     ];
   }
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
+
+  @override
+  List<String> get wellKnownIds => const <String>['linux'];
 }

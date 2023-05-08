@@ -16,13 +16,11 @@ class Title extends StatelessWidget {
   /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).
   /// [color] and [child] are required arguments.
   Title({
-    Key key,
+    super.key,
     this.title = '',
-    @required this.color,
-    @required this.child,
-  }) : assert(title != null),
-       assert(color != null && color.alpha == 0xFF),
-       super(key: key);
+    required this.color,
+    required this.child,
+  }) : assert(color.alpha == 0xFF);
 
   /// A one-line description of this app for use in the window manager.
   /// Must not be null.
@@ -35,7 +33,7 @@ class Title extends StatelessWidget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override

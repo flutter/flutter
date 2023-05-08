@@ -31,7 +31,7 @@ import 'media_query.dart';
 ///    intrusions.
 ///  * [Padding], for insetting widgets in general.
 ///  * [MediaQuery], from which the window padding is obtained.
-///  * [dart:ui.Window.padding], which reports the padding from the operating
+///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
 ///    system.
 class SafeArea extends StatelessWidget {
   /// Creates a widget that avoids operating system interfaces.
@@ -39,19 +39,15 @@ class SafeArea extends StatelessWidget {
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be
   /// null.
   const SafeArea({
-    Key key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
-    @required this.child,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+    required this.child,
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -71,9 +67,9 @@ class SafeArea extends StatelessWidget {
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
 
-  /// Specifies whether the [SafeArea] should maintain the [viewPadding] instead
-  /// of the [padding] when consumed by the [viewInsets] of the current
-  /// context's [MediaQuery], defaults to false.
+  /// Specifies whether the [SafeArea] should maintain the bottom
+  /// [MediaQueryData.viewPadding] instead of the bottom [MediaQueryData.padding],
+  /// defaults to false.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// SafeArea, the padding can be maintained below the obstruction rather than
@@ -88,17 +84,17 @@ class SafeArea extends StatelessWidget {
   /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
   /// to zero out any sides that were avoided by this widget.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData data = MediaQuery.of(context);
-    EdgeInsets padding = data.padding;
+    EdgeInsets padding = MediaQuery.paddingOf(context);
     // Bottom padding has been consumed - i.e. by the keyboard
-    if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
-      padding = padding.copyWith(bottom: data.viewPadding.bottom);
+    if (maintainBottomViewPadding) {
+      padding = padding.copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom);
+    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -122,9 +118,9 @@ class SafeArea extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties.add(FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
-    properties.add(FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
-    properties.add(FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }
 
@@ -143,28 +139,24 @@ class SafeArea extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [SafeArea], for insetting widgets to avoid operating system intrusions.
+///  * [SafeArea], for insetting box widgets to avoid operating system intrusions.
 ///  * [SliverPadding], for insetting slivers in general.
 ///  * [MediaQuery], from which the window padding is obtained.
-///  * [dart:ui.Window.padding], which reports the padding from the operating
+///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
 ///    system.
 class SliverSafeArea extends StatelessWidget {
   /// Creates a sliver that avoids operating system interfaces.
   ///
   /// The [left], [top], [right], [bottom], and [minimum] arguments must not be null.
   const SliverSafeArea({
-    Key key,
+    super.key,
     this.left = true,
     this.top = true,
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
-    @required this.sliver,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null),
-       super(key: key);
+    required this.sliver,
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -193,7 +185,7 @@ class SliverSafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
     return SliverPadding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),
@@ -216,8 +208,8 @@ class SliverSafeArea extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    properties.add(FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
-    properties.add(FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
-    properties.add(FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+    properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
+    properties.add(FlagProperty('right', value: right, ifTrue: 'avoid right padding'));
+    properties.add(FlagProperty('bottom', value: bottom, ifTrue: 'avoid bottom padding'));
   }
 }

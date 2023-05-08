@@ -59,7 +59,7 @@ import 'material.dart';
 ///       height: 100.0,
 ///       child: InkWell(
 ///         onTap: () { /* ... */ },
-///         child: Center(
+///         child: const Center(
 ///           child: Text('YELLOW'),
 ///         )
 ///       ),
@@ -78,17 +78,23 @@ import 'material.dart';
 ///   color: Colors.grey[800],
 ///   child: Center(
 ///     child: Ink.image(
-///       image: AssetImage('cat.jpeg'),
+///       image: const AssetImage('cat.jpeg'),
 ///       fit: BoxFit.cover,
 ///       width: 300.0,
 ///       height: 200.0,
 ///       child: InkWell(
 ///         onTap: () { /* ... */ },
-///         child: Align(
+///         child: const Align(
 ///           alignment: Alignment.topLeft,
 ///           child: Padding(
-///             padding: const EdgeInsets.all(10.0),
-///             child: Text('KITTEN', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+///             padding: EdgeInsets.all(10.0),
+///             child: Text(
+///               'KITTEN',
+///               style: TextStyle(
+///                 fontWeight: FontWeight.w900,
+///                 color: Colors.white,
+///               ),
+///             ),
 ///           ),
 ///         )
 ///       ),
@@ -96,6 +102,27 @@ import 'material.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+///
+/// What to do if you want to clip this [Ink.image]?
+///
+/// {@tool dartpad}
+/// Wrapping the [Ink] in a clipping widget directly will not work since the
+/// [Material] it will be printed on is responsible for clipping.
+///
+/// In this example the image is not being clipped as expected. This is because
+/// it is being rendered onto the Scaffold body Material, which isn't wrapped in
+/// the [ClipRRect].
+///
+/// ** See code in examples/api/lib/material/ink/ink.image_clip.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// One solution would be to deliberately wrap the [Ink.image] in a [Material].
+/// This makes sure the Material that the image is painted on is also responsible
+/// for clipping said content.
+///
+/// ** See code in examples/api/lib/material/ink/ink.image_clip.1.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -119,10 +146,10 @@ class Ink extends StatefulWidget {
   /// If there is no intention to render anything on this decoration, consider
   /// using a [Container] with a [BoxDecoration] instead.
   Ink({
-    Key key,
+    super.key,
     this.padding,
-    Color color,
-    Decoration decoration,
+    Color? color,
+    Decoration? decoration,
     this.width,
     this.height,
     this.child,
@@ -130,10 +157,9 @@ class Ink extends StatefulWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".',
        ),
-       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
-       super(key: key);
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
   /// a [Material].
@@ -153,24 +179,20 @@ class Ink extends StatefulWidget {
   ///
   /// See [paintImage] for a description of the meaning of these arguments.
   Ink.image({
-    Key key,
+    super.key,
     this.padding,
-    @required ImageProvider image,
-    ImageErrorListener onImageError,
-    ColorFilter colorFilter,
-    BoxFit fit,
+    required ImageProvider image,
+    ImageErrorListener? onImageError,
+    ColorFilter? colorFilter,
+    BoxFit? fit,
     AlignmentGeometry alignment = Alignment.center,
-    Rect centerSlice,
+    Rect? centerSlice,
     ImageRepeat repeat = ImageRepeat.noRepeat,
     bool matchTextDirection = false,
     this.width,
     this.height,
     this.child,
   }) : assert(padding == null || padding.isNonNegative),
-       assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
        decoration = BoxDecoration(
          image: DecorationImage(
            image: image,
@@ -182,46 +204,47 @@ class Ink extends StatefulWidget {
            repeat: repeat,
            matchTextDirection: matchTextDirection,
          ),
-       ),
-       super(key: key);
+       );
 
   /// The [child] contained by the container.
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
   ///
   /// This padding is in addition to any padding inherent in the [decoration];
   /// see [Decoration.padding].
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   /// The decoration to paint on the nearest ancestor [Material] widget.
   ///
   /// A shorthand for specifying just a solid color is available in the
-  /// constructor: set the `color` argument instead of the `decoration`
+  /// constructor: set the `color` argument instead of the [decoration]
   /// argument.
   ///
   /// A shorthand for specifying just an image is also available using the
   /// [Ink.image] constructor.
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// A width to apply to the [decoration] and the [child]. The width includes
   /// any [padding].
-  final double width;
+  final double? width;
 
   /// A height to apply to the [decoration] and the [child]. The height includes
   /// any [padding].
-  final double height;
+  final double? height;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
-    if (decoration == null || decoration.padding == null)
-      return padding;
-    final EdgeInsetsGeometry decorationPadding = decoration.padding;
-    if (padding == null)
+    if (decoration == null) {
+      return padding ?? EdgeInsets.zero;
+    }
+    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
+    if (padding == null) {
       return decorationPadding;
-    return padding.add(decorationPadding);
+    }
+    return padding!.add(decorationPadding);
   }
 
   @override
@@ -232,11 +255,12 @@ class Ink extends StatefulWidget {
   }
 
   @override
-  _InkState createState() => _InkState();
+  State<Ink> createState() => _InkState();
 }
 
 class _InkState extends State<Ink> {
-  InkDecoration _ink;
+  final GlobalKey _boxKey = GlobalKey();
+  InkDecoration? _ink;
 
   void _handleRemoved() {
     _ink = null;
@@ -249,31 +273,33 @@ class _InkState extends State<Ink> {
     super.deactivate();
   }
 
-  Widget _build(BuildContext context, BoxConstraints constraints) {
+  Widget _build(BuildContext context) {
+    // By creating the InkDecoration from within a Builder widget, we can
+    // use the RenderBox of the Padding widget.
     if (_ink == null) {
       _ink = InkDecoration(
         decoration: widget.decoration,
+        isVisible: Visibility.of(context),
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context),
-        referenceBox: context.findRenderObject() as RenderBox,
+        referenceBox: _boxKey.currentContext!.findRenderObject()! as RenderBox,
         onRemoved: _handleRemoved,
       );
     } else {
-      _ink.decoration = widget.decoration;
-      _ink.configuration = createLocalImageConfiguration(context);
+      _ink!.decoration = widget.decoration;
+      _ink!.isVisible = Visibility.of(context);
+      _ink!.configuration = createLocalImageConfiguration(context);
     }
-    Widget current = widget.child;
-    final EdgeInsetsGeometry effectivePadding = widget._paddingIncludingDecoration;
-    if (effectivePadding != null)
-      current = Padding(padding: effectivePadding, child: current);
-    return current ?? Container();
+    return widget.child ?? ConstrainedBox(constraints: const BoxConstraints.expand());
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Widget result = LayoutBuilder(
-      builder: _build,
+    Widget result = Padding(
+      key: _boxKey,
+      padding: widget._paddingIncludingDecoration,
+      child: Builder(builder: _build),
     );
     if (widget.width != null || widget.height != null) {
       result = SizedBox(
@@ -304,32 +330,46 @@ class _InkState extends State<Ink> {
 class InkDecoration extends InkFeature {
   /// Draws a decoration on a [Material].
   InkDecoration({
-    @required Decoration decoration,
-    @required ImageConfiguration configuration,
-    @required MaterialInkController controller,
-    @required RenderBox referenceBox,
-    VoidCallback onRemoved,
-  }) : assert(configuration != null),
-       _configuration = configuration,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+    required Decoration? decoration,
+    bool isVisible = true,
+    required ImageConfiguration configuration,
+    required super.controller,
+    required super.referenceBox,
+    super.onRemoved,
+  }) : _configuration = configuration {
     this.decoration = decoration;
+    this.isVisible = isVisible;
     controller.addInkFeature(this);
   }
 
-  BoxPainter _painter;
+  BoxPainter? _painter;
 
   /// What to paint on the [Material].
   ///
   /// The decoration is painted at the position and size of the [referenceBox],
   /// on the [Material] that owns the [controller].
-  Decoration get decoration => _decoration;
-  Decoration _decoration;
-  set decoration(Decoration value) {
-    if (value == _decoration)
+  Decoration? get decoration => _decoration;
+  Decoration? _decoration;
+  set decoration(Decoration? value) {
+    if (value == _decoration) {
       return;
+    }
     _decoration = value;
     _painter?.dispose();
     _painter = _decoration?.createBoxPainter(_handleChanged);
+    controller.markNeedsPaint();
+  }
+
+  /// Whether the decoration should be painted.
+  ///
+  /// Defaults to true.
+  bool get isVisible => _isVisible;
+  bool _isVisible = true;
+  set isVisible(bool value) {
+    if (value == _isVisible) {
+      return;
+    }
+    _isVisible = value;
     controller.markNeedsPaint();
   }
 
@@ -341,9 +381,9 @@ class InkDecoration extends InkFeature {
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
-    assert(value != null);
-    if (value == _configuration)
+    if (value == _configuration) {
       return;
+    }
     _configuration = value;
     controller.markNeedsPaint();
   }
@@ -360,19 +400,20 @@ class InkDecoration extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    if (_painter == null)
+    if (_painter == null || !isVisible) {
       return;
-    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    }
+    final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final ImageConfiguration sizedConfiguration = configuration.copyWith(
       size: referenceBox.size,
     );
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      _painter.paint(canvas, Offset.zero, sizedConfiguration);
+      _painter!.paint(canvas, Offset.zero, sizedConfiguration);
       canvas.restore();
     } else {
-      _painter.paint(canvas, originOffset, sizedConfiguration);
+      _painter!.paint(canvas, originOffset, sizedConfiguration);
     }
   }
 }

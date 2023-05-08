@@ -2,154 +2,351 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
 
-import 'package:collection/collection.dart' show ListEquality;
+
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart';
+import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
+
+const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
+const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
+const FakeEmulator emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
+const List<Emulator> emulators = <Emulator>[
+  emulator1,
+  emulator2,
+  emulator3,
+];
+
+// We have to send a command that fails in order to get the list of valid
+// system images paths. This is an example of the output to use in the fake.
+const String fakeCreateFailureOutput =
+  'Error: Package path (-k) not specified. Valid system image paths are:\n'
+  'system-images;android-27;google_apis;x86\n'
+  'system-images;android-P;google_apis;x86\n'
+  'system-images;android-27;google_apis_playstore;x86\n'
+  'null\n'; // Yep, these really end with null (on dantup's machine at least)
+
+const FakeCommand kListEmulatorsCommand = FakeCommand(
+  command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+  stderr: fakeCreateFailureOutput,
+  exitCode: 1,
+);
 
 void main() {
-  MockProcessManager mockProcessManager;
-  MockConfig mockConfig;
-  MockAndroidSdk mockSdk;
-  MockXcode mockXcode;
+  late FakeProcessManager fakeProcessManager;
+  late FakeAndroidSdk sdk;
+  late FileSystem fileSystem;
+  late Xcode xcode;
 
   setUp(() {
-    mockProcessManager = MockProcessManager();
-    mockConfig = MockConfig();
-    mockSdk = MockAndroidSdk();
-    mockXcode = MockXcode();
+    fileSystem = MemoryFileSystem.test();
+    fakeProcessManager = FakeProcessManager.empty();
+    sdk = FakeAndroidSdk();
+    xcode = Xcode.test(processManager: fakeProcessManager, fileSystem: fileSystem);
 
-    when(mockSdk.avdManagerPath).thenReturn('avdmanager');
-    when(mockSdk.emulatorPath).thenReturn('emulator');
+    sdk
+      ..avdManagerPath = 'avdmanager'
+      ..emulatorPath = 'emulator'
+      ..adbPath = 'adb';
   });
 
   group('EmulatorManager', () {
+    // iOS discovery uses context.
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
-      final List<Emulator> emulators =
-          await emulatorManager.getAllAvailableEmulators();
-      expect(emulators, isList);
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
+        returnsNormally);
     });
 
-    testUsingContext('getEmulatorsById', () async {
-      final _MockEmulator emulator1 =
-          _MockEmulator('Nexus_5', 'Nexus 5', 'Google');
-      final _MockEmulator emulator2 =
-          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
-      final _MockEmulator emulator3 =
-          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
-      final List<Emulator> emulators = <Emulator>[
-        emulator1,
-        emulator2,
-        emulator3,
-      ];
-      final TestEmulatorManager testEmulatorManager =
-          TestEmulatorManager(emulators);
+    testUsingContext('getEmulators with no Android SDK', () async {
+      // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+        ]),
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
 
-      Future<void> expectEmulator(String id, List<Emulator> expected) async {
-        expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
-      }
-
-      await expectEmulator('Nexus_5', <Emulator>[emulator1]);
-      await expectEmulator('Nexus_5X', <Emulator>[emulator2]);
-      await expectEmulator('Nexus_5X_API_27_x86', <Emulator>[emulator2]);
-      await expectEmulator('Nexus', <Emulator>[emulator1, emulator2]);
-      await expectEmulator('iOS Simulator', <Emulator>[emulator3]);
-      await expectEmulator('ios', <Emulator>[emulator3]);
+      await expectLater(() async => emulatorManager.getAllAvailableEmulators(),
+        returnsNormally);
     });
 
+    testWithoutContext('getEmulatorsById', () async {
+      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators,
+        logger: BufferLogger.test(),
+        processManager: fakeProcessManager,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+        fileSystem: fileSystem,
+      );
+
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5'), <Emulator>[emulator1]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X'), <Emulator>[emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus_5X_API_27_x86'),  <Emulator>[emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('Nexus'), <Emulator>[emulator1, emulator2]);
+      expect(await testEmulatorManager.getEmulatorsMatching('iOS Simulator'), <Emulator>[emulator3]);
+      expect(await testEmulatorManager.getEmulatorsMatching('ios'),  <Emulator>[emulator3]);
+    });
+
+    testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
+      sdk.avdManagerPath = null;
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
+
+      expect(result.success, false);
+      expect(result.error, contains('avdmanager is missing from the Android SDK'));
+    });
+
+    // iOS discovery uses context.
     testUsingContext('create emulator with an empty name does not fail', () async {
-      final CreateEmulatorResult res = await emulatorManager.createEmulator();
-      expect(res.success, equals(true));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Config: () => mockConfig,
-      AndroidSdk: () => mockSdk,
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1',
+          ),
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          kListEmulatorsCommand,
+          const FakeCommand(
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              '-n',
+              'flutter_emulator',
+              '-k',
+              'system-images;android-27;google_apis_playstore;x86',
+              '-d',
+              'pixel',
+            ],
+          ),
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
+
+      expect(result.success, true);
     });
 
-    testUsingContext('create emulator with a unique name does not throw', () async {
-      final CreateEmulatorResult res =
-          await emulatorManager.createEmulator(name: 'test');
-      expect(res.success, equals(true));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Config: () => mockConfig,
-      AndroidSdk: () => mockSdk,
+    testWithoutContext('create emulator with a unique name does not throw', () async {
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          kListEmulatorsCommand,
+          const FakeCommand(
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              // The specified name is given with the -n flag.
+              '-n',
+              'test',
+              '-k',
+              'system-images;android-27;google_apis_playstore;x86',
+              '-d',
+              'pixel',
+            ],
+          ),
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
+
+      expect(result.success, true);
     });
 
-    testUsingContext('create emulator with an existing name errors', () async {
-      final CreateEmulatorResult res =
-          await emulatorManager.createEmulator(name: 'existing-avd-1');
-      expect(res.success, equals(false));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Config: () => mockConfig,
-      AndroidSdk: () => mockSdk,
+    testWithoutContext('create emulator with an existing name errors', () async {
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          kListEmulatorsCommand,
+          const FakeCommand(
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              '-n',
+              'existing-avd-1',
+              '-k',
+              'system-images;android-27;google_apis_playstore;x86',
+              '-d',
+              'pixel',
+            ],
+            exitCode: 1,
+            stderr: "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
+              'Use --force if you want to replace it.',
+          ),
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'existing-avd-1');
+
+      expect(result.success, false);
     });
 
+    // iOS discovery uses context.
     testUsingContext('create emulator without a name but when default exists adds a suffix', () async {
-      // First will get default name.
-      CreateEmulatorResult res = await emulatorManager.createEmulator();
-      expect(res.success, equals(true));
+      final EmulatorManager emulatorManager = EmulatorManager(
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['emulator', '-list-avds'],
+            stdout: 'existing-avd-1\nflutter_emulator',
+          ),
+          const FakeCommand(
+            command: <String>['avdmanager', 'list', 'device', '-c'],
+            stdout: 'test\ntest2\npixel\npixel-xl\n',
+          ),
+          kListEmulatorsCommand,
+          const FakeCommand(
+            command: <String>[
+              'avdmanager',
+              'create',
+              'avd',
+              // a "_2" suffix is added to disambiguate from the existing emulator.
+              '-n',
+              'flutter_emulator_2',
+              '-k',
+              'system-images;android-27;google_apis_playstore;x86',
+              '-d',
+              'pixel',
+            ],
+          ),
+        ]),
+        androidSdk: sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdk: sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
+      );
+      final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
-      final String defaultName = res.emulatorName;
-
-      // Second...
-      res = await emulatorManager.createEmulator();
-      expect(res.success, equals(true));
-      expect(res.emulatorName, equals('${defaultName}_2'));
-
-      // Third...
-      res = await emulatorManager.createEmulator();
-      expect(res.success, equals(true));
-      expect(res.emulatorName, equals('${defaultName}_3'));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Config: () => mockConfig,
-      AndroidSdk: () => mockSdk,
+      expect(result.success, true);
+      expect(result.emulatorName, 'flutter_emulator_2');
     });
   });
 
   group('ios_emulators', () {
-    bool didAttemptToRunSimulator = false;
-    setUp(() {
-      when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
-      when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        final List<String> args = invocation.positionalArguments[0] as List<String>;
-        if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
-          didAttemptToRunSimulator = true;
-        }
-        return ProcessResult(101, 0, '', '');
-      });
-    });
     testUsingContext('runs correct launch commands', () async {
-      final Emulator emulator = IOSEmulator('ios');
+      fileSystem.directory('/fake/Xcode.app/Contents/Developer/Applications/Simulator.app').createSync(recursive: true);
+      fakeProcessManager.addCommands(
+        <FakeCommand>[
+          const FakeCommand(
+            command: <String>['/usr/bin/xcode-select', '--print-path'],
+            stdout: '/fake/Xcode.app/Contents/Developer',
+          ),
+          const FakeCommand(command: <String>[
+            'open',
+            '-n',
+            '-a',
+            '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
+          ]),
+          const FakeCommand(command: <String>[
+            'open',
+            '-a',
+            '/fake/Xcode.app/Contents/Developer/Applications/Simulator.app',
+          ]),
+        ],
+      );
+
+      const Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
-      expect(didAttemptToRunSimulator, equals(true));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Config: () => mockConfig,
-      Xcode: () => mockXcode,
+      ProcessManager: () => fakeProcessManager,
+      Xcode: () => xcode,
+      FileSystem: () => fileSystem,
     });
   });
 }
 
 class TestEmulatorManager extends EmulatorManager {
-  TestEmulatorManager(this.allEmulators);
+  TestEmulatorManager(this.allEmulators, {
+    required super.logger,
+    required super.processManager,
+    required super.androidWorkflow,
+    required super.fileSystem,
+  });
 
   final List<Emulator> allEmulators;
 
@@ -159,8 +356,8 @@ class TestEmulatorManager extends EmulatorManager {
   }
 }
 
-class _MockEmulator extends Emulator {
-  _MockEmulator(String id, this.name, this.manufacturer)
+class FakeEmulator extends Emulator {
+  const FakeEmulator(String id, this.name, this.manufacturer)
     : super(id, true);
 
   @override
@@ -176,87 +373,27 @@ class _MockEmulator extends Emulator {
   PlatformType get platformType => PlatformType.android;
 
   @override
-  Future<void> launch() {
+  Future<void> launch({bool coldBoot = false}) {
     throw UnimplementedError('Not implemented in Mock');
   }
 }
 
-class MockConfig extends Mock implements Config {}
-
-class MockProcessManager extends Mock implements ProcessManager {
-  /// We have to send a command that fails in order to get the list of valid
-  /// system images paths. This is an example of the output to use in the mock.
-  static const String mockCreateFailureOutput =
-      'Error: Package path (-k) not specified. Valid system image paths are:\n'
-      'system-images;android-27;google_apis;x86\n'
-      'system-images;android-P;google_apis;x86\n'
-      'system-images;android-27;google_apis_playstore;x86\n'
-      'null\n'; // Yep, these really end with null (on dantup's machine at least)
-
-  static const ListEquality<String> _equality = ListEquality<String>();
-  final List<String> _existingAvds = <String>['existing-avd-1'];
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  @override
+  String? avdManagerPath;
 
   @override
-  ProcessResult runSync(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding stdoutEncoding = systemEncoding,
-    Encoding stderrEncoding = systemEncoding,
-  }) {
-    final String program = command[0] as String;
-    final List<String> args = command.sublist(1) as List<String>;
-    switch (program) {
-      case '/usr/bin/xcode-select':
-        throw ProcessException(program, args);
-        break;
-      case 'emulator':
-        return _handleEmulator(args);
-      case 'avdmanager':
-        return _handleAvdManager(args);
-    }
-    throw StateError('Unexpected process call: $command');
-  }
+  String? emulatorPath;
 
-  ProcessResult _handleEmulator(List<String> args) {
-    if (_equality.equals(args, <String>['-list-avds'])) {
-      return ProcessResult(101, 0, '${_existingAvds.join('\n')}\n', '');
-    }
-    throw ProcessException('emulator', args);
-  }
+  @override
+  String? adbPath;
 
-  ProcessResult _handleAvdManager(List<String> args) {
-    if (_equality.equals(args, <String>['list', 'device', '-c'])) {
-      return ProcessResult(101, 0, 'test\ntest2\npixel\npixel-xl\n', '');
-    }
-    if (_equality.equals(args, <String>['create', 'avd', '-n', 'temp'])) {
-      return ProcessResult(101, 1, '', mockCreateFailureOutput);
-    }
-    if (args.length == 8 &&
-        _equality.equals(args,
-            <String>['create', 'avd', '-n', args[3], '-k', args[5], '-d', args[7]])) {
-      // In order to support testing auto generation of names we need to support
-      // tracking any created emulators and reject when they already exist so this
-      // mock will compare the name of the AVD being created with the fake existing
-      // list and either reject if it exists, or add it to the list and return success.
-      final String name = args[3];
-      // Error if this AVD already existed
-      if (_existingAvds.contains(name)) {
-        return ProcessResult(
-            101,
-            1,
-            '',
-            "Error: Android Virtual Device '$name' already exists.\n"
-            'Use --force if you want to replace it.');
-      } else {
-        _existingAvds.add(name);
-        return ProcessResult(101, 0, '', '');
-      }
-    }
-    throw ProcessException('emulator', args);
-  }
+  @override
+  String? getAvdManagerPath() => avdManagerPath;
+
+  @override
+  String getAvdPath() => 'avd';
+
+  @override
+  Map<String, String> get sdkManagerEnv => <String, String>{};
 }
-
-class MockXcode extends Mock implements Xcode {}

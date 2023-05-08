@@ -7,15 +7,17 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
+  const ProgressIndicatorDemo({super.key});
+
   static const String routeName = '/material/progress-indicator';
 
   @override
-  _ProgressIndicatorDemoState createState() => _ProgressIndicatorDemoState();
+  State<ProgressIndicatorDemo> createState() => _ProgressIndicatorDemoState();
 }
 
 class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<double> _animation;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -31,10 +33,11 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed)
+      if (status == AnimationStatus.dismissed) {
         _controller.forward();
-      else if (status == AnimationStatus.completed)
+      } else if (status == AnimationStatus.completed) {
         _controller.reverse();
+      }
     });
   }
 
@@ -54,17 +57,15 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
           case AnimationStatus.dismissed:
           case AnimationStatus.forward:
             _controller.forward();
-            break;
           case AnimationStatus.reverse:
           case AnimationStatus.completed:
             _controller.reverse();
-            break;
         }
       }
     });
   }
 
-  Widget _buildIndicators(BuildContext context, Widget child) {
+  Widget _buildIndicators(BuildContext context, Widget? child) {
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
@@ -94,7 +95,10 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
+        .map<Widget>((Widget c) => Container(
+          margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+          child: c,
+        ))
         .toList(),
     );
   }
@@ -109,7 +113,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       body: Center(
         child: SingleChildScrollView(
           child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge!,
             child: GestureDetector(
               onTap: _handleTap,
               behavior: HitTestBehavior.opaque,

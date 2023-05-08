@@ -4,12 +4,12 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart';
 
+import 'gesture_utils.dart';
 
 void main() {
   testWidgets('Events bubble up the tree', (WidgetTester tester) async {
@@ -43,6 +43,33 @@ void main() {
       'bottom',
       'middle',
       'top',
+    ]));
+  });
+
+  testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: Listener(
+            onPointerHover: (_) {
+              log.add('bottom');
+            },
+            child: const Text('X', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Listener)));
+
+    expect(log, equals(<String>[
+      'bottom',
     ]));
   });
 
@@ -155,7 +182,6 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset center = tester.getCenter(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -233,7 +259,6 @@ void main() {
       final Offset center = tester.getCenter(find.byKey(key));
       final Offset topLeft = tester.getTopLeft(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -244,7 +269,7 @@ void main() {
 
       final Matrix4 expectedTransform = Matrix4.identity()
         ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0)
-        ..translate(-topLeft.dx, -topLeft.dy, 0);
+        ..translate(-topLeft.dx, -topLeft.dy);
 
       expect(center, isNot(const Offset(50, 50)));
 
@@ -310,7 +335,6 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
       final TestGesture gesture = await tester.startGesture(downPosition);
-      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -322,7 +346,7 @@ void main() {
       const Offset offset = Offset((800 - 100) / 2, (600 - 100) / 2);
       final Matrix4 expectedTransform = Matrix4.identity()
         ..rotateZ(-math.pi / 2)
-        ..translate(-offset.dx, -offset.dy, 0.0);
+        ..translate(-offset.dx, -offset.dy);
 
       final Offset localDownPosition = const Offset(50, 50) + const Offset(5, -10);
       expect(down.localPosition, within(distance: 0.001, from: localDownPosition));
@@ -378,6 +402,7 @@ void main() {
       onPointerDown: (PointerDownEvent event) {},
       onPointerUp: (PointerUpEvent event) {},
       onPointerMove: (PointerMoveEvent event) {},
+      onPointerHover: (PointerHoverEvent event) {},
       onPointerCancel: (PointerCancelEvent event) {},
       onPointerSignal: (PointerSignalEvent event) {},
       behavior: HitTestBehavior.opaque,
@@ -394,15 +419,7 @@ void main() {
       'constraints: MISSING',
       'size: MISSING',
       'behavior: opaque',
-      'listeners: down, move, up, cancel, signal',
+      'listeners: down, move, up, hover, cancel, signal',
     ]);
   });
-}
-
-Future<void> scrollAt(Offset position, WidgetTester tester) {
-  final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
-  // Create a hover event so that |testPointer| has a location when generating the scroll.
-  testPointer.hover(position);
-  final HitTestResult result = tester.hitTestOnBinding(position);
-  return tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
 }

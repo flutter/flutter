@@ -10,11 +10,11 @@ import 'theme.dart';
 
 const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 
-/// The top-most region of a material design drawer. The header's [child]
+/// The top-most region of a Material Design drawer. The header's [child]
 /// widget, if any, is placed inside a [Container] whose [decoration] can be
 /// passed as an argument, inset by the given [padding].
 ///
-/// Part of the material design [Drawer].
+/// Part of the Material Design [Drawer].
 ///
 /// Requires one of its ancestors to be a [Material] widget. This condition is
 /// satisfied by putting the [DrawerHeader] in a [Drawer].
@@ -25,18 +25,18 @@ const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 ///    specialized for showing user accounts.
 ///  * <https://material.io/design/components/navigation-drawer.html>
 class DrawerHeader extends StatelessWidget {
-  /// Creates a material design drawer header.
+  /// Creates a Material Design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const DrawerHeader({
-    Key key,
+    super.key,
     this.decoration,
     this.margin = const EdgeInsets.only(bottom: 8.0),
     this.padding = const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
     this.duration = const Duration(milliseconds: 250),
     this.curve = Curves.fastOutSlowIn,
-    @required this.child,
-  }) : super(key: key);
+    required this.child,
+  });
 
   /// Decoration for the main drawer header [Container]; useful for applying
   /// backgrounds.
@@ -44,7 +44,7 @@ class DrawerHeader extends StatelessWidget {
   /// This decoration will extend under the system status bar.
   ///
   /// If this is changed, it will be animated according to [duration] and [curve].
-  final Decoration decoration;
+  final Decoration? decoration;
 
   /// The padding by which to inset [child].
   ///
@@ -55,7 +55,7 @@ class DrawerHeader extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   /// The margin around the drawer header.
-  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry? margin;
 
   /// The duration for animations of the [decoration].
   final Duration duration;
@@ -68,15 +68,15 @@ class DrawerHeader extends StatelessWidget {
   /// This widget will be sized to the size of the header. To position the child
   /// precisely, consider using an [Align] or [Center] widget.
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final double statusBarHeight = MediaQuery.paddingOf(context).top;
     return Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
       margin: margin,
@@ -91,11 +91,11 @@ class DrawerHeader extends StatelessWidget {
         duration: duration,
         curve: curve,
         child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyText1,
+          style: theme.textTheme.bodyLarge!,
           child: MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: child,
+            child: child!,
           ),
         ),
       ),

@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
 
 import 'l10n/generated_cupertino_localizations.dart';
 import 'utils/date_localizations.dart' as util;
@@ -35,7 +32,7 @@ import 'widgets_localizations.dart';
 /// app supports with [CupertinoApp.supportedLocales]:
 ///
 /// ```dart
-/// new CupertinoApp(
+/// CupertinoApp(
 ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
 ///   supportedLocales: [
 ///     const Locale('en', 'US'), // American English
@@ -57,32 +54,23 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// The remaining '*Format' arguments uses the intl package to provide
   /// [DateFormat] configurations for the `localeName`.
   const GlobalCupertinoLocalizations({
-    @required String localeName,
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat dayFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat singleDigitHourFormat,
-    @required intl.DateFormat singleDigitMinuteFormat,
-    @required intl.DateFormat doubleDigitMinuteFormat,
-    @required intl.DateFormat singleDigitSecondFormat,
-    @required intl.NumberFormat decimalFormat,
-  }) : assert(localeName != null),
-       _localeName = localeName,
-       assert(fullYearFormat != null),
+    required String localeName,
+    required intl.DateFormat fullYearFormat,
+    required intl.DateFormat dayFormat,
+    required intl.DateFormat mediumDateFormat,
+    required intl.DateFormat singleDigitHourFormat,
+    required intl.DateFormat singleDigitMinuteFormat,
+    required intl.DateFormat doubleDigitMinuteFormat,
+    required intl.DateFormat singleDigitSecondFormat,
+    required intl.NumberFormat decimalFormat,
+  }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
-       assert(dayFormat != null),
        _dayFormat = dayFormat,
-       assert(mediumDateFormat != null),
        _mediumDateFormat = mediumDateFormat,
-       assert(singleDigitHourFormat != null),
        _singleDigitHourFormat = singleDigitHourFormat,
-       assert(singleDigitMinuteFormat != null),
        _singleDigitMinuteFormat = singleDigitMinuteFormat,
-       assert(doubleDigitMinuteFormat != null),
        _doubleDigitMinuteFormat = doubleDigitMinuteFormat,
-       assert(singleDigitSecondFormat != null),
        _singleDigitSecondFormat = singleDigitSecondFormat,
-       assert(decimalFormat != null),
        _decimalFormat =decimalFormat;
 
   final String _localeName;
@@ -109,7 +97,10 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerDayOfMonth(int dayIndex) {
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+     if (weekDay != null) {
+      return ' ${DefaultCupertinoLocalizations.shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
+    }
     // Year and month doesn't matter since we just want to day formatted.
     return _dayFormat.format(DateTime.utc(0, 0, dayIndex));
   }
@@ -130,20 +121,26 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   /// Subclasses should provide the optional zero pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
-  @protected String get datePickerHourSemanticsLabelZero => null;
+  @protected
+  String? get datePickerHourSemanticsLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
-  @protected String get datePickerHourSemanticsLabelOne => null;
+  @protected
+  String? get datePickerHourSemanticsLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
-  @protected String get datePickerHourSemanticsLabelTwo => null;
+  @protected
+  String? get datePickerHourSemanticsLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
-  @protected String get datePickerHourSemanticsLabelFew => null;
+  @protected
+  String? get datePickerHourSemanticsLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
-  @protected String get datePickerHourSemanticsLabelMany => null;
+  @protected
+  String? get datePickerHourSemanticsLabelMany => null;
   /// Subclasses should provide the required other pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
-  @protected String get datePickerHourSemanticsLabelOther;
+  @protected
+  String? get datePickerHourSemanticsLabelOther;
 
   @override
-  String datePickerHourSemanticsLabel(int hour) {
+  String? datePickerHourSemanticsLabel(int hour) {
     return intl.Intl.pluralLogic(
       hour,
       zero: datePickerHourSemanticsLabelZero,
@@ -153,24 +150,30 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       many: datePickerHourSemanticsLabelMany,
       other: datePickerHourSemanticsLabelOther,
       locale: _localeName,
-    ).replaceFirst(r'$hour', _decimalFormat.format(hour));
+    )?.replaceFirst(r'$hour', _decimalFormat.format(hour));
   }
 
   /// Subclasses should provide the optional zero pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
-  @protected String get datePickerMinuteSemanticsLabelZero => null;
+  @protected
+  String? get datePickerMinuteSemanticsLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
-  @protected String get datePickerMinuteSemanticsLabelOne => null;
+  @protected
+  String? get datePickerMinuteSemanticsLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
-  @protected String get datePickerMinuteSemanticsLabelTwo => null;
+  @protected
+  String? get datePickerMinuteSemanticsLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
-  @protected String get datePickerMinuteSemanticsLabelFew => null;
+  @protected
+  String? get datePickerMinuteSemanticsLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
-  @protected String get datePickerMinuteSemanticsLabelMany => null;
+  @protected
+  String? get datePickerMinuteSemanticsLabelMany => null;
   /// Subclasses should provide the required other pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
-  @protected String get datePickerMinuteSemanticsLabelOther;
+  @protected
+  String? get datePickerMinuteSemanticsLabelOther;
 
   @override
-  String datePickerMinuteSemanticsLabel(int minute) {
+  String? datePickerMinuteSemanticsLabel(int minute) {
     return intl.Intl.pluralLogic(
       minute,
       zero: datePickerMinuteSemanticsLabelZero,
@@ -180,7 +183,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       many: datePickerMinuteSemanticsLabelMany,
       other: datePickerMinuteSemanticsLabelOther,
       locale: _localeName,
-    ).replaceFirst(r'$minute', _decimalFormat.format(minute));
+    )?.replaceFirst(r'$minute', _decimalFormat.format(minute));
   }
 
   /// A string describing the [DatePickerDateOrder] enum value.
@@ -213,7 +216,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
           "locale $_localeName.\nNon conforming string for $_localeName's "
           '.arb file',
         );
-        return null;
+        return DatePickerDateOrder.mdy;
     }
   }
 
@@ -247,8 +250,23 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
           "for locale $_localeName.\nNon conforming string for $_localeName's "
           '.arb file',
         );
-        return null;
+        return DatePickerDateTimeOrder.date_time_dayPeriod;
     }
+  }
+
+  /// The raw version of [tabSemanticsLabel], with `$tabIndex` and `$tabCount` verbatim
+  /// in the string.
+  @protected
+  String get tabSemanticsLabelRaw;
+
+  @override
+  String tabSemanticsLabel({ required int tabIndex, required int tabCount }) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    final String template = tabSemanticsLabelRaw;
+    return template
+      .replaceFirst(r'$tabIndex', _decimalFormat.format(tabIndex))
+      .replaceFirst(r'$tabCount', _decimalFormat.format(tabCount));
   }
 
   @override
@@ -267,20 +285,26 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timerPickerHourLabelZero => null;
+  @protected
+  String? get timerPickerHourLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timerPickerHourLabelOne => null;
+  @protected
+  String? get timerPickerHourLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timerPickerHourLabelTwo => null;
+  @protected
+  String? get timerPickerHourLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timerPickerHourLabelFew => null;
+  @protected
+  String? get timerPickerHourLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timerPickerHourLabelMany => null;
+  @protected
+  String? get timerPickerHourLabelMany => null;
   /// Subclasses should provide the required other pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timerPickerHourLabelOther;
+  @protected
+  String? get timerPickerHourLabelOther;
 
   @override
-  String timerPickerHourLabel(int hour) {
+  String? timerPickerHourLabel(int hour) {
     return intl.Intl.pluralLogic(
       hour,
       zero: timerPickerHourLabelZero,
@@ -290,24 +314,40 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       many: timerPickerHourLabelMany,
       other: timerPickerHourLabelOther,
       locale: _localeName,
-    ).replaceFirst(r'$hour', _decimalFormat.format(hour));
+    )?.replaceFirst(r'$hour', _decimalFormat.format(hour));
   }
 
+  @override
+  List<String> get timerPickerHourLabels => <String>[
+    if (timerPickerHourLabelZero != null) timerPickerHourLabelZero!,
+    if (timerPickerHourLabelOne != null) timerPickerHourLabelOne!,
+    if (timerPickerHourLabelTwo != null) timerPickerHourLabelTwo!,
+    if (timerPickerHourLabelFew != null) timerPickerHourLabelFew!,
+    if (timerPickerHourLabelMany != null) timerPickerHourLabelMany!,
+    if (timerPickerHourLabelOther != null) timerPickerHourLabelOther!,
+  ];
+
   /// Subclasses should provide the optional zero pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timerPickerMinuteLabelZero => null;
+  @protected
+  String? get timerPickerMinuteLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timerPickerMinuteLabelOne => null;
+  @protected
+  String? get timerPickerMinuteLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timerPickerMinuteLabelTwo => null;
+  @protected
+  String? get timerPickerMinuteLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timerPickerMinuteLabelFew => null;
+  @protected
+  String? get timerPickerMinuteLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timerPickerMinuteLabelMany => null;
+  @protected
+  String? get timerPickerMinuteLabelMany => null;
   /// Subclasses should provide the required other pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timerPickerMinuteLabelOther;
+  @protected
+  String? get timerPickerMinuteLabelOther;
 
   @override
-  String timerPickerMinuteLabel(int minute) {
+  String? timerPickerMinuteLabel(int minute) {
     return intl.Intl.pluralLogic(
       minute,
       zero: timerPickerMinuteLabelZero,
@@ -317,24 +357,40 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       many: timerPickerMinuteLabelMany,
       other: timerPickerMinuteLabelOther,
       locale: _localeName,
-    ).replaceFirst(r'$minute', _decimalFormat.format(minute));
+    )?.replaceFirst(r'$minute', _decimalFormat.format(minute));
   }
 
+  @override
+  List<String> get timerPickerMinuteLabels => <String>[
+    if (timerPickerMinuteLabelZero != null) timerPickerMinuteLabelZero!,
+    if (timerPickerMinuteLabelOne != null) timerPickerMinuteLabelOne!,
+    if (timerPickerMinuteLabelTwo != null) timerPickerMinuteLabelTwo!,
+    if (timerPickerMinuteLabelFew != null) timerPickerMinuteLabelFew!,
+    if (timerPickerMinuteLabelMany != null) timerPickerMinuteLabelMany!,
+    if (timerPickerMinuteLabelOther != null) timerPickerMinuteLabelOther!,
+  ];
+
   /// Subclasses should provide the optional zero pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timerPickerSecondLabelZero => null;
+  @protected
+  String? get timerPickerSecondLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timerPickerSecondLabelOne => null;
+  @protected
+  String? get timerPickerSecondLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timerPickerSecondLabelTwo => null;
+  @protected
+  String? get timerPickerSecondLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timerPickerSecondLabelFew => null;
+  @protected
+  String? get timerPickerSecondLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timerPickerSecondLabelMany => null;
+  @protected
+  String? get timerPickerSecondLabelMany => null;
   /// Subclasses should provide the required other pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timerPickerSecondLabelOther;
+  @protected
+  String? get timerPickerSecondLabelOther;
 
   @override
-  String timerPickerSecondLabel(int second) {
+  String? timerPickerSecondLabel(int second) {
     return intl.Intl.pluralLogic(
       second,
       zero: timerPickerSecondLabelZero,
@@ -344,11 +400,20 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       many: timerPickerSecondLabelMany,
       other: timerPickerSecondLabelOther,
       locale: _localeName,
-    ).replaceFirst(r'$second', _decimalFormat.format(second));
+    )?.replaceFirst(r'$second', _decimalFormat.format(second));
   }
 
-  /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
-  /// to create an instance of this class.
+  @override
+  List<String> get timerPickerSecondLabels => <String>[
+    if (timerPickerSecondLabelZero != null) timerPickerSecondLabelZero!,
+    if (timerPickerSecondLabelOne != null) timerPickerSecondLabelOne!,
+    if (timerPickerSecondLabelTwo != null) timerPickerSecondLabelTwo!,
+    if (timerPickerSecondLabelFew != null) timerPickerSecondLabelFew!,
+    if (timerPickerSecondLabelMany != null) timerPickerSecondLabelMany!,
+    if (timerPickerSecondLabelOther != null) timerPickerSecondLabelOther!,
+  ];
+
+  /// A [LocalizationsDelegate] for [CupertinoLocalizations].
   ///
   /// Most internationalized apps will use [GlobalCupertinoLocalizations.delegates]
   /// as the value of [CupertinoApp.localizationsDelegates] to include
@@ -367,7 +432,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// app supports with [CupertinoApp.supportedLocales]:
   ///
   /// ```dart
-  /// new CupertinoApp(
+  /// CupertinoApp(
   ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
   ///   supportedLocales: [
   ///     const Locale('en', 'US'), // English
@@ -403,18 +468,18 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         'might be $localeName',
       );
 
-      intl.DateFormat fullYearFormat;
-      intl.DateFormat dayFormat;
-      intl.DateFormat mediumDateFormat;
+      late intl.DateFormat fullYearFormat;
+      late intl.DateFormat dayFormat;
+      late intl.DateFormat mediumDateFormat;
       // We don't want any additional decoration here. The am/pm is handled in
       // the date picker. We just want an hour number localized.
-      intl.DateFormat singleDigitHourFormat;
-      intl.DateFormat singleDigitMinuteFormat;
-      intl.DateFormat doubleDigitMinuteFormat;
-      intl.DateFormat singleDigitSecondFormat;
-      intl.NumberFormat decimalFormat;
+      late intl.DateFormat singleDigitHourFormat;
+      late intl.DateFormat singleDigitMinuteFormat;
+      late intl.DateFormat doubleDigitMinuteFormat;
+      late intl.DateFormat singleDigitSecondFormat;
+      late intl.NumberFormat decimalFormat;
 
-      void loadFormats(String locale) {
+      void loadFormats(String? locale) {
         fullYearFormat = intl.DateFormat.y(locale);
         dayFormat = intl.DateFormat.d(locale);
         mediumDateFormat = intl.DateFormat.MMMEd(locale);
@@ -444,7 +509,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         doubleDigitMinuteFormat,
         singleDigitSecondFormat,
         decimalFormat,
-      ));
+      )!);
     });
   }
 

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
@@ -18,24 +18,12 @@ void main() {
 
   testWidgets('should handle having no title', (WidgetTester tester) async {
     final Title widget = Title(
-      child: Container(),
       color: const Color(0xFF00FF00),
+      child: Container(),
     );
     expect(widget.toString, isNot(throwsException));
     expect(widget.title, equals(''));
     expect(widget.color, equals(const Color(0xFF00FF00)));
-  });
-
-  testWidgets('should not allow null title or color', (WidgetTester tester) async {
-    expect(() => Title(
-      title: null,
-      color: const Color(0xFF00FF00),
-      child: Container(),
-    ), throwsAssertionError);
-    expect(() => Title(
-      color: null,
-      child: Container(),
-    ), throwsAssertionError);
   });
 
   testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
@@ -48,13 +36,14 @@ void main() {
   testWidgets('should not pass "null" to setApplicationSwitcherDescription', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
       log.add(methodCall);
+      return null;
     });
 
     await tester.pumpWidget(Title(
-      child: Container(),
       color: const Color(0xFF00FF00),
+      child: Container(),
     ));
 
     expect(log, hasLength(1));

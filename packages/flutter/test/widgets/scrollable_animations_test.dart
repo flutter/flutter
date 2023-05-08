@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
@@ -13,8 +13,8 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
           controller: controller,
+          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
         ),
       ),
     );
@@ -33,15 +33,15 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
           controller: controller,
+          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
         ),
       ),
     );
 
     expectNoAnimation();
 
-    final double halfTolerance = controller.position.physics.tolerance.distance / 2;
+    final double halfTolerance = controller.position.physics.toleranceFor(controller.position).distance / 2;
     expect(halfTolerance, isNonZero);
     final double targetPosition = controller.position.pixels + halfTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);
@@ -56,15 +56,15 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
           controller: controller,
+          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
         ),
       ),
     );
 
     expectNoAnimation();
 
-    final double doubleTolerance = controller.position.physics.tolerance.distance * 2;
+    final double doubleTolerance = controller.position.physics.toleranceFor(controller.position).distance * 2;
     expect(doubleTolerance, isNonZero);
     final double targetPosition = controller.position.pixels + doubleTolerance;
     controller.position.animateTo(targetPosition, duration: const Duration(seconds: 10), curve: Curves.linear);

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
-import 'package:quiver/testing/async.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'capture_output.dart';
 
@@ -41,7 +41,7 @@ void main() {
   test('debugPrint throttling', () {
     FakeAsync().run((FakeAsync async) {
       List<String> log = captureOutput(() {
-        debugPrintThrottled('A' * (22 * 1024) + '\nB');
+        debugPrintThrottled('${'A' * (22 * 1024)}\nB');
       });
       expect(log.length, 1);
       async.elapse(const Duration(seconds: 2));

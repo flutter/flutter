@@ -64,7 +64,7 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 Semantics(
-                  checked: true
+                  checked: true,
                 ),
               ],
             ),

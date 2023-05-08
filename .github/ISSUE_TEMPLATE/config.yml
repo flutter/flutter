@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: I want help writing my application
+    url: https://stackoverflow.com/tags/flutter
+    about: Ask your questions about how to achieve a particular effect in Flutter or get help with using a particular API.

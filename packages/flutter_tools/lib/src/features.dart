@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import 'base/context.dart';
-import 'globals.dart' as globals;
 
 /// The current [FeatureFlags] implementation.
 ///
 /// If not injected, a default implementation is provided.
-FeatureFlags get featureFlags => context.get<FeatureFlags>();
+FeatureFlags get featureFlags => context.get<FeatureFlags>()!;
 
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
@@ -19,47 +16,44 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>();
 /// flags should be provided with a default implementation here. Clients that
 /// use this class should extent instead of implement, so that new flags are
 /// picked up automatically.
-class FeatureFlags {
+abstract class FeatureFlags {
+  /// const constructor so that subclasses can be const.
   const FeatureFlags();
 
   /// Whether flutter desktop for linux is enabled.
-  bool get isLinuxEnabled => isEnabled(flutterLinuxDesktopFeature);
+  bool get isLinuxEnabled => false;
 
   /// Whether flutter desktop for macOS is enabled.
-  bool get isMacOSEnabled => isEnabled(flutterMacOSDesktopFeature);
+  bool get isMacOSEnabled => false;
 
   /// Whether flutter web is enabled.
-  bool get isWebEnabled => isEnabled(flutterWebFeature);
+  bool get isWebEnabled => false;
 
   /// Whether flutter desktop for Windows is enabled.
-  bool get isWindowsEnabled => isEnabled(flutterWindowsDesktopFeature);
+  bool get isWindowsEnabled => false;
 
-  /// Whether the Android embedding V2 is enabled.
-  bool get isAndroidEmbeddingV2Enabled => isEnabled(flutterAndroidEmbeddingV2Feature);
+  /// Whether android is enabled.
+  bool get isAndroidEnabled => true;
+
+  /// Whether iOS is enabled.
+  bool get isIOSEnabled => true;
+
+  /// Whether fuchsia is enabled.
+  bool get isFuchsiaEnabled => true;
+
+  /// Whether custom devices are enabled.
+  bool get areCustomDevicesEnabled => false;
+
+  /// Whether fast single widget reloads are enabled.
+  bool get isSingleWidgetReloadEnabled => false;
+
+  /// Whether WebAssembly compilation for Flutter Web is enabled.
+  bool get isFlutterWebWasmEnabled => false;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
-  bool isEnabled(Feature feature) {
-    final String currentChannel = globals.flutterVersion.channel;
-    final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
-    if (!featureSetting.available) {
-      return false;
-    }
-    bool isEnabled = featureSetting.enabledByDefault;
-    if (feature.configSetting != null) {
-      final bool configOverride = globals.config.getValue(feature.configSetting) as bool;
-      if (configOverride != null) {
-        isEnabled = configOverride;
-      }
-    }
-    if (feature.environmentOverride != null) {
-      if (globals.platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
-        isEnabled = true;
-      }
-    }
-    return isEnabled;
-  }
+  bool isEnabled(Feature feature);
 }
 
 /// All current Flutter feature flags.
@@ -68,83 +62,103 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  flutterAndroidEmbeddingV2Feature,
+  singleWidgetReload,
+  flutterAndroidFeature,
+  flutterIOSFeature,
+  flutterFuchsiaFeature,
+  flutterCustomDevicesFeature,
+  flutterWebWasm,
 ];
 
+/// All current Flutter feature flags that can be configured.
+///
+/// [Feature.configSetting] is not `null`.
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+
 /// The [Feature] for flutter web.
-const Feature flutterWebFeature = Feature(
+const Feature flutterWebFeature = Feature.fullyEnabled(
   name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-  dev: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
 );
 
 /// The [Feature] for macOS desktop.
-const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter for desktop on macOS',
+const Feature flutterMacOSDesktopFeature = Feature.fullyEnabled(
+  name: 'support for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-  dev: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
 );
 
 /// The [Feature] for Linux desktop.
-const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter for desktop on Linux',
+const Feature flutterLinuxDesktopFeature = Feature.fullyEnabled(
+  name: 'support for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'FLUTTER_LINUX',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
 );
 
 /// The [Feature] for Windows desktop.
-const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter for desktop on Windows',
+const Feature flutterWindowsDesktopFeature = Feature.fullyEnabled(
+  name: 'support for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'FLUTTER_WINDOWS',
+);
+
+/// The [Feature] for Android devices.
+const Feature flutterAndroidFeature = Feature.fullyEnabled(
+  name: 'Flutter for Android',
+  configSetting: 'enable-android',
+);
+
+/// The [Feature] for iOS devices.
+const Feature flutterIOSFeature = Feature.fullyEnabled(
+  name: 'Flutter for iOS',
+  configSetting: 'enable-ios',
+);
+
+/// The [Feature] for Fuchsia support.
+const Feature flutterFuchsiaFeature = Feature(
+  name: 'Flutter for Fuchsia',
+  configSetting: 'enable-fuchsia',
+  environmentOverride: 'FLUTTER_FUCHSIA',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: false,
   ),
 );
 
-/// The [Feature] for generating projects using the new Android embedding.
-const Feature flutterAndroidEmbeddingV2Feature = Feature(
-  name: 'flutter create generates projects using the Android embedding V2',
-  environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
-  configSetting: 'enable-android-embedding-v2',
+const Feature flutterCustomDevicesFeature = Feature(
+  name: 'Early support for custom device types',
+  configSetting: 'enable-custom-devices',
+  environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
   beta: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
-  dev: FeatureChannelSetting(
+  stable: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
   ),
+);
+
+/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
+const Feature singleWidgetReload = Feature(
+  name: 'Hot reload optimization for changes to class body of a single widget',
+  configSetting: 'single-widget-reload-optimization',
+  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
   ),
-  stable: FeatureChannelSetting(
+  beta: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+/// Enabling WebAssembly compilation from `flutter build web`
+const Feature flutterWebWasm = Feature(
+  name: 'WebAssembly compilation from flutter build web',
+  environmentOverride: 'FLUTTER_WEB_WASM',
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
   ),
@@ -161,23 +175,39 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
 class Feature {
   /// Creates a [Feature].
   const Feature({
-    @required this.name,
+    required this.name,
     this.environmentOverride,
     this.configSetting,
+    this.extraHelpText,
     this.master = const FeatureChannelSetting(),
-    this.dev = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
-    this.stable = const FeatureChannelSetting(),
+    this.stable = const FeatureChannelSetting()
   });
+
+  /// Creates a [Feature] that is fully enabled across channels.
+  const Feature.fullyEnabled(
+      {required this.name,
+      this.environmentOverride,
+      this.configSetting,
+      this.extraHelpText})
+      : master = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        beta = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        ),
+        stable = const FeatureChannelSetting(
+          available: true,
+          enabledByDefault: true,
+        );
 
   /// The user visible name for this feature.
   final String name;
 
   /// The settings for the master branch and other unknown channels.
   final FeatureChannelSetting master;
-
-  /// The settings for the dev branch.
-  final FeatureChannelSetting dev;
 
   /// The settings for the beta branch.
   final FeatureChannelSetting beta;
@@ -192,15 +222,20 @@ class Feature {
   /// a feature.
   ///
   /// If not provided, defaults to `null` meaning there is no override.
-  final String environmentOverride;
+  final String? environmentOverride;
 
   /// The name of a setting that can be used to enable this feature.
   ///
   /// If not provided, defaults to `null` meaning there is no config setting.
-  final String configSetting;
+  final String? configSetting;
+
+  /// Additional text to add to the end of the help message.
+  ///
+  /// If not provided, defaults to `null` meaning there is no additional text.
+  final String? extraHelpText;
 
   /// A help message for the `flutter config` command, or null if unsupported.
-  String generateHelpMessage() {
+  String? generateHelpMessage() {
     if (configSetting == null) {
       return null;
     }
@@ -208,7 +243,6 @@ class Feature {
         'This setting will take effect on ');
     final List<String> channels = <String>[
       if (master.available) 'master',
-      if (dev.available) 'dev',
       if (beta.available) 'beta',
       if (stable.available) 'stable',
     ];
@@ -221,6 +255,9 @@ class Feature {
         ..removeLast()).join(', ');
       buffer.write('the $prefix, and ${channels.last} channels.');
     }
+    if (extraHelpText != null) {
+      buffer.write(' $extraHelpText');
+    }
     return buffer.toString();
   }
 
@@ -231,8 +268,6 @@ class Feature {
         return stable;
       case 'beta':
         return beta;
-      case 'dev':
-        return dev;
       case 'master':
       default:
         return master;

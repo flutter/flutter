@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
 final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
-
-final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
+final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
@@ -23,9 +25,10 @@ Future<void> main() async {
 
     section('Find Java');
 
-    final String javaHome = await findJavaHome();
-    if (javaHome == null)
+    final String? javaHome = await findJavaHome();
+    if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
+    }
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
@@ -44,7 +47,8 @@ Future<void> main() async {
 
       final File readonlyTxtAssetFile = await File(path.join(
         projectDir.path,
-        'assets/read-only.txt'
+        'assets',
+        'read-only.txt'
       ))
       .create(recursive: true);
 
@@ -55,15 +59,15 @@ Future<void> main() async {
       if (!Platform.isWindows) {
         await exec('chmod', <String>[
           '444',
-          readonlyTxtAssetFile.path
+          readonlyTxtAssetFile.path,
         ]);
       }
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
-        '\n  # assets:\n',
-        '\n  assets:\n    - assets/read-only.txt\n',
+        '$platformLineSep  # assets:$platformLineSep',
+        '$platformLineSep  assets:$platformLineSep    - assets/read-only.txt$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
 
@@ -71,8 +75,8 @@ Future<void> main() async {
 
       content = await pubspec.readAsString();
       content = content.replaceFirst(
-        '\ndependencies:\n',
-        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
+        '${platformLineSep}dependencies:$platformLineSep',
+        '${platformLineSep}dependencies:$platformLineSep  device_info: 2.0.3$platformLineSep  package_info: 2.0.2$platformLineSep',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -177,7 +181,7 @@ Future<void> main() async {
             flutterDirectory.path,
             'dev',
             'integration_tests',
-            useAndroidEmbeddingV2 ? 'android_host_app_v2_embedding' : 'android_host_app',
+            'android_host_app_v2_embedding',
           ),
         ),
         hostApp,
@@ -255,7 +259,7 @@ Future<void> main() async {
 
       section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyDebugAssetFilePath = path.join(
+      final String readonlyDebugAssetFilePath = path.joinAll(<String>[
         hostApp.path,
         'app',
         'build',
@@ -263,8 +267,10 @@ Future<void> main() async {
         'merged_assets',
         'debug',
         'out',
-        'flutter_assets/assets/read-only.txt',
-      );
+        'flutter_assets',
+        'assets',
+        'read-only.txt',
+      ]);
       final File readonlyDebugAssetFile = File(readonlyDebugAssetFilePath);
       if (!exists(readonlyDebugAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
@@ -272,7 +278,7 @@ Future<void> main() async {
 
       String modes = readonlyDebugAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes != null && modes.compareTo(fileReadWriteMode) != 0) {
+      if (modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 
@@ -312,6 +318,24 @@ Future<void> main() async {
         'lib/armeabi-v7a/libflutter.so',
       ], await getFilesInApk(releaseHostApk));
 
+      section('Check the NOTICE file is correct');
+
+      await inDirectory(hostApp, () async {
+        final File apkFile = File(releaseHostApk);
+        final Archive apk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
+        // Shouldn't be missing since we already checked it exists above.
+        final ArchiveFile? noticesFile = apk.findFile('assets/flutter_assets/NOTICES.Z');
+
+        final Uint8List? licenseData = noticesFile?.content as Uint8List?;
+        if (licenseData == null) {
+          return TaskResult.failure('Invalid license file.');
+        }
+        final String licenseString = utf8.decode(gzip.decode(licenseData));
+        if (!licenseString.contains('skia') || !licenseString.contains('Flutter Authors')) {
+          return TaskResult.failure('License content missing.');
+        }
+      });
+
       section('Check release AndroidManifest.xml');
 
       final String androidManifestRelease = await getAndroidManifest(debugHostApk);
@@ -325,7 +349,7 @@ Future<void> main() async {
 
       section('Check file access modes for read-only asset from Flutter module');
 
-      final String readonlyReleaseAssetFilePath = path.join(
+      final String readonlyReleaseAssetFilePath = path.joinAll(<String>[
         hostApp.path,
         'app',
         'build',
@@ -333,8 +357,10 @@ Future<void> main() async {
         'merged_assets',
         'release',
         'out',
-        'flutter_assets/assets/read-only.txt',
-      );
+        'flutter_assets',
+        'assets',
+        'read-only.txt',
+      ]);
       final File readonlyReleaseAssetFile = File(readonlyReleaseAssetFilePath);
       if (!exists(readonlyReleaseAssetFile)) {
         return TaskResult.failure('Failed to copy read-only asset file');
@@ -342,7 +368,7 @@ Future<void> main() async {
 
       modes = readonlyReleaseAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes != null && modes.compareTo(fileReadWriteMode) != 0) {
+      if (modes.compareTo(fileReadWriteMode) != 0) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 

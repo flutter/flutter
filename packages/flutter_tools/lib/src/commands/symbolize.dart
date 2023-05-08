@@ -14,16 +14,16 @@ import '../base/io.dart';
 import '../convert.dart';
 import '../runner/flutter_command.dart';
 
-/// Support for symbolicating a Dart stack trace.
+/// Support for symbolizing a Dart stack trace.
 ///
 /// This command accepts either paths to an input file containing the
-/// stack trace and an output file for the symbolicated trace to be
+/// stack trace and an output file for the symbolizing trace to be
 /// written, or it accepts a stack trace over stdin and outputs it
 /// over stdout.
 class SymbolizeCommand extends FlutterCommand {
   SymbolizeCommand({
-    @required Stdio stdio,
-    @required FileSystem fileSystem,
+    required Stdio stdio,
+    required FileSystem fileSystem,
     DwarfSymbolizationService dwarfSymbolizationService = const DwarfSymbolizationService(),
   }) : _stdio = stdio,
        _fileSystem = fileSystem,
@@ -43,7 +43,7 @@ class SymbolizeCommand extends FlutterCommand {
     argParser.addOption(
       'output',
       abbr: 'o',
-      valueHelp: 'A file path for a symbolicated stack trace to be written to.'
+      help: 'A file path for a symbolized stack trace to be written to.'
     );
   }
 
@@ -52,23 +52,29 @@ class SymbolizeCommand extends FlutterCommand {
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
-  String get description => 'Symbolize a stack trace from an AOT compiled flutter application.';
+  String get description => 'Symbolize a stack trace from an AOT-compiled Flutter app.';
 
   @override
   String get name => 'symbolize';
+
+  @override
+  final String category = FlutterCommandCategory.tools;
 
   @override
   bool get shouldUpdateCache => false;
 
   @override
   Future<void> validateCommand() {
-    if (!argResults.wasParsed('debug-info')) {
-      throwToolExit('"--debug-info" is required to symbolicate stack traces.');
+    if (argResults?.wasParsed('debug-info') != true) {
+      throwToolExit('"--debug-info" is required to symbolize stack traces.');
     }
-    if (!_fileSystem.isFileSync(stringArg('debug-info'))) {
-      throwToolExit('${stringArg('debug-info')} does not exist.');
+    final String debugInfoPath = stringArg('debug-info')!;
+    if (debugInfoPath.endsWith('.dSYM')
+        ? !_fileSystem.isDirectorySync(debugInfoPath)
+        : !_fileSystem.isFileSync(debugInfoPath)) {
+      throwToolExit('$debugInfoPath does not exist.');
     }
-    if (argResults.wasParsed('input') && !_fileSystem.isFileSync(stringArg('input'))) {
+    if ((argResults?.wasParsed('input') ?? false) && !_fileSystem.isFileSync(stringArg('input')!)) {
       throwToolExit('${stringArg('input')} does not exist.');
     }
     return super.validateCommand();
@@ -80,12 +86,12 @@ class SymbolizeCommand extends FlutterCommand {
     IOSink output;
 
     // Configure output to either specified file or stdout.
-    if (argResults.wasParsed('output')) {
+    if (argResults?.wasParsed('output') ?? false) {
       final File outputFile = _fileSystem.file(stringArg('output'));
       if (!outputFile.parent.existsSync()) {
         outputFile.parent.createSync(recursive: true);
       }
-       output = outputFile.openWrite();
+      output = outputFile.openWrite();
     } else {
       final StreamController<List<int>> outputController = StreamController<List<int>>();
       outputController
@@ -96,13 +102,31 @@ class SymbolizeCommand extends FlutterCommand {
     }
 
     // Configure input from either specified file or stdin.
-    if (argResults.wasParsed('input')) {
+    if (argResults?.wasParsed('input') ?? false) {
       input = _fileSystem.file(stringArg('input')).openRead();
     } else {
       input = _stdio.stdin;
     }
 
-    final Uint8List symbols = _fileSystem.file(stringArg('debug-info')).readAsBytesSync();
+    String debugInfoPath = stringArg('debug-info')!;
+
+    // If it's a dSYM container, expand the path to the actual DWARF.
+    if (debugInfoPath.endsWith('.dSYM')) {
+      final Directory debugInfoDir = _fileSystem
+        .directory(debugInfoPath)
+        .childDirectory('Contents')
+        .childDirectory('Resources')
+        .childDirectory('DWARF');
+
+      final List<FileSystemEntity> dwarfFiles = debugInfoDir.listSync().whereType<File>().toList();
+      if (dwarfFiles.length == 1) {
+        debugInfoPath = dwarfFiles.first.path;
+      } else {
+        throwToolExit('Expected a single DWARF file in a dSYM container.');
+      }
+    }
+
+    final Uint8List symbols = _fileSystem.file(debugInfoPath).readAsBytesSync();
     await _dwarfSymbolizationService.decode(
       input: input,
       output: output,
@@ -113,9 +137,46 @@ class SymbolizeCommand extends FlutterCommand {
   }
 }
 
+typedef SymbolsTransformer = StreamTransformer<String, String> Function(Uint8List);
+
+StreamTransformer<String, String> _defaultTransformer(Uint8List symbols) {
+  final Dwarf? dwarf = Dwarf.fromBytes(symbols);
+  if (dwarf == null) {
+    throwToolExit('Failed to decode symbols file');
+  }
+  return DwarfStackTraceDecoder(dwarf, includeInternalFrames: true);
+}
+
+// A no-op transformer for `DwarfSymbolizationService.test`
+StreamTransformer<String, String> _testTransformer(Uint8List buffer) {
+  return StreamTransformer<String, String>.fromHandlers(
+    handleData: (String data, EventSink<String> sink) {
+      sink.add(data);
+    },
+    handleDone: (EventSink<String> sink) {
+      sink.close();
+    },
+    handleError: (Object error, StackTrace stackTrace, EventSink<String> sink) {
+      sink.addError(error, stackTrace);
+    }
+  );
+}
+
 /// A service which decodes stack traces from Dart applications.
 class DwarfSymbolizationService {
-  const DwarfSymbolizationService();
+  const DwarfSymbolizationService({
+    SymbolsTransformer symbolsTransformer = _defaultTransformer,
+  }) : _transformer = symbolsTransformer;
+
+  /// Create a DwarfSymbolizationService with a no-op transformer for testing.
+  @visibleForTesting
+  factory DwarfSymbolizationService.test() {
+    return const DwarfSymbolizationService(
+      symbolsTransformer: _testTransformer
+    );
+  }
+
+  final SymbolsTransformer _transformer;
 
   /// Decode a stack trace from [input] and place the results in [output].
   ///
@@ -125,26 +186,22 @@ class DwarfSymbolizationService {
   /// Throws a [ToolExit] if the symbols cannot be parsed or the stack trace
   /// cannot be decoded.
   Future<void> decode({
-    @required Stream<List<int>> input,
-    @required IOSink output,
-    @required Uint8List symbols,
+    required Stream<List<int>> input,
+    required IOSink output,
+    required Uint8List symbols,
   }) async {
-    final Dwarf dwarf = Dwarf.fromBytes(symbols);
-    if (dwarf == null) {
-      throwToolExit('Failed to decode symbols file');
-    }
-
     final Completer<void> onDone = Completer<void>();
-    StreamSubscription<void> subscription;
+    StreamSubscription<void>? subscription;
     subscription = input
+      .cast<List<int>>()
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
-      .transform(DwarfStackTraceDecoder(dwarf, includeInternalFrames: true))
+      .transform(_transformer(symbols))
       .listen((String line) {
         try {
           output.writeln(line);
         } on Exception catch(e, s) {
-          subscription.cancel().whenComplete(() {
+          subscription?.cancel().whenComplete(() {
             if (!onDone.isCompleted) {
               onDone.completeError(e, s);
             }

@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_driver/src/common/find.dart';
+import 'package:flutter_driver/flutter_driver.dart';
 
 import '../../common.dart';
 
 void main() {
+  final FakeDeserialize fakeDeserialize = FakeDeserialize();
+
   test('Ancestor finder serialize', () {
     const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
@@ -35,7 +37,7 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Ancestor a = Ancestor.deserialize(serialized);
+    final Ancestor a = Ancestor.deserialize(serialized, fakeDeserialize);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
@@ -70,10 +72,12 @@ void main() {
       'firstMatchOnly': 'true',
     };
 
-    final Descendant a = Descendant.deserialize(serialized);
+    final Descendant a = Descendant.deserialize(serialized, fakeDeserialize);
     expect(a.of, isA<ByType>());
     expect(a.matching, isA<ByValueKey>());
     expect(a.matchRoot, isTrue);
     expect(a.firstMatchOnly, isTrue);
   });
 }
+
+class FakeDeserialize extends Fake with DeserializeFinderFactory { }

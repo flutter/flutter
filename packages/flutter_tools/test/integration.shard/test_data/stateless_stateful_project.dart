@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/globals.dart' as globals;
-
 import '../test_utils.dart';
 import 'project.dart';
 
@@ -12,7 +10,7 @@ class HotReloadProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -31,8 +29,8 @@ class HotReloadProject extends Project {
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
-    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
+    await ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     runApp(MyApp());
   }
 
@@ -74,6 +72,10 @@ class HotReloadProject extends Project {
 
   void toggleState() {
     stateful = !stateful;
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'main.dart'), getCode(stateful));
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      getCode(stateful),
+      writeFutureModifiedDate: true,
+    );
   }
 }

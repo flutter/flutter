@@ -6,7 +6,7 @@ import 'dart:async';
 
 /// A [Future] whose [then] implementation calls the callback immediately.
 ///
-/// This is similar to [new Future.value], except that the value is available in
+/// This is similar to [Future.value], except that the value is available in
 /// the same event-loop iteration.
 ///
 /// ⚠ This class is useful in cases where you want to expose a single API, where
@@ -19,7 +19,7 @@ class SynchronousFuture<T> implements Future<T> {
   ///
   /// See also:
   ///
-  ///  * [new Future.value] for information about creating a regular
+  ///  * [Future.value] for information about creating a regular
   ///    [Future] that completes with a value.
   SynchronousFuture(this._value);
 
@@ -34,27 +34,29 @@ class SynchronousFuture<T> implements Future<T> {
   }
 
   @override
-  Future<T> catchError(Function onError, { bool test(Object error) }) => Completer<T>().future;
+  Future<T> catchError(Function onError, { bool Function(Object error)? test }) => Completer<T>().future;
 
   @override
-  Future<E> then<E>(FutureOr<E> f(T value), { Function onError }) {
-    final dynamic result = f(_value);
-    if (result is Future<E>)
+  Future<R> then<R>(FutureOr<R> Function(T value) onValue, { Function? onError }) {
+    final FutureOr<R> result = onValue(_value);
+    if (result is Future<R>) {
       return result;
-    return SynchronousFuture<E>(result as E);
+    }
+    return SynchronousFuture<R>(result);
   }
 
   @override
-  Future<T> timeout(Duration timeLimit, { FutureOr<T> onTimeout() }) {
+  Future<T> timeout(Duration timeLimit, { FutureOr<T> Function()? onTimeout }) {
     return Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
-  Future<T> whenComplete(FutureOr<dynamic> action()) {
+  Future<T> whenComplete(FutureOr<dynamic> Function() action) {
     try {
       final FutureOr<dynamic> result = action();
-      if (result is Future)
+      if (result is Future) {
         return result.then<T>((dynamic value) => _value);
+      }
       return this;
     } catch (e, stack) {
       return Future<T>.error(e, stack);

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -24,7 +26,7 @@ const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
 
 void main() {
 
-  Future<void> _dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> dragSlider(WidgetTester tester, Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
@@ -59,7 +61,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -95,7 +97,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
+    await tester.tap(find.byKey(sliderKey), warnIfMissed: false);
     expect(value, equals(0.0));
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
@@ -134,7 +136,7 @@ void main() {
       ),
     );
 
-    await _dragSlider(tester, sliderKey);
+    await dragSlider(tester, sliderKey);
 
     expect(numberOfTimesOnChangeStartIsCalled, equals(1));
 
@@ -175,7 +177,7 @@ void main() {
       ),
     );
 
-    await _dragSlider(tester, sliderKey);
+    await dragSlider(tester, sliderKey);
 
     expect(numberOfTimesOnChangeEndIsCalled, equals(1));
 
@@ -188,8 +190,8 @@ void main() {
   testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
-    double startValue;
-    double endValue;
+    late double startValue;
+    late double endValue;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -242,8 +244,8 @@ void main() {
   testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
-    double startValue;
-    double endValue;
+    late double startValue;
+    late double endValue;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -318,6 +320,7 @@ void main() {
             increasedValue: '60%',
             decreasedValue: '40%',
             textDirection: TextDirection.ltr,
+            flags: <SemanticsFlag>[SemanticsFlag.isSlider],
             actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
           ),
         ],
@@ -341,7 +344,14 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      TestSemantics.root(),
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            id: 1,
+            flags: <SemanticsFlag>[SemanticsFlag.isSlider],
+          ),
+        ],
+      ),
       ignoreRect: true,
       ignoreTransform: true,
     ));
@@ -365,6 +375,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
+      isSlider: true,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '50%',
@@ -387,6 +398,7 @@ void main() {
     );
 
     expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
+      isSlider: true,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '60%',
@@ -577,7 +589,7 @@ void main() {
       ..rrect()
       ..rrect()
       ..rrect()
-      ..rrect(color: CupertinoColors.systemPurple.color)
+      ..rrect(color: CupertinoColors.systemPurple.color),
     );
 
     await tester.pumpWidget(
@@ -600,7 +612,49 @@ void main() {
           ..rrect()
           ..rrect()
           ..rrect()
-          ..rrect(color: CupertinoColors.activeOrange.color)
+          ..rrect(color: CupertinoColors.activeOrange.color),
+    );
+  });
+
+  testWidgets('Hovering over Cupertino slider thumb updates cursor to clickable on Web', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: CupertinoSlider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() { value = newValue; });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
+    await gesture.moveTo(topLeft + const Offset(15, 0));
+    addTearDown(gesture.removePointer);
+    await tester.pumpAndSettle();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
 }

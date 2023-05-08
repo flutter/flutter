@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,9 +22,7 @@ void main() {
             return const Text('Next');
           },
         },
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          GlobalMaterialLocalizations.delegate,
-        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const <Locale>[
           Locale('en', 'US'),
           Locale('es', 'ES'),
@@ -43,14 +40,14 @@ void main() {
                   },
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<int>>[
-                      PopupMenuItem<int>(
+                      const PopupMenuItem<int>(
                         value: 1,
                         child: Text(
                           'hello, world',
                           style: TextStyle(color: Colors.blue),
                         ),
                       ),
-                      PopupMenuItem<int>(
+                      const PopupMenuItem<int>(
                         value: 2,
                         child: Text(
                           '你好，世界',
@@ -92,7 +89,7 @@ void main() {
     expect(topRight, const Offset(477.0, 347.5));
     expect(bottomLeft, const Offset(392.0, 364.5));
     expect(bottomRight, const Offset(477.0, 364.5));
-  }, skip: !isLinux);
+  });
 
   testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
     // This test in combination with 'Text baseline with CJK locale' verify the baselines
@@ -109,9 +106,7 @@ void main() {
             return const Text('Next');
           },
         },
-        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          GlobalMaterialLocalizations.delegate,
-        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const <Locale>[
           Locale('en', 'US'),
           Locale('es', 'ES'),
@@ -129,14 +124,14 @@ void main() {
                   },
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<int>>[
-                      PopupMenuItem<int>(
+                      const PopupMenuItem<int>(
                         value: 1,
                         child: Text(
                           'hello, world',
                           style: TextStyle(color: Colors.blue),
                         ),
                       ),
-                      PopupMenuItem<int>(
+                      const PopupMenuItem<int>(
                         value: 2,
                         child: Text(
                           '你好，世界',
@@ -164,7 +159,6 @@ void main() {
     Offset bottomLeft = tester.getBottomLeft(find.text('hello, world'));
     Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
 
-
     expect(topLeft, const Offset(392.0, 300.0));
     expect(topRight, const Offset(584.0, 300.0));
     expect(bottomLeft, const Offset(392.0, 316));
@@ -179,5 +173,5 @@ void main() {
     expect(topRight, const Offset(472.0, 348.0));
     expect(bottomLeft, const Offset(392.0, 364.0));
     expect(bottomRight, const Offset(472.0, 364.0));
-  }, skip: !isLinux);
+  });
 }

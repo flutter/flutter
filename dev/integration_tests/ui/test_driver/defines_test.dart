@@ -6,7 +6,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
-  FlutterDriver driver;
+  late FlutterDriver driver;
 
   setUpAll(() async {
     driver = await FlutterDriver.connect();
@@ -16,7 +16,7 @@ void main() {
     await driver.close();
   });
 
-  test('Can run with --dart-deinfe', () async {
-    await driver.waitFor(find.text('ExampleValue'));
-  });
+  test('Can run with --dart-define', () async {
+    await driver.waitFor(find.text('Example,AValue'));
+  }, timeout: Timeout.none);
 }

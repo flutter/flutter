@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_types.dart';
 
 class StockSettings extends StatefulWidget {
-  const StockSettings(this.configuration, this.updater);
+  const StockSettings(this.configuration, this.updater, {super.key});
 
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
@@ -17,7 +17,7 @@ class StockSettings extends StatefulWidget {
 }
 
 class StockSettingsState extends State<StockSettings> {
-  void _handleOptimismChanged(bool value) {
+  void _handleOptimismChanged(bool? value) {
     value ??= false;
     sendUpdates(widget.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
   }
@@ -63,7 +63,6 @@ class StockSettingsState extends State<StockSettings> {
     switch (widget.configuration.stockMode) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
-        break;
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
@@ -72,13 +71,13 @@ class StockSettingsState extends State<StockSettings> {
               title: const Text('Change mode?'),
               content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: const Text('NO THANKS'),
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
                 ),
-                FlatButton(
+                TextButton(
                   child: const Text('AGREE'),
                   onPressed: () {
                     Navigator.pop(context, true);
@@ -88,13 +87,11 @@ class StockSettingsState extends State<StockSettings> {
             );
           },
         ).then<void>(_handleOptimismChanged);
-        break;
     }
   }
 
   void sendUpdates(StockConfiguration value) {
-    if (widget.updater != null)
-      widget.updater(value);
+    widget.updater(value);
   }
 
   AppBar buildAppBar(BuildContext context) {
@@ -111,7 +108,7 @@ class StockSettingsState extends State<StockSettings> {
         onTap: _confirmOptimismChange,
         trailing: Checkbox(
           value: widget.configuration.stockMode == StockMode.optimistic,
-          onChanged: (bool value) => _confirmOptimismChange(),
+          onChanged: (bool? value) => _confirmOptimismChange(),
         ),
       ),
       ListTile(
@@ -143,7 +140,7 @@ class StockSettingsState extends State<StockSettings> {
       ),
     ];
     assert(() {
-      // material grid and size construction lines are only available in checked mode
+      // material grid and size construction lines are only available in debug mode
       rows.addAll(<Widget>[
         ListTile(
           leading: const Icon(Icons.border_clear),

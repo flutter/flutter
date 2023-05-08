@@ -3,46 +3,39 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../base/logger.dart';
-import '../../project.dart';
-import 'ios_migrator.dart';
+import '../../base/project_migrator.dart';
+import '../../xcode_project.dart';
 
 // Xcode legacy build system no longer supported by Xcode.
 // Set in https://github.com/flutter/flutter/pull/21901/.
 // Removed in https://github.com/flutter/flutter/pull/33684.
-class XcodeBuildSystemMigration extends IOSMigrator {
+class XcodeBuildSystemMigration extends ProjectMigrator {
   XcodeBuildSystemMigration(
     IosProject project,
-    Logger logger,
-  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings,
-      super(logger);
+    super.logger,
+  ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings;
 
-  final File _xcodeWorkspaceSharedSettings;
+  final File? _xcodeWorkspaceSharedSettings;
 
   @override
-  bool migrate() {
-    if (!_xcodeWorkspaceSharedSettings.existsSync()) {
-      logger.printTrace('Xcode workspace settings not found, skipping migration');
-      return true;
+  void migrate() {
+    final File? xcodeWorkspaceSharedSettings = _xcodeWorkspaceSharedSettings;
+    if (xcodeWorkspaceSharedSettings == null || !xcodeWorkspaceSharedSettings.existsSync()) {
+      logger.printTrace('Xcode workspace settings not found, skipping build system migration');
+      return;
     }
 
-    final String contents = _xcodeWorkspaceSharedSettings.readAsStringSync();
+    final String contents = xcodeWorkspaceSharedSettings.readAsStringSync();
 
-    // Only delete this file when it matches the original Flutter template.
+    // Only delete this file when it is pointing to the legacy build system.
     const String legacyBuildSettingsWorkspace = '''
-<plist version="1.0">
-<dict>
 	<key>BuildSystemType</key>
-	<string>Original</string>
-</dict>
-</plist>''';
+	<string>Original</string>''';
 
     // contains instead of equals to ignore newline file ending variance.
     if (contents.contains(legacyBuildSettingsWorkspace)) {
-      logger.printStatus('Legacy build system detected, removing ${_xcodeWorkspaceSharedSettings.path}');
-      _xcodeWorkspaceSharedSettings.deleteSync();
+      logger.printStatus('Legacy build system detected, removing ${xcodeWorkspaceSharedSettings.path}');
+      xcodeWorkspaceSharedSettings.deleteSync();
     }
-
-    return true;
   }
 }

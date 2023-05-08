@@ -3,33 +3,135 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/runner.dart';
+import 'package:flutter_tools/src/test/test_time_recorder.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:flutter_tools/src/test/watcher.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
+import '../../src/fake_devices.dart';
+import '../../src/logging_logger.dart';
+import '../../src/test_flutter_command_runner.dart';
+
+const String _pubspecContents = '''
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''';
+final String _packageConfigContents = json.encode(<String, Object>{
+  'configVersion': 2,
+  'packages': <Map<String, Object>>[
+    <String, String>{
+      'name': 'test_api',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12',
+    },
+    <String, String>{
+      'name': 'integration_test',
+      'rootUri': 'file:///path/to/flutter/packages/integration_test',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12',
+    },
+  ],
+  'generated': '2021-02-24T07:55:20.084834Z',
+  'generator': 'pub',
+  'generatorVersion': '2.13.0-68.0.dev',
+});
 
 void main() {
   Cache.disableLocking();
-  MemoryFileSystem fs;
+  late MemoryFileSystem fs;
+  late LoggingLogger logger;
 
   setUp(() {
-    fs = MemoryFileSystem();
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
+    fs = MemoryFileSystem.test(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
+    final Directory package = fs.directory('package');
+    package.childFile('pubspec.yaml').createSync(recursive: true);
+    package.childFile('pubspec.yaml').writeAsStringSync(_pubspecContents);
+    (package.childDirectory('.dart_tool')
+        .childFile('package_config.json')
+      ..createSync(recursive: true))
+        .writeAsString(_packageConfigContents);
+    package.childDirectory('test').childFile('some_test.dart').createSync(recursive: true);
+    package.childDirectory('integration_test').childFile('some_integration_test.dart').createSync(recursive: true);
+
+    fs.currentDirectory = package.path;
+
+    logger = LoggingLogger();
+  });
+
+  testUsingContext('Missing dependencies in pubspec',
+      () async {
+    // Clear the dependencies already added in [setUp].
+    fs.file('pubspec.yaml').writeAsStringSync('');
+    fs.directory('.dart_tool').childFile('package_config.json').writeAsStringSync('');
+
+    final FakePackageTest fakePackageTest = FakePackageTest();
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+    createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('Missing dependencies in pubspec for integration tests',
+      () async {
+    // Only use the flutter_test dependency, integration_test is deliberately
+    // absent.
+    fs.file('pubspec.yaml').writeAsStringSync('''
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+    ''');
+    fs.directory('.dart_tool').childFile('package_config.json').writeAsStringSync(json.encode(<String, Object>{
+      'configVersion': 2,
+      'packages': <Map<String, Object>>[
+        <String, String>{
+          'name': 'test_api',
+          'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+          'packageUri': 'lib/',
+          'languageVersion': '2.12',
+        },
+      ],
+      'generated': '2021-02-24T07:55:20.084834Z',
+      'generator': 'pub',
+      'generatorVersion': '2.13.0-68.0.dev',
+    }));
+    final FakePackageTest fakePackageTest = FakePackageTest();
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      'integration_test',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('Pipes test-randomize-ordering-seed to package:test',
@@ -52,7 +154,77 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext(
+      'Confirmation that the reporter and timeout args are not set by default',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    expect(fakePackageTest.lastArgs, isNot(contains('-r')));
+    expect(fakePackageTest.lastArgs, isNot(contains('compact')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
+    expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  group('shard-index and total-shards', () {
+    testUsingContext('with the params they are Piped to package:test',
+        () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner =
+          createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--total-shards=1',
+        '--shard-index=2',
+        '--no-pub',
+      ]);
+
+      expect(fakePackageTest.lastArgs, contains('--total-shards=1'));
+      expect(fakePackageTest.lastArgs, contains('--shard-index=2'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    });
+
+    testUsingContext('without the params they not Piped to package:test',
+        () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner =
+          createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+
+      expect(fakePackageTest.lastArgs, isNot(contains('--total-shards')));
+      expect(fakePackageTest.lastArgs, isNot(contains('--shard-index')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    });
   });
 
   testUsingContext('Supports coverage and machine', () async {
@@ -69,12 +241,11 @@ void main() {
       '--coverage',
       '--',
       'test/fake_test.dart',
-    ]), throwsA(isA<ToolExit>()
-      .having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
+    ]), throwsA(isA<ToolExit>().having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
   testUsingContext('Pipes start-paused to package:test',
@@ -99,10 +270,35 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
-  testUsingContext('Pipes enable-observatory', () async {
+  testUsingContext('Pipes run-skipped to package:test',
+      () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--run-skipped',
+      '--',
+      'test/fake_test.dart',
+    ]);
+    expect(
+      fakePackageTest.lastArgs,
+      contains('--run-skipped'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Pipes enable-vmService', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
@@ -117,7 +313,7 @@ void main() {
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       true,
     );
 
@@ -130,7 +326,7 @@ void main() {
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       true,
     );
 
@@ -141,56 +337,570 @@ void main() {
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       false,
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
-    Cache: () => FakeCache(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+  });
+
+  testUsingContext('Verbose prints phase timings', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner, verbose: true);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--',
+      'test/fake_test.dart',
+    ]);
+
+    // Expect one message for each phase.
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
+
+    // As we force the `runTests` command to take at least 1 ms expect at least
+    // one phase to take a non-zero amount of time.
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    expect(logPhaseMessagesNonZero, isNotEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    Logger: () => logger,
+  });
+
+  testUsingContext('Non-verbose does not prints phase timings', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner =
+        createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--',
+      'test/fake_test.dart',
+    ]);
+
+    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    expect(logPhaseMessages, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    Logger: () => logger,
+  });
+
+  testUsingContext('Pipes different args when running Integration Tests', () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      'integration_test',
+    ]);
+
+    expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  testUsingContext('Overrides concurrency when running Integration Tests', () async {
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--concurrency=100',
+      'integration_test',
+    ]);
+
+    expect(fakePackageTest.lastArgs, contains('--concurrency=1'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  group('Detecting Integration Tests', () {
+    testUsingContext('when integration_test is not passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+
+      expect(testCommand.isIntegrationTest, false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
+    testUsingContext('when integration_test is passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        'integration_test',
+      ]);
+
+      expect(testCommand.isIntegrationTest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
+    testUsingContext('when relative path to integration test is passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        'integration_test/some_integration_test.dart',
+      ]);
+
+      expect(testCommand.isIntegrationTest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
+    testUsingContext('when absolute path to integration test is passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '/package/integration_test/some_integration_test.dart',
+      ]);
+
+      expect(testCommand.isIntegrationTest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
+    testUsingContext('when absolute unnormalized path to integration test is passed', () async {
+      final FakePackageTest fakePackageTest = FakePackageTest();
+
+      final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '/package/../package/integration_test/some_integration_test.dart',
+      ]);
+
+      expect(testCommand.isIntegrationTest, true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+
+    testUsingContext('when both test and integration test are passed', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      expect(() => commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        'test/some_test.dart',
+        'integration_test/some_integration_test.dart',
+      ]), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
+  group('Required artifacts', () {
+    testUsingContext('for default invocation', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+
+      expect(await testCommand.requiredArtifacts, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when platform is chrome', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--platform=chrome',
+      ]);
+
+      expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[DevelopmentArtifact.web]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when running integration tests', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        'integration_test',
+      ]);
+
+      expect(await testCommand.requiredArtifacts, <DevelopmentArtifact>[
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.androidGenSnapshot,
+      ]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[
+        FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+      ]),
+    });
+  });
+
+  testUsingContext('Integration tests when no devices are connected', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      'integration_test',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  // TODO(jiahaog): Remove this when web is supported. https://github.com/flutter/flutter/issues/66264
+  testUsingContext('Integration tests when only web devices are connected', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    expect(() => commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      'integration_test',
+    ]), throwsToolExit());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral'),
+    ]),
+  });
+
+  testUsingContext('Integration tests set the correct dart-defines', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      'integration_test',
+    ]);
+
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.dartDefines,
+      contains('INTEGRATION_TEST_SHOULD_REPORT_RESULTS_TO_NATIVE=false'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  testUsingContext('Integration tests given flavor', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--flavor',
+      'dev',
+      'integration_test',
+    ]);
+
+    expect(
+      testRunner.lastDebuggingOptionsValue.buildInfo.flavor,
+      contains('dev'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[
+      FakeDevice('ephemeral', 'ephemeral', type: PlatformType.android),
+    ]),
+  });
+
+  testUsingContext('Builds the asset manifest by default', () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+    ]);
+
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    expect(fileExists, true);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  testUsingContext("Don't build the asset manifest if --no-test-assets if informed", () async {
+    final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+    final TestCommand testCommand = TestCommand(testRunner: testRunner);
+    final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+    await commandRunner.run(const <String>[
+      'test',
+      '--no-pub',
+      '--no-test-assets',
+    ]);
+
+    final bool fileExists = await fs.isFile(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    expect(fileExists, false);
+
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fs,
+    ProcessManager: () => FakeProcessManager.any(),
+    DeviceManager: () => _FakeDeviceManager(<Device>[]),
+  });
+
+  group('Fatal Logs', () {
+    testUsingContext("doesn't fail when --fatal-warnings is set and no warning output", () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      try {
+        await commandRunner.run(const <String>[
+          'test',
+          '--no-pub',
+          '--${FlutterOptions.kFatalWarnings}',
+        ]);
+      } on Exception {
+        fail('Unexpected exception thrown');
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+    testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      testLogger.printWarning('Warning: Mild annoyance, Will Robinson!');
+      expect(commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+    testUsingContext('fails when --fatal-warnings is set and only errors emitted', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      testLogger.printError('Error: Danger Will Robinson!');
+      expect(commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--${FlutterOptions.kFatalWarnings}',
+      ]), throwsToolExit(message: 'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
+  group('File Reporter', () {
+    testUsingContext('defaults to unset null value', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+      ]);
+      expect(testRunner.lastFileReporterValue, null);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when set --file-reporter value is passed on', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--file-reporter=json:out.jsonl'
+      ]);
+      expect(testRunner.lastFileReporterValue, 'json:out.jsonl');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
-  FakeFlutterTestRunner(this.exitCode);
+  FakeFlutterTestRunner(this.exitCode, [this.leastRunTime]);
 
   int exitCode;
-  bool lastEnableObservatoryValue;
+  Duration? leastRunTime;
+  bool? lastEnableVmServiceValue;
+  late DebuggingOptions lastDebuggingOptionsValue;
+  String? lastFileReporterValue;
+  String? lastReporterOption;
 
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<String> testFiles, {
-    Directory workDir,
+    List<Uri> testFiles, {
+    required DebuggingOptions debuggingOptions,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
-    bool enableObservatory = false,
-    bool startPaused = false,
-    bool disableServiceAuthCodes = false,
+    String? tags,
+    String? excludeTags,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
-    String precompiledDillPath,
-    Map<String, String> precompiledDillFiles,
-    BuildMode buildMode,
-    bool trackWidgetCreation = false,
+    String? precompiledDillPath,
+    Map<String, String>? precompiledDillFiles,
     bool updateGoldens = false,
-    TestWatcher watcher,
-    int concurrency,
-    bool buildTestAssets = false,
-    FlutterProject flutterProject,
-    String icudtlPath,
-    Directory coverageDirectory,
+    TestWatcher? watcher,
+    required int? concurrency,
+    String? testAssetDirectory,
+    FlutterProject? flutterProject,
+    String? icudtlPath,
+    Directory? coverageDirectory,
     bool web = false,
-    String randomSeed,
+    String? randomSeed,
+    String? reporter,
+    String? fileReporter,
+    String? timeout,
+    bool runSkipped = false,
+    int? shardIndex,
+    int? totalShards,
+    Device? integrationTestDevice,
+    String? integrationTestUserIdentifier,
+    TestTimeRecorder? testTimeRecorder,
   }) async {
-    lastEnableObservatoryValue = enableObservatory;
+    lastEnableVmServiceValue = enableVmService;
+    lastDebuggingOptionsValue = debuggingOptions;
+    lastFileReporterValue = fileReporter;
+    lastReporterOption = reporter;
+
+    if (leastRunTime != null) {
+      await Future<void>.delayed(leastRunTime!);
+    }
+
     return exitCode;
   }
-
 }
 
 class FakePackageTest implements TestWrapper {
-  List<String> lastArgs;
+  List<String>? lastArgs;
 
   @override
   Future<void> main(List<String> args) async {
@@ -202,4 +912,25 @@ class FakePackageTest implements TestWrapper {
     Iterable<Runtime> runtimes,
     FutureOr<PlatformPlugin> Function() platforms,
   ) {}
+}
+
+class _FakeDeviceManager extends DeviceManager {
+  _FakeDeviceManager(this._connectedDevices) : super(logger: testLogger);
+
+  final List<Device> _connectedDevices;
+
+  @override
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return <Device>[];
+    }
+    return _connectedDevices;
+  }
 }

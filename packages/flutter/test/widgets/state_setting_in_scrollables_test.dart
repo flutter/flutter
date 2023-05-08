@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Foo extends StatefulWidget {
-  const Foo({ Key key }) : super(key: key);
+  const Foo({ super.key });
   @override
   FooState createState() => FooState();
 }
@@ -19,7 +19,7 @@ class FooState extends State<Foo> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return ScrollConfiguration(
-          behavior: FooScrollBehavior(),
+          behavior: const FooScrollBehavior(),
           child: ListView(
             controller: scrollController,
             children: <Widget>[
@@ -68,12 +68,14 @@ class FooState extends State<Foo> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }
 
 class FooScrollBehavior extends ScrollBehavior {
+  const FooScrollBehavior();
+
   @override
   bool shouldNotify(FooScrollBehavior old) => true;
 }

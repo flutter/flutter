@@ -7,9 +7,12 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'system_channels.dart';
 
-export 'dart:ui' show Brightness;
+export 'dart:ui' show Brightness, Color;
+
+export 'binding.dart' show SystemUiChangeCallback;
 
 /// Specifies a particular device orientation.
 ///
@@ -58,18 +61,18 @@ class ApplicationSwitcherDescription {
   const ApplicationSwitcherDescription({ this.label, this.primaryColor });
 
   /// A label and description of the current state of the application.
-  final String label;
+  final String? label;
 
   /// The application's primary color.
   ///
   /// This may influence the color that the operating system uses to represent
   /// the application.
-  final int primaryColor;
+  final int? primaryColor;
 }
 
 /// Specifies a system overlay at a particular location.
 ///
-/// Used by [SystemChrome.setEnabledSystemUIOverlays].
+/// Used by [SystemChrome.setEnabledSystemUIMode].
 enum SystemUiOverlay {
   /// The status bar provided by the embedder on the top of the application
   /// surface, if any.
@@ -80,56 +83,192 @@ enum SystemUiOverlay {
   bottom,
 }
 
+/// Describes different display configurations for both Android and iOS.
+///
+/// These modes mimic Android-specific display setups.
+///
+/// Used by [SystemChrome.setEnabledSystemUIMode].
+enum SystemUiMode {
+  /// Fullscreen display with status and navigation bars presentable by tapping
+  /// anywhere on the display.
+  ///
+  /// Available starting at SDK 16 or Android J. Earlier versions of Android
+  /// will not be affected by this setting.
+  ///
+  /// For applications running on iOS, the status bar and home indicator will be
+  /// hidden for a similar fullscreen experience.
+  ///
+  /// Tapping on the screen displays overlays, this gesture is not received by
+  /// the application.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemUiChangeCallback], used to listen and respond to the change in
+  ///     system overlays.
+  leanBack,
+
+  /// Fullscreen display with status and navigation bars presentable through a
+  /// swipe gesture at the edges of the display.
+  ///
+  /// Available starting at SDK 19 or Android K. Earlier versions of Android
+  /// will not be affected by this setting.
+  ///
+  /// For applications running on iOS, the status bar and home indicator will be
+  /// hidden for a similar fullscreen experience.
+  ///
+  /// A swipe gesture from the edge of the screen displays overlays. In contrast
+  /// to [SystemUiMode.immersiveSticky], this gesture is not received by the
+  /// application.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemUiChangeCallback], used to listen and respond to the change in
+  ///     system overlays.
+  immersive,
+
+  /// Fullscreen display with status and navigation bars presentable through a
+  /// swipe gesture at the edges of the display.
+  ///
+  /// Available starting at SDK 19 or Android K. Earlier versions of Android
+  /// will not be affected by this setting.
+  ///
+  /// For applications running on iOS, the status bar and home indicator will be
+  /// hidden for a similar fullscreen experience.
+  ///
+  /// A swipe gesture from the edge of the screen displays overlays. In contrast
+  /// to [SystemUiMode.immersive], this gesture is received by the application.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemUiChangeCallback], used to listen and respond to the change in
+  ///     system overlays.
+  immersiveSticky,
+
+  /// Fullscreen display with status and navigation elements rendered over the
+  /// application.
+  ///
+  /// Available starting at SDK 29 or Android 10. Earlier versions of Android
+  /// will not be affected by this setting.
+  ///
+  /// For applications running on iOS, the status bar and home indicator will be
+  /// visible.
+  ///
+  /// The system overlays will not disappear or reappear in this mode as they
+  /// are permanently displayed on top of the application.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemUiOverlayStyle], can be used to configure transparent status and
+  ///     navigation bars with or without a contrast scrim.
+  edgeToEdge,
+
+  /// Declares manually configured [SystemUiOverlay]s.
+  ///
+  /// When using this mode with [SystemChrome.setEnabledSystemUIMode], the
+  /// preferred overlays must be set by the developer.
+  ///
+  /// When [SystemUiOverlay.top] is enabled, the status bar will remain visible
+  /// on all platforms. Omitting this overlay will hide the status bar on iOS &
+  /// Android.
+  ///
+  /// When [SystemUiOverlay.bottom] is enabled, the navigation bar and home
+  /// indicator of Android and iOS applications will remain visible. Omitting this
+  /// overlay will hide them.
+  ///
+  /// Omitting both overlays will result in the same configuration as
+  /// [SystemUiMode.leanBack].
+  manual,
+}
+
 /// Specifies a preference for the style of the system overlays.
 ///
-/// Used by [SystemChrome.setSystemUIOverlayStyle].
+/// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
+/// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
+/// imperatively setting the style of the systeme overlays.
+@immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({
     this.systemNavigationBarColor,
     this.systemNavigationBarDividerColor,
     this.systemNavigationBarIconBrightness,
+    this.systemNavigationBarContrastEnforced,
     this.statusBarColor,
     this.statusBarBrightness,
     this.statusBarIconBrightness,
+    this.systemStatusBarContrastEnforced,
   });
 
   /// The color of the system bottom navigation bar.
   ///
   /// Only honored in Android versions O and greater.
-  final Color systemNavigationBarColor;
+  final Color? systemNavigationBarColor;
 
   /// The color of the divider between the system's bottom navigation bar and the app's content.
   ///
   /// Only honored in Android versions P and greater.
-  final Color systemNavigationBarDividerColor;
+  final Color? systemNavigationBarDividerColor;
 
   /// The brightness of the system navigation bar icons.
   ///
   /// Only honored in Android versions O and greater.
-  final Brightness systemNavigationBarIconBrightness;
+  /// When set to [Brightness.light], the system navigation bar icons are light.
+  /// When set to [Brightness.dark], the system navigation bar icons are dark.
+  final Brightness? systemNavigationBarIconBrightness;
+
+  /// Overrides the contrast enforcement when setting a transparent navigation
+  /// bar.
+  ///
+  /// When setting a transparent navigation bar in SDK 29+, or Android 10 and up,
+  /// a translucent body scrim may be applied behind the button navigation bar
+  /// to ensure contrast with buttons and the background of the application.
+  ///
+  /// SDK 28-, or Android P and lower, will not apply this body scrim.
+  ///
+  /// Setting this to false overrides the default body scrim.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemUiOverlayStyle.systemNavigationBarColor], which is overridden
+  ///   when transparent to enforce this contrast policy.
+  final bool? systemNavigationBarContrastEnforced;
 
   /// The color of top status bar.
   ///
   /// Only honored in Android version M and greater.
-  final Color statusBarColor;
+  final Color? statusBarColor;
 
   /// The brightness of top status bar.
   ///
   /// Only honored in iOS.
-  final Brightness statusBarBrightness;
+  final Brightness? statusBarBrightness;
 
   /// The brightness of the top status bar icons.
   ///
   /// Only honored in Android version M and greater.
-  final Brightness statusBarIconBrightness;
+  final Brightness? statusBarIconBrightness;
+
+  /// Overrides the contrast enforcement when setting a transparent status
+  /// bar.
+  ///
+  /// When setting a transparent status bar in SDK 29+, or Android 10 and up,
+  /// a translucent body scrim may be applied to ensure contrast with icons and
+  /// the background of the application.
+  ///
+  /// SDK 28-, or Android P and lower, will not apply this body scrim.
+  ///
+  /// Setting this to false overrides the default body scrim.
+  ///
+  /// See also:
+  ///
+  ///   * [SystemUiOverlayStyle.statusBarColor], which is overridden
+  ///   when transparent to enforce this contrast policy.
+  final bool? systemStatusBarContrastEnforced;
 
   /// System overlays should be drawn with a light color. Intended for
   /// applications with a dark background.
   static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
@@ -139,8 +278,6 @@ class SystemUiOverlayStyle {
   /// applications with a light background.
   static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
     systemNavigationBarIconBrightness: Brightness.light,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
@@ -151,57 +288,66 @@ class SystemUiOverlayStyle {
     return <String, dynamic>{
       'systemNavigationBarColor': systemNavigationBarColor?.value,
       'systemNavigationBarDividerColor': systemNavigationBarDividerColor?.value,
+      'systemStatusBarContrastEnforced': systemStatusBarContrastEnforced,
       'statusBarColor': statusBarColor?.value,
       'statusBarBrightness': statusBarBrightness?.toString(),
       'statusBarIconBrightness': statusBarIconBrightness?.toString(),
       'systemNavigationBarIconBrightness': systemNavigationBarIconBrightness?.toString(),
+      'systemNavigationBarContrastEnforced': systemNavigationBarContrastEnforced,
     };
   }
 
   @override
-  String toString() => _toMap().toString();
+  String toString() => '${objectRuntimeType(this, 'SystemUiOverlayStyle')}(${_toMap()})';
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
-    Color systemNavigationBarColor,
-    Color systemNavigationBarDividerColor,
-    Color statusBarColor,
-    Brightness statusBarBrightness,
-    Brightness statusBarIconBrightness,
-    Brightness systemNavigationBarIconBrightness,
+    Color? systemNavigationBarColor,
+    Color? systemNavigationBarDividerColor,
+    bool? systemNavigationBarContrastEnforced,
+    Color? statusBarColor,
+    Brightness? statusBarBrightness,
+    Brightness? statusBarIconBrightness,
+    bool? systemStatusBarContrastEnforced,
+    Brightness? systemNavigationBarIconBrightness,
   }) {
     return SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
       systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
+      systemNavigationBarContrastEnforced: systemNavigationBarContrastEnforced ?? this.systemNavigationBarContrastEnforced,
       statusBarColor: statusBarColor ?? this.statusBarColor,
       statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
       statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
+      systemStatusBarContrastEnforced: systemStatusBarContrastEnforced ?? this.systemStatusBarContrastEnforced,
       systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
     );
   }
 
   @override
-  int get hashCode {
-    return hashValues(
-      systemNavigationBarColor,
-      systemNavigationBarDividerColor,
-      statusBarColor,
-      statusBarBrightness,
-      statusBarIconBrightness,
-      systemNavigationBarIconBrightness,
-    );
-  }
+  int get hashCode => Object.hash(
+    systemNavigationBarColor,
+    systemNavigationBarDividerColor,
+    systemNavigationBarContrastEnforced,
+    statusBarColor,
+    statusBarBrightness,
+    statusBarIconBrightness,
+    systemStatusBarContrastEnforced,
+    systemNavigationBarIconBrightness,
+  );
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is SystemUiOverlayStyle
         && other.systemNavigationBarColor == systemNavigationBarColor
         && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
+        && other.systemNavigationBarContrastEnforced == systemNavigationBarContrastEnforced
         && other.statusBarColor == statusBarColor
         && other.statusBarIconBrightness == statusBarIconBrightness
         && other.statusBarBrightness == statusBarBrightness
+        && other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced
         && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
@@ -212,12 +358,7 @@ List<String> _stringify(List<dynamic> list) => <String>[
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
-class SystemChrome {
-  // This class is not meant to be instatiated or extended; this constructor
-  // prevents instantiation and extension.
-  // ignore: unused_element
-  SystemChrome._();
-
+abstract final class SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.
   ///
@@ -257,14 +398,14 @@ class SystemChrome {
     );
   }
 
-  /// Specifies the set of system overlays to have visible when the application
+  /// Specifies the [SystemUiMode] to have visible when the application
   /// is running.
   ///
   /// The `overlays` argument is a list of [SystemUiOverlay] enum values
-  /// denoting the overlays to show.
+  /// denoting the overlays to show when configured with [SystemUiMode.manual].
   ///
-  /// If a particular overlay is unsupported on the platform, enabling or
-  /// disabling that overlay will be ignored.
+  /// If a particular mode is unsupported on the platform, enabling or
+  /// disabling that mode will be ignored.
   ///
   /// The settings here can be overridden by the platform when System UI becomes
   /// necessary for functionality.
@@ -275,19 +416,67 @@ class SystemChrome {
   /// visibility cannot be changed until 1 second after the keyboard is closed to
   /// prevent malware locking users from navigation buttons.
   ///
-  /// To regain "fullscreen" after text entry, the UI overlays should be set again
-  /// after a delay of 1 second. This can be achieved through [restoreSystemUIOverlays]
-  /// or calling this again. Otherwise, the original UI overlay settings will be
+  /// To regain "fullscreen" after text entry, the UI overlays can be set again
+  /// after a delay of at least 1 second through [restoreSystemUIOverlays] or
+  /// calling this again. Otherwise, the original UI overlay settings will be
   /// automatically restored only when the application loses and regains focus.
-  static Future<void> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await SystemChannels.platform.invokeMethod<void>(
-      'SystemChrome.setEnabledSystemUIOverlays',
-      _stringify(overlays),
-    );
+  ///
+  /// Alternatively, a [SystemUiChangeCallback] can be provided to respond to
+  /// changes in the System UI. This will be called, for example, when in
+  /// [SystemUiMode.leanBack] and the user taps the screen to bring up the
+  /// system overlays. The callback provides a boolean to represent if the
+  /// application is currently in a fullscreen mode or not, so that the
+  /// application can respond to these changes. When `systemOverlaysAreVisible`
+  /// is true, the application is not fullscreen. See
+  /// [SystemChrome.setSystemUIChangeCallback] to respond to these changes in a
+  /// fullscreen application.
+  static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
+    if (mode != SystemUiMode.manual) {
+      await SystemChannels.platform.invokeMethod<void>(
+        'SystemChrome.setEnabledSystemUIMode',
+        mode.toString(),
+      );
+    } else {
+      assert(mode == SystemUiMode.manual && overlays != null);
+      await SystemChannels.platform.invokeMethod<void>(
+        'SystemChrome.setEnabledSystemUIOverlays',
+        _stringify(overlays!),
+      );
+    }
+  }
+
+  /// Sets the callback method for responding to changes in the system UI.
+  ///
+  /// This is relevant when using [SystemUiMode.leanBack]
+  /// and [SystemUiMode.immersive] and [SystemUiMode.immersiveSticky] on Android
+  /// platforms, where the [SystemUiOverlay]s can appear and disappear based on
+  /// user interaction.
+  ///
+  /// This will be called, for example, when in [SystemUiMode.leanBack] and the
+  /// user taps the screen to bring up the system overlays. The callback
+  /// provides a boolean to represent if the application is currently in a
+  /// fullscreen mode or not, so that the application can respond to these
+  /// changes. When `systemOverlaysAreVisible` is true, the application is not
+  /// fullscreen.
+  ///
+  /// When using [SystemUiMode.edgeToEdge], system overlays are always visible
+  /// and do not change. When manually configuring [SystemUiOverlay]s with
+  /// [SystemUiMode.manual], this callback will only be triggered when all
+  /// overlays have been disabled. This results in the same behavior as
+  /// [SystemUiMode.leanBack].
+  ///
+  static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
+    ServicesBinding.instance.setSystemUiChangeCallback(callback);
+    // Skip setting up the listener if there is no callback.
+    if (callback != null) {
+      await SystemChannels.platform.invokeMethod<void>(
+        'SystemChrome.setSystemUIChangeListener',
+      );
+    }
   }
 
   /// Restores the system overlays to the last settings provided via
-  /// [setEnabledSystemUIOverlays]. May be used when the platform force enables/disables
+  /// [setEnabledSystemUIMode]. May be used when the platform force enables/disables
   /// UI elements.
   ///
   /// For example, when the Android keyboard disables hidden status and navigation bars,
@@ -298,12 +487,11 @@ class SystemChrome {
   static Future<void> restoreSystemUIOverlays() async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.restoreSystemUIOverlays',
-      null,
     );
   }
 
-  /// Specifies the style to use for the system overlays that are visible (if
-  /// any).
+  /// Specifies the style to use for the system overlays (e.g. the status bar on
+  /// Android or iOS, the system navigation bar on Android) that are visible (if any).
   ///
   /// This method will schedule the embedder update to be run in a microtask.
   /// Any subsequent calls to this method during the current event loop will
@@ -314,79 +502,49 @@ class SystemChrome {
   /// system UI styles. For instance, to change the system UI style on a new
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///
-  /// However, the [AppBar] widget automatically sets the system overlay style
-  /// based on its [AppBar.brightness], so configure that instead of calling
-  /// this method directly. Likewise, do the same for [CupertinoNavigationBar]
-  /// via [CupertinoNavigationBar.backgroundColor].
+  /// The [AppBar] widget automatically sets the system overlay style based on
+  /// its [AppBar.systemOverlayStyle], so configure that instead of calling this
+  /// method directly. Likewise, do the same for [CupertinoNavigationBar] via
+  /// [CupertinoNavigationBar.backgroundColor].
   ///
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// {@tool snippet}
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-  ///   return Placeholder();
-  /// }
-  /// ```
+  /// {@tool sample}
+  /// The following example uses an `AppBar` to set the system status bar color and
+  /// the system navigation bar color.
+  ///
+  /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.0.dart **
   /// {@end-tool}
   ///
   /// For more complex control of the system overlay styles, consider using
-  /// an [AnnotatedRegion] widget instead of calling [setSystemUiOverlayStyle]
+  /// an [AnnotatedRegion] widget instead of calling [setSystemUIOverlayStyle]
   /// directly. This widget places a value directly into the layer tree where
   /// it can be hit-tested by the framework. On every frame, the framework will
   /// hit-test and select the annotated region it finds under the status and
   /// navigation bar and synthesize them into a single style. This can be used
-  /// to configure the system styles when an app bar is not used.
+  /// to configure the system styles when an app bar is not used. When an app
+  /// bar is used, apps should not enclose the app bar in an annotated region
+  /// because one is automatically created. If an app bar is used and the app
+  /// bar is enclosed in an annotated region, the app bar overlay style supersedes
+  /// the status bar properties defined in the enclosing annotated region overlay
+  /// style and the enclosing annotated region overlay style supersedes the app bar
+  /// overlay style navigation bar properties.
   ///
-  /// {@tool sample --template=stateful_widget_material}
-  /// The following example creates a widget that changes the status bar color
-  /// to a random value on Android.
+  /// {@tool sample}
+  /// The following example uses an `AnnotatedRegion<SystemUiOverlayStyle>` to set
+  /// the system status bar color and the system navigation bar color.
   ///
-  /// ```dart imports
-  /// import 'package:flutter/services.dart';
-  /// import 'dart:math' as math;
-  /// ```
-  ///
-  /// ```dart
-  /// final _random = math.Random();
-  /// SystemUiOverlayStyle _currentStyle = SystemUiOverlayStyle.light;
-  ///
-  /// void _changeColor() {
-  ///   final color = Color.fromRGBO(
-  ///     _random.nextInt(255),
-  ///     _random.nextInt(255),
-  ///     _random.nextInt(255),
-  ///     1.0,
-  ///   );
-  ///   setState(() {
-  ///     _currentStyle = SystemUiOverlayStyle.dark.copyWith(
-  ///       statusBarColor: color,
-  ///     );
-  ///   });
-  /// }
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return AnnotatedRegion(
-  ///     value: _currentStyle,
-  ///     child: Center(
-  ///       child: RaisedButton(
-  ///         child: const Text('Change Color'),
-  ///         onPressed: _changeColor,
-  ///        ),
-  ///      ),
-  ///    );
-  ///  }
-  /// ```
+  /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
   /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///  * [AppBar.systemOverlayStyle], a convenient property for declaratively setting
+  ///    the style of the system overlays.
+  ///  * [AnnotatedRegion], the widget used to place a `SystemUiOverlayStyle` into
+  ///    the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
-    assert(style != null);
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.
       _pendingStyle = style;
@@ -403,7 +561,7 @@ class SystemChrome {
       if (_pendingStyle != _latestStyle) {
         SystemChannels.platform.invokeMethod<void>(
           'SystemChrome.setSystemUIOverlayStyle',
-          _pendingStyle._toMap(),
+          _pendingStyle!._toMap(),
         );
         _latestStyle = _pendingStyle;
       }
@@ -411,10 +569,10 @@ class SystemChrome {
     });
   }
 
-  static SystemUiOverlayStyle _pendingStyle;
+  static SystemUiOverlayStyle? _pendingStyle;
 
   /// The last style that was set using [SystemChrome.setSystemUIOverlayStyle].
   @visibleForTesting
-  static SystemUiOverlayStyle get latestStyle => _latestStyle;
-  static SystemUiOverlayStyle _latestStyle;
+  static SystemUiOverlayStyle? get latestStyle => _latestStyle;
+  static SystemUiOverlayStyle? _latestStyle;
 }

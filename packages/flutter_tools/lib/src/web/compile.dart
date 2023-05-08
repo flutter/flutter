@@ -2,100 +2,171 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
+import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/dart.dart';
-import '../build_system/targets/icon_tree_shaker.dart';
 import '../build_system/targets/web.dart';
-import '../convert.dart';
+import '../cache.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
+import '../version.dart';
+import 'compiler_config.dart';
+import 'migrations/scrub_generated_plugin_registrant.dart';
 
-/// The [WebCompilationProxy] instance.
-WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
+export 'compiler_config.dart';
 
-Future<void> buildWeb(
-  FlutterProject flutterProject,
-  String target,
-  BuildInfo buildInfo,
-  bool initializePlatform,
-  bool csp,
-) async {
-  if (!flutterProject.web.existsSync()) {
-    throwToolExit('Missing index.html.');
-  }
-  final bool hasWebPlugins = findPlugins(flutterProject)
-    .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
-  await injectPlugins(flutterProject, checkProjects: true);
-  final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
-  final Stopwatch sw = Stopwatch()..start();
-  try {
-    final BuildResult result = await globals.buildSystem.build(const WebServiceWorker(), Environment.test(
-      globals.fs.currentDirectory,
-      outputDir: globals.fs.directory(getWebBuildDirectory()),
-      buildDir: flutterProject.directory
-        .childDirectory('.dart_tool')
-        .childDirectory('flutter_build'),
-      defines: <String, String>{
-        kBuildMode: getNameForBuildMode(buildInfo.mode),
-        kTargetFile: target,
-        kInitializePlatform: initializePlatform.toString(),
-        kHasWebPlugins: hasWebPlugins.toString(),
-        kDartDefines: jsonEncode(buildInfo.dartDefines),
-        kCspMode: csp.toString(),
-        kIconTreeShakerFlag: buildInfo.treeShakeIcons.toString(),
-      },
-      artifacts: globals.artifacts,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      processManager: globals.processManager,
-    ));
-    if (!result.success) {
-      for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal
-            ? measurement.stackTrace
-            : null,
-        );
-      }
-      throwToolExit('Failed to compile application for the Web.');
-    }
-  } on Exception catch (err) {
-    throwToolExit(err.toString());
-  } finally {
-    status.stop();
-  }
-  globals.flutterUsage.sendTiming('build', 'dart2js', Duration(milliseconds: sw.elapsedMilliseconds));
-}
+class WebBuilder {
+  WebBuilder({
+    required Logger logger,
+    required BuildSystem buildSystem,
+    required Usage usage,
+    required FlutterVersion flutterVersion,
+    required FileSystem fileSystem,
+  })  : _logger = logger,
+        _buildSystem = buildSystem,
+        _flutterUsage = usage,
+        _flutterVersion = flutterVersion,
+        _fileSystem = fileSystem;
 
-/// An indirection on web compilation.
-///
-/// Avoids issues with syncing build_runner_core to other repos.
-class WebCompilationProxy {
-  const WebCompilationProxy();
+  final Logger _logger;
+  final BuildSystem _buildSystem;
+  final Usage _flutterUsage;
+  final FlutterVersion _flutterVersion;
+  final FileSystem _fileSystem;
 
-  /// Initialize the web compiler from the `projectDirectory`.
-  ///
-  /// Returns whether or not the build was successful.
-  ///
-  /// `release` controls whether we build the bundle for dartdevc or only
-  /// the entry points for dart2js to later take over.
-  Future<bool> initialize({
-    @required Directory projectDirectory,
-    @required String projectName,
-    String testOutputDir,
-    List<String> testFiles,
-    BuildMode mode,
-    bool initializePlatform,
+  Future<void> buildWeb(
+    FlutterProject flutterProject,
+    String target,
+    BuildInfo buildInfo,
+    String serviceWorkerStrategy, {
+    required WebCompilerConfig compilerConfig,
+    String? baseHref,
+    String? outputDirectoryPath,
   }) async {
-    throw UnimplementedError();
+    if (compilerConfig.isWasm) {
+      globals.logger.printBox(
+        title: 'Experimental feature',
+        '''
+  WebAssembly compilation is experimental.
+  See $kWasmPreviewUri for more information.''',
+      );
+    }
+
+    final bool hasWebPlugins =
+        (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+    final Directory outputDirectory = outputDirectoryPath == null
+        ? _fileSystem.directory(getWebBuildDirectory(compilerConfig.isWasm))
+        : _fileSystem.directory(outputDirectoryPath);
+    outputDirectory.createSync(recursive: true);
+
+    // The migrators to apply to a Web project.
+    final List<ProjectMigrator> migrators = <ProjectMigrator>[
+      ScrubGeneratedPluginRegistrant(flutterProject.web, _logger),
+    ];
+
+    final ProjectMigration migration = ProjectMigration(migrators);
+    migration.run();
+
+    final Status status = _logger.startProgress('Compiling $target for the Web...');
+    final Stopwatch sw = Stopwatch()..start();
+    try {
+      final BuildResult result = await _buildSystem.build(
+          WebServiceWorker(_fileSystem, buildInfo.webRenderer, isWasm: compilerConfig.isWasm),
+          Environment(
+            projectDir: _fileSystem.currentDirectory,
+            outputDir: outputDirectory,
+            buildDir: flutterProject.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
+            defines: <String, String>{
+              kTargetFile: target,
+              kHasWebPlugins: hasWebPlugins.toString(),
+              if (baseHref != null) kBaseHref: baseHref,
+              kServiceWorkerStrategy: serviceWorkerStrategy,
+              ...compilerConfig.toBuildSystemEnvironment(),
+              ...buildInfo.toBuildSystemEnvironment(),
+            },
+            artifacts: globals.artifacts!,
+            fileSystem: _fileSystem,
+            logger: _logger,
+            processManager: globals.processManager,
+            platform: globals.platform,
+            usage: _flutterUsage,
+            cacheDir: globals.cache.getRoot(),
+            engineVersion: globals.artifacts!.isLocalEngine ? null : _flutterVersion.engineRevision,
+            flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+            // Web uses a different Dart plugin registry.
+            // https://github.com/flutter/flutter/issues/80406
+            generateDartPluginRegistry: false,
+          ));
+      if (!result.success) {
+        for (final ExceptionMeasurement measurement in result.exceptions.values) {
+          _logger.printError(
+            'Target ${measurement.target} failed: ${measurement.exception}',
+            stackTrace: measurement.fatal ? measurement.stackTrace : null,
+          );
+        }
+        throwToolExit('Failed to compile application for the Web.');
+      }
+    } on Exception catch (err) {
+      throwToolExit(err.toString());
+    } finally {
+      status.stop();
+    }
+    _flutterUsage.sendTiming(
+      'build',
+      compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
+      Duration(milliseconds: sw.elapsedMilliseconds),
+    );
   }
 }
+
+/// Web rendering backend mode.
+enum WebRendererMode {
+  /// Auto detects which rendering backend to use.
+  autoDetect,
+  /// Always uses canvaskit.
+  canvaskit,
+  /// Always uses html.
+  html,
+}
+
+/// The correct precompiled artifact to use for each build and render mode.
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdk,
+  },
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdk,
+  },
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdk,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdk,
+  },
+};
+
+/// The correct source map artifact to use for each build and render mode.
+const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtifactMap = <WebRendererMode, Map<NullSafetyMode, HostArtifact>>{
+  WebRendererMode.autoDetect: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitAndHtmlSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitAndHtmlSdkSourcemaps,
+  },
+  WebRendererMode.canvaskit: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledCanvaskitSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledCanvaskitSdkSourcemaps,
+  },
+  WebRendererMode.html: <NullSafetyMode, HostArtifact> {
+    NullSafetyMode.sound: HostArtifact.webPrecompiledSoundSdkSourcemaps,
+    NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
+  },
+};
+
+const String kWasmPreviewUri = 'https://flutter.dev/wasm';

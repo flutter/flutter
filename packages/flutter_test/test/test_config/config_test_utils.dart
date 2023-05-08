@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void testConfig(
   String description,
-  String expectedStringValue, {
+  String? expectedStringValue, {
   Map<Type, dynamic> otherExpectedValues = const <Type, dynamic>{int: isNull},
 }) {
-  final String actualStringValue = Zone.current[String] as String;
+  final String? actualStringValue = Zone.current[String] as String?;
   final Map<Type, dynamic> otherActualValues = otherExpectedValues.map<Type, dynamic>(
     (Type key, dynamic value) {
       return MapEntry<Type, dynamic>(key, Zone.current[key]);

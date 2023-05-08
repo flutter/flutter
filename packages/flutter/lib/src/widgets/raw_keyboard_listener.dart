@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -22,10 +21,16 @@ export 'package:flutter/services.dart' show RawKeyEvent;
 /// For text entry, consider using a [EditableText], which integrates with
 /// on-screen keyboards and input method editors (IMEs).
 ///
+/// The [RawKeyboardListener] is different from [KeyboardListener] in that
+/// [RawKeyboardListener] uses the legacy [RawKeyboard] API. Use
+/// [KeyboardListener] if possible.
+///
 /// See also:
 ///
 ///  * [EditableText], which should be used instead of this widget for text
 ///    entry.
+///  * [KeyboardListener], a similar widget based on the newer
+///    [HardwareKeyboard] API.
 class RawKeyboardListener extends StatefulWidget {
   /// Creates a widget that receives raw keyboard events.
   ///
@@ -36,15 +41,13 @@ class RawKeyboardListener extends StatefulWidget {
   ///
   /// The [autofocus] argument must not be null.
   const RawKeyboardListener({
-    Key key,
-    @required this.focusNode,
+    super.key,
+    required this.focusNode,
     this.autofocus = false,
+    this.includeSemantics = true,
     this.onKey,
-    @required this.child,
-  }) : assert(focusNode != null),
-       assert(autofocus != null),
-       assert(child != null),
-       super(key: key);
+    required this.child,
+  });
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
@@ -52,16 +55,19 @@ class RawKeyboardListener extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// {@macro flutter.widgets.Focus.includeSemantics}
+  final bool includeSemantics;
+
   /// Called whenever this widget receives a raw keyboard event.
-  final ValueChanged<RawKeyEvent> onKey;
+  final ValueChanged<RawKeyEvent>? onKey;
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
   @override
-  _RawKeyboardListenerState createState() => _RawKeyboardListenerState();
+  State<RawKeyboardListener> createState() => _RawKeyboardListenerState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -94,31 +100,33 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   void _handleFocusChanged() {
-    if (widget.focusNode.hasFocus)
+    if (widget.focusNode.hasFocus) {
       _attachKeyboardIfDetached();
-    else
+    } else {
       _detachKeyboardIfAttached();
+    }
   }
 
   bool _listening = false;
 
   void _attachKeyboardIfDetached() {
-    if (_listening)
+    if (_listening) {
       return;
+    }
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
     _listening = true;
   }
 
   void _detachKeyboardIfAttached() {
-    if (!_listening)
+    if (!_listening) {
       return;
+    }
     RawKeyboard.instance.removeListener(_handleRawKeyEvent);
     _listening = false;
   }
 
   void _handleRawKeyEvent(RawKeyEvent event) {
-    if (widget.onKey != null)
-      widget.onKey(event);
+    widget.onKey?.call(event);
   }
 
   @override
@@ -126,6 +134,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
+      includeSemantics: widget.includeSemantics,
       child: widget.child,
     );
   }

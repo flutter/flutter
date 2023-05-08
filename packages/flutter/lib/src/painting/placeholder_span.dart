@@ -37,8 +37,11 @@ abstract class PlaceholderSpan extends InlineSpan {
   const PlaceholderSpan({
     this.alignment = ui.PlaceholderAlignment.bottom,
     this.baseline,
-    TextStyle style,
-  }) : super(style: style,);
+    super.style,
+  });
+
+  /// The unicode character to represent a placeholder.
+  static const int placeholderCodeUnit = 0xFFFC;
 
   /// How the placeholder aligns vertically with the text.
   ///
@@ -49,32 +52,20 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// [ui.PlaceholderAlignment.aboveBaseline], and [ui.PlaceholderAlignment.belowBaseline].
   ///
   /// This is ignored when using other alignment modes.
-  final TextBaseline baseline;
+  final TextBaseline? baseline;
 
   /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
   /// plain text representation when `includePlaceholders` is true.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     if (includePlaceholders) {
-      buffer.write('\uFFFC');
+      buffer.writeCharCode(placeholderCodeUnit);
     }
   }
 
   @override
   void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
     collector.add(InlineSpanSemanticsInformation.placeholder);
-  }
-
-  // TODO(garyq): Remove this after next stable release.
-  /// The [visitTextSpan] method is invalid on [PlaceholderSpan]s
-  @override
-  @Deprecated(
-    'Use to visitChildren instead. '
-    'This feature was deprecated after v1.7.3.'
-  )
-  bool visitTextSpan(bool visitor(TextSpan span)) {
-    assert(false, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
-    return false;
   }
 
   /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
@@ -84,7 +75,6 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// replacement character (0xFFFC) that is inserted to represent it.
   ///
   /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
-  @override
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
     semanticsOffsets.add(offset.value);
     semanticsOffsets.add(offset.value + 1);

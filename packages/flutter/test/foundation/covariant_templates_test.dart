@@ -4,12 +4,12 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-class X {}
+class X { }
 
-class Y extends X {}
+class Y extends X { }
 
 class A<U extends X> {
-  U u;
+  U? u;
 }
 
 void main() {

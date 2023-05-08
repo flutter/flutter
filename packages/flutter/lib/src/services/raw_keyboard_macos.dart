@@ -4,9 +4,24 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'keyboard_key.dart';
-import 'keyboard_maps.dart';
+import 'keyboard_maps.g.dart';
 import 'raw_keyboard.dart';
+
+export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
+
+export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
+export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
+
+/// Convert a UTF32 rune to its lower case.
+int runeToLowerCase(int rune) {
+  // Assume only Basic Multilingual Plane runes have lower and upper cases.
+  // For other characters, return them as is.
+  const int utf16BmpUpperBound = 0xD7FF;
+  if (rune > utf16BmpUpperBound) {
+    return rune;
+  }
+  return String.fromCharCode(rune).toLowerCase().codeUnitAt(0);
+}
 
 /// Platform-specific key event data for macOS.
 ///
@@ -26,10 +41,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     this.charactersIgnoringModifiers = '',
     this.keyCode = 0,
     this.modifiers = 0,
-  }) : assert(characters != null),
-       assert(charactersIgnoringModifiers != null),
-       assert(keyCode != null),
-       assert(modifiers != null);
+    this.specifiedLogicalKey,
+  });
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
@@ -60,67 +73,67 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///  * [Apple's NSEvent documentation](https://developer.apple.com/documentation/appkit/nsevent/1535211-modifierflags?language=objc)
   final int modifiers;
 
-  @override
-  String get keyLabel => charactersIgnoringModifiers.isEmpty ? null : charactersIgnoringModifiers;
+  /// A logical key specified by the embedding that should be used instead of
+  /// deriving from raw data.
+  ///
+  /// The macOS embedding detects the keyboard layout and maps some keys to
+  /// logical keys in a way that can not be derived from per-key information.
+  ///
+  /// This is not part of the native macOS key event.
+  final int? specifiedLogicalKey;
 
   @override
-  PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey.none;
+  String get keyLabel => charactersIgnoringModifiers;
+
+  @override
+  PhysicalKeyboardKey get physicalKey => kMacOsToPhysicalKey[keyCode] ?? PhysicalKeyboardKey(LogicalKeyboardKey.windowsPlane + keyCode);
 
   @override
   LogicalKeyboardKey get logicalKey {
+    if (specifiedLogicalKey != null) {
+      final int key = specifiedLogicalKey!;
+      return LogicalKeyboardKey.findKeyByKeyId(key) ?? LogicalKeyboardKey(key);
+    }
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
-    final LogicalKeyboardKey numPadKey = kMacOsNumPadMap[keyCode];
+    final LogicalKeyboardKey? numPadKey = kMacOsNumPadMap[keyCode];
     if (numPadKey != null) {
       return numPadKey;
     }
-    // If this key is printable, generate the LogicalKeyboardKey from its Unicode value.
-    // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
-    // keys are considered modifier function keys, which generate invalid Unicode scalar values.
-    if (keyLabel != null &&
-        !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
-        !_isUnprintableKey(keyLabel)) {
-      // Given that charactersIgnoringModifiers can contain a String of arbitrary length,
-      // limit to a maximum of two Unicode scalar values. It is unlikely that a keyboard would produce a code point
-      // bigger than 32 bits, but it is still worth defending against this case.
-      assert(charactersIgnoringModifiers.length <= 2);
-      int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
-      if (charactersIgnoringModifiers.length == 2) {
-        final int secondCode = charactersIgnoringModifiers.codeUnitAt(1);
-        codeUnit = (codeUnit << 16) | secondCode;
+
+    // Keys that can't be derived with characterIgnoringModifiers will be
+    // derived from their key codes using this map.
+    final LogicalKeyboardKey? knownKey = kMacOsToLogicalKey[keyCode];
+    if (knownKey != null) {
+      return knownKey;
+    }
+
+    // If this key is a single printable character, generate the
+    // LogicalKeyboardKey from its Unicode value. Control keys such as ESC,
+    // CTRL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
+    // keys are considered modifier function keys, which generate invalid
+    // Unicode scalar values. Multi-char characters are also discarded.
+    int? character;
+    if (keyLabel.isNotEmpty) {
+      final List<int> codePoints = keyLabel.runes.toList();
+      if (codePoints.length == 1 &&
+          // Ideally we should test whether `codePoints[0]` is in the range.
+          // Since LogicalKeyboardKey.isControlCharacter and _isUnprintableKey
+          // only tests BMP, it is fine to test keyLabel instead.
+          !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
+          !_isUnprintableKey(keyLabel)) {
+        character = runeToLowerCase(codePoints[0]);
       }
-
-      final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
-        keyId,
-        keyLabel: keyLabel,
-        debugName: kReleaseMode ? null : 'Key ${keyLabel.toUpperCase()}',
-      );
+    }
+    if (character != null) {
+      final int keyId = LogicalKeyboardKey.unicodePlane | (character & LogicalKeyboardKey.valueMask);
+      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(keyId);
     }
 
-    // Control keys like "backspace" and movement keys like arrow keys don't have a printable representation,
-    // but are present on the physical keyboard. Since there is no logical keycode map for macOS
-    // (macOS uses the keycode to reference physical keys), a LogicalKeyboardKey is created with
-    // the physical key's HID usage and debugName. This avoids duplicating the physical
-    // key map.
-    if (physicalKey != PhysicalKeyboardKey.none) {
-      final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
-      return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
-        keyId,
-        keyLabel: physicalKey.debugName,
-        debugName: physicalKey.debugName,
-      );
-    }
-
-    // This is a non-printable key that is unrecognized, so a new code is minted
-    // with the autogenerated bit set.
-    const int macOsKeyIdPlane = 0x00500000000;
-
-    return LogicalKeyboardKey(
-      macOsKeyIdPlane | keyCode | LogicalKeyboardKey.autogeneratedMask,
-      debugName: kReleaseMode ? null : 'Unknown macOS key code $keyCode',
-    );
+    // This is a non-printable key that we don't know about, so we mint a new
+    // code.
+    return LogicalKeyboardKey(keyCode | LogicalKeyboardKey.macosPlane);
   }
 
   bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
@@ -128,10 +141,9 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       return false;
     }
     // If only the "anyMask" bit is set, then we respond true for requests of
-    // whether either left or right is pressed.
-    // Handles the case where macOS supplies just the "either" modifier flag,
-    // but not the left/right flag. (e.g. modifierShift but not
-    // modifierLeftShift).
+    // whether either left or right is pressed. Handles the case where macOS
+    // supplies just the "either" modifier flag, but not the left/right flag.
+    // (e.g. modifierShift but not modifierLeftShift).
     final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
     switch (side) {
       case KeyboardSide.any:
@@ -143,29 +155,23 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case KeyboardSide.right:
         return modifiers & rightMask != 0 || anyOnly;
     }
-    return false;
   }
 
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
-    bool result;
+    final bool result;
     switch (key) {
       case ModifierKey.controlModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
-        break;
       case ModifierKey.shiftModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
-        break;
       case ModifierKey.altModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
-        break;
       case ModifierKey.metaModifier:
         result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
-        break;
       case ModifierKey.capsLockModifier:
         result = independentModifier & modifierCapsLock != 0;
-        break;
     // On macOS, the function modifier bit is set for any function key, like F1,
     // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
     // that of the Fn modifier key, so there's no good way to emulate that on
@@ -176,15 +182,14 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.scrollLockModifier:
         // These modifier masks are not used in macOS keyboards.
         result = false;
-        break;
     }
     assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
     return result;
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
-    KeyboardSide findSide(int leftMask, int rightMask, int anyMask) {
+  KeyboardSide? getModifierSide(ModifierKey key) {
+    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -194,7 +199,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       } else if (combined == combinedMask || modifiers & (combinedMask | anyMask) == anyMask) {
         // Handles the case where macOS supplies just the "either" modifier
         // flag, but not the left/right flag. (e.g. modifierShift but not
-        // modifierLeftShift).
+        // modifierLeftShift), or if left and right flags are provided, but not
+        // the "either" modifier flag.
         return KeyboardSide.all;
       }
       return null;
@@ -202,13 +208,13 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
+        return findSide(modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
+        return findSide(modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftOption, modifierRightOption, modifierOption);
+        return findSide(modifierOption, modifierLeftOption, modifierRightOption);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftCommand, modifierRightCommand, modifierCommand);
+        return findSide(modifierCommand, modifierLeftCommand, modifierRightCommand);
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:
@@ -216,10 +222,51 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.symbolModifier:
         return KeyboardSide.all;
     }
-
-    assert(false, 'Not handling $key type properly.');
-    return null;
   }
+
+  @override
+  bool shouldDispatchEvent() {
+    // On macOS laptop keyboards, the fn key is used to generate home/end and
+    // f1-f12, but it ALSO generates a separate down/up event for the fn key
+    // itself. Other platforms hide the fn key, and just produce the key that
+    // it is combined with, so to keep it possible to write cross platform
+    // code that looks at which keys are pressed, the fn key is ignored on
+    // macOS.
+    return logicalKey != LogicalKeyboardKey.fn;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<String>('characters', characters));
+    properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
+    properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
+    properties.add(DiagnosticsProperty<int>('modifiers', modifiers));
+    properties.add(DiagnosticsProperty<int?>('specifiedLogicalKey', specifiedLogicalKey, defaultValue: null));
+  }
+
+  @override
+  bool operator==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is RawKeyEventDataMacOs
+        && other.characters == characters
+        && other.charactersIgnoringModifiers == charactersIgnoringModifiers
+        && other.keyCode == keyCode
+        && other.modifiers == modifiers;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    characters,
+    charactersIgnoringModifiers,
+    keyCode,
+    modifiers,
+  );
 
   /// Returns true if the given label represents an unprintable key.
   ///
@@ -231,7 +278,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///
   /// Used by [RawKeyEvent] subclasses to help construct IDs.
   static bool _isUnprintableKey(String label) {
-    if (label.length > 1) {
+    if (label.length != 1) {
       return false;
     }
     final int codeUnit = label.codeUnitAt(0);
@@ -245,7 +292,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
   ///
-  /// {@template flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@template flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
@@ -255,102 +302,95 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierShift = 0x20000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// SHIFT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftShift = 0x02;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// SHIFT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightShift = 0x04;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CTRL modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierControl = 0x40000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CTRL modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftControl = 0x01;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CTRL modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightControl = 0x2000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// ALT modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierOption = 0x80000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// ALT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftOption = 0x20;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// ALT modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightOption = 0x40;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierCommand = 0x100000;
 
   /// This mask is used to check the [modifiers] field to test whether the left
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierLeftCommand = 0x08;
 
   /// This mask is used to check the [modifiers] field to test whether the right
   /// CMD modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierRightCommand = 0x10;
 
   /// This mask is used to check the [modifiers] field to test whether any key in
   /// the numeric keypad is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierNumericPad = 0x200000;
 
   /// This mask is used to check the [modifiers] field to test whether the
   /// HELP modifier key is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierHelp = 0x400000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// FUNCTION modifier keys is pressed.
   ///
-  /// {@macro flutter.services.rawKeyEventDataMacOs.modifiers}
+  /// {@macro flutter.services.RawKeyEventDataMacOs.modifierCapsLock}
   static const int modifierFunction = 0x800000;
 
   /// Used to retrieve only the device-independent modifier flags, allowing
   /// applications to mask off the device-dependent modifier flags, including
   /// event coalescing information.
   static const int deviceIndependentMask = 0xffff0000;
-
-  @override
-  String toString() {
-    return '${objectRuntimeType(this, 'RawKeyEventDataMacOs')}(keyLabel: $keyLabel, keyCode: $keyCode, characters: $characters,'
-        ' unmodifiedCharacters: $charactersIgnoringModifiers, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
-  }
 }

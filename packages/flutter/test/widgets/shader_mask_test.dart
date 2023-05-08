@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Shader;
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 Shader createShader(Rect bounds) {
   return const LinearGradient(
@@ -19,25 +22,24 @@ Shader createShader(Rect bounds) {
 
 void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
-    final Widget child = Container(width: 100.0, height: 100.0);
-    await tester.pumpWidget(ShaderMask(child: child, shaderCallback: createShader));
-  }, skip: isBrowser);
+    const Widget child = SizedBox(width: 100.0, height: 100.0);
+    await tester.pumpWidget(const ShaderMask(shaderCallback: createShader, child: child));
+  });
 
   testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
-    Rect shaderBounds;
+    late Rect shaderBounds;
     Shader recordShaderBounds(Rect bounds) {
       shaderBounds = bounds;
       return createShader(bounds);
     }
 
     final Widget widget = Align(
-      alignment: Alignment.center,
       child: SizedBox(
         width: 400.0,
         height: 400.0,
         child: ShaderMask(
           shaderCallback: recordShaderBounds,
-          child: Container(width: 100.0, height: 100.0),
+          child: const SizedBox(width: 100.0, height: 100.0),
         ),
       ),
     );
@@ -45,7 +47,7 @@ void main() {
 
     // The shader bounds rectangle should reflect the position of the centered SizedBox.
     expect(shaderBounds, equals(const Rect.fromLTWH(0.0, 0.0, 400.0, 400.0)));
-  }, skip: isBrowser);
+  });
 
 
   testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
@@ -58,7 +60,6 @@ void main() {
           alignment: Alignment.bottomRight,
           child: ShaderMask(
             shaderCallback: (Rect bounds) => const RadialGradient(
-              center: Alignment.center,
               radius: 0.05,
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
@@ -88,7 +89,6 @@ void main() {
           alignment: Alignment.topLeft,
           child: ShaderMask(
             shaderCallback: (Rect bounds) => const RadialGradient(
-              center: Alignment.center,
               radius: 0.05,
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
@@ -108,5 +108,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
-  }, skip: isBrowser);
+  });
 }

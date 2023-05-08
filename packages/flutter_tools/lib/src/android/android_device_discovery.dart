@@ -2,87 +2,111 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/user_messages.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import 'adb.dart';
 import 'android_device.dart';
 import 'android_sdk.dart';
-import 'android_workflow.dart' hide androidWorkflow;
-import 'android_workflow.dart' as workflow show androidWorkflow;
+import 'android_workflow.dart';
 
-/// Device discovery for Android physical devices and emulators.s
+/// Device discovery for Android physical devices and emulators.
+///
+/// This class primarily delegates to the `adb` command line tool provided by
+/// the Android SDK to discover instances of connected android devices.
+///
+/// See also:
+///   * [AndroidDevice], the type of discovered device.
 class AndroidDevices extends PollingDeviceDiscovery {
-  // TODO(jonahwilliams): make these required after google3 is updated.
   AndroidDevices({
-    AndroidWorkflow androidWorkflow,
-    ProcessManager processManager,
-    Logger logger,
-    AndroidSdk androidSdk,
-  }) : _androidWorkflow = androidWorkflow ?? workflow.androidWorkflow,
-       _androidSdk = androidSdk ?? globals.androidSdk,
+    required AndroidWorkflow androidWorkflow,
+    required ProcessManager processManager,
+    required Logger logger,
+    AndroidSdk? androidSdk,
+    required FileSystem fileSystem,
+    required Platform platform,
+    required UserMessages userMessages,
+  }) : _androidWorkflow = androidWorkflow,
+       _androidSdk = androidSdk,
        _processUtils = ProcessUtils(
-         logger: logger ?? globals.logger,
-         processManager: processManager ?? globals.processManager,
+         logger: logger,
+         processManager: processManager,
         ),
-       super('Android devices');
+        _processManager = processManager,
+        _logger = logger,
+        _fileSystem = fileSystem,
+        _platform = platform,
+        _userMessages = userMessages,
+        super('Android devices');
 
   final AndroidWorkflow _androidWorkflow;
   final ProcessUtils _processUtils;
-  final AndroidSdk _androidSdk;
+  final AndroidSdk? _androidSdk;
+  final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final UserMessages _userMessages;
 
   @override
-  bool get supportsPlatform => true;
+  bool get supportsPlatform => _androidWorkflow.appliesToHostPlatform;
 
   @override
   bool get canListAnything => _androidWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration timeout }) async {
-    final String adbPath = getAdbPath(_androidSdk);
-    if (adbPath == null) {
+  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+    if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
     String text;
     try {
-      text = (await _processUtils.run(
-        <String>[adbPath, 'devices', '-l'],
+      text = (await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l'],
         throwOnError: true,
       )).stdout.trim();
-    } on ArgumentError catch (exception) {
-      throwToolExit('Unable to find "adb", check your Android SDK installation and '
-        'ANDROID_HOME environment variable: ${exception.message}');
     } on ProcessException catch (exception) {
-      throwToolExit('Unable to run "adb", check your Android SDK installation and '
-        'ANDROID_HOME environment variable: ${exception.executable}');
+      throwToolExit(
+        'Unable to run "adb", check your Android SDK installation and '
+        '$kAndroidSdkRoot environment variable: ${exception.executable}',
+      );
     }
     final List<AndroidDevice> devices = <AndroidDevice>[];
-    parseADBDeviceOutput(text, devices: devices);
+    _parseADBDeviceOutput(
+      text,
+      devices: devices,
+    );
     return devices;
   }
 
   @override
   Future<List<String>> getDiagnostics() async {
-    final String adbPath = getAdbPath(_androidSdk);
-    if (adbPath == null) {
+    if (_doesNotHaveAdb()) {
       return <String>[];
     }
 
-    final RunResult result = await _processUtils.run(<String>[adbPath, 'devices', '-l']);
+    final RunResult result = await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l']);
     if (result.exitCode != 0) {
       return <String>[];
-    } else {
-      final String text = result.stdout;
-      final List<String> diagnostics = <String>[];
-      parseADBDeviceOutput(text, diagnostics: diagnostics);
-      return diagnostics;
     }
+    final List<String> diagnostics = <String>[];
+    _parseADBDeviceOutput(
+      result.stdout,
+      diagnostics: diagnostics,
+    );
+    return diagnostics;
+  }
+
+  bool _doesNotHaveAdb() {
+    return _androidSdk == null ||
+      _androidSdk?.adbPath == null ||
+      !_processManager.canRun(_androidSdk!.adbPath);
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
@@ -91,11 +115,10 @@ class AndroidDevices extends PollingDeviceDiscovery {
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,
   /// in which case information for that parameter won't be populated.
-  @visibleForTesting
-  static void parseADBDeviceOutput(
+  void _parseADBDeviceOutput(
     String text, {
-    List<AndroidDevice> devices,
-    List<String> diagnostics,
+    List<AndroidDevice>? devices,
+    List<String>? diagnostics,
   }) {
     // Check for error messages from adb
     if (!text.contains('List of devices')) {
@@ -120,11 +143,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
       }
 
       if (_kDeviceRegex.hasMatch(line)) {
-        final Match match = _kDeviceRegex.firstMatch(line);
+        final Match match = _kDeviceRegex.firstMatch(line)!;
 
-        final String deviceID = match[1];
-        final String deviceState = match[2];
-        String rest = match[3];
+        final String deviceID = match[1]!;
+        final String deviceState = match[2]!;
+        String? rest = match[3];
 
         final Map<String, String> info = <String, String>{};
         if (rest != null && rest.isNotEmpty) {
@@ -137,8 +160,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
           }
         }
 
-        if (info['model'] != null) {
-          info['model'] = cleanAdbDeviceName(info['model']);
+        final String? model = info['model'];
+        if (model != null) {
+          info['model'] = cleanAdbDeviceName(model);
         }
 
         if (deviceState == 'unauthorized') {
@@ -154,14 +178,22 @@ class AndroidDevices extends PollingDeviceDiscovery {
             productID: info['product'],
             modelID: info['model'] ?? deviceID,
             deviceCodeName: info['device'],
+            androidSdk: _androidSdk!,
+            fileSystem: _fileSystem,
+            logger: _logger,
+            platform: _platform,
+            processManager: _processManager,
           ));
         }
       } else {
         diagnostics?.add(
           'Unexpected failure parsing device information from adb output:\n'
           '$line\n'
-          'Please report a bug at https://github.com/flutter/flutter/issues/new/choose');
+          '${_userMessages.flutterToolBugInstructions}');
       }
     }
   }
+
+  @override
+  List<String> get wellKnownIds => const <String>[];
 }
