@@ -176,13 +176,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> run(Iterable<String> args) {
-    // Have an invocation of 'build' print out it's sub-commands.
+    // Have invocations of 'build', 'custom-devices', and 'pub' print out
+    // their sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1) {
       if (args.first == 'build') {
         args = <String>['build', '-h'];
       } else if (args.first == 'custom-devices') {
         args = <String>['custom-devices', '-h'];
+      } else if (args.first == 'pub') {
+        args = <String>['pub', '-h'];
       }
     }
 
