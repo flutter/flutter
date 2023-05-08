@@ -38,28 +38,6 @@ void testMain() {
     expect(hasFakeRule, isFalse);
   });
 
-  test('Attaches outrageous text styles to flt-scene-host', () {
-    final bool hasColorRed = hasCssRule(styleElement,
-        selector: 'flt-scene-host', declaration: 'color: red');
-
-    bool hasFont = false;
-    if (isSafari) {
-      // Safari expands the shorthand rules, so we check for all we've set (separately).
-      hasFont = hasCssRule(styleElement,
-              selector: 'flt-scene-host',
-              declaration: 'font-family: monospace') &&
-          hasCssRule(styleElement,
-              selector: 'flt-scene-host', declaration: 'font-size: 14px');
-    } else {
-      hasFont = hasCssRule(styleElement,
-          selector: 'flt-scene-host', declaration: 'font: $_kDefaultCssFont');
-    }
-
-    expect(hasColorRed, isTrue,
-        reason: 'Should make foreground color red within scene host.');
-    expect(hasFont, isTrue, reason: 'Should pass default css font.');
-  });
-
   test('Attaches styling to remove password reveal icons on Edge', () {
     // Check that style.sheet! contains input::-ms-reveal rule
     final bool hidesRevealIcons = hasCssRule(styleElement,
