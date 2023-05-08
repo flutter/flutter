@@ -11,14 +11,21 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/test_initialization.dart';
+
 const MethodCodec codec = StandardMethodCodec();
 
 /// Common test setup for all CanvasKit unit-tests.
 void setUpCanvasKitTest() {
-  setUpAll(() async {
-    expect(renderer, isA<CanvasKitRenderer>(), reason: 'This test must run in CanvasKit mode.');
-    debugDisableFontFallbacks = false;
-    await initializeEngine(assetManager: WebOnlyMockAssetManager());
+  setUpUnitTests(
+    emulateTesterEnvironment: false,
+    setUpTestViewDimensions: false,
+  );
+
+  setUpAll(() {
+    // Ahem must be added to font fallbacks list regardless of where it was
+    // downloaded from.
+    FontFallbackData.instance.globalFontFallbacks.add('Ahem');
   });
 
   tearDown(() {

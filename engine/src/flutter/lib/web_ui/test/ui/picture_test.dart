@@ -6,14 +6,14 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 
-import 'utils.dart';
+import '../common/test_initialization.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  setUpUiTest();
+  setUpUnitTests();
 
   test('Picture construction invokes onCreate once', () async {
     int onCreateInvokedCount = 0;
