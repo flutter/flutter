@@ -1,0 +1,39 @@
+{
+    "drone_dimensions": [
+        "device_type=none",
+        "os=Windows-10"
+    ],
+    "gclient_variables": {
+        "download_android_deps": false
+    },
+    "dependencies": [
+        {
+            "dependency": "certs",
+            "version": "version:9563bb"
+        }
+    ],
+    "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--prebuilt-dart-sdk"
+    ],
+    "name": "host_debug_unopt",
+    "ninja": {
+        "config": "host_debug_unopt"
+    },
+    "tests": [
+        {
+            "language": "python3",
+            "name": "test: Host Tests for host_debug_unopt",
+            "parameters": [
+                "--variant",
+                "host_debug_unopt",
+                "--type",
+                "engine",
+                "--engine-capture-core-dump"
+            ],
+            "script": "flutter/testing/run_tests.py"
+        }
+    ]
+}
