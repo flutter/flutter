@@ -468,7 +468,7 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String? bundleIdentifier = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+      final String? bundleIdentifier = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleIdentifierKey);
       if (bundleIdentifier == null) {
         globals.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
         return LaunchResult.failed();

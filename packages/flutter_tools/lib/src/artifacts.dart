@@ -583,7 +583,7 @@ class CachedArtifacts implements Artifacts {
     final String root = _fileSystem.path.join(
       _cache.getArtifactDirectory('flutter_runner').path,
       'flutter',
-      fuchsiaArchForTargetPlatform(platform),
+      platform.fuchsiaArchForTargetPlatform,
       mode.isRelease ? 'release' : mode.toString(),
     );
     final String runtime = mode.isJit ? 'jit' : 'aot';
