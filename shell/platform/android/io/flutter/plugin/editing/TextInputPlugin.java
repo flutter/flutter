@@ -15,7 +15,6 @@ import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStructure;
-import android.view.WindowInsets;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -80,19 +79,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     // the Flutter view to grow and shrink to accommodate Android
     // controlled keyboard animations.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      int mask = 0;
-      if ((View.SYSTEM_UI_FLAG_HIDE_NAVIGATION & mView.getWindowSystemUiVisibility()) == 0) {
-        mask = mask | WindowInsets.Type.navigationBars();
-      }
-      if ((View.SYSTEM_UI_FLAG_FULLSCREEN & mView.getWindowSystemUiVisibility()) == 0) {
-        mask = mask | WindowInsets.Type.statusBars();
-      }
-      imeSyncCallback =
-          new ImeSyncDeferringInsetsCallback(
-              view,
-              mask, // Overlay, insets that should be merged with the deferred insets
-              WindowInsets.Type.ime() // Deferred, insets that will animate
-              );
+      imeSyncCallback = new ImeSyncDeferringInsetsCallback(view);
       imeSyncCallback.install();
 
       // When the IME is hidden, we need to notify the framework that close connection.
