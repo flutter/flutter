@@ -7,7 +7,8 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../html/paragraph/helper.dart';
+import '../../common/test_initialization.dart';
+import '../paragraph/helper.dart';
 
 /// Some text measurements are sensitive to browser implementations. Position
 /// info in the following tests only pass in Chrome, they are slightly different
@@ -31,7 +32,7 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await initializeTestFlutterViewEmbedder();
+  setUpUnitTests();
 
   test('empty paragraph', () {
     final CanvasParagraph paragraph1 = rich(

@@ -11,6 +11,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide ImageShader, TextStyle;
 
+import '../../common/test_initialization.dart';
 import '../screenshot.dart';
 
 void main() {
@@ -22,12 +23,9 @@ Future<void> testMain() async {
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
 
-  setUpAll(() async {
-    debugEmulateFlutterTesterEnvironment = true;
-    await webOnlyInitializePlatform();
-    await renderer.fontCollection.debugDownloadTestFonts();
-    renderer.fontCollection.registerDownloadedFonts();
-  });
+  setUpUnitTests(
+    setUpTestViewDimensions: false,
+  );
 
   setUp(() {
     GlContextCache.dispose();

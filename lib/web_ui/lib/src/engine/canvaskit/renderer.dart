@@ -48,6 +48,8 @@ class CanvasKitRenderer implements Renderer {
   static CanvasKitRenderer get instance => _instance;
   static late CanvasKitRenderer _instance;
 
+  Future<void>? _initialized;
+
   @override
   String get rendererTag => 'canvaskit';
 
@@ -66,14 +68,16 @@ class CanvasKitRenderer implements Renderer {
 
   @override
   Future<void> initialize() async {
-    if (windowFlutterCanvasKit != null) {
-      canvasKit = windowFlutterCanvasKit!;
-    } else {
-      canvasKit = await downloadCanvasKit();
-      windowFlutterCanvasKit = canvasKit;
-    }
-
-    _instance = this;
+    _initialized ??= () async {
+      if (windowFlutterCanvasKit != null) {
+        canvasKit = windowFlutterCanvasKit!;
+      } else {
+        canvasKit = await downloadCanvasKit();
+        windowFlutterCanvasKit = canvasKit;
+      }
+      _instance = this;
+    }();
+    return _initialized;
   }
 
   @override
