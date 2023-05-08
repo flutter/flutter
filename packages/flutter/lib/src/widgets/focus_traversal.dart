@@ -35,8 +35,8 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
   return target;
 }
 
-/// Signature for the callback that's called when a traversal policy is
-/// requesting focus.
+/// Signature for the callback that's called when a traversal policy
+/// requests focus.
 typedef TraversalRequestFocusCallback = void Function(
     FocusNode node, {
     ScrollPositionAlignmentPolicy? alignmentPolicy,
