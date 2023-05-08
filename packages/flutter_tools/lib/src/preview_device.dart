@@ -52,7 +52,10 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   bool get canListAnything => _platform.isWindows;
 
   @override
-  Future<List<Device>> get devices async => <Device>[
+  Future<List<Device>> devices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => <Device>[
     if (_platform.isWindows)
       PreviewDevice(
         artifacts: _artifacts,
@@ -63,8 +66,11 @@ class PreviewDeviceDiscovery extends DeviceDiscovery {
   ];
 
   @override
-  Future<List<Device>> discoverDevices({Duration? timeout}) {
-    return devices;
+  Future<List<Device>> discoverDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) {
+    return devices();
   }
 
   @override
