@@ -548,6 +548,7 @@ void main() {
   testUsingContext('FlutterVersion() falls back to git if .version.json is malformed', () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+    final File legacyVersionFile = flutterRoot.childFile('version');
     final File versionFile = flutterRoot.childFile('.version.json')..writeAsStringSync(
       '{',
     );
@@ -594,10 +595,12 @@ void main() {
 
     // version file was deleted because it couldn't be parsed
     expect(versionFile.existsSync(), isFalse);
+    expect(legacyVersionFile.existsSync(), isFalse);
     // version file was written to disk
     flutterVersion.ensureVersionFile();
     expect(processManager, hasNoRemainingExpectations);
     expect(versionFile.existsSync(), isTrue);
+    expect(legacyVersionFile.existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
     Cache: () => cache,
