@@ -163,7 +163,7 @@ void main() {
 
   testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
+    final List<String> command = <String>[
       flutterBin,
       'build',
       'apk',
@@ -171,7 +171,16 @@ void main() {
       '--analyze-size',
       '--target-platform=android-arm64',
       '--split-debug-info=infos',
-    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+    ];
+    final String workingDirectory =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result =
+        await processManager.run(command, workingDirectory: workingDirectory);
+
+    printOnFailure('workingDirectory: $workingDirectory');
+    printOnFailure('command:\n${command.join(" ")}');
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
 
     expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));
 
