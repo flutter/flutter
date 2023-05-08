@@ -545,6 +545,64 @@ void main() {
     Cache: () => cache,
   });
 
+  testUsingContext('FlutterVersion() falls back to git if .version.json is malformed', () async {
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+    final File versionFile = flutterRoot.childFile('.version.json')..writeAsStringSync(
+      '{',
+    );
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(
+        command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
+        stdout: '1234abcd',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'tag', '--points-at', '1234abcd'],
+      ),
+      const FakeCommand(
+        command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
+        stdout: '0.1.2-3-1234abcd',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+        stdout: 'feature-branch',
+      ),
+      FakeCommand(
+        command: const <String>[
+          'git',
+          '-c',
+          'log.showSignature=false',
+          'log',
+          'HEAD',
+          '-n',
+          '1',
+          '--pretty=format:%ad',
+          '--date=iso',
+        ],
+        stdout: _testClock.ago(VersionFreshnessValidator.versionAgeConsideredUpToDate('stable') ~/ 2).toString(),
+      ),
+    ]);
+
+    // version file exists in a malformed state
+    expect(versionFile.existsSync(), isTrue);
+    final FlutterVersion flutterVersion = FlutterVersion(
+      clock: _testClock,
+      fs: fs,
+      flutterRoot: flutterRoot.path,
+    );
+
+    // version file was deleted because it couldn't be parsed
+    expect(versionFile.existsSync(), isFalse);
+    // version file was written to disk
+    flutterVersion.ensureVersionFile();
+    expect(processManager, hasNoRemainingExpectations);
+    expect(versionFile.existsSync(), isTrue);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+    Cache: () => cache,
+  });
+
   testUsingContext('GitTagVersion', () {
     const String hash = 'abcdef';
     GitTagVersion gitTagVersion;
