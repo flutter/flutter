@@ -178,10 +178,12 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     Curve? curve,
   }) {
     node.requestFocus();
-    Scrollable.ensureVisible(node.context!, alignment: alignment ?? 1.0,
-        alignmentPolicy: alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
-        duration: duration ?? Duration.zero,
-        curve: curve ?? Curves.ease);
+    Scrollable.ensureVisible(
+      node.context!, alignment: alignment ?? 1.0,
+      alignmentPolicy: alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
+      duration: duration ?? Duration.zero,
+      curve: curve ?? Curves.ease,
+    );
   }
 
   /// Returns the node that should receive focus if focus is traversing
