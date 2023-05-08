@@ -19,7 +19,6 @@ import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
-import 'build_info.dart';
 import 'convert.dart';
 import 'features.dart';
 
@@ -537,7 +536,7 @@ class Cache {
   }
 
   String getHostPlatformArchName() {
-    return getNameForHostPlatformArch(_osUtils.hostPlatform);
+    return _osUtils.hostPlatform.platformName;
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
