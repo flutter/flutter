@@ -13,7 +13,7 @@ class AutocompleteExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Autocomplete Basic'),
+          title: const Text('Autocomplete - async'),
         ),
         body: const Center(
           child: _AsyncAutocomplete(),
@@ -43,7 +43,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
         _searchingWithQuery = textEditingValue.text;
-        Iterable<String> options = await _FakeAPI.search(_searchingWithQuery!);
+        final Iterable<String> options = await _FakeAPI.search(_searchingWithQuery!);
 
         // If another search happened after this one, throw away these options.
         // Use the previous options intead and wait for the newer request to

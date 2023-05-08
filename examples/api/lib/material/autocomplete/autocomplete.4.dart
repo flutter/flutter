@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [Autocomplete] that demonstrates fetching the
-/// options asynchronously and debouncing the network calls.
+/// options asynchronously and debouncing the network calls, including handling
+/// network errors.
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -15,7 +16,7 @@ class AutocompleteExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Autocomplete - async and debouncing'),
+          title: const Text('Autocomplete - async, debouncing, and network errors'),
         ),
         body: const Center(
           child: _AsyncAutocomplete(),
@@ -42,17 +43,32 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
 
   late final _Debounceable<Iterable<String>?, String> _debouncedSearch;
 
+  // Whether to consider the fake network to be offline.
+  bool _networkEnabled = true;
+
+  // A network error was recieved on the most recent query.
+  bool _networkError = false;
+
   // Calls the "remote" API to search with the given query. Returns null when
   // the call has been made obsolete.
   Future<Iterable<String>?> _search(String query) async {
     _currentQuery = query;
 
-    // In a real application, there should be some error handling here.
-    final Iterable<String> options = await _FakeAPI.search(_currentQuery!);
+    late final Iterable<String> options;
+    try {
+      options = await _FakeAPI.search(_currentQuery!, _networkEnabled);
+    } catch (error) {
+      if (error is _NetworkException) {
+        setState(() {
+          _networkError = true;
+        });
+        return <String>[];
+      }
+      rethrow;
+    }
 
     // If another search happened after this one, throw away these options.
     if (_currentQuery != query) {
-      _currentQuery = null;
       return null;
     }
     _currentQuery = null;
@@ -68,18 +84,59 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
 
   @override
   Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      optionsBuilder: (TextEditingValue textEditingValue) async {
-        final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
-        if (options == null) {
-          return _lastOptions;
-        }
-        _lastOptions = options;
-        return options;
-      },
-      onSelected: (String selection) {
-        debugPrint('You just selected $selection');
-      },
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              _networkEnabled
+                  ? 'Network is on, turn this off to induce network errors.'
+                  : 'Network is off, turn this on to allow requests to go through.',
+            ),
+            Switch(
+              value: _networkEnabled,
+              onChanged: (bool? value) {
+                setState(() {
+                  _networkEnabled = !_networkEnabled;
+                });
+              },
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 32.0,
+        ),
+        Autocomplete<String>(
+          fieldViewBuilder: (BuildContext context, TextEditingController controller, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+            return TextFormField(
+              decoration: InputDecoration(
+                errorText: _networkError ? 'Network error, please try again.' : null,
+              ),
+              controller: controller,
+              focusNode: focusNode,
+              onFieldSubmitted: (String value) {
+                onFieldSubmitted();
+              },
+            );
+          },
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            setState(() {
+              _networkError = false;
+            });
+            final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
+            if (options == null) {
+              return _lastOptions;
+            }
+            _lastOptions = options;
+            return options;
+          },
+          onSelected: (String selection) {
+            debugPrint('You just selected $selection');
+          },
+        ),
+      ],
     );
   }
 }
@@ -93,8 +150,11 @@ class _FakeAPI {
   ];
 
   // Searches the options, but injects a fake "network" delay.
-  static Future<Iterable<String>> search(String query) async {
+  static Future<Iterable<String>> search(String query, bool networkEnabled) async {
     await Future.delayed(const Duration(seconds: 1)); // Fake 1 second delay.
+    if (!networkEnabled) {
+      throw const _NetworkException();
+    }
     if (query == '') {
       return const Iterable<String>.empty();
     }
@@ -159,4 +219,9 @@ class _DebounceTimer {
 // An excpetion indicating that the timer was canceled.
 class _CancelException implements Exception {
   const _CancelException();
+}
+
+// An exception indicating that a network request has failed.
+class _NetworkException implements Exception {
+  const _NetworkException();
 }
