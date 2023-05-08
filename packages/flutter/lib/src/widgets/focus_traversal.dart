@@ -171,12 +171,12 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// Requests focus from `node` and ensures the node is visible
   /// by calling [Scrollable.ensureVisible].
   static void defaultTraversalRequestFocusCallback(
-      FocusNode node, {
-        ScrollPositionAlignmentPolicy? alignmentPolicy,
-        double? alignment,
-        Duration? duration,
-        Curve? curve,
-      }) {
+    FocusNode node, {
+    ScrollPositionAlignmentPolicy? alignmentPolicy,
+    double? alignment,
+    Duration? duration,
+    Curve? curve,
+  }) {
     node.requestFocus();
     Scrollable.ensureVisible(node.context!, alignment: alignment ?? 1.0,
         alignmentPolicy: alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
