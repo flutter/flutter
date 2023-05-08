@@ -1906,32 +1906,34 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     }
   });
-  
+
   testWidgetsWithLeakTracking('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
     bool isTapped = false;
 
     await tester.pumpWidget(
       MaterialApp(
-        home: GestureDetector(
-          onTap: () {
-            isTapped = true;
-          },
-          child: Container(),
+        home: Tooltip(
+          richMessage: TextSpan(
+            text: tooltipText,
+            recognizer: TapGestureRecognizer()..onTap = () {
+              isTapped = true;
+            }
+          ),
+          showDuration: const Duration(seconds: 5),
+          triggerMode: TooltipTriggerMode.tap,
+          child: const Icon(Icons.refresh)
         ),
       ),
     );
 
-    // Verify that the widget tree was built.
-    expect(find.byType(GestureDetector), findsOneWidget);
-    expect(find.byType(Container), findsOneWidget);
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
 
-    // Perform a tap gesture.
-    await tester.tap(find.byType(GestureDetector));
+    await _testGestureTap(tester, tooltip);
+    final Finder textSpan = find.text(tooltipText);
+    expect(textSpan, findsOneWidget);
 
-    // Wait for the frame to be rendered.
-    await tester.pumpAndSettle();
-
-    // Verify that the onTap function was called.
+    await _testGestureTap(tester, textSpan);
     expect(isTapped, isTrue);
   });
 }
