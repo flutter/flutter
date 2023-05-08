@@ -101,16 +101,20 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If
   /// [length] is zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex = 0, Duration? animationDuration, required this.length, required TickerProvider vsync})
-    : assert(length != null && length >= 0),
-      assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
-      _index = initialIndex,
-      _previousIndex = initialIndex,
-      _animationDuration = animationDuration ?? kTabScrollDuration,
-      _animationController = AnimationController.unbounded(
-        value: initialIndex.toDouble(),
-        vsync: vsync,
-      );
+  TabController({
+    int initialIndex = 0,
+    Duration? animationDuration,
+    required this.length,
+    required TickerProvider vsync,
+  }) : assert(length >= 0),
+       assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
+       _index = initialIndex,
+       _previousIndex = initialIndex,
+       _animationDuration = animationDuration ?? kTabScrollDuration,
+       _animationController = AnimationController.unbounded(
+         value: initialIndex.toDouble(),
+         vsync: vsync,
+       );
 
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
@@ -177,7 +181,6 @@ class TabController extends ChangeNotifier {
   final int length;
 
   void _changeIndex(int value, { Duration? duration, Curve? curve }) {
-    assert(value != null);
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
@@ -254,7 +257,6 @@ class TabController extends ChangeNotifier {
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController!.value - _index.toDouble();
   set offset(double value) {
-    assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
     if (value == offset) {
@@ -348,8 +350,7 @@ class DefaultTabController extends StatefulWidget {
     this.initialIndex = 0,
     required this.child,
     this.animationDuration,
-  }) : assert(initialIndex != null),
-       assert(length >= 0),
+  }) : assert(length >= 0),
        assert(length == 0 || (initialIndex >= 0 && initialIndex < length));
 
   /// The total number of tabs.
@@ -375,18 +376,65 @@ class DefaultTabController extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of [DefaultTabController] that encloses the given
+  /// context, or null if none is found.
   ///
-  /// {@tool snippet}
-  /// Typical usage is as follows:
+  /// {@tool snippet} Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabController.of(context)!;
+  /// TabController? controller = DefaultTabController.maybeOf(context);
   /// ```
   /// {@end-tool}
-  static TabController? of(BuildContext context) {
-    final _TabControllerScope? scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
-    return scope?.controller;
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTabController] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTabController.of], which is similar to this method, but asserts
+  ///   if no [DefaultTabController] ancestor is found.
+  static TabController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_TabControllerScope>()?.controller;
+  }
+
+  /// The closest instance of [DefaultTabController] that encloses the given
+  /// context.
+  ///
+  /// If no instance is found, this method will assert in debug mode and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTabController] in the [context].
+  ///
+  /// {@tool snippet} Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TabController controller = DefaultTabController.of(context);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTabController.maybeOf], which is similar to this method, but
+  ///   returns null if no [DefaultTabController] ancestor is found.
+  static TabController of(BuildContext context) {
+    final TabController? controller = maybeOf(context);
+    assert(() {
+      if (controller == null) {
+        throw FlutterError(
+          'DefaultTabController.of() was called with a context that does not '
+          'contain a DefaultTabController widget.\n'
+          'No DefaultTabController widget ancestor could be found starting from '
+          'the context that was passed to DefaultTabController.of(). This can '
+          'happen because you are using a widget that looks for a DefaultTabController '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return controller!;
   }
 
   @override

@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Zgjidhi të gjitha",
   "tabSemanticsLabel": "Skeda $tabIndex nga $tabCount",
   "modalBarrierDismissLabel": "Hiq",
-  "searchTextFieldPlaceholderLabel": "Kërko"
+  "searchTextFieldPlaceholderLabel": "Kërko",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

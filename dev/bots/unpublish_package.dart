@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 /// This script removes published archives from the cloud storage and the
 /// corresponding JSON metadata file that the website uses to determine what
 /// releases are available.
@@ -10,6 +9,7 @@
 /// If asked to remove a release that is currently the release on that channel,
 /// it will replace that release with the next most recent release on that
 /// channel.
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -37,9 +37,7 @@ class UnpublishException implements Exception {
   @override
   String toString() {
     String output = runtimeType.toString();
-    if (message != null) {
-      output += ': $message';
-    }
+    output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
@@ -113,9 +111,7 @@ class ProcessRunner {
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
-  }) : assert(subprocessOutput != null),
-       assert(processManager != null),
-       assert(platform != null) {
+  }) {
     environment = Map<String, String>.from(platform.environment);
   }
 
@@ -255,9 +251,6 @@ class ArchiveUnpublisher {
         continue;
       }
       final Map<String, String> replacementRelease = releases.firstWhere((Map<String, String> value) => value['channel'] == getChannelName(channel));
-      if (replacementRelease == null) {
-        throw UnpublishException('Unable to find previous release for channel ${getChannelName(channel)}.');
-      }
       (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] = replacementRelease['hash'];
       print(
         '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
@@ -468,7 +461,7 @@ Future<void> main(List<String> rawArguments) async {
   final String tempDirArg = parsedArguments['temp_dir'] as String;
   Directory tempDir;
   bool removeTempDir = false;
-  if (tempDirArg == null || tempDirArg.isEmpty) {
+  if (tempDirArg.isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {

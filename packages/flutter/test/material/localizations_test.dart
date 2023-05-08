@@ -75,6 +75,12 @@ void main() {
     expect(localizations.reorderItemDown, isNotNull);
     expect(localizations.reorderItemLeft, isNotNull);
     expect(localizations.reorderItemRight, isNotNull);
+    expect(localizations.expandedIconTapHint, isNotNull);
+    expect(localizations.collapsedIconTapHint, isNotNull);
+    expect(localizations.expansionTileExpandedHint, isNotNull);
+    expect(localizations.expansionTileCollapsedHint, isNotNull);
+    expect(localizations.expandedHint, isNotNull);
+    expect(localizations.collapsedHint, isNotNull);
     expect(localizations.keyboardKeyAlt, isNotNull);
     expect(localizations.keyboardKeyAltGraph, isNotNull);
     expect(localizations.keyboardKeyBackspace, isNotNull);
@@ -120,7 +126,13 @@ void main() {
     expect(localizations.keyboardKeyPrintScreen, isNotNull);
     expect(localizations.keyboardKeyScrollLock, isNotNull);
     expect(localizations.keyboardKeySelect, isNotNull);
+    expect(localizations.keyboardKeyShift, isNotNull);
     expect(localizations.keyboardKeySpace, isNotNull);
+    expect(localizations.currentDateLabel, isNotNull);
+    expect(localizations.scrimLabel, isNotNull);
+    expect(localizations.bottomSheetLabel, isNotNull);
+
+    expect(localizations.scrimOnTapHint('FOO'), contains('FOO'));
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

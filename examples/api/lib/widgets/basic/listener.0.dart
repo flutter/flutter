@@ -2,39 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Listener].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Listener].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ListenerApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ListenerApp extends StatelessWidget {
+  const ListenerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Listener Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: ListenerExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ListenerExample extends StatefulWidget {
+  const ListenerExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ListenerExample> createState() => _ListenerExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ListenerExampleState extends State<ListenerExample> {
   int _downCounter = 0;
   int _upCounter = 0;
   double x = 0.0;
@@ -69,13 +66,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         onPointerDown: _incrementDown,
         onPointerMove: _updateLocation,
         onPointerUp: _incrementUp,
-        child: Container(
+        child: ColoredBox(
           color: Colors.lightBlueAccent,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                  'You have pressed or released in this area this many times:'),
+              const Text('You have pressed or released in this area this many times:'),
               Text(
                 '$_downCounter presses\n$_upCounter releases',
                 style: Theme.of(context).textTheme.headlineMedium,

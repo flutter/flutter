@@ -148,7 +148,6 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
     case BoxFit.fill:
       sourceSize = inputSize;
       destinationSize = outputSize;
-      break;
     case BoxFit.contain:
       sourceSize = inputSize;
       if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height) {
@@ -156,7 +155,6 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       } else {
         destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       }
-      break;
     case BoxFit.cover:
       if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
         sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
@@ -164,19 +162,29 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
         sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
       }
       destinationSize = outputSize;
-      break;
     case BoxFit.fitWidth:
-      sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
-      destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
-      break;
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
+        // Like "cover"
+        sourceSize = Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
+        destinationSize = outputSize;
+      } else {
+        // Like "contain"
+        sourceSize = inputSize;
+        destinationSize = Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+      }
     case BoxFit.fitHeight:
-      sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
-      destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
-      break;
+      if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
+        // Like "contain"
+        sourceSize = inputSize;
+        destinationSize = Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
+      } else {
+        // Like "cover"
+        sourceSize = Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
+        destinationSize = outputSize;
+      }
     case BoxFit.none:
       sourceSize = Size(math.min(inputSize.width, outputSize.width), math.min(inputSize.height, outputSize.height));
       destinationSize = sourceSize;
-      break;
     case BoxFit.scaleDown:
       sourceSize = inputSize;
       destinationSize = inputSize;
@@ -187,7 +195,6 @@ FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
       if (destinationSize.width > outputSize.width) {
         destinationSize = Size(outputSize.width, outputSize.width / aspectRatio);
       }
-      break;
   }
   return FittedSizes(sourceSize, destinationSize);
 }

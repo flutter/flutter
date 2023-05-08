@@ -36,12 +36,7 @@ class BouncingScrollSimulation extends Simulation {
     required this.spring,
     double constantDeceleration = 0,
     super.tolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null) {
+  }) : assert(leadingExtent <= trailingExtent) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -71,7 +66,6 @@ class BouncingScrollSimulation extends Simulation {
         _springTime = double.infinity;
       }
     }
-    assert(_springTime != null);
   }
 
   /// The maximum velocity that can be transferred from the inertia of a ballistic
@@ -129,98 +123,129 @@ class BouncingScrollSimulation extends Simulation {
   }
 }
 
-/// An implementation of scroll physics that matches Android.
+/// An implementation of scroll physics that aligns with Android.
+///
+/// For any value of [velocity], this travels the same total distance as the
+/// Android scroll physics.
+///
+/// This scroll physics has been adjusted relative to Android's in order to make
+/// it ballistic, meaning that the deceleration at any moment is a function only
+/// of the current velocity [dx] and does not depend on how long ago the
+/// simulation was started.  (This is required by Flutter's scrolling protocol,
+/// where [ScrollActivityDelegate.goBallistic] may restart a scroll activity
+/// using only its current velocity and the scroll position's own state.)
+/// Compared to this scroll physics, Android's moves faster at the very
+/// beginning, then slower, and it ends at the same place but a little later.
+///
+/// Times are measured in seconds, and positions in logical pixels.
 ///
 /// See also:
 ///
 ///  * [BouncingScrollSimulation], which implements iOS scroll physics.
 //
-// This class is based on Scroller.java from Android:
-//   https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
+// This class is based on OverScroller.java from Android:
+//   https://android.googlesource.com/platform/frameworks/base/+/android-13.0.0_r24/core/java/android/widget/OverScroller.java#738
+// and in particular class SplineOverScroller (at the end of the file), starting
+// at method "fling".  (A very similar algorithm is in Scroller.java in the same
+// directory, but OverScroller is what's used by RecyclerView.)
 //
-// The "See..." comments below refer to Scroller methods and values. Some
-// simplifications have been made.
+// In the Android implementation, times are in milliseconds, positions are in
+// physical pixels, but velocity is in physical pixels per whole second.
+//
+// The "See..." comments below refer to SplineOverScroller methods and values.
 class ClampingScrollSimulation extends Simulation {
-  /// Creates a scroll physics simulation that matches Android scrolling.
+  /// Creates a scroll physics simulation that aligns with Android scrolling.
   ClampingScrollSimulation({
     required this.position,
     required this.velocity,
     this.friction = 0.015,
     super.tolerance,
-  }) : assert(_flingVelocityPenetration(0.0) == _initialVelocityPenetration) {
-    _duration = _flingDuration(velocity);
-    _distance = (velocity * _duration / _initialVelocityPenetration).abs();
+  }) {
+    _duration = _flingDuration();
+    _distance = _flingDistance();
   }
 
-  /// The position of the particle at the beginning of the simulation.
+  /// The position of the particle at the beginning of the simulation, in
+  /// logical pixels.
   final double position;
 
   /// The velocity at which the particle is traveling at the beginning of the
-  /// simulation.
+  /// simulation, in logical pixels per second.
   final double velocity;
 
   /// The amount of friction the particle experiences as it travels.
   ///
-  /// The more friction the particle experiences, the sooner it stops.
+  /// The more friction the particle experiences, the sooner it stops and the
+  /// less far it travels.
+  ///
+  /// The default value causes the particle to travel the same total distance
+  /// as in the Android scroll physics.
+  // See mFlingFriction.
   final double friction;
 
+  /// The total time the simulation will run, in seconds.
   late double _duration;
+
+  /// The total, signed, distance the simulation will travel, in logical pixels.
   late double _distance;
 
   // See DECELERATION_RATE.
   static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);
 
-  // See computeDeceleration().
-  static double _decelerationForFriction(double friction) {
-    return friction * 61774.04968;
+  // See INFLEXION.
+  static const double _kInflexion = 0.35;
+
+  // See mPhysicalCoeff.  This has a value of 0.84 times Earth gravity,
+  // expressed in units of logical pixels per second^2.
+  static const double _physicalCoeff =
+      9.80665 // g, in meters per second^2
+        * 39.37 // 1 meter / 1 inch
+        * 160.0 // 1 inch / 1 logical pixel
+        * 0.84; // "look and feel tuning"
+
+  // See getSplineFlingDuration().
+  double _flingDuration() {
+    // See getSplineDeceleration().  That function's value is
+    // math.log(velocity.abs() / referenceVelocity).
+    final double referenceVelocity = friction * _physicalCoeff / _kInflexion;
+
+    // This is the value getSplineFlingDuration() would return, but in seconds.
+    final double androidDuration =
+        math.pow(velocity.abs() / referenceVelocity,
+                 1 / (_kDecelerationRate - 1.0)) as double;
+
+    // We finish a bit sooner than Android, in order to travel the
+    // same total distance.
+    return _kDecelerationRate * _kInflexion * androidDuration;
   }
 
-  // See getSplineFlingDuration(). Returns a value in seconds.
-  double _flingDuration(double velocity) {
-    // See mPhysicalCoeff
-    final double scaledFriction = friction * _decelerationForFriction(0.84);
-
-    // See getSplineDeceleration().
-    final double deceleration = math.log(0.35 * velocity.abs() / scaledFriction);
-
-    return math.exp(deceleration / (_kDecelerationRate - 1.0));
-  }
-
-  // Based on a cubic curve fit to the Scroller.computeScrollOffset() values
-  // produced for an initial velocity of 4000. The value of Scroller.getDuration()
-  // and Scroller.getFinalY() were 686ms and 961 pixels respectively.
-  //
-  // Algebra courtesy of Wolfram Alpha.
-  //
-  // f(x) = scrollOffset, x is time in milliseconds
-  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
-  // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
-  // f(686ms) = 961 pixels
-  // Scale to f(0 <= t <= 1.0), x = t * 686
-  // f(t) = 1165.03 t^3 - 3143.62 t^2 + 2945.87 t
-  // Scale f(t) so that 0.0 <= f(t) <= 1.0
-  // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
-  //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
-  static const double _initialVelocityPenetration = 3.065;
-  static double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (_initialVelocityPenetration * t);
-  }
-
-  // The derivative of the _flingDistancePenetration() function.
-  static double _flingVelocityPenetration(double t) {
-    return (3.6 * t * t) - (6.54 * t) + _initialVelocityPenetration;
+  // See getSplineFlingDistance().  This returns the same value but with the
+  // sign of [velocity], and in logical pixels.
+  double _flingDistance() {
+    final double distance = velocity * _duration / _kDecelerationRate;
+    assert(() {
+      // This is the more complicated calculation that getSplineFlingDistance()
+      // actually performs, which boils down to the much simpler formula above.
+      final double referenceVelocity = friction * _physicalCoeff / _kInflexion;
+      final double logVelocity = math.log(velocity.abs() / referenceVelocity);
+      final double distanceAgain =
+          friction * _physicalCoeff
+            * math.exp(logVelocity * _kDecelerationRate / (_kDecelerationRate - 1.0));
+      return (distance.abs() - distanceAgain).abs() < tolerance.distance;
+    }());
+    return distance;
   }
 
   @override
   double x(double time) {
     final double t = clampDouble(time / _duration, 0.0, 1.0);
-    return position + _distance * _flingDistancePenetration(t) * velocity.sign;
+    return position + _distance * (1.0 - math.pow(1.0 - t, _kDecelerationRate));
   }
 
   @override
   double dx(double time) {
     final double t = clampDouble(time / _duration, 0.0, 1.0);
-    return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
+    return velocity * math.pow(1.0 - t, _kDecelerationRate - 1.0);
   }
 
   @override

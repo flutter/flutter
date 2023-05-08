@@ -17,34 +17,34 @@ void main() {
     expect(Fizz.count, 0);
 
     DebugReassembleConfig config = DebugReassembleConfig(widgetName: 'Bar');
-    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!, config);
 
     expect(Foo.count, 0);
     expect(Bar.count, 1);
     expect(Fizz.count, 1);
 
     config = DebugReassembleConfig(widgetName: 'Fizz');
-    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!, config);
 
     expect(Foo.count, 0);
     expect(Bar.count, 1);
     expect(Fizz.count, 2);
 
     config = DebugReassembleConfig(widgetName: 'NoMatch');
-    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!, config);
 
     expect(Foo.count, 0);
     expect(Bar.count, 1);
     expect(Fizz.count, 2);
 
     config = DebugReassembleConfig();
-    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, config);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!, config);
 
     expect(Foo.count, 1);
     expect(Bar.count, 2);
     expect(Fizz.count, 3);
 
-    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.renderViewElement!, null);
+    WidgetsBinding.instance.buildOwner!.reassemble(WidgetsBinding.instance.rootElement!, null);
 
     expect(Foo.count, 2);
     expect(Bar.count, 3);

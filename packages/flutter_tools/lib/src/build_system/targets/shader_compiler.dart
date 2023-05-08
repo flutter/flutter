@@ -17,12 +17,13 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../device.dart';
 import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
 enum ShaderTarget {
-  impellerAndroid('--opengl-es'),
-  impelleriOS('--metal-ios'),
+  impellerAndroid('--runtime-stage-gles'),
+  impelleriOS('--runtime-stage-metal'),
   sksl('--sksl');
 
   const ShaderTarget(this.target);
@@ -47,21 +48,22 @@ class DevelopmentShaderCompiler {
 
   late ShaderTarget _shaderTarget;
   bool _debugConfigured = false;
+  bool _jsonMode = false;
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
+  void configureCompiler(TargetPlatform? platform, { required ImpellerStatus impellerStatus }) {
     switch (platform) {
       case TargetPlatform.ios:
-        _shaderTarget = enableImpeller ? ShaderTarget.impelleriOS : ShaderTarget.sksl;
-        break;
+        _shaderTarget = ShaderTarget.impelleriOS;
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
       case TargetPlatform.android_arm:
       case TargetPlatform.android:
-        _shaderTarget = enableImpeller ? ShaderTarget.impellerAndroid : ShaderTarget.sksl;
-        break;
+        _shaderTarget = impellerStatus == ImpellerStatus.enabled
+          ? ShaderTarget.impellerAndroid
+          : ShaderTarget.sksl;
       case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
@@ -69,10 +71,12 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-        assert(!enableImpeller);
+        assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
-        break;
+      case TargetPlatform.web_javascript:
+        assert(impellerStatus != ImpellerStatus.enabled);
+        _shaderTarget = ShaderTarget.sksl;
+        _jsonMode = true;
       case null:
         return;
     }
@@ -102,6 +106,7 @@ class DevelopmentShaderCompiler {
         outputPath: output.path,
         target: _shaderTarget,
         fatal: false,
+        json: _jsonMode,
       );
       if (!success) {
         return null;
@@ -157,6 +162,7 @@ class ShaderCompiler {
     required String outputPath,
     required ShaderTarget target,
     bool fatal = true,
+    required bool json,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),
@@ -168,16 +174,21 @@ class ShaderCompiler {
       );
     }
 
+    final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
       '--iplr',
+      if (json)
+        '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',
       '--input-type=frag',
       '--include=${input.parent.path}',
+      '--include=$shaderLibPath',
     ];
+    _logger.printTrace('shaderc command: $cmd');
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;
     if (code != 0) {

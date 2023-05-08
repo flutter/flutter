@@ -180,9 +180,7 @@ class Hero extends StatefulWidget {
     this.placeholderBuilder,
     this.transitionOnUserGestures = false,
     required this.child,
-  }) : assert(tag != null),
-       assert(transitionOnUserGestures != null),
-       assert(child != null);
+  });
 
   /// The identifier for this particular hero. If the tag of this hero matches
   /// the tag of a hero on a [PageRoute] that we're navigating to or from, then
@@ -272,9 +270,6 @@ class Hero extends StatefulWidget {
     bool isUserGestureTransition,
     NavigatorState navigator,
   ) {
-    assert(context != null);
-    assert(isUserGestureTransition != null);
-    assert(navigator != null);
     final Map<Object, _HeroState> result = <Object, _HeroState>{};
 
     void inviteHero(StatefulElement hero, Object tag) {
@@ -308,7 +303,6 @@ class Hero extends StatefulWidget {
       if (widget is Hero) {
         final StatefulElement hero = element as StatefulElement;
         final Object tag = widget.tag;
-        assert(tag != null);
         if (Navigator.of(hero) == navigator) {
           inviteHero(hero, tag);
         } else {
@@ -372,7 +366,7 @@ class _HeroState extends State<Hero> {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
     final RenderBox box = context.findRenderObject()! as RenderBox;
-    assert(box != null && box.hasSize);
+    assert(box.hasSize);
     setState(() {
       _placeholderSize = box.size;
     });
@@ -480,7 +474,7 @@ class _HeroFlightManifest {
   static Rect _boundingBoxFor(BuildContext context, BuildContext? ancestorContext) {
     assert(ancestorContext != null);
     final RenderBox box = context.findRenderObject()! as RenderBox;
-    assert(box != null && box.hasSize && box.size.isFinite);
+    assert(box.hasSize && box.size.isFinite);
     return MatrixUtils.transformRect(
       box.getTransformTo(ancestorContext?.findRenderObject()),
       Offset.zero & box.size,
@@ -537,7 +531,6 @@ class _HeroFlight {
 
   // The OverlayEntry WidgetBuilder callback for the hero's overlay.
   Widget _buildOverlay(BuildContext context) {
-    assert(manifest != null);
     shuttle ??= manifest.shuttleBuilder(
       context,
       manifest.animation,
@@ -650,9 +643,7 @@ class _HeroFlight {
     assert(!_aborted);
     assert(() {
       final Animation<double> initial = initialManifest.animation;
-      assert(initial != null);
       final HeroFlightDirection type = initialManifest.type;
-      assert(type != null);
       switch (type) {
         case HeroFlightDirection.pop:
           return initial.value == 1.0 && initialManifest.isUserGestureTransition
@@ -673,11 +664,9 @@ class _HeroFlight {
       case HeroFlightDirection.pop:
         _proxyAnimation.parent = ReverseAnimation(manifest.animation);
         shouldIncludeChildInPlaceholder = false;
-        break;
       case HeroFlightDirection.push:
         _proxyAnimation.parent = manifest.animation;
         shouldIncludeChildInPlaceholder = true;
-        break;
     }
 
     heroRectTween = manifest.createHeroRectTween(begin: manifest.fromHeroLocation, end: manifest.toHeroLocation);
@@ -796,14 +785,12 @@ class HeroController extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     assert(navigator != null);
-    assert(route != null);
     _maybeStartHeroTransition(previousRoute, route, HeroFlightDirection.push, false);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     assert(navigator != null);
-    assert(route != null);
     // Don't trigger another flight when a pop is committed as a user gesture
     // back swipe is snapped.
     if (!navigator!.userGestureInProgress) {
@@ -823,7 +810,6 @@ class HeroController extends NavigatorObserver {
   @override
   void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
     assert(navigator != null);
-    assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, true);
   }
 
@@ -873,12 +859,10 @@ class HeroController extends NavigatorObserver {
           if (from.animation!.value == 0.0) {
             return;
           }
-          break;
         case HeroFlightDirection.push:
           if (to.animation!.value == 1.0) {
             return;
           }
-          break;
       }
 
       // For pop transitions driven by a user gesture: if the "to" page has
@@ -1054,8 +1038,7 @@ class HeroMode extends StatelessWidget {
     super.key,
     required this.child,
     this.enabled = true,
-  }) : assert(child != null),
-       assert(enabled != null);
+  });
 
   /// The subtree to place inside the [HeroMode].
   final Widget child;

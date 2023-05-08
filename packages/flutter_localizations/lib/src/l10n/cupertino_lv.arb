@@ -26,5 +26,6 @@
   "selectAllButtonLabel": "Atlasīt visu",
   "tabSemanticsLabel": "$tabIndex. cilne no $tabCount",
   "modalBarrierDismissLabel": "Nerādīt",
-  "searchTextFieldPlaceholderLabel": "Meklēšana"
+  "searchTextFieldPlaceholderLabel": "Meklēšana",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

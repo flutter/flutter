@@ -125,7 +125,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   /// Returns the areas of the screen that are obstructed by display features.
   ///
-  /// A [DisplayFeature] obstructs the screen when the the area it occupies is
+  /// A [DisplayFeature] obstructs the screen when the area it occupies is
   /// not 0 or the `state` is [DisplayFeatureState.postureHalfOpened].
   static Iterable<Rect> avoidBounds(MediaQueryData mediaQuery) {
     return mediaQuery.displayFeatures

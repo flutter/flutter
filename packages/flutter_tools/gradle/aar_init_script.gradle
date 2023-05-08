@@ -26,8 +26,10 @@ void configureProject(Project project, String outputDir) {
         project.version = project.property("buildNumber")
     }
 
-    project.android.libraryVariants.all { variant ->
-        addAarTask(project, variant)
+    project.components.forEach { component ->
+        if (component.name != "all") {
+            addAarTask(project, component)
+        }
     }
 
     project.publishing {
@@ -36,43 +38,6 @@ void configureProject(Project project, String outputDir) {
                 url = uri("file://${outputDir}/outputs/repo")
             }
         }
-    }
-
-    // Some extra work to have alternative publications with the same format as the old maven plugin.
-    // Instead of using classifiers for the variants, the old maven plugin appended `_{variant}` to the artifactId
-
-    // First, create a default MavenPublication for each variant (except "all" since that is used to publish artifacts in the new way)
-    project.components.forEach { component ->
-        if (component.name != "all") {
-            project.publishing.publications.create(component.name, MavenPublication) {
-                from component
-            }
-        }
-    }
-
-    // then, rename the artifactId to include the variant and make sure to remove any classifier
-    // data tha gradle has set, as well as adding a <relocation> tag pointing to the new coordinates
-    project.publishing.publications.forEach { pub ->
-        def relocationArtifactId = pub.artifactId
-        pub.artifactId = "${relocationArtifactId}_${pub.name}"
-        pub.alias = true
-
-        pub.pom.distributionManagement {
-            relocation {
-                // New artifact coordinates
-                groupId = "${pub.groupId}"
-                artifactId = "${relocationArtifactId}"
-                version = "${pub.version}"
-                message = "Use classifiers rather than _variant for new publish plugin"
-            }
-        }
-
-    }
-
-    // also publish the artifacts in the new way, using one set of coordinates with classifiers
-    project.publishing.publications.create("all", MavenPublication) {
-        from project.components.all
-        alias false
     }
 
     if (!project.property("is-plugin").toBoolean()) {
@@ -114,14 +79,23 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void addAarTask(Project project, variant) {
-    String variantName = variant.name.capitalize()
+void addAarTask(Project project, component) {
+    String variantName = component.name.capitalize()
     String taskName = "assembleAar$variantName"
     project.tasks.create(name: taskName) {
         // This check is required to be able to configure the archives before `publish` runs.
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
         }
+
+        // Create a default MavenPublication for the variant (except "all" since that is used to publish artifacts in the new way)
+        project.publishing.publications.create(component.name, MavenPublication) { pub ->
+            groupId = "${pub.groupId}"
+            artifactId = "${pub.artifactId}_${pub.name}"
+            version = "${pub.version}"
+            from component
+        }
+
         // Generate the Maven artifacts.
         finalizedBy "publish"
     }

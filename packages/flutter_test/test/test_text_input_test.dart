@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=20210721"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

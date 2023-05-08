@@ -12,7 +12,7 @@ void main() {
     const String tooltipText = 'I am a rich tooltip. I am another span of this rich tooltip';
 
     await tester.pumpWidget(
-      const example.MyApp(),
+      const example.TooltipExampleApp(),
     );
 
     TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);

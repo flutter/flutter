@@ -16,7 +16,7 @@ final Set<String> interestingLabels = <String>{
 };
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  ZoneIgnoringTestBinding.ensureInitialized();
   initTimelineTests();
   test('Children of MultiChildRenderObjectElement show up in tracing', () async {
     // We don't have expectations around the first frame because there's a race around
@@ -65,8 +65,8 @@ class TestRootState extends State<TestRoot> {
   @override
   Widget build(BuildContext context) {
     return _showRow
-      ? Row(
-          children: const <Widget>[
+      ? const Row(
+          children: <Widget>[
             TestChildWidget(),
             TestChildWidget(),
           ],

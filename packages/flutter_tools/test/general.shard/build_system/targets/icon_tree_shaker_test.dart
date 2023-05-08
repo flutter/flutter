@@ -40,6 +40,8 @@ void main() {
     '--kernel-file', appDillPath,
     '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     '--class-name', 'IconData',
+    '--annotation-class-name', '_StaticIconProvider',
+    '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
   ];
 
   void addConstFinderInvocation(
@@ -62,7 +64,6 @@ void main() {
     String stderr = '',
     required CompleterIOSink stdinSink,
   }) {
-    assert(stdinSink != null);
     stdinSink.clear();
     processManager.addCommand(FakeCommand(
       command: fontSubsetArgs,
@@ -79,7 +80,7 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    dartPath = artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    dartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     constFinderPath = artifacts.getArtifactPath(Artifact.constFinder);
     fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
 
@@ -227,13 +228,18 @@ void main() {
       fileSystem: fileSystem,
       artifacts: artifacts,
     );
-
     final CompleterIOSink stdinSink = CompleterIOSink();
     addConstFinderInvocation(appDill.path, stdout: validConstFinderResult);
     resetFontSubsetInvocation(stdinSink: stdinSink);
-
+    // Font starts out 2500 bytes long
+    final File inputFont = fileSystem.file(inputPath)
+        ..writeAsBytesSync(List<int>.filled(2500, 0));
+    // after subsetting, font is 1200 bytes long
+    fileSystem.file(outputPath)
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.filled(1200, 0));
     bool subsetted = await iconTreeShaker.subsetFont(
-      input: fileSystem.file(inputPath),
+      input: inputFont,
       outputPath: outputPath,
       relativePath: relativePath,
     );
@@ -249,6 +255,10 @@ void main() {
     expect(subsetted, true);
     expect(stdinSink.getAndClear(), '59470\n');
     expect(processManager, hasNoRemainingExpectations);
+    expect(
+      logger.statusText,
+      contains('Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 2500 to 1200 bytes (52.0% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.'),
+    );
   });
 
   testWithoutContext('Does not subset a non-supported font', () async {
@@ -315,40 +325,41 @@ void main() {
     expect(subsetted, false);
   });
 
-  testWithoutContext('Non-constant instances', () async {
-    final Environment environment = createEnvironment(<String, String>{
-      kIconTreeShakerFlag: 'true',
-      kBuildMode: 'release',
+  for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.android_arm, TargetPlatform.web_javascript]) {
+    testWithoutContext('Non-constant instances $platform', () async {
+      final Environment environment = createEnvironment(<String, String>{
+        kIconTreeShakerFlag: 'true',
+        kBuildMode: 'release',
+      });
+      final File appDill = environment.buildDir.childFile('app.dill')
+        ..createSync(recursive: true);
+
+      final IconTreeShaker iconTreeShaker = IconTreeShaker(
+        environment,
+        fontManifestContent,
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
+
+      await expectLater(
+        () => iconTreeShaker.subsetFont(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          relativePath: relativePath,
+        ),
+        throwsToolExit(
+          message:
+            'Avoid non-constant invocations of IconData or try to build'
+            ' again with --no-tree-shake-icons.',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
     });
-    final File appDill = environment.buildDir.childFile('app.dill')
-      ..createSync(recursive: true);
-
-    final IconTreeShaker iconTreeShaker = IconTreeShaker(
-      environment,
-      fontManifestContent,
-      logger: logger,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-    );
-
-    addConstFinderInvocation(appDill.path, stdout: constFinderResultWithInvalid);
-
-    await expectLater(
-      () => iconTreeShaker.subsetFont(
-        input: fileSystem.file(inputPath),
-        outputPath: outputPath,
-        relativePath: relativePath,
-      ),
-      throwsToolExit(
-        message:
-          'Avoid non-constant invocations of IconData or try to build'
-          ' again with --no-tree-shake-icons.',
-      ),
-    );
-    expect(processManager, hasNoRemainingExpectations);
-  });
-
+  }
   testWithoutContext('Non-zero font-subset exit code', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',

@@ -74,24 +74,24 @@ void main() {
       expect(BuildMode.jitRelease.isPrecompiled, false);
       expect(BuildMode.jitRelease.isJit, true);
 
-      expect(BuildMode.fromName('debug'), BuildMode.debug);
-      expect(BuildMode.fromName('profile'), BuildMode.profile);
-      expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
-      expect(BuildMode.fromName('release'), BuildMode.release);
-      expect(() => BuildMode.fromName('foo'), throwsArgumentError);
+      expect(BuildMode.fromCliName('debug'), BuildMode.debug);
+      expect(BuildMode.fromCliName('profile'), BuildMode.profile);
+      expect(BuildMode.fromCliName('jit_release'), BuildMode.jitRelease);
+      expect(BuildMode.fromCliName('release'), BuildMode.release);
+      expect(() => BuildMode.fromCliName('foo'), throwsArgumentError);
     });
   });
 
   testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
-    expect(getDartNameForDarwinArch(DarwinArch.armv7),  'armv7');
-    expect(getDartNameForDarwinArch(DarwinArch.arm64),  'arm64');
-    expect(getDartNameForDarwinArch(DarwinArch.x86_64), 'x64');
+    expect(DarwinArch.armv7.dartName,  'armv7');
+    expect(DarwinArch.arm64.dartName,  'arm64');
+    expect(DarwinArch.x86_64.dartName, 'x64');
   });
 
   testWithoutContext('getNameForDarwinArch returns Apple names', () {
-    expect(getNameForDarwinArch(DarwinArch.armv7),  'armv7');
-    expect(getNameForDarwinArch(DarwinArch.arm64),  'arm64');
-    expect(getNameForDarwinArch(DarwinArch.x86_64), 'x86_64');
+    expect(DarwinArch.armv7.name,  'armv7');
+    expect(DarwinArch.arm64.name,  'arm64');
+    expect(DarwinArch.x86_64.name, 'x86_64');
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
@@ -230,6 +230,7 @@ void main() {
       treeShakeIcons: true,
       trackWidgetCreation: true,
       dartDefines: <String>['foo=2', 'bar=2'],
+      dartDefineConfigJsonMap: <String, Object>{'baz': '2'},
       dartObfuscation: true,
       splitDebugInfoPath: 'foo/',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
@@ -252,6 +253,7 @@ void main() {
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
       '-Pfizz=bazz',
+      '-Pbaz=2',
     ]);
   });
 
@@ -287,7 +289,7 @@ void main() {
           treeShakeIcons: true,
           trackWidgetCreation: true,
           dartDefines: <String>['foo=2', 'bar=2'],
-          dartDefineConfigJsonMap: <String,Object>{ 'DART_DEFINES' : 'Define a variable, but it occupies the variable name of the system'},
+          dartDefineConfigJsonMap: <String, Object>{'DART_DEFINES': 'Define a variable, but it occupies the variable name of the system'},
           dartObfuscation: true,
       );
       buildInfo.toEnvironmentConfig();
@@ -313,11 +315,11 @@ void main() {
           treeShakeIcons: true,
           trackWidgetCreation: true,
           dartDefines: <String>['foo=2', 'bar=2'],
-          dartDefineConfigJsonMap: <String,Object>{ 'dart-defines' : 'Define a variable, but it occupies the variable name of the system'},
+          dartDefineConfigJsonMap: <String, Object>{'dart-defines': 'Define a variable, but it occupies the variable name of the system'},
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
     testUsingContext('toGradleConfig repeated variable with not set', () async {
@@ -326,11 +328,11 @@ void main() {
           treeShakeIcons: true,
           trackWidgetCreation: true,
           dartDefines: <String>['dart-defines=Define a variable, but it occupies the variable name of the system'],
-          dartDefineConfigJsonMap: <String,Object>{ 'dart-defines' : 'Define a variable, but it occupies the variable name of the system'},
+          dartDefineConfigJsonMap: <String, Object>{'dart-defines': 'Define a variable, but it occupies the variable name of the system'},
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('he key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
     testUsingContext('toGradleConfig with androidProjectArgs override gradle project variant', () async {
@@ -338,11 +340,11 @@ void main() {
           treeShakeIcons: true,
           trackWidgetCreation: true,
           androidProjectArgs: <String>['applicationId=com.google'],
-          dartDefineConfigJsonMap: <String,Object>{ 'applicationId' : 'override applicationId'},
+          dartDefineConfigJsonMap: <String, Object>{'applicationId': 'override applicationId'},
           dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used'));
+      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
   });

@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [KeyEventManager.keyMessageHandler].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(
-  const MaterialApp(
-    home: Scaffold(
-      body: Center(
-        child: FallbackDemo(),
-      )
+/// Flutter code sample for [KeyEventManager.keyMessageHandler].
+
+void main() {
+  runApp(
+    const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: FallbackDemo(),
+        ),
+      ),
     ),
-  ),
-);
+  );
+}
 
 class FallbackDemo extends StatefulWidget {
   const FallbackDemo({super.key});
@@ -38,7 +40,7 @@ class FallbackDemoState extends State<FallbackDemo> {
       // to type text, because these key events will no longer be sent to the
       // text input system.
       return false;
-    }
+    },
   );
 
   @override
@@ -52,7 +54,7 @@ class FallbackDemoState extends State<FallbackDemo> {
         child: Column(
           children: <Widget>[
             const Text('This area handles key presses that are unhandled by any shortcuts, by '
-              'displaying them below. Try text shortcuts such as Ctrl-A!'),
+                'displaying them below. Try text shortcuts such as Ctrl-A!'),
             Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
             const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
             Shortcuts(
@@ -67,7 +69,7 @@ class FallbackDemoState extends State<FallbackDemo> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
@@ -91,7 +93,7 @@ class FallbackFocusNode {
 ///
 /// A global registrar like [FallbackKeyEventRegistrar] is almost always needed
 /// when patching [KeyEventManager.keyMessageHandler]. This is because
-/// [FallbackFocus] will add and and remove callbacks constantly, but
+/// [FallbackFocus] will add and remove callbacks constantly, but
 /// [KeyEventManager.keyMessageHandler] can only be patched once, and can not
 /// be unpatched. Therefore [FallbackFocus] must not directly interact with
 /// [KeyEventManager.keyMessageHandler], but through a separate registrar that
@@ -113,6 +115,7 @@ class FallbackKeyEventRegistrar {
     }
     return _instance;
   }
+
   static bool _initialized = false;
   static final FallbackKeyEventRegistrar _instance = FallbackKeyEventRegistrar._();
 

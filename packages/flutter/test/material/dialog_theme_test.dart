@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -46,6 +47,12 @@ RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
 }
 
 void main() {
+  test('DialogTheme lerp special cases', () {
+    expect(DialogTheme.lerp(null, null, 0), const DialogTheme());
+    const DialogTheme theme = DialogTheme();
+    expect(identical(DialogTheme.lerp(theme, theme, 0.5), theme), true);
+  });
+
   testWidgets('Dialog Theme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DialogTheme(
@@ -269,7 +276,7 @@ void main() {
 
     // first is Text('X')
     final RichText text = tester.widget(find.byType(RichText).last);
-    expect(text.text.style!.color, ThemeData().colorScheme.secondary);
+    expect(text.text.style!.color, theme.colorScheme.secondary);
   });
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {

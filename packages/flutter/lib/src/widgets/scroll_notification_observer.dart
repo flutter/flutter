@@ -35,7 +35,7 @@ class _ScrollNotificationObserverScope extends InheritedWidget {
   bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
   final ScrollNotificationCallback listener;
 }
@@ -45,13 +45,13 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// To add a listener to a [ScrollNotificationObserver] ancestor:
 ///
 /// ```dart
-/// ScrollNotificationObserver.of(context)!.addListener(_listener);
+/// ScrollNotificationObserver.of(context).addListener(_listener);
 /// ```
 ///
 /// To remove the listener from a [ScrollNotificationObserver] ancestor:
 ///
 /// ```dart
-/// ScrollNotificationObserver.of(context)!.removeListener(_listener);
+/// ScrollNotificationObserver.of(context).removeListener(_listener);
 /// ```
 ///
 /// Stateful widgets that share an ancestor [ScrollNotificationObserver] typically
@@ -78,16 +78,57 @@ class ScrollNotificationObserver extends StatefulWidget {
   const ScrollNotificationObserver({
     super.key,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// The subtree below this widget.
   final Widget child;
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// If there is no enclosing [ScrollNotificationObserver] widget, then null is returned.
-  static ScrollNotificationObserverState? of(BuildContext context) {
+  /// If there is no enclosing [ScrollNotificationObserver] widget, then null is
+  /// returned.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [ScrollNotificationObserver] in the [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [ScrollNotificationObserver.of], which is similar to this method, but
+  ///   asserts if no [ScrollNotificationObserver] ancestor is found.
+  static ScrollNotificationObserverState? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
+  }
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no ancestor is found, this method will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [ScrollNotificationObserver] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [ScrollNotificationObserver.maybeOf], which is similar to this method,
+  ///   but returns null if no [ScrollNotificationObserver] ancestor is found.
+  static ScrollNotificationObserverState of(BuildContext context) {
+    final ScrollNotificationObserverState? observerState = maybeOf(context);
+    assert(() {
+      if (observerState == null) {
+        throw FlutterError(
+          'ScrollNotificationObserver.of() was called with a context that does not contain a '
+          'ScrollNotificationObserver widget.\n'
+          'No ScrollNotificationObserver widget ancestor could be found starting from the '
+          'context that was passed to ScrollNotificationObserver.of(). This can happen '
+          'because you are using a widget that looks for a ScrollNotificationObserver '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return observerState!;
   }
 
   @override
@@ -167,16 +208,12 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   @override
   Widget build(BuildContext context) {
-    // A ScrollMetricsNotification allows listeners to be notified for an
-    // initial state, as well as if the content dimensions change without
-    // scrolling.
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (ScrollMetricsNotification notification) {
-        _notifyListeners(_ConvertedScrollMetricsNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ));
+        // A ScrollMetricsNotification allows listeners to be notified for an
+        // initial state, as well as if the content dimensions change without
+        // scrolling.
+        _notifyListeners(notification.asScrollUpdate());
         return false;
       },
       child: NotificationListener<ScrollNotification>(
@@ -198,12 +235,4 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     _listeners = null;
     super.dispose();
   }
-}
-
-class _ConvertedScrollMetricsNotification extends ScrollUpdateNotification {
-  _ConvertedScrollMetricsNotification({
-    required super.metrics,
-    required super.context,
-    required super.depth,
-  });
 }

@@ -23,7 +23,7 @@ void main() {
     ).forEach(runner.addCommand);
     verifyCommandRunner(runner);
     for (final Command<void> command in runner.commands.values) {
-      if(command.name == 'analyze') {
+      if (command.name == 'analyze') {
         final AnalyzeCommand analyze = command as AnalyzeCommand;
         expect(analyze.allProjectValidators().length, 2);
       }
@@ -47,13 +47,13 @@ void main() {
     await runner.run(<String>['dummy', '--key']);
 
     expect(command.boolArg('key'), true);
-    expect(command.boolArg('empty'), null);
+    expect(() => command.boolArg('non-existent'), throwsArgumentError);
 
-    expect(command.boolArgDeprecated('key'), true);
-    expect(() => command.boolArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(command.boolArg('key'), true);
+    expect(() => command.boolArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.boolArg('key-false'), false);
-    expect(command.boolArgDeprecated('key-false'), false);
+    expect(command.boolArg('key-false'), false);
   });
 
   testUsingContext('String? safe argResults', () async {
@@ -72,10 +72,10 @@ void main() {
     await runner.run(<String>['dummy', '--key=value']);
 
     expect(command.stringArg('key'), 'value');
-    expect(command.stringArg('empty'), null);
+    expect(() => command.stringArg('non-existent'), throwsArgumentError);
 
-    expect(command.stringArgDeprecated('key'), 'value');
-    expect(() => command.stringArgDeprecated('empty'), throwsA(const TypeMatcher<ArgumentError>()));
+    expect(command.stringArg('key'), 'value');
+    expect(() => command.stringArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
   });
 
   testUsingContext('List<String> safe argResults', () async {
@@ -97,7 +97,7 @@ void main() {
     await runner.run(<String>['dummy', '--key', 'a']);
 
     // throws error when trying to parse non-existent key.
-    expect(() => command.stringsArg('empty'),throwsA(const TypeMatcher<ArgumentError>()));
+    expect(() => command.stringsArg('non-existent'), throwsA(const TypeMatcher<ArgumentError>()));
 
     expect(command.stringsArg('key'), <String>['a']);
 
@@ -151,6 +151,7 @@ final RegExp _bannedQuotePatterns = RegExp(r" '|' |'\.|\('|'\)|`");
 final RegExp _bannedArgumentReferencePatterns = RegExp(r'[^"=]--[^ ]');
 final RegExp _questionablePatterns = RegExp(r'[a-z]\.[A-Z]');
 final RegExp _bannedUri = RegExp(r'\b[Uu][Rr][Ii]\b');
+final RegExp _nonSecureFlutterDartUrl = RegExp(r'http://([a-z0-9-]+\.)*(flutter|dart)\.dev', caseSensitive: false);
 const String _needHelp = "Every option must have help explaining what it does, even if it's "
                          'for testing purposes, because this is the bare minimum of '
                          'documentation we can add just for ourselves. If it is not intended '
@@ -175,7 +176,10 @@ void verifyOptions(String? command, Iterable<Option> options) {
       expect(option.name, matches(_allowedArgumentNamePattern), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (Is it all lowercase? Does it use hyphens rather than underscores?)');
     }
     expect(option.name, isNot(matches(_bannedArgumentNamePattern)), reason: '$_header$target--${option.name}" is not a valid name for a command line argument. (We use "--foo-url", not "--foo-uri", for example.)');
-    expect(option.hide, isFalse, reason: '${_header}Help for $target--${option.name}" is always hidden. $_needHelp');
+    // The flag --sound-null-safety is deprecated
+    if (option.name != FlutterOptions.kNullSafety && option.name != FlutterOptions.kNullAssertions) {
+      expect(option.hide, isFalse, reason: '${_header}Help for $target--${option.name}" is always hidden. $_needHelp');
+    }
     expect(option.help, isNotNull, reason: '${_header}Help for $target--${option.name}" has null help. $_needHelp');
     expect(option.help, isNotEmpty, reason: '${_header}Help for $target--${option.name}" has empty help. $_needHelp');
     expect(option.help, isNot(matches(_bannedLeadingPatterns)), reason: '${_header}A line in the help for $target--${option.name}" starts with a lowercase letter. For stylistic consistency, all help messages must start with a capital letter.');
@@ -209,6 +213,7 @@ void verifyOptions(String? command, Iterable<Option> options) {
     }
     expect(option.help, isNot(endsWith(':')), reason: '${_header}Help for $target--${option.name}" ends with a colon, which seems unlikely to be correct.');
     expect(option.help, isNot(contains(_bannedUri)), reason: '${_header}Help for $target--${option.name}" uses the term "URI" rather than "URL".');
+    expect(option.help, isNot(contains(_nonSecureFlutterDartUrl)), reason: '${_header}Help for $target--${option.name}" links to a non-secure ("http") version of a Flutter or Dart site.');
     // TODO(ianh): add some checking for embedded URLs to make sure we're consistent on how we format those.
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }

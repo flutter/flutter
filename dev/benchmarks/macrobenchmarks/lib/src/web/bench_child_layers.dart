@@ -32,17 +32,17 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   double wobbleCounter = 0;
 
   late List<Picture> _pictures;
-  late Size windowSize;
+  late Size viewSize;
   late Size cellSize;
   late Size rectSize;
 
   @override
   Future<void> setUpAll() async {
     _pictures = <Picture>[];
-    windowSize = window.physicalSize;
+    viewSize = view.physicalSize;
     cellSize = Size(
-      windowSize.width / kColumns,
-      windowSize.height / kRows,
+      viewSize.width / kColumns,
+      viewSize.height / kRows,
     );
     rectSize = cellSize * 0.8;
 

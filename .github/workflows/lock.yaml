@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: dessant/lock-threads@e460dfeb36e731f3aeb214be6b0c9a9d9a67eda6
+      - uses: dessant/lock-threads@c1b35aecc5cdb1a34539d14196df55838bb2f836
         with:
           process-only: 'issues'
           github-token: ${{ github.token }}

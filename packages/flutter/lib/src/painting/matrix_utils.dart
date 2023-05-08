@@ -8,17 +8,12 @@ import 'package:vector_math/vector_math_64.dart';
 import 'basic_types.dart';
 
 /// Utility functions for working with matrices.
-class MatrixUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  MatrixUtils._();
-
+abstract final class MatrixUtils {
   /// Returns the given [transform] matrix as an [Offset], if the matrix is
   /// nothing but a 2D translation.
   ///
   /// Otherwise, returns null.
   static Offset? getAsTranslation(Matrix4 transform) {
-    assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[0] == 1.0 && // col 1
@@ -45,7 +40,6 @@ class MatrixUtils {
   ///
   /// Otherwise, returns null.
   static double? getAsScale(Matrix4 transform) {
-    assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[1] == 0.0 && // col 1 (value 0 is the scale)
@@ -81,7 +75,6 @@ class MatrixUtils {
     if (b == null) {
       return isIdentity(a);
     }
-    assert(a != null && b != null);
     return a.storage[0] == b.storage[0]
         && a.storage[1] == b.storage[1]
         && a.storage[2] == b.storage[2]
@@ -102,7 +95,6 @@ class MatrixUtils {
 
   /// Whether the given matrix is the identity matrix.
   static bool isIdentity(Matrix4 a) {
-    assert(a != null);
     return a.storage[0] == 1.0 // col 1
         && a.storage[1] == 0.0
         && a.storage[2] == 0.0
@@ -437,7 +429,6 @@ class MatrixUtils {
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
   static Rect inverseTransformRect(Matrix4 transform, Rect rect) {
-    assert(rect != null);
     // As exposed by `unrelated_type_equality_checks`, this assert was a no-op.
     // Fixing it introduces a bunch of runtime failures; for more context see:
     // https://github.com/flutter/flutter/pull/31568
@@ -455,8 +446,8 @@ class MatrixUtils {
   ///
   /// The `radius` simulates the radius of the cylinder the plane is being
   /// wrapped onto. If the transformation is applied to a 0-dimensional dot
-  /// instead of a plane, the dot would simply translate by +/- `radius` pixels
-  /// along the `orientation` [Axis] when rotating from 0 to +/- 90 degrees.
+  /// instead of a plane, the dot would translate by ± `radius` pixels
+  /// along the `orientation` [Axis] when rotating from 0 to ±90 degrees.
   ///
   /// A positive radius means the object is closest at 0 `angle` and a negative
   /// radius means the object is closest at π `angle` or 180 degrees.
@@ -478,7 +469,7 @@ class MatrixUtils {
   /// The `orientation` is the direction of the rotation axis.
   ///
   /// Because the viewing position is a point, it's never possible to see the
-  /// outer side of the cylinder at or past +/- π / 2 or 90 degrees and it's
+  /// outer side of the cylinder at or past ±π/2 or 90 degrees and it's
   /// almost always possible to end up seeing the inner side of the cylinder
   /// or the back side of the transformed plane before π / 2 when perspective > 0.
   static Matrix4 createCylindricalProjectionTransform({
@@ -487,10 +478,7 @@ class MatrixUtils {
     double perspective = 0.001,
     Axis orientation = Axis.vertical,
   }) {
-    assert(radius != null);
-    assert(angle != null);
     assert(perspective >= 0 && perspective <= 1.0);
-    assert(orientation != null);
 
     // Pre-multiplied matrix of a projection matrix and a view matrix.
     //
@@ -561,8 +549,7 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     super.showName,
     super.defaultValue,
     super.level,
-  }) : assert(showName != null),
-       assert(level != null);
+  });
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {

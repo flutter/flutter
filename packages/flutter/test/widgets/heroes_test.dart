@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
-import 'dart:ui' show WindowPadding;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -184,28 +183,8 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) => Text(widget.value);
 }
 
-class FakeWindowPadding implements WindowPadding {
-  const FakeWindowPadding({
-    this.left = 0.0,
-    this.top = 0.0,
-    this.right = 0.0,
-    this.bottom = 0.0,
-  });
-
-  @override
-  final double left;
-  @override
-  final double top;
-  @override
-  final double right;
-  @override
-  final double bottom;
-}
-
-
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
-  assert(testImage != null);
 
   setUp(() {
     transitionFromUserGestures = false;
@@ -3091,72 +3070,71 @@ Future<void> main() async {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
   testWidgets('smooth transition between different incoming data', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-      const Key imageKey1 = Key('image1');
-      const Key imageKey2 = Key('image2');
-      final TestImageProvider imageProvider = TestImageProvider(testImage);
-      final TestWidgetsFlutterBinding testBinding = tester.binding;
+    addTearDown(tester.view.reset);
 
-      testBinding.window.paddingTestValue = const FakeWindowPadding(top: 50);
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    const Key imageKey1 = Key('image1');
+    const Key imageKey2 = Key('image2');
+    final TestImageProvider imageProvider = TestImageProvider(testImage);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          navigatorKey: navigatorKey,
-          home: Scaffold(
-            appBar: AppBar(title: const Text('test')),
-            body: Hero(
-              tag: 'imageHero',
-              child: GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                children: <Widget>[
-                  Image(image: imageProvider, key: imageKey1),
-                ],
-              ),
+    tester.view.padding = const FakeViewPadding(top: 50);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(
+          appBar: AppBar(title: const Text('test')),
+          body: Hero(
+            tag: 'imageHero',
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              children: <Widget>[
+                Image(image: imageProvider, key: imageKey1),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final MaterialPageRoute<void> route2 = MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return Scaffold(
-            body: Hero(
-              tag: 'imageHero',
-              child: GridView.count(
-                crossAxisCount: 3,
-                shrinkWrap: true,
-                children: <Widget>[
-                  Image(image: imageProvider, key: imageKey2),
-                ],
-              ),
+    final MaterialPageRoute<void> route2 = MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          body: Hero(
+            tag: 'imageHero',
+            child: GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              children: <Widget>[
+                Image(image: imageProvider, key: imageKey2),
+              ],
             ),
-          );
-        },
-      );
+          ),
+        );
+      },
+    );
 
-      // Load images.
-      imageProvider.complete();
-      await tester.pump();
+    // Load images.
+    imageProvider.complete();
+    await tester.pump();
 
-      final double forwardRest = tester.getTopLeft(find.byType(Image)).dy;
-      navigatorKey.currentState!.push(route2);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
-      await tester.pumpAndSettle();
+    final double forwardRest = tester.getTopLeft(find.byType(Image)).dy;
+    navigatorKey.currentState!.push(route2);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+    await tester.pumpAndSettle();
 
-      navigatorKey.currentState!.pop(route2);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
-      await tester.pumpAndSettle();
-      expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
-
-      testBinding.window.clearAllTestValues();
-    },
-  );
+    navigatorKey.currentState!.pop(route2);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byType(Image)).dy, moreOrLessEquals(forwardRest, epsilon: 0.1));
+  });
 }
 
 class TestDependencies extends StatelessWidget {
@@ -3169,7 +3147,7 @@ class TestDependencies extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromView(View.of(context)),
         child: child,
       ),
     );

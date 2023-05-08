@@ -2,34 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [IgnorePointer].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [IgnorePointer].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const IgnorePointerApp());
 
-  static const String _title = 'Flutter Code Sample';
+class IgnorePointerApp extends StatelessWidget {
+  const IgnorePointerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text('IgnorePointer Sample'),
+        ),
+        body: const Center(child: IgnorePointerExample()),
+      ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class IgnorePointerExample extends StatefulWidget {
+  const IgnorePointerExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<IgnorePointerExample> createState() => _IgnorePointerExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _IgnorePointerExampleState extends State<IgnorePointerExample> {
   bool ignoring = false;
   void setIgnoring(bool newValue) {
     setState(() {
@@ -39,10 +42,21 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: ElevatedButton(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Text('Ignoring: $ignoring'),
+        IgnorePointer(
+          ignoring: ignoring,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.all(24.0),
+            ),
+            onPressed: () {},
+            child: const Text('Click me!'),
+          ),
+        ),
+        FilledButton(
           onPressed: () {
             setIgnoring(!ignoring);
           },
@@ -50,22 +64,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             ignoring ? 'Set ignoring to false' : 'Set ignoring to true',
           ),
         ),
-      ),
-      body: Center(
-        child: IgnorePointer(
-          ignoring: ignoring,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Text('Ignoring: $ignoring'),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Click me!'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 }

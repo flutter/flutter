@@ -99,9 +99,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
     this.borderColor,
     this.pressedColor,
     this.padding,
-  }) : assert(children != null),
-       assert(children.length >= 2),
-       assert(onValueChanged != null),
+  }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.any((T child) => child == groupValue),
          'The groupValue must be either null or one of the keys in the children map.',
@@ -407,7 +405,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
 }
 
 class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedControlRenderWidget({
+  const _SegmentedControlRenderWidget({
     super.key,
     super.children,
     required this.selectedIndex,
@@ -458,8 +456,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     required TextDirection textDirection,
     required List<Color> backgroundColors,
     required Color borderColor,
-  }) : assert(textDirection != null),
-       _textDirection = textDirection,
+  }) : _textDirection = textDirection,
        _selectedIndex = selectedIndex,
        _pressedIndex = pressedIndex,
        _backgroundColors = backgroundColors,
@@ -660,14 +657,12 @@ class _RenderSegmentedControl<T> extends RenderBox
           lastChild,
           firstChild,
         );
-        break;
       case TextDirection.ltr:
         _layoutRects(
           childAfter,
           firstChild,
           lastChild,
         );
-        break;
     }
 
     size = _computeOverallSizeFromChildSize(childSize);
@@ -685,7 +680,6 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child, int childIndex) {
-    assert(child != null);
 
     final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;
 
@@ -708,7 +702,6 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     RenderBox? child = lastChild;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData! as _SegmentedControlContainerBoxParentData;

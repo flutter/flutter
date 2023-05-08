@@ -47,8 +47,7 @@ class ChipTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Specifies the color, shape, and text style values for descendant chip
   /// widgets.
@@ -113,7 +112,8 @@ class ChipTheme extends InheritedTheme {
 ///    Typically this is a [Text] widget.
 ///  * The "delete icon", which is a widget that appears at the end of the chip.
 ///  * The chip is disabled when it is not accepting user input. Only some chips
-///    have a disabled state: [InputChip], [ChoiceChip], and [FilterChip].
+///    have a disabled state: [ActionChip], [ChoiceChip], [FilterChip], and
+///    [InputChip].
 ///
 /// The simplest way to create a ChipThemeData is to use [copyWith] on the one
 /// you get from [ChipTheme.of], or create an entirely new one with
@@ -225,8 +225,6 @@ class ChipThemeData with Diagnosticable {
   }) {
     assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
     assert(primaryColor == null || brightness == null, 'Only one of primaryColor or brightness may be specified');
-    assert(secondaryColor != null);
-    assert(labelStyle != null);
 
     if (primaryColor != null) {
       brightness = ThemeData.estimateBrightnessForColor(primaryColor);
@@ -286,8 +284,8 @@ class ChipThemeData with Diagnosticable {
   /// [DisabledChipAttributes.disabledColor], the background color
   /// which indicates that the chip is not enabled.
   ///
-  /// This property applies to [ChoiceChip], [FilterChip],
-  /// [InputChip], [RawChip].
+  /// This property applies to [ActionChip], [ChoiceChip],
+  /// [FilterChip], [InputChip], and [RawChip].
   final Color? disabledColor;
 
   /// Overrides the default for
@@ -486,9 +484,8 @@ class ChipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ChipThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),

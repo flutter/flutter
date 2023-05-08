@@ -125,15 +125,14 @@ void main() {
           // Measure the delta in rotation.
           // Check that it never grows by more than a safe amount.
           //
-          // Note that there may be multiple transitions all active at
+          // There may be multiple transitions all active at
           // the same time. We are concerned only with the closest one.
           final Iterable<RotationTransition> rotationTransitions = tester.widgetList(
             find.byType(RotationTransition),
           );
           final Iterable<double> currentRotations = rotationTransitions.map((RotationTransition t) => t.turns.value);
 
-          if (previousRotations != null && previousRotations!.isNotEmpty
-              && currentRotations != null && currentRotations.isNotEmpty
+          if (previousRotations != null && previousRotations!.isNotEmpty && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
             for (final double currentRotation in currentRotations) {
@@ -296,6 +295,21 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 572.0));
   });
 
+  testWidgets('Contained floating action button locations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildFrame(
+        location: FloatingActionButtonLocation.endContained,
+        bab: const SizedBox(height: 100.0),
+        viewInsets: EdgeInsets.zero,
+      ),
+    );
+
+    // Scaffold 800x600, FAB is 56x56, BAB is 800x100, FAB's center is
+    // at the top of the BAB.
+    // Formula: scaffold height - BAB height + FAB height / 2 + BAB top & bottom margins.
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 550.0));
+ });
+
   testWidgets('Mini-start-top floating action button location', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -303,8 +317,8 @@ void main() {
           appBar: AppBar(),
           floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
           floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-          body: Column(
-            children: const <Widget>[
+          body: const Column(
+            children: <Widget>[
               ListTile(
                 leading: CircleAvatar(),
               ),
@@ -428,6 +442,12 @@ void main() {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _dockedOffsetY));
+    });
+
+    testWidgets('endContained', (WidgetTester tester) async {
+      await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endContained));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _containedOffsetY));
     });
 
     testWidgets('miniStartTop', (WidgetTester tester) async {
@@ -1617,6 +1637,7 @@ const double _miniRightOffsetX = _rightOffsetX + kMiniButtonOffsetAdjustment;
 const double _topOffsetY = 56.0;
 const double _floatOffsetY = 500.0;
 const double _dockedOffsetY = 544.0;
+const double _containedOffsetY = 544.0 + 56.0 / 2;
 const double _miniFloatOffsetY = _floatOffsetY + kMiniButtonOffsetAdjustment;
 
 Widget _singleFabScaffold(
@@ -1717,16 +1738,13 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     double fabX;
-    assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
-        break;
       case TextDirection.ltr:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
         fabX = startPadding;
-        break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return Offset(fabX, fabY);

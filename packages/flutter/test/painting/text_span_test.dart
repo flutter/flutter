@@ -282,6 +282,51 @@ void main() {
     expect(collector[0].semanticsLabel, 'bbb');
   });
 
+  test('TextSpan visitDirectChildren', () {
+    List<InlineSpan> directChildrenOf(InlineSpan root) {
+      final List<InlineSpan> visitOrder = <InlineSpan>[];
+      root.visitDirectChildren((InlineSpan span) {
+        visitOrder.add(span);
+        return true;
+      });
+      return visitOrder;
+    }
+
+    const TextSpan leaf1 = TextSpan(text: 'leaf1');
+    const TextSpan leaf2 = TextSpan(text: 'leaf2');
+
+    const TextSpan branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
+    const TextSpan branch2 = TextSpan(text: 'branch2');
+
+    const TextSpan root = TextSpan(children: <InlineSpan>[branch1, branch2]);
+
+    expect(directChildrenOf(root), <TextSpan>[branch1, branch2]);
+    expect(directChildrenOf(branch1), <TextSpan>[leaf1, leaf2]);
+    expect(directChildrenOf(branch2), isEmpty);
+    expect(directChildrenOf(leaf1), isEmpty);
+    expect(directChildrenOf(leaf2), isEmpty);
+
+    int? indexInTree(InlineSpan target) {
+      int index = 0;
+      bool findInSubtree(InlineSpan subtreeRoot) {
+        if (identical(target, subtreeRoot)) {
+          // return false to stop traversal.
+          return false;
+        }
+        index += 1;
+        return subtreeRoot.visitDirectChildren(findInSubtree);
+      }
+      return findInSubtree(root) ? null : index;
+    }
+
+    expect(indexInTree(root), 0);
+    expect(indexInTree(branch1), 1);
+    expect(indexInTree(leaf1), 2);
+    expect(indexInTree(leaf2), 3);
+    expect(indexInTree(branch2), 4);
+    expect(indexInTree(const TextSpan(text: 'foobar')), null);
+  });
+
   testWidgets('handles mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(

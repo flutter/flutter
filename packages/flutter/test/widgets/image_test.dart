@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:async';
 import 'dart:io';
@@ -1997,7 +1998,13 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('image_test.missing.1.png'),
     );
-    expect(tester.takeException().toString(), startsWith('Unable to load asset: '));
+    expect(
+      tester.takeException().toString(),
+      equals(
+        'Unable to load asset: "missing-asset".\n'
+        'The asset does not exist or has empty data.',
+      ),
+    );
     await tester.pump();
     await expectLater(
       find.byKey(key),
@@ -2024,9 +2031,7 @@ void main() {
 
 @immutable
 class _ConfigurationAwareKey {
-  const _ConfigurationAwareKey(this.provider, this.configuration)
-    : assert(provider != null),
-      assert(configuration != null);
+  const _ConfigurationAwareKey(this.provider, this.configuration);
 
   final ImageProvider provider;
   final ImageConfiguration configuration;
@@ -2168,7 +2173,7 @@ class _DebouncingImageProvider extends ImageProvider<Object> {
   Future<Object> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  ImageStreamCompleter loadBuffer(Object key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
 }
 
 class _FailingImageProvider extends ImageProvider<int> {
@@ -2177,11 +2182,7 @@ class _FailingImageProvider extends ImageProvider<int> {
     this.failOnLoad = false,
     required this.throws,
     required this.image,
-  }) : assert(failOnLoad != null),
-       assert(failOnObtainKey != null),
-       assert(failOnLoad == true || failOnObtainKey == true),
-       assert(throws != null),
-       assert(image != null);
+  }) : assert(failOnLoad == true || failOnObtainKey == true);
 
   final bool failOnObtainKey;
   final bool failOnLoad;

@@ -190,8 +190,8 @@ void main() {
       routes: <String, WidgetBuilder>{
         '/foo' : (BuildContext context) => const Text('New route'),
       },
-      home: Row(
-        children: const <Widget>[
+      home: const Row(
+        children: <Widget>[
           _TickingWidget(),
           _MultiTickingWidget(),
           Text('Old route'),

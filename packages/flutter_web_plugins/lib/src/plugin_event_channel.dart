@@ -43,8 +43,7 @@ class PluginEventChannel<T> {
     this.name, [
     this.codec = const StandardMethodCodec(),
     this.binaryMessenger,
-  ]) : assert(name != null),
-       assert(codec != null);
+  ]);
 
   /// The logical channel on which communication happens.
   ///
@@ -108,7 +107,7 @@ class _EventChannelHandler<T> {
     this.codec,
     this.controller,
     this.messenger,
-  ) : assert(messenger != null);
+  );
 
   final String name;
   final MethodCodec codec;

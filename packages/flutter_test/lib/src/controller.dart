@@ -14,6 +14,7 @@ import 'event_simulation.dart';
 import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
+import 'window.dart';
 
 /// The default drag touch slop used to break up a large drag into multiple
 /// smaller moves.
@@ -22,6 +23,202 @@ import 'test_pointer.dart';
 const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
+
+/// Class that programmatically interacts with the [Semantics] tree.
+///
+/// Allows for testing of the [Semantics] tree, which is used by assistive
+/// technology, search engines, and other analysis software to determine the
+/// meaning of an application.
+///
+/// Should be accessed through [WidgetController.semantics]. If no custom
+/// implementation is provided, a default [SemanticsController] will be created.
+class SemanticsController {
+  /// Creates a [SemanticsController] that uses the given binding. Will be
+  /// automatically created as part of instantiating a [WidgetController], but
+  /// a custom implementation can be passed via the [WidgetController] constructor.
+  SemanticsController._(WidgetsBinding binding) : _binding = binding;
+
+  static final int _scrollingActions =
+    SemanticsAction.scrollUp.index |
+    SemanticsAction.scrollDown.index |
+    SemanticsAction.scrollLeft.index |
+    SemanticsAction.scrollRight.index;
+
+  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+  static final int _importantFlagsForAccessibility =
+    SemanticsFlag.hasCheckedState.index |
+    SemanticsFlag.hasToggledState.index |
+    SemanticsFlag.hasEnabledState.index |
+    SemanticsFlag.isButton.index |
+    SemanticsFlag.isTextField.index |
+    SemanticsFlag.isFocusable.index |
+    SemanticsFlag.isSlider.index |
+    SemanticsFlag.isInMutuallyExclusiveGroup.index;
+
+  final WidgetsBinding _binding;
+
+  /// Attempts to find the [SemanticsNode] of first result from `finder`.
+  ///
+  /// If the object identified by the finder doesn't own its semantic node,
+  /// this will return the semantics data of the first ancestor with semantics.
+  /// The ancestor's semantic data will include the child's as well as
+  /// other nodes that have been merged together.
+  ///
+  /// If the [SemanticsNode] of the object identified by the finder is
+  /// force-merged into an ancestor (e.g. via the [MergeSemantics] widget)
+  /// the node into which it is merged is returned. That node will include
+  /// all the semantics information of the nodes merged into it.
+  ///
+  /// Will throw a [StateError] if the finder returns more than one element or
+  /// if no semantics are found or are not enabled.
+  SemanticsNode find(Finder finder) {
+    TestAsyncUtils.guardSync();
+    if (!_binding.semanticsEnabled) {
+      throw StateError('Semantics are not enabled.');
+    }
+    final Iterable<Element> candidates = finder.evaluate();
+    if (candidates.isEmpty) {
+      throw StateError('Finder returned no matching elements.');
+    }
+    if (candidates.length > 1) {
+      throw StateError('Finder returned more than one element.');
+    }
+    final Element element = candidates.single;
+    RenderObject? renderObject = element.findRenderObject();
+    SemanticsNode? result = renderObject?.debugSemantics;
+    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
+      renderObject = renderObject.parent as RenderObject?;
+      result = renderObject?.debugSemantics;
+    }
+    if (result == null) {
+      throw StateError('No Semantics data found.');
+    }
+    return result;
+  }
+
+  /// Simulates a traversal of the currently visible semantics tree as if by
+  /// assistive technologies.
+  ///
+  /// Starts at the node for `start`. If `start` is not provided, then the
+  /// traversal begins with the first accessible node in the tree. If `start`
+  /// finds zero elements or more than one element, a [StateError] will be
+  /// thrown.
+  ///
+  /// Ends at the node for `end`, inclusive. If `end` is not provided, then the
+  /// traversal ends with the last accessible node in the currently available
+  /// tree. If `end` finds zero elements or more than one element, a
+  /// [StateError] will be thrown.
+  ///
+  /// Since the order is simulated, edge cases that differ between platforms
+  /// (such as how the last visible item in a scrollable list is handled) may be
+  /// inconsistent with platform behavior, but are expected to be sufficient for
+  /// testing order, availability to assistive technologies, and interactions.
+  ///
+  /// ## Sample Code
+  ///
+  /// ```
+  /// testWidgets('MyWidget', (WidgetTester tester) async {
+  ///   await tester.pumpWidget(MyWidget());
+  ///
+  ///   expect(
+  ///     tester.semantics.simulatedAccessibilityTraversal(),
+  ///     containsAllInOrder([
+  ///       containsSemantics(label: 'My Widget'),
+  ///       containsSemantics(label: 'is awesome!', isChecked: true),
+  ///     ]),
+  ///   );
+  /// });
+  /// ```
+  ///
+  /// See also:
+  ///
+  /// * [containsSemantics] and [matchesSemantics], which can be used to match
+  ///   against a single node in the traversal.
+  /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
+  ///   match the order allowing extra nodes before after and between matching
+  ///   parts of the traversal.
+  /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
+  ///   match the order of the traversal.
+  Iterable<SemanticsNode> simulatedAccessibilityTraversal({Finder? start, Finder? end}) {
+    TestAsyncUtils.guardSync();
+    final List<SemanticsNode> traversal = <SemanticsNode>[];
+    _traverse(_binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!, traversal);
+
+    int startIndex = 0;
+    int endIndex = traversal.length - 1;
+
+    if (start != null) {
+      final SemanticsNode startNode = find(start);
+      startIndex = traversal.indexOf(startNode);
+      if (startIndex == -1) {
+        throw StateError(
+          'The expected starting node was not found.\n'
+          'Finder: ${start.description}\n\n'
+          'Expected Start Node: $startNode\n\n'
+          'Traversal: [\n  ${traversal.join('\n  ')}\n]');
+      }
+    }
+
+    if (end != null) {
+      final SemanticsNode endNode = find(end);
+      endIndex = traversal.indexOf(endNode);
+      if (endIndex == -1) {
+        throw StateError(
+          'The expected ending node was not found.\n'
+          'Finder: ${end.description}\n\n'
+          'Expected End Node: $endNode\n\n'
+          'Traversal: [\n  ${traversal.join('\n  ')}\n]');
+      }
+    }
+
+    return traversal.getRange(startIndex, endIndex + 1);
+  }
+
+  /// Recursive depth first traversal of the specified `node`, adding nodes
+  /// that are important for semantics to the `traversal` list.
+  void _traverse(SemanticsNode node, List<SemanticsNode> traversal){
+    if (_isImportantForAccessibility(node)) {
+      traversal.add(node);
+    }
+
+    final List<SemanticsNode> children = node.debugListChildrenInOrder(DebugSemanticsDumpOrder.traversalOrder);
+    for (final SemanticsNode child in children) {
+      _traverse(child, traversal);
+    }
+  }
+
+  /// Whether or not the node is important for semantics. Should match most cases
+  /// on the platforms, but certain edge cases will be inconsistent.
+  ///
+  /// Based on:
+  ///
+  /// * [flutter/engine/AccessibilityBridge.java#SemanticsNode.isFocusable()](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/view/AccessibilityBridge.java#L2641)
+  /// * [flutter/engine/SemanticsObject.mm#SemanticsObject.isAccessibilityElement](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Source/SemanticsObject.mm#L449)
+  bool _isImportantForAccessibility(SemanticsNode node) {
+    // If the node scopes a route, it doesn't matter what other flags/actions it
+    // has, it is _not_ important for accessibility, so we short circuit.
+    if (node.hasFlag(SemanticsFlag.scopesRoute)) {
+      return false;
+    }
+
+    final bool hasNonScrollingAction = node.getSemanticsData().actions & ~_scrollingActions != 0;
+    if (hasNonScrollingAction) {
+      return true;
+    }
+
+    final bool hasImportantFlag = node.getSemanticsData().flags & _importantFlagsForAccessibility != 0;
+    if (hasImportantFlag) {
+      return true;
+    }
+
+    final bool hasContent = node.label.isNotEmpty || node.value.isNotEmpty || node.hint.isNotEmpty;
+    if (hasContent) {
+      return true;
+    }
+
+    return false;
+  }
+}
 
 /// Class that programmatically interacts with widgets.
 ///
@@ -32,15 +229,83 @@ const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 /// Concrete subclasses must implement the [pump] method.
 abstract class WidgetController {
   /// Creates a widget controller that uses the given binding.
-  WidgetController(this.binding);
+  WidgetController(this.binding)
+    : _semantics = SemanticsController._(binding);
 
   /// A reference to the current instance of the binding.
   final WidgetsBinding binding;
+
+  /// The [TestPlatformDispatcher] that is being used in this test.
+  ///
+  /// This will be injected into the framework such that calls to
+  /// [WidgetsBinding.platformDispatcher] will use this. This allows
+  /// users to change platform specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [TestFlutterView] which allows changing view specific properties
+  ///     for testing
+  ///   * [view] and [viewOf] which are used to find
+  ///     [TestFlutterView]s from the widget tree
+  TestPlatformDispatcher get platformDispatcher => binding.platformDispatcher as TestPlatformDispatcher;
+
+  /// The [TestFlutterView] provided by default when testing with
+  /// [WidgetTester.pumpWidget].
+  ///
+  /// If the test uses multiple views, this will return the view that is painted
+  /// into by [WidgetTester.pumpWidget]. If a different view needs to be
+  /// accessed use [viewOf] to ensure that the view related to the widget being
+  /// evaluated is the one that gets updated.
+  ///
+  /// See also:
+  ///
+  ///   * [viewOf], which can find a [TestFlutterView] related to a given finder.
+  ///     This is how to modify view properties for testing when dealing with
+  ///     multiple views.
+  TestFlutterView get view => platformDispatcher.implicitView!;
+
+  /// Provides access to a [SemanticsController] for testing anything related to
+  /// the [Semantics] tree.
+  ///
+  /// Assistive technologies, search engines, and other analysis tools all make
+  /// use of the [Semantics] tree to determine the meaning of an application.
+  /// If semantics has been disabled for the test, this will throw a [StateError].
+  SemanticsController get semantics {
+    if (!binding.semanticsEnabled) {
+      throw StateError(
+        'Semantics are not enabled. Enable them by passing '
+        '`semanticsEnabled: true` to `testWidgets`, or by manually creating a '
+        '`SemanticsHandle` with `WidgetController.ensureSemantics()`.');
+    }
+
+    return _semantics;
+  }
+  final SemanticsController _semantics;
 
   // FINDER API
 
   // TODO(ianh): verify that the return values are of type T and throw
   // a good message otherwise, in all the generic methods below
+
+  /// Finds the [TestFlutterView] that is the closest ancestor of the widget
+  /// found by [finder].
+  ///
+  /// [TestFlutterView] can be used to modify view specific properties for testing.
+  ///
+  /// See also:
+  ///
+  ///   * [view] which returns the [TestFlutterView] used when only a single
+  ///     view is being used.
+  TestFlutterView viewOf(Finder finder) {
+    final View view = firstWidget<View>(
+      find.ancestor(
+        of: finder,
+        matching: find.byType(View),
+      )
+    );
+
+    return view.view as TestFlutterView;
+  }
 
   /// Checks if `finder` exists in the tree.
   bool any(Finder finder) {
@@ -114,7 +379,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<Element> get allElements {
     TestAsyncUtils.guardSync();
-    return collectAllElementsFrom(binding.renderViewElement!, skipOffstage: false);
+    return collectAllElementsFrom(binding.rootElement!, skipOffstage: false);
   }
 
   /// The matching element in the widget tree.
@@ -347,6 +612,16 @@ abstract class WidgetController {
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   ///
+  /// {@template flutter.flutter_test.WidgetController.fling.offset}
+  /// The `offset` represents a distance the pointer moves in the global
+  /// coordinate system of the screen.
+  ///
+  /// Positive [Offset.dy] values mean the pointer moves downward. Negative
+  /// [Offset.dy] values mean the pointer moves upwards. Accordingly, positive
+  /// [Offset.dx] values mean the pointer moves towards the right. Negative
+  /// [Offset.dx] values mean the pointer moves towards left.
+  /// {@endtemplate}
+  ///
   /// {@template flutter.flutter_test.WidgetController.fling}
   /// This can pump frames.
   ///
@@ -559,8 +834,10 @@ abstract class WidgetController {
   ///
   /// The [WidgetTester] subclass implements this by deferring to the [binding].
   ///
-  /// See also [SchedulerBinding.endOfFrame], which returns a future that could
-  /// be appropriate to return in the implementation of this method.
+  /// See also:
+  ///
+  ///  * [SchedulerBinding.endOfFrame], which returns a future that could be
+  ///    appropriate to return in the implementation of this method.
   Future<void> pump([Duration duration]);
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -601,6 +878,8 @@ abstract class WidgetController {
   ///
   /// The operation happens at once. If you want the drag to last for a period
   /// of time, consider using [timedDrag].
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
   ///
   /// {@template flutter.flutter_test.WidgetController.drag}
   /// By default, if the x or y component of offset is greater than
@@ -663,7 +942,6 @@ abstract class WidgetController {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons, kind: kind);
-      assert(gesture != null);
 
       final double xSign = offset.dx.sign;
       final double ySign = offset.dy.sign;
@@ -737,6 +1015,8 @@ abstract class WidgetController {
   /// time, starting in the middle of the widget.
   ///
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@macro flutter.flutter_test.WidgetController.fling.offset}
   ///
   /// This is the timed version of [drag]. This may or may not result in a
   /// [fling] or ballistic animation, depending on the speed from
@@ -853,6 +1133,19 @@ abstract class WidgetController {
     return result;
   }
 
+  TestGesture _createGesture({
+    int? pointer,
+    required PointerDeviceKind kind,
+    required int buttons,
+  }) {
+    return TestGesture(
+      dispatcher: sendEventToBinding,
+      kind: kind,
+      pointer: pointer ?? _getNextPointer(),
+      buttons: buttons,
+    );
+  }
+
   /// Creates gesture and returns the [TestGesture] object which you can use
   /// to continue the gesture using calls on the [TestGesture] object.
   ///
@@ -863,25 +1156,23 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    return TestGesture(
-      dispatcher: sendEventToBinding,
-      kind: kind,
-      pointer: pointer ?? _getNextPointer(),
-      buttons: buttons,
-    );
+    return _createGesture(pointer: pointer, kind: kind, buttons: buttons);
   }
 
-  /// Creates a gesture with an initial down gesture at a particular point, and
-  /// returns the [TestGesture] object which you can use to continue the
-  /// gesture.
+  /// Creates a gesture with an initial appropriate starting gesture at a
+  /// particular point, and returns the [TestGesture] object which you can use
+  /// to continue the gesture. Usually, the starting gesture will be a down event,
+  /// but if [kind] is set to [PointerDeviceKind.trackpad], the gesture will start
+  /// with a panZoomStart gesture.
   ///
   /// You can use [createGesture] if your gesture doesn't begin with an initial
-  /// down gesture.
+  /// down or panZoomStart gesture.
   ///
   /// See also:
   ///  * [WidgetController.drag], a method to simulate a drag.
-  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given widget in a given duration.
-  ///    It sends move events at a given frequency and it is useful when there are listeners involved.
+  ///  * [WidgetController.timedDrag], a method to simulate the drag of a given
+  ///    widget in a given duration. It sends move events at a given frequency and
+  ///    it is useful when there are listeners involved.
   ///  * [WidgetController.fling], a method to simulate a fling.
   Future<TestGesture> startGesture(
     Offset downLocation, {
@@ -889,13 +1180,12 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    assert(downLocation != null);
-    final TestGesture result = await createGesture(
-      pointer: pointer,
-      kind: kind,
-      buttons: buttons,
-    );
-    await result.down(downLocation);
+    final TestGesture result = _createGesture(pointer: pointer, kind: kind, buttons: buttons);
+    if (kind == PointerDeviceKind.trackpad) {
+      await result.panZoomStart(downLocation);
+    } else {
+      await result.down(downLocation);
+    }
     return result;
   }
 
@@ -1033,9 +1323,7 @@ abstract class WidgetController {
       }
       if (!found) {
         bool outOfBounds = false;
-        if (binding.renderView != null && binding.renderView.size != null) {
-          outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
-        }
+        outOfBounds = !(Offset.zero & binding.renderView.size).contains(location);
         if (hitTestWarningShouldBeFatal) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Finder specifies a widget that would not receive pointer events.'),
@@ -1082,8 +1370,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
-  /// supported.
+  /// else. Must not be null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1114,7 +1401,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     final bool handled = await simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
     // Internally wrapped in async guard.
     await simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
@@ -1129,8 +1415,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from
   /// that type of system. Defaults to "web" on web, and "android" everywhere
-  /// else. Must not be null. Some platforms (e.g. Windows, iOS) are not yet
-  /// supported.
+  /// else. Must not be null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1158,7 +1443,6 @@ abstract class WidgetController {
     String? character,
     PhysicalKeyboardKey? physicalKey
   }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyDownEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1192,7 +1476,6 @@ abstract class WidgetController {
         String platform = _defaultPlatform,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   }
@@ -1205,7 +1488,7 @@ abstract class WidgetController {
   /// Specify `platform` as one of the platforms allowed in
   /// [platform.Platform.operatingSystem] to make the event appear to be from that type
   /// of system. Defaults to "web" on web, and "android" everywhere else. Must not be
-  /// null. Some platforms (e.g. Windows, iOS) are not yet supported.
+  /// null.
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -1234,7 +1517,6 @@ abstract class WidgetController {
         String? character,
         PhysicalKeyboardKey? physicalKey
       }) async {
-    assert(platform != null);
     // Internally wrapped in async guard.
     return simulateKeyRepeatEvent(key, platform: platform, character: character, physicalKey: physicalKey);
   }
@@ -1257,35 +1539,14 @@ abstract class WidgetController {
   ///
   /// Will throw a [StateError] if the finder returns more than one element or
   /// if no semantics are found or are not enabled.
-  SemanticsNode getSemantics(Finder finder) {
-    if (binding.pipelineOwner.semanticsOwner == null) {
-      throw StateError('Semantics are not enabled.');
-    }
-    final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
-      throw StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
-      throw StateError('Finder returned more than one element.');
-    }
-    final Element element = candidates.single;
-    RenderObject? renderObject = element.findRenderObject();
-    SemanticsNode? result = renderObject?.debugSemantics;
-    while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject.parent as RenderObject?;
-      result = renderObject?.debugSemantics;
-    }
-    if (result == null) {
-      throw StateError('No Semantics data found.');
-    }
-    return result;
-  }
+  // TODO(pdblasi-google): Deprecate this and point references to semantics.find. See https://github.com/flutter/flutter/issues/112670.
+  SemanticsNode getSemantics(Finder finder) => semantics.find(finder);
 
   /// Enable semantics in a test by creating a [SemanticsHandle].
   ///
   /// The handle must be disposed at the end of the test.
   SemanticsHandle ensureSemantics() {
-    return binding.pipelineOwner.ensureSemantics();
+    return binding.ensureSemantics();
   }
 
   /// Given a widget `W` specified by [finder] and a [Scrollable] widget `S` in
@@ -1342,16 +1603,12 @@ abstract class WidgetController {
       switch (widget<Scrollable>(scrollable!).axisDirection) {
         case AxisDirection.up:
           moveStep = Offset(0, delta);
-          break;
         case AxisDirection.down:
           moveStep = Offset(0, -delta);
-          break;
         case AxisDirection.left:
           moveStep = Offset(delta, 0);
-          break;
         case AxisDirection.right:
           moveStep = Offset(-delta, 0);
-          break;
       }
       await dragUntilVisible(
         finder,
@@ -1413,7 +1670,6 @@ class LiveWidgetController extends WidgetController {
   Future<int> pumpAndSettle([
     Duration duration = const Duration(milliseconds: 100),
   ]) {
-    assert(duration != null);
     assert(duration > Duration.zero);
     return TestAsyncUtils.guard<int>(() async {
       int count = 0;
@@ -1427,7 +1683,6 @@ class LiveWidgetController extends WidgetController {
 
   @override
   Future<List<Duration>> handlePointerEventRecord(List<PointerEventRecord> records) {
-    assert(records != null);
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       final List<Duration> handleTimeStampDiff = <Duration>[];
@@ -1435,12 +1690,12 @@ class LiveWidgetController extends WidgetController {
       for (final PointerEventRecord record in records) {
         final DateTime now = clock.now();
         startTime ??= now;
-        // So that the first event is promised to receive a zero timeDiff
+        // So that the first event is promised to receive a zero timeDiff.
         final Duration timeDiff = record.timeDelay - now.difference(startTime);
         if (timeDiff.isNegative) {
           // This happens when something (e.g. GC) takes a long time during the
           // processing of the events.
-          // Flush all past events
+          // Flush all past events.
           handleTimeStampDiff.add(-timeDiff);
           record.events.forEach(binding.handlePointerEvent);
         } else {

@@ -51,7 +51,7 @@ class MouseTrackerAnnotation with Diagnosticable {
     this.onExit,
     this.cursor = MouseCursor.defer,
     this.validForMouseTracker = true,
-  }) : assert(cursor != null);
+  });
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// entered the region and [validForMouseTracker] is true.

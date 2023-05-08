@@ -152,6 +152,54 @@ void main() {
     expect(doubleTapCanceled, isFalse);
   });
 
+  testGesture('Should recognize double tap with secondaryButton', (GestureTester tester) {
+    final DoubleTapGestureRecognizer tapSecondary = DoubleTapGestureRecognizer(
+      allowedButtonsFilter: (int buttons) => buttons == kSecondaryButton,
+    );
+    tapSecondary.onDoubleTap = () {
+      doubleTapRecognized = true;
+    };
+    tapSecondary.onDoubleTapDown = (TapDownDetails details) {
+      doubleTapDownDetails = details;
+    };
+    tapSecondary.onDoubleTapCancel = () {
+      doubleTapCanceled = true;
+    };
+
+    // Down/up pair 7: normal tap sequence close to pair 6
+    const PointerDownEvent down7 = PointerDownEvent(
+      pointer: 7,
+      position: Offset(10.0, 10.0),
+      buttons: kSecondaryMouseButton,
+    );
+
+    const PointerUpEvent up7 = PointerUpEvent(
+      pointer: 7,
+      position: Offset(11.0, 9.0),
+    );
+
+    tapSecondary.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    tester.route(up6);
+    GestureBinding.instance.gestureArena.sweep(6);
+    expect(doubleTapDownDetails, isNull);
+
+    tester.async.elapse(const Duration(milliseconds: 100));
+    tapSecondary.addPointer(down7);
+    tester.closeArena(7);
+    expect(doubleTapDownDetails, isNotNull);
+    expect(doubleTapDownDetails!.globalPosition, down7.position);
+    expect(doubleTapDownDetails!.localPosition, down7.localPosition);
+    tester.route(down7);
+    expect(doubleTapRecognized, isFalse);
+
+    tester.route(up7);
+    expect(doubleTapRecognized, isTrue);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(doubleTapCanceled, isFalse);
+  });
+
   testGesture('Inter-tap distance cancels double tap', (GestureTester tester) {
     tap.addPointer(down1);
     tester.closeArena(1);
@@ -493,6 +541,56 @@ void main() {
       expect(doubleTapCanceled, isFalse);
     });
 
+    testGesture('Button change with allowedButtonsFilter should interrupt existing sequence', (GestureTester tester) {
+      final DoubleTapGestureRecognizer tapPrimary = DoubleTapGestureRecognizer(
+        allowedButtonsFilter: (int buttons) => buttons == kPrimaryButton,
+      );
+      tapPrimary.onDoubleTap = () {
+        doubleTapRecognized = true;
+      };
+      tapPrimary.onDoubleTapDown = (TapDownDetails details) {
+        doubleTapDownDetails = details;
+      };
+      tapPrimary.onDoubleTapCancel = () {
+        doubleTapCanceled = true;
+      };
+
+      // Down1 -> down6 (different button from 1) -> down2 (same button as 1)
+      // Down1 and down2 could've been a double tap, but is interrupted by down 6.
+      // Down6 gets ignored because it's not a primary button. Regardless, the state
+      // is reset.
+      const Duration interval = Duration(milliseconds: 100);
+      assert(interval * 2 < kDoubleTapTimeout);
+      assert(interval > kDoubleTapMinTime);
+
+      tapPrimary.addPointer(down1);
+      tester.closeArena(1);
+      tester.route(down1);
+      tester.route(up1);
+      GestureBinding.instance.gestureArena.sweep(1);
+
+      tester.async.elapse(interval);
+
+      tapPrimary.addPointer(down6);
+      tester.closeArena(6);
+      tester.route(down6);
+      tester.route(up6);
+      GestureBinding.instance.gestureArena.sweep(6);
+
+      tester.async.elapse(interval);
+      expect(doubleTapRecognized, isFalse);
+
+      tapPrimary.addPointer(down2);
+      tester.closeArena(2);
+      tester.route(down2);
+      tester.route(up2);
+      GestureBinding.instance.gestureArena.sweep(2);
+
+      expect(doubleTapRecognized, isFalse);
+      expect(doubleTapDownDetails, isNull);
+      expect(doubleTapCanceled, isFalse);
+    });
+
     testGesture('Button change should start a valid sequence', (GestureTester tester) {
       // Down6 -> down1 (different button from 6) -> down2 (same button as 1)
 
@@ -618,6 +716,44 @@ void main() {
     tester.closeArena(7);
     tester.route(down7);
     tester.route(up7);
+    expect(recognized, <String>[]);
+
+    recognized.clear();
+    doubleTap.dispose();
+  });
+
+  testGesture('Buttons filter should cancel invalid taps', (GestureTester tester) {
+    final List<String> recognized = <String>[];
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer(
+      allowedButtonsFilter: (int buttons) => false,
+    )
+      ..onDoubleTap = () {
+        recognized.add('primary');
+      };
+
+    // Down/up pair 7: normal tap sequence close to pair 6
+    const PointerDownEvent down7 = PointerDownEvent(
+      pointer: 7,
+      position: Offset(10.0, 10.0),
+    );
+
+    const PointerUpEvent up7 = PointerUpEvent(
+      pointer: 7,
+      position: Offset(11.0, 9.0),
+    );
+
+    doubleTap.addPointer(down7);
+    tester.closeArena(7);
+    tester.route(down7);
+    tester.route(up7);
+    GestureBinding.instance.gestureArena.sweep(7);
+
+    tester.async.elapse(const Duration(milliseconds: 100));
+    doubleTap.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    tester.route(up6);
+
     expect(recognized, <String>[]);
 
     recognized.clear();

@@ -8,6 +8,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  test('Border.lerp identical a,b', () {
+    expect(Border.lerp(null, null, 0), null);
+    const Border border = Border();
+    expect(identical(Border.lerp(border, border, 0.5), border), true);
+  });
+
+  test('BoxBorder.lerp identical a,b', () {
+    expect(BoxBorder.lerp(null, null, 0), null);
+    const BoxBorder border = Border();
+    expect(identical(BoxBorder.lerp(border, border, 0.5), border), true);
+  });
+
+  test('BorderDirectional.lep identical a,b', () {
+    expect(BorderDirectional.lerp(null, null, 0), null);
+    const BorderDirectional border = BorderDirectional();
+    expect(identical(ShapeBorder.lerp(border, border, 0.5), border), true);
+  });
+
+  test('OutlinedBorder.lep identical a,b', () {
+    expect(OutlinedBorder.lerp(null, null, 0), null);
+    const OutlinedBorder border = RoundedRectangleBorder();
+    expect(identical(OutlinedBorder.lerp(border, border, 0.5), border), true);
+  });
+
+  test('ShapeBorder.lep identical a,b', () {
+    expect(ShapeBorder.lerp(null, null, 0), null);
+    const ShapeBorder border = CircleBorder();
+    expect(identical(ShapeBorder.lerp(border, border, 0.5), border), true);
+  });
+
   test('Compound borders', () {
     final Border b1 = Border.all(color: const Color(0xFF00FF00));
     final Border b2 = Border.all(color: const Color(0xFF0000FF));

@@ -43,7 +43,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     return KeyEventResult.ignored;
   }
 
-  String _asHex(int value) => value != null ? '0x${value.toRadixString(16)}' : 'null';
+  String _asHex(int value) => '0x${value.toRadixString(16)}';
 
   String _getEnumName(dynamic enumItem) {
     final String name = '$enumItem';

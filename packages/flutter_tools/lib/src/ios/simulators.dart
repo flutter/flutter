@@ -257,6 +257,25 @@ class SimControl {
     return result;
   }
 
+  Future<RunResult> stopApp(String deviceId, String appIdentifier) async {
+    RunResult result;
+    try {
+      result = await _processUtils.run(
+        <String>[
+          ..._xcode.xcrunCommand(),
+          'simctl',
+          'terminate',
+          deviceId,
+          appIdentifier,
+        ],
+        throwOnError: true,
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to terminate $appIdentifier on $deviceId:\n$exception');
+    }
+    return result;
+  }
+
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
       await _processUtils.run(
@@ -308,7 +327,7 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   @override
-  DevFSWriter createDevFSWriter(covariant ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: globals.fs);
   }
 
@@ -350,8 +369,7 @@ class IOSSimulator extends Device {
     String? userIdentifier,
   }) async {
     try {
-      final IOSApp iosApp = app;
-      await _simControl.install(id, iosApp.simulatorBundlePath);
+      await _simControl.install(id, app.simulatorBundlePath);
       return true;
     } on Exception {
       return false;
@@ -401,7 +419,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    covariant IOSApp package, {
+    IOSApp package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -426,30 +444,15 @@ class IOSSimulator extends Device {
     }
 
     // Prepare launch arguments.
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
-    final List<String> args = <String>[
-      '--enable-dart-profiling',
-      if (debuggingOptions.debuggingEnabled) ...<String>[
-        if (debuggingOptions.buildInfo.isDebug) ...<String>[
-          '--enable-checked-mode',
-          '--verify-entry-points',
-        ],
-        if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
-        if (debuggingOptions.startPaused) '--start-paused',
-        if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
-        if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
-        if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        if (debuggingOptions.traceAllowlist != null) '--trace-allowlist="${debuggingOptions.traceAllowlist}"',
-        if (debuggingOptions.traceSkiaAllowlist != null) '--trace-skia-allowlist="${debuggingOptions.traceSkiaAllowlist}"',
-        if (dartVmFlags.isNotEmpty) '--dart-flags=$dartVmFlags',
-        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
-        if (route != null) '--route=$route',
-      ],
-    ];
+    final List<String> launchArguments = debuggingOptions.getIOSLaunchArguments(
+      EnvironmentType.simulator,
+      route,
+      platformArgs,
+    );
 
-    ProtocolDiscovery? observatoryDiscovery;
+    ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
-      observatoryDiscovery = ProtocolDiscovery.observatory(
+      vmServiceDiscovery = ProtocolDiscovery.vmService(
         getLogReader(app: package),
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
@@ -465,13 +468,13 @@ class IOSSimulator extends Device {
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
       final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String? bundleIdentifier = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+      final String? bundleIdentifier = globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleIdentifierKey);
       if (bundleIdentifier == null) {
         globals.printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
         return LaunchResult.failed();
       }
 
-      await _simControl.launch(id, bundleIdentifier, args);
+      await _simControl.launch(id, bundleIdentifier, launchArguments);
     } on Exception catch (error) {
       globals.printError('$error');
       return LaunchResult.failed();
@@ -482,13 +485,13 @@ class IOSSimulator extends Device {
     }
 
     // Wait for the service protocol port here. This will complete once the
-    // device has printed "Observatory is listening on..."
-    globals.printTrace('Waiting for observatory port to be available...');
+    // device has printed "Dart VM Service is listening on..."
+    globals.printTrace('Waiting for VM Service port to be available...');
 
     try {
-      final Uri? deviceUri = await observatoryDiscovery?.uri;
+      final Uri? deviceUri = await vmServiceDiscovery?.uri;
       if (deviceUri != null) {
-        return LaunchResult.succeeded(observatoryUri: deviceUri);
+        return LaunchResult.succeeded(vmServiceUri: deviceUri);
       }
       globals.printError(
         'Error waiting for a debug connection: '
@@ -497,12 +500,12 @@ class IOSSimulator extends Device {
     } on Exception catch (error) {
       globals.printError('Error waiting for a debug connection: $error');
     } finally {
-      await observatoryDiscovery?.cancel();
+      await vmServiceDiscovery?.cancel();
     }
     return LaunchResult.failed();
   }
 
-  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
+  Future<void> _setupUpdatedApplicationBundle(BuildableIOSApp app, BuildInfo buildInfo, String? mainPath) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
@@ -532,11 +535,13 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
-    // Currently we don't have a way to stop an app running on iOS.
-    return false;
+    if (app == null) {
+      return false;
+    }
+    return (await _simControl.stopApp(id, app.id)).exitCode == 0;
   }
 
   String get logFilePath {
@@ -568,7 +573,7 @@ class IOSSimulator extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
+    covariant IOSApp? app,
     bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
@@ -860,9 +865,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     }
 
     final String filteredLine = _filterSystemLog(line);
-    if (filteredLine == null) {
-      return;
-    }
 
     _linesController.add(filteredLine);
   }

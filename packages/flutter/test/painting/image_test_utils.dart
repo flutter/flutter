@@ -30,11 +30,16 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
-    throw UnsupportedError('Use ImageProvider.loadBuffer instead.');
+    throw UnsupportedError('Use ImageProvider.loadImage instead.');
   }
 
   @override
   ImageStreamCompleter loadBuffer(TestImageProvider key, DecoderBufferCallback decode) {
+    throw UnsupportedError('Use ImageProvider.loadImage instead.');
+  }
+
+  @override
+  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     loadCallCount += 1;
     return OneFrameImageStreamCompleter(_completer.future);
   }

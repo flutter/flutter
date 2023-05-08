@@ -106,6 +106,10 @@ class ControlsDetails {
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 typedef ControlsWidgetBuilder = Widget Function(BuildContext context, ControlsDetails details);
 
+/// A builder that creates the icon widget for the [Step] at [stepIndex], given
+/// [stepState].
+typedef StepIconBuilder = Widget? Function(int stepIndex, StepState stepState);
+
 const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
   color: Colors.white,
@@ -139,9 +143,7 @@ class Step {
     this.state = StepState.indexed,
     this.isActive = false,
     this.label,
-  }) : assert(title != null),
-       assert(content != null),
-       assert(state != null);
+  });
 
   /// The title of the step that typically describes it.
   final Widget title;
@@ -209,10 +211,10 @@ class Stepper extends StatefulWidget {
     this.controlsBuilder,
     this.elevation,
     this.margin,
-  }) : assert(steps != null),
-       assert(type != null),
-       assert(currentStep != null),
-       assert(0 <= currentStep && currentStep < steps.length);
+    this.connectorColor,
+    this.connectorThickness,
+    this.stepIconBuilder,
+  }) : assert(0 <= currentStep && currentStep < steps.length);
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -308,8 +310,29 @@ class Stepper extends StatefulWidget {
   /// The elevation of this stepper's [Material] when [type] is [StepperType.horizontal].
   final double? elevation;
 
-  /// custom margin on vertical stepper.
+  /// Custom margin on vertical stepper.
   final EdgeInsetsGeometry? margin;
+
+  /// Customize connected lines colors.
+  ///
+  /// Resolves in the following states:
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.disabled].
+  ///
+  /// If not set then the widget will use default colors, primary for selected state
+  /// and grey.shade400 for disabled state.
+  final MaterialStateProperty<Color>? connectorColor;
+
+  /// The thickness of the connecting lines.
+  final double? connectorThickness;
+
+  /// Callback for creating custom icons for the [steps].
+  ///
+  /// When overriding icon for [StepState.error], please return
+  /// a widget whose width and height are 14 pixels or less to avoid overflow.
+  ///
+  /// If null, the default icons will be used for respective [StepState].
+  final StepIconBuilder? stepIconBuilder;
 
   @override
   State<Stepper> createState() => _StepperState();
@@ -367,18 +390,33 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return false;
   }
 
-  Widget _buildLine(bool visible) {
+  Color _connectorColor(bool isActive) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Set<MaterialState> states = <MaterialState>{
+      if (isActive) MaterialState.selected else MaterialState.disabled,
+    };
+    final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
+    if (resolvedConnectorColor != null) {
+      return resolvedConnectorColor;
+    }
+    return isActive ? colorScheme.primary : Colors.grey.shade400;
+  }
+
+  Widget _buildLine(bool visible, bool isActive) {
     return Container(
-      width: visible ? 1.0 : 0.0,
+      width: visible ? widget.connectorThickness ?? 1.0 : 0.0,
       height: 16.0,
-      color: Colors.grey.shade400,
+      color: _connectorColor(isActive),
     );
   }
 
   Widget _buildCircleChild(int index, bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
-    assert(state != null);
+    final Widget? icon = widget.stepIconBuilder?.call(index, state);
+    if (icon != null) {
+      return icon;
+    }
     switch (state) {
       case StepState.indexed:
       case StepState.disabled:
@@ -404,11 +442,19 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Color _circleColor(int index) {
+    final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Set<MaterialState> states = <MaterialState>{
+      if (isActive) MaterialState.selected else MaterialState.disabled,
+    };
+    final Color? resolvedConnectorColor = widget.connectorColor?.resolve(states);
+    if (resolvedConnectorColor != null) {
+      return resolvedConnectorColor;
+    }
     if (!_isDark()) {
-      return widget.steps[index].isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
+      return isActive ? colorScheme.primary : colorScheme.onSurface.withOpacity(0.38);
     } else {
-      return widget.steps[index].isActive ? colorScheme.secondary : colorScheme.background;
+      return isActive ? colorScheme.secondary : colorScheme.background;
     }
   }
 
@@ -491,10 +537,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     switch (Theme.of(context).brightness) {
       case Brightness.light:
         cancelColor = Colors.black54;
-        break;
       case Brightness.dark:
         cancelColor = Colors.white70;
-        break;
     }
 
     final ThemeData themeData = Theme.of(context);
@@ -525,7 +569,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(buttonPadding),
                 shape: const MaterialStatePropertyAll<OutlinedBorder>(buttonShape),
               ),
-              child: Text(localizations.continueButtonLabel),
+              child: Text(
+                themeData.useMaterial3
+                  ? localizations.continueButtonLabel
+                  : localizations.continueButtonLabel.toUpperCase()
+              ),
             ),
             Container(
               margin: const EdgeInsetsDirectional.only(start: 8.0),
@@ -536,7 +584,11 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                   padding: buttonPadding,
                   shape: buttonShape,
                 ),
-                child: Text(localizations.cancelButtonLabel),
+                child: Text(
+                  themeData.useMaterial3
+                    ? localizations.cancelButtonLabel
+                    : localizations.cancelButtonLabel.toUpperCase()
+                ),
               ),
             ),
           ],
@@ -549,7 +601,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
-    assert(widget.steps[index].state != null);
     switch (widget.steps[index].state) {
       case StepState.indexed:
       case StepState.editing:
@@ -570,7 +621,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
-    assert(widget.steps[index].state != null);
     switch (widget.steps[index].state) {
       case StepState.indexed:
       case StepState.editing:
@@ -591,7 +641,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
-    assert(widget.steps[index].state != null);
     switch (widget.steps[index].state) {
       case StepState.indexed:
       case StepState.editing:
@@ -645,6 +694,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalHeader(int index) {
+    final bool isActive = widget.steps[index].isActive;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
@@ -653,9 +703,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             children: <Widget>[
               // Line parts are always added in order for the ink splash to
               // flood the tips of the connector lines.
-              _buildLine(!_isFirst(index)),
+              _buildLine(!_isFirst(index), isActive),
               _buildIcon(index),
-              _buildLine(!_isLast(index)),
+              _buildLine(!_isLast(index), isActive),
             ],
           ),
           Expanded(
@@ -680,9 +730,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             width: 24.0,
             child: Center(
               child: SizedBox(
-                width: _isLast(index) ? 0.0 : 1.0,
+                width: widget.connectorThickness ?? 1.0,
                 child: Container(
-                  color: Colors.grey.shade400,
+                  color: _connectorColor(widget.steps[index].isActive),
                 ),
               ),
             ),
@@ -775,9 +825,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         if (!_isLast(i))
           Expanded(
             child: Container(
+              key: Key('line$i'),
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: 1.0,
-              color: Colors.grey.shade400,
+              height: widget.connectorThickness ?? 1.0,
+              color: _connectorColor(widget.steps[i+1].isActive),
             ),
           ),
       ],
@@ -838,7 +889,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       }
       return true;
     }());
-    assert(widget.type != null);
     switch (widget.type) {
       case StepperType.vertical:
         return _buildVertical();

@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
@@ -28,54 +27,19 @@ Future<void> main() async {
 
       section('Create release build');
 
-      // This only builds the iOS app, not the companion watchOS app. The watchOS app
-      // has been removed as a build dependency and is not embedded in the app to avoid
-      // requiring the watchOS being available in CI.
-      // Instead, validate the tool detects that there is a watch companion, and omits
-      // the "-sdk iphoneos" option, which fails to build the watchOS app.
+      // This attempts to build the companion watchOS app. However, the watchOS
+      // SDK is not available in CI and therefore the build will fail.
+      // Check to make sure that the tool attempts to build the companion watchOS app.
       // See https://github.com/flutter/flutter/pull/94190.
       await inDirectory(projectDir, () async {
         final String buildOutput = await evalFlutter(
           'build',
           options: <String>['ios', '--no-codesign', '--release', '--verbose'],
         );
-        if (!buildOutput.contains('Watch companion app found')) {
-          throw TaskResult.failure('Did not detect watch companion');
+        if (!buildOutput.contains('-destination generic/platform=watchOS')) {
+          print(buildOutput);
+          throw TaskResult.failure('Did not try to get watch build settings');
         }
-        if (buildOutput.contains('-sdk iphoneos -destination')) {
-          throw TaskResult.failure('-sdk must be omitted for app with watch companion');
-        }
-      });
-
-      final String appBundle = Directory(path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'iphoneos',
-        'Runner.app',
-      )).path;
-
-      final String appFrameworkPath = path.join(
-        appBundle,
-        'Frameworks',
-        'App.framework',
-        'App',
-      );
-      final String flutterFrameworkPath = path.join(
-        appBundle,
-        'Frameworks',
-        'Flutter.framework',
-        'Flutter',
-      );
-
-      checkDirectoryExists(appBundle);
-      await _checkFlutterFrameworkArchs(appFrameworkPath);
-      await _checkFlutterFrameworkArchs(flutterFrameworkPath);
-
-      section('Clean build');
-
-      await inDirectory(projectDir, () async {
-        await flutter('clean');
       });
 
       return TaskResult.success(null);
@@ -85,17 +49,4 @@ Future<void> main() async {
       rmTree(tempDir);
     }
   });
-}
-
-Future<void> _checkFlutterFrameworkArchs(String frameworkPath) async {
-  checkFileExists(frameworkPath);
-
-  final String archs = await fileType(frameworkPath);
-  if (!archs.contains('arm64')) {
-    throw TaskResult.failure('$frameworkPath arm64 architecture missing');
-  }
-
-  if (archs.contains('x86_64')) {
-    throw TaskResult.failure('$frameworkPath x86_64 architecture unexpectedly present');
-  }
 }

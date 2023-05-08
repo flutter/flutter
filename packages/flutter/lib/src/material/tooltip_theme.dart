@@ -149,10 +149,9 @@ class TooltipThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
-    assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
@@ -269,7 +268,7 @@ class TooltipTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;
@@ -299,6 +298,15 @@ class TooltipTheme extends InheritedTheme {
 
 /// The method of interaction that will trigger a tooltip.
 /// Used in [Tooltip.triggerMode] and [TooltipThemeData.triggerMode].
+///
+/// On desktop, a tooltip will be shown as soon as a pointer hovers over
+/// the widget, regardless of the value of [Tooltip.triggerMode].
+///
+/// See also:
+///
+///   * [Tooltip.waitDuration], which defines the length of time that
+///     a pointer must hover over a tooltip's widget before the tooltip
+///     will be shown.
 enum TooltipTriggerMode {
   /// Tooltip will only be shown by calling `ensureTooltipVisible`.
   manual,

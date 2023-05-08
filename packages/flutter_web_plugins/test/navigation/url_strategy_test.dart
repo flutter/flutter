@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 @TestOn('chrome') // Uses web-only Flutter SDK
+library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+
+import 'common.dart';
 
 void main() {
   group('$HashUrlStrategy', () {
@@ -140,46 +143,4 @@ void main() {
       expect(strategy.prepareExternalUrl('/bar/'), '/foo/bar/');
     });
   });
-}
-
-/// A mock implementation of [PlatformLocation] that doesn't access the browser.
-class TestPlatformLocation extends PlatformLocation {
-  @override
-  String pathname = '';
-
-  @override
-  String search = '';
-
-  @override
-  String hash = '';
-
-  @override
-  Object? get state => null;
-
-  /// Mocks the base href of the document.
-  String baseHref = '';
-
-  @override
-  void addPopStateListener(EventListener fn) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void removePopStateListener(EventListener fn) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void pushState(Object? state, String title, String url) {}
-
-  @override
-  void replaceState(Object? state, String title, String url) {}
-
-  @override
-  void go(int count) {
-    throw UnimplementedError();
-  }
-
-  @override
-  String getBaseHref() => baseHref;
 }

@@ -10,21 +10,17 @@ abstract class ClipContext {
   Canvas get canvas;
 
   void _clipAndPaint(void Function(bool doAntiAlias) canvasClipCall, Clip clipBehavior, Rect bounds, VoidCallback painter) {
-    assert(canvasClipCall != null);
     canvas.save();
     switch (clipBehavior) {
       case Clip.none:
         break;
       case Clip.hardEdge:
         canvasClipCall(false);
-        break;
       case Clip.antiAlias:
         canvasClipCall(true);
-        break;
       case Clip.antiAliasWithSaveLayer:
         canvasClipCall(true);
         canvas.saveLayer(bounds, Paint());
-        break;
     }
     painter();
     if (clipBehavior == Clip.antiAliasWithSaveLayer) {

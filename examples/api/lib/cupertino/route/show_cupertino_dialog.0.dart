@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [showCupertinoDialog].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [showCupertinoDialog].
 
 void main() => runApp(const CupertinoDialogApp());
 
@@ -41,8 +41,8 @@ class CupertinoDialogExample extends StatelessWidget {
     );
   }
 
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  @pragma('vm:entry-point')
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,
       builder: (BuildContext context) {

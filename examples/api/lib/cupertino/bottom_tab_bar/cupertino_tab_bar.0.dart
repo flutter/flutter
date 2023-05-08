@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoTabBar].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoTabBar].
 
 void main() => runApp(const CupertinoTabBarApp());
 
@@ -30,7 +30,7 @@ class CupertinoTabBarExample extends StatelessWidget {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.star_fill),
-            label: 'Favourites',
+            label: 'Favorites',
           ),
           BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.clock_solid),

@@ -57,8 +57,7 @@ class LinuxDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant LinuxApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {
@@ -71,8 +70,8 @@ class LinuxDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant LinuxApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo.mode);
   }
 }
 

@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -66,6 +67,7 @@ void main() {
         final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -74,7 +76,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -95,6 +97,7 @@ void main() {
         );
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -103,7 +106,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -121,6 +124,7 @@ void main() {
         );
 
         final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -162,6 +166,7 @@ void main() {
             );
 
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -196,6 +201,7 @@ void main() {
 
           testUsingContext('contains license and version', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -216,6 +222,7 @@ void main() {
 
           testUsingContext('debug URL', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -234,6 +241,7 @@ void main() {
 
           testUsingContext('profile URL', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -252,6 +260,7 @@ void main() {
 
           testUsingContext('release URL', () async {
             final BuildIOSFrameworkCommand command = BuildIOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -295,6 +304,7 @@ void main() {
         final FakeFlutterVersion fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
         final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -303,7 +313,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -324,6 +334,7 @@ void main() {
         );
 
         final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -332,7 +343,7 @@ void main() {
         );
 
         expect(() => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Detected version is $frameworkVersion'));
+            throwsToolExit(message: '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -350,6 +361,7 @@ void main() {
         );
 
         final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
@@ -391,6 +403,7 @@ void main() {
             );
 
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -425,6 +438,7 @@ void main() {
 
           testUsingContext('contains license and version', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -445,6 +459,7 @@ void main() {
 
           testUsingContext('debug URL', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -463,6 +478,7 @@ void main() {
 
           testUsingContext('profile URL', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -481,6 +497,7 @@ void main() {
 
           testUsingContext('release URL', () async {
             final BuildMacOSFrameworkCommand command = BuildMacOSFrameworkCommand(
+              logger: BufferLogger.test(),
               buildSystem: TestBuildSystem.all(BuildResult(success: true)),
               platform: fakePlatform,
               flutterVersion: fakeFlutterVersion,
@@ -539,12 +556,10 @@ void main() {
 
     testWithoutContext('created with symbols', () async {
       final Directory parentA = fileSystem.directory('FrameworkA')..createSync();
-      final File bcsymbolmapA = parentA.childFile('ABC123.bcsymbolmap')..createSync();
       final File dSYMA = parentA.childFile('FrameworkA.framework.dSYM')..createSync();
       final Directory frameworkA = parentA.childDirectory('FrameworkA.framework')..createSync();
 
       final Directory parentB = fileSystem.directory('FrameworkB')..createSync();
-      final File bcsymbolmapB = parentB.childFile('ZYX987.bcsymbolmap')..createSync();
       final File dSYMB = parentB.childFile('FrameworkB.framework.dSYM')..createSync();
       final Directory frameworkB = parentB.childDirectory('FrameworkB.framework')..createSync();
       final Directory output = fileSystem.directory('output');
@@ -557,13 +572,9 @@ void main() {
           '-framework',
           frameworkA.path,
           '-debug-symbols',
-          bcsymbolmapA.path,
-          '-debug-symbols',
           dSYMA.path,
           '-framework',
           frameworkB.path,
-          '-debug-symbols',
-          bcsymbolmapB.path,
           '-debug-symbols',
           dSYMB.path,
           '-output',

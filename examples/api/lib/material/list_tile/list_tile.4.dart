@@ -2,139 +2,83 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ListTile].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ListTileApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ListTileApp extends StatelessWidget {
+  const ListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
-      ),
+      theme: ThemeData(useMaterial3: true),
+      home: const ListTileExample(),
     );
   }
 }
 
-class CustomListItem extends StatelessWidget {
-  const CustomListItem({
-    super.key,
-    required this.thumbnail,
-    required this.title,
-    required this.user,
-    required this.viewCount,
-  });
+class ListTileExample extends StatefulWidget {
+  const ListTileExample({super.key});
 
-  final Widget thumbnail;
-  final String title;
-  final String user;
-  final int viewCount;
+  @override
+  State<ListTileExample> createState() => _ListTileExampleState();
+}
+
+class _ListTileExampleState extends State<ListTileExample> {
+  ListTileTitleAlignment? titleAlignment;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(title: const Text('ListTile.titleAlignment Sample')),
+      body: Column(
         children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: thumbnail,
-          ),
-          Expanded(
-            flex: 3,
-            child: _VideoDescription(
-              title: title,
-              user: user,
-              viewCount: viewCount,
+          const Divider(),
+          ListTile(
+            titleAlignment: titleAlignment,
+            leading: Checkbox(
+              value: true,
+              onChanged: (bool? value) {},
+            ),
+            title: const Text('Headline Text'),
+            subtitle: const Text(
+                'Tapping on the trailing widget will show a menu that allows you to change the title alignment. The title alignment is set to threeLine by default if `ThemeData.useMaterial3` is true. Otherwise, defaults to titleHeight.'),
+            trailing: PopupMenuButton<ListTileTitleAlignment>(
+              onSelected: (ListTileTitleAlignment? value) {
+                setState(() {
+                  titleAlignment = value;
+                });
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<ListTileTitleAlignment>>[
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.threeLine,
+                  child: Text('threeLine'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.titleHeight,
+                  child: Text('titleHeight'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.top,
+                  child: Text('top'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.center,
+                  child: Text('center'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.bottom,
+                  child: Text('bottom'),
+                ),
+              ],
             ),
           ),
-          const Icon(
-            Icons.more_vert,
-            size: 16.0,
-          ),
+          const Divider(),
         ],
       ),
-    );
-  }
-}
-
-class _VideoDescription extends StatelessWidget {
-  const _VideoDescription({
-    required this.title,
-    required this.user,
-    required this.viewCount,
-  });
-
-  final String title;
-  final String user;
-  final int viewCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 14.0,
-            ),
-          ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
-          Text(
-            user,
-            style: const TextStyle(fontSize: 10.0),
-          ),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
-          Text(
-            '$viewCount views',
-            style: const TextStyle(fontSize: 10.0),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(8.0),
-      itemExtent: 106.0,
-      children: <CustomListItem>[
-        CustomListItem(
-          user: 'Flutter',
-          viewCount: 999000,
-          thumbnail: Container(
-            decoration: const BoxDecoration(color: Colors.blue),
-          ),
-          title: 'The Flutter YouTube Channel',
-        ),
-        CustomListItem(
-          user: 'Dash',
-          viewCount: 884000,
-          thumbnail: Container(
-            decoration: const BoxDecoration(color: Colors.yellow),
-          ),
-          title: 'Announcing Flutter 1.0',
-        ),
-      ],
     );
   }
 }

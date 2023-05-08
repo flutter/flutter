@@ -242,7 +242,7 @@ void main() {
                   Container(
                     color: Colors.red,
                   ),
-                  Container(
+                  ColoredBox(
                     color: Colors.green,
                     child: TextField(
                       controller: textController,
@@ -553,7 +553,14 @@ void main() {
         focusNode.requestFocus();
         await tester.pumpAndSettle();
 
-        expect(isCaretOnScreen(tester), !readOnly);
+        if (kIsWeb) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+          await tester.pump();
+        }
+
+        // On web, the entire field is selected, and only part of that selection
+        // is visible on the screen.
+        expect(isCaretOnScreen(tester), !readOnly && !kIsWeb);
         expect(scrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
         expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });

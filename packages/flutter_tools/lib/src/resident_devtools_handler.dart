@@ -91,16 +91,30 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
     await _callConnectedVmServiceUriExtension(devicesWithExtension);
+
     if (_shutdown) {
       // If we're shutting down, no point reporting the debugger list.
       return;
     }
     _readyToAnnounce = true;
     assert(_devToolsLauncher!.activeDevToolsServer != null);
+
+    final Uri? devToolsUrl = _devToolsLauncher!.devToolsUrl;
+    if (devToolsUrl != null) {
+      for (final FlutterDevice? device in devicesWithExtension) {
+        if (device == null) {
+          continue;
+        }
+        // Notify the DDS instances that there's a DevTools instance available so they can correctly
+        // redirect DevTools related requests.
+        device.device?.dds.setExternalDevToolsUri(devToolsUrl);
+      }
+    }
+
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
-      _residentRunner.printDebuggerList(includeObservatory: false);
+      _residentRunner.printDebuggerList(includeVmService: false);
     }
   }
 

@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -44,6 +45,39 @@ void main() {
 
     expect(value, isFalse);
     await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+  });
+
+  testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoSwitch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
     expect(value, isTrue);
   });
 
@@ -761,6 +795,66 @@ void main() {
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile('switch.tap.on.dark.png'),
+    );
+  });
+
+  testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoTheme(
+        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: Column(
+                    children: <Widget>[
+                      CupertinoSwitch(
+                        key: switchKey,
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: true,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                      CupertinoSwitch(
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: false,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.off.themed.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.on.themed.png'),
     );
   });
 

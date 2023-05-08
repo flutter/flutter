@@ -16,13 +16,15 @@ void main() {
       ),
     );
 
-    expect(find.text('One'), findsNWidgets(4));
+    expect(find.text('One'), findsOneWidget);
+    expect(find.text('One', skipOffstage: false), findsNWidgets(4));
 
     await tester.tap(find.text('One').first);
     await tester.pumpAndSettle();
     expect(find.text('Two'), findsOneWidget);
     await tester.tap(find.text('Two'));
     await tester.pumpAndSettle();
-    expect(find.text('Two'), findsNWidgets(4));
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.text('Two', skipOffstage: false), findsNWidgets(4));
   });
 }

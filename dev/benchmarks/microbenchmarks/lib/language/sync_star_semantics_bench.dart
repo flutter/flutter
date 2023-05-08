@@ -83,11 +83,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
   String? workingLabel;
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
-      if (workingText != null) {
-        yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText);
-        workingText = '';
-        workingLabel = null;
-      }
+      yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText);
+      workingText = '';
+      workingLabel = null;
       yield info;
     } else {
       workingText += info.text;
@@ -100,11 +98,7 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<Inlin
       }
     }
   }
-  if (workingText != null) {
-    yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel);
-  } else {
-    assert(workingLabel != null);
-  }
+  assert(workingLabel != null);
 }
 
 Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpanSemanticsInformation> inputs) {
@@ -113,11 +107,9 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
   final List<InlineSpanSemanticsInformation> result = <InlineSpanSemanticsInformation>[];
   for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
-      if (workingText != null) {
-        result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText));
-        workingText = '';
-        workingLabel = null;
-      }
+      result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText));
+      workingText = '';
+      workingLabel = null;
       result.add(info);
     } else {
       workingText += info.text;
@@ -130,10 +122,6 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
       }
     }
   }
-  if (workingText != null) {
-    result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel));
-  } else {
-    assert(workingLabel != null);
-  }
+  assert(workingLabel != null);
   return result;
 }

@@ -15,11 +15,12 @@
   "timerPickerMinuteLabelOther": "నిమి.",
   "timerPickerSecondLabelOne": "సెకన్లు.",
   "timerPickerSecondLabelOther": "సెకన్లు.",
-  "cutButtonLabel": "కత్తిరించు",
+  "cutButtonLabel": "కత్తిరించండి",
   "copyButtonLabel": "కాపీ చేయి",
-  "pasteButtonLabel": "అతికించు",
+  "pasteButtonLabel": "పేస్ట్ చేయండి",
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
   "tabSemanticsLabel": "$tabCountలో $tabIndexవ ట్యాబ్",
   "modalBarrierDismissLabel": "విస్మరించు",
-  "searchTextFieldPlaceholderLabel": "సెర్చ్ చేయి"
+  "searchTextFieldPlaceholderLabel": "సెర్చ్ చేయి",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

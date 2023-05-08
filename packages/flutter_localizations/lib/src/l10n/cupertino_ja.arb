@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "すべて選択",
   "tabSemanticsLabel": "タブ: $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "閉じる",
-  "searchTextFieldPlaceholderLabel": "検索"
+  "searchTextFieldPlaceholderLabel": "検索",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

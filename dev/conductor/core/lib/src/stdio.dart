@@ -6,6 +6,14 @@ import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
+/// An interface for presenting text output to the user.
+///
+/// Although this could have been simplified by calling `print()`
+/// from the tool, this abstraction allows unit tests to verify output
+/// and allows a GUI frontend to provide an alternative implementation.
+///
+/// User input probably should be part of this class–however it is currently
+/// part of context.dart.
 abstract class Stdio {
   final List<String> logs = <String>[];
 

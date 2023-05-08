@@ -2,24 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ExpansionPanelList].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ExpansionPanelList].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ExpansionPanelListExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ExpansionPanelListExampleApp extends StatelessWidget {
+  const ExpansionPanelListExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('ExpansionPanelList Sample')),
+        body: const ExpansionPanelListExample(),
       ),
     );
   }
@@ -47,14 +44,14 @@ List<Item> generateItems(int numberOfItems) {
   });
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class ExpansionPanelListExample extends StatefulWidget {
+  const ExpansionPanelListExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<ExpansionPanelListExample> createState() => _ExpansionPanelListExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
   final List<Item> _data = generateItems(8);
 
   @override
@@ -82,8 +79,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           },
           body: ListTile(
               title: Text(item.expandedValue),
-              subtitle:
-                  const Text('To delete this panel, tap the trash can icon'),
+              subtitle: const Text('To delete this panel, tap the trash can icon'),
               trailing: const Icon(Icons.delete),
               onTap: () {
                 setState(() {

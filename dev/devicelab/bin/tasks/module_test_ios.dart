@@ -170,7 +170,7 @@ Future<void> main() async {
         '''
 dependencies:
   url_launcher: 6.0.20
-  android_alarm_manager: 0.4.5+11
+  android_alarm_manager: 2.0.2
   google_sign_in_ios: 5.5.0
   $dartPluginName:
     path: ../$dartPluginName
@@ -548,8 +548,7 @@ end
       );
 
       if (!xcodebuildOutput.contains('flutter --verbose --local-engine-src-path=bogus assemble') || // Verbose output
-          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus') ||
-          !xcodebuildOutput.contains('Command PhaseScriptExecution failed with a nonzero exit code')) {
+          !xcodebuildOutput.contains('Unable to detect a Flutter engine build directory in bogus')) {
         return TaskResult.failure('Host Objective-C app build succeeded though flutter script failed');
       }
 

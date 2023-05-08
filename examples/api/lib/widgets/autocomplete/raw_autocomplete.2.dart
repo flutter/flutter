@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RawAutocomplete].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [RawAutocomplete].
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -62,8 +62,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _dropdownValue = newValue;
               });
             },
-            items: <String>['One', 'Two', 'Free', 'Four']
-                .map<DropdownMenuItem<String>>((String value) {
+            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
@@ -99,10 +98,12 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 _autocompleteSelection = selection;
               });
             },
-            fieldViewBuilder: (BuildContext context,
-                TextEditingController textEditingController,
-                FocusNode focusNode,
-                VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (
+              BuildContext context,
+              TextEditingController textEditingController,
+              FocusNode focusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
               return TextFormField(
                 controller: textEditingController,
                 decoration: const InputDecoration(
@@ -120,9 +121,11 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                 },
               );
             },
-            optionsViewBuilder: (BuildContext context,
-                AutocompleteOnSelected<String> onSelected,
-                Iterable<String> options) {
+            optionsViewBuilder: (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
               return Align(
                 alignment: Alignment.topLeft,
                 child: Material(
@@ -164,8 +167,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                       child: ListBody(
                         children: <Widget>[
                           Text('DropdownButtonFormField: "$_dropdownValue"'),
-                          Text(
-                              'TextFormField: "${_textEditingController.text}"'),
+                          Text('TextFormField: "${_textEditingController.text}"'),
                           Text('RawAutocomplete: "$_autocompleteSelection"'),
                         ],
                       ),

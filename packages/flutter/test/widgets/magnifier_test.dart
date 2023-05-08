@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';

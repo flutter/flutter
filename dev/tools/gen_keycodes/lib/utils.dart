@@ -153,9 +153,6 @@ String wrapString(String input, {required String prefix}) {
 ///
 /// An null list is considered a list with length 0.
 void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
-  if (list1 == null && list2 == null) {
-    return;
-  }
   assert(list1.length == list2.length);
   final Iterator<T1> it1 = list1.iterator;
   final Iterator<T2> it2 = list2.iterator;

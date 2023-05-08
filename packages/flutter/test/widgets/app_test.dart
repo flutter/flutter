@@ -275,17 +275,17 @@ void main() {
 
   testWidgets('WidgetsApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
@@ -300,7 +300,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -308,16 +308,16 @@ void main() {
   testWidgets('WidgetsApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(WidgetsApp.router(
       routerDelegate: delegate,
       color: const Color(0xFF123456),
@@ -326,7 +326,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -334,19 +334,19 @@ void main() {
   testWidgets('WidgetsApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     await expectLater(() async {
@@ -361,16 +361,16 @@ void main() {
   testWidgets('WidgetsApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await expectLater(() async {
       await tester.pumpWidget(WidgetsApp.router(
@@ -384,18 +384,18 @@ void main() {
   testWidgets('WidgetsApp.router router config works', (WidgetTester tester) async {
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
       routeInformationProvider: PlatformRouteInformationProvider(
-        initialRouteInformation: const RouteInformation(
-          location: 'initial',
+        initialRouteInformation: RouteInformation(
+          uri: Uri.parse('initial'),
         ),
       ),
       routeInformationParser: SimpleRouteInformationParser(),
       routerDelegate: SimpleNavigatorRouterDelegate(
         builder: (BuildContext context, RouteInformation information) {
-          return Text(information.location!);
+          return Text(information.uri.toString());
         },
         onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-          delegate.routeInformation = const RouteInformation(
-            location: 'popped',
+          delegate.routeInformation = RouteInformation(
+            uri: Uri.parse('popped'),
           );
           return route.didPop(result);
         },
@@ -410,7 +410,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -418,7 +418,7 @@ void main() {
   testWidgets('WidgetsApp.router has correct default', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) => true,
     );
@@ -595,53 +595,30 @@ void main() {
     expect(tester.takeException(), "Warning: This application's locale, C_UTF-8, is not supported by all of its localization delegates.");
   });
 
-  testWidgets('WidgetsApp creates a MediaQuery if `useInheritedMediaQuery` is set to false', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    await tester.pumpWidget(
-      WidgetsApp(
-        builder: (BuildContext context, Widget? child) {
-          capturedContext = context;
-          return const Placeholder();
-        },
-        color: const Color(0xFF123456),
-      ),
-    );
-    expect(MediaQuery.of(capturedContext), isNotNull);
-  });
+  testWidgets("WidgetsApp doesn't have dependency on MediaQuery", (WidgetTester tester) async {
+    int routeBuildCount = 0;
 
-  testWidgets('WidgetsApp does not create MediaQuery if `useInheritedMediaQuery` is set to true and one is available', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    final UniqueKey uniqueKey = UniqueKey();
-    await tester.pumpWidget(
-      MediaQuery(
-      key: uniqueKey,
-        data: const MediaQueryData(),
-        child: WidgetsApp(
-          useInheritedMediaQuery: true,
-          builder: (BuildContext context, Widget? child) {
-            capturedContext = context;
-            return const Placeholder();
-          },
-          color: const Color(0xFF123456),
-        ),
-      ),
-    );
-    expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
-  });
-
-  testWidgets('WidgetsApp does create a MediaQuery if `useInheritedMediaQuery` is set to true and none is available', (WidgetTester tester) async {
-    late BuildContext capturedContext;
-    await tester.pumpWidget(
-      WidgetsApp(
-        useInheritedMediaQuery: true,
-        builder: (BuildContext context, Widget? child) {
-          capturedContext = context;
+    final Widget widget = WidgetsApp(
+      color: const Color.fromARGB(255, 255, 255, 255),
+      onGenerateRoute: (_) {
+        return PageRouteBuilder<void>(pageBuilder: (_, __, ___) {
+          routeBuildCount++;
           return const Placeholder();
-        },
-        color: const Color(0xFF123456),
-      ),
+        });
+      },
     );
-    expect(MediaQuery.of(capturedContext), isNotNull);
+
+    await tester.pumpWidget(
+      MediaQuery(data: const MediaQueryData(textScaleFactor: 10), child: widget),
+    );
+
+    expect(routeBuildCount, equals(1));
+
+    await tester.pumpWidget(
+      MediaQuery(data: const MediaQueryData(textScaleFactor: 20), child: widget),
+    );
+
+    expect(routeBuildCount, equals(1));
   });
 
   testWidgets('WidgetsApp provides meta based shortcuts for iOS and macOS', (WidgetTester tester) async {
@@ -792,7 +769,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation.location!),
+          key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],

@@ -213,7 +213,7 @@ Google contributes translations for all the languages supported by
 this package. (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.md).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=2_bug.yml).
 
 
 ### See Also

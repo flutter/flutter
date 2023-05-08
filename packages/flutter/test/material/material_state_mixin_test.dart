@@ -58,7 +58,7 @@ class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       key: key,
       color: widget.evaluator(this) ? trueColor : falseColor,
       child: _InnerWidget(
@@ -70,18 +70,17 @@ class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
 }
 
 void main() {
-
   Future<void> verify(WidgetTester tester, Widget widget, StreamController<bool> controller,) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: widget)));
     // Set the value to True
     controller.sink.add(true);
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byKey(key)).color, trueColor);
+    expect(tester.widget<ColoredBox>(find.byKey(key)).color, trueColor);
 
     // Set the value to False
     controller.sink.add(false);
     await tester.pumpAndSettle();
-    expect(tester.widget<Container>(find.byKey(key)).color, falseColor);
+    expect(tester.widget<ColoredBox>(find.byKey(key)).color, falseColor);
   }
 
   testWidgets('MaterialState.pressed is tracked', (WidgetTester tester) async {

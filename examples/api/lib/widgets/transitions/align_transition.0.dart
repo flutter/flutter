@@ -2,37 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AlignTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AlignTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AlignTransitionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class AlignTransitionExampleApp extends StatelessWidget {
+  const AlignTransitionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: AlignTransitionExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class AlignTransitionExample extends StatefulWidget {
+  const AlignTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<AlignTransitionExample> createState() => _AlignTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with TickerProviderStateMixin {
+class _AlignTransitionExampleState extends State<AlignTransitionExample> with TickerProviderStateMixin {
   // Using `late final` for lazy initialization. See
   // https://dart.dev/null-safety/understanding-null-safety#lazy-initialization.
   late final AnimationController _controller = AnimationController(
@@ -57,7 +53,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ColoredBox(
       color: Colors.white,
       child: AlignTransition(
         alignment: _animation,

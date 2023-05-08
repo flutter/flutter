@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:flutter_test/flutter_test.dart' hide TypeMatcher, isInstanceOf;
 
 import '../../../raw/text.dart' as demo;
 

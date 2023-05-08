@@ -2,45 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RawScrollbar].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RawScrollbar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RawScrollbarExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class RawScrollbarExampleApp extends StatelessWidget {
+  const RawScrollbarExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('RawScrollbar Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: RawScrollbarExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RawScrollbarExample extends StatefulWidget {
+  const RawScrollbarExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RawScrollbarExample> createState() => _RawScrollbarExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RawScrollbarExampleState extends State<RawScrollbarExample> {
   final ScrollController _firstController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
       return Row(
         children: <Widget>[
           SizedBox(
@@ -78,9 +74,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                           height: 50,
-                          color: index.isEven
-                              ? Colors.amberAccent
-                              : Colors.blueAccent,
+                          color: index.isEven ? Colors.amberAccent : Colors.blueAccent,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text('Scrollable 2 : Index $index'),

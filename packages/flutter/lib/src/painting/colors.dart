@@ -89,11 +89,7 @@ class HSVColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(value != null),
-      assert(alpha >= 0.0),
+    : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
       assert(hue >= 0.0),
       assert(hue <= 360.0),
@@ -198,9 +194,8 @@ class HSVColor {
   ///
   /// Values outside of the valid range for each channel will be clamped.
   static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!._scaleAlpha(t);
@@ -262,11 +257,7 @@ class HSLColor {
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
   const HSLColor.fromAHSL(this.alpha, this.hue, this.saturation, this.lightness)
-    : assert(alpha != null),
-      assert(hue != null),
-      assert(saturation != null),
-      assert(lightness != null),
-      assert(alpha >= 0.0),
+    : assert(alpha >= 0.0),
       assert(alpha <= 1.0),
       assert(hue >= 0.0),
       assert(hue <= 360.0),
@@ -386,9 +377,8 @@ class HSLColor {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return b!._scaleAlpha(t);
@@ -489,13 +479,12 @@ class ColorSwatch<T> extends Color {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static ColorSwatch<T>? lerp<T>(ColorSwatch<T>? a, ColorSwatch<T>? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     final Map<T, Color> swatch;
     if (b == null) {
-      if (a == null) {
-        return null;
-      } else {
-        swatch = a._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
-      }
+      swatch = a!._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
     } else {
       if (a == null) {
         swatch = b._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(null, color, t)!));
@@ -519,9 +508,7 @@ class ColorProperty extends DiagnosticsProperty<Color> {
     super.defaultValue,
     super.style,
     super.level,
-  }) : assert(showName != null),
-       assert(style != null),
-       assert(level != null);
+  });
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {

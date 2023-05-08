@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Hero].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
+/// Flutter code sample for [Hero].
 
 void main() {
   // Slow down time to see Hero flight animation.
@@ -38,7 +38,7 @@ class HeroExample extends StatelessWidget {
               tag: 'hero-default-tween',
               child: BoxWidget(
                 size: const Size(50.0, 50.0),
-                color:Colors.red[700]!.withOpacity(0.5),
+                color: Colors.red[700]!.withOpacity(0.5),
               ),
             ),
             title: const Text(
@@ -54,7 +54,7 @@ class HeroExample extends StatelessWidget {
               },
               child: BoxWidget(
                 size: const Size(50.0, 50.0),
-                color:Colors.blue[700]!.withOpacity(0.5),
+                color: Colors.blue[700]!.withOpacity(0.5),
               ),
             ),
             title: const Text(

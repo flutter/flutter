@@ -7,6 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
+import 'icon_button.dart';
+import 'icons.dart';
 import 'material.dart';
 import 'material_state.dart';
 import 'scaffold.dart';
@@ -19,17 +22,13 @@ import 'theme.dart';
 // late BuildContext context;
 
 const double _singleLineVerticalPadding = 14.0;
-
-// TODO(ianh): We should check if the given text and actions are going to fit on
-// one line or not, and if they are, use the single-line layout, and if not, use
-// the multiline layout, https://github.com/flutter/flutter/issues/32782
-// See https://material.io/components/snackbars#specs, 'Longer Action Text' does
-// not match spec.
-
 const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
-const Curve _snackBarFadeInCurve = Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarM3HeightCurve = Curves.easeInOutQuart;
+
+const Curve _snackBarFadeInCurve = Interval(0.4, 1.0);
+const Curve _snackBarM3FadeInCurve = Interval(0.4, 0.6, curve: Curves.easeInCirc);
 const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [SnackBar] was closed.
@@ -73,8 +72,8 @@ enum SnackBarClosedReason {
 
 /// A button for a [SnackBar], known as an "action".
 ///
-/// Snack bar actions are always enabled. If you want to disable a snack bar
-/// action, simply don't include it in the snack bar.
+/// Snack bar actions are always enabled. Instead of disabling a snack bar
+/// action, avoid including it in the snack bar in the first place.
 ///
 /// Snack bar actions can only be pressed once. Subsequent presses are ignored.
 ///
@@ -90,18 +89,40 @@ class SnackBarAction extends StatefulWidget {
     super.key,
     this.textColor,
     this.disabledTextColor,
+    this.backgroundColor,
+    this.disabledBackgroundColor,
     required this.label,
     required this.onPressed,
-  }) : assert(label != null),
-       assert(onPressed != null);
+  }) : assert(backgroundColor is! MaterialStateColor || disabledBackgroundColor == null,
+        'disabledBackgroundColor must not be provided when background color is '
+        'a MaterialStateColor');
 
   /// The button label color. If not provided, defaults to
   /// [SnackBarThemeData.actionTextColor].
+  ///
+  /// If [textColor] is a [MaterialStateColor], then the text color will be
+  /// resolved against the set of [MaterialState]s that the action text
+  /// is in, thus allowing for different colors for states such as pressed,
+  /// hovered and others.
   final Color? textColor;
+
+  /// The button background fill color. If not provided, defaults to
+  /// [SnackBarThemeData.actionBackgroundColor].
+  ///
+  /// If [backgroundColor] is a [MaterialStateColor], then the text color will
+  /// be resolved against the set of [MaterialState]s that the action text is
+  /// in, thus allowing for different colors for the states.
+  final Color? backgroundColor;
 
   /// The button disabled label color. This color is shown after the
   /// [SnackBarAction] is dismissed.
   final Color? disabledTextColor;
+
+  /// The button diabled background color. This color is shown after the
+  /// [SnackBarAction] is dismissed.
+  ///
+  /// If not provided, defaults to [SnackBarThemeData.disabledActionBackgroundColor].
+  final Color? disabledBackgroundColor;
 
   /// The button label.
   final String label;
@@ -132,17 +153,61 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    Color? resolveForegroundColor(Set<MaterialState> states) {
-      final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
-      if (states.contains(MaterialState.disabled)) {
-        return widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+    final SnackBarThemeData defaults = Theme.of(context).useMaterial3
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
+    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+
+    MaterialStateColor resolveForegroundColor() {
+      if (widget.textColor != null) {
+        if (widget.textColor is MaterialStateColor) {
+          return widget.textColor! as MaterialStateColor;
+        }
+      } else if (snackBarTheme.actionTextColor != null) {
+        if (snackBarTheme.actionTextColor is MaterialStateColor) {
+          return snackBarTheme.actionTextColor! as MaterialStateColor;
+        }
+      } else if (defaults.actionTextColor != null) {
+        if (defaults.actionTextColor is MaterialStateColor) {
+          return defaults.actionTextColor! as MaterialStateColor;
+        }
       }
-      return widget.textColor ?? snackBarTheme.actionTextColor;
+
+      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return widget.disabledTextColor ??
+              snackBarTheme.disabledActionTextColor ??
+              defaults.disabledActionTextColor!;
+        }
+        return widget.textColor ??
+            snackBarTheme.actionTextColor ??
+            defaults.actionTextColor!;
+      });
+    }
+
+    MaterialStateColor? resolveBackgroundColor() {
+      if (widget.backgroundColor is MaterialStateColor) {
+        return widget.backgroundColor! as MaterialStateColor;
+      }
+      if (snackBarTheme.actionBackgroundColor is MaterialStateColor) {
+        return snackBarTheme.actionBackgroundColor! as MaterialStateColor;
+      }
+      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          return widget.disabledBackgroundColor ??
+              snackBarTheme.disabledActionBackgroundColor ??
+              Colors.transparent;
+        }
+        return widget.backgroundColor ??
+            snackBarTheme.actionBackgroundColor ??
+            Colors.transparent;
+      });
     }
 
     return TextButton(
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.resolveWith<Color?>(resolveForegroundColor),
+        foregroundColor: resolveForegroundColor(),
+        backgroundColor: resolveBackgroundColor(),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
@@ -213,19 +278,20 @@ class SnackBar extends StatefulWidget {
     this.shape,
     this.behavior,
     this.action,
+    this.actionOverflowThreshold,
+    this.showCloseIcon,
+    this.closeIconColor,
     this.duration = _snackBarDisplayDuration,
     this.animation,
     this.onVisible,
     this.dismissDirection = DismissDirection.down,
     this.clipBehavior = Clip.hardEdge,
   }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(
-         width == null || margin == null,
+       assert(width == null || margin == null,
          'Width and margin can not be used together',
        ),
-       assert(duration != null),
-       assert(clipBehavior != null);
+       assert(actionOverflowThreshold == null || (actionOverflowThreshold >= 0 && actionOverflowThreshold <= 1),
+        'Action overflow threshold must be between 0 and 1 inclusive');
 
   /// The primary content of the snack bar.
   ///
@@ -255,7 +321,8 @@ class SnackBar extends StatefulWidget {
   /// This property is only used when [behavior] is [SnackBarBehavior.floating].
   /// It can not be used if [width] is specified.
   ///
-  /// If this property is null, then the default is
+  /// If this property is null, then [SnackBarThemeData.insetPadding] of
+  /// [ThemeData.snackBarTheme] is used. If that is also null, then the default is
   /// `EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0)`.
   final EdgeInsetsGeometry? margin;
 
@@ -293,8 +360,9 @@ class SnackBar extends StatefulWidget {
   /// available space. This property is only used when [behavior] is
   /// [SnackBarBehavior.floating]. It can not be used if [margin] is specified.
   ///
-  /// If this property is null, then the snack bar will take up the full device
-  /// width less the margin.
+  /// If this property is null, then [SnackBarThemeData.width] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, the snack bar will
+  /// take up the full device width less the margin.
   final double? width;
 
   /// The shape of the snack bar's [Material].
@@ -318,6 +386,9 @@ class SnackBar extends StatefulWidget {
   /// If this property is null, then [SnackBarThemeData.behavior] of
   /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
   /// [SnackBarBehavior.fixed].
+  ///
+  /// If this value is [SnackBarBehavior.floating], the length of the bar
+  /// is defined by either [width] or [margin].
   final SnackBarBehavior? behavior;
 
   /// (optional) An action that the user can take based on the snack bar.
@@ -327,6 +398,36 @@ class SnackBar extends StatefulWidget {
   ///
   /// The action should not be "dismiss" or "cancel".
   final SnackBarAction? action;
+
+  /// (optional) The percentage threshold for action widget's width before it overflows
+  /// to a new line.
+  ///
+  /// Must be between 0 and 1. If the width of the snackbar's [content] is greater
+  /// than this percentage of the width of the snackbar less the width of its [action],
+  /// then the [action] will appear below the [content].
+  ///
+  /// At a value of 0, the action will not overflow to a new line.
+  ///
+  /// Defaults to 0.25.
+  final double? actionOverflowThreshold;
+
+  /// (optional) Whether to include a "close" icon widget.
+  ///
+  /// Tapping the icon will close the snack bar.
+  final bool? showCloseIcon;
+
+  /// (optional) An optional color for the close icon, if [showCloseIcon] is
+  /// true.
+  ///
+  /// If this property is null, then [SnackBarThemeData.closeIconColor] of
+  /// [ThemeData.snackBarTheme] is used. If that is null, then the default is
+  /// inverse surface.
+  ///
+  /// If [closeIconColor] is a [MaterialStateColor], then the icon color will be
+  /// resolved against the set of [MaterialState]s that the action text
+  /// is in, thus allowing for different colors for states such as pressed,
+  /// hovered and others.
+  final Color? closeIconColor;
 
   /// The amount of time the snack bar should be displayed.
   ///
@@ -383,6 +484,9 @@ class SnackBar extends StatefulWidget {
       shape: shape,
       behavior: behavior,
       action: action,
+      actionOverflowThreshold: actionOverflowThreshold,
+      showCloseIcon: showCloseIcon,
+      closeIconColor: closeIconColor,
       duration: duration,
       animation: newAnimation,
       onVisible: onVisible,
@@ -436,40 +540,45 @@ class _SnackBarState extends State<SnackBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final bool isThemeDark = theme.brightness == Brightness.dark;
-    final Color buttonColor = isThemeDark ? colorScheme.primary : colorScheme.secondary;
+    final Color buttonColor =  isThemeDark ? colorScheme.primary : colorScheme.secondary;
+    final SnackBarThemeData defaults = theme.useMaterial3
+        ? _SnackbarDefaultsM3(context)
+        : _SnackbarDefaultsM2(context);
 
     // SnackBar uses a theme that is the opposite brightness from
     // the surrounding theme.
     final Brightness brightness = isThemeDark ? Brightness.light : Brightness.dark;
-    final Color themeBackgroundColor = isThemeDark
-      ? colorScheme.onSurface
-      : Color.alphaBlend(colorScheme.onSurface.withOpacity(0.80), colorScheme.surface);
-    final ThemeData inverseTheme = theme.copyWith(
-      colorScheme: ColorScheme(
-        primary: colorScheme.onPrimary,
-        primaryVariant: colorScheme.onPrimary,
-        secondary: buttonColor,
-        secondaryVariant: colorScheme.onSecondary,
-        surface: colorScheme.onSurface,
-        background: themeBackgroundColor,
-        error: colorScheme.onError,
-        onPrimary: colorScheme.primary,
-        onSecondary: colorScheme.secondary,
-        onSurface: colorScheme.surface,
-        onBackground: colorScheme.background,
-        onError: colorScheme.error,
-        brightness: brightness,
-      ),
-    );
 
-    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? ThemeData(brightness: brightness).textTheme.titleMedium;
-    final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    // Invert the theme values for Material 2. Material 3 values are tokenized to pre-inverted values.
+    final ThemeData effectiveTheme = theme.useMaterial3
+        ? theme
+        : theme.copyWith(
+            colorScheme: ColorScheme(
+              primary: colorScheme.onPrimary,
+              primaryVariant: colorScheme.onPrimary,
+              secondary: buttonColor,
+              secondaryVariant: colorScheme.onSecondary,
+              surface: colorScheme.onSurface,
+              background: defaults.backgroundColor!,
+              error: colorScheme.onError,
+              onPrimary: colorScheme.primary,
+              onSecondary: colorScheme.secondary,
+              onSurface: colorScheme.surface,
+              onBackground: colorScheme.background,
+              onError: colorScheme.error,
+              brightness: brightness,
+            ),
+          );
+
+    final TextStyle? contentTextStyle = snackBarTheme.contentTextStyle ?? defaults.contentTextStyle;
+    final SnackBarBehavior snackBarBehavior = widget.behavior ?? snackBarTheme.behavior ?? defaults.behavior!;
+    final double? width = widget.width ?? snackBarTheme.width;
     assert((){
       // Whether the behavior is set through the constructor or the theme,
       // assert that our other properties are configured properly.
@@ -485,54 +594,123 @@ class _SnackBarState extends State<SnackBar> {
           }
         }
         assert(widget.margin == null, message('Margin'));
-        assert(widget.width == null, message('Width'));
+        assert(width == null, message('Width'));
       }
       return true;
     }());
 
+    final bool showCloseIcon =  widget.showCloseIcon ?? snackBarTheme.showCloseIcon ?? defaults.showCloseIcon!;
+
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double horizontalPadding = isFloatingSnackBar ? 16.0 : 24.0;
-    final EdgeInsetsGeometry padding = widget.padding
-      ?? EdgeInsetsDirectional.only(start: horizontalPadding, end: widget.action != null ? 0 : horizontalPadding);
+    final EdgeInsetsGeometry padding = widget.padding ??
+        EdgeInsetsDirectional.only(
+            start: horizontalPadding,
+            end: widget.action != null || showCloseIcon
+                ? 0
+                : horizontalPadding);
 
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
+    final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
 
     final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: widget.animation!, curve: _snackBarFadeInCurve);
+    final CurvedAnimation fadeInM3Animation = CurvedAnimation(parent: widget.animation!, curve: _snackBarM3FadeInCurve);
+
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
       parent: widget.animation!,
       curve: _snackBarFadeOutCurve,
       reverseCurve: const Threshold(0.0),
     );
+    // Material 3 Animation has a height animation on entry, but a direct fade out on exit.
+    final CurvedAnimation heightM3Animation = CurvedAnimation(
+      parent: widget.animation!,
+      curve: _snackBarM3HeightCurve,
+      reverseCurve: const Threshold(0.0),
+    );
+
+
+    final IconButton? iconButton = showCloseIcon
+        ? IconButton(
+            icon: const Icon(Icons.close),
+            iconSize: 24.0,
+            color: widget.closeIconColor ?? snackBarTheme.closeIconColor ?? defaults.closeIconColor,
+            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.dismiss),
+          )
+        : null;
+
+    // Calculate combined width of Action, Icon, and their padding, if they are present.
+    final TextPainter actionTextPainter = TextPainter(
+        text: TextSpan(
+          text: widget.action?.label ?? '',
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        maxLines: 1,
+        textDirection: TextDirection.ltr)
+      ..layout();
+    final double actionAndIconWidth = actionTextPainter.size.width +
+        (widget.action != null ? actionHorizontalMargin : 0) +
+        (showCloseIcon ? (iconButton?.iconSize ?? 0 + iconHorizontalMargin) : 0);
+
+    final EdgeInsets margin = widget.margin?.resolve(TextDirection.ltr) ?? snackBarTheme.insetPadding ?? defaults.insetPadding!;
+
+    final double snackBarWidth = widget.width ?? MediaQuery.sizeOf(context).width - (margin.left + margin.right);
+    final double actionOverflowThreshold = widget.actionOverflowThreshold
+      ?? snackBarTheme.actionOverflowThreshold
+      ?? defaults.actionOverflowThreshold!;
+
+    final bool willOverflowAction = actionAndIconWidth / snackBarWidth > actionOverflowThreshold;
+
+    final List<Widget> maybeActionAndIcon = <Widget>[
+      if (widget.action != null)
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: actionHorizontalMargin),
+          child: TextButtonTheme(
+            data: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: buttonColor,
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              ),
+            ),
+            child: widget.action!,
+          ),
+        ),
+      if (showCloseIcon)
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: iconHorizontalMargin),
+          child: iconButton,
+        ),
+    ];
 
     Widget snackBar = Padding(
       padding: padding,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              padding: widget.padding == null ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding) : null,
-              child: DefaultTextStyle(
-                style: contentTextStyle!,
-                child: widget.content,
-              ),
-            ),
-          ),
-          if (widget.action != null)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: actionHorizontalMargin),
-              child: TextButtonTheme(
-                data: TextButtonThemeData(
-                  style: TextButton.styleFrom(
-                    foregroundColor: buttonColor,
-                    padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: Wrap(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: widget.padding == null
+                        ? const EdgeInsets.symmetric(
+                            vertical: _singleLineVerticalPadding)
+                        : null,
+                    child: DefaultTextStyle(
+                      style: contentTextStyle!,
+                      child: widget.content,
+                    ),
                   ),
                 ),
-                child: widget.action!,
-              ),
+                if (!willOverflowAction) ...maybeActionAndIcon,
+                if (willOverflowAction) SizedBox(width: snackBarWidth * 0.4),
+              ],
             ),
-        ],
-      ),
+            if (willOverflowAction)
+              Padding(
+                padding: const EdgeInsets.only(bottom: _singleLineVerticalPadding),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: maybeActionAndIcon),
+              ),
+            ],
+        ),
     );
 
     if (!isFloatingSnackBar) {
@@ -542,19 +720,18 @@ class _SnackBarState extends State<SnackBar> {
       );
     }
 
-    final double elevation = widget.elevation ?? snackBarTheme.elevation ?? 6.0;
-    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? inverseTheme.colorScheme.background;
-    final ShapeBorder? shape = widget.shape
-      ?? snackBarTheme.shape
-      ?? (isFloatingSnackBar ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))) : null);
+    final double elevation = widget.elevation ?? snackBarTheme.elevation ?? defaults.elevation!;
+    final Color backgroundColor = widget.backgroundColor ?? snackBarTheme.backgroundColor ?? defaults.backgroundColor!;
+    final ShapeBorder? shape = widget.shape ?? snackBarTheme.shape ?? (isFloatingSnackBar ? defaults.shape : null);
 
     snackBar = Material(
       shape: shape,
       elevation: elevation,
       color: backgroundColor,
+      clipBehavior: widget.clipBehavior,
       child: Theme(
-        data: inverseTheme,
-        child: mediaQueryData.accessibleNavigation
+        data: effectiveTheme,
+        child: accessibleNavigation || theme.useMaterial3
             ? snackBar
             : FadeTransition(
                 opacity: fadeOutAnimation,
@@ -564,24 +741,16 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     if (isFloatingSnackBar) {
-      const double topMargin = 5.0;
-      const double bottomMargin = 10.0;
       // If width is provided, do not include horizontal margins.
-      if (widget.width != null) {
+      if (width != null) {
         snackBar = Container(
-          margin: const EdgeInsets.only(top: topMargin, bottom: bottomMargin),
-          width: widget.width,
+          margin: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
+          width: width,
           child: snackBar,
         );
       } else {
-        const double horizontalMargin = 15.0;
         snackBar = Padding(
-          padding: widget.margin ?? const EdgeInsets.fromLTRB(
-            horizontalMargin,
-            topMargin,
-            horizontalMargin,
-            bottomMargin,
-          ),
+          padding: margin,
           child: snackBar,
         );
       }
@@ -610,12 +779,28 @@ class _SnackBarState extends State<SnackBar> {
     );
 
     final Widget snackBarTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       snackBarTransition = snackBar;
-    } else if (isFloatingSnackBar) {
+    } else if (isFloatingSnackBar && !theme.useMaterial3) {
       snackBarTransition = FadeTransition(
         opacity: fadeInAnimation,
         child: snackBar,
+      );
+     // Is Material 3 Floating Snack Bar.
+    } else if (isFloatingSnackBar && theme.useMaterial3) {
+      snackBarTransition = FadeTransition(
+        opacity: fadeInM3Animation,
+        child: AnimatedBuilder(
+          animation: heightM3Animation,
+          builder: (BuildContext context, Widget? child) {
+            return Align(
+              alignment: AlignmentDirectional.bottomStart,
+              heightFactor: heightM3Animation.value,
+              child: child,
+            );
+          },
+          child: snackBar,
+        ),
       );
     } else {
       snackBarTransition = AnimatedBuilder(
@@ -641,3 +826,127 @@ class _SnackBarState extends State<SnackBar> {
     );
   }
 }
+
+// Hand coded defaults based on Material Design 2.
+class _SnackbarDefaultsM2 extends SnackBarThemeData {
+  _SnackbarDefaultsM2(BuildContext context)
+      : _theme = Theme.of(context),
+        _colors = Theme.of(context).colorScheme,
+        super(elevation: 6.0);
+
+  late final ThemeData _theme;
+  late final ColorScheme _colors;
+
+  @override
+  Color get backgroundColor => _theme.brightness == Brightness.light
+      ? Color.alphaBlend(_colors.onSurface.withOpacity(0.80), _colors.surface)
+      : _colors.onSurface;
+
+  @override
+  TextStyle? get contentTextStyle => ThemeData(
+          brightness: _theme.brightness == Brightness.light
+              ? Brightness.dark
+              : Brightness.light)
+      .textTheme
+      .titleMedium;
+
+  @override
+  SnackBarBehavior get behavior => SnackBarBehavior.fixed;
+
+  @override
+  Color get actionTextColor => _colors.secondary;
+
+  @override
+  Color get disabledActionTextColor => _colors.onSurface
+      .withOpacity(_theme.brightness == Brightness.light ? 0.38 : 0.3);
+
+  @override
+  ShapeBorder get shape => const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(4.0),
+        ),
+      );
+
+  @override
+  EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
+
+  @override
+  bool get showCloseIcon => false;
+
+  @override
+  Color get closeIconColor => _colors.onSurface;
+
+  @override
+  double get actionOverflowThreshold => 0.25;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Snackbar
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// Token database version: v0_162
+
+class _SnackbarDefaultsM3 extends SnackBarThemeData {
+    _SnackbarDefaultsM3(this.context);
+
+  final BuildContext context;
+  late final ThemeData _theme = Theme.of(context);
+  late final ColorScheme _colors = _theme.colorScheme;
+
+  @override
+  Color get backgroundColor => _colors.inverseSurface;
+
+  @override
+  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return _colors.inversePrimary;
+    }
+    if (states.contains(MaterialState.pressed)) {
+      return _colors.inversePrimary;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return _colors.inversePrimary;
+    }
+    if (states.contains(MaterialState.focused)) {
+      return _colors.inversePrimary;
+    }
+    return _colors.inversePrimary;
+  });
+
+  @override
+  Color get disabledActionTextColor =>
+    _colors.inversePrimary;
+
+
+  @override
+  TextStyle get contentTextStyle =>
+    Theme.of(context).textTheme.bodyMedium!.copyWith
+      (color:  _colors.onInverseSurface,
+    );
+
+  @override
+  double get elevation => 6.0;
+
+  @override
+  ShapeBorder get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+
+  @override
+  SnackBarBehavior get behavior => SnackBarBehavior.fixed;
+
+  @override
+  EdgeInsets get insetPadding => const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0);
+
+  @override
+  bool get showCloseIcon => false;
+
+  @override
+  Color? get closeIconColor => _colors.onInverseSurface;
+
+  @override
+  double get actionOverflowThreshold => 0.25;
+}
+
+// END GENERATED TOKEN PROPERTIES - Snackbar

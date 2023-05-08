@@ -8,7 +8,7 @@ import 'package:test_core/src/executable.dart' as test; // ignore: implementatio
 import 'package:test_core/src/platform.dart' as hack show registerPlatformPlugin; // ignore: implementation_imports
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 
-export 'package:test_api/backend.dart' show Runtime; // ignore: deprecated_member_use
+export 'package:test_api/backend.dart' show Runtime;
 export 'package:test_core/src/platform.dart' show PlatformPlugin;
 
 abstract class TestWrapper {

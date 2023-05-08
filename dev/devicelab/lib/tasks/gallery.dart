@@ -18,17 +18,17 @@ final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration
 ///
 /// https://github.com/flutter/flutter/issues/103542
 TaskFunction createGalleryTransitionBuildTest(List<String> args, {bool semanticsEnabled = false}) {
-  return GalleryTransitionBuildTest(args, semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionBuildTest(args, semanticsEnabled: semanticsEnabled).call;
 }
 
 TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
-  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled).call;
 }
 
 TaskFunction createGalleryTransitionE2EBuildTest(
   List<String> args, {
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return GalleryTransitionBuildTest(
     args,
@@ -39,12 +39,12 @@ TaskFunction createGalleryTransitionE2EBuildTest(
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
     enableImpeller: enableImpeller,
-  );
+  ).call;
 }
 
 TaskFunction createGalleryTransitionE2ETest({
   bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  bool? enableImpeller,
 }) {
   return GalleryTransitionTest(
     testFile: semanticsEnabled
@@ -56,7 +56,7 @@ TaskFunction createGalleryTransitionE2ETest({
     timelineTraceFile: null,
     driverFile: 'transitions_perf_e2e_test',
     enableImpeller: enableImpeller,
-  );
+  ).call;
 }
 
 TaskFunction createGalleryTransitionHybridBuildTest(
@@ -67,7 +67,7 @@ TaskFunction createGalleryTransitionHybridBuildTest(
     args,
     semanticsEnabled: semanticsEnabled,
     driverFile: semanticsEnabled ? 'transitions_perf_hybrid_with_semantics_test' : 'transitions_perf_hybrid_test',
-  );
+  ).call;
 }
 
 TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
@@ -76,7 +76,7 @@ TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) 
     driverFile: semanticsEnabled
         ? 'transitions_perf_hybrid_with_semantics_test'
         : 'transitions_perf_hybrid_test',
-  );
+  ).call;
 }
 
 class GalleryTransitionTest {
@@ -91,14 +91,14 @@ class GalleryTransitionTest {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller,
   });
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
-  final bool enableImpeller;
+  final bool? enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -136,7 +136,8 @@ class GalleryTransitionTest {
       await flutter('drive', options: <String>[
         '--no-dds',
         '--profile',
-        if (enableImpeller) '--enable-impeller',
+        if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+        if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
         if (needFullTimeline)
           '--trace-startup',
         if (applicationBinaryPath != null)
@@ -150,6 +151,8 @@ class GalleryTransitionTest {
         'test_driver/$testDriver.dart',
         '-d',
         deviceId,
+        '-v',
+        '--verbose-system-logs'
       ]);
     });
 
@@ -233,14 +236,14 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     this.driverFile,
     this.measureCpuGpu = true,
     this.measureMemory = true,
-    this.enableImpeller = false,
+    this.enableImpeller,
   }) : super(workingDirectory: galleryDirectory);
 
   final bool semanticsEnabled;
   final bool needFullTimeline;
   final bool measureCpuGpu;
   final bool measureMemory;
-  final bool enableImpeller;
+  final bool? enableImpeller;
   final String testFile;
   final String timelineSummaryFile;
   final String? timelineTraceFile;
@@ -278,7 +281,8 @@ class GalleryTransitionBuildTest extends BuildTestTask {
     return <String>[
       '--no-dds',
       '--profile',
-      if (enableImpeller) '--enable-impeller',
+      if (enableImpeller != null && enableImpeller!) '--enable-impeller',
+      if (enableImpeller != null && !enableImpeller!) '--no-enable-impeller',
       if (needFullTimeline) '--trace-startup',
       '-t',
       'test_driver/$testFile.dart',

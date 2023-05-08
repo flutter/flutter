@@ -18,14 +18,14 @@ void main() {
   testWidgets(
     '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
     (WidgetTester tester) async {
-      ObjectEvent? recievedEvent;
-      ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
+      ObjectEvent? receivedEvent;
+      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
 
       ma.addListener(listener);
       expect(ma.hasListeners, isFalse);
 
       await _activateFlutterObjects(tester);
-      expect(recievedEvent, isNull);
+      expect(receivedEvent, isNull);
       expect(ma.hasListeners, isFalse);
 
       ma.removeListener(listener);

@@ -12,13 +12,13 @@ void main() {
       const example.ChipApp(),
     );
 
-    ChoiceChip choosenChip = tester.widget(find.byType(ChoiceChip).at(1));
-    expect(choosenChip.selected, true);
+    ChoiceChip chosenChip = tester.widget(find.byType(ChoiceChip).at(1));
+    expect(chosenChip.selected, true);
 
     await tester.tap(find.byType(ChoiceChip).at(0));
     await tester.pumpAndSettle();
 
-    choosenChip = tester.widget(find.byType(ChoiceChip).at(0));
-    expect(choosenChip.selected, true);
+    chosenChip = tester.widget(find.byType(ChoiceChip).at(0));
+    expect(chosenChip.selected, true);
   });
 }

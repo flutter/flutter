@@ -78,9 +78,10 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 
   // Verify that the dumps are pretty.
   final String routeName = demo.routeName;
-  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement!.toStringDeep());
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.rootElement!.toStringDeep());
   verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance.renderView.toStringDeep());
   verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? '');
+  verifyToStringOutput('debugDumpFocusTree', routeName, WidgetsBinding.instance.focusManager.toStringDeep());
 
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
@@ -184,8 +185,8 @@ void main() {
   );
 
   testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
-    RendererBinding.instance.setSemanticsEnabled(true);
+    final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
     await smokeGallery(tester);
-    RendererBinding.instance.setSemanticsEnabled(false);
+    handle.dispose();
   });
 }

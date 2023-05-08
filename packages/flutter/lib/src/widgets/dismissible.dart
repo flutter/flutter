@@ -112,9 +112,7 @@ class Dismissible extends StatefulWidget {
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
     this.behavior = HitTestBehavior.opaque,
-  }) : assert(key != null),
-       assert(secondaryBackground == null || background != null),
-       assert(dragStartBehavior != null),
+  }) : assert(secondaryBackground == null || background != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -263,16 +261,13 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     required this.axis,
     required this.moveAnimation,
-  }) : assert(axis != null),
-       assert(moveAnimation != null),
-       super(reclip: moveAnimation);
+  }) : super(reclip: moveAnimation);
 
   final Axis axis;
   final Animation<Offset> moveAnimation;
 
   @override
   Rect getClip(Size size) {
-    assert(axis != null);
     switch (axis) {
       case Axis.horizontal:
         final double offset = moveAnimation.value.dx * size.width;
@@ -395,19 +390,16 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
         _dragExtent += delta;
-        break;
 
       case DismissDirection.up:
         if (_dragExtent + delta < 0) {
           _dragExtent += delta;
         }
-        break;
 
       case DismissDirection.down:
         if (_dragExtent + delta > 0) {
           _dragExtent += delta;
         }
-        break;
 
       case DismissDirection.endToStart:
         switch (Directionality.of(context)) {
@@ -415,14 +407,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             if (_dragExtent + delta > 0) {
               _dragExtent += delta;
             }
-            break;
           case TextDirection.ltr:
             if (_dragExtent + delta < 0) {
               _dragExtent += delta;
             }
-            break;
         }
-        break;
 
       case DismissDirection.startToEnd:
         switch (Directionality.of(context)) {
@@ -430,18 +419,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             if (_dragExtent + delta < 0) {
               _dragExtent += delta;
             }
-            break;
           case TextDirection.ltr:
             if (_dragExtent + delta > 0) {
               _dragExtent += delta;
             }
-            break;
         }
-        break;
 
       case DismissDirection.none:
         _dragExtent = 0;
-        break;
     }
     if (oldDragExtent.sign != _dragExtent.sign) {
       setState(() {
@@ -480,7 +465,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
-    assert(widget.direction != null);
     if (_dragExtent == 0.0) {
       // If it was a fling, then it was a fling that was let loose at the exact
       // middle of the range (i.e. when there's no displacement). In that case,
@@ -506,7 +490,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       assert(vy != 0.0);
       flingDirection = _extentToDirection(vy);
     }
-    assert(_dismissDirection != null);
     if (flingDirection == _dismissDirection) {
       return _FlingGestureKind.forward;
     }
@@ -533,13 +516,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         }
         _dragExtent = flingVelocity.sign;
         _moveController!.fling(velocity: flingVelocity.abs() * _kFlingVelocityScale);
-        break;
       case _FlingGestureKind.reverse:
         assert(_dragExtent != 0.0);
         assert(!_moveController!.isDismissed);
         _dragExtent = flingVelocity.sign;
         _moveController!.fling(velocity: -flingVelocity.abs() * _kFlingVelocityScale);
-        break;
       case _FlingGestureKind.none:
         if (!_moveController!.isDismissed) { // we already know it's not completed, we check that above
           if (_moveController!.value > (widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold)) {
@@ -548,7 +529,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
             _moveController!.reverse();
           }
         }
-        break;
     }
   }
 

@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Image.frameBuilder].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Image.frameBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FrameBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class FrameBuilderExampleApp extends StatelessWidget {
+  const FrameBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: FrameBuilderExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class FrameBuilderExample extends StatelessWidget {
+  const FrameBuilderExample({super.key});
 
   @override
   @override
@@ -36,8 +33,7 @@ class MyStatelessWidget extends StatelessWidget {
       ),
       child: Image.network(
         'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-        frameBuilder: (BuildContext context, Widget child, int? frame,
-            bool wasSynchronouslyLoaded) {
+        frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
           if (wasSynchronouslyLoaded) {
             return child;
           }

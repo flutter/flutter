@@ -84,8 +84,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.collapseMode = CollapseMode.parallax,
     this.stretchModes = const <StretchMode>[StretchMode.zoomBackground],
     this.expandedTitleScale = 1.5,
-  }) : assert(collapseMode != null),
-       assert(expandedTitleScale >= 1);
+  }) : assert(expandedTitleScale >= 1);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -117,7 +116,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// bottom-left or its center.
   ///
   /// Typically this property is used to adjust how far the title is
-  /// is inset from the bottom-left and it is specified along with
+  /// inset from the bottom-left and it is specified along with
   /// [centerTitle] false.
   ///
   /// By default the value of this property is
@@ -159,7 +158,6 @@ class FlexibleSpaceBar extends StatefulWidget {
     required double currentExtent,
     required Widget child,
   }) {
-    assert(currentExtent != null);
     return FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
@@ -179,7 +177,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     if (widget.centerTitle != null) {
       return widget.centerTitle!;
     }
-    assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -197,7 +194,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       return Alignment.bottomCenter;
     }
     final TextDirection textDirection = Directionality.of(context);
-    assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
         return Alignment.bottomRight;
@@ -223,10 +219,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
-        assert(
-          settings != null,
-          'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().',
-        );
 
         final List<Widget> children = <Widget>[];
 
@@ -294,7 +286,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
               title = widget.title;
-              break;
             case TargetPlatform.android:
             case TargetPlatform.fuchsia:
             case TargetPlatform.linux:
@@ -303,7 +294,6 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 namesRoute: true,
                 child: widget.title,
               );
-              break;
           }
 
           // StretchMode.fadeTitle
@@ -388,10 +378,9 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
     required this.currentExtent,
     required super.child,
     this.isScrolledUnder,
-  }) : assert(toolbarOpacity != null),
-       assert(minExtent != null && minExtent >= 0),
-       assert(maxExtent != null && maxExtent >= 0),
-       assert(currentExtent != null && currentExtent >= 0),
+  }) : assert(minExtent >= 0),
+       assert(maxExtent >= 0),
+       assert(currentExtent >= 0),
        assert(toolbarOpacity >= 0.0),
        assert(minExtent <= maxExtent),
        assert(minExtent <= currentExtent),

@@ -29,9 +29,8 @@ Future<ui.Image> createTestImage({
   int height = 1,
   bool cache = true,
 }) => TestAsyncUtils.guard(() async {
-  assert(width != null && width > 0);
-  assert(height != null && height > 0);
-  assert(cache != null);
+  assert(width > 0);
+  assert(height > 0);
 
   final int cacheKey = Object.hash(width, height);
   if (cache && _cache.containsKey(cacheKey)) {

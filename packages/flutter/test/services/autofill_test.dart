@@ -125,6 +125,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
+  void insertContent(KeyboardInsertedContent content) {
+    latestMethodCall = 'commitContent';
+  }
+
+  @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
@@ -137,6 +142,11 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   @override
   void showAutocorrectionPromptRect(int start, int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
+  @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    latestMethodCall = 'didChangeInputControl';
   }
 
   @override

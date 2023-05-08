@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Valitse kaikki",
   "tabSemanticsLabel": "Välilehti $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Ohita",
-  "searchTextFieldPlaceholderLabel": "Hae"
+  "searchTextFieldPlaceholderLabel": "Hae",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

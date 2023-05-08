@@ -21,8 +21,6 @@ import 'convert.dart';
 
 /// Opt-in changes to the dart compilers.
 const List<String> kDartCompilerExperiments = <String>[
-  // improve AOT code size.
-  '--compact-async',
 ];
 
 /// The target model describes the set of core libraries that are available within
@@ -146,10 +144,8 @@ class StdoutHandler {
       switch (message[0]) {
         case '+':
           sources.add(Uri.parse(message.substring(1)));
-          break;
         case '-':
           sources.remove(Uri.parse(message.substring(1)));
-          break;
         default:
           _logger.printTrace('Unexpected prefix for $message uri - ignoring');
       }
@@ -169,37 +165,33 @@ class StdoutHandler {
 }
 
 /// List the preconfigured build options for a given build mode.
-List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
-  switch (mode) {
-    case BuildMode.debug:
-      return <String>[
-        // These checks allow the CLI to override the value of this define for unit
-        // testing the framework.
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
+    switch (mode) {
+      BuildMode.debug => <String>[
+          // These checks allow the CLI to override the value of this define for unit
+          // testing the framework.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=false',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          '--enable-asserts',
+        ],
+      BuildMode.profile => <String>[
+          // These checks allow the CLI to override the value of this define for
+          // benchmarks with most timeline traces disabled.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=true',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          ...kDartCompilerExperiments,
+        ],
+      BuildMode.release => <String>[
           '-Ddart.vm.profile=false',
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-          '-Ddart.vm.product=false',
-        '--enable-asserts',
-      ];
-    case BuildMode.profile:
-      return <String>[
-        // These checks allow the CLI to override the value of this define for
-        // benchmarks with most timeline traces disabled.
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
-          '-Ddart.vm.profile=true',
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-          '-Ddart.vm.product=false',
-        ...kDartCompilerExperiments,
-      ];
-    case BuildMode.release:
-      return <String>[
-        '-Ddart.vm.profile=false',
-        '-Ddart.vm.product=true',
-        ...kDartCompilerExperiments,
-      ];
-  }
-  throw Exception('Unknown BuildMode: $mode');
-}
+          '-Ddart.vm.product=true',
+          ...kDartCompilerExperiments,
+        ],
+      _ => throw Exception('Unknown BuildMode: $mode')
+    };
 
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
@@ -248,14 +240,16 @@ class KernelCompiler {
     required List<String> dartDefines,
     required PackageConfig packageConfig,
   }) async {
+    final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      platform: platform,
     );
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
     }
-    final String engineDartPath = _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path;
+    final String engineDartPath = _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform);
     if (!_processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -590,8 +584,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  }) : assert(sdkRoot != null),
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
        _artifacts = artifacts,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
@@ -654,7 +647,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
   }) async {
-    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -740,11 +732,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? outputPath,
     {String? additionalSourceUri}
   ) async {
+    final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
+      Artifact.frontendServerSnapshotForEngineDartSdk,
+      platform: platform,
     );
     final List<String> command = <String>[
-      _artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+      _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
@@ -763,7 +757,9 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--output-dill',
         outputPath,
       ],
-      if (librariesSpec != null) ...<String>[
+      // If we have a platform dill, we don't need to pass the libraries spec,
+      // since the information is embedded in the .dill file.
+      if (librariesSpec != null && platformDill == null) ...<String>[
         '--libraries-spec',
         librariesSpec!,
       ],
@@ -773,11 +769,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
-      if (fileSystemRoots != null)
-        for (final String root in fileSystemRoots) ...<String>[
-          '--filesystem-root',
-          root,
-        ],
+      for (final String root in fileSystemRoots) ...<String>[
+        '--filesystem-root',
+        root,
+      ],
       if (fileSystemScheme != null) ...<String>[
         '--filesystem-scheme',
         fileSystemScheme!,

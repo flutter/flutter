@@ -38,6 +38,11 @@ void main() {
       expect(localizations.datePickerDayOfMonth(2), isNotNull);
       expect(localizations.datePickerDayOfMonth(10), isNotNull);
 
+      expect(localizations.datePickerDayOfMonth(0, 1), isNotNull);
+      expect(localizations.datePickerDayOfMonth(1, 2), isNotNull);
+      expect(localizations.datePickerDayOfMonth(2, 3), isNotNull);
+      expect(localizations.datePickerDayOfMonth(10, 4), isNotNull);
+
       expect(localizations.datePickerMediumDate(DateTime(2019, 3, 25)), isNotNull);
 
       expect(localizations.datePickerHour(0), isNotNull);

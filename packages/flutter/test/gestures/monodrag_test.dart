@@ -10,6 +10,31 @@ import 'gesture_tester.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('acceptGesture tolerates a null lastPendingEventTimestamp', () {
+    // Regression test for https://github.com/flutter/flutter/issues/112403
+    // and b/249091367
+    final DragGestureRecognizer recognizer = VerticalDragGestureRecognizer();
+    const PointerDownEvent event = PointerDownEvent(timeStamp: Duration(days: 10));
+
+    expect(recognizer.debugLastPendingEventTimestamp, null);
+
+    recognizer.addAllowedPointer(event);
+    expect(recognizer.debugLastPendingEventTimestamp, event.timeStamp);
+
+    // Normal case: acceptGesture called and we have a last timestamp set.
+    recognizer.acceptGesture(event.pointer);
+    expect(recognizer.debugLastPendingEventTimestamp, null);
+
+    // Reject the gesture to reset state and allow accepting it again.
+    recognizer.rejectGesture(event.pointer);
+    expect(recognizer.debugLastPendingEventTimestamp, null);
+
+    // Not entirely clear how this can happen, but the bugs mentioned above show
+    // we can end up in this state empircally.
+    recognizer.acceptGesture(event.pointer);
+    expect(recognizer.debugLastPendingEventTimestamp, null);
+  });
+
   testGesture('do not crash on up event for a pending pointer after winning arena for another pointer', (GestureTester tester) {
     // Regression test for https://github.com/flutter/flutter/issues/75061.
 
@@ -49,34 +74,55 @@ void main() {
     GestureBinding.instance.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
-  testWidgets('VerticalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        VerticalDragGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
+  group('Recognizers on different button filters:', () {
+    final List<String> recognized = <String>[];
+    late HorizontalDragGestureRecognizer primaryRecognizer;
+    late HorizontalDragGestureRecognizer secondaryRecognizer;
+    setUp(() {
+      primaryRecognizer = HorizontalDragGestureRecognizer(
+          allowedButtonsFilter: (int buttons) => kPrimaryButton == buttons)
+        ..onStart = (DragStartDetails details) {
+          recognized.add('onStartPrimary');
+        };
+      secondaryRecognizer = HorizontalDragGestureRecognizer(
+          allowedButtonsFilter: (int buttons) => kSecondaryButton == buttons)
+        ..onStart = (DragStartDetails details) {
+          recognized.add('onStartSecondary');
+        };
+    });
 
-  testWidgets('HorizontalDragGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        HorizontalDragGestureRecognizer(
-          kind: PointerDeviceKind.touch,
-          supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
+    tearDown(() {
+      recognized.clear();
+      primaryRecognizer.dispose();
+      secondaryRecognizer.dispose();
+    });
+
+    testGesture('Primary button works', (GestureTester tester) {
+      const PointerDownEvent down1 = PointerDownEvent(
+        pointer: 6,
+        position: Offset(10.0, 10.0),
+      );
+
+      primaryRecognizer.addPointer(down1);
+      secondaryRecognizer.addPointer(down1);
+      tester.closeArena(down1.pointer);
+      tester.route(down1);
+      expect(recognized, <String>['onStartPrimary']);
+    });
+
+    testGesture('Secondary button works', (GestureTester tester) {
+      const PointerDownEvent down1 = PointerDownEvent(
+        pointer: 6,
+        position: Offset(10.0, 10.0),
+        buttons: kSecondaryMouseButton,
+      );
+
+      primaryRecognizer.addPointer(down1);
+      secondaryRecognizer.addPointer(down1);
+      tester.closeArena(down1.pointer);
+      tester.route(down1);
+      expect(recognized, <String>['onStartSecondary']);
+    });
   });
 }
 

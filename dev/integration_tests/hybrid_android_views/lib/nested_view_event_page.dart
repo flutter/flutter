@@ -122,7 +122,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   Widget _statusWidget() {
     assert(_lastTestStatus != _LastTestStatus.pending);
     final String message = _lastTestStatus == _LastTestStatus.success ? 'Success' : lastError!;
-    return Container(
+    return ColoredBox(
       color: _lastTestStatus == _LastTestStatus.success ? Colors.green : Colors.red,
       child: Text(
         message,

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../src/common.dart';
@@ -37,6 +38,7 @@ void main() {
           terminal: globals.terminal,
           processManager: globals.processManager,
           allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+          suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -56,6 +58,7 @@ void main() {
       '│ [✓] Is Flutter Package: yes                                       │\n'
       '│ [✓] Uses Material Design: yes                                     │\n'
       '│ [✓] Is Plugin: no                                                 │\n'
+      '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpString} │\n'
       '└───────────────────────────────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));
@@ -73,6 +76,7 @@ void main() {
         allProjectValidators: <ProjectValidator>[
           PubDependenciesProjectValidator(globals.processManager),
         ],
+        suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -107,7 +111,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    testUsingContext('analyze --suggesions --machine produces expected values', () async {
+    testUsingContext('analyze --suggestions --machine produces expected values', () async {
       final ProcessResult result = await globals.processManager.run(<String>['flutter', 'analyze', '--suggestions', '--machine'], workingDirectory: tempDir.childDirectory('test_project').path);
 
       expect(result.stdout is String, true);

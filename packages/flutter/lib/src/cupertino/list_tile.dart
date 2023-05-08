@@ -283,6 +283,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     final Widget title = DefaultTextStyle(
       style: titleTextStyle,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       child: widget.title,
     );
 
@@ -291,10 +292,8 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       switch (widget._type) {
         case _CupertinoListTileType.base:
           padding = widget.subtitle == null ? _kPadding : _kPaddingWithSubtitle;
-          break;
         case _CupertinoListTileType.notched:
           padding = widget.leading == null ? _kNotchedPaddingWithoutLeading : _kNotchedPadding;
-          break;
       }
     }
 
@@ -303,6 +302,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       subtitle = DefaultTextStyle(
         style: subtitleTextStyle,
         maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         child: widget.subtitle!,
       );
     }
@@ -329,10 +329,8 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     switch (widget._type) {
       case _CupertinoListTileType.base:
         minHeight = subtitle == null ? _kMinHeight : _kMinHeightWithSubtitle;
-        break;
       case _CupertinoListTileType.notched:
         minHeight = widget.leading == null ? _kNotchedMinHeightWithoutLeading : _kNotchedMinHeight;
-        break;
     }
 
     final Widget child = Container(
@@ -353,18 +351,19 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
               SizedBox(width: widget.leadingToTitle),
             ] else
               SizedBox(height: widget.leadingSize),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                title,
-                if (subtitle != null) ...<Widget>[
-                  const SizedBox(height: _kNotchedTitleToSubtitle),
-                  subtitle,
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  title,
+                  if (subtitle != null) ...<Widget>[
+                    const SizedBox(height: _kNotchedTitleToSubtitle),
+                    subtitle,
+                  ],
                 ],
-              ],
+              ),
             ),
-            const Spacer(),
             if (additionalInfo != null) ...<Widget>[
               additionalInfo,
               if (widget.trailing != null)

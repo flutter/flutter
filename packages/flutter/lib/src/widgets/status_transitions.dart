@@ -13,7 +13,7 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   const StatusTransitionWidget({
     super.key,
     required this.animation,
-  }) : assert(animation != null);
+  });
 
   /// The animation to which this widget is listening.
   final Animation<double> animation;

@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 void main() {
   testWidgets('Semantics tester visits last child', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(
       Text.rich(
         TextSpan(
