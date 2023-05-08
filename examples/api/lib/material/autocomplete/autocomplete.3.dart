@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Autocomplete] that demonstrates fetching the
 /// options asynchronously and debouncing the network calls.
 
+// TODO(justinmc): Could you add an actual debounce function now?
+// TODO(justinmc): Consider adding error handling.
+
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
@@ -25,6 +28,37 @@ class AutocompleteExampleApp extends StatelessWidget {
   }
 }
 
+class _DebounceTimer {
+  _DebounceTimer(
+  ) {
+    _timer = Timer(_debounceDuration, _onComplete);
+  }
+
+  static const Duration _debounceDuration = Duration(milliseconds: 500);
+
+  late final Timer _timer;
+  final Completer _completer = Completer();
+
+  void _onComplete() {
+    _completer.complete();
+  }
+
+  Future<void> get future => _completer.future;
+
+  bool get isCompleted => _completer.isCompleted;
+
+  void cancel() {
+    //print('justin cancel');
+    _timer.cancel();
+    _completer.completeError(const _CancelException());
+  }
+}
+
+// An excpetion indicating that the timer was canceled.
+class _CancelException implements Exception {
+  const _CancelException();
+}
+
 class _AsyncAutocomplete extends StatefulWidget {
   const _AsyncAutocomplete();
 
@@ -38,37 +72,32 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
   String? _currentQuery;
 
   // The most recent options received from the API.
-  late Iterable<String> _lastOptions;
+  late Iterable<String> _lastOptions = <String>[];
 
-  Timer? _debounceTimer;
-  static const Duration _debounceDuration = Duration(milliseconds: 500);
-  // The query to use to search with when the debounce timer expires.
-  String? _debounceQuery;
+  _DebounceTimer? _debounceTimer;
 
   Future<Iterable<String>?> _debouncedSearch(String query) async {
-    if (_debounceTimer == null) {
-      _debounceTimer = Timer(_debounceDuration, () {
-        if (_debounceQuery == null) {
-          return;
-        }
-        _search(_debounceQuery!);
-      });
-      return _search(query);
+    if (_debounceTimer != null && !_debounceTimer!.isCompleted) {
+      _debounceTimer!.cancel();
     }
-    if (_debounceTimer != null && _debounceTimer.isActive) {
-      _debounceQuery = query;
-      return;
+    _debounceTimer = _DebounceTimer();
+    try {
+      await _debounceTimer!.future;
+    } catch (error) {
+      if (error is _CancelException) {
+        return null;
+      }
+      rethrow;
     }
-    final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
-    if (options == null) {
-      return _lastOptions;
-    }
-    _lastOptions = options;
-    return options;
+    return _search(query);
   }
 
+  // Calls the "remote" API to search with the given query. Returns null when
+  // the call has been made obsolete.
   Future<Iterable<String>?> _search(String query) async {
     _currentQuery = query;
+
+    // In a real application, there should be some error handling here.
     Iterable<String> options = await _FakeAPI.search(_currentQuery!);
 
     // If another search happened after this one, throw away these options.
@@ -85,7 +114,6 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
   Widget build(BuildContext context) {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
-        //final Iterable<String>? options = await _search(textEditingValue.text);
         final Iterable<String>? options = await _debouncedSearch(textEditingValue.text);
         if (options == null) {
           return _lastOptions;
@@ -131,6 +159,7 @@ typedef _Debounced<S, T> = S Function(T currentArg);
 /// it hasn't received a call in duration.
 ///
 /// Only works for functions that take exactly one argument and return void.
+/*
 _Debounced<S, T> _debounce<S, T>({
   required Duration duration,
   required _Debounceable<S, T> function,
@@ -150,4 +179,4 @@ _Debounced<S, T> _debounce<S, T>({
     return timer!;
   };
 }
-
+*/
