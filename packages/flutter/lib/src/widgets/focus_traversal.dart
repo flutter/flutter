@@ -154,7 +154,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// const constructors so that they can be used in const expressions.
   ///
   /// {@template flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
-  /// The `requestFocusCallback` can be used to override the default behaviour
+  /// The `requestFocusCallback` can be used to override the default behavior
   /// of the focus requests. If `requestFocusCallback`
   /// is null, it defaults to [defaultTraversalRequestFocusCallback].
   /// {@endtemplate}
