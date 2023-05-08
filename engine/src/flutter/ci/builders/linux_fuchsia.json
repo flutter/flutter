@@ -1,0 +1,205 @@
+{
+    "builds": [
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--fuchsia",
+                "--fuchsia-cpu",
+                "arm64",
+                "--runtime-mode",
+                "profile"
+            ],
+            "name": "fuchsia_profile_arm64",
+            "ninja": {
+                "config": "fuchsia_profile_arm64",
+                "targets": [
+                    "flutter/shell/platform/fuchsia:fuchsia"
+                ]
+            }
+        },
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--fuchsia",
+                "--fuchsia-cpu",
+                "arm64",
+                "--runtime-mode",
+                "release"
+            ],
+            "name": "fuchsia_release_arm64",
+            "ninja": {
+                "config": "fuchsia_release_arm64",
+                "targets": [
+                    "flutter/shell/platform/fuchsia:fuchsia"
+                ]
+            }
+        },
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--fuchsia",
+                "--fuchsia-cpu",
+                "arm64",
+                "--runtime-mode",
+                "debug",
+                "--no-lto"
+            ],
+            "name": "fuchsia_debug_arm64",
+            "ninja": {
+                "config": "fuchsia_debug_arm64",
+                "targets": [
+                    "flutter/shell/platform/fuchsia:fuchsia",
+                    "fuchsia_tests"
+                ]
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--fuchsia",
+                "--fuchsia-cpu",
+                "x64",
+                "--runtime-mode",
+                "profile"
+            ],
+            "name": "fuchsia_profile_x64",
+            "ninja": {
+                "config": "fuchsia_profile_x64",
+                "targets": [
+                    "flutter/shell/platform/fuchsia:fuchsia"
+                ]
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--fuchsia",
+                "--fuchsia-cpu",
+                "x64",
+                "--runtime-mode",
+                "release"
+            ],
+            "name": "fuchsia_release_x64",
+            "ninja": {
+                "config": "fuchsia_release_x64",
+                "targets": [
+                    "flutter/shell/platform/fuchsia:fuchsia"
+                ]
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--fuchsia",
+                "--fuchsia-cpu",
+                "x64",
+                "--runtime-mode",
+                "debug",
+                "--no-lto"
+            ],
+            "name": "fuchsia_debug_x64",
+            "ninja": {
+                "config": "fuchsia_debug_x64",
+                "targets": [
+                    "flutter/shell/platform/fuchsia:fuchsia",
+                    "fuchsia_tests"
+                ]
+            }
+        }
+    ],
+    "generators": {
+        "tasks": [
+            {
+                "name": "Upload fuchsia artifacts",
+                "parameters": [
+                    "--engine-version",
+                    "HEAD",
+                    "--skip-build"
+                ],
+                "script": "flutter/tools/fuchsia/build_fuchsia_artifacts.py",
+                "language": "python3"
+            },
+            {
+                "name": "Upload to CIPD for arch: arm64",
+                "parameters": [
+                    "--engine-version",
+                    "HEAD",
+                    "--target-arch",
+                    "arm64",
+                    "--out-dir",
+                    "/b/s/w/ir/x/w/recipe_cleanup/tmppqs4ecj7",
+                    "--symbol-dirs",
+                    "out/fuchsia_debug_arm64/.build-id",
+                    "out/fuchsia_profile_arm64/.build-id",
+                    "out/fuchsia_release_arm64/.build-id"
+                ],
+                "script": "flutter/tools/fuchsia/merge_and_upload_debug_symbols.py",
+                "language": "python3"
+            },
+            {
+                "name": "Upload to CIPD for arch: x64",
+                "parameters": [
+                    "--engine-version",
+                    "HEAD",
+                    "--target-arch",
+                    "x64",
+                    "--out-dir",
+                    "/b/s/w/ir/x/w/recipe_cleanup/tmppqs4ecj7",
+                    "--symbol-dirs",
+                    "out/fuchsia_debug_x64/.build-id",
+                    "out/fuchsia_profile_x64/.build-id",
+                    "out/fuchsia_release_x64/.build-id"
+                ],
+                "script": "flutter/tools/fuchsia/merge_and_upload_debug_symbols.py",
+                "language": "python3"
+            },
+            {
+                "name": "Verify-export-symbols-release-binaries",
+                "parameters": [
+                    "src/out"
+                ],
+                "script": "flutter/testing/symbols/verify_exported.dart",
+                "language": "dart"
+            }
+        ]
+    }
+}
