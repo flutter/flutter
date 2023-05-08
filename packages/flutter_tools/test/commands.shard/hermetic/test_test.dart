@@ -158,7 +158,7 @@ dev_dependencies:
   });
 
   testUsingContext(
-      'Confirmation that the reporter and timeout args are not set by default',
+      'Confirmation that the reporter, timeout, and concurrency args are not set by default',
       () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
 
@@ -175,6 +175,7 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, isNot(contains('compact')));
     expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
     expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
