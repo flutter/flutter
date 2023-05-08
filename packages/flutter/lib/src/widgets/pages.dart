@@ -7,7 +7,7 @@ import 'framework.dart';
 import 'routes.dart';
 
 /// A modal route that replaces the entire screen.
-abstract class PageRoute<T> extends ModalRoute<T> {
+abstract class PageRoute extends ModalRoute {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
     super.settings,
@@ -31,10 +31,10 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool get barrierDismissible => false;
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute;
+  bool canTransitionTo(TransitionRoute nextRoute) => nextRoute is PageRoute;
 
   @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => previousRoute is PageRoute;
+  bool canTransitionFrom(TransitionRoute previousRoute) => previousRoute is PageRoute;
 }
 
 Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
@@ -45,7 +45,7 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 ///
 /// Callers must define the [pageBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
-class PageRouteBuilder<T> extends PageRoute<T> {
+class PageRouteBuilder extends PageRoute {
   /// Creates a route that delegates to builder callbacks.
   ///
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],

@@ -83,7 +83,7 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 ///  * [MaterialRouteTransitionMixin], which is a mixin that provides
 ///    platform-appropriate transitions for a [PageRoute].
 ///  * [CupertinoPageRoute], which is a [PageRoute] that leverages this mixin.
-mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
+mixin CupertinoRouteTransitionMixin on PageRoute {
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -122,7 +122,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  void didChangePrevious(Route<dynamic>? previousRoute) {
+  void didChangePrevious(Route? previousRoute) {
     final String? previousTitleString = previousRoute is CupertinoRouteTransitionMixin
       ? previousRoute.title
       : null;
@@ -145,7 +145,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   String? get barrierLabel => null;
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+  bool canTransitionTo(TransitionRoute nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
@@ -158,7 +158,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   ///
   ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
   ///    would be allowed.
-  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
+  static bool isPopGestureInProgress(PageRoute route) {
     return route.navigator!.userGestureInProgress;
   }
 
@@ -183,7 +183,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// This should only be used between frames, not during build.
   bool get popGestureEnabled => _isPopGestureEnabled(this);
 
-  static bool _isPopGestureEnabled<T>(PageRoute<T> route) {
+  static bool _isPopGestureEnabled(PageRoute route) {
     // If there's nothing to go back to, then obviously we don't support
     // the back gesture.
     if (route.isFirst) {
@@ -245,10 +245,10 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
-  static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
+  static _CupertinoBackGestureController _startPopGesture(PageRoute route) {
     assert(_isPopGestureEnabled(route));
 
-    return _CupertinoBackGestureController<T>(
+    return _CupertinoBackGestureController(
       navigator: route.navigator!,
       controller: route.controller!, // protected access
     );
@@ -268,8 +268,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   ///
   ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
   ///    [PageTransitionsBuilder] for the [PageTransitionsTheme].
-  static Widget buildPageTransitions<T>(
-    PageRoute<T> route,
+  static Widget buildPageTransitions(
+    PageRoute route,
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
@@ -293,9 +293,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
-        child: _CupertinoBackGestureDetector<T>(
-          enabledCallback: () => _isPopGestureEnabled<T>(route),
-          onStartPopGesture: () => _startPopGesture<T>(route),
+        child: _CupertinoBackGestureDetector(
+          enabledCallback: () => _isPopGestureEnabled(route),
+          onStartPopGesture: () => _startPopGesture(route),
           child: child,
         ),
       );
@@ -304,7 +304,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return buildPageTransitions(this, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -331,7 +331,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 ///  * [CupertinoTabScaffold], for applications that have a tab bar at the
 ///    bottom with multiple pages.
 ///  * [CupertinoPage], for a [Page] version of this class.
-class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class CupertinoPageRoute extends PageRoute with CupertinoRouteTransitionMixin {
   /// Creates a page route for use in an iOS designed app.
   ///
   /// The [builder], [maintainState], and [fullscreenDialog] arguments must not
@@ -368,15 +368,15 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class _PageBasedCupertinoPageRoute extends PageRoute with CupertinoRouteTransitionMixin {
   _PageBasedCupertinoPageRoute({
-    required CupertinoPage<T> page,
+    required CupertinoPage page,
   }) : assert(page != null),
        super(settings: page) {
     assert(opaque);
   }
 
-  CupertinoPage<T> get _page => settings as CupertinoPage<T>;
+  CupertinoPage get _page => settings as CupertinoPage;
 
   @override
   Widget buildContent(BuildContext context) => _page.child;
@@ -410,7 +410,7 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
 /// See also:
 ///
 ///  * [CupertinoPageRoute], for a [PageRoute] version of this class.
-class CupertinoPage<T> extends Page<T> {
+class CupertinoPage extends Page {
   /// Creates a cupertino page.
   const CupertinoPage({
     required this.child,
@@ -438,8 +438,8 @@ class CupertinoPage<T> extends Page<T> {
   final bool fullscreenDialog;
 
   @override
-  Route<T> createRoute(BuildContext context) {
-    return _PageBasedCupertinoPageRoute<T>(page: this);
+  Route createRoute(BuildContext context) {
+    return _PageBasedCupertinoPageRoute(page: this);
   }
 }
 
@@ -595,7 +595,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
 ///
 /// The type `T` specifies the return type of the route with which this gesture
 /// detector is associated.
-class _CupertinoBackGestureDetector<T> extends StatefulWidget {
+class _CupertinoBackGestureDetector extends StatefulWidget {
   const _CupertinoBackGestureDetector({
     super.key,
     required this.enabledCallback,
@@ -609,14 +609,14 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
 
   final ValueGetter<bool> enabledCallback;
 
-  final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
+  final ValueGetter<_CupertinoBackGestureController> onStartPopGesture;
 
   @override
-  _CupertinoBackGestureDetectorState<T> createState() => _CupertinoBackGestureDetectorState<T>();
+  _CupertinoBackGestureDetectorState createState() => _CupertinoBackGestureDetectorState();
 }
 
-class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureDetector<T>> {
-  _CupertinoBackGestureController<T>? _backGestureController;
+class _CupertinoBackGestureDetectorState extends State<_CupertinoBackGestureDetector> {
+  _CupertinoBackGestureController? _backGestureController;
 
   late HorizontalDragGestureRecognizer _recognizer;
 
@@ -1018,7 +1018,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+class CupertinoModalPopupRoute extends PopupRoute {
   /// A route that shows a modal iOS-style popup that slides up from the
   /// bottom of the screen.
   CupertinoModalPopupRoute({
@@ -1176,7 +1176,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-Future<T?> showCupertinoModalPopup<T>({
+Future<void> showCupertinoModalPopup({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
@@ -1189,7 +1189,7 @@ Future<T?> showCupertinoModalPopup<T>({
 }) {
   assert(useRootNavigator != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push(
-    CupertinoModalPopupRoute<T>(
+    CupertinoModalPopupRoute(
       builder: builder,
       filter: filter,
       barrierColor: CupertinoDynamicColor.resolve(barrierColor, context),
@@ -1283,7 +1283,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-Future<T?> showCupertinoDialog<T>({
+Future<T?> showCupertinoDialog({
   required BuildContext context,
   required WidgetBuilder builder,
   String? barrierLabel,
@@ -1295,7 +1295,7 @@ Future<T?> showCupertinoDialog<T>({
   assert(builder != null);
   assert(useRootNavigator != null);
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(CupertinoDialogRoute(
     builder: builder,
     context: context,
     barrierDismissible: barrierDismissible,
@@ -1343,7 +1343,7 @@ Future<T?> showCupertinoDialog<T>({
 ///  * [showDialog], which displays a Material dialog.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
+class CupertinoDialogRoute<T> extends RawDialogRoute {
   /// A dialog route that shows an iOS-style dialog.
   CupertinoDialogRoute({
     required WidgetBuilder builder,

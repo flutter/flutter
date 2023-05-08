@@ -446,8 +446,8 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T? result) {
-    super.didComplete(result);
+  void didComplete() {
+    super.didComplete();
     assert(delegate._route == this);
     delegate._route = null;
     delegate._currentBody = null;

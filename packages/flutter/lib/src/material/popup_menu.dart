@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -338,7 +340,8 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   void handleTap() {
     widget.onTap?.call();
 
-    Navigator.pop<T>(context, widget.value);
+    (ModalRoute.of(context)! as ResultRouteMixin<T>).result = widget.value;
+    Navigator.pop(context);
   }
 
   @override
@@ -945,7 +948,7 @@ Future<T?> showMenu<T>({
   }
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(_PopupMenuRoute<T>(
+  final _PopupMenuRoute<T> route = _PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
@@ -957,7 +960,9 @@ Future<T?> showMenu<T>({
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
     clipBehavior: clipBehavior,
-  ));
+  );
+   navigator.push(route);
+   return route.popped.then((_) => route.result);
 }
 
 /// Signature for the callback invoked when a menu item is selected. The

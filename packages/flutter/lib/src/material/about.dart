@@ -1174,9 +1174,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
         onGenerateInitialRoutes: (NavigatorState navigator, String initialRoute) {
           switch (focus) {
             case _Focus.master:
-              return <Route<void>>[masterPageRoute];
+              return <Route>[masterPageRoute];
             case _Focus.detail:
-              return <Route<void>>[
+              return <Route>[
                 masterPageRoute,
                 _detailPageRoute(_cachedDetailArguments),
               ];

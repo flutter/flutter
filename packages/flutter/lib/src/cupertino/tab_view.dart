@@ -173,7 +173,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     );
   }
 
-  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+  Route? _onGenerateRoute(RouteSettings settings) {
     final String? name = settings.name;
     WidgetBuilder? routeBuilder;
     String? title;
@@ -196,7 +196,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     return null;
   }
 
-  Route<dynamic>? _onUnknownRoute(RouteSettings settings) {
+  Route? _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(
@@ -213,7 +213,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
       }
       return true;
     }());
-    final Route<dynamic>? result = widget.onUnknownRoute!(settings);
+    final Route? result = widget.onUnknownRoute!(settings);
     assert(() {
       if (result == null) {
         throw FlutterError(

@@ -225,7 +225,7 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 /// The signature of [WidgetsApp.onGenerateInitialRoutes].
 ///
 /// Creates a series of one or more initial routes.
-typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRoute);
+typedef InitialRouteListFactory = List<Route> Function(String initialRoute);
 
 /// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
@@ -1390,7 +1390,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   GlobalKey<NavigatorState>? _navigator;
 
-  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+  Route? _onGenerateRoute(RouteSettings settings) {
     final String? name = settings.name;
     final WidgetBuilder? pageContentBuilder = name == Navigator.defaultRouteName && widget.home != null
         ? (BuildContext context) => widget.home!
@@ -1402,7 +1402,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         'The default onGenerateRoute handler for WidgetsApp must have a '
         'pageRouteBuilder set if the home or routes properties are set.',
       );
-      final Route<dynamic> route = widget.pageRouteBuilder!<dynamic>(
+      final Route route = widget.pageRouteBuilder!<dynamic>(
         settings,
         pageContentBuilder,
       );
@@ -1415,7 +1415,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return null;
   }
 
-  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
+  Route _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(
@@ -1434,7 +1434,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       }
       return true;
     }());
-    final Route<dynamic>? result = widget.onUnknownRoute!(settings);
+    final Route? result = widget.onUnknownRoute!(settings);
     assert(() {
       if (result == null) {
         throw FlutterError(
