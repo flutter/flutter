@@ -2179,7 +2179,6 @@ targets:
       task_name: new_gallery__transition_perf
 
   - name: Linux_android new_gallery_impeller__transition_perf
-    bringup: false
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2456,7 +2455,6 @@ targets:
 
   - name: Staging_build_linux analyze
     presubmit: false
-    bringup: false
     recipe: flutter/flutter
     timeout: 60
     properties:
@@ -4808,7 +4806,7 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: false
+    bringup: true # https://github.com/flutter/flutter/issues/126286
     enabled_branches:
       - beta
       - stable
@@ -4821,7 +4819,6 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: false
     enabled_branches:
       - beta
       - stable
@@ -4837,7 +4834,6 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: false
     enabled_branches:
       - beta
       - stable
