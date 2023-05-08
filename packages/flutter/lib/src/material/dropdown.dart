@@ -1499,8 +1499,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: Color(0xFFBDBDBD),
-                    width: 0.0,
+                    color: Color(0x80BDBDBD),
+                    width: 2.0,
+                    strokeAlign: BorderSide.strokeAlignCenter,
                   ),
                 ),
               ),

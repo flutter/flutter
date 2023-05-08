@@ -613,9 +613,9 @@ void main() {
           .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
       },
       paints
-        ..path(
-          includes: <Offset>[const Offset(15.0, 30.0)],
-          excludes: <Offset>[const Offset(25.0, 30.0)],
+        ..drrect(
+          inner: RRect.fromLTRBR(20.0, 20.0, 30.0, 40.0, Radius.zero),
+          outer: RRect.fromLTRBR(10.0, 20.0, 30.0, 40.0, Radius.zero),
           color: const Color(0xFF00FF00),
         ),
     );
@@ -625,9 +625,9 @@ void main() {
           .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
       },
       paints
-        ..path(
-          includes: <Offset>[const Offset(25.0, 30.0)],
-          excludes: <Offset>[const Offset(15.0, 30.0)],
+        ..drrect(
+          inner: RRect.fromLTRBR(10.0, 20.0, 20.0, 40.0, Radius.zero),
+          outer: RRect.fromLTRBR(10.0, 20.0, 30.0, 40.0, Radius.zero),
           color: const Color(0xFF00FF00),
         ),
     );
@@ -666,10 +666,9 @@ void main() {
         );
       },
       paints
-        ..path(
-          includes: <Offset>[const Offset(49.0, 10.0)],
-          excludes: <Offset>[const Offset(31.0, 10.0)],
-        ),
+        ..drrect(
+            inner: RRect.fromLTRBR(30.0, 0.0, 48.0, 20.0, Radius.zero),
+            outer: RRect.fromLTRBR(30.0, 0.0, 50.0, 20.0, Radius.zero)),
     );
     expect(
       (Canvas canvas) {
@@ -680,10 +679,9 @@ void main() {
         );
       },
       paints
-        ..path(
-          includes: <Offset>[const Offset(31.0, 10.0)],
-          excludes: <Offset>[const Offset(49.0, 10.0)],
-        ),
+          ..drrect(
+            inner: RRect.fromLTRBR(32.0, 0.0, 50.0, 20.0, Radius.zero),
+            outer: RRect.fromLTRBR(30.0, 0.0, 50.0, 20.0, Radius.zero)),
     );
     expect(decoration2.padding, const EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0));
     expect(decoration2.scale(2.0), decoration4);

@@ -2036,7 +2036,7 @@ void main() {
       border: Border(bottom: BorderSide(color: Color(0xFFCCBB00), width: 4.0)),
     );
     const BoxDecoration defaultDecoration = BoxDecoration(
-      border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0)),
+      border: Border(bottom: BorderSide(color: Color(0x80BDBDBD), width: 2.0, strokeAlign: BorderSide.strokeAlignCenter)),
     );
 
     final Widget customUnderline = Container(height: 4.0, decoration: decoration);

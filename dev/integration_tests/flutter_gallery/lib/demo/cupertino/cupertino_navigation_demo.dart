@@ -763,8 +763,8 @@ class CupertinoDemoTab3 extends StatelessWidget {
               decoration: BoxDecoration(
                 color: CupertinoTheme.of(context).scaffoldBackgroundColor,
                 border: const Border(
-                  top: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
-                  bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
+                  top: BorderSide(color: Color(0x80BCBBC1), width: 2.0, strokeAlign: BorderSide.strokeAlignCenter),
+                  bottom: BorderSide(color: Color(0x80BCBBC1), width: 2.0, strokeAlign: BorderSide.strokeAlignCenter),
                 ),
               ),
               height: 44.0,

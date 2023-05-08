@@ -177,11 +177,13 @@ class _DatePickerItem extends StatelessWidget {
         border: Border(
           top: BorderSide(
             color: CupertinoColors.inactiveGray,
-            width: 0.0,
+            width: 2.0,
+            strokeAlign: BorderSide.strokeAlignCenter,
           ),
           bottom: BorderSide(
             color: CupertinoColors.inactiveGray,
-            width: 0.0,
+            width: 2.0,
+            strokeAlign: BorderSide.strokeAlignCenter,
           ),
         ),
       ),

@@ -249,16 +249,17 @@ abstract class BoxBorder extends ShapeBorder {
     required BorderRadius? borderRadius,
     required BoxShape shape,
     required TextDirection? textDirection,
-    BorderSide? left,
     BorderSide? top,
     BorderSide? right,
     BorderSide? bottom,
+    BorderSide? left,
     required Color color,
   }) {
-    final BorderSide l = left ?? BorderSide.none;
     final BorderSide t = top ?? BorderSide.none;
     final BorderSide r = right ?? BorderSide.none;
     final BorderSide b = bottom ?? BorderSide.none;
+    final BorderSide l = left ?? BorderSide.none;
+
     final RRect borderRect;
     switch (shape) {
       case BoxShape.rectangle:
@@ -496,10 +497,10 @@ class Border extends BoxBorder {
   }
 
   Set<Color> get _distinctVisibleColors => <Color?>{
-        if (left.style == BorderStyle.none) null else left.color,
-        if (bottom.style == BorderStyle.none) null else bottom.color,
-        if (right.style == BorderStyle.none) null else right.color,
         if (top.style == BorderStyle.none) null else top.color,
+        if (right.style == BorderStyle.none) null else right.color,
+        if (bottom.style == BorderStyle.none) null else bottom.color,
+        if (left.style == BorderStyle.none) null else left.color,
       }.whereNotNull().toSet();
 
   @override
@@ -627,10 +628,10 @@ class Border extends BoxBorder {
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
-          left: left.style == BorderStyle.none ? null : left,
           top: top.style == BorderStyle.none ? null : top,
           right: right.style == BorderStyle.none ? null : right,
           bottom: bottom.style == BorderStyle.none ? null : bottom,
+          left: left.style == BorderStyle.none ? null : left,
           color: visibleColors.first);
       return;
     }
@@ -819,10 +820,10 @@ class BorderDirectional extends BoxBorder {
   }
 
   Set<Color> get _distinctVisibleColors => <Color?>{
-        if (start.style == BorderStyle.none) null else start.color,
-        if (bottom.style == BorderStyle.none) null else bottom.color,
-        if (end.style == BorderStyle.none) null else end.color,
         if (top.style == BorderStyle.none) null else top.color,
+        if (end.style == BorderStyle.none) null else end.color,
+        if (bottom.style == BorderStyle.none) null else bottom.color,
+        if (start.style == BorderStyle.none) null else start.color,
       }.whereNotNull().toSet();
 
   @override
@@ -992,10 +993,10 @@ class BorderDirectional extends BoxBorder {
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
-          left: left.style == BorderStyle.none ? null : left,
           top: top.style == BorderStyle.none ? null : top,
           right: right.style == BorderStyle.none ? null : right,
           bottom: bottom.style == BorderStyle.none ? null : bottom,
+          left: left.style == BorderStyle.none ? null : left,
           color: visibleColors.first);
       return;
     }
