@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' hide TextStyle;
+import '../../common/test_initialization.dart';
 import '../screenshot.dart';
 
 void main() {
@@ -13,13 +14,9 @@ void main() {
 }
 
 Future<void> testMain() async {
-
-  setUpAll(() async {
-    debugEmulateFlutterTesterEnvironment = true;
-    await webOnlyInitializePlatform();
-    await renderer.fontCollection.debugDownloadTestFonts();
-    renderer.fontCollection.registerDownloadedFonts();
-  });
+  setUpUnitTests(
+    setUpTestViewDimensions: false,
+  );
 
   Future<void> testGradient(String fileName, Shader shader,
       {Rect paintRect = const Rect.fromLTRB(50, 50, 300, 300),

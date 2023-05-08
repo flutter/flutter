@@ -8,7 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../screenshot.dart';
+import '../../common/test_initialization.dart';
 import 'text_scuba.dart';
 
 typedef PaintTest = void Function(RecordingCanvas recordingCanvas);
@@ -23,7 +23,10 @@ Future<void> testMain() async {
     viewportSize: const Size(600, 600),
   );
 
-  setUpStableTestFonts();
+  setUpUnitTests(
+    emulateTesterEnvironment: false,
+    setUpTestViewDimensions: false,
+  );
 
   void paintTest(EngineCanvas canvas, PaintTest painter) {
     const Rect screenRect = Rect.fromLTWH(0, 0, 600, 600);

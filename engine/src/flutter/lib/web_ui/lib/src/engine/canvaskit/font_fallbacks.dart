@@ -456,7 +456,7 @@ class FallbackFontDownloadQueue {
       final Uint8List bytes = downloadedData[url]!;
       FontFallbackData.instance.registerFallbackFont(font.name, bytes);
       if (pendingFonts.isEmpty) {
-        renderer.fontCollection.registerDownloadedFonts();
+        (renderer.fontCollection as SkiaFontCollection).registerDownloadedFonts();
         sendFontChangeMessage();
       }
     }

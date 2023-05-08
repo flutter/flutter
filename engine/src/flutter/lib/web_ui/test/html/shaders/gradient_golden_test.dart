@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
+import '../../common/test_initialization.dart';
 import '../screenshot.dart';
 
 // TODO(yjbanov): unskip Firefox tests when Firefox implements WebGL in headless mode.
@@ -25,11 +26,7 @@ Future<void> testMain() async {
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
   const Rect region = Rect.fromLTWH(0, 0, 500, 240);
 
-  setUp(() async {
-    debugEmulateFlutterTesterEnvironment = true;
-  });
-
-  setUpStableTestFonts();
+  setUpUnitTests();
 
   test('Paints sweep gradient rectangles', () async {
     final RecordingCanvas canvas =

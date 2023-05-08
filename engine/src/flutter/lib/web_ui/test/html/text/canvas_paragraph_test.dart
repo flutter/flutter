@@ -7,14 +7,15 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../html/paragraph/helper.dart';
+import '../../common/test_initialization.dart';
+import '../paragraph/helper.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
 Future<void> testMain() async {
-  await initializeTestFlutterViewEmbedder();
+  setUpUnitTests();
 
   group('$CanvasParagraph.getBoxesForRange', () {
     test('return empty list for invalid ranges', () {

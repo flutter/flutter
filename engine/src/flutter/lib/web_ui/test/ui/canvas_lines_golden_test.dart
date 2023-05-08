@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
+import '../common/test_initialization.dart';
 import 'utils.dart';
 
 void main() {
@@ -14,7 +15,9 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUiTest();
+  setUpUnitTests(
+    setUpTestViewDimensions: false,
+  );
 
   const Rect region = Rect.fromLTWH(0, 0, 300, 300);
 

@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
-import '../html/paragraph/helper.dart';
+import '../paragraph/helper.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
