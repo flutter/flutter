@@ -40,11 +40,12 @@ const double _kNavBarBackButtonTapWidth = 50.0;
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
 
+const Color _kDefaultNavBarBorderColor = Color(0x4D000000);
+
 const Border _kDefaultNavBarBorder = Border(
   bottom: BorderSide(
-    color: Color(0x26000000),
-    width: 2.0,
-    strokeAlign: BorderSide.strokeAlignCenter,
+    color: _kDefaultNavBarBorderColor,
+    width: 0.0, // 0.0 means one physical pixel
   ),
 );
 
