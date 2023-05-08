@@ -256,7 +256,7 @@ abstract class FlutterVersion {
     DateTime localFrameworkCommitDate;
     try {
       // Don't perform the update check if fetching the latest local commit failed.
-      localFrameworkCommitDate = DateTime.parse(_gitCommitDate());
+      localFrameworkCommitDate = DateTime.parse(_gitCommitDate(workingDirectory: flutterRoot));
     } on VersionCheckError {
       return;
     }
@@ -328,7 +328,7 @@ abstract class FlutterVersion {
     try {
       // Fetch upstream branch's commit and tags
       await _run(<String>['git', 'fetch', '--tags']);
-      return _gitCommitDate(gitRef: kGitTrackingUpstream);
+      return _gitCommitDate(gitRef: kGitTrackingUpstream, workingDirectory: Cache.flutterRoot);
     } on VersionCheckError catch (error) {
       globals.printError(error.message);
       rethrow;
@@ -354,7 +354,7 @@ abstract class FlutterVersion {
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
     _branch ??= () {
-      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', globals.processUtils);
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD', globals.processUtils, flutterRoot);
       return branch == 'HEAD' ? channel : branch;
     }();
     if (redactUnknownBranches || _branch!.isEmpty) {
@@ -399,6 +399,7 @@ abstract class FlutterVersion {
 String _gitCommitDate({
   String gitRef = 'HEAD',
   bool lenient = false,
+  required String? workingDirectory,
 }) {
   final List<String> args = FlutterVersion.gitLog(<String>[
     gitRef,
@@ -410,7 +411,11 @@ String _gitCommitDate({
   try {
     // Don't plumb 'lenient' through directly so that we can print an error
     // if something goes wrong.
-    return _runSync(args, lenient: false);
+    return _runSync(
+      args,
+      lenient: false,
+      workingDirectory: workingDirectory,
+    );
   } on VersionCheckError catch (e) {
     if (lenient) {
       final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
@@ -527,7 +532,7 @@ class _FlutterVersionGit extends FlutterVersion {
   final String frameworkRevision;
 
   @override
-  String get frameworkCommitDate => _gitCommitDate(lenient: true);
+  String get frameworkCommitDate => _gitCommitDate(lenient: true, workingDirectory: flutterRoot);
 
   String? _repositoryUrl;
   @override
@@ -803,10 +808,14 @@ class VersionCheckError implements Exception {
 ///
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, { bool lenient = true }) {
+String _runSync(
+  List<String> command, {
+  bool lenient = true,
+  required String? workingDirectory,
+}) {
   final ProcessResult results = globals.processManager.runSync(
     command,
-    workingDirectory: Cache.flutterRoot,
+    workingDirectory: workingDirectory,
   );
 
   if (results.exitCode == 0) {
@@ -824,10 +833,10 @@ String _runSync(List<String> command, { bool lenient = true }) {
   return '';
 }
 
-String _runGit(String command, ProcessUtils processUtils, [String? workingDirectory]) {
+String _runGit(String command, ProcessUtils processUtils, String? workingDirectory) {
   return processUtils.runSync(
     command.split(' '),
-    workingDirectory: workingDirectory ?? Cache.flutterRoot,
+    workingDirectory: workingDirectory,
   ).stdout.trim();
 }
 
