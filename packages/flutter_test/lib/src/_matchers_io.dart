@@ -78,11 +78,13 @@ class MatchesGoldenFile extends AsyncMatcher {
       }
     }
     Future<ui.Image?> imageFuture;
-    bool disposeImage = false; // set to true if the matcher created and owns the image and must therefore dispose it.
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image?>) {
       imageFuture = item;
+      disposeImage = false;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
+      disposeImage = false;
     } else if (item is Finder) {
       final Iterable<Element> elements = item.evaluate();
       if (elements.isEmpty) {
