@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Autocomplete] that demonstrates fetching the
 /// options asynchronously and debouncing the network calls.
 
-// TODO(justinmc): Could you add an actual debounce function now?
-// TODO(justinmc): Consider adding error handling.
-
 void main() => runApp(const AutocompleteExampleApp());
 
 class AutocompleteExampleApp extends StatelessWidget {
@@ -28,37 +25,6 @@ class AutocompleteExampleApp extends StatelessWidget {
   }
 }
 
-class _DebounceTimer {
-  _DebounceTimer(
-  ) {
-    _timer = Timer(_debounceDuration, _onComplete);
-  }
-
-  static const Duration _debounceDuration = Duration(milliseconds: 500);
-
-  late final Timer _timer;
-  final Completer _completer = Completer();
-
-  void _onComplete() {
-    _completer.complete();
-  }
-
-  Future<void> get future => _completer.future;
-
-  bool get isCompleted => _completer.isCompleted;
-
-  void cancel() {
-    //print('justin cancel');
-    _timer.cancel();
-    _completer.completeError(const _CancelException());
-  }
-}
-
-// An excpetion indicating that the timer was canceled.
-class _CancelException implements Exception {
-  const _CancelException();
-}
-
 class _AsyncAutocomplete extends StatefulWidget {
   const _AsyncAutocomplete();
 
@@ -74,23 +40,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
   // The most recent options received from the API.
   late Iterable<String> _lastOptions = <String>[];
 
-  _DebounceTimer? _debounceTimer;
-
-  Future<Iterable<String>?> _debouncedSearch(String query) async {
-    if (_debounceTimer != null && !_debounceTimer!.isCompleted) {
-      _debounceTimer!.cancel();
-    }
-    _debounceTimer = _DebounceTimer();
-    try {
-      await _debounceTimer!.future;
-    } catch (error) {
-      if (error is _CancelException) {
-        return null;
-      }
-      rethrow;
-    }
-    return _search(query);
-  }
+  late final _Debounceable<Iterable<String>?, String> _debouncedSearch;
 
   // Calls the "remote" API to search with the given query. Returns null when
   // the call has been made obsolete.
@@ -108,6 +58,12 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
     _currentQuery = null;
 
     return options;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _debouncedSearch = _debounce<Iterable<String>?, String>(_search);
   }
 
   @override
@@ -148,35 +104,59 @@ class _FakeAPI {
   }
 }
 
+typedef _Debounceable<S, T> = Future<S?> Function(T parameter);
 
-/// A function that can be debounced with the _debounce function.
-typedef _Debounceable<S, T> = S Function(T currentArg);
-
-/// A function that has been debounced by _debounce.
-typedef _Debounced<S, T> = S Function(T currentArg);
-
-/// Returns a _Debounced that will call through to the given function only after
-/// it hasn't received a call in duration.
+/// Returns a new function that is a debounced version of the given function.
 ///
-/// Only works for functions that take exactly one argument and return void.
-/*
-_Debounced<S, T> _debounce<S, T>({
-  required Duration duration,
-  required _Debounceable<S, T> function,
-}) {
-  Timer? timer;
-  late T arg;
+/// This means that the original function will be called only after no calls
+/// have been made for the given Duration.
+_Debounceable<S, T> _debounce<S, T>(_Debounceable<S?, T> function) {
+  _DebounceTimer? debounceTimer;
 
-  return (T currentArg) {
-    arg = currentArg;
-    if (timer != null && timer!.isActive) {
-      return timer!;
+  return (T parameter) async {
+    if (debounceTimer != null && !debounceTimer!.isCompleted) {
+      debounceTimer!.cancel();
     }
-    timer = Timer(duration, () {
-      function(arg);
-      timer = null;
-    });
-    return timer!;
+    debounceTimer = _DebounceTimer();
+    try {
+      await debounceTimer!.future;
+    } catch (error) {
+      if (error is _CancelException) {
+        return null;
+      }
+      rethrow;
+    }
+    return function(parameter);
   };
 }
-*/
+
+// A wrapper around Timer used for debouncing.
+class _DebounceTimer {
+  _DebounceTimer(
+  ) {
+    _timer = Timer(_debounceDuration, _onComplete);
+  }
+
+  static const Duration _debounceDuration = Duration(milliseconds: 500);
+
+  late final Timer _timer;
+  final Completer _completer = Completer();
+
+  void _onComplete() {
+    _completer.complete();
+  }
+
+  Future<void> get future => _completer.future;
+
+  bool get isCompleted => _completer.isCompleted;
+
+  void cancel() {
+    _timer.cancel();
+    _completer.completeError(const _CancelException());
+  }
+}
+
+// An excpetion indicating that the timer was canceled.
+class _CancelException implements Exception {
+  const _CancelException();
+}
