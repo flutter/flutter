@@ -1,4 +1,4 @@
-Signature: 97f07bcb1b8ca9869d9487aa0ff03a1b
+Signature: 126831cc78d416d4d830c20a186ac345
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8002,8 +8002,6 @@ ORIGIN: ../../../third_party/skia/src/sksl/SkSLPosition.h + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/sksl/SkSLProgramKind.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCase.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp + ../../../third_party/skia/LICENSE
@@ -8046,8 +8044,6 @@ FILE: ../../../third_party/skia/src/sksl/SkSLPosition.h
 FILE: ../../../third_party/skia/src/sksl/SkSLProgramKind.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLBlock.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLCase.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLFunction.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLLayout.cpp
