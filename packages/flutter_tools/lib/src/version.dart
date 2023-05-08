@@ -89,6 +89,10 @@ abstract class FlutterVersion {
     // if we are fetching tags, ignore cached versionFile
     if (fetchTags && versionFile.existsSync()) {
       versionFile.deleteSync();
+      final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
+      if (legacyVersionFile.existsSync()) {
+        legacyVersionFile.deleteSync();
+      }
     }
 
     final String frameworkRevision = _runGit(
@@ -186,6 +190,7 @@ abstract class FlutterVersion {
   String get engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
+  // This is static as it is called from a constructor.
   static File getVersionFile(FileSystem fs, String flutterRoot) {
     return fs.file(fs.path.join(flutterRoot, '.version.json'));
   }
@@ -584,11 +589,15 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    fs.file(fs.path.join(flutterRoot, 'version')).writeAsStringSync(frameworkVersion);
+    final File legacyVersionFile = fs.file(fs.path.join(flutterRoot, 'version'));
+    if (!legacyVersionFile.existsSync()) {
+      legacyVersionFile.writeAsStringSync(frameworkVersion);
+    }
+
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    final File versionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
-    if (!versionFile.existsSync()) {
-      versionFile.writeAsStringSync(encoder.convert(toJson()));
+    final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
+    if (!newVersionFile.existsSync()) {
+      newVersionFile.writeAsStringSync(encoder.convert(toJson()));
     }
   }
 }
