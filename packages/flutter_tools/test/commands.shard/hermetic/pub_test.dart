@@ -30,6 +30,20 @@ void main() {
     Cache.enableLocking();
   });
 
+  testUsingContext('pub shows help', () async {
+    Object? usage;
+    final PackagesCommand command = PackagesCommand(
+      usagePrintFn: (Object? object) => usage = object,
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['pub']);
+
+    expect(usage, allOf(
+      contains('Commands for managing Flutter packages.'),
+      contains('Usage: flutter pub <subcommand> [arguments]'),
+    ));
+  });
+
   testUsingContext('pub get usage values are resilient to missing package config files before running "pub get"', () async {
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     fileSystem.currentDirectory.childFile('.flutter-plugins').createSync();

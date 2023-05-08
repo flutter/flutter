@@ -123,7 +123,7 @@ class CustomDevicesCommand extends FlutterCommand {
 
   final CustomDevicesConfig _customDevicesConfig;
   final FeatureFlags _featureFlags;
-  final void Function(Object) _usagePrintFn;
+  final PrintFn _usagePrintFn;
 
   @override
   String get description {
