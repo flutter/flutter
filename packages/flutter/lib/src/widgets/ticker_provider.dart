@@ -64,13 +64,13 @@ class TickerMode extends StatefulWidget {
     return widget?.enabled ?? true;
   }
 
-  /// Obtains a [ValueNotifier] from the [TickerMode] surrounding the `context`,
+  /// Obtains a [ValueListenable] from the [TickerMode] surrounding the `context`,
   /// which indicates whether tickers are enabled in the given subtree.
   ///
-  /// When that [TickerMode] enabled or disabled tickers, the notifier notifies
+  /// When that [TickerMode] enabled or disabled tickers, the listenable notifies
   /// its listeners.
   ///
-  /// While the [ValueNotifier] is stable for the lifetime of the surrounding
+  /// While the [ValueListenable] is stable for the lifetime of the surrounding
   /// [TickerMode], calling this method does not establish a dependency between
   /// the `context` and the [TickerMode] and the widget owning the `context`
   /// does not rebuild when the ticker mode changes from true to false or vice
@@ -79,7 +79,7 @@ class TickerMode extends StatefulWidget {
   /// [Ticker]. Since no dependency is established, the widget owning the
   /// `context` is also not informed when it is moved to a new location in the
   /// tree where it may have a different [TickerMode] ancestor. When this
-  /// happens, the widget must manually unsubscribe from the old notifier,
+  /// happens, the widget must manually unsubscribe from the old listenable,
   /// obtain a new one from the new ancestor [TickerMode] by calling this method
   /// again, and re-subscribe to it. [StatefulWidget]s can, for example, do this
   /// in [State.activate], which is called after the widget has been moved to
@@ -93,10 +93,10 @@ class TickerMode extends StatefulWidget {
   /// potential unnecessary rebuilds.
   ///
   /// In the absence of a [TickerMode] widget, this function returns a
-  /// [ValueNotifier], whose [ValueNotifier.value] is always true.
-  static ValueNotifier<bool> getNotifier(BuildContext context) {
+  /// [ValueListenable], whose [ValueListenable.value] is always true.
+  static ValueListenable<bool> getNotifier(BuildContext context) {
     final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
-    return widget?.notifier ?? ValueNotifier<bool>(true);
+    return widget?.notifier ?? const _ConstantValueListenable<bool>(true);
   }
 
   @override
@@ -228,7 +228,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     super.dispose();
   }
 
-  ValueNotifier<bool>? _tickerModeNotifier;
+  ValueListenable<bool>? _tickerModeNotifier;
 
   @override
   void activate() {
@@ -245,7 +245,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   }
 
   void _updateTickerModeNotifier() {
-    final ValueNotifier<bool> newNotifier = TickerMode.getNotifier(context);
+    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
     if (newNotifier == _tickerModeNotifier) {
       return;
     }
@@ -307,7 +307,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     _tickers!.remove(ticker);
   }
 
-  ValueNotifier<bool>? _tickerModeNotifier;
+  ValueListenable<bool>? _tickerModeNotifier;
 
   @override
   void activate() {
@@ -327,7 +327,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   }
 
   void _updateTickerModeNotifier() {
-    final ValueNotifier<bool> newNotifier = TickerMode.getNotifier(context);
+    final ValueListenable<bool> newNotifier = TickerMode.getNotifier(context);
     if (newNotifier == _tickerModeNotifier) {
       return;
     }
@@ -394,4 +394,23 @@ class _WidgetTicker extends Ticker {
     _creator._removeTicker(this);
     super.dispose();
   }
+}
+
+class _ConstantValueListenable<T> implements ValueListenable<T> {
+  const _ConstantValueListenable(this.value);
+
+  @override
+  void addListener(VoidCallback listener) {
+    // Intentionally left empty: Value cannot change, so we never have to
+    // notify registered listeners.
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    // Intentionally left empty: Value cannot change, so we never have to
+    // notify registered listeners.
+  }
+
+  @override
+  final T value;
 }

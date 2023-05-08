@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -78,9 +80,7 @@ void main() {
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
-  // TODO(polina-c): fix ValueNotifier not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
@@ -132,9 +132,12 @@ void main() {
     await tester.pumpFrames(target(), const Duration(milliseconds: 50));
     expect(taps, isEmpty);
 
+    final ui.Image image = await animationSheet.collate(6);
+
     await expectLater(
-      animationSheet.collate(6),
+      image,
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
+    image.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }

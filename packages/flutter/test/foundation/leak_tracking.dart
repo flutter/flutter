@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
+export 'package:leak_tracker/leak_tracker.dart' show LeakTrackingTestConfig, StackTraceCollectionConfig;
+
 /// Set of objects, that does not hold the objects from garbage collection.
 ///
 /// The objects are referenced by hash codes and can duplicate with low probability.
