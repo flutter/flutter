@@ -4821,7 +4821,7 @@ targets:
     recipe: packaging/packaging
     timeout: 60
     scheduler: release
-    bringup: true
+    bringup: false
     enabled_branches:
       - beta
       - stable
