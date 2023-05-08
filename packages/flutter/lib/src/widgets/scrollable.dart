@@ -1625,6 +1625,7 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
 
 /// Specifies how to configure the [DragGestureRecognizer]s of a
 /// [TwoDimensionalScrollable].
+// TODO(Piinks): Add sample code, <BUG>
 enum DiagonalDragBehavior {
   /// This behavior will not allow for any diagonal scrolling.
   ///
@@ -1714,7 +1715,7 @@ class TwoDimensionalScrollable extends StatefulWidget {
   ///
   ///  * [TwoDimensionalViewport], which is a viewport that displays a span of
   ///    widgets in both dimensions.
-  final  TwoDimensionalViewportBuilder viewportBuilder;
+  final TwoDimensionalViewportBuilder viewportBuilder;
 
   /// {@macro flutter.widgets.Scrollable.incrementCalculator}
   ///
@@ -1869,13 +1870,40 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
   @override
   void didUpdateWidget(TwoDimensionalScrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the old widget had a controller, and no longer does, it will need the
-    // fallback controller
-    if (oldWidget.verticalDetails.controller != null && widget.verticalDetails.controller == null) {
-      _verticalFallbackController = ScrollController();
+    // Handle changes in the provided/fallback scroll controllers
+
+    // Vertical
+    if (oldWidget.verticalDetails.controller != widget.verticalDetails.controller) {
+      if (oldWidget.verticalDetails.controller == null) {
+        // The old controller was null, meaning the fallback cannot be null.
+        // Dispose of the fallback.
+        assert(_verticalFallbackController !=  null);
+        assert(widget.verticalDetails.controller != null);
+        _verticalFallbackController!.dispose();
+        _verticalFallbackController = null;
+      } else if (widget.verticalDetails.controller == null) {
+        // If the new controller is null, we need to set up the fallback
+        // ScrollController.
+        assert(_verticalFallbackController == null);
+        _verticalFallbackController = ScrollController();
+      }
     }
-    if (oldWidget.horizontalDetails.controller != null && widget.horizontalDetails.controller == null) {
-      _horizontalFallbackController = ScrollController();
+
+    // Horizontal
+    if (oldWidget.horizontalDetails.controller != widget.horizontalDetails.controller) {
+      if (oldWidget.horizontalDetails.controller == null) {
+        // The old controller was null, meaning the fallback cannot be null.
+        // Dispose of the fallback.
+        assert(_horizontalFallbackController !=  null);
+        assert(widget.horizontalDetails.controller != null);
+        _horizontalFallbackController!.dispose();
+        _horizontalFallbackController = null;
+      } else if (widget.horizontalDetails.controller == null) {
+        // If the new controller is null, we need to set up the fallback
+        // ScrollController.
+        assert(_horizontalFallbackController == null);
+        _horizontalFallbackController = ScrollController();
+      }
     }
   }
 
@@ -1923,22 +1951,8 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
       )
     );
 
-    // Build scrollbars for 2 dimensions instead of 1.
-    // TODO(Piinks): The right way is to create a dual constructor,
+    // TODO(Piinks): Build scrollbars for 2 dimensions instead of 1,
     //  https://github.com/flutter/flutter/issues/122348
-    // result = _configuration.buildScrollbar(
-    //   context,
-    //   _configuration.buildScrollbar(
-    //     context,
-    //     result,
-    //     widget.horizontalDetails.copyWith(
-    //       controller: widget.horizontalDetails.controller ?? _horizontalFallbackController,
-    //     ),
-    //   ),
-    //   widget.verticalDetails.copyWith(
-    //     controller: widget.verticalDetails.controller ?? _verticalFallbackController,
-    //   ),
-    // );
 
     return _TwoDimensionalScrollableScope(
       twoDimensionalScrollable: this,
@@ -2110,7 +2124,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
       case DiagonalDragBehavior.weightedEvent:
       case DiagonalDragBehavior.weightedContinuous:
         // See if one axis wins the drag.
-        // evaluateLockedAxis(details.globalPosition);
+        _evaluateLockedAxis(details.globalPosition);
         switch (lockedAxis) {
           case null:
             // Prepare to scroll diagonally

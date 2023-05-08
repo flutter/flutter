@@ -27,7 +27,7 @@ void main() {
       };
       // Horizontal wrong
       await tester.pumpWidget(MaterialApp(
-        home: SimpleTableView(
+        home: SimpleBuilderTableView(
           delegate: TwoDimensionalChildBuilderDelegate(builder: (_, __) => null),
           horizontalDetails: const ScrollableDetails.vertical(),
           // Horizontal has default const ScrollableDetails.horizontal()
@@ -36,7 +36,7 @@ void main() {
 
       // Vertical wrong
       await tester.pumpWidget(MaterialApp(
-        home: SimpleTableView(
+        home: SimpleBuilderTableView(
           delegate: TwoDimensionalChildBuilderDelegate(builder: (_, __) => null),
           verticalDetails: const ScrollableDetails.horizontal(),
           // Horizontal has default const ScrollableDetails.horizontal()
@@ -46,7 +46,7 @@ void main() {
       // Both wrong
       // Vertical wrong
       await tester.pumpWidget(MaterialApp(
-        home: SimpleTableView(
+        home: SimpleBuilderTableView(
           delegate: TwoDimensionalChildBuilderDelegate(builder: (_, __) => null),
           verticalDetails: const ScrollableDetails.horizontal(),
           horizontalDetails: const ScrollableDetails.vertical(),
@@ -66,7 +66,7 @@ void main() {
       final ScrollController horizontalController = ScrollController(initialScrollOffset: 50);
 
       await tester.pumpWidget(MaterialApp(
-        home: SimpleTableView(
+        home: SimpleBuilderTableView(
           verticalDetails: ScrollableDetails.vertical(controller: verticalController),
           horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
           delegate: TwoDimensionalChildBuilderDelegate(
@@ -110,7 +110,7 @@ void main() {
         return MaterialApp(
           home: PrimaryScrollController(
             controller: controller,
-            child: SimpleTableView(
+            child: SimpleBuilderTableView(
               mainAxis: mainAxis,
               primary: explicitPrimary,
               verticalDetails: ScrollableDetails.vertical(
@@ -287,7 +287,7 @@ void main() {
       late BuildContext capturedContext;
       // Default
       await tester.pumpWidget(MaterialApp(
-        home: SimpleTableView(
+        home: SimpleBuilderTableView(
           delegate: TwoDimensionalChildBuilderDelegate(
             builder: (BuildContext context, ChildVicinity vicinity) {
               capturedContext = context;
@@ -307,7 +307,7 @@ void main() {
 
       // Customized
       await tester.pumpWidget(MaterialApp(
-        home: SimpleTableView(
+        home: SimpleBuilderTableView(
           verticalDetails: const ScrollableDetails.vertical(reverse: true),
           horizontalDetails: const ScrollableDetails.horizontal(reverse: true),
           diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
