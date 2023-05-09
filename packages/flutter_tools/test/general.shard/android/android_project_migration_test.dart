@@ -47,8 +47,8 @@ zipStorePath=wrapper/dists
 
 final Version androidStudioDolphin = Version(2021, 3, 1);
 
-final JavaVersion _javaVersion17 = JavaVersion(longText: 'openjdk 17.0.2', shortText: '17.0.2');
-final JavaVersion _javaVersion16 = JavaVersion(longText: 'openjdk 16.0.2', shortText: '16.0.2');
+final JavaVersion _javaVersion17 = JavaVersion(longText: 'openjdk 17.0.2', number: '17.0.2');
+final JavaVersion _javaVersion16 = JavaVersion(longText: 'openjdk 16.0.2', number: '16.0.2');
 
 void main() {
   group('Android migration', () {

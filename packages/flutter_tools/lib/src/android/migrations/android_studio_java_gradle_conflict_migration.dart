@@ -99,7 +99,7 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
         return;
       }
 
-      final String? javaVersionString = _java?.getVersion()?.shortText;
+      final String? javaVersionString = _java?.getVersion()?.number;
       final Version? javaVersion = Version.parse(javaVersionString);
       if (javaVersion == null) {
         logger.printTrace(javaVersionNotFound);
