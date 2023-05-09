@@ -35,8 +35,6 @@ class TrackedObjectsVK {
     }
     auto pool = pool_.lock();
     if (!pool) {
-      VALIDATION_LOG
-          << "Command pool died before a command buffer could be recycled.";
       // The buffer can not be freed if its command pool has been destroyed.
       buffer_.release();
       return;
@@ -159,7 +157,8 @@ bool CommandEncoderVK::Submit() {
 
   return fence_waiter_->AddFence(
       std::move(fence), [tracked_objects = std::move(tracked_objects_)] {
-        // Nothing to do, we just drop the tracked objects on the floor.
+        // Nothing to do, we just drop the tracked
+        // objects on the floor.
       });
 }
 

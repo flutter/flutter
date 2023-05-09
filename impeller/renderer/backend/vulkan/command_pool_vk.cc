@@ -15,10 +15,6 @@
 namespace impeller {
 
 using CommandPoolMap = std::map<uint64_t, std::shared_ptr<CommandPoolVK>>;
-
-// TODO(https://github.com/flutter/flutter/issues/125571): This is storing tons
-// of CommandPoolVK's in the test runner since many contexts are created on the
-// same thread. We need to come up with a different way to clean these up.
 FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<CommandPoolMap> tls_command_pool;
 
 static Mutex g_all_pools_mutex;
@@ -52,6 +48,9 @@ std::shared_ptr<CommandPoolVK> CommandPoolVK::GetThreadLocal(
 }
 
 void CommandPoolVK::ClearAllPools(const ContextVK* context) {
+  if (tls_command_pool.get()) {
+    tls_command_pool.get()->erase(context->GetHash());
+  }
   Lock pool_lock(g_all_pools_mutex);
   if (auto found = g_all_pools.find(context); found != g_all_pools.end()) {
     for (auto& weak_pool : found->second) {

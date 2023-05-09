@@ -8,6 +8,7 @@ impeller_component("vulkan_unittests") {
   testonly = true
   sources = [
     "blit_command_vk_unittests.cc",
+    "context_vk_unittests.cc",
     "test/mock_vulkan.cc",
     "test/mock_vulkan.h",
   ]
