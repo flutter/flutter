@@ -435,7 +435,7 @@ dependencies {
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
@@ -466,7 +466,7 @@ dependencies {
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
@@ -498,7 +498,7 @@ dependencies {
         java = FakeJava(version: JavaVersion(longText: '11.0.14', number: '11.0.14'));
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
@@ -533,7 +533,7 @@ dependencies {
         java = FakeJava(version: JavaVersion(longText: javaV, number: javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
@@ -584,7 +584,7 @@ dependencies {
         java = FakeJava(version: JavaVersion(longText: '17.0.2', number: '17.0.2'));
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
@@ -625,7 +625,7 @@ dependencies {
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
-            FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
+            FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory
             .childDirectory(androidStudio.javaPath!)
             .createSync();
@@ -1553,31 +1553,10 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
-  FakeAndroidSdkWithDir(this._directory, AndroidStudio _androidStudio) {
-    _javaPath = '${_androidStudio.javaPath}/bin/java';
-  }
-  late String _javaPath;
-  String? javaVersion;
+  FakeAndroidSdkWithDir(this._directory);
 
   final Directory _directory;
 
   @override
-  late bool platformToolsAvailable;
-
-  @override
-  late bool licensesAvailable;
-
-  @override
-  AndroidSdkVersion? latestVersion;
-
-  @override
   Directory get directory => _directory;
-
-  @override
-  Map<String, String> get sdkManagerEnv => <String, String>{'PATH': _javaPath};
-
-  @override
-  String? getJavaVersion() {
-    return javaVersion;
-  }
 }
