@@ -2672,7 +2672,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
     } else if (oldWidget.readOnly && _hasFocus) {
-      _openInputConnection();
+      _openInputConnection(canTouchLayoutPhaseData: false);
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -3133,7 +3133,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// default.
   bool get _needsAutofill => _effectiveAutofillClient.textInputConfiguration.autofillConfiguration.enabled;
 
-  void _openInputConnection() {
+  void _openInputConnection({bool canTouchLayoutPhaseData = true}) {
     if (!_shouldCreateInputConnection) {
       return;
     }
@@ -3155,11 +3155,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // function is executed, we may be in build phase, while the
       // _updateSizeAndTransform may need layout phase information.
       // See https://github.com/flutter/flutter/issues/126312 for more details.
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        if (_textInputConnection != null) {
-          _updateSizeAndTransform();
-        }
-      });
+      if (canTouchLayoutPhaseData) {
+        _updateSizeAndTransform();
+      } else {
+        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+          if (_textInputConnection != null) {
+            _updateSizeAndTransform();
+          }
+        });
+      }
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
         ..setStyle(
