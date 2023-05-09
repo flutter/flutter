@@ -677,6 +677,7 @@ void main() {
       final RenderSliver renderSliver = renderViewport.lastChild!;
       expect(renderSliver.geometry!.scrollExtent, 0.0);
       expect(find.byType(SliverOffstage), findsNothing);
+      semantics.dispose();
     });
 
     testWidgets('offstage false', (WidgetTester tester) async {
@@ -696,6 +697,7 @@ void main() {
       final RenderSliver renderSliver = renderViewport.lastChild!;
       expect(renderSliver.geometry!.scrollExtent, 14.0);
       expect(find.byType(SliverOffstage), paints..paragraph());
+      semantics.dispose();
     });
   });
 
@@ -841,6 +843,7 @@ void main() {
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
       expect(events, equals(<String>[]));
+      semantics.dispose();
     });
 
     testWidgets('ignores semantics', (WidgetTester tester) async {
@@ -863,6 +866,23 @@ void main() {
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector));
       expect(events, equals(<String>['tap']));
+      semantics.dispose();
+    });
+
+    testWidgets('ignoring only block semantics actions', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(boilerPlate(
+        SliverIgnorePointer(
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () { },
+            ),
+          ),
+        ),
+      ));
+      expect(semantics, includesNodeWith(label: 'a', actions: <SemanticsAction>[]));
+      semantics.dispose();
     });
 
     testWidgets('ignores pointer events & semantics', (WidgetTester tester) async {
@@ -884,6 +904,7 @@ void main() {
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       await tester.tap(find.byType(GestureDetector), warnIfMissed: false);
       expect(events, equals(<String>[]));
+      semantics.dispose();
     });
 
     testWidgets('ignores nothing', (WidgetTester tester) async {
@@ -906,6 +927,7 @@ void main() {
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       await tester.tap(find.byType(GestureDetector));
       expect(events, equals(<String>['tap']));
+      semantics.dispose();
     });
   });
 
@@ -1287,6 +1309,55 @@ void main() {
     await tester.tap(find.text('Index 1'));
     expect(firstTapped, 0);
     expect(secondTapped, 1);
+  });
+
+  testWidgets('SliverGridRegularTileLayout.computeMaxScrollOffset handles 0 children', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/59663
+    final ScrollController controller = ScrollController();
+
+    // SliverGridDelegateWithFixedCrossAxisCount
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 0,
+              itemBuilder: (_, __) => Container(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                mainAxisSpacing: 10,
+                childAspectRatio: 2.1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct scroll extent
+    expect(controller.position.maxScrollExtent, 0.0);
+
+    // SliverGridDelegateWithMaxCrossAxisExtent
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverGrid.builder(
+              itemCount: 0,
+              itemBuilder: (_, __) => Container(),
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    // Verify correct scroll extent
+    expect(controller.position.maxScrollExtent, 0.0);
   });
 }
 

@@ -24,11 +24,7 @@ part of material_animated_icons; // ignore: use_string_in_part_of_directives
 /// See also:
 ///
 ///  * [Icons], for the list of available static Material Icons.
-abstract class AnimatedIcons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  AnimatedIcons._();
-
+abstract final class AnimatedIcons {
   /// The Material Design add to event icon animation.
   ///
   /// {@animation 72 72 https://flutter.github.io/assets-for-api-docs/assets/widgets/add_event.mp4}

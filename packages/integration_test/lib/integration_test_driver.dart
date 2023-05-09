@@ -47,7 +47,7 @@ Future<void> writeResponseData(
 
 /// Adaptor to run an integration test using `flutter drive`.
 ///
-/// To an integration test `<test_name>.dart` using `flutter drive`, put a file named
+/// To run an integration test `<test_name>.dart` using `flutter drive`, put a file named
 /// `<test_name>_test.dart` in the app's `test_driver` directory:
 ///
 /// ```dart

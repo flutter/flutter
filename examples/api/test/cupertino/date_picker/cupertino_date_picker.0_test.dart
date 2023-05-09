@@ -18,7 +18,7 @@ void main() {
 
     // Drag month, day and year wheels to change the picked date.
     await tester.drag(find.text('October'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
-    await tester.drag(find.text('26'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
+    await tester.drag(find.textContaining('26').last, _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
     await tester.drag(find.text('2016'), _kRowOffset, touchSlopY: 0, warnIfMissed: false); // see top of file
 
     await tester.pump();

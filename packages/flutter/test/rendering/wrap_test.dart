@@ -216,10 +216,8 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip!);
-          break;
         case null:
           wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
-          break;
       }
       layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       context.paintChild(wrap, Offset.zero);

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoNavigationBar].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoNavigationBar].
 
 void main() => runApp(const NavBarApp());
 

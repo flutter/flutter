@@ -22,6 +22,7 @@ class AnalyzeOnce extends AnalyzeBase {
     required super.processManager,
     required super.terminal,
     required super.artifacts,
+    required super.suppressAnalytics,
     this.workingDirectory,
   }) : super(
         repoRoots: repoRoots,
@@ -67,6 +68,7 @@ class AnalyzeOnce extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
 
     Stopwatch? timer;

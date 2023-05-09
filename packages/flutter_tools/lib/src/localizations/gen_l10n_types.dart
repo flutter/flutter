@@ -94,6 +94,7 @@ const Set<String> _validNumberFormats = <String>{
   'compactLong',
   'currency',
   'decimalPattern',
+  'decimalPatternDigits',
   'decimalPercentPattern',
   'percentPattern',
   'scientificPattern',
@@ -118,6 +119,7 @@ const Set<String> _numberFormatsWithNamedParameters = <String>{
   'compactSimpleCurrency',
   'compactLong',
   'currency',
+  'decimalPatternDigits',
   'decimalPercentPattern',
   'simpleCurrency',
 };

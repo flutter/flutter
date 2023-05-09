@@ -961,11 +961,9 @@ class VersionFreshnessValidator {
     switch (remoteVersionStatus) {
       case VersionCheckResult.newVersionAvailable:
         updateMessage = _newVersionAvailableMessage;
-        break;
       case VersionCheckResult.versionIsCurrent:
       case VersionCheckResult.unknown:
         updateMessage = versionOutOfDateMessage(frameworkAge);
-        break;
     }
 
     logger.printBox(updateMessage);

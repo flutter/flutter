@@ -94,6 +94,7 @@ Future<T> runInContext<T>(
         usage: globals.flutterUsage,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
+        androidStudio: globals.androidStudio,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         operatingSystemUtils: globals.os,
@@ -236,7 +237,6 @@ Future<T> runInContext<T>(
         fuchsiaArtifacts: globals.fuchsiaArtifacts!,
       ),
       GradleUtils: () => GradleUtils(
-        fileSystem: globals.fs,
         operatingSystemUtils: globals.os,
         logger: globals.logger,
         platform: globals.platform,

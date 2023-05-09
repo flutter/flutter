@@ -28,6 +28,7 @@ abstract class AnalyzeBase {
     required this.processManager,
     required this.terminal,
     required this.artifacts,
+    required this.suppressAnalytics,
   });
 
   /// The parsed argument results for execution.
@@ -48,6 +49,8 @@ abstract class AnalyzeBase {
   final Terminal terminal;
   @protected
   final Artifacts artifacts;
+  @protected
+  final bool suppressAnalytics;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();

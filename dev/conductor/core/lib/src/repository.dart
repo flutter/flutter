@@ -418,50 +418,6 @@ abstract class Repository {
     return exitcode == 0;
   }
 
-  /// Determines if a commit will cherry-pick to current HEAD without conflict.
-  Future<bool> canCherryPick(String commit) async {
-    assert(
-      await gitCheckoutClean(),
-      'cannot cherry-pick because git checkout ${(await checkoutDirectory).path} is not clean',
-    );
-
-    final int exitcode = await git.run(
-      <String>['cherry-pick', '--no-commit', commit],
-      'attempt to cherry-pick $commit without committing',
-      allowNonZeroExitCode: true,
-      workingDirectory: (await checkoutDirectory).path,
-    );
-
-    final bool result = exitcode == 0;
-
-    if (result == false) {
-      stdio.printError(await git.getOutput(
-        <String>['diff'],
-        'get diff of failed cherry-pick',
-        workingDirectory: (await checkoutDirectory).path,
-      ));
-    }
-
-    await reset('HEAD');
-    return result;
-  }
-
-  /// Cherry-pick a [commit] to the current HEAD.
-  ///
-  /// This method will throw a [GitException] if the command fails.
-  Future<void> cherryPick(String commit) async {
-    assert(
-      await gitCheckoutClean(),
-      'cannot cherry-pick because git checkout ${(await checkoutDirectory).path} is not clean',
-    );
-
-    await git.run(
-      <String>['cherry-pick', commit],
-      'cherry-pick $commit',
-      workingDirectory: (await checkoutDirectory).path,
-    );
-  }
-
   /// Resets repository HEAD to [ref].
   Future<void> reset(String ref) async {
     await git.run(
@@ -823,12 +779,6 @@ class HostFrameworkRepository extends FrameworkRepository {
   Future<void> checkout(String ref) async {
     throw ConductorException(
         'checkout not implemented for the host repository');
-  }
-
-  @override
-  Future<String> cherryPick(String commit) async {
-    throw ConductorException(
-        'cherryPick not implemented for the host repository');
   }
 
   @override

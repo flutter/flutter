@@ -880,6 +880,31 @@ void main() {
     ));
   });
 
+  testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+      'canvaskit.wasm',
+    ));
+    canvasKitWasm.createSync(recursive: true);
+    canvasKitWasm.writeAsStringSync('hello world');
+
+    final LegacyCanvasKitRemover remover = LegacyCanvasKitRemover(cache);
+    expect(await remover.isUpToDate(fileSystem), false);
+    await remover.update(
+      FakeArtifactUpdater(),
+      BufferLogger.test(),
+      fileSystem,
+      FakeOperatingSystemUtils(),
+    );
+    expect(await remover.isUpToDate(fileSystem), true);
+
+    expect(canvasKitWasm.existsSync(), isFalse);
+  });
+
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
@@ -978,6 +1003,13 @@ void main() {
     await pubDependencies.update(FakeArtifactUpdater(), logger, fileSystem, FakeOperatingSystemUtils());
 
     expect(pub.calledGet, 1);
+    expect(
+      pub.invocations.first,
+      predicate<FakePubInvocation>(
+        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        'Pub invoked with PubOutputMode.none',
+      ),
+    );
   });
 
   testUsingContext('Check current DevTools version', () async {
@@ -1172,8 +1204,17 @@ class FakeVersionedPackageResolver extends Fake implements VersionedPackageResol
   }
 }
 
+class FakePubInvocation {
+  FakePubInvocation({
+    required this.outputMode,
+  });
+
+  final PubOutputMode outputMode;
+}
+
 class FakePub extends Fake implements Pub {
-  int calledGet = 0;
+  final List<FakePubInvocation> invocations = <FakePubInvocation>[];
+  int get calledGet => invocations.length;
 
   @override
   Future<void> get({
@@ -1188,7 +1229,7 @@ class FakePub extends Fake implements Pub {
     bool printProgress = true,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    calledGet += 1;
+    invocations.add(FakePubInvocation(outputMode: outputMode));
   }
 }
 

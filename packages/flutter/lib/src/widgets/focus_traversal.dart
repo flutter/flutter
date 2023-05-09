@@ -496,11 +496,11 @@ class _DirectionalPolicyData {
 /// only want to implement new next/previous policies.
 ///
 /// Since hysteresis in the navigation order is undesirable, this implementation
-/// maintains a stack of previous locations that have been visited on the
-/// policy data for the affected [FocusScopeNode]. If the previous direction
-/// was the opposite of the current direction, then the this policy will request
-/// focus on the previously focused node. Change to another direction other than
-/// the current one or its opposite will clear the stack.
+/// maintains a stack of previous locations that have been visited on the policy
+/// data for the affected [FocusScopeNode]. If the previous direction was the
+/// opposite of the current direction, then the this policy will request focus
+/// on the previously focused node. Change to another direction other than the
+/// current one or its opposite will clear the stack.
 ///
 /// For instance, if the focus moves down, down, down, and then up, up, up, it
 /// will follow the same path through the widgets in both directions. However,
@@ -508,17 +508,31 @@ class _DirectionalPolicyData {
 /// follow the same path on the way up as it did on the way down, since changing
 /// the axis of motion resets the history.
 ///
+/// This class implements an algorithm that considers an infinite band extending
+/// along the direction of movement, the width or height (depending on
+/// direction) of the currently focused widget, and finds the closest widget in
+/// that band along the direction of movement. If nothing is found in that band,
+/// then it picks the widget with an edge closest to the band in the
+/// perpendicular direction. If two out-of-band widgets are the same distance
+/// from the band, then it picks the one closest along the direction of
+/// movement.
+///
+/// The goal of this algorithm is to pick a widget that (to the user) doesn't
+/// appear to traverse along the wrong axis, as it might if it only sorted
+/// widgets by distance along one axis, but also jumps to the next logical
+/// widget in a direction without skipping over widgets.
+///
 /// See also:
 ///
-///  * [FocusNode], for a description of the focus system.
-///  * [FocusTraversalGroup], a widget that groups together and imposes a
-///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
-///  * [WidgetOrderTraversalPolicy], a policy that relies on the widget
-///    creation order to describe the order of traversal.
-///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///    natural "reading order" for the current [Directionality].
-///  * [OrderedTraversalPolicy], a policy that describes the order
-///    explicitly using [FocusTraversalOrder] widgets.
+/// * [FocusNode], for a description of the focus system.
+/// * [FocusTraversalGroup], a widget that groups together and imposes a
+///   traversal policy on the [Focus] nodes below it in the widget hierarchy.
+/// * [WidgetOrderTraversalPolicy], a policy that relies on the widget creation
+///   order to describe the order of traversal.
+/// * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///   natural "reading order" for the current [Directionality].
+/// * [OrderedTraversalPolicy], a policy that describes the order explicitly
+///   using [FocusTraversalOrder] widgets.
 mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   final Map<FocusScopeNode, _DirectionalPolicyData> _policyData = <FocusScopeNode, _DirectionalPolicyData>{};
 
@@ -622,6 +636,54 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     return sorted;
   }
 
+  static int _verticalCompareClosestEdge(Offset target, Rect a, Rect b) {
+    // Find which edge is closest to the target for each.
+    final double aCoord = (a.top - target.dy).abs() < (a.bottom - target.dy).abs() ? a.top : a.bottom;
+    final double bCoord = (b.top - target.dy).abs() < (b.bottom - target.dy).abs() ? b.top : b.bottom;
+    return (aCoord - target.dy).abs().compareTo((bCoord - target.dy).abs());
+  }
+
+  static int _horizontalCompareClosestEdge(Offset target, Rect a, Rect b) {
+    // Find which edge is closest to the target for each.
+    final double aCoord = (a.left - target.dx).abs() < (a.right - target.dx).abs() ? a.left : a.right;
+    final double bCoord = (b.left - target.dx).abs() < (b.right - target.dx).abs() ? b.left : b.right;
+    return (aCoord - target.dx).abs().compareTo((bCoord - target.dx).abs());
+  }
+
+  // Sort the ones that have edges that are closest horizontally first, and if
+  // two are the same horizontal distance, pick the one that is closest
+  // vertically.
+  static Iterable<FocusNode> _sortClosestEdgesByDistancePreferHorizontal(Offset target, Iterable<FocusNode> nodes) {
+    final List<FocusNode> sorted = nodes.toList();
+    mergeSort<FocusNode>(sorted, compare: (FocusNode nodeA, FocusNode nodeB) {
+      final int horizontal = _horizontalCompareClosestEdge(target, nodeA.rect, nodeB.rect);
+      if (horizontal == 0) {
+        // If they're the same distance horizontally, pick the closest one
+        // vertically.
+        return _verticalCompare(target, nodeA.rect.center, nodeB.rect.center);
+      }
+      return horizontal;
+    });
+    return sorted;
+  }
+
+  // Sort the ones that have edges that are closest vertically first, and if
+  // two are the same vertical distance, pick the one that is closest
+  // horizontally.
+  static Iterable<FocusNode> _sortClosestEdgesByDistancePreferVertical(Offset target, Iterable<FocusNode> nodes) {
+    final List<FocusNode> sorted = nodes.toList();
+    mergeSort<FocusNode>(sorted, compare: (FocusNode nodeA, FocusNode nodeB) {
+      final int vertical = _verticalCompareClosestEdge(target, nodeA.rect, nodeB.rect);
+      if (vertical == 0) {
+        // If they're the same distance vertically, pick the closest one
+        // horizontally.
+        return _horizontalCompare(target, nodeA.rect.center, nodeB.rect.center);
+      }
+      return vertical;
+    });
+    return sorted;
+  }
+
   // Sorts nodes from left to right horizontally, and removes nodes that are
   // either to the right of the left side of the target node if we're going
   // left, or to the left of the right side of the target node if we're going
@@ -640,10 +702,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     switch (direction) {
       case TraversalDirection.left:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx <= target.left);
-        break;
       case TraversalDirection.right:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dx >= target.right);
-        break;
       case TraversalDirection.up:
       case TraversalDirection.down:
         throw ArgumentError('Invalid direction $direction');
@@ -667,10 +727,8 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     switch (direction) {
       case TraversalDirection.up:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy <= target.top);
-        break;
       case TraversalDirection.down:
         filtered = nodes.where((FocusNode node) => node.rect != target && node.rect.center.dy >= target.bottom);
-        break;
       case TraversalDirection.left:
       case TraversalDirection.right:
         throw ArgumentError('Invalid direction $direction');
@@ -709,11 +767,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           case TraversalDirection.up:
           case TraversalDirection.left:
             alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
-            break;
           case TraversalDirection.right:
           case TraversalDirection.down:
             alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
-            break;
         }
         _focusAndEnsureVisible(
           lastNode,
@@ -730,15 +786,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             case TraversalDirection.right:
               // Reset the policy data if we change directions.
               invalidateScopeData(nearestScope);
-              break;
             case TraversalDirection.up:
             case TraversalDirection.down:
               if (popOrInvalidate(direction)) {
                 return true;
               }
-              break;
           }
-          break;
         case TraversalDirection.left:
         case TraversalDirection.right:
           switch (policyData.history.first.direction) {
@@ -747,12 +800,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
               if (popOrInvalidate(direction)) {
                 return true;
               }
-              break;
             case TraversalDirection.up:
             case TraversalDirection.down:
               // Reset the policy data if we change directions.
               invalidateScopeData(nearestScope);
-              break;
           }
       }
     }
@@ -803,14 +854,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             firstFocus,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
-          break;
         case TraversalDirection.right:
         case TraversalDirection.down:
           _focusAndEnsureVisible(
             firstFocus,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
-          break;
       }
       return true;
     }
@@ -843,9 +892,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           break;
         }
         // Only out-of-band targets are eligible, so pick the one that is
-        // closest the to the center line horizontally.
-        found = _sortByDistancePreferHorizontal(focusedChild.rect.center, eligibleNodes).first;
-        break;
+        // closest to the center line horizontally, and if any are the same
+        // distance horizontally, pick the closest one of those vertically.
+        found = _sortClosestEdgesByDistancePreferHorizontal(focusedChild.rect.center, eligibleNodes).first;
       case TraversalDirection.right:
       case TraversalDirection.left:
         Iterable<FocusNode> eligibleNodes = _sortAndFilterHorizontally(direction, focusedChild.rect, nearestScope.traversalDescendants);
@@ -869,9 +918,9 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           break;
         }
         // Only out-of-band targets are eligible, so pick the one that is
-        // to the center line vertically.
-        found = _sortByDistancePreferVertical(focusedChild.rect.center, eligibleNodes).first;
-        break;
+        // closest to the center line vertically, and if any are the same
+        // distance vertically, pick the closest one of those horizontally.
+        found = _sortClosestEdgesByDistancePreferVertical(focusedChild.rect.center, eligibleNodes).first;
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
@@ -882,14 +931,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
             found,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
-          break;
         case TraversalDirection.down:
         case TraversalDirection.right:
           _focusAndEnsureVisible(
             found,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
-          break;
       }
       return true;
     }

@@ -421,7 +421,7 @@ class SemanticsTester {
   /// You should call [dispose] at the end of a test that creates a semantics
   /// tester.
   SemanticsTester(this.tester) {
-    _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+    _semanticsHandle = tester.ensureSemantics();
 
     // This _extra_ clean-up is needed for the case when a test fails and
     // therefore fails to call dispose() explicitly. The test is still required
@@ -633,7 +633,7 @@ class SemanticsTester {
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is int) {
-      list = SemanticsFlag.values.values
+      list = SemanticsFlag.values
           .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
@@ -648,7 +648,7 @@ class SemanticsTester {
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
-      list = SemanticsAction.values.values
+      list = SemanticsAction.values
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
       list = actions as List<SemanticsAction>;

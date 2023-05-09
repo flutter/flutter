@@ -55,6 +55,8 @@ class DataTableThemeData with Diagnosticable {
     this.columnSpacing,
     this.dividerThickness,
     this.checkboxHorizontalMargin,
+    this.headingCellCursor,
+    this.dataRowCursor,
   }) : assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
          'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
@@ -106,6 +108,12 @@ class DataTableThemeData with Diagnosticable {
   /// {@macro flutter.material.dataTable.checkboxHorizontalMargin}
   final double? checkboxHorizontalMargin;
 
+  /// If specified, overrides the default value of [DataColumn.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? headingCellCursor;
+
+  /// If specified, overrides the default value of [DataRow.mouseCursor].
+  final MaterialStateProperty<MouseCursor?>? dataRowCursor;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
@@ -126,6 +134,8 @@ class DataTableThemeData with Diagnosticable {
     double? columnSpacing,
     double? dividerThickness,
     double? checkboxHorizontalMargin,
+    MaterialStateProperty<MouseCursor?>? headingCellCursor,
+    MaterialStateProperty<MouseCursor?>? dataRowCursor,
   }) {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
@@ -141,6 +151,8 @@ class DataTableThemeData with Diagnosticable {
       columnSpacing: columnSpacing ?? this.columnSpacing,
       dividerThickness: dividerThickness ?? this.dividerThickness,
       checkboxHorizontalMargin: checkboxHorizontalMargin ?? this.checkboxHorizontalMargin,
+      headingCellCursor: headingCellCursor ?? this.headingCellCursor,
+      dataRowCursor: dataRowCursor ?? this.dataRowCursor,
     );
   }
 
@@ -166,6 +178,8 @@ class DataTableThemeData with Diagnosticable {
       columnSpacing: lerpDouble(a.columnSpacing, b.columnSpacing, t),
       dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
       checkboxHorizontalMargin: lerpDouble(a.checkboxHorizontalMargin, b.checkboxHorizontalMargin, t),
+      headingCellCursor: t < 0.5 ? a.headingCellCursor : b.headingCellCursor,
+      dataRowCursor: t < 0.5 ? a.dataRowCursor : b.dataRowCursor,
     );
   }
 
@@ -183,6 +197,8 @@ class DataTableThemeData with Diagnosticable {
     columnSpacing,
     dividerThickness,
     checkboxHorizontalMargin,
+    headingCellCursor,
+    dataRowCursor,
   );
 
   @override
@@ -205,7 +221,9 @@ class DataTableThemeData with Diagnosticable {
       && other.horizontalMargin == horizontalMargin
       && other.columnSpacing == columnSpacing
       && other.dividerThickness == dividerThickness
-      && other.checkboxHorizontalMargin == checkboxHorizontalMargin;
+      && other.checkboxHorizontalMargin == checkboxHorizontalMargin
+      && other.headingCellCursor == headingCellCursor
+      && other.dataRowCursor == dataRowCursor;
   }
 
   @override
@@ -223,6 +241,8 @@ class DataTableThemeData with Diagnosticable {
     properties.add(DoubleProperty('columnSpacing', columnSpacing, defaultValue: null));
     properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: null));
     properties.add(DoubleProperty('checkboxHorizontalMargin', checkboxHorizontalMargin, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('headingCellCursor', headingCellCursor, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>?>('dataRowCursor', dataRowCursor, defaultValue: null));
   }
 }
 

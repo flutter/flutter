@@ -75,6 +75,12 @@ void main() {
     expect(localizations.reorderItemDown, isNotNull);
     expect(localizations.reorderItemLeft, isNotNull);
     expect(localizations.reorderItemRight, isNotNull);
+    expect(localizations.expandedIconTapHint, isNotNull);
+    expect(localizations.collapsedIconTapHint, isNotNull);
+    expect(localizations.expansionTileExpandedHint, isNotNull);
+    expect(localizations.expansionTileCollapsedHint, isNotNull);
+    expect(localizations.expandedHint, isNotNull);
+    expect(localizations.collapsedHint, isNotNull);
     expect(localizations.keyboardKeyAlt, isNotNull);
     expect(localizations.keyboardKeyAltGraph, isNotNull);
     expect(localizations.keyboardKeyBackspace, isNotNull);

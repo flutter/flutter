@@ -10,6 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
@@ -55,6 +56,17 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
   ///
   /// This must be maintained by the [ListWheelChildManager].
   int? index;
+
+  /// Transform applied to this child during painting.
+  ///
+  /// Can be used to find the local bounds of this child in the viewport,
+  /// and then use it, for example, in hit testing.
+  ///
+  /// May be null if child was laid out, but not painted
+  /// by the parent, but normally this shouldn't happen,
+  /// because [RenderListWheelViewport] paints all of the
+  /// children it has laid out.
+  Matrix4? transform;
 }
 
 /// Render, onto a wheel, a bigger sequential set of objects inside this viewport.
@@ -751,8 +763,9 @@ class RenderListWheelViewport
 
     // Relayout all active children.
     RenderBox? child = firstChild;
+    int index = currentFirstIndex;
     while (child != null) {
-      child.layout(childConstraints, parentUsesSize: true);
+      _layoutChild(child, childConstraints, index++);
       child = childAfter(child);
     }
 
@@ -816,22 +829,41 @@ class RenderListWheelViewport
 
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
+    // The magnifier cannot be turned off if the opacity is less than 1.0.
+    if (overAndUnderCenterOpacity >= 1) {
+      _paintAllChildren(context, offset);
+      return;
+    }
+
+    // In order to reduce the number of opacity layers, we first paint all
+    // partially opaque children, then finally paint the fully opaque children.
+    context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), (PaintingContext context, Offset offset) {
+      _paintAllChildren(context, offset, center: false);
+    });
+    _paintAllChildren(context, offset, center: true);
+  }
+
+  void _paintAllChildren(PaintingContext context, Offset offset, { bool? center }) {
     RenderBox? childToPaint = firstChild;
     while (childToPaint != null) {
       final ListWheelParentData childParentData = childToPaint.parentData! as ListWheelParentData;
-      _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
+      _paintTransformedChild(childToPaint, context, offset, childParentData.offset, center: center);
       childToPaint = childAfter(childToPaint);
     }
   }
 
-  /// Takes in a child with a **scrollable layout offset** and paints it in the
-  /// **transformed cylindrical space viewport painting coordinates**.
+  // Takes in a child with a **scrollable layout offset** and paints it in the
+  // **transformed cylindrical space viewport painting coordinates**.
+  //
+  // The value of `center` is passed through to _paintChildWithMagnifier only
+  // if the magnifier is enabled and/or opacity is < 1.0.
   void _paintTransformedChild(
     RenderBox child,
     PaintingContext context,
     Offset offset,
-    Offset layoutOffset,
-  ) {
+    Offset layoutOffset, {
+    required bool? center,
+  }) {
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
             layoutOffset.dx,
@@ -864,22 +896,35 @@ class RenderListWheelViewport
 
     final bool shouldApplyOffCenterDim = overAndUnderCenterOpacity < 1;
     if (useMagnifier || shouldApplyOffCenterDim) {
-      _paintChildWithMagnifier(context, offset, child, transform, offsetToCenter, untransformedPaintingCoordinates);
+      _paintChildWithMagnifier(context, offset, child, transform, offsetToCenter, untransformedPaintingCoordinates, center: center);
     } else {
+      assert(center == null);
       _paintChildCylindrically(context, offset, child, transform, offsetToCenter);
     }
   }
 
-  /// Paint child with the magnifier active - the child will be rendered
-  /// differently if it intersects with the magnifier.
+  // Paint child with the magnifier active - the child will be rendered
+  // differently if it intersects with the magnifier.
+  //
+  // `center` controls how items that partially intersect the center magnifier
+  // are rendered. If `center` is false, items are only painted cynlindrically.
+  // If `center` is true, only the clipped magnifier items are painted.
+  // If `center` is null, partially intersecting items are painted both as the
+  // magnifier and cynlidrical item, while non-intersecting items are painted
+  // only cylindrically.
+  //
+  // This property is used to lift the opacity that would be applied to each
+  // cylindrical item into a single layer, reducing the rendering cost of the
+  // pickers which use this viewport.
   void _paintChildWithMagnifier(
     PaintingContext context,
     Offset offset,
     RenderBox child,
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
-    Offset untransformedPaintingCoordinates,
-  ) {
+    Offset untransformedPaintingCoordinates, {
+    required bool? center,
+  }) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnification / 2;
     final double magnifierBottomLinePosition =
@@ -890,27 +935,28 @@ class RenderListWheelViewport
     final bool isBeforeMagnifierBottomLine = untransformedPaintingCoordinates.dy
         <= magnifierBottomLinePosition;
 
+    final Rect centerRect = Rect.fromLTWH(
+      0.0,
+      magnifierTopLinePosition,
+      size.width,
+      _itemExtent * _magnification,
+    );
+    final Rect topHalfRect = Rect.fromLTWH(
+      0.0,
+      0.0,
+      size.width,
+      magnifierTopLinePosition,
+    );
+    final Rect bottomHalfRect = Rect.fromLTWH(
+      0.0,
+      magnifierBottomLinePosition,
+      size.width,
+      magnifierTopLinePosition,
+    );
     // Some part of the child is in the center magnifier.
-    if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
-      final Rect centerRect = Rect.fromLTWH(
-        0.0,
-        magnifierTopLinePosition,
-        size.width,
-        _itemExtent * _magnification,
-      );
-      final Rect topHalfRect = Rect.fromLTWH(
-        0.0,
-        0.0,
-        size.width,
-        magnifierTopLinePosition,
-      );
-      final Rect bottomHalfRect = Rect.fromLTWH(
-        0.0,
-        magnifierBottomLinePosition,
-        size.width,
-        magnifierTopLinePosition,
-      );
+    final bool inCenter = isAfterMagnifierTopLine && isBeforeMagnifierBottomLine;
 
+    if ((center == null || center) && inCenter) {
       // Clipping the part in the center.
       context.pushClipRect(
         needsCompositing,
@@ -927,8 +973,10 @@ class RenderListWheelViewport
           );
         },
       );
+    }
 
-      // Clipping the part in either the top-half or bottom-half of the wheel.
+    // Clipping the part in either the top-half or bottom-half of the wheel.
+    if ((center == null || !center) && inCenter) {
       context.pushClipRect(
         needsCompositing,
         offset,
@@ -936,16 +984,18 @@ class RenderListWheelViewport
           ? topHalfRect
           : bottomHalfRect,
         (PaintingContext context, Offset offset) {
-          _paintChildCylindrically(
-            context,
-            offset,
-            child,
-            cylindricalTransform,
-            offsetToCenter,
-          );
+            _paintChildCylindrically(
+              context,
+              offset,
+              child,
+              cylindricalTransform,
+              offsetToCenter,
+            );
         },
       );
-    } else {
+    }
+
+    if ((center == null || !center) && !inCenter) {
       _paintChildCylindrically(
         context,
         offset,
@@ -964,18 +1014,15 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
+    final Offset paintOriginOffset = offset + offsetToCenter;
+
     // Paint child cylindrically, without [overAndUnderCenterOpacity].
     void painter(PaintingContext context, Offset offset) {
       context.paintChild(
         child,
         // Paint everything in the center (e.g. angle = 0), then transform.
-        offset + offsetToCenter,
+        paintOriginOffset,
       );
-    }
-
-    // Paint child cylindrically, with [overAndUnderCenterOpacity].
-    void opacityPainter(PaintingContext context, Offset offset) {
-      context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), painter);
     }
 
     context.pushTransform(
@@ -983,8 +1030,14 @@ class RenderListWheelViewport
       offset,
       _centerOriginTransform(cylindricalTransform),
       // Pre-transform painting function.
-      overAndUnderCenterOpacity == 1 ? painter : opacityPainter,
+      painter,
     );
+
+    final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
+    // Save the final transform that accounts both for the offset and cylindrical transform.
+    final Matrix4 transform = _centerOriginTransform(cylindricalTransform)
+      ..translate(paintOriginOffset.dx, paintOriginOffset.dy);
+    childParentData.transform = transform;
   }
 
   /// Return the Matrix4 transformation that would zoom in content in the
@@ -1014,12 +1067,33 @@ class RenderListWheelViewport
     return result;
   }
 
-  /// This returns the matrices relative to the **untransformed plane's viewport
-  /// painting coordinates** system.
+  static bool _debugAssertValidPaintTransform(ListWheelParentData parentData) {
+    if (parentData.transform == null) {
+      throw FlutterError(
+        'Child paint transform happened to be null. \n'
+        '$RenderListWheelViewport normally paints all of the children it has laid out. \n'
+        'Did you forget to update the $ListWheelParentData.transform during the paint() call? \n'
+        'If this is intetional, change or remove this assertion accordingly.'
+      );
+    }
+    return true;
+  }
+
+  static bool _debugAssertValidHitTestOffsets(String context, Offset offset1, Offset offset2) {
+    if (offset1 != offset2) {
+      throw FlutterError("$context - hit test expected values didn't match: $offset1 != $offset2");
+    }
+    return true;
+  }
+
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
-    transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
+    final Matrix4? paintTransform = parentData.transform;
+    assert(_debugAssertValidPaintTransform(parentData));
+    if (paintTransform != null) {
+      transform.multiply(paintTransform);
+    }
   }
 
   @override
@@ -1031,7 +1105,36 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    RenderBox? child = lastChild;
+    while (child != null) {
+      final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
+      final Matrix4? transform = childParentData.transform;
+      assert(_debugAssertValidPaintTransform(childParentData));
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(() {
+            if (transform == null) {
+              return _debugAssertValidHitTestOffsets('Null transform', transformed, position);
+            }
+            final Matrix4? inverted = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
+            if (inverted == null) {
+              return _debugAssertValidHitTestOffsets('Null inverted transform', transformed, position);
+            }
+            return _debugAssertValidHitTestOffsets('MatrixUtils.transformPoint', transformed, MatrixUtils.transformPoint(inverted, position));
+          }());
+          return child!.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) {
+        return true;
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
+  }
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {

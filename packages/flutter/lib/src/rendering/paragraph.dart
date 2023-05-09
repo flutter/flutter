@@ -134,7 +134,6 @@ class RenderParagraph extends RenderBox
         _textPainter.text = value;
         _cachedCombinedSemanticsInfos = null;
         markNeedsSemanticsUpdate();
-        break;
       case RenderComparison.paint:
         _textPainter.text = value;
         _cachedAttributedLabels = null;
@@ -142,7 +141,6 @@ class RenderParagraph extends RenderBox
         _extractPlaceholderSpans(value);
         markNeedsPaint();
         markNeedsSemanticsUpdate();
-        break;
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
@@ -153,7 +151,6 @@ class RenderParagraph extends RenderBox
         _removeSelectionRegistrarSubscription();
         _disposeSelectableFragments();
         _updateSelectionRegistrarSubscription();
-        break;
     }
   }
 
@@ -497,19 +494,17 @@ class RenderParagraph extends RenderBox
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
+        case ui.PlaceholderAlignment.belowBaseline:
           assert(
             RenderObject.debugCheckingIntrinsics,
             'Intrinsics are not available for PlaceholderAlignment.baseline, '
             'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
           );
           return false;
-        }
         case ui.PlaceholderAlignment.top:
         case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
+        case ui.PlaceholderAlignment.bottom:
           continue;
-        }
       }
     }
     return true;
@@ -690,14 +685,12 @@ class RenderParagraph extends RenderBox
             baselineOffset = child.getDistanceToBaseline(
               _placeholderSpans[childIndex].baseline!,
             );
-            break;
           case ui.PlaceholderAlignment.aboveBaseline:
           case ui.PlaceholderAlignment.belowBaseline:
           case ui.PlaceholderAlignment.bottom:
           case ui.PlaceholderAlignment.middle:
           case ui.PlaceholderAlignment.top:
             baselineOffset = null;
-            break;
         }
       } else {
         assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
@@ -793,12 +786,10 @@ class RenderParagraph extends RenderBox
         case TextOverflow.visible:
           _needsClipping = false;
           _overflowShader = null;
-          break;
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
           _needsClipping = true;
           _overflowShader = null;
-          break;
         case TextOverflow.fade:
           _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
@@ -813,11 +804,9 @@ class RenderParagraph extends RenderBox
               case TextDirection.rtl:
                 fadeEnd = 0.0;
                 fadeStart = fadeSizePainter.width;
-                break;
               case TextDirection.ltr:
                 fadeEnd = size.width;
                 fadeStart = fadeEnd - fadeSizePainter.width;
-                break;
             }
             _overflowShader = ui.Gradient.linear(
               Offset(fadeStart, 0.0),
@@ -834,7 +823,6 @@ class RenderParagraph extends RenderBox
             );
           }
           fadeSizePainter.dispose();
-          break;
       }
     } else {
       _needsClipping = false;
@@ -1402,17 +1390,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case SelectionEventType.endEdgeUpdate:
         final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
         result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
-        break;
       case SelectionEventType.clear:
         result = _handleClearSelection();
-        break;
       case SelectionEventType.selectAll:
         result = _handleSelectAll();
-        break;
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
-        break;
       case SelectionEventType.granularlyExtendSelection:
         final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
@@ -1420,7 +1404,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           granularlyExtendSelection.isEnd,
           granularlyExtendSelection.granularity,
         );
-        break;
       case SelectionEventType.directionallyExtendSelection:
         final DirectionallyExtendSelectionEvent directionallyExtendSelection = event as DirectionallyExtendSelectionEvent;
         result = _handleDirectionallyExtendSelection(
@@ -1428,7 +1411,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           directionallyExtendSelection.isEnd,
           directionallyExtendSelection.direction,
         );
-        break;
     }
 
     if (existingSelectionStart != _textSelectionStart ||
@@ -1567,7 +1549,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         );
         newPosition = moveResult.key;
         result = moveResult.value;
-        break;
       case SelectionExtendDirection.forward:
       case SelectionExtendDirection.backward:
         _textSelectionEnd ??= movement == SelectionExtendDirection.forward
@@ -1583,7 +1564,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         );
         newPosition = paragraph.getPositionForOffset(baselineOffsetInParagraphCoordinates);
         result = SelectionResult.end;
-        break;
     }
     if (isExtent) {
       _textSelectionEnd = newPosition;
@@ -1612,16 +1592,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         final String text = range.textInside(fullText);
         newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, CharacterBoundary(text));
         result = SelectionResult.end;
-        break;
       case TextGranularity.word:
         final TextBoundary textBoundary = paragraph._textPainter.wordBoundaries.moveByWordBoundary;
         newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
         result = SelectionResult.end;
-        break;
       case TextGranularity.line:
         newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
         result = SelectionResult.end;
-        break;
       case TextGranularity.document:
         final String text = range.textInside(fullText);
         newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, DocumentBoundary(text));
@@ -1632,7 +1609,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         } else {
           result = SelectionResult.end;
         }
-        break;
     }
 
     if (isExtent) {
@@ -1671,10 +1647,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           0,
           characterBoundary.getLeadingTextBoundaryAt(range.start + end.offset) ?? range.start,
         ) - 1;
-        break;
       case TextAffinity.downstream:
         caretOffset = end.offset;
-        break;
     }
     final int offset = forward
       ? textBoundary.getTrailingTextBoundaryAt(caretOffset) ?? range.end
