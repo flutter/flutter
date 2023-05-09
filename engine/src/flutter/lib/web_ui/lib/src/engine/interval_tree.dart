@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'noto_font.dart' show CodeunitRange;
+import 'noto_font.dart' show CodePointRange;
 
 /// A tree which stores a set of intervals that can be queried for intersection.
 class IntervalTree<T> {
@@ -14,12 +14,12 @@ class IntervalTree<T> {
   ///
   /// When the interval tree is queried, it will return a list of [T]s which
   /// have a range which contains the point.
-  factory IntervalTree.createFromRanges(Map<T, List<CodeunitRange>> rangesMap) {
+  factory IntervalTree.createFromRanges(Map<T, List<CodePointRange>> rangesMap) {
     assert(rangesMap.isNotEmpty);
     // Get a list of all the ranges ordered by start index.
     final List<IntervalTreeNode<T>> intervals = <IntervalTreeNode<T>>[];
-    rangesMap.forEach((T key, List<CodeunitRange> rangeList) {
-      for (final CodeunitRange range in rangeList) {
+    rangesMap.forEach((T key, List<CodePointRange> rangeList) {
+      for (final CodePointRange range in rangeList) {
         intervals.add(IntervalTreeNode<T>(key, range.start, range.end));
       }
     });

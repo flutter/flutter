@@ -7,6 +7,8 @@
 #include <emscripten/html5_webgl.h>
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/modules/skparagraph/include/FontCollection.h"
+#include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
 
 namespace Skwasm {
 
@@ -30,5 +32,10 @@ inline void makeCurrent(EMSCRIPTEN_WEBGL_CONTEXT_HANDLE handle) {
     printf("make_context failed: %d", result);
   }
 }
+
+struct FlutterFontCollection {
+  sk_sp<skia::textlayout::FontCollection> collection;
+  sk_sp<skia::textlayout::TypefaceFontProvider> provider;
+};
 
 }  // namespace Skwasm

@@ -19,6 +19,10 @@ const String _robotoUrl =
 class SkiaFontCollection implements FlutterFontCollection {
   final Set<String> _downloadedFontFamilies = <String>{};
 
+  @override
+  late FontFallbackManager fontFallbackManager =
+    FontFallbackManager(SkiaFallbackRegistry(this));
+
   /// Fonts that started the download process, but are not yet registered.
   ///
   /// /// Once downloaded successfully, this map is cleared and the resulting
@@ -26,6 +30,7 @@ class SkiaFontCollection implements FlutterFontCollection {
   final List<UnregisteredFont> _unregisteredFonts = <UnregisteredFont>[];
 
   final List<RegisteredFont> _registeredFonts = <RegisteredFont>[];
+  final List<RegisteredFont> registeredFallbackFonts = <RegisteredFont>[];
 
   /// Returns fonts that have been downloaded, registered, and parsed.
   ///
@@ -59,8 +64,7 @@ class SkiaFontCollection implements FlutterFontCollection {
           .add(SkFont(font.typeface));
     }
 
-    for (final RegisteredFont font
-        in FontFallbackData.instance.registeredFallbackFonts) {
+    for (final RegisteredFont font in registeredFallbackFonts) {
       _fontProvider!.registerFont(font.bytes, font.family);
       familyToFontMap
           .putIfAbsent(font.family, () => <SkFont>[])
@@ -108,8 +112,8 @@ class SkiaFontCollection implements FlutterFontCollection {
       }
     }
 
-    /// We need a default fallback font for CanvasKit, in order to
-    /// avoid crashing while laying out text with an unregistered font. We chose
+    /// We need a default fallback font for CanvasKit, in order to avoid
+    /// crashing while laying out text with an unregistered font. We chose
     /// Roboto to match Android.
     if (!loadedRoboto) {
       // Download Roboto and add it to the font buffers.
@@ -216,6 +220,12 @@ class SkiaFontCollection implements FlutterFontCollection {
 
   @override
   void clear() {}
+
+  @override
+  void debugResetFallbackFonts() {
+    fontFallbackManager = FontFallbackManager(SkiaFallbackRegistry(this));
+    registeredFallbackFonts.clear();
+  }
 }
 
 /// Represents a font that has been registered.
@@ -253,4 +263,58 @@ class FontDownloadResult {
   final String assetName;
   final UnregisteredFont? font;
   final FontLoadError? error;
+}
+
+class SkiaFallbackRegistry implements FallbackFontRegistry {
+  SkiaFallbackRegistry(this.fontCollection);
+
+  SkiaFontCollection fontCollection;
+
+  @override
+  List<int> getMissingCodePoints(List<int> codeUnits, List<String> fontFamilies) {
+    final List<SkFont> fonts = <SkFont>[];
+    for (final String font in fontFamilies) {
+      final List<SkFont>? typefacesForFamily = fontCollection.familyToFontMap[font];
+      if (typefacesForFamily != null) {
+        fonts.addAll(typefacesForFamily);
+      }
+    }
+    final List<bool> codePointsSupported =
+        List<bool>.filled(codeUnits.length, false);
+    final String testString = String.fromCharCodes(codeUnits);
+    for (final SkFont font in fonts) {
+      final Uint16List glyphs = font.getGlyphIDs(testString);
+      assert(glyphs.length == codePointsSupported.length);
+      for (int i = 0; i < glyphs.length; i++) {
+        codePointsSupported[i] |= glyphs[i] != 0;
+      }
+    }
+
+    final List<int> missingCodeUnits = <int>[];
+    for (int i = 0; i < codePointsSupported.length; i++) {
+      if (!codePointsSupported[i]) {
+        missingCodeUnits.add(codeUnits[i]);
+      }
+    }
+    return missingCodeUnits;
+  }
+
+  @override
+  Future<void> loadFallbackFont(String familyName, String url) async {
+    final ByteBuffer buffer = await httpFetchByteBuffer(url);
+    final SkTypeface? typeface =
+        canvasKit.Typeface.MakeFreeTypeFaceFromData(buffer);
+    if (typeface == null) {
+      printWarning('Failed to parse fallback font $familyName as a font.');
+      return;
+    }
+    fontCollection.registeredFallbackFonts.add(
+      RegisteredFont(buffer.asUint8List(), familyName, typeface)
+    );
+  }
+
+  @override
+  void updateFallbackFontFamilies(List<String> families) {
+    fontCollection.registerDownloadedFonts();
+  }
 }

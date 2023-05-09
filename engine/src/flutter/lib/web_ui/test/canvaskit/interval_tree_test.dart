@@ -13,9 +13,9 @@ void main() {
 void testMain() {
   group('$IntervalTree', () {
     test('is balanced', () {
-      final Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
-        'A': const <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(6, 10)],
-        'B': const <CodeunitRange>[CodeunitRange(4, 6)],
+      final Map<String, List<CodePointRange>> ranges = <String, List<CodePointRange>>{
+        'A': const <CodePointRange>[CodePointRange(0, 5), CodePointRange(6, 10)],
+        'B': const <CodePointRange>[CodePointRange(4, 6)],
       };
 
       // Should create a balanced 3-node tree with a root with a left and right
@@ -30,23 +30,23 @@ void testMain() {
       expect(root.right!.right, isNull);
 
       // Should create a balanced 15-node tree (4 layers deep).
-      final Map<String, List<CodeunitRange>> ranges2 = <String, List<CodeunitRange>>{
-        'A': const <CodeunitRange>[
-          CodeunitRange(1, 1),
-          CodeunitRange(2, 2),
-          CodeunitRange(3, 3),
-          CodeunitRange(4, 4),
-          CodeunitRange(5, 5),
-          CodeunitRange(6, 6),
-          CodeunitRange(7, 7),
-          CodeunitRange(8, 8),
-          CodeunitRange(9, 9),
-          CodeunitRange(10, 10),
-          CodeunitRange(11, 11),
-          CodeunitRange(12, 12),
-          CodeunitRange(13, 13),
-          CodeunitRange(14, 14),
-          CodeunitRange(15, 15),
+      final Map<String, List<CodePointRange>> ranges2 = <String, List<CodePointRange>>{
+        'A': const <CodePointRange>[
+          CodePointRange(1, 1),
+          CodePointRange(2, 2),
+          CodePointRange(3, 3),
+          CodePointRange(4, 4),
+          CodePointRange(5, 5),
+          CodePointRange(6, 6),
+          CodePointRange(7, 7),
+          CodePointRange(8, 8),
+          CodePointRange(9, 9),
+          CodePointRange(10, 10),
+          CodePointRange(11, 11),
+          CodePointRange(12, 12),
+          CodePointRange(13, 13),
+          CodePointRange(14, 14),
+          CodePointRange(15, 15),
         ],
       };
 
@@ -66,9 +66,9 @@ void testMain() {
     });
 
     test('finds values whose intervals overlap with a given point', () {
-      final Map<String, List<CodeunitRange>> ranges = <String, List<CodeunitRange>>{
-        'A': const <CodeunitRange>[CodeunitRange(0, 5), CodeunitRange(7, 10)],
-        'B': const <CodeunitRange>[CodeunitRange(4, 6)],
+      final Map<String, List<CodePointRange>> ranges = <String, List<CodePointRange>>{
+        'A': const <CodePointRange>[CodePointRange(0, 5), CodePointRange(7, 10)],
+        'B': const <CodePointRange>[CodePointRange(4, 6)],
       };
       final IntervalTree<String> tree = IntervalTree<String>.createFromRanges(ranges);
 
