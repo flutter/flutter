@@ -14,6 +14,7 @@ import 'android_studio.dart';
 const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
 const String _kJavaExecutable = 'java';
 
+/// Represents an installation of Java.
 class Java {
   Java({
     required this.javaHome,
@@ -200,11 +201,11 @@ String? _findJavaBinary({
 // Returns a user visible String that says the tool failed to parse
 // the version of java along with the output.
 String _formatJavaVersionWarning(String javaVersionRaw) {
-return 'Could not parse java version from: \n'
+  return 'Could not parse java version from: \n'
     '$javaVersionRaw \n'
     'If there is a version please look for an existing bug '
-    'https://github.com/flutter/flutter/issues/'
-    ' and if one does not exist file a new issue.';
+    'https://github.com/flutter/flutter/issues/ '
+    'and if one does not exist file a new issue.';
 }
 
 class JavaVersion {
