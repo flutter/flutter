@@ -3151,6 +3151,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
+      // It has to be run in post-frame callback, because when the current
+      // function is executed, we may be in build phase, while the
+      // _updateSizeAndTransform may need layout phase information.
+      // See https://github.com/flutter/flutter/issues/126312 for more details.
       SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
