@@ -4617,7 +4617,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return _colors.onErrorContainer;
       }
@@ -4632,7 +4632,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
@@ -4656,7 +4656,7 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }

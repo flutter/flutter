@@ -1524,7 +1524,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {
     final Matrix4 transform = paragraph.getTransformTo(null);
     if (transform.invert() == 0.0) {
-      switch(movement) {
+      switch (movement) {
         case SelectionExtendDirection.previousLine:
         case SelectionExtendDirection.backward:
           return SelectionResult.previous;
@@ -1537,7 +1537,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(!baselineInParagraphCoordinates.isNaN);
     final TextPosition newPosition;
     final SelectionResult result;
-    switch(movement) {
+    switch (movement) {
       case SelectionExtendDirection.previousLine:
       case SelectionExtendDirection.nextLine:
         assert(_textSelectionEnd != null && _textSelectionStart != null);

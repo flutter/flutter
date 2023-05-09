@@ -88,7 +88,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {${componentColor('md.comp.filled-text-field.error.leading-icon') == componentColor('md.comp.filled-text-field.leading-icon') ? '' : '''
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.filled-text-field.error.focus.leading-icon')};
       }
@@ -111,7 +111,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if(states.contains(MaterialState.error)) {${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
+    if (states.contains(MaterialState.error)) {${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.filled-text-field.error.focus.trailing-icon')};
       }'''}
@@ -135,7 +135,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.focus.label-text')});
       }
@@ -159,7 +159,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     final TextStyle textStyle = ${textStyle("md.comp.filled-text-field.label-text")} ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: ${componentColor('md.comp.filled-text-field.error.focus.label-text')});
       }

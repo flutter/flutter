@@ -3722,7 +3722,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
       // We found the page for all the consecutive pageless routes below. Attach these
       // pageless routes to the page.
-      if(unattachedPagelessRoutes.isNotEmpty) {
+      if (unattachedPagelessRoutes.isNotEmpty) {
          pageRouteToPagelessRoutes.putIfAbsent(
           oldEntry,
           () =>  List<_RouteEntry>.from(unattachedPagelessRoutes),

@@ -254,7 +254,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
 
   @override
   void copyArtifacts() {
-    if(applicationBinaryPath != null) {
+    if (applicationBinaryPath != null) {
       copy(
         file('${galleryDirectory.path}/build/app/outputs/flutter-apk/app-profile.apk'),
         Directory(applicationBinaryPath!),

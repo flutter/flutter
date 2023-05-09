@@ -379,7 +379,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    if(!useMaterial3) {
+    if (!useMaterial3) {
       expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
       expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
@@ -722,7 +722,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    if(!useMaterial3) {
+    if (!useMaterial3) {
       expect(tester.getTopLeft(find.byKey(key)).dy, tester.getTopLeft(find.text('hint')).dy);
       expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
     }

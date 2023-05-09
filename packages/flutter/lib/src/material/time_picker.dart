@@ -2291,7 +2291,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        switch(timeOfDayFormat) {
+        switch (timeOfDayFormat) {
           case TimeOfDayFormat.HH_colon_mm:
           case TimeOfDayFormat.HH_dot_mm:
           case TimeOfDayFormat.frenchCanadian:
@@ -2331,7 +2331,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context));
         final double timePickerWidth;
-        switch(timeOfDayFormat) {
+        switch (timeOfDayFormat) {
           case TimeOfDayFormat.HH_colon_mm:
           case TimeOfDayFormat.HH_dot_mm:
           case TimeOfDayFormat.frenchCanadian:
