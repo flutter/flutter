@@ -454,7 +454,7 @@ class IOSDevice extends Device {
         _logger.printError('');
         return LaunchResult.failed();
       }
-      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+      packageId = buildResult.xcodeBuildExecution?.buildSettings[IosProject.kProductBundleIdKey];
     }
 
     packageId ??= package.id;

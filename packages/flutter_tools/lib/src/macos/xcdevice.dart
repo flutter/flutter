@@ -637,7 +637,7 @@ class XCDevice {
         }
         _logger.printWarning(
           'Unknown architecture $architecture, defaulting to '
-          '${getNameForDarwinArch(cpuArchitecture)}',
+          '${cpuArchitecture.name}',
         );
       }
     }

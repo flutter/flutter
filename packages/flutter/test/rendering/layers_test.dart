@@ -512,29 +512,6 @@ void main() {
     });
   });
 
-  test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
-    final PhysicalModelLayer layer = PhysicalModelLayer(
-      clipPath: Path(),
-      elevation: 0,
-      color: const Color(0x00000000),
-      shadowColor: const Color(0x00000000),
-    );
-    checkNeedsAddToScene(layer, () {
-      final Path newPath = Path();
-      newPath.addRect(unitRect);
-      layer.clipPath = newPath;
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.elevation = 1;
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.color = const Color(0x00000001);
-    });
-    checkNeedsAddToScene(layer, () {
-      layer.shadowColor = const Color(0x00000001);
-    });
-  });
-
   test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
     final OffsetLayer child = OffsetLayer();
@@ -1007,7 +984,6 @@ void main() {
     final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
     final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
     final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
-    final PhysicalModelLayer physicalModelLayer = PhysicalModelLayer();
     final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
     final ShaderMaskLayer shaderMaskLayer = ShaderMaskLayer();
     final TextureLayer textureLayer = TextureLayer(rect: Rect.zero, textureId: 1);
@@ -1017,7 +993,6 @@ void main() {
     expect(clipRRectLayer.supportsRasterization(), true);
     expect(imageFilterLayer.supportsRasterization(), true);
     expect(backdropFilterLayer.supportsRasterization(), true);
-    expect(physicalModelLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);
     expect(shaderMaskLayer.supportsRasterization(), true);
     expect(textureLayer.supportsRasterization(), true);
