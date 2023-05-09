@@ -1909,8 +1909,14 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
 
   @override
   Widget build(BuildContext context) {
-    assert(axisDirectionToAxis(widget.horizontalDetails.direction) == Axis.horizontal);
-    assert(axisDirectionToAxis(widget.verticalDetails.direction) == Axis.vertical);
+    assert(
+      axisDirectionToAxis(widget.verticalDetails.direction) == Axis.vertical,
+      'TwoDimensionalScrollable.verticalDetails are not Axis.vertical.'
+    );
+    assert(
+      axisDirectionToAxis(widget.horizontalDetails.direction) == Axis.horizontal,
+      'TwoDimensionalScrollable.horizontalDetails are not Axis.horizontal.'
+    );
 
     final Widget result = RestorationScope(
       restorationId: widget.restorationId,
@@ -1925,7 +1931,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
           ?? Clip.hardEdge,
         incrementCalculator: widget.incrementCalculator,
         excludeFromSemantics: widget.excludeFromSemantics,
-        restorationId: 'OuterTwoDimensionalScrollable',
+        restorationId: 'OuterVerticalTwoDimensionalScrollable',
         dragStartBehavior: widget.dragStartBehavior,
         diagonalDragBehavior: widget.diagonalDragBehavior,
         viewportBuilder: (BuildContext context, ViewportOffset verticalOffset) {
@@ -1940,7 +1946,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
               ?? Clip.hardEdge,
             incrementCalculator: widget.incrementCalculator,
             excludeFromSemantics: widget.excludeFromSemantics,
-            restorationId: 'InnerTwoDimensionalScrollable',
+            restorationId: 'InnerHorizontalTwoDimensionalScrollable',
             dragStartBehavior: widget.dragStartBehavior,
             diagonalDragBehavior: widget.diagonalDragBehavior,
             viewportBuilder: (BuildContext context, ViewportOffset horizontalOffset) {
