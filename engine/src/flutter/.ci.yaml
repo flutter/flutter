@@ -307,7 +307,7 @@ targets:
 
   - name: Linux linux_web_engine
     recipe: engine_v2/engine_v2
-    timeout: 60
+    timeout: 70
     properties:
       release_build: "true"
       config_name: linux_web_engine
