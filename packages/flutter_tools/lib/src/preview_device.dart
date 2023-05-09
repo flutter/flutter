@@ -192,7 +192,7 @@ class PreviewDevice extends Device {
 
     final Process process = await _processManager.start(
       <String>[
-        assetDirectory.childFile('hello_world').path,
+        assetDirectory.childFile('flutter_preview').path,
       ],
     );
     _process = process;

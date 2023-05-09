@@ -79,7 +79,10 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   }
 
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
+  final Directory buildDirectory = globals.fs.directory(globals.fs.path.join(
+    projectPath,
+    getWindowsBuildDirectory(),
+  ));
   final Status status = globals.logger.startProgress(
     'Building Windows application...',
   );
