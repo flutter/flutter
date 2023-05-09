@@ -634,12 +634,19 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+
+    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+    // A bug in the HTML renderer and/or Chrome 96+ causes a
+    // discrepancy in the paragraph height.
+    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     expect(
       secondIconRenderBox.localToGlobal(Offset.zero),
       equals(
         Offset(
           (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          hasIssue99933
+            ? (nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0) - 1
+            : nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
         ),
       ),
     );
