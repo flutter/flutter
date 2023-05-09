@@ -112,8 +112,6 @@ class Java {
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
 
-  JavaVersion? _version;
-
   /// Returns an environment variable map with
   /// 1. JAVA_HOME set if this object has a known home directory, and
   /// 2. The java binary folder appended onto PATH, if the binary location is known.
@@ -131,21 +129,17 @@ class Java {
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
-  JavaVersion? getVersion() {
-    if (_version == null) {
-      final RunResult result = _processUtils.runSync(
-        <String>[binaryPath, '--version'],
-        environment: environment,
-      );
-      if (result.exitCode != 0) {
-        _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
-          ' stdout: ${result.stdout} stderr: ${result.stderr}');
-      }
-      _version = JavaVersion.tryParseFromJavaOutput(result.stdout, logger: _logger);
+  late final JavaVersion? version = (() {
+    final RunResult result = _processUtils.runSync(
+      <String>[binaryPath, '--version'],
+      environment: environment,
+    );
+    if (result.exitCode != 0) {
+      _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
+        ' stdout: ${result.stdout} stderr: ${result.stderr}');
     }
-
-    return _version;
-  }
+    return JavaVersion.tryParseFromJavaOutput(result.stdout, logger: _logger);
+  })();
 
   bool canRun() {
     return _processManager.canRun(binaryPath);
