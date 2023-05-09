@@ -78,7 +78,7 @@ void main() {
             selectedItems.remove(item);
           }
         },
-        chipBuilder: (BuildContext context, String item, bool selected, onSelected) {
+        chipBuilder: (BuildContext context, String item, bool selected, void Function(bool value) onSelected,) {
           return ChoiceChip(
             selected: selected,
             label: Text(item),
@@ -94,13 +94,13 @@ void main() {
   });
 
   testWidgets('Constraints are applied correctly', (WidgetTester tester) async {
-    final BoxConstraints constraints = BoxConstraints(
+    const BoxConstraints constraints =  BoxConstraints(
         minWidth: 80, maxWidth: 100, minHeight: 40, maxHeight: 60);
 
     final Set<String> selectedItems = <String>{};
 
     final ChipSet<String> chipSet = ChipSet<String>(
-      items: <String>['Apple', 'Banana', 'Cherry'],
+      items: const <String>['Apple', 'Banana', 'Cherry'],
       isSelected: (String item) => selectedItems.contains(item),
       onSelected: (String item, bool isSelected) {
         if (isSelected) {
