@@ -19,12 +19,14 @@
 namespace impeller {
 
 PipelineLibraryVK::PipelineLibraryVK(
+    const std::weak_ptr<DeviceHolder>& device_holder,
     const vk::Device& device,
     std::shared_ptr<const Capabilities> caps,
     fml::UniqueFD cache_directory,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner)
-    : device_(device),
+    : device_holder_(device_holder),
       pso_cache_(std::make_shared<PipelineCacheVK>(std::move(caps),
+                                                   device_holder,
                                                    device,
                                                    std::move(cache_directory))),
       worker_task_runner_(std::move(worker_task_runner)) {
@@ -225,7 +227,12 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   blend_state.setAttachments(attachment_blend_state);
   pipeline_info.setPColorBlendState(&blend_state);
 
-  auto render_pass = CreateRenderPass(device_, desc);
+  std::shared_ptr<DeviceHolder> strong_device = device_holder_.lock();
+  if (!strong_device) {
+    return nullptr;
+  }
+
+  auto render_pass = CreateRenderPass(strong_device->GetDevice(), desc);
   if (render_pass) {
     pipeline_info.setBasePipelineHandle(VK_NULL_HANDLE);
     pipeline_info.setSubpass(0);
@@ -279,13 +286,14 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   descs_layout_info.setBindings(desc_bindings);
 
   auto [descs_result, descs_layout] =
-      device_.createDescriptorSetLayoutUnique(descs_layout_info);
+      strong_device->GetDevice().createDescriptorSetLayoutUnique(
+          descs_layout_info);
   if (descs_result != vk::Result::eSuccess) {
     VALIDATION_LOG << "unable to create uniform descriptors";
     return nullptr;
   }
 
-  ContextVK::SetDebugName(device_, descs_layout.get(),
+  ContextVK::SetDebugName(strong_device->GetDevice(), descs_layout.get(),
                           "Descriptor Set Layout " + desc.GetLabel());
 
   //----------------------------------------------------------------------------
@@ -293,8 +301,8 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
   ///
   vk::PipelineLayoutCreateInfo pipeline_layout_info;
   pipeline_layout_info.setSetLayouts(descs_layout.get());
-  auto pipeline_layout =
-      device_.createPipelineLayoutUnique(pipeline_layout_info);
+  auto pipeline_layout = strong_device->GetDevice().createPipelineLayoutUnique(
+      pipeline_layout_info);
   if (pipeline_layout.result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create pipeline layout for pipeline "
                    << desc.GetLabel() << ": "
@@ -321,9 +329,10 @@ std::unique_ptr<PipelineVK> PipelineLibraryVK::CreatePipeline(
     return nullptr;
   }
 
-  ContextVK::SetDebugName(device_, *pipeline_layout.value,
+  ContextVK::SetDebugName(strong_device->GetDevice(), *pipeline_layout.value,
                           "Pipeline Layout " + desc.GetLabel());
-  ContextVK::SetDebugName(device_, *pipeline, "Pipeline " + desc.GetLabel());
+  ContextVK::SetDebugName(strong_device->GetDevice(), *pipeline,
+                          "Pipeline " + desc.GetLabel());
 
   return std::make_unique<PipelineVK>(weak_from_this(),                  //
                                       desc,                              //

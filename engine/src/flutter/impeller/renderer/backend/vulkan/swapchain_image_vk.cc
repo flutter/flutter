@@ -7,7 +7,7 @@
 namespace impeller {
 
 SwapchainImageVK::SwapchainImageVK(TextureDescriptor desc,
-                                   vk::Device device,
+                                   const vk::Device& device,
                                    vk::Image image)
     : TextureSourceVK(desc), image_(image) {
   vk::ImageViewCreateInfo view_info;

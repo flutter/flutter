@@ -18,7 +18,8 @@
 namespace impeller {
 
 class ContextGLES final : public Context,
-                          public BackendCast<ContextGLES, Context> {
+                          public BackendCast<ContextGLES, Context>,
+                          public std::enable_shared_from_this<ContextGLES> {
  public:
   static std::shared_ptr<ContextGLES> Create(
       std::unique_ptr<ProcTableGLES> gl,

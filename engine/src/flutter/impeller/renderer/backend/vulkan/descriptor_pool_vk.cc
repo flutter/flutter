@@ -9,7 +9,11 @@
 
 namespace impeller {
 
-DescriptorPoolVK::DescriptorPoolVK(vk::Device device) : device_(device) {}
+DescriptorPoolVK::DescriptorPoolVK(
+    std::weak_ptr<const DeviceHolder> device_holder)
+    : device_holder_(device_holder) {
+  FML_DCHECK(device_holder.lock());
+}
 
 DescriptorPoolVK::~DescriptorPoolVK() = default;
 
@@ -44,7 +48,12 @@ std::optional<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSet(
   vk::DescriptorSetAllocateInfo set_info;
   set_info.setDescriptorPool(pool.value());
   set_info.setSetLayouts(layout);
-  auto [result, sets] = device_.allocateDescriptorSets(set_info);
+  std::shared_ptr<const DeviceHolder> strong_device = device_holder_.lock();
+  if (!strong_device) {
+    return std::nullopt;
+  }
+  auto [result, sets] =
+      strong_device->GetDevice().allocateDescriptorSets(set_info);
   if (result == vk::Result::eErrorOutOfPoolMemory) {
     return GrowPool() ? AllocateDescriptorSet(layout) : std::nullopt;
   }
@@ -65,7 +74,11 @@ std::optional<vk::DescriptorPool> DescriptorPoolVK::GetDescriptorPool() {
 
 bool DescriptorPoolVK::GrowPool() {
   const auto new_pool_size = Allocation::NextPowerOfTwoSize(pool_size_ + 1u);
-  auto new_pool = CreatePool(device_, new_pool_size);
+  std::shared_ptr<const DeviceHolder> strong_device = device_holder_.lock();
+  if (!strong_device) {
+    return false;
+  }
+  auto new_pool = CreatePool(strong_device->GetDevice(), new_pool_size);
   if (!new_pool) {
     return false;
   }

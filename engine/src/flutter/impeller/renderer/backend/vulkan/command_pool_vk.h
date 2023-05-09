@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -38,7 +39,7 @@ class CommandPoolVK {
 
  private:
   const std::thread::id owner_id_;
-  vk::Device device_ = {};
+  std::weak_ptr<const DeviceHolder> device_holder_;
   vk::UniqueCommandPool graphics_pool_;
   Mutex buffers_to_collect_mutex_;
   std::set<SharedHandleVK<vk::CommandBuffer>> buffers_to_collect_

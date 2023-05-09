@@ -8,14 +8,20 @@
 #include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
 
 class PipelineCacheVK {
  public:
+  // The [device] is passed in directly so that it can be used in the
+  // constructor directly. The [device_holder] isn't guaranteed to be valid
+  // at the time of executing `PipelineCacheVK` because of how `ContextVK` does
+  // initialization.
   explicit PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
-                           vk::Device device,
+                           std::weak_ptr<DeviceHolder> device_holder,
+                           const vk::Device& device,
                            fml::UniqueFD cache_directory);
 
   ~PipelineCacheVK();
@@ -28,7 +34,7 @@ class PipelineCacheVK {
 
  private:
   const std::shared_ptr<const Capabilities> caps_;
-  const vk::Device device_;
+  std::weak_ptr<DeviceHolder> device_holder_;
   const fml::UniqueFD cache_directory_;
   mutable Mutex cache_mutex_;
   vk::UniquePipelineCache cache_ IPLR_GUARDED_BY(cache_mutex_);

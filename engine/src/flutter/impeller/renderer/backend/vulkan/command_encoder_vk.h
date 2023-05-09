@@ -10,6 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/queue_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
@@ -69,13 +70,13 @@ class CommandEncoderVK {
   friend class ::impeller::testing::
       BlitCommandVkTest_BlitGenerateMipmapCommandVK_Test;
 
-  vk::Device device_ = {};
+  std::weak_ptr<const DeviceHolder> device_holder_;
   std::shared_ptr<QueueVK> queue_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::shared_ptr<TrackedObjectsVK> tracked_objects_;
   bool is_valid_ = false;
 
-  CommandEncoderVK(vk::Device device,
+  CommandEncoderVK(std::weak_ptr<const DeviceHolder> device_holder,
                    const std::shared_ptr<QueueVK>& queue,
                    const std::shared_ptr<CommandPoolVK>& pool,
                    std::shared_ptr<FenceWaiterVK> fence_waiter);
