@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' as gradle_utils;
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -405,9 +406,7 @@ void main() {
     });
 
     group('java gradle agp compatibility', () {
-      Future<FlutterProject?> configureJavaGradleAgpForTest(
-        FakeAndroidSdkWithDir androidSdk, {
-        required String javaV,
+      Future<FlutterProject?> configureGradleAgpForTest({
         required String gradleV,
         required String agpV,
       }) async {
@@ -420,7 +419,6 @@ dependencies {
 ''';
         });
         addGradleWrapperFile(project.directory, gradleV);
-        androidSdk.javaVersion = javaV;
         return project;
       }
 
@@ -429,9 +427,11 @@ dependencies {
       // especially important for filesystem.
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: JavaVersion(longText: '17.0.2', shortText: '17.0.2'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
@@ -442,9 +442,7 @@ dependencies {
         _testInMemory(
           'flamingo values are compatible',
           () async {
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: '17.0.2',
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '8.0',
               agpV: '7.4.2',
             );
@@ -452,6 +450,7 @@ dependencies {
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -459,9 +458,11 @@ dependencies {
       });
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: JavaVersion(longText: '1.8.0_242', shortText: '1.8.0_242'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
@@ -472,9 +473,7 @@ dependencies {
         _testInMemory(
           'java 8 era values are compatible',
           () async {
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: '1.8.0_242',
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
@@ -482,6 +481,7 @@ dependencies {
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -490,10 +490,12 @@ dependencies {
 
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
+        java = FakeJava(version: JavaVersion(longText: '11.0.14', shortText: '11.0.14'));
         androidStudio = FakeAndroidStudio();
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
@@ -503,9 +505,7 @@ dependencies {
         _testInMemory(
           'electric eel era values are compatible',
           () async {
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: '11.0.14',
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
@@ -513,17 +513,24 @@ dependencies {
                 await project!.android.hasValidJavaGradleAgpVersions();
             expect(value.success, isTrue);
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
         );
       });
       group('_', () {
+        const String javaV = '17.0.2';
+        const String gradleV = '6.7.3';
+        const String agpV = '7.2.0';
+
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
+        java = FakeJava(version: JavaVersion(longText: javaV, shortText: javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
@@ -533,12 +540,8 @@ dependencies {
         _testInMemory(
           'incompatible everything',
           () async {
-            const String javaV = '17.0.2';
-            const String gradleV = '6.7.3';
-            const String agpV = '7.2.0';
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: javaV,
+
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
             );
@@ -561,17 +564,24 @@ dependencies {
             expect(value.description, contains(RegExp(javaV)));
             expect(value.description, contains(RegExp(gradleV)));
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
         );
       });
       group('_', () {
+        const String javaV = '17.0.2';
+        const String gradleV = '6.7.3';
+        const String agpV = '4.2.0';
+
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
+        java = FakeJava(version: JavaVersion(longText: '17.0.2', shortText: '17.0.2'));
         androidStudio = FakeAndroidStudio();
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
@@ -581,12 +591,7 @@ dependencies {
         _testInMemory(
           'incompatible java/gradle only',
           () async {
-            const String javaV = '17.0.2';
-            const String gradleV = '6.7.3';
-            const String agpV = '4.2.0';
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: javaV,
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
             );
@@ -604,6 +609,7 @@ dependencies {
             expect(value.description, contains(RegExp(javaV)));
             expect(value.description, contains(RegExp(gradleV)));
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -611,9 +617,11 @@ dependencies {
       });
       group('_', () {
         final FakeProcessManager processManager;
+        final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
+        java = FakeJava(version: JavaVersion(longText: '11.0.2', shortText: '11.0.2'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
@@ -624,12 +632,9 @@ dependencies {
         _testInMemory(
           'incompatible gradle/agp only',
           () async {
-            const String javaV = '11.0.2';
             const String gradleV = '7.0.3';
             const String agpV = '7.1.0';
-            final FlutterProject? project = await configureJavaGradleAgpForTest(
-              androidSdk,
-              javaV: javaV,
+            final FlutterProject? project = await configureGradleAgpForTest(
               gradleV: gradleV,
               agpV: agpV,
             );
@@ -647,6 +652,7 @@ dependencies {
             expect(value.description, contains(RegExp(gradleV)));
             expect(value.description, contains(RegExp(agpV)));
           },
+          java: java,
           androidStudio: androidStudio,
           processManager: processManager,
           androidSdk: androidSdk,
@@ -1402,6 +1408,7 @@ void _testInMemory(
   String description,
   Future<void> Function() testMethod, {
   FileSystem? fileSystem,
+  Java? java,
   AndroidStudio? androidStudio,
   ProcessManager? processManager,
   AndroidSdk? androidSdk,
@@ -1464,6 +1471,7 @@ void _testInMemory(
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => processManager ?? FakeProcessManager.any(),
+      Java : () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
       // Intentionlly null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,

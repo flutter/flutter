@@ -101,6 +101,7 @@ Future<T> runInContext<T>(
         userMessages: globals.userMessages,
         processManager: globals.processManager,
         androidStudio: globals.androidStudio,
+        java: globals.java,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -215,6 +216,7 @@ Future<T> runInContext<T>(
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
+        java: globals.java,
         androidSdk: globals.androidSdk,
         processManager: globals.processManager,
         logger: globals.logger,

@@ -266,7 +266,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       AndroidStudioJavaGradleConflictMigration(_logger,
           project: project.android,
           androidStudio: _androidStudio,
-          androidSdk: globals.androidSdk)
+          java: globals.java)
       ,
     ];
 
@@ -422,7 +422,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
-      final String? javaHome = globals.androidSdk?.javaHome;
+      final String? javaHome = globals.java?.javaHome;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -692,7 +692,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.androidSdk?.javaHome;
+      final String? javaHome = globals.java?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -745,7 +745,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.androidSdk?.javaHome;
+      final String? javaHome = globals.java?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,

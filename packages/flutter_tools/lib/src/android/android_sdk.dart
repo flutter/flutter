@@ -2,17 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-import 'android_studio.dart';
 import 'java.dart';
 
 // ANDROID_HOME is deprecated.
@@ -37,13 +32,17 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory) {
+  AndroidSdk(this.directory, {
+    Java? java,
+  }): _java = java {
     reinitialize();
   }
 
   static const String javaHomeEnvironmentVariable = 'JAVA_HOME';
   /// The Android SDK root directory.
   final Directory directory;
+
+  final Java? _java;
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
@@ -410,67 +409,6 @@ class AndroidSdk {
     return null;
   }
 
-  /// Returns the version of java in the format \d(.\d)+(.\d)+
-  /// Returns null if version not found.
-  ///
-  /// Callers should instead use the [Java] class.
-  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
-  String? getJavaVersion() {
-    return globals.java?.getVersion()?.shortText;
-  }
-
-  /// A value that would be appropriate to use as JAVA_HOME.
-  ///
-  /// This method considers jdk in the following order:
-  /// * the JDK bundled with Android Studio, if one is found;
-  /// * the JAVA_HOME in the ambient environment, if set;
-  ///
-  /// Callers should instead use the [Java] class.
-  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
-  String? get javaHome {
-    return findJavaHome();
-  }
-
-  /// A value that would be appropriate to use as JAVA_HOME.
-  ///
-  /// This method considers jdk in the following order:
-  /// * the JDK bundled with Android Studio, if one is found;
-  /// * the JAVA_HOME in the ambient environment, if set;
-  ///
-  /// Callers should instead use the [Java] class.
-  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
-  static String? findJavaHome() {
-    return globals.java?.home;
-  }
-
-  /// Finds the java binary that is used for all operations across the tool.
-  ///
-  /// Callers should instead use the [Java] class.
-  // TODO(andrewkolos): see https://github.com/flutter/flutter/issues/126126.
-  static String? findJavaBinary({
-    required Logger logger,
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) {
-    return Java.find(
-      logger: logger,
-      androidStudio: androidStudio,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: processManager,
-    )?.binary;
-  }
-
-  /// Returns an environment with the Java folder added to PATH for use in calling
-  /// Java-based Android SDK commands such as sdkmanager and avdmanager.
-  Map<String, String> get sdkManagerEnv {
-    // TODO(andrewkolos): Inject Java to avoid referencing the global this deep.
-    // See https://github.com/flutter/flutter/issues/126126.
-    return globals.java?.getJavaEnvironment() ?? <String, String>{};
-  }
-
   /// Returns the version of the Android SDK manager tool or null if not found.
   String? get sdkManagerVersion {
     if (sdkManagerPath == null || !globals.processManager.canRun(sdkManagerPath)) {
@@ -481,7 +419,7 @@ class AndroidSdk {
     }
     final RunResult result = globals.processUtils.runSync(
       <String>[sdkManagerPath!, '--version'],
-      environment: sdkManagerEnv,
+      environment: _java?.environment,
     );
     if (result.exitCode != 0) {
       globals.printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');

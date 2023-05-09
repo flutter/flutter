@@ -607,35 +607,33 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 
 class FakeJava extends Fake implements Java {
   FakeJava({
-    this.home = 'android-studio/jbr',
-    String binaryPath = 'android-studio/jbr/bin/java',
+    this.javaHome = 'android-studio/jbr',
+    String binary = 'android-studio/jbr/bin/java',
     JavaVersion? version,
     bool canRun = true,
-  }): binary = binaryPath,
+  }): binaryPath = binary,
       _version = version ?? JavaVersion(
        longText: 'openjdk 19.0.2 2023-01-17',
        shortText: '19.0.2',
       ),
       _environment = <String, String>{
-        if (home != null) 'JAVA_HOME': home,
+        if (javaHome != null) 'JAVA_HOME': javaHome,
         'PATH': 'android-studio/jbr/bin',
       },
       _canRun = canRun;
 
   @override
-  String? home;
+  String? javaHome;
 
   @override
-  String binary;
+  String binaryPath;
 
   final Map<String, String> _environment;
   final JavaVersion? _version;
   final bool _canRun;
 
   @override
-  Map<String, String> getJavaEnvironment() {
-    return _environment;
-  }
+  Map<String, String> get environment => _environment;
 
   @override
   JavaVersion? getVersion() {
