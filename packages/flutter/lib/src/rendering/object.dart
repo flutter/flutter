@@ -3930,7 +3930,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 /// This mixin is typically used to implement render objects created
 /// in a [SingleChildRenderObjectWidget].
 mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject {
-
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
   ///

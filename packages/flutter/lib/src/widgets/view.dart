@@ -7,6 +7,7 @@
 import 'dart:collection';
 import 'dart:ui' show FlutterView, SemanticsUpdate;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -29,9 +30,10 @@ import 'media_query.dart';
 /// [FlutterView] must never exist within the same widget tree at the same time.
 /// Internally, this limitation is enforced by a [GlobalObjectKey] that derives
 /// its identity from the [view] provided to this widget.
-class View extends StatefulWidget {
+class View extends StatelessWidget {
   /// Injects the provided [view] into the widget tree.
   View({
+    super.key,
     required this.view,
     @Deprecated(
       'Do not use. '
@@ -48,8 +50,7 @@ class View extends StatefulWidget {
     required this.child,
   }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
        _deprecatedRenderView = deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
-       assert(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null || deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view),
-       super(key: GlobalObjectKey(view));
+       assert(deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null || deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView == view);
 
   /// The [FlutterView] to be injected into the tree.
   final FlutterView view;
@@ -59,9 +60,6 @@ class View extends StatefulWidget {
 
   final PipelineOwner? _deprecatedPipelineOwner;
   final RenderView? _deprecatedRenderView;
-
-  @override
-  State<View> createState() => _ViewState();
 
   /// Returns the [FlutterView] that the provided `context` will render into.
   ///
@@ -124,91 +122,66 @@ class View extends StatefulWidget {
     }());
     return result!;
   }
-}
-
-class _ViewState extends State<View> {
-  // Pulled out of _ViewRenderObjectWidgetElement to configure ViewHooksScope.
-  late final PipelineOwner _pipelineOwner = PipelineOwner(
-    onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
-    onSemanticsUpdate: _handleSemanticsUpdate,
-    onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
-  );
-
-  void _handleSemanticsOwnerCreated() {
-    (_pipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
-    // If the rootNode is not set yet, initial semantics are scheduled in _ViewElement.mount right after the rootNode is set.
-  }
-
-  void _handleSemanticsOwnerDisposed() {
-    (_pipelineOwner.rootNode as RenderView?)?.clearSemantics();
-  }
-
-  void _handleSemanticsUpdate(SemanticsUpdate update) {
-    widget.view.updateSemantics(update);
-  }
-
-  PipelineOwner get _effectivePipelineOwner => widget._deprecatedPipelineOwner ?? _pipelineOwner;
-
-  @override
-  void didUpdateWidget(View oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    assert(oldWidget._deprecatedPipelineOwner == widget._deprecatedPipelineOwner);
-    assert(oldWidget._deprecatedRenderView == widget._deprecatedRenderView);
-  }
-
-  // Hooks provided by an ancestor for this view.
-  late ViewHooks _ancestorHooks;
-  // Hooks provided by this view for descendant views.
-  late ViewHooks _descendantHooks;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _ancestorHooks = ViewHooks.of(context);
-    _descendantHooks = _ancestorHooks.copyWith(pipelineOwner: _effectivePipelineOwner);
-  }
 
   @override
   Widget build(BuildContext context) {
-    return _ViewRenderObjectWidget(
-      view: widget.view,
-      hooks: _ancestorHooks,
-      pipelineOwner: _effectivePipelineOwner,
-      deprecatedRenderView: widget._deprecatedRenderView,
-      child: _ViewScope(
-        view: widget.view,
-        child: ViewHooksScope(
-          hooks: _descendantHooks,
-          child: MediaQuery.fromView(
-            view: widget.view,
-            child: widget.child,
+    final ViewHooks ancestorHock = ViewHooks.of(context);
+    return RawView._deprecated(
+      view: view,
+      hooks: ancestorHock,
+      deprecatedPipelineOwner: _deprecatedPipelineOwner,
+      deprecatedRenderView: _deprecatedRenderView,
+      builder: (BuildContext context, PipelineOwner owner) {
+        return _ViewScope(
+          view: view,
+          child: ViewHooksScope(
+            hooks: ancestorHock.copyWith(pipelineOwner: owner),
+            child: MediaQuery.fromView(
+              view: view,
+              child: child,
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 }
 
-class _ViewRenderObjectWidget extends SingleChildRenderObjectWidget {
-  _ViewRenderObjectWidget({
+typedef RawViewContentBuilder = Widget Function(BuildContext context, PipelineOwner owner);
+
+class RawView extends RenderObjectWidget {
+  RawView({
     required this.view,
     required this.hooks,
-    required this.pipelineOwner,
-    this.deprecatedRenderView,
-    required super.child,
-  }) : assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view);
+    required this.builder,
+  }) : _deprecatedPipelineOwner = null,
+       _deprecatedRenderView = null,
+       super(key: GlobalObjectKey(view));
+
+  RawView._deprecated({
+    required this.view,
+    required this.hooks,
+    PipelineOwner? deprecatedPipelineOwner,
+    RenderView? deprecatedRenderView,
+    required this.builder,
+  }) : _deprecatedPipelineOwner = deprecatedPipelineOwner,
+       _deprecatedRenderView = deprecatedRenderView,
+       assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view),
+       super(key: _DeprecatedRawViewKey(view, deprecatedPipelineOwner, deprecatedRenderView));
 
   final FlutterView view;
   final ViewHooks hooks;
-  final PipelineOwner pipelineOwner;
-  final RenderView? deprecatedRenderView;
+  final RawViewContentBuilder builder;
+
+  final PipelineOwner? _deprecatedPipelineOwner;
+  final RenderView? _deprecatedRenderView;
 
   @override
-  SingleChildRenderObjectElement createElement() => _ViewRenderObjectWidgetElement(this);
+  RenderObjectElement createElement() => _RawViewElement(this);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return deprecatedRenderView ?? RenderView(
+    return _deprecatedRenderView ?? RenderView(
       view: view,
     );
   }
@@ -217,20 +190,49 @@ class _ViewRenderObjectWidget extends SingleChildRenderObjectWidget {
   // GlobalKey, so we never need to update the RenderObject with a new view.
 }
 
-class _ViewRenderObjectWidgetElement extends RootSingleChildRenderObjectElementMixin {
-  _ViewRenderObjectWidgetElement(super.widget);
+class _RawViewElement extends RenderTreeRootElement {
+  _RawViewElement(super.widget);
+
+  late final PipelineOwner _pipelineOwner = PipelineOwner(
+    onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
+    onSemanticsUpdate: _handleSemanticsUpdate,
+    onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
+  );
+
+  PipelineOwner get _effectivePipelineOwner => (widget as RawView)._deprecatedPipelineOwner ?? _pipelineOwner;
+
+  void _handleSemanticsOwnerCreated() {
+    (_effectivePipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
+    // If the rootNode is not set yet, initial semantics are scheduled in _ViewElement.mount right after the rootNode is set.
+  }
+
+  void _handleSemanticsOwnerDisposed() {
+    (_effectivePipelineOwner.rootNode as RenderView?)?.clearSemantics();
+  }
+
+  void _handleSemanticsUpdate(SemanticsUpdate update) {
+    (widget as RawView).view.updateSemantics(update);
+  }
 
   @override
   RenderView get renderObject => super.renderObject as RenderView;
+
+  Element? _child;
+
+  void _updateChild() {
+    // TODO(goderbauer): Error catching around builder.
+    final Widget child = (widget as RawView).builder(this, _effectivePipelineOwner);
+    _child = updateChild(_child, child, null);
+  }
 
   @override
   void mount(Element? parent, Object? newSlot) {
     // TODO(goderbauer): why do we need this? - Views are only allowed in certain places.
     // assert(newSlot == View.viewSlot);
-    final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    super.mount(parent, newSlot); // calls attachRenderObject(), updates slot memeber.
+    super.mount(parent, newSlot); // calls attachRenderObject(), updates slot member.
+    _updateChild();
     renderObject.prepareInitialFrame();
-    if (viewWidget.pipelineOwner.semanticsOwner != null) {
+    if (_effectivePipelineOwner.semanticsOwner != null) {
       renderObject.scheduleInitialSemantics();
     }
   }
@@ -240,10 +242,10 @@ class _ViewRenderObjectWidgetElement extends RootSingleChildRenderObjectElementM
   @override
   void attachRenderObject(Object? newSlot) {
     // assert(newSlot == View.viewSlot);
-    final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    viewWidget.hooks.pipelineOwner.adoptChild(viewWidget.pipelineOwner);
-    assert(viewWidget.pipelineOwner.rootNode == null);
-    viewWidget.pipelineOwner.rootNode = renderObject;
+    final RawView viewWidget = widget as RawView;
+    viewWidget.hooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
+    assert(_effectivePipelineOwner.rootNode == null);
+    _effectivePipelineOwner.rootNode = renderObject;
     viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
     _attached = true;
     super.attachRenderObject(newSlot); // updates slot member
@@ -251,36 +253,68 @@ class _ViewRenderObjectWidgetElement extends RootSingleChildRenderObjectElementM
 
   @override
   void detachRenderObject() {
-    final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
+    final RawView viewWidget = widget as RawView;
     if (!_attached) {
       // In global key move scenarios `detachRenderObject` is called twice.
-      assert(viewWidget.pipelineOwner.rootNode == null);
+      assert(_effectivePipelineOwner.rootNode == null);
       return;
     }
     viewWidget.hooks.renderViewRepository.removeRenderView(renderObject);
-    assert(viewWidget.pipelineOwner.rootNode == renderObject);
-    viewWidget.pipelineOwner.rootNode = null;
-    viewWidget.hooks.pipelineOwner.dropChild(viewWidget.pipelineOwner);
+    assert(_effectivePipelineOwner.rootNode == renderObject);
+    _effectivePipelineOwner.rootNode = null;
+    viewWidget.hooks.pipelineOwner.dropChild(_effectivePipelineOwner);
     _attached = false;
     super.detachRenderObject(); // updates slot member
   }
 
   @override
-  void update(_ViewRenderObjectWidget oldWidget) {
+  void update(RawView oldWidget) {
     super.update(oldWidget);
-    final _ViewRenderObjectWidget viewWidget = widget as _ViewRenderObjectWidget;
-    assert(oldWidget.deprecatedRenderView == viewWidget.deprecatedRenderView);
-    assert(oldWidget.pipelineOwner == viewWidget.pipelineOwner);
+    _updateChild();
+    final RawView viewWidget = widget as RawView;
     final ViewHooks oldHooks = oldWidget.hooks;
     final ViewHooks newHooks = viewWidget.hooks;
     if (oldHooks.pipelineOwner != newHooks.pipelineOwner) {
-      oldHooks.pipelineOwner.dropChild(viewWidget.pipelineOwner);
-      newHooks.pipelineOwner.adoptChild(viewWidget.pipelineOwner);
+      oldHooks.pipelineOwner.dropChild(_effectivePipelineOwner);
+      newHooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
     }
     if (oldHooks.renderViewRepository != newHooks.renderViewRepository) {
       oldHooks.renderViewRepository.removeRenderView(renderObject);
       newHooks.renderViewRepository.addRenderView(renderObject);
     }
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (_child != null) {
+      visitor(_child!);
+    }
+  }
+
+  @override
+  void forgetChild(Element child) {
+    assert(child == _child);
+    _child = null;
+    super.forgetChild(child);
+  }
+
+  @override
+  void insertRenderObjectChild(RenderBox child, Object? slot) {
+    assert(slot == null);
+    assert(renderObject.debugValidateChild(child));
+    renderObject.child = child;
+  }
+
+  @override
+  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
+    assert(false);
+  }
+
+  @override
+  void removeRenderObjectChild(RenderObject child, Object? slot) {
+    assert(slot == null);
+    assert(renderObject.child == child);
+    renderObject.child = null;
   }
 }
 
@@ -492,4 +526,30 @@ class _MultiChildComponentElement extends Element {
     }
     return children;
   }
+}
+
+@optionalTypeArgs
+class _DeprecatedRawViewKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
+  const _DeprecatedRawViewKey(this.view, this.owner, this.renderView) : super.constructor();
+
+  final FlutterView view;
+  final PipelineOwner? owner;
+  final RenderView? renderView;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is _DeprecatedRawViewKey<T>
+        && identical(other.view, view)
+        && identical(other.owner, owner)
+        && identical(other.renderView, renderView);
+  }
+
+  @override
+  int get hashCode => Object.hash(view, owner, renderView);
+
+  @override
+  String toString() => '[_DeprecatedRawViewKey ${describeIdentity(view)}]';
 }
