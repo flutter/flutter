@@ -77,7 +77,6 @@ void PortableUITest::SetUpRealmBase() {
   // // Route base system services to flutter and the test UI stack.
   realm_builder_.AddRoute(Route{
       .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
-                       Protocol{fuchsia::sys::Environment::Name_},
                        Protocol{fuchsia::sysmem::Allocator::Name_},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},
                        Protocol{fuchsia::ui::input::ImeService::Name_},
