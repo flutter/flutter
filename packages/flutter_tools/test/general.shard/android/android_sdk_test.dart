@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -350,13 +351,13 @@ void main() {
         final String androidStudioBundledJdkHome = globals.androidStudio!.javaPath!;
         final String expectedJavaBinaryPath = globals.fs.path.join(androidStudioBundledJdkHome, 'bin', 'java');
 
-        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+        final String? foundJavaBinaryPath = Java.find(
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
           platform: globals.platform,
           processManager: globals.processManager,
-        );
+        )?.binaryPath;
 
         expect(foundJavaBinaryPath, expectedJavaBinaryPath);
       }, overrides: <Type, Generator>{
@@ -370,13 +371,13 @@ void main() {
       testUsingContext('returns the current value of JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
         final String expectedJavaBinaryPath = globals.fs.path.join('java-home-path', 'bin', 'java');
 
-        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+        final String? foundJavaBinaryPath = Java.find(
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
           platform: globals.platform,
           processManager: globals.processManager,
-        );
+        )?.binaryPath;
 
         expect(foundJavaBinaryPath, expectedJavaBinaryPath);
       }, overrides: <Type, Generator>{
@@ -390,13 +391,13 @@ void main() {
       });
 
       testUsingContext('returns the java binary found on PATH if no other can be found', () {
-        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+        final String? foundJavaBinaryPath = Java.find(
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
           platform: globals.platform,
           processManager: globals.processManager,
-        );
+        )?.binaryPath;
 
         expect(foundJavaBinaryPath, 'java');
       }, overrides: <Type, Generator>{
@@ -414,13 +415,13 @@ void main() {
       });
 
       testUsingContext('returns null if no java binary could be found', () {
-        final String? foundJavaBinaryPath = AndroidSdk.findJavaBinary(
+        final String? foundJavaBinaryPath = Java.find(
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
           platform: globals.platform,
           processManager: globals.processManager,
-        );
+        )?.binaryPath;
 
         expect(foundJavaBinaryPath, null);
       }, overrides: <Type, Generator>{

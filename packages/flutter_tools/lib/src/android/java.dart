@@ -16,8 +16,8 @@ const String _kJavaExecutable = 'java';
 
 class Java {
   Java({
-    required this.home,
-    required this.binary,
+    required this.javaHome,
+    required this.binaryPath,
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils os,
@@ -78,8 +78,8 @@ class Java {
     }
 
     return Java(
-      home: home,
-      binary: binary,
+      javaHome: home,
+      binaryPath: binary,
       logger: logger,
       fileSystem: fileSystem,
       os: os,
@@ -92,17 +92,17 @@ class Java {
   ///
   /// This should only be used for logging and validation purposes.
   /// If you need to set JAVA_HOME when starting a process, consider
-  /// using [getJavaEnvironment] instead.
+  /// using [environment] instead.
   /// If you need to inspect the files of the runtime, considering adding
   /// a new method to this class instead.
-  final String? home;
+  final String? javaHome;
 
   /// The path of the runtime's java binary.
   ///
   /// This should be only used for logging and validation purposes.
   /// If you need to invoke the binary directly, consider adding a new method
   /// to this class instead.
-  final String binary;
+  final String binaryPath;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -119,10 +119,10 @@ class Java {
   ///
   /// This map should be used as the environment when invoking any Java-dependent
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
-  Map<String, String> getJavaEnvironment() {
+  Map<String, String> get environment {
     return <String, String>{
-      if (home != null) _javaHomeEnvironmentVariable: home!,
-      'PATH': _fileSystem.path.dirname(binary) +
+      if (javaHome != null) _javaHomeEnvironmentVariable: javaHome!,
+      'PATH': _fileSystem.path.dirname(binaryPath) +
                         _os.pathVarSeparator +
                         _platform.environment['PATH']!,
     };
@@ -133,8 +133,8 @@ class Java {
   JavaVersion? getVersion() {
     if (_version == null) {
       final RunResult result = _processUtils.runSync(
-        <String>[binary, '--version'],
-        environment: getJavaEnvironment(),
+        <String>[binaryPath, '--version'],
+        environment: environment,
       );
       if (result.exitCode != 0) {
         _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
@@ -147,7 +147,7 @@ class Java {
   }
 
   bool canRun() {
-    return _processManager.canRun(binary);
+    return _processManager.canRun(binaryPath);
   }
 }
 
