@@ -13,8 +13,8 @@ namespace testing {
 TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
   auto context = CreateMockVulkanContext();
   auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDevice(), context->GetGraphicsQueue(),
-                           pool, context->GetFenceWaiter());
+  CommandEncoderVK encoder(context, context->GetGraphicsQueue(), pool,
+                           context->GetFenceWaiter());
   BlitCopyTextureToTextureCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
@@ -31,8 +31,8 @@ TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
 TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
   auto context = CreateMockVulkanContext();
   auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDevice(), context->GetGraphicsQueue(),
-                           pool, context->GetFenceWaiter());
+  CommandEncoderVK encoder(context, context->GetGraphicsQueue(), pool,
+                           context->GetFenceWaiter());
   BlitCopyTextureToBufferCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),
@@ -49,8 +49,8 @@ TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
 TEST(BlitCommandVkTest, BlitGenerateMipmapCommandVK) {
   auto context = CreateMockVulkanContext();
   auto pool = CommandPoolVK::GetThreadLocal(context.get());
-  CommandEncoderVK encoder(context->GetDevice(), context->GetGraphicsQueue(),
-                           pool, context->GetFenceWaiter());
+  CommandEncoderVK encoder(context, context->GetGraphicsQueue(), pool,
+                           context->GetFenceWaiter());
   BlitGenerateMipmapCommandVK cmd;
   cmd.texture = context->GetResourceAllocator()->CreateTexture({
       .size = ISize(100, 100),

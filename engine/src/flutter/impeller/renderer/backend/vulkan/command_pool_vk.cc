@@ -79,7 +79,7 @@ CommandPoolVK::CommandPoolVK(const ContextVK* context)
     return;
   }
 
-  device_ = context->GetDevice();
+  device_holder_ = context->weak_from_this();
   graphics_pool_ = std::move(pool.value);
   is_valid_ = true;
 }
@@ -102,6 +102,10 @@ vk::CommandPool CommandPoolVK::GetGraphicsCommandPool() const {
 }
 
 vk::UniqueCommandBuffer CommandPoolVK::CreateGraphicsCommandBuffer() {
+  std::shared_ptr<const DeviceHolder> strong_device = device_holder_.lock();
+  if (!strong_device) {
+    return {};
+  }
   if (std::this_thread::get_id() != owner_id_) {
     return {};
   }
@@ -113,7 +117,8 @@ vk::UniqueCommandBuffer CommandPoolVK::CreateGraphicsCommandBuffer() {
   alloc_info.commandPool = graphics_pool_.get();
   alloc_info.commandBufferCount = 1u;
   alloc_info.level = vk::CommandBufferLevel::ePrimary;
-  auto [result, buffers] = device_.allocateCommandBuffersUnique(alloc_info);
+  auto [result, buffers] =
+      strong_device->GetDevice().allocateCommandBuffersUnique(alloc_info);
   if (result != vk::Result::eSuccess) {
     return {};
   }

@@ -112,9 +112,9 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   render_target_desc.SetColorAttachment(color0, 0u);
 
   // The constructor is private. So make_unique may not be used.
-  return std::unique_ptr<SurfaceMTL>(
-      new SurfaceMTL(context->weak_from_this(), render_target_desc, resolve_tex,
-                     drawable, requires_blit, clip_rect));
+  return std::unique_ptr<SurfaceMTL>(new SurfaceMTL(context, render_target_desc,
+                                                    resolve_tex, drawable,
+                                                    requires_blit, clip_rect));
 }
 
 SurfaceMTL::SurfaceMTL(const std::weak_ptr<Context>& context,
