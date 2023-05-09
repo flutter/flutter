@@ -156,7 +156,7 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 }
 
 void main() {
-  for(final bool useMaterial3 in  <bool>[true, false]){
+  for (final bool useMaterial3 in  <bool>[true, false]){
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
