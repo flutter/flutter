@@ -6,46 +6,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:fidl_fuchsia_ui_test_input/fidl_async.dart' as test_mouse;
-import 'package:fuchsia_services/services.dart';
 import 'package:zircon/zircon.dart';
 
 void main() {
   print('Launching mouse-input-view');
   MyApp app = MyApp();
   app.run();
-}
-
-List<test_mouse.MouseButton> getPressedButtons(int buttons) {
-  var pressed_buttons = <test_mouse.MouseButton>[];
-  if (buttons & 0x1 != 0) {
-    pressed_buttons.add(test_mouse.MouseButton.first);
-  }
-  if (buttons & (0x1 >> 1) != 0) {
-    pressed_buttons.add(test_mouse.MouseButton.second);
-  }
-  if (buttons & (0x1 >> 2) != 0) {
-    pressed_buttons.add(test_mouse.MouseButton.third);
-  }
-
-  return pressed_buttons;
-}
-
-test_mouse.MouseEventPhase getPhase(String event_type) {
-  switch (event_type) {
-    case 'add':
-      return test_mouse.MouseEventPhase.add;
-    case 'hover':
-      return test_mouse.MouseEventPhase.hover;
-    case 'down':
-      return test_mouse.MouseEventPhase.down;
-    case 'move':
-      return test_mouse.MouseEventPhase.move;
-    case 'up':
-      return test_mouse.MouseEventPhase.up;
-    default:
-      print('Invalid event type: ${event_type}');
-  }
 }
 
 class MyApp {
@@ -67,11 +33,8 @@ class MyApp {
 
   // Each tap will increment the counter, we then determine what color to choose
   int _touchCounter = 0;
-  final _responseListener = test_mouse.MouseInputListenerProxy();
 
   void run() {
-    Incoming.fromSvcPath()
-      ..connectToService(_responseListener);
     // Set up window callbacks.
     window.onPointerDataPacket = (PointerDataPacket packet) {
       this.pointerDataPacket(packet);
@@ -122,28 +85,45 @@ class MyApp {
           _touchCounter++;
         }
 
-        // Incoming.fromSvcPath()
-        //   ..connectToService(_responseListener)
-          // ..close();
-
-        _respond(test_mouse.MouseInputListenerReportMouseInputRequest(
+        _reportMouseInput(
           localX: data.physicalX,
           localY: data.physicalY,
-          buttons: getPressedButtons(data.buttons),
-          phase: getPhase(data.change.name),
+          buttons: data.buttons,
+          phase: data.change.name,
           timeReceived: nowNanos,
           wheelXPhysicalPixel: data.scrollDeltaX,
           wheelYPhysicalPixel: data.scrollDeltaY,
-          componentName: 'mouse-input-view',
-        ));
+        );
       }
     }
 
     window.scheduleFrame();
   }
 
-  void _respond(test_mouse.MouseInputListenerReportMouseInputRequest request) async {
+  void _reportMouseInput(
+      {double localX,
+      double localY,
+      int timeReceived,
+      int buttons,
+      String phase,
+      double wheelXPhysicalPixel,
+      double wheelYPhysicalPixel}) {
     print('mouse-input-view reporting mouse input to MouseInputListener');
-    await _responseListener.reportMouseInput(request);
+    final message = utf8.encoder
+        .convert(json.encode({
+          'method': 'MouseInputListener.ReportMouseInput',
+          'local_x': localX,
+          'local_y': localY,
+          'time_received': timeReceived,
+          'component_name': 'touch-input-view',
+          'buttons': buttons,
+          'phase': 'asdf',
+          'wheel_x_physical_pixel': wheelXPhysicalPixel,
+          'wheel_y_physical_pixel': wheelYPhysicalPixel,
+        }))
+        .buffer
+        .asByteData();
+    PlatformDispatcher.instance
+        .sendPlatformMessage('fuchsia/input_test', message, null);
   }
 }

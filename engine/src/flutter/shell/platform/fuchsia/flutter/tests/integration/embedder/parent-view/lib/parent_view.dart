@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:args/args.dart';
-import 'package:fidl_fuchsia_ui_app/fidl_async.dart';
-import 'package:fidl_fuchsia_ui_views/fidl_async.dart';
-import 'package:fuchsia_services/services.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math_64;
 import 'package:zircon/zircon.dart';
 
 final _argsCsvFilePath = '/config/data/args.csv';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   print('parent-view: starting');
 
   args = args + _GetArgsFromConfigFile();
@@ -32,21 +30,12 @@ void main(List<String> args) {
 
   TestApp app;
   final useFlatland = arguments['useFlatland'];
-  if (useFlatland) {
-    app = TestApp(
-      ChildView(_launchFlatlandChildView()),
-      showOverlay: arguments['showOverlay'],
-      hitTestable: arguments['hitTestable'],
-      focusable: arguments['focusable'],
-    );
-  } else {
-    app = TestApp(
-      ChildView.gfx(_launchGfxChildView()),
-      showOverlay: arguments['showOverlay'],
-      hitTestable: arguments['hitTestable'],
-      focusable: arguments['focusable'],
-    );
-  }
+  app = TestApp(
+    ChildView(await _launchChildView(useFlatland)),
+    showOverlay: arguments['showOverlay'],
+    hitTestable: arguments['hitTestable'],
+    focusable: arguments['focusable'],
+  );
 
   app.run();
 }
@@ -62,35 +51,33 @@ class TestApp {
 
   Color _backgroundColor = _blue;
 
-  TestApp(
-    this.childView,
-    {this.showOverlay = false,
-    this.hitTestable = true,
-    this.focusable = true}) {
-  }
+  TestApp(this.childView,
+      {this.showOverlay = false,
+      this.hitTestable = true,
+      this.focusable = true}) {}
 
   void run() {
     childView.create(hitTestable, focusable, (ByteData reply) {
-        // Set up window allbacks.
-        window.onPointerDataPacket = (PointerDataPacket packet) {
-          for (final data in packet.data) {
-            if (data.change == PointerChange.down) {
-              this._backgroundColor = _black;
-            }
+      // Set up window allbacks.
+      window.onPointerDataPacket = (PointerDataPacket packet) {
+        for (final data in packet.data) {
+          if (data.change == PointerChange.down) {
+            this._backgroundColor = _black;
           }
-          window.scheduleFrame();
-        };
-        window.onMetricsChanged = () {
-          window.scheduleFrame();
-        };
-        window.onBeginFrame = (Duration duration) {
-          this.beginFrame(duration);
-        };
-
-        // The child view should be attached to Scenic now.
-        // Ready to build the scene.
+        }
         window.scheduleFrame();
-      });
+      };
+      window.onMetricsChanged = () {
+        window.scheduleFrame();
+      };
+      window.onBeginFrame = (Duration duration) {
+        this.beginFrame(duration);
+      };
+
+      // The child view should be attached to Scenic now.
+      // Ready to build the scene.
+      window.scheduleFrame();
+    });
   }
 
   void beginFrame(Duration duration) {
@@ -114,18 +101,16 @@ class TestApp {
     // Alignment.center
     final windowCenter = windowSize.center(Offset.zero);
     final windowPhysicalCenter = window.physicalSize.center(Offset.zero);
-    final childPhysicalOffset = windowPhysicalCenter - childPhysicalSize.center(Offset.zero);
+    final childPhysicalOffset =
+        windowPhysicalCenter - childPhysicalSize.center(Offset.zero);
 
     sceneBuilder
-      ..pushTransform(
-        vector_math_64.Matrix4.translationValues(childPhysicalOffset.dx,
-                                                 childPhysicalOffset.dy,
-                                                 0.0).storage)
+      ..pushTransform(vector_math_64.Matrix4.translationValues(
+              childPhysicalOffset.dx, childPhysicalOffset.dy, 0.0)
+          .storage)
       ..addPlatformView(childView.viewId,
-                        width: childPhysicalSize.width,
-                        height: childPhysicalSize.height)
-      ..pop()
-    ;
+          width: childPhysicalSize.width, height: childPhysicalSize.height)
+      ..pop();
 
     if (showOverlay) {
       final containerSize = windowSize * .66;
@@ -135,15 +120,16 @@ class TestApp {
       final overlaySize = containerSize * 0.5;
       // Alignment.topRight
       final overlayOffset = Offset(
-        containerOffset.dx + containerSize.width - overlaySize.width,
-        containerOffset.dy);
+          containerOffset.dx + containerSize.width - overlaySize.width,
+          containerOffset.dy);
 
       final overlayPhysicalSize = overlaySize * pixelRatio;
       final overlayPhysicalOffset = overlayOffset * pixelRatio;
       final overlayPhysicalBounds = overlayPhysicalOffset & overlayPhysicalSize;
 
       final recorder = PictureRecorder();
-      final overlayCullRect = Offset.zero & overlayPhysicalSize; // in canvas physical coordinates
+      final overlayCullRect =
+          Offset.zero & overlayPhysicalSize; // in canvas physical coordinates
       final canvas = Canvas(recorder, overlayCullRect);
       canvas.scale(pixelRatio);
       final paint = Paint()..color = Color.fromARGB(255, 0, 255, 0);
@@ -152,8 +138,7 @@ class TestApp {
       sceneBuilder
         ..pushClipRect(overlayPhysicalBounds) // in window physical coordinates
         ..addPicture(overlayPhysicalOffset, overlayPicture)
-        ..pop()
-        ;
+        ..pop();
     }
     sceneBuilder.pop();
 
@@ -162,22 +147,12 @@ class TestApp {
 }
 
 class ChildView {
-  final ViewHolderToken viewHolderToken;
-  final ViewportCreationToken viewportCreationToken;
   final int viewId;
 
-  ChildView(this.viewportCreationToken) : viewHolderToken = null, viewId = viewportCreationToken.value.handle.handle {
-    assert(viewId != null);
-  }
+  ChildView(this.viewId);
 
-  ChildView.gfx(this.viewHolderToken) : viewportCreationToken = null, viewId = viewHolderToken.value.handle.handle {
-    assert(viewId != null);
-  }
-
-  void create(
-    bool hitTestable,
-    bool focusable,
-    PlatformMessageResponseCallback callback) {
+  void create(bool hitTestable, bool focusable,
+      PlatformMessageResponseCallback callback) {
     // Construct the dart:ui platform message to create the view, and when the
     // return callback is invoked, build the scene. At that point, it is safe
     // to embed the child-view2 in the scene.
@@ -195,59 +170,31 @@ class ChildView {
       ],
     };
 
-    final ByteData createViewMessage = utf8.encoder.convert(
-      json.encode(<String, Object>{
-        'method': 'View.create',
-        'args': args,
-      })
-    ).buffer.asByteData();
+    final ByteData createViewMessage = utf8.encoder
+        .convert(json.encode(<String, Object>{
+          'method': 'View.create',
+          'args': args,
+        }))
+        .buffer
+        .asByteData();
 
     final platformViewsChannel = 'flutter/platform_views';
 
-    PlatformDispatcher.instance.sendPlatformMessage(
-      platformViewsChannel,
-      createViewMessage,
-      callback);
+    PlatformDispatcher.instance
+        .sendPlatformMessage(platformViewsChannel, createViewMessage, callback);
   }
 }
 
-ViewportCreationToken _launchFlatlandChildView() {
-  ViewProviderProxy viewProvider = ViewProviderProxy();
-  Incoming.fromSvcPath()
-    ..connectToService(viewProvider)
-    ..close();
+Future<int> _launchChildView(bool useFlatland) async {
+  final message = Int8List.fromList([useFlatland ? 0x31 : 0x30]);
+  final completer = new Completer<ByteData>();
+  PlatformDispatcher.instance.sendPlatformMessage(
+      'fuchsia/child_view', ByteData.sublistView(message), (ByteData reply) {
+    completer.complete(reply);
+  });
 
-  final viewTokens = ChannelPair();
-  assert(viewTokens.status == ZX.OK);
-  final viewportCreationToken = ViewportCreationToken(value: viewTokens.first);
-  final viewCreationToken = ViewCreationToken(value: viewTokens.second);
-
-  final createViewArgs = CreateView2Args(viewCreationToken: viewCreationToken);
-  viewProvider.createView2(createViewArgs);
-  viewProvider.ctrl.close();
-
-  return viewportCreationToken;
-}
-
-ViewHolderToken _launchGfxChildView() {
-  ViewProviderProxy viewProvider = ViewProviderProxy();
-  Incoming.fromSvcPath()
-    ..connectToService(viewProvider)
-    ..close();
-
-  final viewTokens = EventPairPair();
-  assert(viewTokens.status == ZX.OK);
-  final viewHolderToken = ViewHolderToken(value: viewTokens.first);
-
-  final viewRefs = EventPairPair();
-  assert(viewRefs.status == ZX.OK);
-  final viewRefControl = ViewRefControl(reference: viewRefs.first.duplicate(ZX.DEFAULT_EVENTPAIR_RIGHTS & ~ZX.RIGHT_DUPLICATE));
-  final viewRef = ViewRef(reference: viewRefs.second.duplicate(ZX.RIGHTS_BASIC));
-
-  viewProvider.createViewWithViewRef(viewTokens.second, viewRefControl, viewRef);
-  viewProvider.ctrl.close();
-
-  return viewHolderToken;
+  return int.parse(
+      ascii.decode(((await completer.future).buffer.asUint8List())));
 }
 
 List<String> _GetArgsFromConfigFile() {

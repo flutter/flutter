@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flow/embedded_views.h"
-#include "pointer_injector_delegate.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include "platform_view.h"
+
+#include <fuchsia/ui/app/cpp/fidl.h>
+#include <zircon/status.h>
 
 #include <algorithm>
 #include <cstring>
@@ -24,9 +25,26 @@
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 
 #include "logging.h"
+#include "pointer_injector_delegate.h"
 #include "runtime/dart/utils/inlines.h"
 #include "text_delegate.h"
 #include "vsync_waiter.h"
+
+namespace {
+// Helper to extract a given member with a given type from a rapidjson object.
+template <typename T, typename O, typename F>
+bool CallWithMember(O obj, const char* member_name, F func) {
+  auto it = obj.FindMember(member_name);
+  if (it == obj.MemberEnd()) {
+    return false;
+  }
+  if (!it->value.template Is<T>()) {
+    return false;
+  }
+  func(it->value.template Get<T>());
+  return true;
+}
+}  // namespace
 
 namespace flutter_runner {
 
@@ -34,6 +52,8 @@ static constexpr char kFlutterPlatformChannel[] = "flutter/platform";
 static constexpr char kAccessibilityChannel[] = "flutter/accessibility";
 static constexpr char kFlutterPlatformViewsChannel[] = "flutter/platform_views";
 static constexpr char kFuchsiaShaderWarmupChannel[] = "fuchsia/shader_warmup";
+static constexpr char kFuchsiaInputTestChannel[] = "fuchsia/input_test";
+static constexpr char kFuchsiaChildViewChannel[] = "fuchsia/child_view";
 
 PlatformView::PlatformView(
     bool is_flatland,
@@ -56,7 +76,8 @@ PlatformView::PlatformView(
     OnShaderWarmup on_shader_warmup,
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
-        await_vsync_for_secondary_callback_callback)
+        await_vsync_for_secondary_callback_callback,
+    std::shared_ptr<sys::ServiceDirectory> dart_application_svc)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       external_view_embedder_(external_view_embedder),
       focus_delegate_(
@@ -75,6 +96,7 @@ PlatformView::PlatformView(
       await_vsync_callback_(await_vsync_callback),
       await_vsync_for_secondary_callback_callback_(
           await_vsync_for_secondary_callback_callback),
+      dart_application_svc_(dart_application_svc),
       weak_factory_(this) {
   fuchsia::ui::views::ViewRef view_ref_clone;
   fidl::Clone(view_ref, &view_ref_clone);
@@ -140,6 +162,51 @@ PlatformView::PlatformView(
       std::move(pointerinjector_registry), std::move(view_ref_clone),
       is_flatland);
 
+  // This is only used by the integration tests.
+  if (dart_application_svc) {
+    // Connect to TouchInputListener
+    fuchsia::ui::test::input::TouchInputListenerHandle touch_input_listener;
+    zx_status_t touch_input_listener_status =
+        dart_application_svc
+            ->Connect<fuchsia::ui::test::input::TouchInputListener>(
+                touch_input_listener.NewRequest());
+    if (touch_input_listener_status != ZX_OK) {
+      FML_LOG(WARNING)
+          << "fuchsia::ui::test::input::TouchInputListener connection failed: "
+          << zx_status_get_string(touch_input_listener_status);
+    } else {
+      touch_input_listener_.Bind(std::move(touch_input_listener));
+    }
+
+    // Connect to KeyboardInputListener
+    fuchsia::ui::test::input::KeyboardInputListenerHandle
+        keyboard_input_listener;
+    zx_status_t keyboard_input_listener_status =
+        dart_application_svc
+            ->Connect<fuchsia::ui::test::input::KeyboardInputListener>(
+                keyboard_input_listener.NewRequest());
+    if (keyboard_input_listener_status != ZX_OK) {
+      FML_LOG(WARNING) << "fuchsia::ui::test::input::KeyboardInputListener "
+                          "connection failed: "
+                       << zx_status_get_string(keyboard_input_listener_status);
+    } else {
+      keyboard_input_listener_.Bind(std::move(keyboard_input_listener));
+    }
+    // Connect to MouseInputListener
+    fuchsia::ui::test::input::MouseInputListenerHandle mouse_input_listener;
+    zx_status_t mouse_input_listener_status =
+        dart_application_svc
+            ->Connect<fuchsia::ui::test::input::MouseInputListener>(
+                mouse_input_listener.NewRequest());
+    if (mouse_input_listener_status != ZX_OK) {
+      FML_LOG(WARNING)
+          << "fuchsia::ui::test::input::MouseInputListener connection failed: "
+          << zx_status_get_string(mouse_input_listener_status);
+    } else {
+      mouse_input_listener_.Bind(std::move(mouse_input_listener));
+    }
+  }
+
   // Finally! Register the native platform message handlers.
   RegisterPlatformMessageHandlers();
 }
@@ -162,6 +229,12 @@ void PlatformView::RegisterPlatformMessageHandlers() {
   platform_message_handlers_[kFuchsiaShaderWarmupChannel] =
       std::bind(&HandleFuchsiaShaderWarmupChannelPlatformMessage,
                 on_shader_warmup_, std::placeholders::_1);
+  platform_message_handlers_[kFuchsiaInputTestChannel] =
+      std::bind(&PlatformView::HandleFuchsiaInputTestChannelPlatformMessage,
+                this, std::placeholders::_1);
+  platform_message_handlers_[kFuchsiaChildViewChannel] =
+      std::bind(&PlatformView::HandleFuchsiaChildViewChannelPlatformMessage,
+                this, std::placeholders::_1);
 }
 
 static flutter::PointerData::Change GetChangeFromPointerEventPhase(
@@ -671,6 +744,226 @@ bool PlatformView::HandleFuchsiaShaderWarmupChannelPlatformMessage(
   on_shader_warmup(skp_paths, completion_callback, width, height);
   // The response has already been completed by us.
   return true;
+}
+
+// Channel handler for kFuchsiaInputTestChannel
+bool PlatformView::HandleFuchsiaInputTestChannelPlatformMessage(
+    std::unique_ptr<flutter::PlatformMessage> message) {
+  FML_DCHECK(message->channel() == kFuchsiaInputTestChannel);
+
+  const auto& data = message->data();
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.GetMapping()),
+                 data.GetSize());
+  if (document.HasParseError() || !document.IsObject()) {
+    FML_LOG(ERROR) << "Could not parse document";
+    return false;
+  }
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method == root.MemberEnd() || !method->value.IsString()) {
+    FML_LOG(ERROR) << "Missing method";
+    return false;
+  }
+
+  FML_LOG(INFO) << "fuchsia/input_test: method=" << method->value.GetString();
+
+  if (method->value == "TouchInputListener.ReportTouchInput") {
+    if (!touch_input_listener_) {
+      FML_LOG(ERROR) << "TouchInputListener not found.";
+      return false;
+    }
+
+    fuchsia::ui::test::input::TouchInputListenerReportTouchInputRequest request;
+    CallWithMember<double>(
+        root, "local_x", [&](double local_x) { request.set_local_x(local_x); });
+    CallWithMember<double>(
+        root, "local_y", [&](double local_y) { request.set_local_y(local_y); });
+    CallWithMember<int64_t>(root, "time_received", [&](uint64_t time_received) {
+      request.set_time_received(time_received);
+    });
+    CallWithMember<std::string>(root, "component_name",
+                                [&](std::string component_name) {
+                                  request.set_component_name(component_name);
+                                });
+
+    touch_input_listener_->ReportTouchInput(std::move(request));
+    return true;
+  }
+
+  if (method->value == "KeyboardInputListener.ReportTextInput") {
+    if (!keyboard_input_listener_) {
+      FML_LOG(ERROR) << "KeyboardInputListener not found.";
+      return false;
+    }
+
+    fuchsia::ui::test::input::KeyboardInputListenerReportTextInputRequest
+        request;
+    CallWithMember<std::string>(
+        root, "text", [&](std::string text) { request.set_text(text); });
+
+    keyboard_input_listener_->ReportTextInput(std::move(request));
+    return true;
+  }
+
+  if (method->value == "MouseInputListener.ReportMouseInput") {
+    if (!mouse_input_listener_) {
+      FML_LOG(ERROR) << "MouseInputListener not found.";
+      return false;
+    }
+
+    fuchsia::ui::test::input::MouseInputListenerReportMouseInputRequest request;
+    CallWithMember<double>(
+        root, "local_x", [&](double local_x) { request.set_local_x(local_x); });
+    CallWithMember<double>(
+        root, "local_y", [&](double local_y) { request.set_local_y(local_y); });
+    CallWithMember<int64_t>(root, "time_received", [&](uint64_t time_received) {
+      request.set_time_received(time_received);
+    });
+    CallWithMember<std::string>(root, "component_name",
+                                [&](std::string component_name) {
+                                  request.set_component_name(component_name);
+                                });
+    CallWithMember<int>(root, "buttons", [&](int button_mask) {
+      std::vector<fuchsia::ui::test::input::MouseButton> buttons;
+      if (button_mask & 1) {
+        buttons.push_back(fuchsia::ui::test::input::MouseButton::FIRST);
+      }
+      if (button_mask & 2) {
+        buttons.push_back(fuchsia::ui::test::input::MouseButton::SECOND);
+      }
+      if (button_mask & 4) {
+        buttons.push_back(fuchsia::ui::test::input::MouseButton::THIRD);
+      }
+      request.set_buttons(buttons);
+    });
+    CallWithMember<std::string>(root, "phase", [&](std::string phase) {
+      if (phase == "add") {
+        request.set_phase(fuchsia::ui::test::input::MouseEventPhase::ADD);
+      } else if (phase == "hover") {
+        request.set_phase(fuchsia::ui::test::input::MouseEventPhase::HOVER);
+      } else if (phase == "down") {
+        request.set_phase(fuchsia::ui::test::input::MouseEventPhase::DOWN);
+      } else if (phase == "move") {
+        request.set_phase(fuchsia::ui::test::input::MouseEventPhase::MOVE);
+      } else if (phase == "up") {
+        request.set_phase(fuchsia::ui::test::input::MouseEventPhase::UP);
+      } else {
+        FML_LOG(ERROR) << "Unexpected mouse phase: " << phase;
+      }
+    });
+    CallWithMember<double>(
+        root, "wheel_x_physical_pixel", [&](double wheel_x_physical_pixel) {
+          request.set_wheel_x_physical_pixel(wheel_x_physical_pixel);
+        });
+    CallWithMember<double>(
+        root, "wheel_y_physical_pixel", [&](double wheel_y_physical_pixel) {
+          request.set_wheel_y_physical_pixel(wheel_y_physical_pixel);
+        });
+
+    mouse_input_listener_->ReportMouseInput(std::move(request));
+    return true;
+  }
+
+  FML_LOG(ERROR) << "fuchsia/input_test: unrecognized method "
+                 << method->value.GetString();
+  return false;
+}
+
+// Channel handler for kFuchsiaChildViewChannel
+bool PlatformView::HandleFuchsiaChildViewChannelPlatformMessage(
+    std::unique_ptr<flutter::PlatformMessage> message) {
+  FML_DCHECK(message->channel() == kFuchsiaChildViewChannel);
+
+  if (message->data().GetSize() != 1 ||
+      (message->data().GetMapping()[0] != '0' &&
+       message->data().GetMapping()[0] != '1')) {
+    FML_LOG(ERROR) << kFuchsiaChildViewChannel
+                   << " data must be '0' (for gfx) or '1' (for flatland).";
+    return false;
+  }
+
+  bool flatland = message->data().GetMapping()[0] == '1';
+
+  if (!message->response()) {
+    FML_LOG(ERROR) << kFuchsiaChildViewChannel
+                   << " must have a response callback.";
+    return false;
+  }
+
+  if (!dart_application_svc_) {
+    FML_LOG(ERROR) << "No service directory.";
+    return false;
+  }
+
+  fuchsia::ui::app::ViewProviderHandle view_provider_handle;
+  zx_status_t status =
+      dart_application_svc_->Connect(view_provider_handle.NewRequest());
+  if (status != ZX_OK) {
+    FML_LOG(ERROR) << "Failed to connect to view provider.";
+    return false;
+  }
+  fuchsia::ui::app::ViewProviderPtr view_provider;
+  view_provider.Bind(std::move(view_provider_handle));
+
+  zx::handle view_id;
+
+  if (flatland) {
+    zx::channel view_tokens[2];
+    fuchsia::ui::views::ViewportCreationToken viewport_creation_token;
+    fuchsia::ui::views::ViewCreationToken view_creation_token;
+    status = zx::channel::create(0, &viewport_creation_token.value,
+                                 &view_creation_token.value);
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Creating view tokens: "
+                     << zx_status_get_string(status);
+      return false;
+    }
+
+    fuchsia::ui::app::CreateView2Args create_view_args;
+    create_view_args.set_view_creation_token(std::move(view_creation_token));
+    view_provider->CreateView2(std::move(create_view_args));
+
+    view_id = std::move(viewport_creation_token.value);
+  } else {
+    zx::eventpair view_tokens[2];
+    status = zx::eventpair::create(0, &view_tokens[0], &view_tokens[1]);
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Creating view tokens: "
+                     << zx_status_get_string(status);
+      return false;
+    }
+    fuchsia::ui::views::ViewHolderToken view_holder_token;
+    view_holder_token.value = std::move(view_tokens[0]);
+
+    zx::eventpair view_refs[2];
+    status = zx::eventpair::create(0, &view_refs[0], &view_refs[1]);
+    if (status != ZX_OK) {
+      FML_LOG(ERROR) << "Creating view refs: " << zx_status_get_string(status);
+      return false;
+    }
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    view_refs[0].duplicate(ZX_DEFAULT_EVENTPAIR_RIGHTS & ~ZX_RIGHT_DUPLICATE,
+                           &view_ref_control.reference);
+    fuchsia::ui::views::ViewRef view_ref;
+    view_refs[1].duplicate(ZX_RIGHTS_BASIC, &view_ref.reference);
+
+    view_provider->CreateViewWithViewRef(std::move(view_tokens[1]),
+                                         std::move(view_ref_control),
+                                         std::move(view_ref));
+
+    view_id = std::move(view_holder_token.value);
+  }
+
+  if (view_id) {
+    message->response()->Complete(
+        std::make_unique<fml::DataMapping>(std::to_string(view_id.release())
+
+                                               ));
+    return true;
+  } else {
+    return false;
+  }
 }
 
 }  // namespace flutter_runner

@@ -14,9 +14,7 @@ dart_library("lib") {
 
   deps = [
     "//flutter/shell/platform/fuchsia/dart:args",
-    "//flutter/tools/fuchsia/dart:fuchsia_services",
     "//flutter/tools/fuchsia/dart:zircon",
-    "//flutter/tools/fuchsia/fidl:fuchsia.ui.test.input",
   ]
 }
 

@@ -50,7 +50,8 @@ class GfxPlatformView final : public flutter_runner::PlatformView,
       OnShaderWarmup on_shader_warmup,
       AwaitVsyncCallback await_vsync_callback,
       AwaitVsyncForSecondaryCallbackCallback
-          await_vsync_for_secondary_callback_callback);
+          await_vsync_for_secondary_callback_callback,
+      std::shared_ptr<sys::ServiceDirectory> dart_application_svc);
 
   ~GfxPlatformView() override;
 

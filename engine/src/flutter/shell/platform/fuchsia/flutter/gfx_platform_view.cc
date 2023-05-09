@@ -33,7 +33,8 @@ GfxPlatformView::GfxPlatformView(
     OnShaderWarmup on_shader_warmup,
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
-        await_vsync_for_secondary_callback_callback)
+        await_vsync_for_secondary_callback_callback,
+    std::shared_ptr<sys::ServiceDirectory> dart_application_svc)
     : PlatformView(false /* is_flatland */,
                    delegate,
                    std::move(task_runners),
@@ -53,7 +54,8 @@ GfxPlatformView::GfxPlatformView(
                    std::move(on_request_announce_callback),
                    std::move(on_shader_warmup),
                    std::move(await_vsync_callback),
-                   std::move(await_vsync_for_secondary_callback_callback)),
+                   std::move(await_vsync_for_secondary_callback_callback),
+                   std::move(dart_application_svc)),
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
           std::move(on_session_listener_error_callback)),

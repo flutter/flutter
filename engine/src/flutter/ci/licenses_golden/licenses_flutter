@@ -2799,7 +2799,6 @@ ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_runner.h + ../.
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/builtin.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/script_runner_snapshot.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/shim.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.cc.tmpl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.dart + ../../../flutter/LICENSE
@@ -5422,7 +5421,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_runner.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/builtin.dart
-FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/script_runner_snapshot.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/shim.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.cc.tmpl
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/embedder/snapshot.dart

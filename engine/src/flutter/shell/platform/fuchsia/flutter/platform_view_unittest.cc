@@ -331,7 +331,8 @@ class PlatformViewBuilder {
         std::move(on_create_surface_callback_),
         std::move(on_semantics_node_update_callback_),
         std::move(on_request_announce_callback_),
-        std::move(on_shader_warmup_callback_), [](auto...) {}, [](auto...) {});
+        std::move(on_shader_warmup_callback_), [](auto...) {}, [](auto...) {},
+        nullptr);
   }
 
  private:
