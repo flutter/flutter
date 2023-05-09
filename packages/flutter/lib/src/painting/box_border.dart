@@ -503,6 +503,15 @@ class Border extends BoxBorder {
         if (left.style == BorderStyle.none) null else left.color,
       }.whereNotNull().toSet();
 
+  /// [BoxBorder._paintNonUniformBorder] is about 20% than [paintBorder],
+  /// but [paintBorder] is able to draw hairline borders when width is zero
+  /// and style is [BorderStyle.solid].
+  bool get _hasThinBorder =>
+      (top.style == BorderStyle.solid && top.width == 0.0) ||
+      (right.style == BorderStyle.solid && right.width == 0.0) ||
+      (bottom.style == BorderStyle.solid && bottom.width == 0.0) ||
+      (left.style == BorderStyle.solid && left.width == 0.0);
+
   @override
   Border? add(ShapeBorder other, { bool reversed = false }) {
     if (other is Border &&
@@ -623,7 +632,12 @@ class Border extends BoxBorder {
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors;
-    if (visibleColors.length == 1) {
+    final bool hasThinBorder = _hasThinBorder;
+    // Paint a non uniform border if a single color is visible
+    // and (borderRadius is present) or (border is visible and width != 0.0).
+    if (visibleColors.length == 1 &&
+        ((borderRadius != null && borderRadius != BorderRadius.zero) ||
+            !hasThinBorder)) {
       BoxBorder._paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
@@ -637,6 +651,10 @@ class Border extends BoxBorder {
     }
 
      assert(() {
+      if (hasThinBorder) {
+        assert(borderRadius == null || borderRadius == BorderRadius.zero,
+            'A side like `BorderSide(width: 0.0, style: BorderStyle.solid)` can only be drawn when BorderRadius is zero or null.');
+      }
       if (borderRadius != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A borderRadius can only be given on borders with uniform colors.'),
@@ -826,6 +844,12 @@ class BorderDirectional extends BoxBorder {
         if (start.style == BorderStyle.none) null else start.color,
       }.whereNotNull().toSet();
 
+  bool get _hasThinBorder =>
+      (top.style == BorderStyle.solid && top.width == 0.0) ||
+      (end.style == BorderStyle.solid && end.width == 0.0) ||
+      (bottom.style == BorderStyle.solid && bottom.width == 0.0) ||
+      (start.style == BorderStyle.solid && start.width == 0.0);
+
   @override
   BoxBorder? add(ShapeBorder other, { bool reversed = false }) {
     if (other is BorderDirectional) {
@@ -988,7 +1012,10 @@ class BorderDirectional extends BoxBorder {
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors;
-    if (visibleColors.length == 1) {
+    final bool hasThinBorder = _hasThinBorder;
+    if (visibleColors.length == 1 &&
+        ((borderRadius != null && borderRadius != BorderRadius.zero) ||
+            !hasThinBorder)) {
       BoxBorder._paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
@@ -1001,6 +1028,9 @@ class BorderDirectional extends BoxBorder {
       return;
     }
 
+    if (hasThinBorder) {
+      assert(borderRadius == null || borderRadius == BorderRadius.zero, 'A side like `BorderSide(width: 0.0, style: BorderStyle.solid)` can only be drawn when BorderRadius is zero or null.');
+    }
     assert(borderRadius == null, 'A borderRadius can only be given for borders with uniform colors.');
     assert(shape == BoxShape.rectangle, 'A Border can only be drawn as a circle on borders with uniform colors.');
     assert(_strokeAlignIsUniform && top.strokeAlign == BorderSide.strokeAlignInside, 'A Border can only draw strokeAlign different than strokeAlignInside on borders with uniform colors.');

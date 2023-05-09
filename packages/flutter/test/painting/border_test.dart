@@ -381,6 +381,24 @@ void main() {
     expect(tester.takeException(), isAssertionError,
         reason: 'Border with non-uniform colors should fail with borderRadius.');
 
+    await tester.pumpWidget(
+      buildWidget(
+        border: const Border(bottom: BorderSide(width: 0)),
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with width == 0 should fail with borderRadius.');
+
+    await tester.pumpWidget(
+      buildWidget(
+        border: const Border(bottom: BorderSide(width: 0)),
+        borderRadius: BorderRadius.circular(40),
+      ),
+    );
+    expect(tester.takeException(), isNull,
+        reason: 'Border with width == 0 and borderRadius should work.');
+
     // Tests for BorderDirectional.
     const BorderDirectional allowedBorderDirectionalVariations = BorderDirectional(
       start: BorderSide(width: 5),
