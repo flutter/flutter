@@ -14,6 +14,7 @@ import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
 import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -253,6 +254,13 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         xcode: globals.xcode!,
         platform: globals.platform,
+      ),
+      Java: () => Java.find(
+        androidStudio: globals.androidStudio,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        processManager: globals.processManager
       ),
       LocalEngineLocator: () => LocalEngineLocator(
         userMessages: userMessages,
