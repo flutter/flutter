@@ -1262,6 +1262,45 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
         });
 
+        testUsingContext('when only matching device is dev mode disabled', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device', devModeEnabled: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+To use \'target-device\' for development, enable Developer Mode in Settings → Privacy & Security. 
+
+The following devices were found:
+target-device (mobile) • xxx • ios • iOS 16
+'''));
+          expect(devices, isNull);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
+        });
+
+        testUsingContext('when all matching devices are dev mode disabled', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', devModeEnabled: false),
+            FakeIOSDevice(deviceName: 'target-device-2', devModeEnabled: false)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+To use \'target-device-1\' for development, enable Developer Mode in Settings → Privacy & Security. 
+To use \'target-device-2\' for development, enable Developer Mode in Settings → Privacy & Security. 
+
+The following devices were found:
+target-device-1 (mobile) • xxx • ios • iOS 16
+target-device-2 (mobile) • xxx • ios • iOS 16
+'''));
+          expect(devices, isNull);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
+        });
+
         group('when deviceConnectionInterface does not match', () {
           testUsingContext('filter of wireless', () async {
             final FakeIOSDevice device1 = FakeIOSDevice.notConnectedWireless(deviceName: 'not-a-match');
@@ -2691,15 +2730,16 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     String? deviceId,
     String? deviceName,
+    bool? devModeEnabled,
     bool deviceSupported = true,
     bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
-    this.devModeEnabled = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.attached,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
+        devModeEnabled = devModeEnabled ?? true,
         _isSupported = deviceSupported,
         _isSupportedForProject = deviceSupportForProject;
 

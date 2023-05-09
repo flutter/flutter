@@ -226,13 +226,9 @@ class TargetDevices {
         )
     );
 
-    if (device is IOSDevice) {
-      if (!device.devModeEnabled) {
-        _logger.printStatus(
-          userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
-        );
-      }
-    }
+    _logger.printStatus(
+      userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
+    );
 
     if (unsupportedDevices.isNotEmpty) {
       _logger.printStatus('');
@@ -532,8 +528,16 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       }
 
       if (devices.length > 1) {
-        for (Device device in devices) {
+        final List<Device> disabledDevices = [];
+        for (final Device device in devices) {
           if (device is IOSDevice && !device.devModeEnabled) {
+            disabledDevices.add(device);
+            if (disabledDevices.length == devices.length) {
+              // all matching devices have dev mode disabled, so print other
+              // available devices
+              return _handleDisabledIosDevice(device);
+            }
+            // otherwise, just show the error and move on
             _logger.printStatus(
               userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
             );
