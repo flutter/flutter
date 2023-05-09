@@ -109,12 +109,15 @@ Path ToPath(const SkPath& path) {
       fill_type = FillType::kNonZero;
       break;
   }
+  builder.SetConvexity(path.isConvex() ? Convexity::kConvex
+                                       : Convexity::kUnknown);
   return builder.TakePath(fill_type);
 }
 
 Path ToPath(const SkRRect& rrect) {
   return PathBuilder{}
       .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
+      .SetConvexity(Convexity::kConvex)
       .TakePath();
 }
 

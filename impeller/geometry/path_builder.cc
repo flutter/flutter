@@ -21,6 +21,7 @@ Path PathBuilder::CopyPath(FillType fill) const {
 Path PathBuilder::TakePath(FillType fill) {
   auto path = prototype_;
   path.SetFillType(fill);
+  path.SetConvexity(convexity_);
   return path;
 }
 
@@ -100,6 +101,11 @@ PathBuilder& PathBuilder::SmoothQuadraticCurveTo(Point point, bool relative) {
    *  too. So there the last argument is always false (i.e, not relative).
    */
   QuadraticCurveTo(point, ReflectedQuadraticControlPoint1(), false);
+  return *this;
+}
+
+PathBuilder& PathBuilder::SetConvexity(Convexity value) {
+  convexity_ = value;
   return *this;
 }
 
