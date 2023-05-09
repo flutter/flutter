@@ -310,21 +310,4 @@ final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening
 // overridden in other clients.
 NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
 
-bool _searchedForJava = false;
-Java? _javaInstance;
-
-Java? get java => context.get<Java>() ?? (() {
-  if (!_searchedForJava) {
-    _searchedForJava = true;
-
-    _javaInstance = Java.find(
-      androidStudio: androidStudio,
-      logger: logger,
-      fileSystem: fs,
-      platform: platform,
-      processManager: processManager
-    );
-  }
-
-  return _javaInstance;
-})();
+Java? get java => context.get<Java>();
