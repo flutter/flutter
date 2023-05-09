@@ -1046,7 +1046,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
 final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ ])(if|switch|for|do|while)\(');
 
 Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
-  const List<String> extensions = <String>[
+  const Set<String> extensions = <String>{
     '.dart',
     '.java',
     '.swift',
@@ -1055,9 +1055,9 @@ Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { i
     '.cpp',
     '.h',
     '.m',
-  ];
+  };
   final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
-    .where((File file) => extensions.contains(path.extension))
+    .where((File file) => extensions.contains(path.extension(file.path)))
     .toList();
   final List<String> problems = <String>[];
   for (final File file in files) {
