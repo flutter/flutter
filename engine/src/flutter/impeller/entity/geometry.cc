@@ -16,6 +16,37 @@
 
 namespace impeller {
 
+/// Given a convex polyline, create a triangle fan structure.
+std::pair<std::vector<Point>, std::vector<uint16_t>> TessellateConvex(
+    Path::Polyline polyline) {
+  std::vector<Point> output;
+  std::vector<uint16_t> index;
+
+  for (auto j = 0u; j < polyline.contours.size(); j++) {
+    auto [start, end] = polyline.GetContourPointBounds(j);
+    auto center = polyline.points[start];
+
+    // Some polygons will not self close and an additional triangle
+    // must be inserted, others will self close and we need to avoid
+    // inserting an extra triangle.
+    if (polyline.points[end - 1] == polyline.points[start]) {
+      end--;
+    }
+    output.emplace_back(center);
+    output.emplace_back(polyline.points[start + 1]);
+
+    for (auto i = start + 2; i < end; i++) {
+      const auto& point_b = polyline.points[i];
+      output.emplace_back(point_b);
+
+      index.emplace_back(0);
+      index.emplace_back(i - 1);
+      index.emplace_back(i);
+    }
+  }
+  return std::make_pair(output, index);
+}
+
 Geometry::Geometry() = default;
 
 Geometry::~Geometry() = default;
@@ -103,8 +134,30 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
-  VertexBuffer vertex_buffer;
   auto& host_buffer = pass.GetTransientsBuffer();
+  VertexBuffer vertex_buffer;
+
+  if (path_.GetFillType() == FillType::kNonZero &&  //
+      path_.IsConvex()) {
+    auto [points, indicies] = TessellateConvex(
+        path_.CreatePolyline(entity.GetTransformation().GetMaxBasisLength()));
+
+    vertex_buffer.vertex_buffer = host_buffer.Emplace(
+        points.data(), points.size() * sizeof(Point), alignof(Point));
+    vertex_buffer.index_buffer = host_buffer.Emplace(
+        indicies.data(), indicies.size() * sizeof(uint16_t), alignof(uint16_t));
+    vertex_buffer.index_count = indicies.size();
+    vertex_buffer.index_type = IndexType::k16bit;
+
+    return GeometryResult{
+        .type = PrimitiveType::kTriangle,
+        .vertex_buffer = vertex_buffer,
+        .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     entity.GetTransformation(),
+        .prevent_overdraw = false,
+    };
+  }
+
   auto tesselation_result = renderer.GetTessellator()->Tessellate(
       path_.GetFillType(),
       path_.CreatePolyline(entity.GetTransformation().GetMaxBasisLength()),
