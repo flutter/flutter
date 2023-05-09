@@ -614,7 +614,7 @@ class FakeJava extends Fake implements Java {
   }): binaryPath = binary,
       _version = version ?? JavaVersion(
        longText: 'openjdk 19.0.2 2023-01-17',
-       shortText: '19.0.2',
+       number: '19.0.2',
       ),
       _environment = <String, String>{
         if (javaHome != null) 'JAVA_HOME': javaHome,

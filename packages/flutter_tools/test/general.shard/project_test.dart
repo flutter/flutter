@@ -431,7 +431,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: JavaVersion(longText: '17.0.2', shortText: '17.0.2'));
+        java = FakeJava(version: JavaVersion(longText: '17.0.2', number: '17.0.2'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
@@ -462,7 +462,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: JavaVersion(longText: '1.8.0_242', shortText: '1.8.0_242'));
+        java = FakeJava(version: JavaVersion(longText: '1.8.0_242', number: '1.8.0_242'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =
@@ -495,7 +495,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
-        java = FakeJava(version: JavaVersion(longText: '11.0.14', shortText: '11.0.14'));
+        java = FakeJava(version: JavaVersion(longText: '11.0.14', number: '11.0.14'));
         androidStudio = FakeAndroidStudio();
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
@@ -530,7 +530,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
-        java = FakeJava(version: JavaVersion(longText: javaV, shortText: javaV));
+        java = FakeJava(version: JavaVersion(longText: javaV, number: javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
@@ -581,7 +581,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         processManager = FakeProcessManager.empty();
-        java = FakeJava(version: JavaVersion(longText: '17.0.2', shortText: '17.0.2'));
+        java = FakeJava(version: JavaVersion(longText: '17.0.2', number: '17.0.2'));
         androidStudio = FakeAndroidStudio();
         androidSdk =
             FakeAndroidSdkWithDir(fileSystem.currentDirectory, androidStudio);
@@ -621,7 +621,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        java = FakeJava(version: JavaVersion(longText: '11.0.2', shortText: '11.0.2'));
+        java = FakeJava(version: JavaVersion(longText: '11.0.2', number: '11.0.2'));
         processManager = FakeProcessManager.empty();
         androidStudio = FakeAndroidStudio();
         androidSdk =

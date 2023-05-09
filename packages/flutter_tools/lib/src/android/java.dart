@@ -210,11 +210,15 @@ return 'Could not parse java version from: \n'
 class JavaVersion {
   JavaVersion({
     required this.longText,
-    required this.shortText
+    required this.number
   });
 
+  /// Typically the first line of the output from `java --version`.
+  /// For example, `"openjdk 19.0.2 2023-01-17"`.
   final String longText;
-  final String shortText;
+
+  /// The version number. For example, `"19.0.2."`.
+  final String number;
 
   /// Extracts JDK version from the output of java --version.
   static JavaVersion? tryParseFromJavaOutput(String rawVersionOutput, {
@@ -240,6 +244,6 @@ class JavaVersion {
     // Trim away _d+ from versions 1.8 and below.
     final String shortText = rawShortText.split('_').first;
 
-    return JavaVersion(longText: longText, shortText: shortText);
+    return JavaVersion(longText: longText, number: shortText);
   }
 }
