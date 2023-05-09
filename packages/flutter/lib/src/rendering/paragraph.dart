@@ -1329,8 +1329,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
 
-  TextPosition? _originWordSelectionStart;
-  TextPosition? _originWordSelectionEnd;
   bool? _selectableContainsOriginWord;
 
   LayerLink? _startHandleLayerLink;
@@ -1474,6 +1472,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     );
 
     final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
+    if (fullText == 'Item 17') {
+      debugPrint('moving to position $position $isEnd');
+    }
     _setSelectionPosition(position, isEnd: isEnd);
     if (position.offset == range.end) {
       return SelectionResult.next;
@@ -1493,15 +1494,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // current selectable then the _textSelectionEnd will be null.
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
+    debugPrint('$_selectableContainsOriginWord');
     if (_selectableContainsOriginWord == null) {
-      _originWordSelectionStart ??= _textSelectionStart;
-      _originWordSelectionEnd ??= _textSelectionEnd;
-    }
-
-    if (_originWordSelectionStart != null && _originWordSelectionEnd != null) {
-      _selectableContainsOriginWord ??= true;
-    } else {
-      _selectableContainsOriginWord ??= false;
+      _selectableContainsOriginWord = existingSelectionStart != null && existingSelectionEnd != null ? true : false;
     }
 
     _setSelectionPosition(null, isEnd: isEnd);
@@ -1554,17 +1549,18 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // targetPosition = _clampTextPosition(targetPosition ?? position);
 
     TextPosition? targetPosition;
-    debugPrint('start $hashCode');
+    debugPrint('start $fullText $hashCode');
     if (wordBoundary != null) {
       if (existingSelectionStart != null && existingSelectionEnd != null) {
+        debugPrint('exisiting start and end $existingSelectionStart $existingSelectionEnd');
         if (isEnd) {
           debugPrint('moving end edge');
           if (existingSelectionStart.offset < existingSelectionEnd.offset) {
             debugPrint('start before end');
             if (position.offset < existingSelectionStart.offset) {
-              debugPrint('swapping $position $existingSelectionStart');
               targetPosition = wordBoundary.$1;
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
+              debugPrint('swapping $position $existingSelectionStart $targetPosition $localWordBoundary');
               // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
             } else {
@@ -1589,12 +1585,20 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         }
       }
     } else {
-      debugPrint('not in rect');
+      debugPrint('not in rect $position $existingSelectionStart $existingSelectionEnd $_selectableContainsOriginWord');
+      // The localPosition is not contained within the current rect. The adjustedPosition
+      // will either be at the end or beginning of the current rect.
       if (existingSelectionStart != null && existingSelectionEnd != null) {
         if (existingSelectionStart.offset < existingSelectionEnd.offset) {
           debugPrint('start before end');
           if (position.offset < existingSelectionStart.offset) {
-            debugPrint('new position before start');
+            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
+            _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+            debugPrint('new position before start $localWordBoundary $_textSelectionStart');
+          }
+
+          if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
+            debugPrint('not here??');
             final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
             _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
           }
@@ -1602,14 +1606,19 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           debugPrint('end before start $position $existingSelectionStart');
           if (position.offset > existingSelectionStart.offset) {
             final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-            debugPrint('new position after start $existingSelectionStart $localWordBoundary');
+            _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+            debugPrint('new position after start $existingSelectionStart $localWordBoundary ${!isEnd}');
+          }
+
+          if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
+            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
             _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
           }
         }
       }
     }
     targetPosition = _clampTextPosition(targetPosition ?? position);
-    debugPrint('end $hashCode');
+    debugPrint('end $hashCode $targetPosition');
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
@@ -1649,8 +1658,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _handleClearSelection() {
     _textSelectionStart = null;
     _textSelectionEnd = null;
-    _originWordSelectionStart = null;
-    _originWordSelectionEnd = null;
     _selectableContainsOriginWord = null;
     return SelectionResult.none;
   }
@@ -1662,8 +1669,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
-    _originWordSelectionStart = null;
-    _originWordSelectionEnd = null;
     _selectableContainsOriginWord = null;
 
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
