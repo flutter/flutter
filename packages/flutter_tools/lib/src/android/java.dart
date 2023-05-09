@@ -153,13 +153,11 @@ String? _findJavaHome({
 }) {
   final String? androidStudioJavaPath = androidStudio?.javaPath;
   if (androidStudioJavaPath != null) {
-    logger.printTrace("Using Android Studio's java.");
     return androidStudioJavaPath;
   }
 
   final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
   if (javaHomeEnv != null) {
-    logger.printTrace('Using JAVA_HOME from environment valuables.');
     return javaHomeEnv;
   }
   return null;
@@ -177,13 +175,7 @@ String? _findJavaBinary({
   }
 
   // Fallback to PATH based lookup.
-  final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
-  if (pathJava != null) {
-    logger.printTrace('Using java from PATH.');
-  } else {
-    logger.printTrace('Could not find java path.');
-  }
-  return pathJava;
+  return operatingSystemUtils.which(_kJavaExecutable)?.path;
 }
 
 // Returns a user visible String that says the tool failed to parse
