@@ -64,7 +64,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.onHandleEvent = events.add;
+    TestGestureFlutterBinding.instance.onHandleEvent = events.add;
 
     GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
     expect(events.length, 2);

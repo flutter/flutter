@@ -51,17 +51,6 @@ class SwapperWithProperOverrides extends Swapper {
   SwapperElement createElement() => SwapperElementWithProperOverrides(this);
 }
 
-class SwapperWithNoOverrides extends Swapper {
-  const SwapperWithNoOverrides({
-    super.key,
-    super.stable,
-    super.swapper,
-  });
-
-  @override
-  SwapperElement createElement() => SwapperElementWithNoOverrides(this);
-}
-
 abstract class SwapperElement extends RenderObjectElement {
   SwapperElement(Swapper super.widget);
 
@@ -145,10 +134,6 @@ class SwapperElementWithProperOverrides extends SwapperElement {
       renderObject.setSwapper(null, slot! as bool);
     }
   }
-}
-
-class SwapperElementWithNoOverrides extends SwapperElement {
-  SwapperElementWithNoOverrides(super.widget);
 }
 
 class RenderSwapper extends RenderBox {
