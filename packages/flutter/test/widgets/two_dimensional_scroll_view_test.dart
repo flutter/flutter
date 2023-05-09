@@ -13,7 +13,7 @@ Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
   return SizedBox(
     height: 200,
     width: 200,
-    child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+    child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
   );
 }
 
@@ -44,7 +44,6 @@ void main() {
       ));
 
       // Both wrong
-      // Vertical wrong
       await tester.pumpWidget(MaterialApp(
         home: SimpleBuilderTableView(
           delegate: TwoDimensionalChildBuilderDelegate(builder: (_, __) => null),
@@ -53,12 +52,13 @@ void main() {
         ),
       ));
 
+
+      FlutterError.onError = oldHandler;
       expect(exceptions.length, 3);
       for (final Object exception in exceptions) {
         expect(exception, isAssertionError);
         expect((exception as AssertionError).message, contains('are not Axis'));
       }
-      FlutterError.onError = oldHandler;
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('ScrollableDetails.controller can set initial scroll positions, modify within bounds', (WidgetTester tester) async {

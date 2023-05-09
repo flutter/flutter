@@ -29,7 +29,6 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 //     super.cacheExtent,
 //     super.clipBehavior = Clip.hardEdge,
 //   });
-//
 //   @override
 //   void layoutChildSequence() { }
 // }
@@ -142,8 +141,14 @@ abstract class TwoDimensionalViewport extends RenderObjectWidget {
     required this.mainAxis,
     this.cacheExtent,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up),
-       assert(horizontalAxisDirection == AxisDirection.left || horizontalAxisDirection == AxisDirection.right);
+  }) : assert(
+         verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
+         'TwoDimensionalViewport.verticalAxisDirection is not Axis.vertical.'
+       ),
+       assert(
+         horizontalAxisDirection == AxisDirection.left || horizontalAxisDirection == AxisDirection.right,
+         'TwoDimensionalViewport.horizontalAxisDirection is not Axis.horizontal.'
+       );
 
   /// Which part of the content inside the viewport should be visible in the
   /// vertical axis.
@@ -468,8 +473,14 @@ class TwoDimensionalViewportParentData extends ParentData {
   Offset? paintOffset;
 
   @override
-  String toString() => 'vicinity=$vicinity; layoutOffset=$layoutOffset; '
-      '${isVisible ? 'visible; ': ''}paintOffset=$paintOffset; paintExtent=$_paintExtent';
+  String toString() {
+    return 'vicinity=$vicinity; '
+      'layoutOffset=$layoutOffset; '
+      'paintOffset=$paintOffset; '
+      '${_paintExtent == null
+        ? 'not visible '
+        : '${!isVisible ? 'not ' : ''}visible - paintExtent=$_paintExtent'}';
+  }
 }
 
 /// A base class for viewing render objects that scroll in two dimensions.

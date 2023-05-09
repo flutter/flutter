@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,7 +24,7 @@ void main() {
               return SizedBox(
                 height: 200,
                 width: 200,
-                child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+                child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
               );
             }
           )
@@ -51,7 +53,7 @@ void main() {
               return SizedBox(
                 height: 200,
                 width: 200,
-                child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+                child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
               );
             }
           )
@@ -82,7 +84,7 @@ void main() {
             return SizedBox(
               height: 200,
               width: 200,
-              child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+              child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
             );
           }
         );
@@ -141,7 +143,7 @@ void main() {
             return SizedBox(
               height: 200,
               width: 200,
-              child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+              child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
             );
           }
         );
@@ -260,46 +262,306 @@ void main() {
 
   group('TwoDimensionalScrollable', () {
     testWidgets('.of, .maybeOf', (WidgetTester tester) async {
+      late BuildContext capturedContext;
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          capturedContext = context;
+          return const SizedBox.square(dimension: 200);
+        }
+      );
+      await tester.pumpWidget(simpleBuilderTest(
+        delegate: delegate,
+      ));
+      await tester.pumpAndSettle();
 
+      expect(TwoDimensionalScrollable.of(capturedContext), isNotNull);
+      expect(TwoDimensionalScrollable.maybeOf(capturedContext), isNotNull);
+
+      await tester.pumpWidget(Builder(
+        builder: (BuildContext context) {
+          capturedContext = context;
+          TwoDimensionalScrollable.of(context);
+          return Container();
+        }
+      ));
+      await tester.pumpAndSettle();
+      final dynamic exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception as FlutterError;
+      expect(error.toString(), contains(
+        'TwoDimensionalScrollable.of() was called with a context that does '
+        'not contain a TwoDimensionalScrollable widget.'
+      ));
+
+      expect(TwoDimensionalScrollable.maybeOf(capturedContext), isNull);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('horizontal and vertical getters', (WidgetTester tester) async {
-      // Assert if there is no state yet.
+      late BuildContext capturedContext;
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          capturedContext = context;
+          return const SizedBox.square(dimension: 200);
+        }
+      );
+      await tester.pumpWidget(simpleBuilderTest(
+        delegate: delegate,
+      ));
+      await tester.pumpAndSettle();
 
-      // Gets state
-
+      final TwoDimensionalScrollableState scrollable = TwoDimensionalScrollable.of(capturedContext);
+      expect(scrollable.verticalScrollable.position.pixels, 0.0);
+      expect(scrollable.horizontalScrollable.position.pixels, 0.0);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('creates fallback ScrollControllers if not provided by ScrollableDetails', (WidgetTester tester) async {
+      late BuildContext capturedContext;
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          capturedContext = context;
+          return const SizedBox.square(dimension: 200);
+        }
+      );
+      await tester.pumpWidget(simpleBuilderTest(
+        delegate: delegate,
+      ));
+      await tester.pumpAndSettle();
 
+      // Vertical
+      final ScrollableState vertical = Scrollable.of(capturedContext, axis: Axis.vertical);
+      expect(vertical.widget.controller, isNotNull);
+      // Horizontal
+      final ScrollableState horizontal = Scrollable.of(capturedContext, axis: Axis.horizontal);
+      expect(horizontal.widget.controller, isNotNull);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
+      final List<Object> exceptions = <Object>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
       // Horizontal mismatch
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        horizontalDetails: const ScrollableDetails.horizontal(),
+        verticalDetails: const ScrollableDetails.horizontal(),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return Container();
+        },
+      ));
 
       // Vertical mismatch
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        horizontalDetails: const ScrollableDetails.vertical(),
+        verticalDetails: const ScrollableDetails.vertical(),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return Container();
+        },
+      ));
 
+      // Both
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        horizontalDetails: const ScrollableDetails.vertical(),
+        verticalDetails: const ScrollableDetails.horizontal(),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return Container();
+        },
+      ));
+
+      expect(exceptions.length, 3);
+      for (final Object exception in exceptions) {
+        expect(exception, isAssertionError);
+        expect((exception as AssertionError).message, contains('are not Axis'));
+      }
+      FlutterError.onError = oldHandler;
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('correctly sets restorationIds', (WidgetTester tester) async {
+      late BuildContext capturedContext;
       // with restorationID set
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        restorationId: 'Custom Restoration ID',
+        horizontalDetails: const ScrollableDetails.horizontal(),
+        verticalDetails: const ScrollableDetails.vertical(),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return SizedBox.square(
+            dimension: 200,
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              },
+            )
+          );
+        },
+      ));
+      await tester.pumpAndSettle();
+
+      // TODO(Piinks): Ask goderbauer why this isn't finding the restoration scope.
+      // expect(
+      //   RestorationScope.of(capturedContext).restorationId,
+      //   'Custom Restoration ID',
+      // );
+      expect(
+        Scrollable.of(capturedContext, axis: Axis.vertical).widget.restorationId,
+        'OuterVerticalTwoDimensionalScrollable',
+      );
+      expect(
+        Scrollable.of(capturedContext, axis: Axis.horizontal).widget.restorationId,
+        'InnerHorizontalTwoDimensionalScrollable',
+      );
 
       // default restorationID
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        horizontalDetails: const ScrollableDetails.horizontal(),
+        verticalDetails: const ScrollableDetails.vertical(),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return SizedBox.square(
+            dimension: 200,
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              },
+            )
+          );
+        },
+      ));
+      await tester.pumpAndSettle();
 
+      expect(
+        RestorationScope.maybeOf(capturedContext),
+        isNull,
+      );
+      expect(
+        Scrollable.of(capturedContext, axis: Axis.vertical).widget.restorationId,
+        'OuterVerticalTwoDimensionalScrollable',
+      );
+      expect(
+        Scrollable.of(capturedContext, axis: Axis.horizontal).widget.restorationId,
+        'InnerHorizontalTwoDimensionalScrollable',
+      );
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Inner Scrollables receive the correct details from TwoDimensionalScrollable', (WidgetTester tester) async {
       // Default
+      late BuildContext capturedContext;
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        horizontalDetails: const ScrollableDetails.horizontal(),
+        verticalDetails: const ScrollableDetails.vertical(),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return SizedBox.square(
+            dimension: 200,
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              },
+            )
+          );
+        },
+      ));
+      await tester.pumpAndSettle();
+
+      // Vertical
+      ScrollableState vertical = Scrollable.of(capturedContext, axis: Axis.vertical);
+      expect(vertical.widget.key, isNotNull);
+      expect(vertical.widget.axisDirection, AxisDirection.down);
+      expect(vertical.widget.controller, isNotNull);
+      expect(vertical.widget.physics, isNull);
+      expect(vertical.widget.clipBehavior, Clip.hardEdge);
+      expect(vertical.widget.incrementCalculator, isNull);
+      expect(vertical.widget.excludeFromSemantics, isFalse);
+      expect(vertical.widget.restorationId, 'OuterVerticalTwoDimensionalScrollable');
+      expect(vertical.widget.dragStartBehavior, DragStartBehavior.start);
+
+      // Horizontal
+      ScrollableState horizontal = Scrollable.of(capturedContext, axis: Axis.horizontal);
+      expect(horizontal.widget.key, isNotNull);
+      expect(horizontal.widget.axisDirection, AxisDirection.right);
+      expect(horizontal.widget.controller, isNotNull);
+      expect(horizontal.widget.physics, isNull);
+      expect(horizontal.widget.clipBehavior, Clip.hardEdge);
+      expect(horizontal.widget.incrementCalculator, isNull);
+      expect(horizontal.widget.excludeFromSemantics, isFalse);
+      expect(horizontal.widget.restorationId, 'InnerHorizontalTwoDimensionalScrollable');
+      expect(horizontal.widget.dragStartBehavior, DragStartBehavior.start);
 
       // Customized
+      final ScrollController horizontalController = ScrollController();
+      final ScrollController verticalController = ScrollController();
+      double calculator(_) => 0.0;
+      await tester.pumpWidget(TwoDimensionalScrollable(
+        incrementCalculator: calculator,
+        excludeFromSemantics: true,
+        dragStartBehavior: DragStartBehavior.down,
+        horizontalDetails: ScrollableDetails.horizontal(
+          reverse: true,
+          controller: horizontalController,
+          physics: const ClampingScrollPhysics(),
+          decorationClipBehavior: Clip.antiAlias,
+        ),
+        verticalDetails: ScrollableDetails.vertical(
+          reverse: true,
+          controller: verticalController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          decorationClipBehavior: Clip.antiAliasWithSaveLayer,
+        ),
+        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+          return SizedBox.square(
+            dimension: 200,
+            child: Builder(
+              builder: (BuildContext context) {
+                capturedContext = context;
+                return Container();
+              },
+            )
+          );
+        },
+      ));
+      await tester.pumpAndSettle();
 
-    }, variant: TargetPlatformVariant.all());
+      // Vertical
+      vertical = Scrollable.of(capturedContext, axis: Axis.vertical);
+      expect(vertical.widget.key, isNotNull);
+      expect(vertical.widget.axisDirection, AxisDirection.up);
+      expect(vertical.widget.controller, verticalController);
+      expect(vertical.widget.physics, const AlwaysScrollableScrollPhysics());
+      expect(vertical.widget.clipBehavior, Clip.antiAliasWithSaveLayer);
+      expect(
+        vertical.widget.incrementCalculator!(ScrollIncrementDetails(
+          type: ScrollIncrementType.line,
+          metrics: verticalController.position,
+        )),
+        0.0,
+      );
+      expect(vertical.widget.excludeFromSemantics, isTrue);
+      expect(vertical.widget.restorationId, 'OuterVerticalTwoDimensionalScrollable');
+      expect(vertical.widget.dragStartBehavior, DragStartBehavior.down);
 
-    testWidgets('calls on the ScrollBehavior to build two scrollbars', (WidgetTester tester) async {
-      // with restorationID set
-
-      // default restorationID
-
+      // Horizontal
+      horizontal = Scrollable.of(capturedContext, axis: Axis.horizontal);
+      expect(horizontal.widget.key, isNotNull);
+      expect(horizontal.widget.axisDirection, AxisDirection.left);
+      expect(horizontal.widget.controller, horizontalController);
+      expect(horizontal.widget.physics, const ClampingScrollPhysics());
+      expect(horizontal.widget.clipBehavior, Clip.antiAlias);
+      expect(
+        horizontal.widget.incrementCalculator!(ScrollIncrementDetails(
+          type: ScrollIncrementType.line,
+          metrics: horizontalController.position,
+        )),
+        0.0,
+      );
+      expect(horizontal.widget.excludeFromSemantics, isTrue);
+      expect(horizontal.widget.restorationId, 'InnerHorizontalTwoDimensionalScrollable');
+      expect(horizontal.widget.dragStartBehavior, DragStartBehavior.down);
     }, variant: TargetPlatformVariant.all());
 
     group('DiagonalDragBehavior', () {
@@ -322,27 +584,117 @@ void main() {
   });
 
   testWidgets('TwoDimensionalViewport asserts against axes mismatch', (WidgetTester tester) async {
+    final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+      maxXIndex: 0,
+      maxYIndex: 0,
+      builder: (BuildContext context, ChildVicinity vicinity) {
+        return const SizedBox.square(dimension: 200);
+      }
+    );
+
     // Horizontal mismatch
+    expect(
+      () {
+        SimpleBuilderTableViewport(
+          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalAxisDirection: AxisDirection.left,
+          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalAxisDirection: AxisDirection.right,
+          delegate: delegate,
+          mainAxis: Axis.vertical,
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains('AxisDirection is not Axis.'),
+        ),
+      ),
+    );
 
     // Vertical mismatch
+    expect(
+      () {
+        SimpleBuilderTableViewport(
+          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalAxisDirection: AxisDirection.up,
+          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalAxisDirection: AxisDirection.down,
+          delegate: delegate,
+          mainAxis: Axis.vertical,
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains('AxisDirection is not Axis.'),
+        ),
+      ),
+    );
+
+    // Both
+    expect(
+      () {
+        SimpleBuilderTableViewport(
+          verticalOffset: ViewportOffset.fixed(0.0),
+          verticalAxisDirection: AxisDirection.left,
+          horizontalOffset: ViewportOffset.fixed(0.0),
+          horizontalAxisDirection: AxisDirection.down,
+          delegate: delegate,
+          mainAxis: Axis.vertical,
+        );
+      },
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'description',
+          contains('AxisDirection is not Axis.'),
+        ),
+      ),
+    );
   });
 
   test('TwoDimensionalViewportParentData', () {
     // Default vicinity is invalid
-
-    // isVisible cases
+    final TwoDimensionalViewportParentData parentData = TwoDimensionalViewportParentData();
+    expect(parentData.vicinity, ChildVicinity.invalid);
 
     // toString
+    parentData
+      ..vicinity = const ChildVicinity(xIndex: 10, yIndex: 10)
+      ..paintOffset = const Offset(20.0, 20.0)
+      ..layoutOffset = const Offset(20.0, 20.0);
+    expect(
+      parentData.toString(),
+      'vicinity=(yIndex: 10, xIndex: 10); layoutOffset=Offset(20.0, 20.0); '
+      'paintOffset=Offset(20.0, 20.0); not visible ',
+    );
   });
 
   test('ChildVicinity comparable', () {
+    const ChildVicinity baseVicinity = ChildVicinity(xIndex: 0, yIndex: 0);
+    const ChildVicinity sameXVicinity = ChildVicinity(xIndex: 0, yIndex: 2);
+    const ChildVicinity sameYVicinity = ChildVicinity(xIndex: 3, yIndex: 0);
+    const ChildVicinity sameNothingVicinity = ChildVicinity(xIndex: 20, yIndex: 30);
     // ==
+    expect(baseVicinity == baseVicinity, isTrue);
+    expect(baseVicinity == sameXVicinity, isFalse);
+    expect(baseVicinity == sameYVicinity, isFalse);
+    expect(baseVicinity == sameNothingVicinity, isFalse);
 
     // compareTo
-
-    // hashCode
+    expect(baseVicinity.compareTo(baseVicinity), 0);
+    expect(baseVicinity.compareTo(sameXVicinity), -2);
+    expect(baseVicinity.compareTo(sameYVicinity), -3);
+    expect(baseVicinity.compareTo(sameNothingVicinity), -20);
 
     // toString
+    expect(baseVicinity.toString(), '(yIndex: 0, xIndex: 0)');
+    expect(sameXVicinity.toString(), '(yIndex: 2, xIndex: 0)');
+    expect(sameYVicinity.toString(), '(yIndex: 0, xIndex: 3)');
+    expect(sameNothingVicinity.toString(), '(yIndex: 30, xIndex: 20)');
   });
 
   group('RenderTwoDimensionalViewport', () {
