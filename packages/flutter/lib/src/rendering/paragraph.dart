@@ -1490,8 +1490,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
-    // Cache the boundaries of the origin word. If the origin word is not in the
-    // current selectable then the _textSelectionEnd will be null.
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
     debugPrint('$_selectableContainsOriginWord');
@@ -1518,36 +1516,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // maintain a selectables selection collapsed at 0 when the local position is
     // not located inside its rect.
     final (TextPosition start, TextPosition end)? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
-    // TextPosition? targetPosition;
-    // if (_selectableContainsOriginWord!) {
-    //   // Swap the start and end.
-    //   if (position.offset >= _originWordSelectionEnd!.offset) {
-    //     targetPosition = wordBoundary?.$2;
-    //     _setSelectionPosition(_originWordSelectionStart, isEnd: !isEnd);
-    //   } else if (position.offset <= _originWordSelectionStart!.offset) {
-    //     targetPosition = wordBoundary?.$1;
-    //     _setSelectionPosition(_originWordSelectionEnd, isEnd: !isEnd);
-    //   } else {
-    //     targetPosition = wordBoundary?.$2;
-    //     _setSelectionPosition(_originWordSelectionStart, isEnd: !isEnd);
-    //   }
-    // } else {
-    //   // If we are always moving the selection end edge then the selection will
-    //   // always extend to wordBoundary.$2. Instead the selection should expand to
-    //   // wordBoudary.$x that results in the largest selection.
-    //   if (wordBoundary != null) {
-    //     final int selectionEdgeOffset = isEnd ? _textSelectionStart!.offset : _textSelectionEnd!.offset;
-    //     final int lengthWhenExpandingToBegOfWord = (selectionEdgeOffset - wordBoundary.$1.offset).abs();
-    //     final int lengthWhenExpandingToEndOfWord = (selectionEdgeOffset - wordBoundary.$2.offset).abs();
-    //     if (lengthWhenExpandingToBegOfWord > lengthWhenExpandingToEndOfWord) {
-    //       targetPosition = wordBoundary.$1;
-    //     } else {
-    //       targetPosition = wordBoundary.$2;
-    //     }
-    //   }
-    // }
-    // targetPosition = _clampTextPosition(targetPosition ?? position);
-
     TextPosition? targetPosition;
     debugPrint('start $fullText $hashCode');
     if (wordBoundary != null) {
@@ -1582,6 +1550,34 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
               // targetPosition = wordBoundary.$1;
             }
           }
+        } else {
+          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
+            debugPrint('start before end');
+            if (position.offset > existingSelectionEnd.offset) {
+              targetPosition = wordBoundary.$2;
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
+              debugPrint('swapping $position $existingSelectionStart $targetPosition $localWordBoundary');
+              // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
+              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+            } else {
+              // Keep the word at the same wordBoundary regardless of affinity.
+              targetPosition = position.offset == existingSelectionEnd.offset ? existingSelectionStart : wordBoundary.$1;
+              debugPrint('not swapping just moving end edge $position $existingSelectionStart $existingSelectionEnd ${wordBoundary.$1}');
+            }
+          } else {
+            debugPrint('end before start $position $existingSelectionStart $existingSelectionEnd');
+            if (position.offset < existingSelectionEnd.offset) {
+              debugPrint('swapping');
+              targetPosition = wordBoundary.$1;
+              // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
+              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+            } else {
+              debugPrint('not swapping just moving end edge $position $existingSelectionStart');
+              targetPosition = position.offset == existingSelectionEnd.offset ? existingSelectionStart : wordBoundary.$2;
+              // targetPosition = wordBoundary.$1;
+            }
+          }
         }
       }
     } else {
@@ -1589,30 +1585,60 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       // The localPosition is not contained within the current rect. The adjustedPosition
       // will either be at the end or beginning of the current rect.
       if (existingSelectionStart != null && existingSelectionEnd != null) {
-        if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-          debugPrint('start before end');
-          if (position.offset < existingSelectionStart.offset) {
-            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-            _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            debugPrint('new position before start $localWordBoundary $_textSelectionStart');
-          }
+        if (isEnd) {
+          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
+            debugPrint('start before end');
+            if (position.offset < existingSelectionStart.offset) {
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
+              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+              debugPrint('new position before start $localWordBoundary $_textSelectionStart');
+            }
 
-          if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
-            debugPrint('not here??');
-            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-            _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+            if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
+              debugPrint('not here??');
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
+              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+            }
+          } else {
+            debugPrint('end before start $position $existingSelectionStart');
+            if (position.offset > existingSelectionStart.offset) {
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
+              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+              debugPrint('new position after start $existingSelectionStart $localWordBoundary ${!isEnd}');
+            }
+
+            if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
+              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+            }
           }
         } else {
-          debugPrint('end before start $position $existingSelectionStart');
-          if (position.offset > existingSelectionStart.offset) {
-            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-            _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            debugPrint('new position after start $existingSelectionStart $localWordBoundary ${!isEnd}');
-          }
+          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
+            debugPrint('start before end');
+            if (position.offset > existingSelectionEnd.offset) {
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
+              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+              debugPrint('new position before start $localWordBoundary $_textSelectionStart');
+            }
 
-          if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
-            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-            _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+            if (position.offset == existingSelectionEnd.offset && _selectableContainsOriginWord!) {
+              debugPrint('not here??');
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
+              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
+            }
+          } else {
+            debugPrint('end before start $position $existingSelectionStart');
+            if (position.offset < existingSelectionEnd.offset) {
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
+              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+              debugPrint('new position after start $existingSelectionStart $localWordBoundary ${!isEnd}');
+            }
+
+            if (position.offset == existingSelectionEnd.offset && _selectableContainsOriginWord!) {
+              debugPrint('at edges');
+              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
+              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
+            }
           }
         }
       }

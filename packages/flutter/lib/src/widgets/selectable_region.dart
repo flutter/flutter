@@ -504,7 +504,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 1:
         _selectEndTo(offset: details.globalPosition, continuous: true);
       case 2:
-        _selectStartTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
     }
   }
 
