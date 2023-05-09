@@ -232,7 +232,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
     try {
       // TODO(goderbauer): Prototype engine requires view ID here...
-      final ui.SceneBuilder builder = ui.SceneBuilder(flutterView.viewId);
+      final ui.SceneBuilder builder = ui.SceneBuilder(/*flutterView.viewId*/);
       // final ui.SceneBuilder builder = ui.SceneBuilder();
       final ui.Scene scene = layer!.buildScene(builder);
       if (automaticSystemUiAdjustment) {

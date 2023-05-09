@@ -139,6 +139,5 @@ void main() {
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
     image.dispose();
-    // TODO(goderbauer): re-enable after fixing LiveTestBinding
-  }, skip: true);// skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 }

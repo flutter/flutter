@@ -1766,9 +1766,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
-  void _markViewNeedsPaint() {
+  void _markViewsNeedPaint([int? viewId]) {
     _viewNeedsPaint = true;
-    renderView.markNeedsPaint();
+    final Iterable<RenderView> toMark = viewId == null
+        ? renderViews
+        : renderViews.where((RenderView renderView) => renderView.flutterView.viewId == viewId);
+    for (final RenderView renderView in toMark) {
+      renderView.markNeedsPaint();
+    }
   }
 
   TextPainter? _label;
@@ -1786,15 +1791,16 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _label ??= TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
     _label!.text = TextSpan(text: value, style: _labelStyle);
     _label!.layout();
-    _markViewNeedsPaint();
+    _markViewsNeedPaint();
   }
 
-  final Map<int, _LiveTestPointerRecord> _pointerIdToPointerRecord = <int, _LiveTestPointerRecord>{};
+  final Expando<Map<int, _LiveTestPointerRecord>> _renderViewToPointerIdToPointerRecord = Expando<Map<int, _LiveTestPointerRecord>>();
 
   void _handleRenderViewPaint(PaintingContext context, Offset offset, RenderView renderView) {
     assert(offset == Offset.zero);
 
-    if (_pointerIdToPointerRecord.isNotEmpty) {
+    final Map<int, _LiveTestPointerRecord>? pointerIdToRecord = _renderViewToPointerIdToPointerRecord[renderView];
+    if (pointerIdToRecord != null && pointerIdToRecord.isNotEmpty) {
       final double radius = renderView.configuration.size.shortestSide * 0.05;
       final Path path = Path()
         ..addOval(Rect.fromCircle(center: Offset.zero, radius: radius))
@@ -1807,7 +1813,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         ..strokeWidth = radius / 10.0
         ..style = PaintingStyle.stroke;
       bool dirty = false;
-      for (final _LiveTestPointerRecord record in _pointerIdToPointerRecord.values) {
+      for (final _LiveTestPointerRecord record in pointerIdToRecord.values) {
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position), paint);
         if (record.decay < 0) {
@@ -1815,14 +1821,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         }
         record.decay += 1;
       }
-      _pointerIdToPointerRecord
-          .keys
-          .where((int pointer) => _pointerIdToPointerRecord[pointer]!.decay == 0)
-          .toList()
-          .forEach(_pointerIdToPointerRecord.remove);
+      pointerIdToRecord
+        .keys
+        .where((int pointer) => pointerIdToRecord[pointer]!.decay == 0)
+        .toList()
+        .forEach(pointerIdToRecord.remove);
       if (dirty) {
         scheduleMicrotask(() {
-          _markViewNeedsPaint();
+          _markViewsNeedPaint(renderView.flutterView.viewId as int);
         });
       }
     }
@@ -1853,19 +1859,29 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void handlePointerEvent(PointerEvent event) {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
-        final _LiveTestPointerRecord? record = _pointerIdToPointerRecord[event.pointer];
-        if (record != null) {
-          record.position = event.position;
-          if (!event.down) {
-            record.decay = _kPointerDecay;
+        RenderView? target;
+        for (final RenderView renderView in renderViews) {
+          if (renderView.flutterView.viewId == event.viewId) {
+            target = renderView;
+            break;
           }
-          _markViewNeedsPaint();
-        } else if (event.down) {
-          _pointerIdToPointerRecord[event.pointer] = _LiveTestPointerRecord(
-            event.pointer,
-            event.position,
-          );
-          _markViewNeedsPaint();
+        }
+        if (target != null) {
+          final _LiveTestPointerRecord? record = _renderViewToPointerIdToPointerRecord[target]?[event.pointer];
+          if (record != null) {
+            record.position = event.position;
+            if (!event.down) {
+              record.decay = _kPointerDecay;
+            }
+            _markViewsNeedPaint(event.viewId);
+          } else if (event.down) {
+            _renderViewToPointerIdToPointerRecord[target] ??= <int, _LiveTestPointerRecord>{};
+            _renderViewToPointerIdToPointerRecord[target]![event.pointer] = _LiveTestPointerRecord(
+              event.pointer,
+              event.position,
+            );
+            _markViewsNeedPaint(event.viewId);
+          }
         }
         super.handlePointerEvent(event);
       case TestBindingEventSource.device:
