@@ -61,8 +61,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         )!;
         final JavaVersion version = java.getVersion()!;
 
-        expect(java.home, androidStudioBundledJdkHome);
-        expect(java.binary, expectedJavaBinaryPath);
+        expect(java.javaHome, androidStudioBundledJdkHome);
+        expect(java.binaryPath, expectedJavaBinaryPath);
 
         expect(version.longText, 'OpenJDK Runtime Environment Zulu19.32+15-CA (build 19.0.2+7)');
         expect(version.shortText, '19.0.2');
@@ -83,8 +83,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         )!;
 
-        expect(java.home, javaHome);
-        expect(java.binary, expectedJavaBinaryPath);
+        expect(java.javaHome, javaHome);
+        expect(java.binaryPath, expectedJavaBinaryPath);
       });
 
       testWithoutContext('returns the java binary found on PATH if no other can be found', () {
@@ -106,8 +106,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         )!;
 
-        expect(java.binary, os.which('java')!.path);
-        expect(java.home, isNull);
+        expect(java.binaryPath, os.which('java')!.path);
+        expect(java.javaHome, isNull);
       });
 
       testWithoutContext('returns null if no java could be found', () {
@@ -140,15 +140,15 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           os: FakeOperatingSystemUtils(),
           platform: platform,
           processManager: processManager,
-          binary: 'javaHome/bin/java',
-          home: 'javaHome',
+          binaryPath: 'javaHome/bin/java',
+          javaHome: 'javaHome',
         );
       });
 
       void addJavaVersionCommand(String output) {
         processManager.addCommand(
           FakeCommand(
-            command: <String>[java.binary, '--version'],
+            command: <String>[java.binaryPath, '--version'],
             stdout: output,
           ),
         );
