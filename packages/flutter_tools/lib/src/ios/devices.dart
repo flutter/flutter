@@ -288,7 +288,6 @@ class IOSDevice extends Device {
   }
 
   final String? _sdkVersion;
-
   final IOSDeploy _iosDeploy;
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -307,7 +306,6 @@ class IOSDevice extends Device {
 
   final bool devModeEnabled;
 
-
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
@@ -323,7 +321,6 @@ class IOSDevice extends Device {
 
   @override
   bool isConnected;
-
 
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
