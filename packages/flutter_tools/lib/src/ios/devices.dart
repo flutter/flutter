@@ -641,18 +641,6 @@ class IOSDevice extends Device {
     _logReaders[app] = logReader;
   }
 
-  @visibleForTesting
-  Future<bool> isDeveloperModeEnabled() async {
-    final bool enabled = await _iosDeploy.isDeveloperModeEnabled(
-        deviceId: id
-    );
-    if (!enabled) {
-      // _logger.printError('To use $name for development, enable Developer Mode in Settings → Privacy & Security.');
-      return false;
-    }
-    return true;
-  }
-
   @override
   DevicePortForwarder get portForwarder => _portForwarder ??= IOSDevicePortForwarder(
     logger: _logger,

@@ -235,27 +235,6 @@ class IOSDeploy {
     return true;
   }
 
-  Future<bool> isDeveloperModeEnabled({
-    required String deviceId,
-  }) async {
-    final List<String> launchCommand = <String>[
-      _binaryPath,
-      '--id',
-      deviceId,
-      '--check-developer-mode'
-    ];
-    final RunResult result = await _processUtils.run(
-      launchCommand,
-      environment: iosDeployEnv,
-    );
-    // Device does not have developer mode enabled.
-    if (result.stdout.trim().split('\n')[2] == 'Developer mode is not enabled.') {
-      _logger.printTrace('$deviceId does not have Developer Mode enabled');
-      return false;
-    }
-    return true;
-  }
-
   String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _logger);
 }
 

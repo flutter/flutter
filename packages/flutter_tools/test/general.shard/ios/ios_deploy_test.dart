@@ -430,52 +430,6 @@ process continue
     });
   });
 
-  group('IOSDeploy.isDeveloperModeEnabled', () {
-    testWithoutContext('returns true when device does have developer mode enabled', () async {
-      const String deviceId = '123';
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: <String>[
-          iosDeployPath,
-          '--id',
-          deviceId,
-          '--check-developer-mode'
-        ], stdout: '''
-[....] Waiting for iOS device to be connected
-[....] Using 1234 (J407AP, iPad Air 5, iphoneos, arm64e, 16.3.1, 20D67) a.k.a. 'iPad (2)'.
-Developer mode is enabled.
-'''),
-      ]);
-      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
-      final bool isEnabled = await iosDeploy.isDeveloperModeEnabled(
-        deviceId: deviceId,
-      );
-      expect(isEnabled, isTrue);
-      expect(processManager, hasNoRemainingExpectations);
-    });
-
-    testWithoutContext('returns false when device does not have developer mode enabled', () async {
-      const String deviceId = '123';
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: <String>[
-          iosDeployPath,
-          '--id',
-          deviceId,
-          '--check-developer-mode'
-        ], stdout: '''
-[....] Waiting for iOS device to be connected
-[....] Using 1234 (J407AP, iPad Air 5, iphoneos, arm64e, 16.3.1, 20D67) a.k.a. 'iPad (2)'.
-Developer mode is not enabled.
-'''),
-      ]);
-      final IOSDeploy iosDeploy = setUpIOSDeploy(processManager, artifacts: artifacts);
-      final bool isEnabled = await iosDeploy.isDeveloperModeEnabled(
-        deviceId: deviceId,
-      );
-      expect(isEnabled, isFalse);
-      expect(processManager, hasNoRemainingExpectations);
-    });
-  });
-
   group('IOSDeploy.uninstallApp', () {
     testWithoutContext('calls ios-deploy with correct arguments and returns 0 on success', () async {
       const String deviceId = '123';

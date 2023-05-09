@@ -2776,11 +2776,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<String> get targetPlatformDisplayName async => 'ios';
 
   @override
-  Future<bool> isDeveloperModeEnabled() async {
-    return true;
-  }
-
-  @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 }
 
