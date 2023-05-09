@@ -31,7 +31,7 @@ class Java {
       _processManager = processManager,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
-  /// Finds the Java runtime that should be used for all java-dependent
+  /// Finds the Java runtime environment that should be used for all java-dependent
   /// operations across the tool.
   ///
   /// This searches for Java in the following places, in order:
