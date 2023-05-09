@@ -31,6 +31,8 @@ class PathBuilder {
 
   const Path& GetCurrentPath() const;
 
+  PathBuilder& SetConvexity(Convexity value);
+
   PathBuilder& MoveTo(Point point, bool relative = false);
 
   PathBuilder& Close();
@@ -116,6 +118,7 @@ class PathBuilder {
   Point subpath_start_;
   Point current_;
   Path prototype_;
+  Convexity convexity_;
 
   Point ReflectedQuadraticControlPoint1() const;
 
