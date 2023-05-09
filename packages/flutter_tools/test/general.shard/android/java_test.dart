@@ -65,7 +65,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         expect(java.binaryPath, expectedJavaBinaryPath);
 
         expect(version.longText, 'OpenJDK Runtime Environment Zulu19.32+15-CA (build 19.0.2+7)');
-        expect(version.shortText, '19.0.2');
+        expect(version.number, '19.0.2');
       });
 
       testWithoutContext('finds JAVA_HOME if it is set and the JDK bundled with Android Studio could not be found', () {
@@ -162,7 +162,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.202-b10, mixed mode)
 ''');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'Java(TM) SE Runtime Environment (build 1.8.0_202-b10)');
-        expect(version.shortText, '1.8.0');
+        expect(version.number, '1.8.0');
       });
       testWithoutContext('parses jdk 11 windows', () {
         addJavaVersionCommand('''
@@ -172,7 +172,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 11.0.14+10-b13, mixed mode)
 ''');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'Java(TM) SE Runtime Environment (build 11.0.14+10-b13)');
-        expect(version.shortText, '11.0.14');
+        expect(version.number, '11.0.14');
       });
 
       testWithoutContext('parses jdk 11 mac/linux', () {
@@ -183,7 +183,7 @@ OpenJDK 64-Bit Server VM Zulu11.62+17-CA (build 11.0.18+10-LTS, mixed mode)
 ''');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'OpenJDK Runtime Environment Zulu11.62+17-CA (build 11.0.18+10-LTS)');
-        expect(version.shortText, '11.0.18');
+        expect(version.number, '11.0.18');
       });
 
       testWithoutContext('parses jdk 17', () {
@@ -194,7 +194,7 @@ OpenJDK 64-Bit Server VM (build 17.0.6+0-17.0.6b802.4-9586694, mixed mode)
 ''');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'OpenJDK Runtime Environment (build 17.0.6+0-17.0.6b802.4-9586694)');
-        expect(version.shortText, '17.0.6');
+        expect(version.number, '17.0.6');
       });
 
       testWithoutContext('parses jdk 19', () {
@@ -205,7 +205,7 @@ OpenJDK 64-Bit Server VM Homebrew (build 19.0.2, mixed mode, sharing)
 ''');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'OpenJDK Runtime Environment Homebrew (build 19.0.2)');
-        expect(version.shortText, '19.0.2');
+        expect(version.number, '19.0.2');
       });
 
       // https://chrome-infra-packages.appspot.com/p/flutter/java/openjdk/
@@ -217,14 +217,14 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
 ''');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'OpenJDK Runtime Environment 18.9 (build 11.0.2+9)');
-        expect(version.shortText, '11.0.2');
+        expect(version.number, '11.0.2');
       });
 
       testWithoutContext('parses jdk two number versions', () {
         addJavaVersionCommand('openjdk 19.0 2023-01-17');
         final JavaVersion version = java.getVersion()!;
         expect(version.longText, 'openjdk 19.0 2023-01-17');
-        expect(version.shortText, '19.0');
+        expect(version.number, '19.0');
       });
     });
   });
