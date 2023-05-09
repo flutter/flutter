@@ -1492,10 +1492,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
-    debugPrint('$_selectableContainsOriginWord');
-    if (_selectableContainsOriginWord == null) {
-      _selectableContainsOriginWord = existingSelectionStart != null && existingSelectionEnd != null ? true : false;
-    }
+    _selectableContainsOriginWord ??= existingSelectionStart != null && existingSelectionEnd != null;
+
 
     _setSelectionPosition(null, isEnd: isEnd);
     final Matrix4 transform = paragraph.getTransformTo(null);
@@ -1517,125 +1515,163 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     // not located inside its rect.
     final (TextPosition start, TextPosition end)? wordBoundary = !_rect.contains(localPosition) ? null : _getWordBoundaryAtPosition(position);
     TextPosition? targetPosition;
-    debugPrint('start $fullText $hashCode');
     if (wordBoundary != null) {
       if (existingSelectionStart != null && existingSelectionEnd != null) {
-        debugPrint('exisiting start and end $existingSelectionStart $existingSelectionEnd');
         if (isEnd) {
-          debugPrint('moving end edge');
+          // Moving the end edge. This means the start edge remains static until
+          // reaching a condition where a swap is needed.
           if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            debugPrint('start before end');
+            // The start of the selection is before the end.
             if (position.offset < existingSelectionStart.offset) {
+              // The new position is before the start of the selection. So to keep
+              // the origin word in bounds, the start should move to the end of the
+              // origin word.
               targetPosition = wordBoundary.$1;
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              debugPrint('swapping $position $existingSelectionStart $targetPosition $localWordBoundary');
-              // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
             } else {
-              // Keep the word at the same wordBoundary regardless of affinity.
+              // Keep the selection at the same word boundary regardless of affinity.
               targetPosition = position.offset == existingSelectionStart.offset ? existingSelectionEnd : wordBoundary.$2;
-              debugPrint('not swapping just moving end edge $position $existingSelectionStart $existingSelectionEnd ${wordBoundary.$2}');
             }
           } else {
-            debugPrint('end before start $position $existingSelectionStart $existingSelectionEnd');
+            // The end of the selection is before the start.
             if (position.offset > existingSelectionStart.offset) {
-              debugPrint('swapping');
+              // The new position is after the start of the selection. So to keep
+              // the origin word in bounds, the start should move to the beginning
+              // of the origin word.
               targetPosition = wordBoundary.$2;
-              // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
               _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
             } else {
-              debugPrint('not swapping just moving end edge $position $existingSelectionStart');
+              // Keep the selection at the same word boundary regardless of affinity.
               targetPosition = position.offset == existingSelectionStart.offset ? existingSelectionEnd : wordBoundary.$1;
-              // targetPosition = wordBoundary.$1;
             }
           }
         } else {
+          // Moving the start edge. This means the end edge remains static until
+          // reaching a condition where a swap is needed.
           if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            debugPrint('start before end');
+            // The start of the selection is before the end.
             if (position.offset > existingSelectionEnd.offset) {
+              // The new position is after the end of the selection. So to keep the
+              // origin word in bounds, the end should move the to beginning of
+              // the origin word.
               targetPosition = wordBoundary.$2;
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              debugPrint('swapping $position $existingSelectionStart $targetPosition $localWordBoundary');
-              // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
               _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
             } else {
-              // Keep the word at the same wordBoundary regardless of affinity.
+              // Keep the selection at the same word boundary regardless of affinity.
               targetPosition = position.offset == existingSelectionEnd.offset ? existingSelectionStart : wordBoundary.$1;
-              debugPrint('not swapping just moving end edge $position $existingSelectionStart $existingSelectionEnd ${wordBoundary.$1}');
             }
           } else {
-            debugPrint('end before start $position $existingSelectionStart $existingSelectionEnd');
+            // The end of the selection is before the start.
             if (position.offset < existingSelectionEnd.offset) {
-              debugPrint('swapping');
+              // The new position is before the selection end. So to keep the origin
+              // word in bounds, the end edge should be moved to the end of the origin word.
               targetPosition = wordBoundary.$1;
-              // _setSelectionPosition(existingSelectionEnd, isEnd: !isEnd);
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
             } else {
-              debugPrint('not swapping just moving end edge $position $existingSelectionStart');
+              // Keep the selection at the same word boundary regardless of affinity.
               targetPosition = position.offset == existingSelectionEnd.offset ? existingSelectionStart : wordBoundary.$2;
-              // targetPosition = wordBoundary.$1;
             }
           }
         }
       }
     } else {
-      debugPrint('not in rect $position $existingSelectionStart $existingSelectionEnd $_selectableContainsOriginWord');
       // The localPosition is not contained within the current rect. The adjustedPosition
       // will either be at the end or beginning of the current rect.
       if (existingSelectionStart != null && existingSelectionEnd != null) {
         if (isEnd) {
+          // Moving the end edge.
           if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            debugPrint('start before end');
+            // The start of the selection is before the end.
             if (position.offset < existingSelectionStart.offset) {
+              // The new position is before the start of the selection. To keep
+              // the origin word in bounds, the start edge should be moved the end
+              // of the origin word.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-              debugPrint('new position before start $localWordBoundary $_textSelectionStart');
             }
 
             if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
-              debugPrint('not here??');
+              // This case applies when the origin word is at the beginning of
+              // the origin selectable, and the adjustedPosition is at the beginning
+              // of the rect, to keep the origin word in bounds, the start edge should
+              // move to the end the origin word.
+              //
+              // This is only done when the current selectable contains the origin word,
+              // if it does not then we are okay with the selection being collapsed
+              // as a result of the adjustedPosition.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
             }
           } else {
-            debugPrint('end before start $position $existingSelectionStart');
+            // The end of the selection is before the start.
             if (position.offset > existingSelectionStart.offset) {
+              // The new position is after the start of the selection. To keep
+              // the origin word in bounds, the start edge should be moved the
+              // beginning of the origin word.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
               _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-              debugPrint('new position after start $existingSelectionStart $localWordBoundary ${!isEnd}');
             }
 
             if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
+              // This case applies when the origin word is at the end of
+              // the origin selectable, and the adjustedPosition is at the end
+              // of the rect, to keep the origin word in bounds, the start edge should
+              // move to the beginning the origin word.
+              //
+              // This is only done when the current selectable contains the origin word,
+              // if it does not then we are okay with the selection being collapsed
+              // as a result of the adjustedPosition.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
               _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
             }
           }
         } else {
+          // Moving the start edge.
           if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            debugPrint('start before end');
+            // The start of the selection is before the end.
             if (position.offset > existingSelectionEnd.offset) {
+              // The new position is after the end of the selection. To keep
+              // the origin word in bounds, the end edge should be moved the
+              // beginning of the origin word.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
               _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-              debugPrint('new position before start $localWordBoundary $_textSelectionStart');
             }
 
             if (position.offset == existingSelectionEnd.offset && _selectableContainsOriginWord!) {
-              debugPrint('not here??');
+              // This case applies when the origin word is at the end of
+              // the origin selectable, and the adjustedPosition is at the end
+              // of the rect, to keep the origin word in bounds, the end edge should
+              // move to the beginning the origin word.
+              //
+              // This is only done when the current selectable contains the origin word,
+              // if it does not then we are okay with the selection being collapsed
+              // as a result of the adjustedPosition.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
               _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
             }
           } else {
-            debugPrint('end before start $position $existingSelectionStart');
+            // The end of the selection is before the start.
             if (position.offset < existingSelectionEnd.offset) {
+              // The new position is before the end of the selection. To keep
+              // the origin word in bounds, the end edge should be moved the
+              // end of the origin word.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-              debugPrint('new position after start $existingSelectionStart $localWordBoundary ${!isEnd}');
             }
 
             if (position.offset == existingSelectionEnd.offset && _selectableContainsOriginWord!) {
-              debugPrint('at edges');
+              // This case applies when the origin word is at the beginning of
+              // the origin selectable, and the adjustedPosition is at the beginning
+              // of the rect, to keep the origin word in bounds, the end edge should
+              // move to the end the origin word.
+              //
+              // This is only done when the current selectable contains the origin word,
+              // if it does not then we are okay with the selection being collapsed
+              // as a result of the adjustedPosition.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
               _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
             }
@@ -1644,7 +1680,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       }
     }
     targetPosition = _clampTextPosition(targetPosition ?? position);
-    debugPrint('end $hashCode $targetPosition');
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
     if (targetPosition.offset == range.end) {
@@ -1721,6 +1756,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     late TextPosition start;
     late TextPosition end;
     if (position.offset >= word.end) {
+      // This seems to cause an issue when dragging between words.
       // start = end = TextPosition(offset: position.offset);
       start = TextPosition(offset: word.start);
       end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
