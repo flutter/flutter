@@ -36,9 +36,13 @@ abstract class UnpackMacOS extends Target {
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
   ];
 
+  static const String _flutterFrameworkName = 'Flutter';
+  static const String _flutterMacOSFrameworkName = 'FlutterMacOS';
+
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+    Source.pattern('{OUTPUT_DIR}/$_flutterFrameworkName.framework/Versions/A/$_flutterFrameworkName'),
+    Source.pattern('{OUTPUT_DIR}/$_flutterMacOSFrameworkName.framework/Versions/A/$_flutterMacOSFrameworkName'),
   ];
 
   @override
@@ -51,7 +55,33 @@ abstract class UnpackMacOS extends Target {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
     final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
-    final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
+
+    // Copy and thin Flutter.framework
+    _copyFramework(Artifact.macosFlutterFramework, environment, buildMode);
+    final String flutterFrameworkBinaryPath = _getFrameworkBinaryPath(
+      _flutterFrameworkName,
+      environment,
+    );
+    _thinFramework(environment, flutterFrameworkBinaryPath);
+
+    // Copy and thin FlutterMacOS.framework
+    _copyFramework(Artifact.macosFlutterMacOSFramework, environment, buildMode);
+    final String flutterMacOSFrameworkBinaryPath = _getFrameworkBinaryPath(
+      _flutterMacOSFrameworkName,
+      environment,
+    );
+    _thinFramework(environment, flutterMacOSFrameworkBinaryPath);
+  }
+
+  void _copyFramework(
+    Artifact frameworkArtifact,
+    Environment environment,
+    BuildMode buildMode,
+  ) {
+    final String basePath = environment.artifacts.getArtifactPath(
+      frameworkArtifact,
+      mode: buildMode,
+    );
 
     final ProcessResult result = environment.processManager.runSync(<String>[
       'rsync',
@@ -65,20 +95,26 @@ abstract class UnpackMacOS extends Target {
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
-            '${result.stdout}\n---\n${result.stderr}',
+        '${result.stdout}\n---\n${result.stderr}',
       );
     }
+  }
 
+  String _getFrameworkBinaryPath(
+    String frameworkName,
+    Environment environment,
+  ) {
     final File frameworkBinary = environment.outputDir
-      .childDirectory('FlutterMacOS.framework')
+      .childDirectory('$frameworkName.framework')
       .childDirectory('Versions')
       .childDirectory('A')
-      .childFile('FlutterMacOS');
+      .childFile(frameworkName);
     final String frameworkBinaryPath = frameworkBinary.path;
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    _thinFramework(environment, frameworkBinaryPath);
+
+    return frameworkBinaryPath;
   }
 
   void _thinFramework(Environment environment, String frameworkBinaryPath) {
@@ -137,7 +173,8 @@ class ReleaseUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.release),
+    const Source.artifact(Artifact.macosFlutterFramework, mode: BuildMode.release),
+    const Source.artifact(Artifact.macosFlutterMacOSFramework, mode: BuildMode.release),
   ];
 }
 
@@ -151,7 +188,8 @@ class ProfileUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.profile),
+    const Source.artifact(Artifact.macosFlutterFramework, mode: BuildMode.profile),
+    const Source.artifact(Artifact.macosFlutterMacOSFramework, mode: BuildMode.profile),
   ];
 }
 
@@ -165,7 +203,8 @@ class DebugUnpackMacOS extends UnpackMacOS {
   @override
   List<Source> get inputs => <Source>[
     ...super.inputs,
-    const Source.artifact(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+    const Source.artifact(Artifact.macosFlutterFramework, mode: BuildMode.debug),
+    const Source.artifact(Artifact.macosFlutterMacOSFramework, mode: BuildMode.debug),
   ];
 }
 

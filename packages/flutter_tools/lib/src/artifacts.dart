@@ -20,10 +20,13 @@ enum Artifact {
   genSnapshot,
   /// The flutter tester binary.
   flutterTester,
-  flutterFramework,
-  flutterXcframework,
+  iosFlutterFramework,
+  iosFlutterXcframework,
   /// The framework directory of the macOS desktop.
-  flutterMacOSFramework,
+  macosFlutterFramework,
+  macosFlutterXcframework,
+  macosFlutterMacOSFramework,
+  macosFlutterMacOSXcframework,
   vmSnapshotData,
   isolateSnapshotData,
   icuData,
@@ -157,12 +160,18 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'gen_snapshot';
     case Artifact.flutterTester:
       return 'flutter_tester$exe';
-    case Artifact.flutterFramework:
+    case Artifact.iosFlutterFramework:
       return 'Flutter.framework';
-    case Artifact.flutterXcframework:
+    case Artifact.iosFlutterXcframework:
       return 'Flutter.xcframework';
-    case Artifact.flutterMacOSFramework:
+    case Artifact.macosFlutterFramework:
+      return 'Flutter.framework';
+    case Artifact.macosFlutterXcframework:
+      return 'Flutter.xcframework';
+    case Artifact.macosFlutterMacOSFramework:
       return 'FlutterMacOS.framework';
+    case Artifact.macosFlutterMacOSXcframework:
+      return 'FlutterMacOS.xcframework';
     case Artifact.vmSnapshotData:
       return 'vm_isolate_snapshot.bin';
     case Artifact.isolateSnapshotData:
@@ -517,11 +526,14 @@ class CachedArtifacts implements Artifacts {
       case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
-      case Artifact.flutterFramework:
-      case Artifact.flutterMacOSFramework:
+      case Artifact.iosFlutterFramework:
+      case Artifact.macosFlutterFramework:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
-      case Artifact.flutterXcframework:
+      case Artifact.iosFlutterXcframework:
+      case Artifact.macosFlutterXcframework:
+      case Artifact.macosFlutterMacOSFramework:
+      case Artifact.macosFlutterMacOSXcframework:
       case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
@@ -543,11 +555,11 @@ class CachedArtifacts implements Artifacts {
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode, EnvironmentType? environmentType) {
     switch (artifact) {
       case Artifact.genSnapshot:
-      case Artifact.flutterXcframework:
+      case Artifact.iosFlutterXcframework:
         final String artifactFileName = _artifactToFileName(artifact, _platform)!;
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _fileSystem.path.join(engineDir, artifactFileName);
-      case Artifact.flutterFramework:
+      case Artifact.iosFlutterFramework:
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _getIosEngineArtifactPath(engineDir, environmentType, _fileSystem, _platform);
       case Artifact.engineDartSdkPath:
@@ -558,7 +570,10 @@ class CachedArtifacts implements Artifacts {
       case Artifact.wasmOptBinary:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
       case Artifact.constFinder:
-      case Artifact.flutterMacOSFramework:
+      case Artifact.macosFlutterFramework:
+      case Artifact.macosFlutterXcframework:
+      case Artifact.macosFlutterMacOSFramework:
+      case Artifact.macosFlutterMacOSXcframework:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.fontSubset:
@@ -604,10 +619,13 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.constFinder:
-      case Artifact.flutterFramework:
-      case Artifact.flutterMacOSFramework:
+      case Artifact.iosFlutterFramework:
+      case Artifact.macosFlutterFramework:
+      case Artifact.macosFlutterXcframework:
+      case Artifact.macosFlutterMacOSFramework:
+      case Artifact.macosFlutterMacOSXcframework:
       case Artifact.flutterTester:
-      case Artifact.flutterXcframework:
+      case Artifact.iosFlutterXcframework:
       case Artifact.fontSubset:
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -676,7 +694,10 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
         return _fileSystem.path.join(_dartSdkPath(_cache), 'bin', _artifactToFileName(artifact, _platform));
-      case Artifact.flutterMacOSFramework:
+      case Artifact.macosFlutterFramework:
+      case Artifact.macosFlutterXcframework:
+      case Artifact.macosFlutterMacOSFramework:
+      case Artifact.macosFlutterMacOSXcframework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
       case Artifact.linuxHeaders:
@@ -701,8 +722,8 @@ class CachedArtifacts implements Artifacts {
                      .childDirectory(_enginePlatformDirectoryName(platform))
                      .childFile(_artifactToFileName(artifact, _platform, mode)!)
                      .path;
-      case Artifact.flutterFramework:
-      case Artifact.flutterXcframework:
+      case Artifact.iosFlutterFramework:
+      case Artifact.iosFlutterXcframework:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
@@ -769,7 +790,7 @@ String _getIosEngineArtifactPath(String engineDirectory,
     EnvironmentType? environmentType, FileSystem fileSystem, Platform hostPlatform) {
   final Directory xcframeworkDirectory = fileSystem
       .directory(engineDirectory)
-      .childDirectory(_artifactToFileName(Artifact.flutterXcframework, hostPlatform)!);
+      .childDirectory(_artifactToFileName(Artifact.iosFlutterXcframework, hostPlatform)!);
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".');
@@ -792,7 +813,38 @@ String _getIosEngineArtifactPath(String engineDirectory,
   }
 
   return flutterFrameworkSource
-      .childDirectory(_artifactToFileName(Artifact.flutterFramework, hostPlatform)!)
+      .childDirectory(_artifactToFileName(Artifact.iosFlutterFramework, hostPlatform)!)
+      .path;
+}
+
+String _getMacOsEngineArtifactPath(
+  String engineDirectory,
+  FileSystem fileSystem,
+  Platform hostPlatform,
+  Artifact frameworkArtifact,
+  Artifact xcframeworkArtifact,
+) {
+  final Directory xcframeworkDirectory = fileSystem
+      .directory(engineDirectory)
+      .childDirectory(_artifactToFileName(xcframeworkArtifact, hostPlatform)!);
+
+  if (!xcframeworkDirectory.existsSync()) {
+    throwToolExit('No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".');
+  }
+  Directory? flutterFrameworkSource;
+  for (final Directory platformDirectory
+      in xcframeworkDirectory.listSync().whereType<Directory>()) {
+    if (!platformDirectory.basename.startsWith('macos-')) {
+      continue;
+    }
+    flutterFrameworkSource = platformDirectory;
+  }
+  if (flutterFrameworkSource == null) {
+    throwToolExit('No macOS frameworks found in ${xcframeworkDirectory.path}');
+  }
+
+  return flutterFrameworkSource
+      .childDirectory(_artifactToFileName(frameworkArtifact, hostPlatform)!)
       .path;
 }
 
@@ -924,8 +976,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.vmSnapshotData:
         return _fileSystem.path.join(localEngineInfo.engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
       case Artifact.icuData:
-      case Artifact.flutterXcframework:
-      case Artifact.flutterMacOSFramework:
+      case Artifact.iosFlutterXcframework:
+      case Artifact.macosFlutterXcframework:
+      case Artifact.macosFlutterMacOSXcframework:
         return _fileSystem.path.join(localEngineInfo.engineOutPath, artifactFileName);
       case Artifact.platformKernelDill:
         if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
@@ -934,9 +987,25 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
       case Artifact.platformLibrariesJson:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
-      case Artifact.flutterFramework:
+      case Artifact.iosFlutterFramework:
         return _getIosEngineArtifactPath(
             localEngineInfo.engineOutPath, environmentType, _fileSystem, _platform);
+      case Artifact.macosFlutterMacOSFramework:
+        return _getMacOsEngineArtifactPath(
+          localEngineInfo.engineOutPath,
+          _fileSystem,
+          _platform,
+          artifact,
+          Artifact.macosFlutterMacOSXcframework,
+        );
+      case Artifact.macosFlutterFramework:
+        return _getMacOsEngineArtifactPath(
+          localEngineInfo.engineOutPath,
+          _fileSystem,
+          _platform,
+          artifact,
+          Artifact.macosFlutterXcframework,
+        );
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will
@@ -1113,9 +1182,12 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           );
         case Artifact.genSnapshot:
         case Artifact.flutterTester:
-        case Artifact.flutterFramework:
-        case Artifact.flutterXcframework:
-        case Artifact.flutterMacOSFramework:
+        case Artifact.iosFlutterFramework:
+        case Artifact.iosFlutterXcframework:
+        case Artifact.macosFlutterFramework:
+        case Artifact.macosFlutterXcframework:
+        case Artifact.macosFlutterMacOSFramework:
+        case Artifact.macosFlutterMacOSXcframework:
         case Artifact.vmSnapshotData:
         case Artifact.isolateSnapshotData:
         case Artifact.icuData:

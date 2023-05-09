@@ -44,7 +44,7 @@ void main() {
 
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
-        Artifact.flutterXcframework,
+        Artifact.iosFlutterXcframework,
         platform: TargetPlatform.ios,
         mode: BuildMode.release,
       );
@@ -62,7 +62,7 @@ void main() {
       );
       expect(
         () => artifacts.getArtifactPath(
-          Artifact.flutterFramework,
+          Artifact.iosFlutterFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
@@ -74,7 +74,7 @@ void main() {
       fileSystem.directory(xcframeworkPath).createSync(recursive: true);
       expect(
         () => artifacts.getArtifactPath(
-          Artifact.flutterFramework,
+          Artifact.iosFlutterFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
@@ -100,7 +100,7 @@ void main() {
           .childDirectory('Flutter.framework')
           .createSync(recursive: true);
       expect(
-        artifacts.getArtifactPath(Artifact.flutterFramework,
+        artifacts.getArtifactPath(Artifact.iosFlutterFramework,
             platform: TargetPlatform.ios,
             mode: BuildMode.release,
             environmentType: EnvironmentType.simulator),
@@ -108,7 +108,7 @@ void main() {
             .join(xcframeworkPath, 'ios-arm64_x86_64-simulator', 'Flutter.framework'),
       );
       final String actualReleaseFrameworkArtifact = artifacts.getArtifactPath(
-        Artifact.flutterFramework,
+        Artifact.iosFlutterFramework,
         platform: TargetPlatform.ios,
         mode: BuildMode.release,
         environmentType: EnvironmentType.physical,
@@ -130,7 +130,7 @@ void main() {
         anyOf(expectedArm64ReleaseFrameworkArtifact, expectedArmv7ReleaseFrameworkArtifact),
       );
       expect(
-        artifacts.getArtifactPath(Artifact.flutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
+        artifacts.getArtifactPath(Artifact.iosFlutterXcframework, platform: TargetPlatform.ios, mode: BuildMode.release),
         fileSystem.path.join('root', 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.xcframework'),
       );
       expect(
@@ -235,7 +235,7 @@ void main() {
 
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
-        Artifact.flutterXcframework,
+        Artifact.iosFlutterXcframework,
         platform: TargetPlatform.ios,
         mode: BuildMode.release,
       );
@@ -246,7 +246,7 @@ void main() {
       );
       expect(
         () => artifacts.getArtifactPath(
-          Artifact.flutterFramework,
+          Artifact.iosFlutterFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
@@ -258,7 +258,7 @@ void main() {
       fileSystem.directory(xcframeworkPath).createSync(recursive: true);
       expect(
         () => artifacts.getArtifactPath(
-          Artifact.flutterFramework,
+          Artifact.iosFlutterFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
@@ -287,7 +287,7 @@ void main() {
 
       expect(
         artifacts.getArtifactPath(
-          Artifact.flutterFramework,
+          Artifact.iosFlutterFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
@@ -297,7 +297,7 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.flutterFramework,
+          Artifact.iosFlutterFramework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.physical,
@@ -307,7 +307,7 @@ void main() {
       );
       expect(
         artifacts.getArtifactPath(
-          Artifact.flutterXcframework,
+          Artifact.iosFlutterXcframework,
           platform: TargetPlatform.ios,
           mode: BuildMode.release,
         ),

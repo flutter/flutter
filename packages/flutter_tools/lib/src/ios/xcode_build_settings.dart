@@ -13,8 +13,8 @@ import '../project.dart';
 
 String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
     Artifacts artifacts) {
-  final String flutterMacOSFramework = artifacts.getArtifactPath(
-    Artifact.flutterMacOSFramework,
+  final String flutterMacOSFramework= artifacts.getArtifactPath(
+    Artifact.macosFlutterFramework,
     platform: TargetPlatform.darwin,
     mode: mode,
   );

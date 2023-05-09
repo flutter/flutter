@@ -65,7 +65,7 @@ void main() {
         '--delete',
         '--filter',
         '- .DS_Store/',
-        'Artifact.flutterMacOSFramework.debug',
+        'Artifact.macosFlutterFramework.debug',
         environment.outputDir.path,
       ],
     );
@@ -186,7 +186,7 @@ void main() {
   testUsingContext('debug macOS application fails if App.framework missing', () async {
     fileSystem.directory(
       artifacts.getArtifactPath(
-        Artifact.flutterMacOSFramework,
+        Artifact.macosFlutterFramework,
         mode: BuildMode.debug,
       ))
       .createSync();
@@ -205,7 +205,7 @@ void main() {
   testUsingContext('debug macOS application creates correctly structured framework', () async {
     fileSystem.directory(
       artifacts.getArtifactPath(
-        Artifact.flutterMacOSFramework,
+        Artifact.macosFlutterFramework,
         mode: BuildMode.debug,
       ))
       .createSync();

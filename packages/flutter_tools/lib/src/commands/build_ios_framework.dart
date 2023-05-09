@@ -372,7 +372,7 @@ end
       ' ├─Copying Flutter.xcframework...',
     );
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
-      Artifact.flutterXcframework,
+      Artifact.iosFlutterXcframework,
       platform: TargetPlatform.ios,
       mode: buildInfo.mode,
     );

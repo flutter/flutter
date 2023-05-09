@@ -521,7 +521,7 @@ void main() {
         '--delete',
         '--filter',
         '- .DS_Store/',
-        'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+        'Artifact.iosFlutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
         outputDir.path,
       ]);
 
@@ -577,7 +577,7 @@ void main() {
           '--delete',
           '--filter',
           '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+          'Artifact.iosFlutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
           outputDir.path,
           ],
           onRun: () => binary.createSync(recursive: true),
@@ -817,7 +817,7 @@ void main() {
           '--delete',
           '--filter',
           '- .DS_Store/',
-          'Artifact.flutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
+          'Artifact.iosFlutterFramework.TargetPlatform.ios.release.EnvironmentType.physical',
           outputDir.path,
         ]),
         lipoCommandNonFatResult,

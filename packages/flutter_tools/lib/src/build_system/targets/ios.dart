@@ -260,7 +260,7 @@ abstract class UnpackIOS extends Target {
         const Source.pattern(
             '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart'),
         Source.artifact(
-          Artifact.flutterXcframework,
+          Artifact.iosFlutterXcframework,
           platform: TargetPlatform.ios,
           mode: buildMode,
         ),
@@ -304,7 +304,7 @@ abstract class UnpackIOS extends Target {
   void _copyFramework(Environment environment, String sdkRoot) {
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
-      Artifact.flutterFramework,
+      Artifact.iosFlutterFramework,
       platform: TargetPlatform.ios,
       mode: buildMode,
       environmentType: environmentType,
