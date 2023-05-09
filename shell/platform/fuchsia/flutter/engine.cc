@@ -582,7 +582,7 @@ void Engine::Initialize(
                    session_connection_->AwaitVsyncForSecondaryCallback(cb);
                  }
                },
-           product_config](flutter::Shell& shell) mutable {
+           product_config, svc](flutter::Shell& shell) mutable {
             OnShaderWarmup on_shader_warmup = nullptr;
             if (product_config.enable_shader_warmup()) {
               FML_DCHECK(surface_producer_);
@@ -636,7 +636,8 @@ void Engine::Initialize(
                       std::move(on_request_announce_callback),
                       std::move(on_shader_warmup),
                       std::move(await_vsync_callback),
-                      std::move(await_vsync_for_secondary_callback_callback));
+                      std::move(await_vsync_for_secondary_callback_callback),
+                      std::move(svc));
             } else {
               platform_view = std::make_unique<flutter_runner::GfxPlatformView>(
                   shell, shell.GetTaskRunners(), std::move(view_ref),
@@ -655,7 +656,8 @@ void Engine::Initialize(
                   std::move(on_semantics_node_update_callback),
                   std::move(on_request_announce_callback),
                   std::move(on_shader_warmup), std::move(await_vsync_callback),
-                  std::move(await_vsync_for_secondary_callback_callback));
+                  std::move(await_vsync_for_secondary_callback_callback),
+                  std::move(svc));
             }
             return platform_view;
           });

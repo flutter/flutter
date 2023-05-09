@@ -10,6 +10,7 @@
 #include <fuchsia/ui/input3/cpp/fidl.h>
 #include <fuchsia/ui/pointer/cpp/fidl.h>
 #include <fuchsia/ui/scenic/cpp/fidl.h>
+#include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <lib/fidl/cpp/binding.h>
 #include <lib/fit/function.h>
 #include <lib/sys/cpp/service_directory.h>
@@ -84,7 +85,8 @@ class PlatformView : public flutter::PlatformView {
       OnShaderWarmup on_shader_warmup,
       AwaitVsyncCallback await_vsync_callback,
       AwaitVsyncForSecondaryCallbackCallback
-          await_vsync_for_secondary_callback_callback);
+          await_vsync_for_secondary_callback_callback,
+      std::shared_ptr<sys::ServiceDirectory> dart_application_svc);
 
   ~PlatformView() override;
 
@@ -136,6 +138,14 @@ class PlatformView : public flutter::PlatformView {
       OnShaderWarmup on_shader_warmup,
       std::unique_ptr<flutter::PlatformMessage> message);
 
+  // Channel handler for kFuchsiaInputTestChannel.
+  bool HandleFuchsiaInputTestChannelPlatformMessage(
+      std::unique_ptr<flutter::PlatformMessage> message);
+
+  // Channel handler for kFuchsiaChildViewChannel.
+  bool HandleFuchsiaChildViewChannelPlatformMessage(
+      std::unique_ptr<flutter::PlatformMessage> message);
+
   virtual void OnCreateView(ViewCallback on_view_created,
                             int64_t view_id_raw,
                             bool hit_testable,
@@ -185,6 +195,14 @@ class PlatformView : public flutter::PlatformView {
   AwaitVsyncCallback await_vsync_callback_;
   AwaitVsyncForSecondaryCallbackCallback
       await_vsync_for_secondary_callback_callback_;
+
+  // Proxies for input tests.
+  fuchsia::ui::test::input::TouchInputListenerPtr touch_input_listener_;
+  fuchsia::ui::test::input::KeyboardInputListenerPtr keyboard_input_listener_;
+  fuchsia::ui::test::input::MouseInputListenerPtr mouse_input_listener_;
+
+  // Component's service directory.
+  std::shared_ptr<sys::ServiceDirectory> dart_application_svc_;
 
   fml::WeakPtrFactory<PlatformView> weak_factory_;  // Must be the last member.
 
