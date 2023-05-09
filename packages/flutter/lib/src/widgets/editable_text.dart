@@ -3151,7 +3151,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
-      _updateSizeAndTransform();
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
         ..setStyle(
