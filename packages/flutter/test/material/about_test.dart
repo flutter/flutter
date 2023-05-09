@@ -150,9 +150,7 @@ void main() {
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -203,9 +201,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     LicenseRegistry.addLicense(() {
@@ -408,9 +404,7 @@ void main() {
     );
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -433,11 +427,9 @@ void main() {
     final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
     licenseCompleter.complete(licenseEntry);
     expect(licenseEntry.packagesCalled, false);
-  });
+  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -460,7 +452,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(licenseEntry.packagesCalled, true);
-  });
+  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
 
   testWidgetsWithLeakTracking('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1075,9 +1067,7 @@ void main() {
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1138,11 +1128,9 @@ void main() {
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
-  });
+  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1203,7 +1191,7 @@ void main() {
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
-  });
+  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
 
   testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
