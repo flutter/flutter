@@ -1049,6 +1049,8 @@ Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { i
   const Set<String> extensions = <String>{
     '.dart',
     '.java',
+    '.js',
+    '.kt',
     '.swift',
     '.c',
     '.cc',
