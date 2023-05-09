@@ -515,14 +515,6 @@ class XCDevice {
             if (errorMessage.contains('not paired')) {
               UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
             }
-
-            if (errorMessage.contains('enable Developer Mode')) {
-              // _logger.printStatus(errorMessage);
-              devModeEnabled = false;
-              // continue;
-            }
-
-            // _logger.printTrace(errorMessage);
           }
 
           final int? code = _errorCode(errorProperties);
@@ -532,6 +524,10 @@ class XCDevice {
           // Other times this is a false positive and the app will successfully launch despite the error.
           if (code != -10) {
             isConnected = false;
+          }
+
+          if (code == 6) {
+            devModeEnabled = false;
           }
         }
 

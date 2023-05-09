@@ -2695,6 +2695,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
+    this.devModeEnabled = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.attached,
   })  : id = deviceId ?? 'xxx',
@@ -2710,6 +2711,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     this.ephemeral = true,
     this.isConnected = false,
     this.platformType = PlatformType.ios,
+    this.devModeEnabled = true,
     this.connectionInterface = DeviceConnectionInterface.wireless,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
@@ -2723,6 +2725,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
+    this.devModeEnabled = true,
     this.platformType = PlatformType.ios,
     this.connectionInterface = DeviceConnectionInterface.wireless,
   })  : id = deviceId ?? 'xxx',
@@ -2738,6 +2741,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   final bool ephemeral;
+
+  @override
+  final bool devModeEnabled;
 
   @override
   String id;

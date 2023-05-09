@@ -183,8 +183,6 @@ class TargetDevices {
       return _handleNoDevices();
     } else if (_deviceManager.hasSpecifiedAllDevices) {
       return allDevices;
-    } else if (allDevices.length == 1 && _deviceManager.hasSpecifiedDeviceId) {
-      return _handleDisabledIosDevice(allDevices[0]);
     } else if (allDevices.length > 1) {
       return _handleMultipleDevices(attachedDevices, wirelessDevices);
     }
@@ -231,7 +229,7 @@ class TargetDevices {
     if (device is IOSDevice) {
       if (!device.devModeEnabled) {
         _logger.printStatus(
-          userMessages.flutterSpecifiedDeviceDevModeDisabled(_deviceManager.specifiedDeviceId!),
+          userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
         );
       }
     }
@@ -516,13 +514,12 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         includeDisconnected: true,
       );
+
       if (devices.length == 1) {
         Device? matchedDevice = devices.first;
 
-        if (matchedDevice is IOSDevice) {
-          if (!matchedDevice.devModeEnabled) {
-            return _handleDisabledIosDevice(matchedDevice);
-          }
+        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled) {
+          return _handleDisabledIosDevice(matchedDevice);
         }
 
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
@@ -531,6 +528,16 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
         if (matchedDevice != null && matchedDevice.isConnected) {
           return <Device>[matchedDevice];
+        }
+      }
+
+      if (devices.length > 1) {
+        for (Device device in devices) {
+          if (device is IOSDevice && !device.devModeEnabled) {
+            _logger.printStatus(
+              userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
+            );
+          }
         }
       }
     }

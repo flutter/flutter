@@ -271,8 +271,8 @@ class UserMessages {
       'for information about installing additional components.';
   String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
       "matching '$deviceId'.";
-  String flutterSpecifiedDeviceDevModeDisabled(String deviceId) => 'To use '
-      "'$deviceId' for development, enable Developer Mode in Settings → Privacy & Security. ";
+  String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
+      "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security. ";
   String get flutterNoDevicesFound => 'No devices found.';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>
