@@ -1,0 +1,114 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# See https://github.com/actions/labeler/blob/main/README.md for docs.
+'a: accessibility':
+  - any:
+    - accessibility
+    - semantics
+
+'a: animation':
+  - any:
+    - animation
+
+'a: internationalization':
+  - any:
+    - packages/flutter_localizations/**
+
+'a: test':
+  - any:
+    - packages/flutter_driver/**
+    - packages/flutter_goldens/**
+    - packages/flutter_goldens_client/**
+    - packages/flutter_test/**
+
+'a: text input':
+  - any:
+    - text
+
+'d: api docs':
+  - any:
+    - examples/api/**
+
+'d: examples':
+  - any:
+    - examples/**
+
+documentation:
+  - any:
+    - examples/api/**
+
+engine:
+  - any:
+    - bin/internal/engine.version
+
+'f: cupertino':
+  - any:
+    - cupertino
+
+'f: focus':
+  - any:
+    - focus
+
+'f: gestures':
+  - any:
+    - gestures
+
+'f: material':
+  - any:
+    - material
+
+'f: routes':
+  - any:
+    - navigator
+    - route
+
+'f: scrolling':
+  - any:
+    - scroll
+    - sliver
+    - viewport
+
+framework:
+  - any:
+    - packages/flutter/**
+    - packages/flutter_driver/**
+    - packages/flutter_goldens/**
+    - packages/flutter_goldens_client/**
+    - packages/flutter_test/**
+    - packages/integration_test/**
+
+integration_test:
+  - any:
+    - packages/integration_test/**
+
+platform-ios:
+  - any:
+    - packages/flutter_tools/lib/src/ios/**
+
+team:
+  - any:
+    - '**/pubspec.yaml'
+    - '**/fix_data.yaml'
+    - '**/*.expect'
+    - '**/*test_fixes*'
+    - dev/**
+    - examples/**
+    - packages/flutter_goldens/**
+    - packages/flutter_goldens_client/**
+
+'team: gallery':
+  - any:
+    - examples/flutter_gallery/**
+
+tech-debt:
+  - any:
+    - '**/fix_data.yaml'
+    - '**/*.expect'
+    - '**/*test_fixes*'
+
+tool:
+  - any:
+    - packages/flutter_tools/**
+    - packages/fuchsia_remote_debug_protocol/**
