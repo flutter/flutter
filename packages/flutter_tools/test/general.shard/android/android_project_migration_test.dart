@@ -284,7 +284,7 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 
 class FakeErroringJava extends FakeJava {
   @override
-  JavaVersion getVersion() {
+  JavaVersion version() {
     throw Exception('How did this happen?');
   }
 }

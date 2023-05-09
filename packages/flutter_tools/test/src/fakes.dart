@@ -612,7 +612,7 @@ class FakeJava extends Fake implements Java {
     JavaVersion? version,
     bool canRun = true,
   }): binaryPath = binary,
-      _version = version ?? JavaVersion(
+      version = version ?? JavaVersion(
        longText: 'openjdk 19.0.2 2023-01-17',
        number: '19.0.2',
       ),
@@ -629,16 +629,13 @@ class FakeJava extends Fake implements Java {
   String binaryPath;
 
   final Map<String, String> _environment;
-  final JavaVersion? _version;
   final bool _canRun;
 
   @override
   Map<String, String> get environment => _environment;
 
   @override
-  JavaVersion? getVersion() {
-    return _version;
-  }
+  JavaVersion? version;
 
   @override
   bool canRun() {
