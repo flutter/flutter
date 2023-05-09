@@ -1985,7 +1985,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _size ?? (throw AssertionError('RenderBox was not laid out: $this'));
+    return _size ?? (throw StateError('RenderBox was not laid out: $this'));
   }
   Size? _size;
   /// Setting the size, in debug mode, triggers some analysis of the render box,
