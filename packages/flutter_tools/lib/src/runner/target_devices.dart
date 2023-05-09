@@ -183,6 +183,8 @@ class TargetDevices {
       return _handleNoDevices();
     } else if (_deviceManager.hasSpecifiedAllDevices) {
       return allDevices;
+    } else if (allDevices.length == 1 && _deviceManager.hasSpecifiedDeviceId) {
+      return _handleDisabledIosDevice(allDevices[0]);
     } else if (allDevices.length > 1) {
       return _handleMultipleDevices(attachedDevices, wirelessDevices);
     }
@@ -215,6 +217,30 @@ class TargetDevices {
         ? _noDevicesFoundMessage
         : userMessages.flutterNoSupportedDevices);
     await _printUnsupportedDevice(unsupportedDevices);
+    return null;
+  }
+
+  Future<List<Device>?> _handleDisabledIosDevice(Device device) async {
+    // Get connected devices from cache, including unsupported ones.
+    final List<Device> unsupportedDevices = await _deviceManager.getAllDevices(
+        filter: DeviceDiscoveryFilter(
+          deviceConnectionInterface: deviceConnectionInterface,
+        )
+    );
+
+    if (device is IOSDevice) {
+      if (!device.devModeEnabled) {
+        _logger.printStatus(
+          userMessages.flutterSpecifiedDeviceDevModeDisabled(_deviceManager.specifiedDeviceId!),
+        );
+      }
+    }
+
+    if (unsupportedDevices.isNotEmpty) {
+      _logger.printStatus('');
+      _logger.printStatus('The following devices were found:');
+      await Device.printDevices(unsupportedDevices, _logger);
+    }
     return null;
   }
 
@@ -493,12 +519,11 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       if (devices.length == 1) {
         Device? matchedDevice = devices.first;
 
-        // if (matchedDevice is IOSDevice) {
-        //   final bool devModeEnabled = await matchedDevice.isDeveloperModeEnabled();
-        //   if (!devModeEnabled) {
-        //     throwToolExit('');
-        //   }
-        // }
+        if (matchedDevice is IOSDevice) {
+          if (!matchedDevice.devModeEnabled) {
+            return _handleDisabledIosDevice(matchedDevice);
+          }
+        }
 
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
           matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);

@@ -506,7 +506,7 @@ class XCDevice {
         if (identifier == null || name == null) {
           continue;
         }
-
+        bool devModeEnabled = true;
         bool isConnected = true;
         final Map<String, Object?>? errorProperties = _errorProperties(device);
         if (errorProperties != null) {
@@ -517,10 +517,12 @@ class XCDevice {
             }
 
             if (errorMessage.contains('enable Developer Mode')) {
-              _logger.printStatus(errorMessage);
-              continue;
+              // _logger.printStatus(errorMessage);
+              devModeEnabled = false;
+              // continue;
             }
-            _logger.printTrace(errorMessage);
+
+            // _logger.printTrace(errorMessage);
           }
 
           final int? code = _errorCode(errorProperties);
@@ -555,6 +557,7 @@ class XCDevice {
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           platform: globals.platform,
+          devModeEnabled: devModeEnabled
         ));
       }
     }

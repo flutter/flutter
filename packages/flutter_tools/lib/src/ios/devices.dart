@@ -262,6 +262,7 @@ class IOSDevice extends Device {
     required this.connectionInterface,
     required this.isConnected,
     String? sdkVersion,
+    this.devModeEnabled = true,
     required Platform platform,
     required IOSDeploy iosDeploy,
     required IMobileDevice iMobileDevice,
@@ -287,6 +288,7 @@ class IOSDevice extends Device {
   }
 
   final String? _sdkVersion;
+
   final IOSDeploy _iosDeploy;
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -303,6 +305,9 @@ class IOSDevice extends Device {
   @override
   final String name;
 
+  final bool devModeEnabled;
+
+
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
@@ -318,6 +323,7 @@ class IOSDevice extends Device {
 
   @override
   bool isConnected;
+
 
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
@@ -641,7 +647,7 @@ class IOSDevice extends Device {
         deviceId: id
     );
     if (!enabled) {
-      _logger.printError('To use $name for development, enable Developer Mode in Settings → Privacy & Security.');
+      // _logger.printError('To use $name for development, enable Developer Mode in Settings → Privacy & Security.');
       return false;
     }
     return true;
