@@ -36,8 +36,8 @@ class Java {
   ///
   /// This searches for Java in the following places, in order:
   ///
-  /// 1. the runtime bundled with Android Studio;
-  /// 2. the runtime found in the JAVA_HOME env variable, if set; or
+  /// 1. the runtime environment bundled with Android Studio;
+  /// 2. the runtime environment found in the JAVA_HOME env variable, if set; or
   /// 3. the java binary found on PATH.
   ///
   /// Returns null if no java binary could be found.
