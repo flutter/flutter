@@ -3155,7 +3155,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // function is executed, we may be in build phase, while the
       // _updateSizeAndTransform may need layout phase information.
       // See https://github.com/flutter/flutter/issues/126312 for more details.
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => _updateSizeAndTransform());
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        if (_textInputConnection != null) {
+          _updateSizeAndTransform();
+        }
+      });
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
         ..setStyle(
