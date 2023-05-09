@@ -51,6 +51,9 @@ class HtmlFontCollection implements FlutterFontCollection {
     return _loadFontFaceBytes(fontFamily, list);
   }
 
+  @override
+  Null get fontFallbackManager => null;
+
   /// Unregister all fonts that have been registered.
   @override
   void clear() {
@@ -170,5 +173,9 @@ class HtmlFontCollection implements FlutterFontCollection {
       return false;
     }
     return true;
+  }
+
+  @override
+  void debugResetFallbackFonts() {
   }
 }

@@ -205,8 +205,13 @@ class SkwasmCanvas implements ui.Canvas {
   }
 
   @override
-  void drawParagraph(ui.Paragraph uiParagraph, ui.Offset offset) {
-    // TODO(jacksongardner): implement this
+  void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
+    canvasDrawParagraph(
+      _handle,
+      (paragraph as SkwasmParagraph).handle,
+      offset.dx,
+      offset.dy,
+    );
   }
 
   @override

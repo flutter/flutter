@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:web_engine_tester/golden_tester.dart';
 
-import 'common.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -22,99 +22,102 @@ const ui.Rect kDefaultRegion = ui.Rect.fromLTRB(0, 0, 100, 100);
 
 void testMain() {
   group('Font fallbacks', () {
-    setUpCanvasKitTest();
+    setUpUnitTests(
+      emulateTesterEnvironment: false,
+      setUpTestViewDimensions: false,
+    );
 
-    setUpAll(() {
+    setUp(() {
       debugDisableFontFallbacks = false;
     });
 
     /// Used to save and restore [ui.window.onPlatformMessage] after each test.
     ui.PlatformMessageCallback? savedCallback;
 
+    final List<String> downloadedFontFamilies = <String>[];
+
     setUp(() {
-      FontFallbackData.debugReset();
-      notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
+      renderer.fontCollection.debugResetFallbackFonts();
+      renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
+      renderer.fontCollection.fontFallbackManager!.downloadQueue.debugOnLoadFontFamily
+        = (String family) => downloadedFontFamilies.add(family);
       savedCallback = ui.window.onPlatformMessage;
     });
 
     tearDown(() {
+      downloadedFontFamilies.clear();
       ui.window.onPlatformMessage = savedCallback;
     });
 
     test('Roboto is always a fallback font', () {
-      expect(FontFallbackData.instance.globalFontFallbacks, contains('Roboto'));
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, contains('Roboto'));
     });
 
     test('will download Noto Sans Arabic if Arabic text is added', () async {
-      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
-      CkParagraphBuilder pb = CkParagraphBuilder(
-        CkParagraphStyle(),
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
       );
       pb.addText('مرحبا');
 
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
-      expect(FontFallbackData.instance.globalFontFallbacks,
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
           contains('Noto Sans Arabic'));
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
 
-      pb = CkParagraphBuilder(
-        CkParagraphStyle(),
+      pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
       );
       pb.pushStyle(ui.TextStyle(fontSize: 32));
       pb.addText('مرحبا');
       pb.pop();
-      final CkParagraph paragraph = pb.build();
+      final ui.Paragraph paragraph = pb.build();
       paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
       canvas.drawParagraph(paragraph, ui.Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
-      await matchPictureGolden(
-        'canvaskit_font_fallback_arabic.png',
-        recorder.endRecording(),
+      await matchGoldenFile(
+        'ui_font_fallback_arabic.png',
         region: kDefaultRegion,
       );
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
-    }, skip: isSafari || isFirefox);
+    });
 
     test('will put the Noto Color Emoji font before other fallback fonts in the list',
         () async {
-      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // Arabic fallback font.
-      CkParagraphBuilder pb = CkParagraphBuilder(
-        CkParagraphStyle(),
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
       );
       pb.addText('مرحبا');
 
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
-      expect(FontFallbackData.instance.globalFontFallbacks,
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
           <String>['Roboto', 'Noto Sans Arabic']);
 
-      pb = CkParagraphBuilder(
-        CkParagraphStyle(),
+      pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
       );
       pb.pushStyle(ui.TextStyle(fontSize: 26));
       pb.addText('Hello 😊 مرحبا');
       pb.pop();
-      final CkParagraph paragraph = pb.build();
+      final ui.Paragraph paragraph = pb.build();
       paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
-      expect(FontFallbackData.instance.globalFontFallbacks, <String>[
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
         'Roboto',
         'Noto Color Emoji',
         'Noto Sans Arabic',
@@ -123,61 +126,54 @@ void testMain() {
 
     test('will download Noto Color Emojis and Noto Symbols if no matching Noto Font',
         () async {
-      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      expect(FontFallbackData.instance.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
-      CkParagraphBuilder pb = CkParagraphBuilder(
-        CkParagraphStyle(),
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
       );
       pb.addText('Hello 😊');
 
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
-      expect(FontFallbackData.instance.globalFontFallbacks,
+      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
           contains('Noto Color Emoji'));
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas = recorder.beginRecording(kDefaultRegion);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
 
-      pb = CkParagraphBuilder(
-        CkParagraphStyle(),
+      pb = ui.ParagraphBuilder(
+        ui.ParagraphStyle(),
       );
       pb.pushStyle(ui.TextStyle(fontSize: 26));
       pb.addText('Hello 😊');
       pb.pop();
-      final CkParagraph paragraph = pb.build();
+      final ui.Paragraph paragraph = pb.build();
       paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
       canvas.drawParagraph(paragraph, ui.Offset.zero);
+      await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
-      await matchPictureGolden(
-        'canvaskit_font_fallback_emoji.png',
-        recorder.endRecording(),
+      await matchGoldenFile(
+        'ui_font_fallback_emoji.png',
         region: kDefaultRegion,
       );
       // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
-    }, skip: isSafari || isFirefox);
+    });
 
     // Regression test for https://github.com/flutter/flutter/issues/75836
     // When we had this bug our font fallback resolution logic would end up in an
     // infinite loop and this test would freeze and time out.
     test(
-        'Can find fonts for two adjacent unmatched code units from different fonts',
+        'Can find fonts for two adjacent unmatched code points from different fonts',
         () async {
-      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      final LoggingDownloader loggingDownloader =
-          LoggingDownloader(NotoDownloader());
-      notoDownloadQueue.downloader = loggingDownloader;
       // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
 
-      CkParagraphBuilder(CkParagraphStyle()).addText('ヽಠ');
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
+      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('ヽಠ');
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
       expect(
-        loggingDownloader.log,
+        downloadedFontFamilies,
         <String>[
           'Noto Sans SC',
           'Noto Sans Kannada',
@@ -185,60 +181,49 @@ void testMain() {
       );
 
       // Do the same thing but this time with loaded fonts.
-      loggingDownloader.log.clear();
-      CkParagraphBuilder(CkParagraphStyle()).addText('ヽಠ');
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
-      expect(loggingDownloader.log, isEmpty);
+      downloadedFontFamilies.clear();
+      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('ヽಠ');
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      expect(downloadedFontFamilies, isEmpty);
     });
 
     test('can find glyph for 2/3 symbol', () async {
-      final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      final LoggingDownloader loggingDownloader =
-          LoggingDownloader(NotoDownloader());
-      notoDownloadQueue.downloader = loggingDownloader;
       // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
 
-      CkParagraphBuilder(CkParagraphStyle()).addText('⅔');
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
+      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('⅔');
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
       expect(
-        loggingDownloader.log,
+        downloadedFontFamilies,
         <String>[
           'Noto Sans',
         ],
       );
 
       // Do the same thing but this time with loaded fonts.
-      loggingDownloader.log.clear();
-      CkParagraphBuilder(CkParagraphStyle()).addText('⅔');
-      rasterizer.debugRunPostFrameCallbacks();
-      await notoDownloadQueue.debugWhenIdle();
-      expect(loggingDownloader.log, isEmpty);
+      downloadedFontFamilies.clear();
+      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('⅔');
+      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      expect(downloadedFontFamilies, isEmpty);
     });
 
-    test('findMinimumFontsForCodeunits for all supported code units', () async {
-      final LoggingDownloader loggingDownloader =
-          LoggingDownloader(NotoDownloader());
-      notoDownloadQueue.downloader = loggingDownloader;
-
-      // Collect all supported code units from all fallback fonts in the Noto
+    test('findMinimumFontsForCodePoints for all supported code points', () async {
+      // Collect all supported code points from all fallback fonts in the Noto
       // font tree.
       final Set<String> testedFonts = <String>{};
-      final Set<int> supportedUniqueCodeUnits = <int>{};
+      final Set<int> supportedUniqueCodePoints = <int>{};
       final IntervalTree<NotoFont> notoTree =
-          FontFallbackData.instance.notoTree;
-      for (final NotoFont font in FontFallbackData.instance.fallbackFonts) {
+          renderer.fontCollection.fontFallbackManager!.notoTree;
+      for (final NotoFont font in renderer.fontCollection.fontFallbackManager!.fallbackFonts) {
         testedFonts.add(font.name);
-        for (final CodeunitRange range in font.computeUnicodeRanges()) {
-          for (int codeUnit = range.start; codeUnit < range.end; codeUnit++) {
-            supportedUniqueCodeUnits.add(codeUnit);
+        for (final CodePointRange range in font.computeUnicodeRanges()) {
+          for (int codePoint = range.start; codePoint < range.end; codePoint++) {
+            supportedUniqueCodePoints.add(codePoint);
           }
         }
       }
 
       expect(
-          supportedUniqueCodeUnits.length, greaterThan(10000)); // sanity check
+          supportedUniqueCodePoints.length, greaterThan(10000)); // sanity check
       expect(
           testedFonts,
           unorderedEquals(<String>{
@@ -385,9 +370,9 @@ void testMain() {
             'Noto Sans Zanabazar Square',
           }));
 
-      // Construct random paragraphs out of supported code units.
+      // Construct random paragraphs out of supported code points.
       final math.Random random = math.Random(0);
-      final List<int> supportedCodeUnits = supportedUniqueCodeUnits.toList()
+      final List<int> supportedCodePoints = supportedUniqueCodePoints.toList()
         ..shuffle(random);
       const int paragraphLength = 3;
       const int totalTestSize = 1000;
@@ -396,27 +381,27 @@ void testMain() {
           batchStart < totalTestSize;
           batchStart += paragraphLength) {
         final int batchEnd =
-            math.min(batchStart + paragraphLength, supportedCodeUnits.length);
-        final Set<int> codeUnits = <int>{};
+            math.min(batchStart + paragraphLength, supportedCodePoints.length);
+        final Set<int> codePoints = <int>{};
         for (int i = batchStart; i < batchEnd; i += 1) {
-          codeUnits.add(supportedCodeUnits[i]);
+          codePoints.add(supportedCodePoints[i]);
         }
         final Set<NotoFont> fonts = <NotoFont>{};
-        for (final int codeUnit in codeUnits) {
-          final List<NotoFont> fontsForUnit = notoTree.intersections(codeUnit);
+        for (final int codePoint in codePoints) {
+          final List<NotoFont> fontsForPoint = notoTree.intersections(codePoint);
 
-          // All code units are extracted from the same tree, so there must
-          // be at least one font supporting each code unit
-          expect(fontsForUnit, isNotEmpty);
-          fonts.addAll(fontsForUnit);
+          // All code points are extracted from the same tree, so there must
+          // be at least one font supporting each code point
+          expect(fontsForPoint, isNotEmpty);
+          fonts.addAll(fontsForPoint);
         }
 
         try {
-          FontFallbackData.instance.findMinimumFontsForCodeUnits(codeUnits, fonts);
+          renderer.fontCollection.fontFallbackManager!.findMinimumFontsForCodePoints(codePoints, fonts);
         } catch (e) {
           print(
-            'findMinimumFontsForCodeunits failed:\n'
-            '  Code units: ${codeUnits.join(', ')}\n'
+            'findMinimumFontsForCodePoints failed:\n'
+            '  Code points: ${codePoints.join(', ')}\n'
             '  Fonts: ${fonts.map((NotoFont f) => f.name).join(', ')}',
           );
           rethrow;
@@ -424,75 +409,7 @@ void testMain() {
       }
     });
   },
-  skip: isSafari,
+  // HTML renderer doesn't use the fallback font manager.
+  skip: isHtml,
   timeout: const Timeout.factor(4));
-}
-
-class TestDownloader extends NotoDownloader {
-  // Where to redirect downloads to.
-  static final Map<String, String> mockDownloads = <String, String>{};
-  @override
-  Future<String> downloadAsString(String url,
-      {String? debugDescription}) async {
-    if (mockDownloads.containsKey(url)) {
-      url = mockDownloads[url]!;
-      final Uri uri = Uri.parse(url);
-      expect(uri.isScheme('http'), isFalse);
-      expect(uri.isScheme('https'), isFalse);
-      return super.downloadAsString(url);
-    } else {
-      return '';
-    }
-  }
-
-  @override
-  Future<ByteBuffer> downloadAsBytes(String url, {String? debugDescription}) {
-    if (mockDownloads.containsKey(url)) {
-      url = mockDownloads[url]!;
-      final Uri uri = Uri.parse(url);
-      expect(uri.isScheme('http'), isFalse);
-      expect(uri.isScheme('https'), isFalse);
-      return super.downloadAsBytes(url);
-    } else {
-      return Future<ByteBuffer>.value(Uint8List(0).buffer);
-    }
-  }
-}
-
-class LoggingDownloader implements NotoDownloader {
-  LoggingDownloader(this.delegate);
-
-  final List<String> log = <String>[];
-
-  final NotoDownloader delegate;
-
-  @override
-  Future<void> debugWhenIdle() {
-    return delegate.debugWhenIdle();
-  }
-
-  @override
-  Future<ByteBuffer> downloadAsBytes(String url, {String? debugDescription}) {
-    log.add(debugDescription ?? url);
-    return delegate.downloadAsBytes(url);
-  }
-
-  @override
-  Future<String> downloadAsString(String url, {String? debugDescription}) {
-    log.add(debugDescription ?? url);
-    return delegate.downloadAsString(url);
-  }
-
-  @override
-  int get debugActiveDownloadCount => delegate.debugActiveDownloadCount;
-
-  @override
-  String? get fallbackFontUrlPrefixOverride =>
-    delegate.fallbackFontUrlPrefixOverride;
-
-  @override set fallbackFontUrlPrefixOverride(String? override) =>
-    delegate.fallbackFontUrlPrefixOverride;
-
-  @override
-  String get fallbackFontUrlPrefix => delegate.fallbackFontUrlPrefix;
 }

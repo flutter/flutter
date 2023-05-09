@@ -229,6 +229,9 @@ class TextDecoration {
   }
 
   final int _mask;
+
+  int get maskValue => _mask;
+
   bool contains(TextDecoration other) {
     return (_mask | other._mask) == _mask;
   }
@@ -634,7 +637,18 @@ abstract class LineMetrics {
     required double left,
     required double baseline,
     required int lineNumber,
-  }) = engine.EngineLineMetrics;
+  }) => engine.renderer.createLineMetrics(
+    hardBreak: hardBreak,
+    ascent: ascent,
+    descent: descent,
+    unscaledAscent: unscaledAscent,
+    height: height,
+    width: width,
+    left: left,
+    baseline: baseline,
+    lineNumber: lineNumber,
+  );
+
   bool get hardBreak;
   double get ascent;
   double get descent;

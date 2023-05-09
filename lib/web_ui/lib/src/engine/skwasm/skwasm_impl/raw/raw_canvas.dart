@@ -137,6 +137,19 @@ external void canvasDrawShadow(
   bool transparentOccluder,
 );
 
+@Native<Void Function(
+  CanvasHandle,
+  ParagraphHandle,
+  Float,
+  Float,
+)>(symbol: 'canvas_drawParagraph', isLeaf: true)
+external void canvasDrawParagraph(
+  CanvasHandle handle,
+  ParagraphHandle paragraphHandle,
+  double x,
+  double y,
+);
+
 @Native<Void Function(CanvasHandle, RawMatrix44)>(
     symbol: 'canvas_getTransform', isLeaf: true)
 external void canvasGetTransform(CanvasHandle canvas, RawMatrix44 outMatrix);

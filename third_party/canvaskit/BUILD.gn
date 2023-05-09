@@ -71,11 +71,13 @@ copy("canvaskit_chromium_group") {
 # This toolchain is only to be used by skwasm_group below.
 wasm_toolchain("skwasm") {
   extra_toolchain_args = {
-    # In Chromium browsers, we can use the browser's APIs to get the necessary
-    # ICU data.
-    skia_use_icu = false
-    skia_use_client_icu = true
-    skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
+    # Include ICU data. Eventually we'd like to omit this, like we do in the
+    # canvaskit_chromium build, but as of right now the client ICU APIs are
+    # only available in private skia headers, which we can't include in our own
+    # sources. Once skia provides this capability in their public headers, we
+    # can use client ICU instead.
+    skia_use_icu = true
+    skia_use_client_icu = false
 
     skia_use_libjpeg_turbo_decode = false
     skia_use_libpng_decode = false
