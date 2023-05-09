@@ -1043,7 +1043,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
   }
 }
 
-final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|for|do|while)\(');
+final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|for|do|while|catch)\(');
 
 Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
   const Set<String> extensions = <String>{
