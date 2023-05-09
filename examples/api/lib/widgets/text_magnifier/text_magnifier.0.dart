@@ -17,8 +17,6 @@ class TextMagnifierExampleApp extends StatelessWidget {
   final TextDirection textDirection;
   final String text;
 
-  static const Size loupeSize = Size(200, 200);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
