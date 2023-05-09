@@ -99,11 +99,10 @@ class HashUrlStrategy extends ui_web.UrlStrategy {
   String prepareExternalUrl(String internalUrl) {
     // It's convention that if the hash path is empty, we omit the `#`; however,
     // if the empty URL is pushed it won't replace any existing fragment. So
-    // when the hash path is empty, we instead return the location's path and
+    // when the hash path is empty, we still return the location's path and
     // query.
-    return internalUrl.isEmpty
-        ? '${_platformLocation.pathname}${_platformLocation.search}'
-        : '#$internalUrl';
+    return '${_platformLocation.pathname}${_platformLocation.search}'
+        '${internalUrl.isEmpty ? '' : '#$internalUrl'}';
   }
 
   @override
