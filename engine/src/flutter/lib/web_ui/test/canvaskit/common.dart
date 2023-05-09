@@ -22,19 +22,17 @@ void setUpCanvasKitTest() {
     setUpTestViewDimensions: false,
   );
 
-  setUpAll(() {
-    // Ahem must be added to font fallbacks list regardless of where it was
-    // downloaded from.
-    FontFallbackData.instance.globalFontFallbacks.add('Ahem');
-  });
-
   tearDown(() {
     HtmlViewEmbedder.instance.debugClear();
     SurfaceFactory.instance.debugClear();
   });
 
-  setUp(() => notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/');
-  tearDown(() => notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = null);
+  setUp(() =>
+    renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefixOverride
+      = 'assets/fallback_fonts/');
+  tearDown(() =>
+    renderer.fontCollection.fontFallbackManager!.downloadQueue.fallbackFontUrlPrefixOverride
+      = null);
 }
 
 /// Utility function for CanvasKit tests to draw pictures without

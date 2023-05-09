@@ -105,7 +105,8 @@ class SkwasmRenderer implements Renderer {
   ui.Paint createPaint() => SkwasmPaint();
 
   @override
-  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) => SkwasmParagraphBuilder();
+  ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
+    SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
 
   @override
   ui.ParagraphStyle createParagraphStyle({
@@ -120,7 +121,20 @@ class SkwasmRenderer implements Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale
-  }) => SkwasmParagraphStyle();
+  }) => SkwasmParagraphStyle(
+    textAlign: textAlign,
+    textDirection: textDirection,
+    maxLines: maxLines,
+    fontFamily: fontFamily,
+    fontSize: fontSize,
+    height: height,
+    textHeightBehavior: textHeightBehavior,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    strutStyle: strutStyle,
+    ellipsis: ellipsis,
+    locale: locale,
+  );
 
   @override
   ui.Path createPath() => SkwasmPath();
@@ -159,9 +173,17 @@ class SkwasmRenderer implements Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight
-  }) {
-    throw UnimplementedError('createStrutStyle not yet implemented');
-  }
+  }) => SkwasmStrutStyle(
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontSize: fontSize,
+    height: height,
+    leadingDistribution: leadingDistribution,
+    leading: leading,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    forceStrutHeight: forceStrutHeight,
+  );
 
   @override
   ui.Gradient createSweepGradient(
@@ -205,7 +227,29 @@ class SkwasmRenderer implements Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations
-  }) => SkwasmTextStyle();
+  }) => SkwasmTextStyle(
+    color: color,
+    decoration: decoration,
+    decorationColor: decorationColor,
+    decorationStyle: decorationStyle,
+    decorationThickness: decorationThickness,
+    fontWeight: fontWeight,
+    fontStyle: fontStyle,
+    textBaseline: textBaseline,
+    fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
+    fontSize: fontSize,
+    letterSpacing: letterSpacing,
+    wordSpacing: wordSpacing,
+    height: height,
+    leadingDistribution: leadingDistribution,
+    locale: locale,
+    background: background,
+    foreground: foreground,
+    shadows: shadows,
+    fontFeatures: fontFeatures,
+    fontVariations: fontVariations,
+  );
 
   @override
   ui.Vertices createVertices(
@@ -309,4 +353,27 @@ class SkwasmRenderer implements Renderer {
       return SkwasmFragmentProgram.fromBytes(assetKey, data.buffer.asUint8List());
     });
   }
+
+  @override
+  ui.LineMetrics createLineMetrics({
+    required bool hardBreak,
+    required double ascent,
+    required double descent,
+    required double unscaledAscent,
+    required double height,
+    required double width,
+    required double left,
+    required double baseline,
+    required int lineNumber
+  }) => SkwasmLineMetrics(
+    hardBreak: hardBreak,
+    ascent: ascent,
+    descent: descent,
+    unscaledAscent: unscaledAscent,
+    height: height,
+    width: width,
+    left: left,
+    baseline: baseline,
+    lineNumber: lineNumber
+  );
 }

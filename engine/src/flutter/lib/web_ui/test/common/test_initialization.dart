@@ -27,10 +27,10 @@ void setUpUnitTests({
           'useColorEmoji': true,
         }) as engine.JsFlutterConfiguration);
     engine.debugSetConfiguration(config);
-    engine.notoDownloadQueue.downloader.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
 
     debugFontsScope = configureDebugFontsAssetScope(fakeAssetManager);
     await engine.initializeEngine(assetManager: fakeAssetManager);
+    engine.renderer.fontCollection.fontFallbackManager?.downloadQueue.fallbackFontUrlPrefixOverride = 'assets/fallback_fonts/';
 
     if (setUpTestViewDimensions) {
       // Force-initialize FlutterViewEmbedder so it doesn't overwrite test pixel ratio.

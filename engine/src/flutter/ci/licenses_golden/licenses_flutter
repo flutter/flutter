@@ -1867,21 +1867,17 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvaskit_canvas.da
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/color_filter.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/embedded_views.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/embedded_views_diff.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/font_fallback_data.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/font_fallbacks.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/fonts.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_filter.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_wasm_codecs.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_web_codecs.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/interval_tree.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer_scene_builder.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer_tree.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/mask_filter.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/n_way_canvas.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/native_memory.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/noto_font.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/painting.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/path.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/path_metrics.dart + ../../../flutter/LICENSE
@@ -1905,6 +1901,8 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/dom.dart + ../../../flutter/L
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/embedder.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/font_change_util.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/font_fallback_data.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/font_fallbacks.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/fonts.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/global_styles.dart + ../../../flutter/LICENSE
@@ -1948,6 +1946,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/html/surface_stats.dart + ../
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/html/transform.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/initialization.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/interval_tree.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_promise.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_typed_data.dart + ../../../flutter/LICENSE
@@ -1958,6 +1957,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation.dart + ../../../fl
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation/url_strategy.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/noto_font.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/platform_dispatcher.dart + ../../../flutter/LICENSE
@@ -2016,6 +2016,12 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_sk
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_skstring.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_surface.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/skwasm_module.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_line_metrics.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_paragraph.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_paragraph_builder.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_paragraph_style.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_strut_style.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_text_style.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/renderer.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/scene_builder.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/shaders.dart + ../../../flutter/LICENSE
@@ -2075,6 +2081,12 @@ ORIGIN: ../../../flutter/lib/web_ui/skwasm/picture.cpp + ../../../flutter/LICENS
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/shaders.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/string.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/surface.cpp + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/text/line_metrics.cpp + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/text/paragraph.cpp + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/text/paragraph_builder.cpp + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/text/paragraph_style.cpp + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/text/strut_style.cpp + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/text/text_style.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/wrappers.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/runtime/dart_isolate.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/runtime/dart_isolate.h + ../../../flutter/LICENSE
@@ -4470,21 +4482,17 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/canvaskit_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/color_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/embedded_views.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/embedded_views_diff.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/font_fallback_data.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/font_fallbacks.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_wasm_codecs.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/image_web_codecs.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/interval_tree.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer_scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/layer_tree.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/mask_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/n_way_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/native_memory.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/noto_font.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/painting.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/path.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/canvaskit/path_metrics.dart
@@ -4508,6 +4516,8 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/dom.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/embedder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/engine_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_change_util.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_fallback_data.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/font_fallbacks.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/frame_reference.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/global_styles.dart
@@ -4551,6 +4561,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/surface_stats.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html/transform.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/html_image_codec.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/initialization.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/interval_tree.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_promise.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_typed_data.dart
@@ -4561,6 +4572,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/url_strategy.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/noto_font.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_dispatcher.dart
@@ -4619,6 +4631,12 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_skda
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_skstring.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_surface.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/skwasm_module.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_line_metrics.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_paragraph.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_paragraph_builder.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_paragraph_style.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_strut_style.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/text/raw_text_style.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/renderer.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/scene_builder.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/shaders.dart
@@ -4678,6 +4696,12 @@ FILE: ../../../flutter/lib/web_ui/skwasm/picture.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/shaders.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/string.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/surface.cpp
+FILE: ../../../flutter/lib/web_ui/skwasm/text/line_metrics.cpp
+FILE: ../../../flutter/lib/web_ui/skwasm/text/paragraph.cpp
+FILE: ../../../flutter/lib/web_ui/skwasm/text/paragraph_builder.cpp
+FILE: ../../../flutter/lib/web_ui/skwasm/text/paragraph_style.cpp
+FILE: ../../../flutter/lib/web_ui/skwasm/text/strut_style.cpp
+FILE: ../../../flutter/lib/web_ui/skwasm/text/text_style.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/wrappers.h
 FILE: ../../../flutter/runtime/dart_isolate.cc
 FILE: ../../../flutter/runtime/dart_isolate.h

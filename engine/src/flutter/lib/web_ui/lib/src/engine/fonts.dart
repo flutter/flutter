@@ -124,6 +124,14 @@ abstract class FlutterFontCollection {
   /// Completes when fonts from FontManifest.json have been loaded.
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest);
 
+  // The font fallback manager for this font collection. HTML renderer doesn't
+  // have a font fallback manager and just relies on the browser to fall back
+  // properly.
+  FontFallbackManager? get fontFallbackManager;
+
+  // Reset the state of font fallbacks. Only to be used in testing.
+  void debugResetFallbackFonts();
+
   // Unregisters all fonts.
   void clear();
 }

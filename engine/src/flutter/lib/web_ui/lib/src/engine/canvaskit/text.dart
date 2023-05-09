@@ -5,16 +5,8 @@
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../util.dart';
-import 'canvaskit_api.dart';
-import 'font_fallbacks.dart';
-import 'native_memory.dart';
-import 'painting.dart';
-import 'renderer.dart';
-import 'text_fragmenter.dart';
-import 'util.dart';
 
 final bool _ckRequiresClientICU = canvasKit.ParagraphBuilder.RequiresClientICU();
 
@@ -866,7 +858,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     if (style.fontFamilyFallback != null) {
       fontFamilies.addAll(style.fontFamilyFallback!);
     }
-    FontFallbackData.instance.ensureFontsSupportText(text, fontFamilies);
+    renderer.fontCollection.fontFallbackManager!.ensureFontsSupportText(text, fontFamilies);
     _paragraphBuilder.addText(text);
   }
 
@@ -975,6 +967,8 @@ List<String> _getEffectiveFontFamilies(String? fontFamily,
       !fontFamilyFallback.every((String font) => fontFamily == font)) {
     fontFamilies.addAll(fontFamilyFallback);
   }
-  fontFamilies.addAll(FontFallbackData.instance.globalFontFallbacks);
+  fontFamilies.addAll(
+    renderer.fontCollection.fontFallbackManager!.globalFontFallbacks
+  );
   return fontFamilies;
 }

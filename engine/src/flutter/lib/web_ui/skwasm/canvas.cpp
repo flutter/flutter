@@ -8,6 +8,9 @@
 
 #include "third_party/skia/include/core/SkPoint3.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"
+
+using namespace skia::textlayout;
 
 using namespace Skwasm;
 
@@ -203,6 +206,13 @@ SKWASM_EXPORT void canvas_drawShadow(CanvasWrapper* wrapper,
       SkPoint3::Make(kShadowLightXOffset, kShadowLightYOffset,
                      kShadowLightHeight * devicePixelRatio),
       devicePixelRatio * kShadowLightRadius, outAmbient, outSpot, flags);
+}
+
+SKWASM_EXPORT void canvas_drawParagraph(CanvasWrapper* wrapper,
+                                        Paragraph* paragraph,
+                                        SkScalar x,
+                                        SkScalar y) {
+  paragraph->paint(wrapper->canvas, x, y);
 }
 
 SKWASM_EXPORT void canvas_drawPicture(CanvasWrapper* wrapper,

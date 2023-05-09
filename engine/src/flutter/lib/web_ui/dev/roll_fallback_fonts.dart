@@ -182,7 +182,6 @@ class RollFallbackFontsCommand extends Command<bool>
       'lib',
       'src',
       'engine',
-      'canvaskit',
       'font_fallback_data.dart',
     ));
     await fontDataFile.writeAsString(sb.toString());

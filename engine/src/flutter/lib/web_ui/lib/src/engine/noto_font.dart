@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../text/unicode_range.dart';
+import 'text/unicode_range.dart';
 
 class NotoFont {
   NotoFont(this.name, this.url, this._packedRanges);
@@ -11,9 +11,9 @@ class NotoFont {
   final String url;
   final String _packedRanges;
   // A sorted list of Unicode ranges.
-  late final List<CodeunitRange> _ranges = _unpackFontRange(_packedRanges);
+  late final List<CodePointRange> _ranges = _unpackFontRange(_packedRanges);
 
-  List<CodeunitRange> computeUnicodeRanges() => _ranges;
+  List<CodePointRange> computeUnicodeRanges() => _ranges;
 
   // Returns `true` if this font has a glyph for the given [codeunit].
   bool contains(int codeUnit) {
@@ -23,7 +23,7 @@ class NotoFont {
     int max = _ranges.length - 1;
     while (min <= max) {
       final int mid = (min + max) ~/ 2;
-      final CodeunitRange range = _ranges[mid];
+      final CodePointRange range = _ranges[mid];
       if (range.start > codeUnit) {
         max = mid - 1;
       } else {
@@ -38,8 +38,8 @@ class NotoFont {
   }
 }
 
-class CodeunitRange {
-  const CodeunitRange(this.start, this.end);
+class CodePointRange {
+  const CodePointRange(this.start, this.end);
 
   final int start;
   final int end;
@@ -50,10 +50,10 @@ class CodeunitRange {
 
   @override
   bool operator ==(Object other) {
-    if (other is! CodeunitRange) {
+    if (other is! CodePointRange) {
       return false;
     }
-    final CodeunitRange range = other;
+    final CodePointRange range = other;
     return range.start == start && range.end == end;
   }
 
@@ -73,15 +73,15 @@ class MutableInt {
   int value;
 }
 
-List<CodeunitRange> _unpackFontRange(String packedRange) {
+List<CodePointRange> _unpackFontRange(String packedRange) {
     final MutableInt i = MutableInt(0);
-    final List<CodeunitRange> ranges = <CodeunitRange>[];
+    final List<CodePointRange> ranges = <CodePointRange>[];
 
     while (i.value < packedRange.length) {
       final int rangeStart = _consumeInt36(packedRange, i, until: _kCharPipe);
       final int rangeLength = _consumeInt36(packedRange, i, until: _kCharSemicolon);
       final int rangeEnd = rangeStart + rangeLength;
-      ranges.add(CodeunitRange(rangeStart, rangeEnd));
+      ranges.add(CodePointRange(rangeStart, rangeEnd));
     }
     return ranges;
 }
