@@ -10,10 +10,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:fidl_fuchsia_ui_test_input/fidl_async.dart' as test_text;
-import 'package:fuchsia_services/services.dart';
-import 'package:zircon/zircon.dart';
-
 // Corresponds to the USB HID values provided in fidl.fuchsia.input
 // https://fuchsia.dev/reference/fidl/fuchsia.input
 final Map<int, String> hidToKey = {
@@ -39,11 +35,7 @@ class TestApp {
   static const _yellow = Color.fromARGB(255, 255, 255, 0);
   Color _backgroundColor = _yellow;
 
-  final _responseListener = test_text.KeyboardInputListenerProxy();
-
   void run() {
-    // Connect to keyboard input response listener
-    Incoming.fromSvcPath().connectToService(_responseListener);
     // Set up window callbacks
     window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
       this.decodeAndReportPlatformMessage(name, data);
@@ -89,17 +81,20 @@ class TestApp {
 
     if (name == "flutter/keyevent" && decodedJson["type"] == "keydown") {
       if (hidToKey[decodedJson["hidUsage"]] != null) {
-        await _respond(test_text.KeyboardInputListenerReportTextInputRequest(
-          text: hidToKey[decodedJson["hidUsage"]],
-        ));
+        _reportTextInput(hidToKey[decodedJson["hidUsage"]]);
       }
     }
 
     window.scheduleFrame();
   }
 
-  void _respond(test_text.KeyboardInputListenerReportTextInputRequest request) async {
+  void _reportTextInput(String text) {
     print('text-input-view reporting keyboard input to KeyboardInputListener');
-    await _responseListener.reportTextInput(request);
+
+    final message = utf8.encoder.convert(json.encode({
+      'method': 'KeyboardInputListener.ReportTextInput',
+      'text': text,
+    })).buffer.asByteData();
+    PlatformDispatcher.instance.sendPlatformMessage('fuchsia/input_test', message, null);
   }
 }

@@ -32,7 +32,8 @@ FlatlandPlatformView::FlatlandPlatformView(
     OnShaderWarmup on_shader_warmup,
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
-        await_vsync_for_secondary_callback_callback)
+        await_vsync_for_secondary_callback_callback,
+    std::shared_ptr<sys::ServiceDirectory> dart_application_svc)
     : PlatformView(true /* is_flatland */,
                    delegate,
                    std::move(task_runners),
@@ -52,7 +53,8 @@ FlatlandPlatformView::FlatlandPlatformView(
                    std::move(on_request_announce_callback),
                    std::move(on_shader_warmup),
                    std::move(await_vsync_callback),
-                   std::move(await_vsync_for_secondary_callback_callback)),
+                   std::move(await_vsync_for_secondary_callback_callback),
+                   std::move(dart_application_svc)),
       parent_viewport_watcher_(parent_viewport_watcher.Bind()),
       on_create_view_callback_(std::move(on_create_view_callback)),
       on_destroy_view_callback_(std::move(on_destroy_view_callback)),
