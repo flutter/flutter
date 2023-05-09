@@ -16359,6 +16359,7 @@ void main() {
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
   },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
 }
