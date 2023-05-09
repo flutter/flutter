@@ -5093,7 +5093,7 @@ abstract class ComponentElement extends Element {
       _debugDoingBuild = false;
       built = ErrorWidget.builder(
         _reportException(
-          ErrorDescription('building $this'),
+          ErrorDescription('building $this (widget type: ${_widget?.runtimeType})'),
           e,
           stack,
           informationCollector: () => <DiagnosticsNode>[
@@ -5113,7 +5113,7 @@ abstract class ComponentElement extends Element {
     } catch (e, stack) {
       built = ErrorWidget.builder(
         _reportException(
-          ErrorDescription('building $this'),
+          ErrorDescription('building $this (widget type: ${_widget?.runtimeType})'),
           e,
           stack,
           informationCollector: () => <DiagnosticsNode>[
