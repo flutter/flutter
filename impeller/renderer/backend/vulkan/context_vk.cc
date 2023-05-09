@@ -273,11 +273,12 @@ void ContextVK::Setup(Settings settings) {
   device_info.setPEnabledFeatures(&required_features.value());
   // Device layers are deprecated and ignored.
 
-  auto device = physical_device->createDeviceUnique(device_info);
-  if (device.result != vk::Result::eSuccess) {
+  auto device_result = physical_device->createDeviceUnique(device_info);
+  if (device_result.result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create logical device.";
     return;
   }
+  vk::UniqueDevice device = std::move(device_result.value);
 
   if (!caps->SetDevice(physical_device.value())) {
     VALIDATION_LOG << "Capabilities could not be updated.";
@@ -291,7 +292,7 @@ void ContextVK::Setup(Settings settings) {
       weak_from_this(),                  //
       application_info.apiVersion,       //
       physical_device.value(),           //
-      device.value.get(),                //
+      device.get(),                      //
       instance.value.get(),              //
       dispatcher.vkGetInstanceProcAddr,  //
       dispatcher.vkGetDeviceProcAddr     //
@@ -306,7 +307,8 @@ void ContextVK::Setup(Settings settings) {
   /// Setup the pipeline library.
   ///
   auto pipeline_library = std::shared_ptr<PipelineLibraryVK>(
-      new PipelineLibraryVK(device.value.get(),                   //
+      new PipelineLibraryVK(weak_from_this(),                     //
+                            device.get(),                         //
                             caps,                                 //
                             std::move(settings.cache_directory),  //
                             settings.worker_task_runner           //
@@ -317,11 +319,11 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
-  auto sampler_library = std::shared_ptr<SamplerLibraryVK>(
-      new SamplerLibraryVK(device.value.get()));
+  auto sampler_library =
+      std::shared_ptr<SamplerLibraryVK>(new SamplerLibraryVK(device.get()));
 
   auto shader_library = std::shared_ptr<ShaderLibraryVK>(
-      new ShaderLibraryVK(device.value.get(),              //
+      new ShaderLibraryVK(device.get(),                    //
                           settings.shader_libraries_data)  //
   );
 
@@ -334,7 +336,7 @@ void ContextVK::Setup(Settings settings) {
   /// Create the fence waiter.
   ///
   auto fence_waiter =
-      std::shared_ptr<FenceWaiterVK>(new FenceWaiterVK(device.value.get()));
+      std::shared_ptr<FenceWaiterVK>(new FenceWaiterVK(device.get()));
   if (!fence_waiter->IsValid()) {
     VALIDATION_LOG << "Could not create fence waiter.";
     return;
@@ -343,7 +345,7 @@ void ContextVK::Setup(Settings settings) {
   //----------------------------------------------------------------------------
   /// Fetch the queues.
   ///
-  QueuesVK queues(device.value.get(),      //
+  QueuesVK queues(device.get(),            //
                   graphics_queue.value(),  //
                   compute_queue.value(),   //
                   transfer_queue.value()   //
@@ -363,7 +365,7 @@ void ContextVK::Setup(Settings settings) {
   instance_ = std::move(instance.value);
   debug_report_ = std::move(debug_report);
   physical_device_ = physical_device.value();
-  device_ = std::move(device.value);
+  device_ = std::move(device);
   allocator_ = std::move(allocator);
   shader_library_ = std::move(shader_library);
   sampler_library_ = std::move(sampler_library);
@@ -378,7 +380,7 @@ void ContextVK::Setup(Settings settings) {
   /// Label all the relevant objects. This happens after setup so that the debug
   /// messengers have had a chance to be setup.
   ///
-  SetDebugName(device_.get(), device_.get(), "ImpellerDevice");
+  SetDebugName(GetDevice(), device_.get(), "ImpellerDevice");
 }
 
 // |Context|
@@ -421,8 +423,8 @@ vk::Instance ContextVK::GetInstance() const {
   return *instance_;
 }
 
-vk::Device ContextVK::GetDevice() const {
-  return *device_;
+const vk::Device& ContextVK::GetDevice() const {
+  return device_.get();
 }
 
 std::unique_ptr<Surface> ContextVK::AcquireNextSurface() {
@@ -489,7 +491,7 @@ std::unique_ptr<CommandEncoderVK> ContextVK::CreateGraphicsCommandEncoder()
     return nullptr;
   }
   auto encoder = std::unique_ptr<CommandEncoderVK>(new CommandEncoderVK(
-      *device_,                //
+      weak_from_this(),        //
       queues_.graphics_queue,  //
       tls_pool,                //
       fence_waiter_            //

@@ -8,6 +8,7 @@
 #include <queue>
 
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
@@ -26,7 +27,7 @@ namespace impeller {
 ///
 class DescriptorPoolVK {
  public:
-  explicit DescriptorPoolVK(vk::Device device);
+  explicit DescriptorPoolVK(std::weak_ptr<const DeviceHolder> device_holder);
 
   ~DescriptorPoolVK();
 
@@ -34,7 +35,7 @@ class DescriptorPoolVK {
       const vk::DescriptorSetLayout& layout);
 
  private:
-  const vk::Device device_;
+  std::weak_ptr<const DeviceHolder> device_holder_;
   uint32_t pool_size_ = 31u;
   std::queue<vk::UniqueDescriptorPool> pools_;
 
