@@ -178,24 +178,18 @@ String? _findJavaBinary({
   required OperatingSystemUtils operatingSystemUtils,
   required Platform platform,
 }) {
-  try {
-    if (javaHome != null) {
-      return fileSystem.path.join(javaHome, 'bin', 'java');
-    }
-
-    // Fallback to PATH based lookup.
-    final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
-    if (pathJava != null) {
-      logger.printTrace('Using java from PATH.');
-    } else {
-      logger.printTrace('Could not find java path.');
-    }
-    return pathJava;
-  } on Exception catch (e) {
-    logger.printTrace('Exception thrown while searching for java:');
-    logger.printTrace(e.toString());
-    return null;
+  if (javaHome != null) {
+    return fileSystem.path.join(javaHome, 'bin', 'java');
   }
+
+  // Fallback to PATH based lookup.
+  final String? pathJava = operatingSystemUtils.which(_kJavaExecutable)?.path;
+  if (pathJava != null) {
+    logger.printTrace('Using java from PATH.');
+  } else {
+    logger.printTrace('Could not find java path.');
+  }
+  return pathJava;
 }
 
 // Returns a user visible String that says the tool failed to parse
