@@ -3867,6 +3867,7 @@ targets:
       task_name: platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
 
   - name: Mac_ios post_backdrop_filter_perf_ios__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/126416
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
