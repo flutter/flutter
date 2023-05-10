@@ -1999,6 +1999,97 @@ void main() {
     });
 
   });
+
+    // ignore: always_declare_return_types
+  group('showModalBottomSheet modalBarrierDismissLabel', () {
+    testWidgets('Verify that modalBarrierDismissLabel is used if provided', (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      const RouteSettings routeSettings = RouteSettings(name: 'route_name', arguments: 'route_argument');
+      const String customLabel = 'custom label';
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ));
+
+      late RouteSettings retrievedRouteSettings;
+
+      showModalBottomSheet<void>(
+        barrierLabel: customLabel,
+        context: scaffoldKey.currentContext!,
+        routeSettings: routeSettings,
+        builder: (BuildContext context) {
+          retrievedRouteSettings = ModalRoute.of(context)!.settings;
+          return const Text('BottomSheet');
+        },
+      );
+debugPrint(retrievedRouteSettings.toString());
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+
+      expect(retrievedRouteSettings, routeSettings);
+      });
+  });
+
+  group('showModalBottomSheet modalBarrierDismissLabel', () {
+    testWidgets('Verify that barrierLabel is used if provided',
+        (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      const RouteSettings routeSettings =
+          RouteSettings(name: 'route_name', arguments: 'route_argument');
+      const String customLabel = 'custom label';
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ));
+
+      showModalBottomSheet<void>(
+        barrierLabel: 'custom label',
+        context: scaffoldKey.currentContext!,
+        routeSettings: routeSettings,
+        builder: (BuildContext context) {
+          return const Text('BottomSheet');
+        },
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final ModalBarrier modalBarrier =
+          tester.widget(find.byType(ModalBarrier).last);
+      expect(modalBarrier.semanticsLabel, customLabel);
+    });
+
+    testWidgets('Verify that modalBarrierDismissLabel from context is used if barrierLabel is not provided',
+        (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      const RouteSettings routeSettings =
+          RouteSettings(name: 'route_name', arguments: 'route_argument');
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ));
+
+      showModalBottomSheet<void>(
+        context: scaffoldKey.currentContext!,
+        routeSettings: routeSettings,
+        builder: (BuildContext context) {
+          return const Text('BottomSheet');
+        },
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final ModalBarrier modalBarrier =
+          tester.widget(find.byType(ModalBarrier).last);
+      expect(modalBarrier.semanticsLabel, MaterialLocalizations.of(scaffoldKey.currentContext!).modalBarrierDismissLabel);
+    });
+  });
 }
 
 class _TestPage extends StatelessWidget {
