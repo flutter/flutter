@@ -443,6 +443,47 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  testWidgets('CircularProgressIndicator strokeAlign', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: Offset.zero & const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: CircularProgressIndicator.strokeAlignInside,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(2.0, 2.0) & const Size(796.0, 596.0)));
+
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: CircularProgressIndicator.strokeAlignOutside,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(-2.0, -2.0) & const Size(804.0, 604.0)));
+
+    // Unbounded alignment.
+    await tester.pumpWidget(
+      Theme(
+        data: theme,
+        child: const CircularProgressIndicator(
+          strokeAlign: 2.0,
+        ),
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), paints..arc(rect: const Offset(-4.0, -4.0) & const Size(808.0, 608.0)));
+  });
+
   testWidgets('CircularProgressIndicator with strokeCap', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
     expect(find.byType(CircularProgressIndicator),
