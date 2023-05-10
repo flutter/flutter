@@ -2109,7 +2109,7 @@ class TextSelectionGestureDetectorBuilder {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         // On mobile platforms the selection is set on tap up.
-        editableText.hideToolbar(false);
+        editableText.hideToolbar(kind == PointerDeviceKind.touch);
       case TargetPlatform.iOS:
         // On mobile platforms the selection is set on tap up.
         break;
