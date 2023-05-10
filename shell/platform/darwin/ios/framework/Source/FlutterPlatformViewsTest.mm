@@ -1215,7 +1215,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
   NSArray* subviews = editedUIVisualEffectView.subviews;
   for (UIView* view in subviews) {
-    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+    if ([NSStringFromClass([view class]) hasSuffix:@"BackdropView"]) {
       for (CIFilter* filter in view.layer.filters) {
         if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"]) {
           [filter setValue:@"notGaussianBlur" forKey:@"name"];
@@ -1238,7 +1238,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
   NSArray* subviews = editedUIVisualEffectView.subviews;
   for (UIView* view in subviews) {
-    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+    if ([NSStringFromClass([view class]) hasSuffix:@"BackdropView"]) {
       for (CIFilter* filter in view.layer.filters) {
         if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"]) {
           [filter setValue:@"invalidInputRadius" forKey:@"inputRadius"];
@@ -1265,7 +1265,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                visualEffectView:visualEffectView];
   CGColorRef visualEffectSubviewBackgroundColor;
   for (UIView* view in [platformViewFilter backdropFilterView].subviews) {
-    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectSubview")]) {
+    if ([NSStringFromClass([view class]) hasSuffix:@"VisualEffectSubview"]) {
       visualEffectSubviewBackgroundColor = view.layer.backgroundColor;
     }
   }
@@ -2773,7 +2773,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                         inputRadius:(CGFloat)inputRadius {
   XCTAssertTrue(CGRectEqualToRect(visualEffectView.frame, frame));
   for (UIView* view in visualEffectView.subviews) {
-    if (![view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+    if (![NSStringFromClass([view class]) hasSuffix:@"BackdropView"]) {
       continue;
     }
     XCTAssertEqual(view.layer.filters.count, 1u);
