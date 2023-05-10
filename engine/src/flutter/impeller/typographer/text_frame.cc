@@ -42,8 +42,9 @@ const std::vector<TextRun>& TextFrame::GetRuns() const {
   return runs_;
 }
 
-bool TextFrame::HasColor() const {
-  return has_color_;
+GlyphAtlas::Type TextFrame::GetAtlasType() const {
+  return has_color_ ? GlyphAtlas::Type::kColorBitmap
+                    : GlyphAtlas::Type::kAlphaBitmap;
 }
 
 bool TextFrame::MaybeHasOverlapping() const {
