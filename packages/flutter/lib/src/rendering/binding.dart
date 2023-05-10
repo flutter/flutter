@@ -319,7 +319,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(!_viewIdToRenderView.containsValue(view));
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
-    // TODO(goderbauer) if view is [renderView] we may not want to overwrite manually set config.
+    // TODO(goderbauer): if view is [renderView] we may not want to overwrite manually set configs.
     view.configuration = createViewConfigurationFor(view);
   }
 
@@ -761,7 +761,7 @@ class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifol
 }
 
 class _ReusableRenderView extends RenderView {
-  _ReusableRenderView({super.configuration, required super.view});
+  _ReusableRenderView({required super.view});
 
   bool _initialFramePrepared = false;
 

@@ -103,7 +103,7 @@ linter:
     - eol_at_end_of_file
     - exhaustive_cases
     - file_names
-    # - flutter_style_todos # TODO(goderbauer): renable this before submitting
+    - flutter_style_todos
     - hash_and_equals
     - implementation_imports
     - implicit_call_tearoffs

@@ -1239,9 +1239,9 @@ class RootElement extends Element with RootElementMixin {
     }
   }
 
+  // TODO(goderbauer): ??
   // @override
   // RenderObject? get renderObject {
-  //   // TODO(goderbauer): ??
   //   // assert(false);
   //   return null;
   // }
