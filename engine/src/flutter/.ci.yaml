@@ -140,7 +140,6 @@ targets:
     timeout: 60
 
   - name: Linux Fuchsia
-    bringup: true
     recipe: engine/engine
     properties:
       add_recipes_cq: "true"
@@ -257,6 +256,7 @@ targets:
     timeout: 90
 
   - name: Linux linux_fuchsia
+    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 60
     properties:
