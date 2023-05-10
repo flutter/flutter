@@ -111,7 +111,6 @@ void testMain() {
     expect(await logger.actionLog.first, ui.SemanticsAction.tap);
     }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/50590
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/50754
       skip: browserEngine != BrowserEngine.blink);
 
     test('Syncs semantic state from framework', () {

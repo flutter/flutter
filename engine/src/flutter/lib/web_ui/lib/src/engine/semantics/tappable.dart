@@ -24,10 +24,6 @@ class Tappable extends RoleManager {
   void update() {
     final DomElement element = semanticsObject.element;
 
-    // "tab-index=0" is used to allow keyboard traversal of non-form elements.
-    // See also: https://developer.mozilla.org/en-US/docs/Web/Accessibility/Keyboard-navigable_JavaScript_widgets
-    element.tabIndex = 0;
-
     semanticsObject.setAriaRole(
         'button', semanticsObject.hasFlag(ui.SemanticsFlag.isButton));
 
@@ -56,13 +52,6 @@ class Tappable extends RoleManager {
       } else {
         _stopListening();
       }
-    }
-
-    // Request focus so that the AT shifts a11y focus to this node.
-    if (semanticsObject.isFlagsDirty && semanticsObject.hasFocus) {
-      semanticsObject.owner.addOneTimePostUpdateCallback(() {
-        element.focus();
-      });
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import 'focusable.dart';
 import 'semantics.dart';
 
 /// Adds increment/decrement event handling to a semantics object.
@@ -19,7 +20,8 @@ import 'semantics.dart';
 /// gestures must be interpreted by the Flutter framework.
 class Incrementable extends RoleManager {
   Incrementable(SemanticsObject semanticsObject)
-      : super(Role.incrementable, semanticsObject) {
+      : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
+        super(Role.incrementable, semanticsObject) {
     semanticsObject.element.append(_element);
     _element.type = 'range';
     _element.setAttribute('role', 'slider');
@@ -47,10 +49,13 @@ class Incrementable extends RoleManager {
       update();
     };
     semanticsObject.owner.addGestureModeListener(_gestureModeListener);
+    _focusManager.manage(semanticsObject.id, _element);
   }
 
   /// The HTML element used to render semantics to the browser.
   final DomHTMLInputElement _element = createDomHTMLInputElement();
+
+  final AccessibilityFocusManager _focusManager;
 
   /// The value used by the input element.
   ///
@@ -82,6 +87,7 @@ class Incrementable extends RoleManager {
       case GestureMode.pointerEvents:
         _disableBrowserGestureHandling();
     }
+    _focusManager.changeFocus(semanticsObject.hasFocus);
   }
 
   void _enableBrowserGestureHandling() {
@@ -134,6 +140,7 @@ class Incrementable extends RoleManager {
   @override
   void dispose() {
     assert(_gestureModeListener != null);
+    _focusManager.stopManaging();
     semanticsObject.owner.removeGestureModeListener(_gestureModeListener);
     _gestureModeListener = null;
     _disableBrowserGestureHandling();

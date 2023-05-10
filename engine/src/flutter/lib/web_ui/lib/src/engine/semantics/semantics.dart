@@ -18,6 +18,7 @@ import '../util.dart';
 import '../vector_math.dart';
 import 'checkable.dart';
 import 'dialog.dart';
+import 'focusable.dart';
 import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
@@ -326,6 +327,10 @@ class SemanticsNodeUpdate {
 
 /// Identifies one of the roles a [SemanticsObject] plays.
 enum Role {
+  /// Supplies generic accessibility focus features to semantics nodes that have
+  /// [ui.SemanticsFlag.isFocusable] set.
+  focusable,
+
   /// Supports incrementing and/or decrementing its value.
   incrementable,
 
@@ -375,6 +380,7 @@ enum Role {
 typedef RoleManagerFactory = RoleManager Function(SemanticsObject object);
 
 final Map<Role, RoleManagerFactory> _roleFactories = <Role, RoleManagerFactory>{
+  Role.focusable: (SemanticsObject object) => Focusable(object),
   Role.incrementable: (SemanticsObject object) => Incrementable(object),
   Role.scrollable: (SemanticsObject object) => Scrollable(object),
   Role.labelAndValue: (SemanticsObject object) => LabelAndValue(object),
@@ -834,7 +840,23 @@ class SemanticsObject {
       hasAction(ui.SemanticsAction.scrollDown) ||
       hasAction(ui.SemanticsAction.scrollUp);
 
+  /// Whether this object represents a widget that can receive input focus.
+  bool get isFocusable => hasFlag(ui.SemanticsFlag.isFocusable);
+
+  /// Whether this object currently has input focus.
+  ///
+  /// This value only makes sense if [isFocusable] is true.
   bool get hasFocus => hasFlag(ui.SemanticsFlag.isFocused);
+
+  /// Whether this object can be in one of "enabled" or "disabled" state.
+  ///
+  /// If this is true, [isEnabled] communicates the state.
+  bool get hasEnabledState => hasFlag(ui.SemanticsFlag.hasEnabledState);
+
+  /// Whether this object is enabled.
+  ///
+  /// This field is only meaningful if [hasEnabledState] is true.
+  bool get isEnabled => hasFlag(ui.SemanticsFlag.isEnabled);
 
   /// Whether this object represents a hotizontally scrollable area.
   bool get isHorizontalScrollContainer =>
@@ -1262,7 +1284,7 @@ class SemanticsObject {
   RoleManager? debugRoleManagerFor(Role role) => _roleManagers[role];
 
   /// Detects the roles that this semantics object corresponds to and manages
-  /// the lifecycles of [SemanticsObjectRole] objects.
+  /// the lifecycles of [RoleManager] objects.
   void _updateRoles() {
     // Some role managers manage labels themselves for various role-specific reasons.
     final bool managesOwnLabel = isTextField || isDialog || isVisualOnly;
@@ -1270,6 +1292,11 @@ class SemanticsObject {
 
     _updateRole(Role.dialog, isDialog);
     _updateRole(Role.textField, isTextField);
+
+    // The generic `Focusable` role manager can be used for everything except
+    // text fields and incrementables, which have special needs not satisfied by
+    // the generic implementation.
+    _updateRole(Role.focusable, isFocusable && !isTextField && !isIncrementable);
 
     final bool shouldUseTappableRole =
       (hasAction(ui.SemanticsAction.tap) || hasFlag(ui.SemanticsFlag.isButton)) &&
