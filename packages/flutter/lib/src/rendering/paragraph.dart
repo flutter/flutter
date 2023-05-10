@@ -1472,9 +1472,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     );
 
     final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
-    if (fullText == 'Item 17') {
-      debugPrint('moving to position $position $isEnd');
-    }
     _setSelectionPosition(position, isEnd: isEnd);
     if (position.offset == range.end) {
       return SelectionResult.next;
@@ -1577,6 +1574,37 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             }
           }
         }
+      } else if (existingSelectionStart != null) {
+        if (isEnd) {
+          if (position.offset < existingSelectionStart.offset) {
+            targetPosition = wordBoundary.$1;
+          } else {
+            targetPosition = wordBoundary.$2;
+          }
+        } else {
+          // Move edge to closest word boundary.
+          final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
+          final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
+          targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
+        }
+      } else if (existingSelectionEnd != null) {
+        if (isEnd) {
+          // Move edge to closest word boundary.
+          final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
+          final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
+          targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
+        } else {
+          if (position.offset < existingSelectionEnd.offset) {
+            targetPosition = wordBoundary.$1;
+          } else {
+            targetPosition = wordBoundary.$2;
+          }
+        }
+      } else {
+        // Move edge to closest word boundary.
+        final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
+        final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
+        targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
       }
     } else {
       // The localPosition is not contained within the current rect. The adjustedPosition
