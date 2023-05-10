@@ -2967,6 +2967,141 @@ void main() {
       );
     });
 
+    testWidgets('Track outline width resolves in active/enabled states', (WidgetTester tester) async {
+      const double activeEnabledTrackOutlineWidth = 1.0;
+      const double activeDisabledTrackOutlineWidth = 2.0;
+      const double inactiveEnabledTrackOutlineWidth = 3.0;
+      const double inactiveDisabledTrackOutlineWidth = 4.0;
+
+      double getTrackOutlineWidth(Set<MaterialState> states) {
+        if (states.contains(MaterialState.disabled)) {
+          if (states.contains(MaterialState.selected)) {
+            return activeDisabledTrackOutlineWidth;
+          }
+          return inactiveDisabledTrackOutlineWidth;
+        }
+        if (states.contains(MaterialState.selected)) {
+          return activeEnabledTrackOutlineWidth;
+        }
+        return inactiveEnabledTrackOutlineWidth;
+      }
+
+      final MaterialStateProperty<double> trackOutlineWidth = MaterialStateProperty.resolveWith(getTrackOutlineWidth);
+
+      Widget buildSwitch({required bool enabled, required bool active}) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: Center(
+              child: Switch(
+                trackOutlineWidth: trackOutlineWidth,
+                value: active,
+                onChanged: enabled ? (_) { } : null,
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSwitch(enabled: false, active: false));
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(strokeWidth: inactiveDisabledTrackOutlineWidth, style: PaintingStyle.stroke),
+        reason: 'Inactive disabled switch track outline width should be 4.0',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: false, active: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(strokeWidth: activeDisabledTrackOutlineWidth, style: PaintingStyle.stroke),
+        reason: 'Active disabled switch track outline width should be 2.0',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: true, active: false));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(strokeWidth: inactiveEnabledTrackOutlineWidth, style: PaintingStyle.stroke),
+        reason: 'Inactive enabled switch track outline width should be 3.0',
+      );
+
+      await tester.pumpWidget(buildSwitch(enabled: true, active: true));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(strokeWidth: activeEnabledTrackOutlineWidth, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline width should be 1.0',
+      );
+    });
+
+    testWidgets('Switch track outline width resolves in hovered/focused states', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      const double hoveredTrackOutlineWidth = 4.0;
+      const double focusedTrackOutlineWidth = 6.0;
+
+      double getTrackOutlineWidth(Set<MaterialState> states) {
+        if (states.contains(MaterialState.hovered)) {
+          return hoveredTrackOutlineWidth;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return focusedTrackOutlineWidth;
+        }
+        return 8.0;
+      }
+
+      final MaterialStateProperty<double> trackOutlineWidth = MaterialStateProperty.resolveWith(getTrackOutlineWidth);
+
+      Widget buildSwitch() {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: Center(
+              child: Switch(
+                focusNode: focusNode,
+                autofocus: true,
+                value: true,
+                trackOutlineWidth: trackOutlineWidth,
+                onChanged: (_) { },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildSwitch());
+      await tester.pumpAndSettle();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(strokeWidth: focusedTrackOutlineWidth, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline width should be 6.0',
+      );
+
+      // Start hovering
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(style: PaintingStyle.fill)
+          ..rrect(strokeWidth: hoveredTrackOutlineWidth, style: PaintingStyle.stroke),
+        reason: 'Active enabled switch track outline width should be 4.0',
+      );
+    });
+
     testWidgets('Switch thumb color is blended against surface color - M3', (WidgetTester tester) async {
       final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
       final ThemeData theme = ThemeData.light(useMaterial3: true);

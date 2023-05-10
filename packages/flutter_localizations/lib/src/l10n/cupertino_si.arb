@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "සියල්ල තෝරන්න",
   "tabSemanticsLabel": "ටැබ $tabCount න් $tabIndex",
   "modalBarrierDismissLabel": "ඉවත ලන්න",
-  "searchTextFieldPlaceholderLabel": "සෙවීම"
+  "searchTextFieldPlaceholderLabel": "සෙවීම",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

@@ -76,11 +76,9 @@ class RelativeRect {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
 
     return RelativeRect.fromLTRB(left, top, right, bottom);
@@ -566,13 +564,10 @@ class RenderStack extends RenderBox
     switch (fit) {
       case StackFit.loose:
         nonPositionedConstraints = constraints.loosen();
-        break;
       case StackFit.expand:
         nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-        break;
       case StackFit.passthrough:
         nonPositionedConstraints = constraints;
-        break;
     }
 
     RenderBox? child = firstChild;

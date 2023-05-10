@@ -100,7 +100,6 @@ class FlutterDeviceScreenshot {
    * The new surface will either be {@code FlutterSurfaceView} or {@code FlutterTextureView}.
    *
    * @param activity typically {@code FlutterActivity}.
-   * @param onDone callback called once the surface has been restored.
    */
   static void revertFlutterImage(@NonNull Activity activity) {
     final FlutterView flutterView = getFlutterView(activity);

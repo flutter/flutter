@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
@@ -43,6 +45,7 @@ import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/reporting.dart';
+import 'runner/flutter_command.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
@@ -84,6 +87,22 @@ final BotDetector _defaultBotDetector = BotDetector(
   ),
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+
+// Analytics instance for package:unified_analytics for telemetry
+// reporting for all Flutter and Dart related tooling
+Analytics get analytics => context.get<Analytics>() ?? getDefaultAnalytics();
+Analytics getDefaultAnalytics() {
+
+  initializeDateFormatting();
+  final Analytics defaultAnalytics = Analytics(
+    tool: DashTool.flutterTool,
+    flutterChannel: flutterVersion.channel,
+    flutterVersion: flutterVersion.frameworkVersion,
+    dartVersion: flutterVersion.dartSdkVersion,
+  );
+
+  return defaultAnalytics;
+}
 
 /// Currently active implementation of the file system.
 ///
@@ -284,5 +303,8 @@ PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const N
 const String kDefaultFrameworkChannel = 'master';
 
 // Used to build RegExp instances which can detect the VM service message.
-const String kServicePrefixRegExp = '(?:Observatory|The Dart VM service is)';
-final RegExp kVMServiceMessageRegExp = RegExp(kServicePrefixRegExp + r' listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
+
+// The official tool no longer allows non-null safe builds. This can be
+// overridden in other clients.
+NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;

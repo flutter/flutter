@@ -158,7 +158,7 @@ dev_dependencies:
   });
 
   testUsingContext(
-      'Confirmation that the reporter and timeout args are not set by default',
+      'Confirmation that the reporter, timeout, and concurrency args are not set by default',
       () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
 
@@ -175,6 +175,7 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, isNot(contains('compact')));
     expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
     expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -298,7 +299,7 @@ dev_dependencies:
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
   });
 
-  testUsingContext('Pipes enable-observatory', () async {
+  testUsingContext('Pipes enable-vmService', () async {
     final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
     final TestCommand testCommand = TestCommand(testRunner: testRunner);
@@ -313,7 +314,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       true,
     );
 
@@ -326,7 +327,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       true,
     );
 
@@ -337,7 +338,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
     expect(
-      testRunner.lastEnableObservatoryValue,
+      testRunner.lastEnableVmServiceValue,
       false,
     );
   }, overrides: <Type, Generator>{
@@ -600,6 +601,25 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('Overrides concurrency when running web tests', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--concurrency=100',
+        '--platform=chrome',
+      ]);
+
+      expect(testRunner.lastConcurrency, 1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('when running integration tests', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -848,10 +868,11 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 
   int exitCode;
   Duration? leastRunTime;
-  bool? lastEnableObservatoryValue;
+  bool? lastEnableVmServiceValue;
   late DebuggingOptions lastDebuggingOptionsValue;
   String? lastFileReporterValue;
   String? lastReporterOption;
+  int? lastConcurrency;
 
   @override
   Future<int> runTests(
@@ -862,7 +883,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableObservatory = false,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -886,10 +907,11 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
   }) async {
-    lastEnableObservatoryValue = enableObservatory;
+    lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;
     lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
+    lastConcurrency = concurrency;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
@@ -920,8 +942,17 @@ class _FakeDeviceManager extends DeviceManager {
   final List<Device> _connectedDevices;
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => _connectedDevices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return <Device>[];
+    }
+    return _connectedDevices;
+  }
 }

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Listener].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Listener].
 
 void main() => runApp(const ListenerApp());
 
@@ -71,8 +71,7 @@ class _ListenerExampleState extends State<ListenerExample> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                  'You have pressed or released in this area this many times:'),
+              const Text('You have pressed or released in this area this many times:'),
               Text(
                 '$_downCounter presses\n$_upCounter releases',
                 style: Theme.of(context).textTheme.headlineMedium,

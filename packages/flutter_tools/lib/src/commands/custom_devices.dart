@@ -123,7 +123,7 @@ class CustomDevicesCommand extends FlutterCommand {
 
   final CustomDevicesConfig _customDevicesConfig;
   final FeatureFlags _featureFlags;
-  final void Function(Object) _usagePrintFn;
+  final PrintFn _usagePrintFn;
 
   @override
   String get description {
@@ -461,8 +461,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   ///
   /// Only check if `--check` is explicitly specified. (Don't check by default)
   Future<FlutterCommandResult> runNonInteractively() async {
-    final String jsonStr = stringArgDeprecated(_kJson)!;
-    final bool shouldCheck = boolArgDeprecated(_kCheck);
+    final String jsonStr = stringArg(_kJson)!;
+    final bool shouldCheck = boolArg(_kCheck);
 
     dynamic json;
     try {
@@ -570,7 +570,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Run interactively (with user prompts), the target device should be
   /// connected to via ssh.
   Future<FlutterCommandResult> runInteractivelySsh() async {
-    final bool shouldCheck = boolArgDeprecated(_kCheck);
+    final bool shouldCheck = boolArg(_kCheck);
 
     // Listen to the keystrokes stream as late as possible, since it's a
     // single-subscription stream apparently.
@@ -650,7 +650,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       description: 'Should the device use port forwarding? '
         'Using port forwarding is the default because it works in all cases, however if your '
         'remote device has a static IP address and you have a way of '
-        'specifying the "--observatory-host=<ip>" engine option, you might prefer '
+        'specifying the "--vm-service-host=<ip>" engine option, you might prefer '
         'not using port forwarding.',
     );
 
@@ -781,10 +781,10 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    if (stringArgDeprecated(_kJson) != null) {
+    if (stringArg(_kJson) != null) {
       return runNonInteractively();
     }
-    if (boolArgDeprecated(_kSsh) == true) {
+    if (boolArg(_kSsh) == true) {
       return runInteractivelySsh();
     }
     throw UnsupportedError('Unknown run mode');

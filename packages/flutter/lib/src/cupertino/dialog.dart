@@ -856,7 +856,7 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
   @override
   void moveRenderObjectChild(RenderObject child, _AlertDialogSections oldSlot, _AlertDialogSections newSlot) {
     if (!allowMoveRenderObjectChild) {
-      super.moveRenderObjectChild(child, oldSlot, newSlot);
+      assert(false);
       return;
     }
 
@@ -898,10 +898,8 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
     switch (slot) {
       case _AlertDialogSections.contentSection:
         renderObject.contentSection = child as RenderBox;
-        break;
       case _AlertDialogSections.actionsSection:
         renderObject.actionsSection = child as RenderBox;
-        break;
     }
   }
 }

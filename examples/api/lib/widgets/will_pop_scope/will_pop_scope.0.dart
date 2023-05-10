@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [WillPopScope].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [WillPopScope].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const WillPopScopeExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class WillPopScopeExampleApp extends StatelessWidget {
+  const WillPopScopeExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: WillPopScopeExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class WillPopScopeExample extends StatefulWidget {
+  const WillPopScopeExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<WillPopScopeExample> createState() => _WillPopScopeExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _WillPopScopeExampleState extends State<WillPopScopeExample> {
   bool shouldPop = true;
   @override
   Widget build(BuildContext context) {
@@ -51,7 +48,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return const MyStatefulWidget();
+                        return const WillPopScopeExample();
                       },
                     ),
                   );

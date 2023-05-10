@@ -30,7 +30,7 @@ abstract class FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableObservatory = false,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -68,7 +68,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     String? tags,
     String? excludeTags,
-    bool enableObservatory = false,
+    bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -109,7 +109,8 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         '--file-reporter=$fileReporter',
       if (timeout != null)
         ...<String>['--timeout', timeout],
-      '--concurrency=$concurrency',
+      if (concurrency != null)
+        '--concurrency=$concurrency',
       for (final String name in names)
         ...<String>['--name', name],
       for (final String plainName in plainNames)
@@ -176,7 +177,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
               browserFinder: findChromeExecutable,
               logger: globals.logger,
             ),
-            cache: globals.cache,
             testTimeRecorder: testTimeRecorder,
           );
         },
@@ -197,7 +197,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       shellPath: shellPath,
       debuggingOptions: debuggingOptions,
       watcher: watcher,
-      enableObservatory: enableObservatory,
+      enableVmService: enableVmService,
       machine: machine,
       serverType: serverType,
       precompiledDillPath: precompiledDillPath,

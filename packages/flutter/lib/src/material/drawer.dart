@@ -153,6 +153,7 @@ class Drawer extends StatelessWidget {
     this.width,
     this.child,
     this.semanticLabel,
+    this.clipBehavior,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
@@ -237,6 +238,14 @@ class Drawer extends StatelessWidget {
   ///    value is used.
   final String? semanticLabel;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// The [clipBehavior] argument specifies how to clip the drawer's [shape].
+  ///
+  /// If the drawer has a [shape], it defaults to [Clip.hardEdge]. Otherwise,
+  /// defaults to [Clip.none].
+  final Clip? clipBehavior;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -255,6 +264,9 @@ class Drawer extends StatelessWidget {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults= useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
+    final ShapeBorder? effectiveShape = shape ?? (isDrawerStart
+      ? (drawerTheme.shape ?? defaults.shape)
+      : (drawerTheme.endShape ?? defaults.endShape));
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
@@ -267,9 +279,8 @@ class Drawer extends StatelessWidget {
           elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
           shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
-          shape: shape ?? (isDrawerStart
-            ? (drawerTheme.shape ?? defaults.shape)
-            : (drawerTheme.endShape ?? defaults.endShape)),
+          shape: effectiveShape,
+          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
           child: child,
         ),
       ),
@@ -495,7 +506,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case AnimationStatus.completed:
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
-          break;
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
           break;
@@ -527,11 +537,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     switch (status) {
       case AnimationStatus.forward:
         _ensureHistoryEntry();
-        break;
       case AnimationStatus.reverse:
         _historyEntry?.remove();
         _historyEntry = null;
-        break;
       case AnimationStatus.dismissed:
         break;
       case AnimationStatus.completed:
@@ -581,15 +589,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
       case DrawerAlignment.end:
         delta = -delta;
-        break;
     }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
-        break;
       case TextDirection.ltr:
         _controller.value += delta;
-        break;
     }
 
     final bool opened = _controller.value > 0.5;
@@ -610,17 +615,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
         case DrawerAlignment.end:
           visualVelocity = -visualVelocity;
-          break;
       }
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
           widget.drawerCallback?.call(visualVelocity < 0.0);
-          break;
         case TextDirection.ltr:
           _controller.fling(velocity: visualVelocity);
           widget.drawerCallback?.call(visualVelocity > 0.0);
-          break;
       }
     } else if (_controller.value < 0.5) {
       close();
@@ -682,12 +684,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         isDesktop = false;
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         isDesktop = true;
-        break;
     }
 
     double? dragAreaWidth = widget.edgeDragWidth;
@@ -697,11 +697,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
-          break;
         case TextDirection.rtl:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.right : padding.left);
-          break;
       }
     }
 
@@ -727,14 +725,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           platformHasBackButton = false;
-          break;
       }
 
       final Widget child = _DrawerControllerScope(
@@ -821,7 +817,7 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)

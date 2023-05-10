@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
 import 'package:flutter_tools/src/ios/iproxy.dart';
@@ -98,6 +99,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     iProxy: IProxy.test(logger: logger, processManager: processManager),
-    interfaceType: IOSDeviceConnectionInterface.usb,
+    connectionInterface: DeviceConnectionInterface.attached,
+    isConnected: true,
   );
 }

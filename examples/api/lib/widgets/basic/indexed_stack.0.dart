@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [IndexedStack].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [IndexedStack].
 
 void main() => runApp(const IndexedStackApp());
 
@@ -76,9 +76,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
               children: <Widget>[
                 IndexedStack(
                   index: index,
-                  children: <Widget>[
-                    for (String name in names) PersonTracker(name: name)
-                  ],
+                  children: <Widget>[for (String name in names) PersonTracker(name: name)],
                 )
               ],
             ),
