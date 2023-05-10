@@ -132,7 +132,8 @@ class _PreferredAppBarSize extends Size {
 /// be visible if their foreground (text) color is the same as the
 /// app bar's background color.
 ///
-/// The default app bar [backgroundColor] is the overall theme's
+/// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+/// the default app bar [backgroundColor] is the overall theme's
 /// [ColorScheme.primary] if the overall theme's brightness is
 /// [Brightness.light]. Unfortunately this is the same as the default
 /// [ButtonStyle.foregroundColor] for [TextButton] for light themes.
