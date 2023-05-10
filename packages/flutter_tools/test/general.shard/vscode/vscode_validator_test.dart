@@ -37,5 +37,11 @@ void main() {
 
 class _FakeVsCode extends Fake implements VsCode {
   @override
-  Version? get version => Version(1, 2, 3);
+  Iterable<ValidationMessage> get validationMessages => <ValidationMessage>[];
+
+  @override
+  String get productName => 'VS Code';
+
+  @override
+  Version? get version => null;
 }
