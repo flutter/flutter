@@ -454,6 +454,7 @@ abstract class Route<T> {
   @protected
   void dispose() {
     _navigator = null;
+    _restorationScopeId.dispose();
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -463,10 +464,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    final _RouteEntry? currentRouteEntry = _navigator!._history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? currentRouteEntry = _navigator!._lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (currentRouteEntry == null) {
       return false;
     }
@@ -481,10 +479,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    final _RouteEntry? currentRouteEntry = _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? currentRouteEntry = _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (currentRouteEntry == null) {
       return false;
     }
@@ -521,10 +516,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    return _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isRoutePredicate(this)(e),
-      orElse: () => null,
-    )?.isPresent ?? false;
+    return _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
   }
 }
 
@@ -3606,6 +3598,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final _RouteEntry entry in _history) {
       entry.dispose();
     }
+    _rawNextPagelessRestorationScopeId.dispose();
+    _serializableHistory.dispose();
+    userGestureInProgressNotifier.dispose();
     super.dispose();
     // don't unlock, so that the object becomes unusable
     assert(_debugLocked);
@@ -4045,9 +4040,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
-      final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null,
-      );
+      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != null && routeName != _lastAnnouncedRouteName) {
         SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
@@ -4925,10 +4918,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object?>([ T? result ]) async {
-    final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry == null) {
       return false;
     }
@@ -4938,10 +4928,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       // Forget about this pop, we were disposed in the meantime.
       return true;
     }
-    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? newLastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry != newLastEntry) {
       // Forget about this pop, something happened to our history in the meantime.
       return true;
@@ -5025,19 +5012,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    _RouteEntry? candidate = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     while(candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
       pop();
-      candidate = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-        orElse: () => null,
-      );
+      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
 
@@ -5061,10 +5042,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     if (wasCurrent) {
       _afterNavigation(
-        _history.cast<_RouteEntry?>().lastWhere(
-          (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-          orElse: () => null,
-        )?.route,
+        _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate)?.route,
       );
     }
   }
@@ -5138,10 +5116,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   @optionalTypeArgs
   Route<T>? _getRouteById<T>(String id) {
-    return _history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? entry) => entry!.restorationId == id,
-      orElse: () => null,
-    )?.route as Route<T>?;
+    return _firstRouteEntryWhereOrNull((_RouteEntry entry) => entry.restorationId == id)?.route as Route<T>?;
   }
 
   int get _userGesturesInProgress => _userGesturesInProgressCount;
@@ -5227,6 +5202,27 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       });
     }
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
+  }
+
+  /// Gets first route entry satisfying the predicate, or null if not found.
+  _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+    for (final _RouteEntry element in _history) {
+      if (test(element)) {
+        return element;
+      }
+    }
+    return null;
+  }
+
+  /// Gets last route entry satisfying the predicate, or null if not found.
+  _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+    _RouteEntry? result;
+    for (final _RouteEntry element in _history) {
+      if (test(element)) {
+        result = element;
+      }
+    }
+    return result;
   }
 
   @override
