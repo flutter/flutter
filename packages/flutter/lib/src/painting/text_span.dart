@@ -289,12 +289,15 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         builder.addText('\uFFFD');
       }
     }
-    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
-      child.build(
-        builder,
-        textScaleFactor: textScaleFactor,
-        dimensions: dimensions,
-      );
+    final List<InlineSpan>? children = this.children;
+    if (children != null) {
+      for (final InlineSpan child in children) {
+        child.build(
+          builder,
+          textScaleFactor: textScaleFactor,
+          dimensions: dimensions,
+        );
+      }
     }
     if (hasStyle) {
       builder.pop();
@@ -311,9 +314,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (text != null && !visitor(this)) {
       return false;
     }
-    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
-      if (!child.visitChildren(visitor)) {
-        return false;
+    final List<InlineSpan>? children = this.children;
+    if (children != null) {
+      for (final InlineSpan child in children) {
+        if (!child.visitChildren(visitor)) {
+          return false;
+        }
       }
     }
     return true;
@@ -321,9 +327,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   bool visitDirectChildren(InlineSpanVisitor visitor) {
-    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
-      if (!visitor(child)) {
-        return false;
+    final List<InlineSpan>? children = this.children;
+    if (children != null) {
+      for (final InlineSpan child in children) {
+        if (!visitor(child)) {
+          return false;
+        }
       }
     }
     return true;
@@ -393,15 +402,18 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         recognizer: recognizer,
       ));
     }
-    for (final InlineSpan child in children ?? const <InlineSpan>[]) {
-      if (child is TextSpan) {
-        child.computeSemanticsInformation(
-          collector,
-          inheritedLocale: effectiveLocale,
-          inheritedSpellOut: effectiveSpellOut,
-        );
-      } else {
-        child.computeSemanticsInformation(collector);
+    final List<InlineSpan>? children = this.children;
+    if (children != null) {
+      for (final InlineSpan child in children) {
+        if (child is TextSpan) {
+          child.computeSemanticsInformation(
+            collector,
+            inheritedLocale: effectiveLocale,
+            inheritedSpellOut: effectiveSpellOut,
+          );
+        } else {
+          child.computeSemanticsInformation(collector);
+        }
       }
     }
   }
