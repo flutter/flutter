@@ -119,7 +119,7 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
     return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
-      final String abi = getNameForAndroidArch(arch);
+      final String abi = arch.archName;
       return 'app$flavorString-$abi-$buildType.apk';
     });
   }
@@ -347,7 +347,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo
           .targetArchs
-          .map(getPlatformNameForAndroidArch).join(',');
+          .map((AndroidArch e) => e.platformName).join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
     command.add('-Ptarget=$target');
@@ -560,7 +560,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       logger: _logger,
       flutterUsage: _usage,
     );
-    final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+    final String archName = androidBuildInfo.targetArchs.single.archName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final File aotSnapshot = _fileSystem.directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$archName.json');
@@ -688,7 +688,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           localEngineInfo.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map(getPlatformNameForAndroidArch).join(',');
+          .map((AndroidArch e) => e.platformName).join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
 
@@ -939,7 +939,7 @@ Iterable<String> listApkPaths(
       for (AndroidArch androidArch in androidBuildInfo.targetArchs)
         <String>[
           'app',
-          getNameForAndroidArch(androidArch),
+          androidArch.archName,
           ...apkPartialName,
         ].join('-'),
     ];
