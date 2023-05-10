@@ -269,6 +269,10 @@ class FlutterWindowsEngine {
   // Called when a WM_DWMCOMPOSITIONCHANGED message is received.
   void OnDwmCompositionChanged();
 
+  // Called in response to the framework registering a ServiceBindings.
+  // Registers the top level handler for the WM_CLOSE window message.
+  void OnApplicationLifecycleEnabled();
+
  protected:
   // Creates the keyboard key handler.
   //

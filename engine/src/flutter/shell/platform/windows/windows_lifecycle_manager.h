@@ -37,6 +37,9 @@ class WindowsLifecycleManager {
   // Intercept top level window messages, only paying attention to WM_CLOSE.
   bool WindowProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l, LRESULT* result);
 
+  // Signal to start consuming WM_CLOSE messages.
+  void BeginProcessingClose();
+
  protected:
   // Check the number of top-level windows associated with this process, and
   // return true only if there are 1 or fewer.
@@ -51,6 +54,8 @@ class WindowsLifecycleManager {
   FlutterWindowsEngine* engine_;
 
   std::map<std::tuple<HWND, WPARAM, LPARAM>, int> sent_close_messages_;
+
+  bool process_close_;
 };
 
 }  // namespace flutter
