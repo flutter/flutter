@@ -132,7 +132,7 @@ abstract final class SystemChannels {
   ///
   ///  * `System.requestAppExit`: The application has requested that it be
   ///    terminated. See [ServicesBinding.exitApplication].
-  /// 
+  ///
   ///  * `System.initializationComplete`: Indicate to the engine the
   ///    initialization of a binding that may, among other tasks, register a
   ///    handler for application exit attempts.
