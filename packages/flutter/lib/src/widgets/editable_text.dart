@@ -5080,6 +5080,9 @@ class _ScribblePlaceholder extends WidgetSpan {
 /// The [String] has a length of eight because each emoji consists of two code
 /// units.
 ///
+/// Code units are the units by which Dart's String class is measured, which is
+/// encoded in UTF-16.
+///
 /// See also:
 ///
 ///  * [String.runes], which deals with code points like this class.
@@ -5091,15 +5094,50 @@ class _CodePointBoundary extends TextBoundary {
 
   final String _text;
 
-  @override
-  int? getLeadingTextBoundaryAt(int position) {
-    // TODO(justinmc): Iterate through the string and find the closest rune.
-    // Can you cache some of the info so you don't have to recalculate for dupcliate
-    // calls or calls to getTrailingTextBoundaryAt?
+  // Returns true if the given position falls in the middle of a single code
+  // point in _text.
+  bool _breaksCodePoint(int position) {
+    // A string containing the two code units that surround the given position.
+    final String surroundingCodeUnits = _text.substring(
+      position - 1,
+      position + 1,
+    );
+
+    // If the surrounding code units are a single code point, then the position
+    // was in the center of that code point.
+    // a[a|b]
+    // [a|b]b
+    // [a|b]c
+    // [a|a]b
+    // a[b|b]
+    return surroundingCodeUnits.runes.length == 1;
   }
 
   @override
-  int getTrailingTextBoundaryAt(int position) {
+  int? getLeadingTextBoundaryAt(int position) {
+    if (position < 0) {
+      return null;
+    }
+    if (position == 0) {
+      return 0;
+    }
+    if (_text.length <= 1) {
+      return position;
+    }
+
+    return _breaksCodePoint(position) ? position - 1 : position;
+  }
+
+  @override
+  int? getTrailingTextBoundaryAt(int position) {
+    if (position >= _text.length) {
+      return null;
+    }
+    if (_text.length <= 1) {
+      return position;
+    }
+
+    return _breaksCodePoint(position) ? position + 1 : position;
   }
 }
 
