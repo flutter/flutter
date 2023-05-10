@@ -189,9 +189,7 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
             atlas->GetTexture()->GetSize().height);
 }
 
-// TODO(jonahwilliams): Re-enable
-// https://github.com/flutter/flutter/issues/122839
-TEST_P(TypographerTest, DISABLED_GlyphAtlasTextureIsRecycledIfUnchanged) {
+TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
   auto context = TextRenderContext::Create(GetContext());
   auto atlas_context = std::make_shared<GlyphAtlasContext>();
   ASSERT_TRUE(context && context->IsValid());

@@ -135,13 +135,17 @@ namespace {
 ISize OptimumAtlasSizeForFontGlyphPairs(
     const FontGlyphPair::Set& pairs,
     std::vector<Rect>& glyph_positions,
-    const std::shared_ptr<GlyphAtlasContext>& atlas_context) {
+    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
+    GlyphAtlas::Type type) {
   static constexpr auto kMinAtlasSize = 8u;
+  static constexpr auto kMinAlphaBitmapSize = 1024u;
   static constexpr auto kMaxAtlasSize = 4096u;
 
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  ISize current_size(kMinAtlasSize, kMinAtlasSize);
+  ISize current_size = type == GlyphAtlas::Type::kAlphaBitmap
+                           ? ISize(kMinAlphaBitmapSize, kMinAlphaBitmapSize)
+                           : ISize(kMinAtlasSize, kMinAtlasSize);
   size_t total_pairs = pairs.size() + 1;
   do {
     auto rect_packer = std::shared_ptr<GrRectanizer>(
@@ -403,7 +407,7 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   // ---------------------------------------------------------------------------
   auto glyph_atlas = std::make_shared<GlyphAtlas>(type);
   auto atlas_size = OptimumAtlasSizeForFontGlyphPairs(
-      font_glyph_pairs, glyph_positions, atlas_context);
+      font_glyph_pairs, glyph_positions, atlas_context, type);
 
   atlas_context->UpdateGlyphAtlas(glyph_atlas, atlas_size);
   if (atlas_size.IsEmpty()) {
