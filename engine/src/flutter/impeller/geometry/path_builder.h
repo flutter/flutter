@@ -104,14 +104,6 @@ class PathBuilder {
 
   PathBuilder& AddRoundedRect(Rect rect, Scalar radius);
 
-  PathBuilder& AddRoundedRectTopLeft(Rect rect, RoundingRadii radii);
-
-  PathBuilder& AddRoundedRectTopRight(Rect rect, RoundingRadii radii);
-
-  PathBuilder& AddRoundedRectBottomRight(Rect rect, RoundingRadii radii);
-
-  PathBuilder& AddRoundedRectBottomLeft(Rect rect, RoundingRadii radii);
-
   PathBuilder& AddPath(const Path& path);
 
  private:
@@ -119,6 +111,14 @@ class PathBuilder {
   Point current_;
   Path prototype_;
   Convexity convexity_;
+
+  PathBuilder& AddRoundedRectTopLeft(Rect rect, RoundingRadii radii);
+
+  PathBuilder& AddRoundedRectTopRight(Rect rect, RoundingRadii radii);
+
+  PathBuilder& AddRoundedRectBottomRight(Rect rect, RoundingRadii radii);
+
+  PathBuilder& AddRoundedRectBottomLeft(Rect rect, RoundingRadii radii);
 
   Point ReflectedQuadraticControlPoint1() const;
 
