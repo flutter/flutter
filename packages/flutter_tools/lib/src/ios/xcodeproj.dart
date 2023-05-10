@@ -185,6 +185,7 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? target = buildContext.target;
     final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
@@ -195,6 +196,8 @@ class XcodeProjectInterpreter {
         ...<String>['-scheme', scheme],
       if (configuration != null)
         ...<String>['-configuration', configuration],
+      if (target != null)
+        ...<String>['-target', target],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
@@ -380,6 +383,7 @@ class XcodeProjectBuildContext {
     this.configuration,
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
+    this.target,
     this.isWatch = false,
   });
 
@@ -387,10 +391,11 @@ class XcodeProjectBuildContext {
   final String? configuration;
   final EnvironmentType environmentType;
   final String? deviceId;
+  final String? target;
   final bool isWatch;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId, target);
 
   @override
   bool operator ==(Object other) {
@@ -402,9 +407,25 @@ class XcodeProjectBuildContext {
         other.configuration == configuration &&
         other.deviceId == deviceId &&
         other.environmentType == environmentType &&
-        other.isWatch == isWatch;
+        other.isWatch == isWatch &&
+        other.target == target;
   }
 }
+
+/// The settings that are relevant for setting up universal links
+@immutable
+class XcodeUniversalLinkSettings {
+  const XcodeUniversalLinkSettings({
+    this.bundleIdentifier,
+    this.teamIdentifier,
+    this.associatedDomains = const <String>[],
+  });
+
+  final String? bundleIdentifier;
+  final String? teamIdentifier;
+  final List<String> associatedDomains;
+}
+
 
 /// Information about an Xcode project.
 ///
