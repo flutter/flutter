@@ -106,15 +106,26 @@ class RestorationScope extends StatefulWidget {
     final RestorationBucket? bucket = maybeOf(context);
     assert(() {
       if (bucket == null) {
-        throw FlutterError(
-          'RestorationScope.of() was called with a context that does not contain a '
-          'RestorationScope widget.\n'
-          'No RestorationScope widget ancestor could be found starting from the '
-          'context that was passed to RestorationScope.of(). This can happen '
-          'because you are using a widget that looks for a RestorationScope '
-          'ancestor, but no such ancestor exists.\n'
-          'The context used was:\n'
-          '  $context',
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'RestorationScope.of() was called with a context that does not '
+            'contain a RestorationScope widget. '
+          ),
+          ErrorDescription(
+            'No RestorationScope widget ancestor could be found starting from '
+            'the context that was passed to RestorationScope.of(). This can '
+            'happen because you are using a widget that looks for a '
+            'RestorationScope ancestor, but no such ancestor exists.\n'
+            'The context used was:\n'
+            '  $context'
+          ),
+          ErrorHint(
+            'State restoration must be enabled for a RestorationScope. This can '
+            'be done for an app by setting a restorationScopeId in the app '
+            'widget, or by inserting a RootRestorationScope in a given subtree '
+            'of the app.'
+          ),
+        ],
         );
       }
       return true;
