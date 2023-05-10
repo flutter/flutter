@@ -16,7 +16,6 @@
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
 namespace testing {
@@ -67,12 +66,18 @@ TEST_F(ColorFilterLayerTest, EmptyFilter) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(),
-            std::vector({
-                MockCanvas::DrawCall{
-                    0, MockCanvas::DrawPathData{child_path, child_paint}},
-            }));
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ColorFilter)layer::Paint */ {
+    expected_builder.Save();
+    {
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ColorFilterLayerTest, SimpleFilter) {
@@ -257,10 +262,10 @@ TEST_F(ColorFilterLayerTest, CacheChild) {
   layer->Add(mock_layer);
 
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
-  MockCanvas other_canvas;
-  other_canvas.SetTransform(other_transform);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
+  DisplayListBuilder other_canvas;
+  other_canvas.Transform(other_transform);
 
   use_mock_raster_cache();
   const auto* cacheable_color_filter_item = layer->raster_cache_item();
@@ -301,10 +306,10 @@ TEST_F(ColorFilterLayerTest, CacheChildren) {
   DlPaint paint = DlPaint();
 
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
-  MockCanvas other_canvas;
-  other_canvas.SetTransform(other_transform);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
+  DisplayListBuilder other_canvas;
+  other_canvas.Transform(other_transform);
 
   use_mock_raster_cache();
 
@@ -347,10 +352,10 @@ TEST_F(ColorFilterLayerTest, CacheColorFilterLayerSelf) {
   DlPaint paint = DlPaint();
 
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
-  MockCanvas other_canvas;
-  other_canvas.SetTransform(other_transform);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
+  DisplayListBuilder other_canvas;
+  other_canvas.Transform(other_transform);
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);

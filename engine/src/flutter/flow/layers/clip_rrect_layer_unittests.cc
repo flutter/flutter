@@ -11,7 +11,6 @@
 #include "flutter/flow/testing/mock_embedder.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
 namespace testing {
@@ -170,17 +169,19 @@ TEST_F(ClipRRectLayerTest, FullyContainedChild) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_rrect)}));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRRectData{layer_rrect, ClipOp::kIntersect,
-                                            MockCanvas::kHard_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRRect)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRRect(layer_rrect);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ClipRRectLayerTest, PartiallyContainedChild) {
@@ -220,19 +221,19 @@ TEST_F(ClipRRectLayerTest, PartiallyContainedChild) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(clip_rrect)}));
 
-  EXPECT_TRUE(mock_layer->needs_painting(paint_context()));
-  EXPECT_TRUE(layer->needs_painting(paint_context()));
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRRectData{clip_rrect, ClipOp::kIntersect,
-                                            MockCanvas::kHard_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRRect)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRRect(clip_rrect);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 static bool ReadbackResult(PrerollContext* context,
@@ -503,8 +504,8 @@ TEST_F(ClipRRectLayerTest, LayerCached) {
 
   auto initial_transform = SkMatrix::Translate(50.0, 25.5);
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);

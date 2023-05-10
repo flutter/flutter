@@ -11,9 +11,6 @@
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
-#include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/effects/SkImageFilters.h"
 
 namespace flutter {
 namespace testing {
@@ -72,15 +69,30 @@ TEST_F(BackdropFilterLayerTest, EmptyFilter) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
-                                                    nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  parent->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRect)parent::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRect(child_bounds, DlCanvas::ClipOp::kIntersect,
+                                false);
+      /* (BackdropFilter)layer::Paint */ {
+        expected_builder.Save();
+        {
+          expected_builder.SaveLayer(&child_bounds, nullptr, nullptr);
+          {
+            /* mock_layer::Paint */ {
+              expected_builder.DrawPath(child_path, child_paint);
+            }
+          }
+          expected_builder.Restore();
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(BackdropFilterLayerTest, SimpleFilter) {
@@ -104,15 +116,31 @@ TEST_F(BackdropFilterLayerTest, SimpleFilter) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
-                                                    layer_filter, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  parent->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRect)parent::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRect(child_bounds, DlCanvas::ClipOp::kIntersect,
+                                false);
+      /* (BackdropFilter)layer::Paint */ {
+        expected_builder.Save();
+        {
+          expected_builder.SaveLayer(&child_bounds, nullptr,
+                                     layer_filter.get());
+          {
+            /* mock_layer::Paint */ {
+              expected_builder.DrawPath(child_path, child_paint);
+            }
+          }
+          expected_builder.Restore();
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(BackdropFilterLayerTest, NonSrcOverBlend) {
@@ -139,15 +167,32 @@ TEST_F(BackdropFilterLayerTest, NonSrcOverBlend) {
   DlPaint filter_paint = DlPaint();
   filter_paint.setBlendMode(DlBlendMode::kSrc);
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
-                                                    layer_filter, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  parent->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRect)parent::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRect(child_bounds, DlCanvas::ClipOp::kIntersect,
+                                false);
+      /* (BackdropFilter)layer::Paint */ {
+        expected_builder.Save();
+        {
+          DlPaint save_paint = DlPaint().setBlendMode(DlBlendMode::kSrc);
+          expected_builder.SaveLayer(&child_bounds, &save_paint,
+                                     layer_filter.get());
+          {
+            /* mock_layer::Paint */ {
+              expected_builder.DrawPath(child_path, child_paint);
+            }
+          }
+          expected_builder.Restore();
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(BackdropFilterLayerTest, MultipleChildren) {
@@ -184,17 +229,34 @@ TEST_F(BackdropFilterLayerTest, MultipleChildren) {
   EXPECT_EQ(mock_layer1->parent_matrix(), initial_transform);
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{children_bounds, DlPaint(),
-                                                    layer_filter, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  parent->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRect)parent::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRect(children_bounds, DlCanvas::ClipOp::kIntersect,
+                                false);
+      /* (BackdropFilter)layer::Paint */ {
+        expected_builder.Save();
+        {
+          expected_builder.SaveLayer(&children_bounds, nullptr,
+                                     layer_filter.get());
+          {
+            /* mock_layer1::Paint */ {
+              expected_builder.DrawPath(child_path1, child_paint1);
+            }
+            /* mock_layer2::Paint */ {
+              expected_builder.DrawPath(child_path2, child_paint2);
+            }
+          }
+          expected_builder.Restore();
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(BackdropFilterLayerTest, Nested) {
@@ -238,21 +300,45 @@ TEST_F(BackdropFilterLayerTest, Nested) {
   EXPECT_EQ(mock_layer1->parent_matrix(), initial_transform);
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
-  layer1->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{children_bounds, DlPaint(),
-                                                    layer_filter1, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::SaveLayerData{children_bounds, DlPaint(),
-                                                    layer_filter2, 2}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  parent->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipRect)parent::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipRect(children_bounds, DlCanvas::ClipOp::kIntersect,
+                                false);
+      /* (BackdropFilter)layer1::Paint */ {
+        expected_builder.Save();
+        {
+          expected_builder.SaveLayer(&children_bounds, nullptr,
+                                     layer_filter1.get());
+          {
+            /* mock_layer1::Paint */ {
+              expected_builder.DrawPath(child_path1, child_paint1);
+            }
+            /* (BackdropFilter)layer2::Paint */ {
+              expected_builder.Save();
+              {
+                expected_builder.SaveLayer(&children_bounds, nullptr,
+                                           layer_filter2.get());
+                {
+                  /* mock_layer2::Paint */ {
+                    expected_builder.DrawPath(child_path2, child_paint2);
+                  }
+                }
+                expected_builder.Restore();
+              }
+              expected_builder.Restore();
+            }
+          }
+          expected_builder.Restore();
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(BackdropFilterLayerTest, Readback) {
