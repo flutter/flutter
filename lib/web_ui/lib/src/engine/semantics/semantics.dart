@@ -17,6 +17,7 @@ import '../platform_dispatcher.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import 'checkable.dart';
+import 'dialog.dart';
 import 'image.dart';
 import 'incrementable.dart';
 import 'label_and_value.dart';
@@ -356,6 +357,18 @@ enum Role {
   /// with this role, they will be able to get the assistive technology's
   /// attention right away.
   liveRegion,
+
+  /// Adds the "dialog" ARIA role to the node.
+  ///
+  /// This corresponds to a semantics node that has both `scopesRoute` and
+  /// `namesRoute` bits set. While in Flutter a named route is not necessarily a
+  /// dialog, this is the closest analog on the web.
+  ///
+  /// Why is `scopesRoute` alone not sufficient? Because Flutter can create
+  /// routes that are not logically dialogs and there's nothing interesting to
+  /// announce to the user. For example, a modal barrier has `scopesRoute` set
+  /// but marking it as a dialog would be wrong.
+  dialog,
 }
 
 /// A function that creates a [RoleManager] for a [SemanticsObject].
@@ -370,6 +383,7 @@ final Map<Role, RoleManagerFactory> _roleFactories = <Role, RoleManagerFactory>{
   Role.checkable: (SemanticsObject object) => Checkable(object),
   Role.image: (SemanticsObject object) => ImageRoleManager(object),
   Role.liveRegion: (SemanticsObject object) => LiveRegion(object),
+  Role.dialog: (SemanticsObject object) => Dialog(object),
 };
 
 /// Provides the functionality associated with the role of the given
@@ -845,6 +859,15 @@ class SemanticsObject {
       !hasAction(ui.SemanticsAction.tap) &&
       !hasFlag(ui.SemanticsFlag.isButton);
 
+  /// Whether this node should be treated as an ARIA dialog.
+  ///
+  /// See also [Role.dialog].
+  bool get isDialog {
+    final bool scopesRoute = hasFlag(ui.SemanticsFlag.scopesRoute);
+    final bool namesRoute = hasFlag(ui.SemanticsFlag.namesRoute);
+    return scopesRoute && namesRoute;
+  }
+
   /// Whether this object carry enabled/disabled state (and if so whether it is
   /// enabled).
   ///
@@ -1241,7 +1264,11 @@ class SemanticsObject {
   /// Detects the roles that this semantics object corresponds to and manages
   /// the lifecycles of [SemanticsObjectRole] objects.
   void _updateRoles() {
-    _updateRole(Role.labelAndValue, (hasLabel || hasValue || hasTooltip) && !isTextField && !isVisualOnly);
+    // Some role managers manage labels themselves for various role-specific reasons.
+    final bool managesOwnLabel = isTextField || isDialog || isVisualOnly;
+    _updateRole(Role.labelAndValue, (hasLabel || hasValue || hasTooltip) && !managesOwnLabel);
+
+    _updateRole(Role.dialog, isDialog);
     _updateRole(Role.textField, isTextField);
 
     final bool shouldUseTappableRole =
@@ -1393,6 +1420,16 @@ class SemanticsObject {
     }
   }
 
+  /// Recursively visits the tree rooted at `this` node in depth-first fashion.
+  ///
+  /// Calls the [callback] for `this` node, then for all of its descendants.
+  void visitDepthFirst(void Function(SemanticsObject) callback) {
+    callback(this);
+    _currentChildrenInRenderOrder?.forEach((SemanticsObject child) {
+      child.visitDepthFirst(callback);
+    });
+  }
+
   @override
   String toString() {
     if (assertionsEnabled) {
@@ -1468,7 +1505,7 @@ class EngineSemanticsOwner {
 
   /// Map [SemanticsObject.id] to parent [SemanticsObject] it was attached to
   /// this frame.
-  Map<int?, SemanticsObject> _attachments = <int?, SemanticsObject>{};
+  Map<int, SemanticsObject> _attachments = <int, SemanticsObject>{};
 
   /// Declares that the [child] must be attached to the [parent].
   ///
@@ -1484,17 +1521,19 @@ class EngineSemanticsOwner {
   ///
   /// The objects in this list will be detached permanently unless they are
   /// reattached via the [_attachObject] method.
-  List<SemanticsObject?> _detachments = <SemanticsObject?>[];
+  List<SemanticsObject> _detachments = <SemanticsObject>[];
 
   /// Declares that the [SemanticsObject] with the given [id] was detached from
   /// its current parent object.
   ///
   /// The object will be detached permanently unless it is reattached via the
   /// [_attachObject] method.
-  void _detachObject(int? id) {
-    assert(_semanticsTree.containsKey(id));
+  void _detachObject(int id) {
     final SemanticsObject? object = _semanticsTree[id];
-    _detachments.add(object);
+    assert(object != null);
+    if (object != null) {
+      _detachments.add(object);
+    }
   }
 
   /// Callbacks called after all objects in the tree have their properties
@@ -1513,20 +1552,30 @@ class EngineSemanticsOwner {
   /// the one-time callbacks scheduled via the [addOneTimePostUpdateCallback]
   /// method.
   void _finalizeTree() {
-    for (final SemanticsObject? object in _detachments) {
-      final SemanticsObject? parent = _attachments[object!.id];
-      if (parent == null) {
-        // Was not reparented and is removed permanently from the tree.
-        _semanticsTree.remove(object.id);
-        object._parent = null;
-        object.element.remove();
-      } else {
-        assert(object._parent == parent);
-        assert(object.element.parentNode == parent._childContainerElement);
+    for (final SemanticsObject detachmentRoot in _detachments) {
+      // A detached node may or may not have some of its descendants reattached
+      // elsewhere. Walk the descendant tree and find all descendants that were
+      // reattached to a parent. Those descendants need to be removed.
+      final List<SemanticsObject> removals = <SemanticsObject>[];
+      detachmentRoot.visitDepthFirst((SemanticsObject node) {
+        final SemanticsObject? parent = _attachments[node.id];
+        if (parent == null) {
+          // Was not reparented and is removed permanently from the tree.
+          removals.add(node);
+        } else {
+          assert(node._parent == parent);
+          assert(node.element.parentNode == parent._childContainerElement);
+        }
+      });
+
+      for (final SemanticsObject removal in removals) {
+        _semanticsTree.remove(removal.id);
+        removal._parent = null;
+        removal.element.remove();
       }
     }
-    _detachments = <SemanticsObject?>[];
-    _attachments = <int?, SemanticsObject>{};
+    _detachments = <SemanticsObject>[];
+    _attachments = <int, SemanticsObject>{};
 
     if (_oneTimePostUpdateCallbacks.isNotEmpty) {
       for (final ui.VoidCallback callback in _oneTimePostUpdateCallbacks) {
@@ -1595,7 +1644,7 @@ class EngineSemanticsOwner {
         _gestureMode = GestureMode.pointerEvents;
         _notifyGestureModeListeners();
       }
-      final List<int?> keys = _semanticsTree.keys.toList();
+      final List<int> keys = _semanticsTree.keys.toList();
       final int len = keys.length;
       for (int i = 0; i < len; i++) {
         _detachObject(keys[i]);
@@ -1828,7 +1877,22 @@ class EngineSemanticsOwner {
 
     assert(_semanticsTree.containsKey(0)); // must contain root node
     assert(() {
-      // Validate tree
+      // Validate that the node map only contains live elements, i.e. descendants
+      // of the root node. If a node is not reachable from the root, it should
+      // have been removed from the map.
+      final List<int> liveIds = <int>[];
+      final SemanticsObject root = _semanticsTree[0]!;
+      root.visitDepthFirst((SemanticsObject child) {
+        liveIds.add(child.id);
+      });
+      assert(
+        _semanticsTree.keys.every(liveIds.contains),
+        'The semantics node map is inconsistent:\n'
+        '  Nodes in tree: [${liveIds.join(', ')}]\n'
+        '  Nodes in map : [${_semanticsTree.keys.join(', ')}]'
+      );
+
+      // Validate that each node in the final tree is self-consistent.
       _semanticsTree.forEach((int? id, SemanticsObject object) {
         assert(id == object.id);
 
