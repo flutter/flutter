@@ -179,11 +179,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   @override
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
     ...super.buildEventAnalyticsValues,
-    for (MapEntry<String, String> entry in toBuildSystemEnvironment()
-        .entries
-        .where(
-            (MapEntry<String, String> element) => element.value == 'true'))
-      entry.key: entry.value,
+    ...toBuildSystemEnvironment(),
   };
 }
 
