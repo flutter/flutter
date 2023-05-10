@@ -447,7 +447,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget control;
+    final Widget control;
     switch (_radioType) {
       case _RadioType.material:
         control = Radio<T>(
