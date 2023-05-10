@@ -324,16 +324,13 @@ class _RadioPainter extends ToggleablePainter {
         final Paint checkPaint = Paint()
           ..color = activeColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5
+          ..strokeWidth = 2
           ..strokeCap = StrokeCap.round;
-        // The ratios for the offsets below were found from looking at the checkbox
-        // examples on in the HIG docs. The distance from the needed point to the
-        // edge was measured, then devided by the total width.
         final double width = _size.width;
         final Offset origin = Offset(center.dx - (width/2), center.dy - (width/2));
         final Offset start = Offset(width * 0.25, width * 0.52);
         final Offset mid = Offset(width * 0.46, width * 0.75);
-        final Offset end = Offset(width * 0.72, width * 0.29);
+        final Offset end = Offset(width * 0.85, width * 0.29);
         path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
         path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
         canvas.drawPath(path, checkPaint);
