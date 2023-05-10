@@ -2672,7 +2672,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
     } else if (oldWidget.readOnly && _hasFocus) {
-      _openInputConnection();
+      // We have to wait because of #126324
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _openInputConnection();
+      });
     }
 
     if (kIsWeb && _hasInputConnection) {
