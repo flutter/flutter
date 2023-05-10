@@ -134,6 +134,7 @@ export 'engine/safe_browser_api.dart';
 export 'engine/semantics/accessibility.dart';
 export 'engine/semantics/checkable.dart';
 export 'engine/semantics/dialog.dart';
+export 'engine/semantics/focusable.dart';
 export 'engine/semantics/image.dart';
 export 'engine/semantics/incrementable.dart';
 export 'engine/semantics/label_and_value.dart';
