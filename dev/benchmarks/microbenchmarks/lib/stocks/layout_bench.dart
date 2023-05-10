@@ -31,13 +31,13 @@ Future<void> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final TestViewConfiguration big = TestViewConfiguration(
+    final TestViewConfiguration big = TestViewConfiguration.fromView(
       size: const Size(360.0, 640.0),
-      window: RendererBinding.instance.window,
+      view: tester.view,
     );
-    final TestViewConfiguration small = TestViewConfiguration(
+    final TestViewConfiguration small = TestViewConfiguration.fromView(
       size: const Size(355.0, 635.0),
-      window: RendererBinding.instance.window,
+      view: tester.view,
     );
     final RenderView renderView = WidgetsBinding.instance.renderView;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;

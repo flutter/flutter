@@ -222,7 +222,7 @@ void main() {
       final Completer<Uri> completer = Completer<Uri>();
       final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
       sub = process.stdout.transform(utf8.decoder).listen((String e) {
-        if (vmServiceUriRegExp.hasMatch(e)) {
+        if (!completer.isCompleted && vmServiceUriRegExp.hasMatch(e)) {
           completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
         }
       });
@@ -232,6 +232,31 @@ void main() {
       final HttpClientResponse response = await request.close();
       final String content = await response.transform(utf8.decoder).join();
       expect(content.contains('Dart VM Observatory'), true);
+    } finally {
+      await sub.cancel();
+      process.kill();
+    }
+  });
+
+  testWithoutContext('flutter test should serve DevTools', () async {
+    late final Process process;
+    late final StreamSubscription<String> sub;
+    try {
+      process = await _runFlutterTestConcurrent('trivial', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--start-paused']);
+      final Completer<Uri> completer = Completer<Uri>();
+      final RegExp devToolsUriRegExp = RegExp(r'The Flutter DevTools debugger and profiler is available at: (http://[^\s]+)');
+      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+        if (!completer.isCompleted && devToolsUriRegExp.hasMatch(e)) {
+          completer.complete(Uri.parse(devToolsUriRegExp.firstMatch(e)!.group(1)!));
+        }
+      });
+      final Uri devToolsUri = await completer.future;
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(devToolsUri);
+      final HttpClientResponse response = await request.close();
+      final String content = await response.transform(utf8.decoder).join();
+      expect(content.contains('DevTools'), true);
     } finally {
       await sub.cancel();
       process.kill();

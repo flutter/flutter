@@ -368,7 +368,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       switch (status) {
         case AnimationStatus.completed:
           widget.onEnd?.call();
-          break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
@@ -1681,7 +1680,7 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 ///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
-///  * [SliverAnimatedOpacity], for automatically transitioning a sliver's
+///  * [SliverAnimatedOpacity], for automatically transitioning a _sliver's_
 ///    opacity over a given duration whenever the given opacity changes.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.

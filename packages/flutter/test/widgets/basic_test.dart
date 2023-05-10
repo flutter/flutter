@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   group('RawImage', () {
     testWidgets('properties', (WidgetTester tester) async {
@@ -454,8 +456,10 @@ void main() {
     testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
-      const double fontSize1 = 54;
-      const double fontSize2 = 14;
+      // The point size of the font must be a multiple of 4 until
+      // https://github.com/flutter/flutter/issues/122066 is resolved.
+      const double fontSize1 = 52;
+      const double fontSize2 = 12;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -466,11 +470,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
               ],
             ),
@@ -488,29 +492,28 @@ void main() {
       // lines, but being aligned by the first line's baseline, they hang far
       // below the baseline. The size of the parent row is just enough to
       // contain both of them.
-      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
-      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
-      const double belowBaseline1 = fontSize1 * (1 - ahemBaselineLocation);
-      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
-      const double belowBaseline2 = fontSize2 * (1 - ahemBaselineLocation) + fontSize2 * 6;
+      const double ascentRatio = 0.75;
+      const double aboveBaseline1 = fontSize1 * ascentRatio;
+      const double belowBaseline1 = fontSize1 * (1 - ascentRatio);
+      const double aboveBaseline2 = fontSize2 * ascentRatio;
+      const double belowBaseline2 = fontSize2 * (1 - ascentRatio) + fontSize2 * 6;
       final double aboveBaseline = math.max(aboveBaseline1, aboveBaseline2);
       final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
-      expect(rowBox.size.height, moreOrLessEquals(aboveBaseline + belowBaseline, epsilon: .001));
+      expect(rowBox.size.height, aboveBaseline + belowBaseline, );
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
-      expect(
-        tester.getTopLeft(find.byKey(key2)).dy,
-        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
-      );
+      expect(tester.getTopLeft(find.byKey(key2)).dy, aboveBaseline1 - aboveBaseline2);
     });
 
     testWidgets('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/58898
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
-      const double fontSize1 = 54;
-      const double fontSize2 = 14;
+      // The point size of the font must be a multiple of 4 until
+      // https://github.com/flutter/flutter/issues/122066 is resolved.
+      const double fontSize1 = 52;
+      const double fontSize2 = 12;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -521,11 +524,11 @@ void main() {
               children: <Widget>[
                 Text('big text',
                   key: key1,
-                  style: const TextStyle(fontSize: fontSize1),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize1),
                 ),
                 Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
                   key: key2,
-                  style: const TextStyle(fontSize: fontSize2),
+                  style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize2),
                 ),
                 const FlutterLogo(size: 250),
               ],
@@ -544,16 +547,16 @@ void main() {
       // lines, but being aligned by the first line's baseline, they hang far
       // below the baseline. The FlutterLogo extends further than both Texts,
       // so the size of the parent row should contain the FlutterLogo as well.
-      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
-      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
-      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
+      const double ascentRatio = 0.75;
+      const double aboveBaseline1 = fontSize1 * ascentRatio;
+      const double aboveBaseline2 = fontSize2 * ascentRatio;
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
       expect(rowBox.size.height, 250);
       expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
       expect(
         tester.getTopLeft(find.byKey(key2)).dy,
-        moreOrLessEquals(aboveBaseline1 - aboveBaseline2, epsilon: .001),
+        aboveBaseline1 - aboveBaseline2,
       );
     });
   });
@@ -618,12 +621,10 @@ void main() {
             startsWith('A RenderConstraintsTransformBox overflowed'),
             reason: 'for clip = $clip',
           );
-          break;
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           expect(tester.takeException(), isNull, reason: 'for clip = $clip');
-          break;
       }
     }
   });
@@ -832,6 +833,199 @@ void main() {
     logs.clear();
   });
 
+  group('IgnorePointer semantics', () {
+    testWidgets('does not change semantics when not ignoring', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            ignoring: false,
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        matchesSemantics(
+          label: 'button',
+          hasTapAction: true,
+          isButton: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
+      );
+    });
+
+    testWidgets('can toggle the ignoring.', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      final UniqueKey key3 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestIgnorePointer(
+            child: Semantics(
+              key: key1,
+              label: '1',
+              onTap: (){ },
+              container: true,
+              child: Semantics(
+                key: key2,
+                label: '2',
+                onTap: (){ },
+                container: true,
+                child: Semantics(
+                  key: key3,
+                  label: '3',
+                  onTap: (){ },
+                  container: true,
+                  child: const SizedBox(width: 10, height: 10),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+        ),
+      );
+
+      final TestIgnorePointerState state = tester.state<TestIgnorePointerState>(find.byType(TestIgnorePointer));
+      state.setIgnore(false);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+          hasTapAction: true,
+        ),
+      );
+
+      state.setIgnore(true);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+        ),
+      );
+
+      state.setIgnore(false);
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.byKey(key1)),
+        matchesSemantics(
+          label: '1',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key2)),
+        matchesSemantics(
+          label: '2',
+          hasTapAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key3)),
+        matchesSemantics(
+          label: '3',
+          hasTapAction: true,
+        ),
+      );
+    });
+
+    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            ignoringSemantics: true,
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(semantics, isNot(includesNodeWith(label: 'button')));
+      semantics.dispose();
+    });
+
+    testWidgets('ignores user interactions', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IgnorePointer(
+            child: ElevatedButton(
+              key: key,
+              onPressed: () { },
+              child: const Text('button'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        // Tap action is blocked.
+        matchesSemantics(
+          label: 'button',
+          isButton: true,
+          isFocusable: true,
+          hasEnabledState: true,
+          isEnabled: true,
+        ),
+      );
+    });
+  });
+
   testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
     final List<String> logs = <String>[];
     Widget target({required bool absorbing}) => Align(
@@ -1004,5 +1198,32 @@ class _MockCanvas extends Fake implements Canvas {
   void drawRect(Rect rect, Paint paint) {
     rects.add(rect);
     paints.add(paint);
+  }
+}
+
+
+class TestIgnorePointer extends StatefulWidget {
+  const TestIgnorePointer({super.key, required this.child});
+
+  final Widget child;
+  @override
+  State<StatefulWidget> createState() => TestIgnorePointerState();
+}
+
+class TestIgnorePointerState extends State<TestIgnorePointer> {
+  bool ignore = true;
+
+  void setIgnore(bool newIgnore) {
+    setState(() {
+      ignore = newIgnore;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: ignore,
+      child: widget.child,
+    );
   }
 }

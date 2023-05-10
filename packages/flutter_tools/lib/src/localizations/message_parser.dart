@@ -308,13 +308,10 @@ class Parser {
           switch(tokenStr) {
             case 'plural':
               matchedType = ST.plural;
-              break;
             case 'select':
               matchedType = ST.select;
-              break;
             case 'other':
               matchedType = ST.other;
-              break;
           }
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
@@ -374,13 +371,10 @@ class Parser {
             // Theoretically, we can never get here.
             throw L10nException('ICU Syntax Error.');
           }
-          break;
         case ST.placeholderExpr:
           parseAndConstructNode(ST.placeholderExpr, 0);
-          break;
         case ST.pluralExpr:
           parseAndConstructNode(ST.pluralExpr, 0);
-          break;
         case ST.pluralParts:
           if (tokens.isNotEmpty && (
               tokens[0].type == ST.identifier ||
@@ -392,7 +386,6 @@ class Parser {
           } else {
             parseAndConstructNode(ST.pluralParts, 1);
           }
-          break;
         case ST.pluralPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.pluralPart, 0);
@@ -409,10 +402,8 @@ class Parser {
               tokens[0].positionInMessage,
             );
           }
-          break;
         case ST.selectExpr:
           parseAndConstructNode(ST.selectExpr, 0);
-          break;
         case ST.selectParts:
           if (tokens.isNotEmpty && (
             tokens[0].type == ST.identifier ||
@@ -423,7 +414,6 @@ class Parser {
           } else {
             parseAndConstructNode(ST.selectParts, 1);
           }
-          break;
         case ST.selectPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.selectPart, 0);
@@ -440,7 +430,6 @@ class Parser {
               tokens[0].positionInMessage
             );
           }
-          break;
         // At this point, we are only handling terminal symbols.
         // ignore: no_default_cases
         default:
@@ -530,7 +519,6 @@ class Parser {
           node = node.children[1];
         }
         syntaxTree.children = children;
-        break;
       // ignore: no_default_cases
       default:
         node.children.forEach(compress);
@@ -568,7 +556,6 @@ class Parser {
             );
           }
         }
-        break;
       case ST.selectParts:
         if (children.every((Node node) => node.children[0].type != ST.other)) {
           throw L10nParserException(
@@ -579,7 +566,6 @@ class Parser {
             syntaxTree.positionInMessage,
           );
         }
-        break;
       // ignore: no_default_cases
       default:
         break;

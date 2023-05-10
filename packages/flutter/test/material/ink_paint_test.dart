@@ -454,6 +454,66 @@ void main() {
     }));
   });
 
+  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+    final OverlayPortalController controller = OverlayPortalController();
+    controller.show();
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: SizedBox.square(
+            dimension: 200,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(
+                initialEntries: <OverlayEntry>[
+                  OverlayEntry(
+                    builder: (BuildContext context) {
+                      return Center(
+                        child: SizedBox.square(
+                          dimension: 100,
+                          // The material partially overlaps the overlayChild.
+                          // This is to verify that the `overlayChild`'s ink
+                          // features aren't clipped by it.
+                          child: Material(
+                            color: Colors.black,
+                            child: OverlayPortal(
+                              controller: controller,
+                              overlayChildBuilder: (BuildContext context) {
+                                return Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: InkWell(
+                                    splashColor: Colors.red,
+                                    onTap: () {},
+                                    child: const SizedBox.square(dimension: 100),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(InkWell)));
+    addTearDown(() async {
+      await gesture.up();
+    });
+
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
     const Color splashColor = Color(0xff00ff00);
 
@@ -507,6 +567,28 @@ void main() {
       paints
         ..circle(x: 50.0, y: 50.0, color: splashColor)
     );
+  });
+
+  testWidgets('Ink with isVisible=false does not paint', (WidgetTester tester) async {
+    const Color testColor = Color(0xffff1234);
+    Widget inkWidget({required bool isVisible}) {
+      return Material(
+        child: Visibility.maintain(
+          visible: isVisible,
+          child: Ink(
+            decoration: const BoxDecoration(color: testColor),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(inkWidget(isVisible: true));
+    RenderBox box = tester.renderObject(find.byType(Material));
+    expect(box, paints..rect(color: testColor));
+
+    await tester.pumpWidget(inkWidget(isVisible: false));
+    box = tester.renderObject(find.byType(Material));
+    expect(box, isNot(paints..rect(color: testColor)));
   });
 }
 
