@@ -24,7 +24,7 @@ import '../../../src/testbed.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-   '--disable-dart-dev',
+  '--disable-dart-dev',
   'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
   '--platform-binaries=HostArtifact.webPlatformKernelFolder',
   '--invoker=flutter_tool',
@@ -44,6 +44,18 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   _kDartSdkRoot,
   '--libraries-spec',
   'HostArtifact.flutterWebLibrariesJson',
+];
+
+const List<String> _kWasmOptLinuxArgrs = <String> [
+  'Artifact.wasmOptBinary.TargetPlatform.web_javascript',
+  '--all-features',
+  '--closed-world',
+  '--traps-never-happen',
+  '-O3',
+  '--type-ssa',
+  '--gufa',
+  '-O3',
+  '--type-merging',
 ];
 
 /// The result of calling `.parent` on a Memory directory pointing to
@@ -759,10 +771,12 @@ void main() {
 
   test('Dart2WasmTarget invokes dart2wasm with dart defines', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
+    environment.defines[WasmCompilerConfig.kRunWasmOpt] = WasmOptLevel.defaultValue.name;
     environment.defines[kDartDefines] = encodeDartDefines(<String>['FOO=bar', 'BAZ=qux']);
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
+    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
@@ -771,21 +785,38 @@ void main() {
         '-DBAZ=qux',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+      ],
+      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+    );
+
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kWasmOptLinuxArgrs,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+        '-o',
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ])
     );
 
     await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
+
+    expect(outputJsFile.existsSync(), isFalse);
+    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
+    expect(movedJsFile.existsSync(), isTrue);
+    expect(movedJsFile.readAsStringSync(), 'foo');
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
 
   test('Dart2WasmTarget invokes dart2wasm with omit checks', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
+    environment.defines[WasmCompilerConfig.kRunWasmOpt] = WasmOptLevel.defaultValue.name;
     environment.defines[WasmCompilerConfig.kOmitTypeChecks] = 'true';
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
+    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
@@ -793,18 +824,33 @@ void main() {
         '--omit-type-checks',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+      ],
+      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+    );
+
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kWasmOptLinuxArgrs,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+        '-o',
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ])
     );
 
     await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
+
+    expect(outputJsFile.existsSync(), isFalse);
+    final File movedJsFile = environment.buildDir.childFile('main.dart.mjs');
+    expect(movedJsFile.existsSync(), isTrue);
+    expect(movedJsFile.readAsStringSync(), 'foo');
   }, overrides: <Type, Generator>{
     ProcessManager: () => processManager,
   }));
 
-  test('Dart2WasmTarget invokes dart2wasm and wasm-opt when RunWasmOpt is enabled', () => testbed.run(() async {
+  test('Dart2WasmTarget invokes dart2wasm and wasm-opt with debug info in wasmopt debug mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
-    environment.defines[WasmCompilerConfig.kRunWasmOpt] = 'true';
+    environment.defines[WasmCompilerConfig.kRunWasmOpt] = WasmOptLevel.debug.name;
 
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
@@ -820,15 +866,8 @@ void main() {
 
       processManager.addCommand(FakeCommand(
         command: <String>[
-          'Artifact.wasmOptBinary.TargetPlatform.web_javascript',
-          '-all',
-          '--closed-world',
-          '-tnh',
-          '-O3',
-          '--type-ssa',
-          '--gufa',
-          '-O3',
-          '--type-merging',
+          ..._kWasmOptLinuxArgrs,
+          '--debuginfo',
           environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
           '-o',
           environment.buildDir.childFile('main.dart.wasm').absolute.path,
@@ -844,11 +883,33 @@ void main() {
     ProcessManager: () => processManager,
   }));
 
+  test('Dart2WasmTarget invokes dart2wasm (but not wasm-opt) with wasm-opt none option', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'debug';
+    environment.defines[WasmCompilerConfig.kRunWasmOpt] = WasmOptLevel.none.name;
+
+    final File depFile = environment.buildDir.childFile('dart2wasm.d');
+
+    final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kDart2WasmLinuxArgs,
+        '-Ddart.vm.product=true',
+        '--depfile=${depFile.absolute.path}',
+        environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.wasm').absolute.path,
+      ], onRun: () => outputJsFile..createSync()..writeAsStringSync('foo')));
+
+    await Dart2WasmTarget(WebRendererMode.canvaskit).build(environment);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+  }));
 
   test('Dart2WasmTarget with skwasm renderer adds extra flags', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
+    environment.defines[WasmCompilerConfig.kRunWasmOpt] = WasmOptLevel.defaultValue.name;
     final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
+    final File outputJsFile = environment.buildDir.childFile('main.dart.unopt.mjs');
     processManager.addCommand(FakeCommand(
       command: <String>[
         ..._kDart2WasmLinuxArgs,
@@ -857,6 +918,16 @@ void main() {
         '--shared-memory-max-pages=32768',
         '--depfile=${depFile.absolute.path}',
         environment.buildDir.childFile('main.dart').absolute.path,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+      ],
+      onRun: () => outputJsFile..createSync()..writeAsStringSync('foo'))
+    );
+
+    processManager.addCommand(FakeCommand(
+      command: <String>[
+        ..._kWasmOptLinuxArgrs,
+        environment.buildDir.childFile('main.dart.unopt.wasm').absolute.path,
+        '-o',
         environment.buildDir.childFile('main.dart.wasm').absolute.path,
       ])
     );
