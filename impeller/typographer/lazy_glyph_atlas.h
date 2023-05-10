@@ -26,13 +26,11 @@ class LazyGlyphAtlas {
       std::shared_ptr<GlyphAtlasContext> atlas_context,
       std::shared_ptr<Context> context) const;
 
-  bool HasColor() const;
-
  private:
-  std::vector<TextFrame> frames_;
+  std::vector<TextFrame> alpha_frames_;
+  std::vector<TextFrame> color_frames_;
   mutable std::unordered_map<GlyphAtlas::Type, std::shared_ptr<GlyphAtlas>>
       atlas_map_;
-  bool has_color_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(LazyGlyphAtlas);
 };

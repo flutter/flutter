@@ -164,7 +164,8 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
 ContentContext::ContentContext(std::shared_ptr<Context> context)
     : context_(std::move(context)),
       tessellator_(std::make_shared<Tessellator>()),
-      glyph_atlas_context_(std::make_shared<GlyphAtlasContext>()),
+      alpha_glyph_atlas_context_(std::make_shared<GlyphAtlasContext>()),
+      color_glyph_atlas_context_(std::make_shared<GlyphAtlasContext>()),
       scene_context_(std::make_shared<scene::SceneContext>(context_)) {
   if (!context_ || !context_->IsValid()) {
     return;
@@ -286,6 +287,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<SrgbToLinearFilterPipeline>(*context_);
   glyph_atlas_pipelines_[{}] =
       CreateDefaultPipeline<GlyphAtlasPipeline>(*context_);
+  glyph_atlas_color_pipelines_[{}] =
+      CreateDefaultPipeline<GlyphAtlasColorPipeline>(*context_);
   geometry_color_pipelines_[{}] =
       CreateDefaultPipeline<GeometryColorPipeline>(*context_);
   yuv_to_rgb_filter_pipelines_[{}] =
@@ -378,9 +381,10 @@ std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
   return tessellator_;
 }
 
-std::shared_ptr<GlyphAtlasContext> ContentContext::GetGlyphAtlasContext()
-    const {
-  return glyph_atlas_context_;
+std::shared_ptr<GlyphAtlasContext> ContentContext::GetGlyphAtlasContext(
+    GlyphAtlas::Type type) const {
+  return type == GlyphAtlas::Type::kAlphaBitmap ? alpha_glyph_atlas_context_
+                                                : color_glyph_atlas_context_;
 }
 
 std::shared_ptr<Context> ContentContext::GetContext() const {

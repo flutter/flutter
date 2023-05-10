@@ -10,15 +10,12 @@ uniform FrameInfo {
 }
 frame_info;
 
-in vec4 position;
+in highp vec4 position;
 in vec2 uv;
-in float has_color;
 
 out vec2 v_uv;
-out float v_has_color;
 
 void main() {
   gl_Position = frame_info.mvp * position;
   v_uv = uv;
-  v_has_color = has_color;
 }
