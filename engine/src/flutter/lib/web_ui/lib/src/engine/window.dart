@@ -17,7 +17,6 @@ import '../engine.dart' show DimensionsProvider, registerHotRestartListener, ren
 import 'dom.dart';
 import 'navigation/history.dart';
 import 'navigation/js_url_strategy.dart';
-import 'navigation/url_strategy.dart';
 import 'platform_dispatcher.dart';
 import 'services.dart';
 import 'test_embedding.dart';
@@ -381,7 +380,7 @@ external set jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 ui_web.UrlStrategy? _createDefaultUrlStrategy() {
   return ui.debugEmulateFlutterTesterEnvironment
       ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
-      : const HashUrlStrategy();
+      : const ui_web.HashUrlStrategy();
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].

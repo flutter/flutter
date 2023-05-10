@@ -15,6 +15,7 @@ import 'package:ui/src/engine/dom.dart'
 import 'package:ui/src/engine/navigation.dart';
 import 'package:ui/src/engine/services.dart';
 import 'package:ui/src/engine/test_embedding.dart';
+import 'package:ui/ui_web/src/ui_web.dart';
 
 import '../common/spy.dart';
 
@@ -647,6 +648,23 @@ void testMain() {
       expect(strategy.getPath(), '/');
     });
 
+    test('prepareExternalUrl', () {
+      const String internalUrl = '/menu?foo=bar';
+      final HashUrlStrategy strategy = HashUrlStrategy(location);
+
+      location.pathname = '/';
+      expect(strategy.prepareExternalUrl(internalUrl), '/#/menu?foo=bar');
+
+      location.pathname = '/main';
+      expect(strategy.prepareExternalUrl(internalUrl), '/main#/menu?foo=bar');
+
+      location.search = '?foo=bar';
+      expect(
+        strategy.prepareExternalUrl(internalUrl),
+        '/main?foo=bar#/menu?foo=bar',
+      );
+    });
+
     test('addPopStateListener fn unwraps DomPopStateEvent state', () {
       final HashUrlStrategy strategy = HashUrlStrategy(location);
       const String expected = 'expected value';
@@ -711,7 +729,7 @@ Future<void> systemNavigatorPop() {
 }
 
 /// A mock implementation of [PlatformLocation] that doesn't access the browser.
-class TestPlatformLocation extends PlatformLocation {
+class TestPlatformLocation implements PlatformLocation {
   @override
   String? hash;
 
@@ -721,10 +739,10 @@ class TestPlatformLocation extends PlatformLocation {
   List<DomEventListener> popStateListeners = <DomEventListener>[];
 
   @override
-  String get pathname => throw UnimplementedError();
+  String pathname = '';
 
   @override
-  String get search => throw UnimplementedError();
+  String search = '';
 
   /// Calls all the registered `popStateListeners` with a 'popstate'
   /// event with value `state`
