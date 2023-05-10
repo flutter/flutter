@@ -420,6 +420,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Alert the engine that the binding is registered. This instructs the engine to
   /// register its top level window handler on Windows. This signals that the app
   /// is able to process "System.requestAppExit" signals from the engine.
+  @visibleForTesting
   Future<void> initializationComplete() async {
     SystemChannels.platform.invokeMethod('System.initializationComplete');
   }
