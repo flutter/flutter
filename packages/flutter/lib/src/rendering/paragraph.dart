@@ -1473,6 +1473,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
 
     final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
     _setSelectionPosition(position, isEnd: isEnd);
+    debugPrint('moving $fullText end edge $isEnd to $position');
     if (position.offset == range.end) {
       return SelectionResult.next;
     }
@@ -1487,10 +1488,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
+    // When the start/end edges are swapped, i.e. the start is after the end, and the scrollable synthesizes an event
+    // for the start edge, this will potentially move the start edge outside of the origin word boundary and we are unable to recover.
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
     _selectableContainsOriginWord ??= existingSelectionStart != null && existingSelectionEnd != null;
 
+    debugPrint('beginning of update selection edge by word $fullText $_textSelectionStart, $_textSelectionEnd');
 
     _setSelectionPosition(null, isEnd: isEnd);
     final Matrix4 transform = paragraph.getTransformTo(null);
@@ -1710,6 +1714,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     targetPosition = _clampTextPosition(targetPosition ?? position);
 
     _setSelectionPosition(targetPosition, isEnd: isEnd);
+    debugPrint('$fullText moving isEnd: $isEnd to $targetPosition based on $position, current selectable? : ${_rect.contains(localPosition)} final start and end : $_textSelectionStart $_textSelectionEnd');
     if (targetPosition.offset == range.end) {
       return SelectionResult.next;
     }
