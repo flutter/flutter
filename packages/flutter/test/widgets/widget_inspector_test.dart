@@ -4529,7 +4529,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
         final Map<String, Object?>? renderObject = result['renderObject'] as Map<String, Object?>?;
         expect(renderObject, isNotNull);
-        expect(renderObject!['description'], startsWith('RenderView'));
+        expect(renderObject!['description'], contains('RenderView'));
 
         expect(result['parentRenderElement'], isNull);
         expect(result['constraints'], isNull);

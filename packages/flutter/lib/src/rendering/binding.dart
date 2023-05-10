@@ -263,7 +263,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     'Consider using RendererBinding.renderViews instead as the binding may manage multiple RenderViews. '
     'This feature was deprecated after v3.10.0-12.0.pre.'
   )
-  late final RenderView renderView = RenderView(
+  late final RenderView renderView = _ReusableRenderView(
     view: platformDispatcher.implicitView!,
   );
 
@@ -319,6 +319,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     assert(!_viewIdToRenderView.containsValue(view));
     assert(!_viewIdToRenderView.containsKey(viewId));
     _viewIdToRenderView[viewId] = view;
+    // TODO(goderbauer) if view is [renderView] we may not want to overwrite manually set config.
     view.configuration = createViewConfigurationFor(view);
   }
 
@@ -756,5 +757,31 @@ class _BindingPipelineManifold extends ChangeNotifier implements PipelineManifol
   void dispose() {
     _binding.removeSemanticsEnabledListener(notifyListeners);
     super.dispose();
+  }
+}
+
+class _ReusableRenderView extends RenderView {
+  _ReusableRenderView({super.configuration, required super.view});
+
+  bool _initialFramePrepared = false;
+
+  @override
+  void prepareInitialFrame() {
+    if (_initialFramePrepared) {
+      return;
+    }
+    super.prepareInitialFrame();
+    _initialFramePrepared = true;
+  }
+
+  @override
+  void scheduleInitialSemantics() {
+    clearSemantics();
+    super.scheduleInitialSemantics();
+  }
+
+  @override
+  void dispose() { // ignore: must_call_super
+    child = null;
   }
 }

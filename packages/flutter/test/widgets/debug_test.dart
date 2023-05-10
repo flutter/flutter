@@ -148,7 +148,7 @@ void main() {
         },
       ),
     );
-  }, skip: true); // [intended] enable when we have RawView.
+  });
 
   test('debugWidgetBuilderValue control test', () {
     final Widget widget = Container();
@@ -342,7 +342,15 @@ void main() {
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
+  tester.binding.attachRootWidget(Builder(
+    builder: (BuildContext context) {
+      return RawView(
+        view: tester.view,
+        hooks: ViewHooks.of(context),
+        builder: (_, __) => widget,
+      );
+    },
+  ));
   tester.binding.scheduleFrame();
   return tester.binding.pump();
 }
