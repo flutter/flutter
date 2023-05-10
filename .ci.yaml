@@ -115,6 +115,8 @@ platform_properties:
     properties:
       dependencies: >-
         [
+          {"dependency": "xcode", "version": "14e222b"},
+          {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
