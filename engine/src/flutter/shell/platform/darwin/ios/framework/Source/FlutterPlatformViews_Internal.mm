@@ -121,7 +121,7 @@ static BOOL _preparedOnce = NO;
   }
   for (NSUInteger i = 0; i < visualEffectView.subviews.count; i++) {
     UIView* view = visualEffectView.subviews[i];
-    if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectBackdropView")]) {
+    if ([NSStringFromClass([view class]) hasSuffix:@"BackdropView"]) {
       _indexOfBackdropView = i;
       for (NSObject* filter in view.layer.filters) {
         if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"] &&
@@ -130,7 +130,7 @@ static BOOL _preparedOnce = NO;
           break;
         }
       }
-    } else if ([view isKindOfClass:NSClassFromString(@"_UIVisualEffectSubview")]) {
+    } else if ([NSStringFromClass([view class]) hasSuffix:@"VisualEffectSubview"]) {
       _indexOfVisualEffectSubview = i;
     }
   }
