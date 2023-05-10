@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -668,7 +669,7 @@ void main() {
       ..layoutOffset = const Offset(20.0, 20.0);
     expect(
       parentData.toString(),
-      'vicinity=(yIndex: 10, xIndex: 10); layoutOffset=Offset(20.0, 20.0); '
+      'vicinity=(xIndex: 10, yIndex: 10); layoutOffset=Offset(20.0, 20.0); '
       'paintOffset=Offset(20.0, 20.0); not visible ',
     );
   });
@@ -691,53 +692,232 @@ void main() {
     expect(baseVicinity.compareTo(sameNothingVicinity), -20);
 
     // toString
-    expect(baseVicinity.toString(), '(yIndex: 0, xIndex: 0)');
-    expect(sameXVicinity.toString(), '(yIndex: 2, xIndex: 0)');
-    expect(sameYVicinity.toString(), '(yIndex: 0, xIndex: 3)');
-    expect(sameNothingVicinity.toString(), '(yIndex: 30, xIndex: 20)');
+    expect(baseVicinity.toString(), '(xIndex: 0, yIndex: 0)');
+    expect(sameXVicinity.toString(), '(xIndex: 0, yIndex: 2)');
+    expect(sameYVicinity.toString(), '(xIndex: 3, yIndex: 0)');
+    expect(sameNothingVicinity.toString(), '(xIndex: 20, yIndex: 30)');
   });
 
   group('RenderTwoDimensionalViewport', () {
     testWidgets('asserts against axes mismatch', (WidgetTester tester) async {
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return const SizedBox.square(dimension: 200);
+        }
+      );
+
       // Horizontal mismatch
+      expect(
+        () {
+          RenderSimpleBuilderTableViewport(
+            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalAxisDirection: AxisDirection.left,
+            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalAxisDirection: AxisDirection.right,
+            delegate: delegate,
+            mainAxis: Axis.vertical,
+            childManager: _NullBuildContext(),
+          );
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError error) => error.toString(),
+            'description',
+            contains('AxisDirection is not Axis.'),
+          ),
+        ),
+      );
 
       // Vertical mismatch
+      expect(
+        () {
+          RenderSimpleBuilderTableViewport(
+            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalAxisDirection: AxisDirection.up,
+            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalAxisDirection: AxisDirection.down,
+            delegate: delegate,
+            mainAxis: Axis.vertical,
+            childManager: _NullBuildContext(),
+          );
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError error) => error.toString(),
+            'description',
+            contains('AxisDirection is not Axis.'),
+          ),
+        ),
+      );
+
+      // Both
+      expect(
+        () {
+          RenderSimpleBuilderTableViewport(
+            verticalOffset: ViewportOffset.fixed(0.0),
+            verticalAxisDirection: AxisDirection.left,
+            horizontalOffset: ViewportOffset.fixed(0.0),
+            horizontalAxisDirection: AxisDirection.down,
+            delegate: delegate,
+            mainAxis: Axis.vertical,
+            childManager: _NullBuildContext(),
+          );
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError error) => error.toString(),
+            'description',
+            contains('AxisDirection is not Axis.'),
+          ),
+        ),
+      );
     });
 
     testWidgets('getters', (WidgetTester tester) async {
-      // clipBehavior
+      final UniqueKey childKey = UniqueKey();
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox.square(key: childKey, dimension: 200);
+        }
+      );
+      final RenderSimpleBuilderTableViewport renderViewport = RenderSimpleBuilderTableViewport(
+        verticalOffset: ViewportOffset.fixed(10.0),
+        verticalAxisDirection: AxisDirection.down,
+        horizontalOffset: ViewportOffset.fixed(20.0),
+        horizontalAxisDirection: AxisDirection.right,
+        delegate: delegate,
+        mainAxis: Axis.vertical,
+        childManager: _NullBuildContext(),
+      );
 
-      // cacheExtent
+      expect(renderViewport.clipBehavior, Clip.hardEdge);
+      expect(renderViewport.cacheExtent, RenderAbstractViewport.defaultCacheExtent);
+      expect(renderViewport.isRepaintBoundary, isTrue);
+      expect(renderViewport.sizedByParent, isTrue);
+      // No size yet, should assert.
+      expect(
+        () {
+          renderViewport.viewportDimension;
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError error) => error.toString(),
+            'description',
+            contains('hasSize'),
+          ),
+        ),
+      );
+      expect(renderViewport.horizontalOffset.pixels, 20.0);
+      expect(renderViewport.horizontalAxisDirection, AxisDirection.right);
+      expect(renderViewport.verticalOffset.pixels, 10.0);
+      expect(renderViewport.verticalAxisDirection, AxisDirection.down);
+      expect(renderViewport.delegate, delegate);
+      expect(renderViewport.mainAxis, Axis.vertical);
 
-      // isRepaintBoundary
-
-      // sizedByParent
-
-      // viewportDimension - also asserts hasSize
-
-      // horizontalOffset
-
-      // horizontalAxisDirection
-
-      // verticalOffset
-
-      // verticalAxisDirection
-
-      // delegate
-
-      // mainAxis
+      // viewportDimension when hasSize
+      await tester.pumpWidget(simpleBuilderTest(
+        delegate: delegate,
+      ));
+      await tester.pumpAndSettle();
+      final RenderTwoDimensionalViewport viewport = RenderAbstractViewport.of(
+        tester.renderObject(find.byKey(childKey))
+      ) as RenderTwoDimensionalViewport;
+      expect(viewport.viewportDimension, const Size(800.0, 600.0));
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('childrenInPaintOrder correlates with mainAxis', (WidgetTester tester) async {
-      // mainAxis is vertical
+    testWidgets('Children are organized according to mainAxis', (WidgetTester tester) async {
+      final Map<ChildVicinity, UniqueKey> childKeys = <ChildVicinity, UniqueKey>{};
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 5,
+        maxYIndex: 5,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          childKeys[vicinity] = UniqueKey();
+          return SizedBox.square(key: childKeys[vicinity], dimension: 200);
+        }
+      );
+      TwoDimensionalViewportParentData parentDataOf(RenderBox child) {
+        return child.parentData! as TwoDimensionalViewportParentData;
+      }
+      // mainAxis is vertical (default)
+      await tester.pumpWidget(simpleBuilderTest(
+        delegate: delegate,
+      ));
+      await tester.pumpAndSettle();
+      RenderTwoDimensionalViewport viewport = RenderAbstractViewport.of(
+        tester.renderObject(find.byKey(childKeys.values.first))
+      ) as RenderTwoDimensionalViewport;
+      expect(viewport.mainAxis, Axis.vertical);
+      // first child
+      expect(
+        parentDataOf(viewport.firstChild!).vicinity,
+        const ChildVicinity(xIndex: 0, yIndex: 0),
+      );
+      expect(
+        parentDataOf(viewport.childAfter(viewport.firstChild!)!).vicinity,
+        const ChildVicinity(xIndex: 1, yIndex: 0),
+      );
+      expect(
+        viewport.childBefore(viewport.firstChild!),
+        isNull,
+      );
+      // last child
+      expect(
+        parentDataOf(viewport.lastChild!).vicinity,
+        const ChildVicinity(xIndex: 4, yIndex: 3),
+      );
+      expect(
+        viewport.childAfter(viewport.lastChild!),
+        isNull,
+      );
+      expect(
+        parentDataOf(viewport.childBefore(viewport.lastChild!)!).vicinity,
+        const ChildVicinity(xIndex: 3, yIndex: 3),
+      );
 
       // mainAxis is horizontal
+      await tester.pumpWidget(simpleBuilderTest(
+        delegate: delegate,
+        mainAxis: Axis.horizontal,
+      ));
+      await tester.pumpAndSettle();
+      viewport = RenderAbstractViewport.of(
+        tester.renderObject(find.byKey(childKeys.values.first))
+      ) as RenderTwoDimensionalViewport;
+      expect(viewport.mainAxis, Axis.horizontal);
+      // first child
+      expect(
+        parentDataOf(viewport.firstChild!).vicinity,
+        const ChildVicinity(xIndex: 0, yIndex: 0),
+      );
+      expect(
+        parentDataOf(viewport.childAfter(viewport.firstChild!)!).vicinity,
+        const ChildVicinity(xIndex: 0, yIndex: 1),
+      );
+      expect(
+        viewport.childBefore(viewport.firstChild!),
+        isNull,
+      );
+      // last child
+      expect(
+        parentDataOf(viewport.lastChild!).vicinity,
+        const ChildVicinity(xIndex: 4, yIndex: 3),
+      );
+      expect(
+        viewport.childAfter(viewport.lastChild!),
+        isNull,
+      );
+      expect(
+        parentDataOf(viewport.childBefore(viewport.lastChild!)!).vicinity,
+        const ChildVicinity(xIndex: 4, yIndex: 2),
+      );
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('sets up parent data', (WidgetTester tester) async {
       // parent data is TwoDimensionalViewportParentData
-
-      // parentDataOf method works
 
       // parentData is computed correctly - normal axes
       // - layoutOffset, paintOffset, paintExtent, isVisible, ChildVicinity
@@ -771,9 +951,76 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('asserts that both axes are bounded', (WidgetTester tester) async {
-      // Compose unbounded
+      final UniqueKey childKey = UniqueKey();
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox.square(key: childKey, dimension: 200);
+        }
+      );
+      final List<Object> exceptions = <Object>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
+      // Compose unbounded - vertical axis
+      await tester.pumpWidget(MaterialApp(
+        home: Column(
+          children: <Widget>[
+            SimpleBuilderTableView(delegate: delegate)
+          ]
+        )
+      ));
+      await tester.pumpAndSettle();
+      FlutterError.onError = oldHandler;
+      expect(exceptions.isNotEmpty, isTrue);
+      expect((exceptions[0] as FlutterError).message, contains('unbounded'));
 
+      exceptions.clear();
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
+      // Compose unbounded - horizontal axis
+      await tester.pumpWidget(MaterialApp(
+        home: Row(
+          children: <Widget>[
+            SimpleBuilderTableView(delegate: delegate)
+          ]
+        )
+      ));
+      await tester.pumpAndSettle();
+      FlutterError.onError = oldHandler;
+      expect(exceptions.isNotEmpty, isTrue);
+      expect((exceptions[0] as FlutterError).message, contains('unbounded'));
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('computeDryLayout asserts axes are bounded', (WidgetTester tester) async {
+      final UniqueKey childKey = UniqueKey();
+      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+        maxXIndex: 0,
+        maxYIndex: 0,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          return SizedBox.square(key: childKey, dimension: 200);
+        }
+      );
       // Call computeDryLayout with unbounded constraints
+      await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
+      final RenderTwoDimensionalViewport viewport = RenderAbstractViewport.of(
+        tester.renderObject(find.byKey(childKey))
+      ) as RenderTwoDimensionalViewport;
+      expect(
+        () {
+          viewport.computeDryLayout(const BoxConstraints());
+        },
+        throwsA(
+          isA<FlutterError>().having(
+            (FlutterError error) => error.message,
+            'error.message',
+            contains('unbounded'),
+          ),
+        ),
+      );
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('correctly resizes dimensions', (WidgetTester tester) async {
@@ -846,7 +1093,7 @@ void main() {
   });
 }
 
-class _NullBuildContext implements BuildContext {
+class _NullBuildContext implements BuildContext, TwoDimensionalChildManager {
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }

@@ -510,8 +510,14 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required TwoDimensionalChildManager childManager,
     double? cacheExtent,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up),
-       assert(horizontalAxisDirection == AxisDirection.left || horizontalAxisDirection == AxisDirection.right),
+  }) : assert(
+         verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
+         'TwoDimensionalViewport.verticalAxisDirection is not Axis.vertical.'
+       ),
+       assert(
+         horizontalAxisDirection == AxisDirection.left || horizontalAxisDirection == AxisDirection.right,
+         'TwoDimensionalViewport.horizontalAxisDirection is not Axis.horizontal.'
+       ),
        _childManager = childManager,
        _horizontalOffset = horizontalOffset,
        _horizontalAxisDirection = horizontalAxisDirection,
@@ -722,7 +728,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   /// This method is useful when overriding [paint] in order to paint children
   /// in the correct order.
-  @protected
   RenderBox? childBefore(RenderBox child) {
     assert(child.parent == this);
     return parentDataOf(child)._previousSibling;
@@ -735,7 +740,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   /// This method is useful when overriding [paint] in order to paint children
   /// in the correct order.
-  @protected
   RenderBox? childAfter(RenderBox child) {
     assert(child.parent == this);
     return parentDataOf(child)._nextSibling;
@@ -1162,7 +1166,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     }
     // Horizontal
     double lowerBound = 0;
-    double upperBound = viewportDimension.width + cacheExtent;
+    double upperBound = viewportDimension.width;
     final double width = clampDouble(
       clampDouble(childSize.width + layoutOffset.dx.abs(), lowerBound, upperBound),
       0,
@@ -1170,7 +1174,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     );
     // Vertical
     lowerBound = 0;
-    upperBound = viewportDimension.height + cacheExtent;
+    upperBound = viewportDimension.height;
     final double height = clampDouble(
       clampDouble(childSize.height + layoutOffset.dy.abs(), lowerBound, upperBound),
       0,
@@ -1422,6 +1426,6 @@ class ChildVicinity implements Comparable<ChildVicinity> {
 
   @override
   String toString() {
-    return '(yIndex: $yIndex, xIndex: $xIndex)';
+    return '(xIndex: $xIndex, yIndex: $yIndex)';
   }
 }
