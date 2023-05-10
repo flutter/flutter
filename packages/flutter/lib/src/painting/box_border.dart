@@ -243,12 +243,19 @@ abstract class BoxBorder extends ShapeBorder {
     }
   }
 
-  static void _paintNonUniformBorder(
+  /// Paints a Border with different widths, styles and strokeAligns, on any
+  /// borderRadius while using a single color.
+  ///
+  /// See also:
+  ///
+  ///  * [paintBorder], which supports multiple colors but not borderRadius.
+  ///  * [paint], which calls this method.
+  static void paintNonUniformBorder(
     Canvas canvas,
     Rect rect, {
     required BorderRadius? borderRadius,
-    required BoxShape shape,
     required TextDirection? textDirection,
+    BoxShape shape = BoxShape.rectangle,
     BorderSide? top,
     BorderSide? right,
     BorderSide? bottom,
@@ -503,7 +510,7 @@ class Border extends BoxBorder {
         if (left.style == BorderStyle.none) null else left.color,
       }.whereNotNull().toSet();
 
-  /// [BoxBorder._paintNonUniformBorder] is about 20% than [paintBorder],
+  /// [BoxBorder.paintNonUniformBorder] is about 20% than [paintBorder],
   /// but [paintBorder] is able to draw hairline borders when width is zero
   /// and style is [BorderStyle.solid].
   bool get _hasThinBorder =>
@@ -638,7 +645,7 @@ class Border extends BoxBorder {
     if (visibleColors.length == 1 &&
         ((borderRadius != null && borderRadius != BorderRadius.zero) ||
             !hasThinBorder)) {
-      BoxBorder._paintNonUniformBorder(canvas, rect,
+      BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
@@ -1016,7 +1023,7 @@ class BorderDirectional extends BoxBorder {
     if (visibleColors.length == 1 &&
         ((borderRadius != null && borderRadius != BorderRadius.zero) ||
             !hasThinBorder)) {
-      BoxBorder._paintNonUniformBorder(canvas, rect,
+      BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
