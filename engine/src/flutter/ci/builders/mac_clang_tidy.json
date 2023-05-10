@@ -1,0 +1,107 @@
+{
+    "builds": [
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--runtime-mode",
+                "debug",
+                "--prebuilt-dart-sdk",
+                "--no-lto",
+                "--force-mac-arm64"
+            ],
+            "name": "host_debug",
+            "ninja": {
+                "config": "host_debug"
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "debug",
+                "--simulator",
+                "--no-lto",
+                "--force-mac-arm64"
+            ],
+            "name": "ios_debug_sim",
+            "ninja": {
+                "config": "ios_debug_sim"
+            }
+        }
+    ],
+    "tests": [
+        {
+            "name": "test: lint host_debug",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug",
+                "ios_debug_sim"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=1",
+                        "--shard-variants=ios_debug_sim"
+                    ],
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint ios_debug_sim",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac",
+                "cpu=arm64"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug",
+                "ios_debug_sim"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint ios_debug_sim",
+                    "parameters": [
+                        "--variant",
+                        "ios_debug_sim",
+                        "--lint-all",
+                        "--shard-id=0",
+                        "--shard-variants=host_debug"
+                    ],
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        }
+    ]
+}
