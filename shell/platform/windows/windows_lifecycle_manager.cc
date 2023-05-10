@@ -14,7 +14,7 @@
 namespace flutter {
 
 WindowsLifecycleManager::WindowsLifecycleManager(FlutterWindowsEngine* engine)
-    : engine_(engine) {}
+    : engine_(engine), process_close_(false) {}
 
 WindowsLifecycleManager::~WindowsLifecycleManager() {}
 
@@ -49,6 +49,9 @@ bool WindowsLifecycleManager::WindowProc(HWND hwnd,
     // is, we re-dispatch a new WM_CLOSE message. In order to allow the new
     // message to reach other delegates, we ignore it here.
     case WM_CLOSE: {
+      if (!process_close_) {
+        return false;
+      }
       auto key = std::make_tuple(hwnd, wpar, lpar);
       auto itr = sent_close_messages_.find(key);
       if (itr != sent_close_messages_.end()) {
@@ -154,6 +157,10 @@ bool WindowsLifecycleManager::IsLastWindowOfProcess() {
   } while (thread_snapshot.GetNextThread(thread));
 
   return num_windows <= 1;
+}
+
+void WindowsLifecycleManager::BeginProcessingClose() {
+  process_close_ = true;
 }
 
 }  // namespace flutter
