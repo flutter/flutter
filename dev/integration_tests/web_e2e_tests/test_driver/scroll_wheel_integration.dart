@@ -25,5 +25,5 @@ void main() {
       find.byType(app.MyApp),
       matchesGoldenFile('scroll_wheel_by_line'),
     );
-  }, skip: true); // [intended] figure out how to debug this test.
+  });
 }
