@@ -16,7 +16,6 @@
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/display_list_testing.h"
-#include "flutter/testing/mock_canvas.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -93,10 +92,10 @@ TEST_F(OpacityLayerTest, CacheChild) {
   DlPaint paint;
 
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
-  MockCanvas other_canvas;
-  other_canvas.SetTransform(other_transform);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
+  DisplayListBuilder other_canvas;
+  other_canvas.Transform(other_transform);
 
   use_mock_raster_cache();
 
@@ -142,10 +141,10 @@ TEST_F(OpacityLayerTest, CacheChildren) {
   layer->Add(mock_layer2);
 
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
-  MockCanvas other_canvas;
-  other_canvas.SetTransform(other_transform);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
+  DisplayListBuilder other_canvas;
+  other_canvas.Transform(other_transform);
 
   use_mock_raster_cache();
 
@@ -233,18 +232,20 @@ TEST_F(OpacityLayerTest, FullyOpaque) {
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_transform)}));
 
-  SkRect opacity_bounds;
-  expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
-      .roundOut(&opacity_bounds);
-  auto expected_draw_calls =
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+  DisplayListBuilder expected_builder;
+  /* (Opacity)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+      // Opaque alpha needs no SaveLayer, just recurse into painting mock_layer
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(OpacityLayerTest, FullyTransparent) {
@@ -275,20 +276,24 @@ TEST_F(OpacityLayerTest, FullyTransparent) {
       mock_layer->parent_mutators(),
       std::vector({Mutator(layer_transform), Mutator(SK_AlphaTRANSPARENT)}));
 
-  auto expected_draw_calls = std::vector(
-      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
-       MockCanvas::DrawCall{
-           1,
-           MockCanvas::SaveLayerData{
-               child_bounds, DlPaint(DlColor::kTransparent()), nullptr, 2}},
-       MockCanvas::DrawCall{2,
-                            MockCanvas::DrawPathData{child_path, child_paint}},
-       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+  DisplayListBuilder expected_builder;
+  /* (Opacity)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+      /* (Opacity)layer::PaintChildren */ {
+        DlPaint save_paint(DlPaint().setOpacity(layer->opacity()));
+        expected_builder.SaveLayer(&child_bounds, &save_paint);
+        /* mock_layer::Paint */ {
+          expected_builder.DrawPath(child_path, child_paint);
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(OpacityLayerTest, HalfTransparent) {
@@ -324,12 +329,18 @@ TEST_F(OpacityLayerTest, HalfTransparent) {
   DlPaint child_dl_paint = DlPaint(DlColor::kGreen());
 
   auto expected_builder = DisplayListBuilder();
-  expected_builder.Save();
-  expected_builder.Translate(layer_offset.fX, layer_offset.fY);
-  expected_builder.SaveLayer(&opacity_bounds, &save_paint);
-  expected_builder.DrawPath(child_path, child_dl_paint);
-  expected_builder.Restore();
-  expected_builder.Restore();
+  /* (Opacity)layer::Paint */ {
+    expected_builder.Save();
+    expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+    /* (Opacity)layer::PaintChildren */ {
+      expected_builder.SaveLayer(&opacity_bounds, &save_paint);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_dl_paint);
+      }
+      expected_builder.Restore();
+    }
+    expected_builder.Restore();
+  }
   sk_sp<DisplayList> expected_display_list = expected_builder.Build();
 
   layer->Paint(display_list_paint_context());
@@ -384,53 +395,65 @@ TEST_F(OpacityLayerTest, Nested) {
   EXPECT_TRUE(layer2->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer1->parent_matrix(),
             SkMatrix::Concat(initial_transform, layer1_transform));
-  //   EXPECT_EQ(mock_layer1->parent_mutators(),
-  //             std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
+  EXPECT_EQ(mock_layer1->parent_mutators(),
+            std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
   EXPECT_EQ(
       mock_layer2->parent_matrix(),
       SkMatrix::Concat(SkMatrix::Concat(initial_transform, layer1_transform),
                        layer2_transform));
-  //   EXPECT_EQ(mock_layer2->parent_mutators(),
-  //             std::vector({Mutator(layer1_transform), Mutator(alpha1),
-  //                          Mutator(layer2_transform), Mutator(alpha2)}));
+  EXPECT_EQ(mock_layer2->parent_mutators(),
+            std::vector({Mutator(layer1_transform), Mutator(alpha1),
+                         Mutator(layer2_transform), Mutator(alpha2)}));
   EXPECT_EQ(mock_layer3->parent_matrix(),
             SkMatrix::Concat(initial_transform, layer1_transform));
-  //   EXPECT_EQ(mock_layer3->parent_mutators(),
-  //             std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
+  EXPECT_EQ(mock_layer3->parent_mutators(),
+            std::vector({Mutator(layer1_transform), Mutator(alpha1)}));
 
-  DlPaint opacity1_paint;
-  opacity1_paint.setOpacity(alpha1 * (1.0 / SK_AlphaOPAQUE));
-  DlPaint opacity2_paint;
-  opacity2_paint.setOpacity(alpha2 * (1.0 / SK_AlphaOPAQUE));
   SkRect opacity1_bounds =
       expected_layer1_bounds.makeOffset(-layer1_offset.fX, -layer1_offset.fY);
   SkRect opacity2_bounds =
       expected_layer2_bounds.makeOffset(-layer2_offset.fX, -layer2_offset.fY);
-  auto expected_draw_calls = std::vector(
-      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::ConcatMatrixData{SkM44(layer1_transform)}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::SaveLayerData{opacity1_bounds, opacity1_paint,
-                                        nullptr, 2}},
-       MockCanvas::DrawCall{
-           2, MockCanvas::DrawPathData{child1_path, child1_paint}},
-       MockCanvas::DrawCall{2, MockCanvas::SaveData{3}},
-       MockCanvas::DrawCall{
-           3, MockCanvas::ConcatMatrixData{SkM44(layer2_transform)}},
-       MockCanvas::DrawCall{
-           3, MockCanvas::SaveLayerData{opacity2_bounds, opacity2_paint,
-                                        nullptr, 4}},
-       MockCanvas::DrawCall{
-           4, MockCanvas::DrawPathData{child2_path, child2_paint}},
-       MockCanvas::DrawCall{4, MockCanvas::RestoreData{3}},
-       MockCanvas::DrawCall{3, MockCanvas::RestoreData{2}},
-       MockCanvas::DrawCall{
-           2, MockCanvas::DrawPathData{child3_path, child3_paint}},
-       MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
-  layer1->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+  DlPaint opacity1_paint;
+  opacity1_paint.setOpacity(alpha1 * (1.0 / SK_AlphaOPAQUE));
+  DlPaint opacity2_paint;
+  opacity2_paint.setOpacity(alpha2 * (1.0 / SK_AlphaOPAQUE));
+
+  DisplayListBuilder expected_builder;
+  /* (Opacity)layer1::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.Translate(layer1_offset.fX, layer1_offset.fY);
+      /* (Opacity)layer1::PaintChildren */ {
+        expected_builder.SaveLayer(&opacity1_bounds, &opacity1_paint);
+        /* mock_layer1::Paint */ {
+          expected_builder.DrawPath(child1_path, child1_paint);
+        }
+        /* (Opacity)layer2::Paint */ {
+          expected_builder.Save();
+          {
+            expected_builder.Translate(layer2_offset.fX, layer2_offset.fY);
+            /* (Opacity)layer2::PaintChidren */ {
+              expected_builder.SaveLayer(&opacity2_bounds, &opacity2_paint);
+              {
+                /* mock_layer2::Paint */ {
+                  expected_builder.DrawPath(child2_path, child2_paint);
+                }
+              }
+              expected_builder.Restore();
+            }
+          }
+          expected_builder.Restore();
+        }
+        /* mock_layer3::Paint */ {
+          expected_builder.DrawPath(child3_path, child3_paint);
+        }
+        expected_builder.Restore();
+      }
+    }
+    expected_builder.Restore();
+  }
+  layer1->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(OpacityLayerTest, Readback) {
@@ -658,16 +681,12 @@ TEST_F(OpacityLayerDiffTest, FractionalTranslationWithRasterCache) {
 }
 
 TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
-  use_mock_raster_cache();  // Ensure non-fractional alignment.
+  use_mock_raster_cache();  // Ensure pixel-snapped alignment.
 
   const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
   const SkPoint layer_offset = SkPoint::Make(0.5f, 1.5f);
   const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 0.5f);
-  const SkMatrix layer_transform =
-      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
   const DlPaint child_paint = DlPaint(DlColor::kGreen());
-  const SkRect expected_layer_bounds =
-      layer_transform.mapRect(child_path.getBounds());
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
   auto layer = std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, layer_offset);
   layer->Add(mock_layer);
@@ -675,21 +694,25 @@ TEST_F(OpacityLayerTest, FullyOpaqueWithFractionalValues) {
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
 
-  SkRect opacity_bounds;
-  expected_layer_bounds.makeOffset(-layer_offset.fX, -layer_offset.fY)
-      .roundOut(&opacity_bounds);
-  auto expected_draw_calls = std::vector(
-      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::ConcatMatrixData{SkM44(layer_transform)}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::SetMatrixData{SkM44(
-                  RasterCacheUtil::GetIntegralTransCTM(layer_transform))}},
-       MockCanvas::DrawCall{1,
-                            MockCanvas::DrawPathData{child_path, child_paint}},
-       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+  auto expected_builder = DisplayListBuilder();
+  /* (Opacity)layer::Paint */ {
+    expected_builder.Save();
+    expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+    // Opaque alpha needs no SaveLayer, just recurse into painting mock_layer
+    // but since we use the mock raster cache we pixel snap the transform
+    expected_builder.TransformReset();
+    expected_builder.Transform2DAffine(
+        1, 0, SkScalarRoundToScalar(layer_offset.fX),  //
+        0, 1, SkScalarRoundToScalar(layer_offset.fY));
+    /* mock_layer::Paint */ {
+      expected_builder.DrawPath(child_path, child_paint);
+    }
+    expected_builder.Restore();
+  }
+  sk_sp<DisplayList> expected_display_list = expected_builder.Build();
+
+  layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_display_list));
 }
 
 TEST_F(OpacityLayerTest, FullyTransparentDoesNotCullPlatformView) {

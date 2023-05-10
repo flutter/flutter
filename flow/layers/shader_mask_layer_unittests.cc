@@ -11,10 +11,7 @@
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 #include "gtest/gtest.h"
-#include "third_party/skia/include/core/SkShader.h"
-#include "third_party/skia/include/effects/SkPerlinNoiseShader.h"
 
 namespace flutter {
 namespace testing {
@@ -86,23 +83,27 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
   DlPaint filter_paint;
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(nullptr);
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
-                                                    nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                              layer_bounds.fLeft, layer_bounds.fTop)}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
-                                                       layer_bounds.width(),
-                                                       layer_bounds.height()),
-                                                   filter_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ShaderMask)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.SaveLayer(&child_bounds);
+      {
+        /* mock_layer::Paint */ {
+          expected_builder.DrawPath(child_path, child_paint);
+        }
+        expected_builder.Translate(layer_bounds.fLeft, layer_bounds.fTop);
+        expected_builder.DrawRect(
+            SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+            filter_paint);
+      }
+      expected_builder.Restore();
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ShaderMaskLayerTest, SimpleFilter) {
@@ -127,23 +128,27 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
   DlPaint filter_paint;
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(dl_filter);
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
-                                                    nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                              layer_bounds.fLeft, layer_bounds.fTop)}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
-                                                       layer_bounds.width(),
-                                                       layer_bounds.height()),
-                                                   filter_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ShaderMask)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.SaveLayer(&child_bounds);
+      {
+        /* mock_layer::Paint */ {
+          expected_builder.DrawPath(child_path, child_paint);
+        }
+        expected_builder.Translate(layer_bounds.fLeft, layer_bounds.fTop);
+        expected_builder.DrawRect(
+            SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+            filter_paint);
+      }
+      expected_builder.Restore();
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ShaderMaskLayerTest, MultipleChildren) {
@@ -180,25 +185,30 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
   DlPaint filter_paint;
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(dl_filter);
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{children_bounds, DlPaint(),
-                                                    nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                              layer_bounds.fLeft, layer_bounds.fTop)}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawRectData{SkRect::MakeWH(
-                                                       layer_bounds.width(),
-                                                       layer_bounds.height()),
-                                                   filter_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ShaderMask)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.SaveLayer(&children_bounds);
+      {
+        /* mock_layer1::Paint */ {
+          expected_builder.DrawPath(child_path1, child_paint1);
+        }
+        /* mock_layer2::Paint */ {
+          expected_builder.DrawPath(child_path2, child_paint2);
+        }
+        expected_builder.Translate(layer_bounds.fLeft, layer_bounds.fTop);
+        expected_builder.DrawRect(
+            SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+            filter_paint);
+      }
+      expected_builder.Restore();
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ShaderMaskLayerTest, Nested) {
@@ -244,38 +254,44 @@ TEST_F(ShaderMaskLayerTest, Nested) {
   filter_paint2.setBlendMode(DlBlendMode::kSrc);
   filter_paint1.setColorSource(dl_filter1);
   filter_paint2.setColorSource(dl_filter2);
-  layer1->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{
-               0, MockCanvas::SaveLayerData{children_bounds, DlPaint(), nullptr,
-                                            1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::SaveLayerData{child_path2.getBounds(), DlPaint(),
-                                            nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path2, child_paint2}},
-           MockCanvas::DrawCall{2,
-                                MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                    layer_bounds.fLeft, layer_bounds.fTop)}},
-           MockCanvas::DrawCall{
-               2,
-               MockCanvas::DrawRectData{
-                   SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
-                   filter_paint2}},
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1,
-                                MockCanvas::ConcatMatrixData{SkM44::Translate(
-                                    layer_bounds.fLeft, layer_bounds.fTop)}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::DrawRectData{
-                   SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
-                   filter_paint1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+
+  layer1->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ShaderMask)layer1::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.SaveLayer(&children_bounds);
+      {
+        /* mock_layer1::Paint */ {
+          expected_builder.DrawPath(child_path1, child_paint1);
+        }
+        /* (ShaderMask)layer2::Paint */ {
+          expected_builder.Save();
+          {
+            expected_builder.SaveLayer(&child_path2.getBounds());
+            {
+              /* mock_layer2::Paint */ {
+                expected_builder.DrawPath(child_path2, child_paint2);
+              }
+              expected_builder.Translate(layer_bounds.fLeft, layer_bounds.fTop);
+              expected_builder.DrawRect(
+                  SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+                  filter_paint2);
+            }
+            expected_builder.Restore();
+          }
+          expected_builder.Restore();
+        }
+        expected_builder.Translate(layer_bounds.fLeft, layer_bounds.fTop);
+        expected_builder.DrawRect(
+            SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+            filter_paint1);
+      }
+      expected_builder.Restore();
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ShaderMaskLayerTest, Readback) {
@@ -310,8 +326,8 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
   layer->Add(mock_layer);
 
   SkMatrix cache_ctm = initial_transform;
-  MockCanvas cache_canvas;
-  cache_canvas.SetTransform(cache_ctm);
+  DisplayListBuilder cache_canvas;
+  cache_canvas.Transform(cache_ctm);
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
@@ -398,7 +414,7 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
   EXPECT_TRUE(DisplayListsEQ_Verbose(expected_builder.Build(), display_list()));
 }
 
-TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
+TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCacheLayerNotCached) {
   use_mock_raster_cache();  // Ensure non-fractional alignment.
 
   const SkMatrix initial_transform = SkMatrix::Translate(0.5f, 1.0f);
@@ -418,27 +434,31 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCache) {
   DlPaint filter_paint;
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(dl_filter);
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkM44(
-                                               SkMatrix::Translate(0.0, 0.0))}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::SaveLayerData{child_bounds, DlPaint(),
-                                                    nullptr, 2}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::ConcatMatrixData{SkM44::Translate(
-                              layer_bounds.fLeft, layer_bounds.fTop)}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::DrawRectData{SkRect::MakeWH(
-                                                       layer_bounds.width(),
-                                                       layer_bounds.height()),
-                                                   filter_paint}},
-                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ShaderMask)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.TransformReset();
+      // The layer will perform this Identity transform operation by default,
+      // but it should be ignored both here and in the layer paint
+      expected_builder.Transform(SkMatrix());
+      expected_builder.SaveLayer(&child_bounds);
+      {
+        /* mock_layer::Paint */ {
+          expected_builder.DrawPath(child_path, child_paint);
+        }
+        expected_builder.Translate(layer_bounds.fLeft, layer_bounds.fTop);
+        expected_builder.DrawRect(
+            SkRect::MakeWH(layer_bounds.width(), layer_bounds.height()),
+            filter_paint);
+      }
+      expected_builder.Restore();
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 }  // namespace testing

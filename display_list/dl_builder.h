@@ -113,11 +113,17 @@ class DisplayListBuilder final : public virtual DlCanvas,
   SkMatrix GetTransform() const override { return tracker_.matrix_3x3(); }
 
   // |DlCanvas|
-  void ClipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
+  void ClipRect(const SkRect& rect,
+                ClipOp clip_op = ClipOp::kIntersect,
+                bool is_aa = false) override;
   // |DlCanvas|
-  void ClipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
+  void ClipRRect(const SkRRect& rrect,
+                 ClipOp clip_op = ClipOp::kIntersect,
+                 bool is_aa = false) override;
   // |DlCanvas|
-  void ClipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
+  void ClipPath(const SkPath& path,
+                ClipOp clip_op = ClipOp::kIntersect,
+                bool is_aa = false) override;
 
   /// Conservative estimate of the bounds of all outstanding clip operations
   /// measured in the coordinate space within which this DisplayList will

@@ -10,7 +10,6 @@
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/testing/diff_context_test.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 
 namespace flutter {
 namespace testing {
@@ -69,8 +68,6 @@ TEST_F(DisplayListLayerTest, InvalidDisplayListDies) {
 
 TEST_F(DisplayListLayerTest, SimpleDisplayList) {
   const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
-  const SkMatrix layer_offset_matrix =
-      SkMatrix::Translate(layer_offset.fX, layer_offset.fY);
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   DisplayListBuilder builder;
   builder.DrawRect(picture_bounds, DlPaint());
@@ -84,15 +81,18 @@ TEST_F(DisplayListLayerTest, SimpleDisplayList) {
   EXPECT_EQ(layer->display_list(), display_list.get());
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
-  layer->Paint(paint_context());
-  auto expected_draw_calls = std::vector(
-      {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-       MockCanvas::DrawCall{
-           1, MockCanvas::ConcatMatrixData{SkM44(layer_offset_matrix)}},
-       MockCanvas::DrawCall{1,
-                            MockCanvas::DrawDisplayListData{display_list, 1}},
-       MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}});
-  EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (DisplayList)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.Translate(layer_offset.fX, layer_offset.fY);
+      expected_builder.DrawDisplayList(display_list);
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(
+      DisplayListsEQ_Verbose(this->display_list(), expected_builder.Build()));
 }
 
 TEST_F(DisplayListLayerTest, CachingDoesNotChangeCullRect) {

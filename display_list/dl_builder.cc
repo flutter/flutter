@@ -578,15 +578,18 @@ void DisplayListBuilder::Transform2DAffine(
     SkScalar myx, SkScalar myy, SkScalar myt) {
   if (SkScalarsAreFinite(mxx, myx) &&
       SkScalarsAreFinite(mxy, myy) &&
-      SkScalarsAreFinite(mxt, myt) &&
-      !(mxx == 1 && mxy == 0 && mxt == 0 &&
-        myx == 0 && myy == 1 && myt == 0)) {
-    checkForDeferredSave();
-    Push<Transform2DAffineOp>(0, 1,
-                              mxx, mxy, mxt,
-                              myx, myy, myt);
-    tracker_.transform2DAffine(mxx, mxy, mxt,
-                               myx, myy, myt);
+      SkScalarsAreFinite(mxt, myt)) {
+    if (mxx == 1 && mxy == 0 &&
+        myx == 0 && myy == 1) {
+      Translate(mxt, myt);
+    } else {
+      checkForDeferredSave();
+      Push<Transform2DAffineOp>(0, 1,
+                                mxx, mxy, mxt,
+                                myx, myy, myt);
+      tracker_.transform2DAffine(mxx, mxy, mxt,
+                                 myx, myy, myt);
+    }
   }
 }
 // full 4x4 transform in row major order
