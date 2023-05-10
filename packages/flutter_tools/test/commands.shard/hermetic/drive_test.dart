@@ -409,7 +409,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Port publication not disabled for network device', () async {
+  testUsingContext('Port publication not disabled for wireless device', () async {
     final DriveCommand command = DriveCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -421,9 +421,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
+    final Device wirelessDevice = FakeIosDevice()
       ..connectionInterface = DeviceConnectionInterface.wireless;
-    fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -467,7 +467,7 @@ void main() {
     DeviceManager: () => fakeDeviceManager,
   });
 
-  testUsingContext('Port publication does not default to enabled for network device if flag manually added', () async {
+  testUsingContext('Port publication does not default to enabled for wireless device if flag manually added', () async {
     final DriveCommand command = DriveCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -479,9 +479,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
+    final Device wirelessDevice = FakeIosDevice()
       ..connectionInterface = DeviceConnectionInterface.wireless;
-    fakeDeviceManager.wirelessDevices = <Device>[networkDevice];
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',

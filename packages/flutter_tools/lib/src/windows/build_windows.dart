@@ -76,7 +76,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
         'Please run `flutter doctor` for more details.');
   }
 
-  final String buildModeName = getNameForBuildMode(buildInfo.mode);
+  final String buildModeName = buildInfo.mode.cliName;
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',

@@ -1085,17 +1085,17 @@ void main() {
 
   testWidgets('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
@@ -1117,16 +1117,16 @@ void main() {
   testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
     ));
@@ -1142,19 +1142,19 @@ void main() {
   testWidgets('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     await tester.pumpWidget(MaterialApp.router(
@@ -1167,16 +1167,16 @@ void main() {
   testWidgets('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
@@ -1188,18 +1188,18 @@ void main() {
   testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
         routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: const RouteInformation(
-            location: 'initial',
+          initialRouteInformation: RouteInformation(
+            uri: Uri.parse('initial'),
           ),
         ),
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
-            return Text(information.location!);
+            return Text(information.uri.toString());
           },
           onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-            delegate.routeInformation = const RouteInformation(
-              location: 'popped',
+            delegate.routeInformation = RouteInformation(
+              uri: Uri.parse('popped'),
             );
             return route.didPop(result);
           },
@@ -1601,7 +1601,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation.location!),
+          key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],

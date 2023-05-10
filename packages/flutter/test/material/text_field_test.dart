@@ -2189,6 +2189,51 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
+  testWidgets('Cursor should not move on a quick touch drag when touch does not begin on previous selection (iOS)', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // The position we tap during a drag start is not on the collapsed selection,
+    // so the cursor should not move.
+    await gesture.down(textOffsetToPosition(tester, 7));
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -9396,8 +9441,15 @@ void main() {
       await gesture.moveTo(hPos);
       await tester.pumpAndSettle();
 
+      // Toolbar should be hidden during a drag.
+      expect(find.byType(TextButton), findsNothing);
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+
+      // Toolbar should re-appear after a drag.
+      await gesture.up();
+      await tester.pump();
+      expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
   );
 
@@ -15770,6 +15822,107 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
 
+    testWidgets('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                      _,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Tap at '|a' to move the selection to position 0.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 0);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a drag gesture to move the selection to the dragged position, showing
+      // the magnifier.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 0));
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      Offset firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a double-tap select the word at the tapped position.
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 3);
+
+      // Start a drag gesture to extend the selection word-by-word, showing the
+      // magnifier.
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 7);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
     testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
@@ -16052,6 +16205,116 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     }
   });
+
+  testWidgets('Builds the corresponding default spell check toolbar by platform', (WidgetTester tester) async {
+    tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+      true;
+    late final BuildContext builderContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                builderContext = context;
+                return const TextField(
+                  autofocus: true,
+                  spellCheckConfiguration: SpellCheckConfiguration(),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Allow the autofocus to take effect.
+    await tester.pump();
+
+    final EditableTextState editableTextState =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    editableTextState.spellCheckResults =
+        const SpellCheckResults(
+          '',
+          <SuggestionSpan>[
+            SuggestionSpan(TextRange(start: 0, end: 0), <String>['something']),
+          ],
+        );
+    final Widget spellCheckToolbar =
+        TextField.defaultSpellCheckSuggestionsToolbarBuilder(
+          builderContext,
+          editableTextState,
+        );
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expect(spellCheckToolbar, isA<CupertinoSpellCheckSuggestionsToolbar>());
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expect(spellCheckToolbar, isA<SpellCheckSuggestionsToolbar>());
+    }
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+  testWidgets('Builds the corresponding default spell check configuration by platform', (WidgetTester tester) async {
+    tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+      true;
+
+    final SpellCheckConfiguration expectedConfiguration;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        expectedConfiguration = SpellCheckConfiguration(
+          misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+          misspelledSelectionColor: CupertinoTextField.kMisspelledSelectionColor,
+          spellCheckService: DefaultSpellCheckService(),
+          spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        expectedConfiguration = SpellCheckConfiguration(
+          misspelledTextStyle: TextField.materialMisspelledTextStyle,
+          spellCheckService: DefaultSpellCheckService(),
+          spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+        );
+    }
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TextField(
+              autofocus: true,
+              spellCheckConfiguration: SpellCheckConfiguration(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableTextState =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    expect(
+      editableTextState.spellCheckConfiguration.misspelledTextStyle,
+      expectedConfiguration.misspelledTextStyle,
+    );
+    expect(
+      editableTextState.spellCheckConfiguration.misspelledSelectionColor,
+      expectedConfiguration.misspelledSelectionColor,
+    );
+    expect(
+      editableTextState.spellCheckConfiguration.spellCheckService.runtimeType,
+      expectedConfiguration.spellCheckService.runtimeType,
+    );
+    expect(
+      editableTextState.spellCheckConfiguration.spellCheckSuggestionsToolbarBuilder,
+      expectedConfiguration.spellCheckSuggestionsToolbarBuilder,
+    );
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 }
 
 /// A Simple widget for testing the obscure text.

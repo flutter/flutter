@@ -1154,10 +1154,6 @@ mixin WidgetInspectorService {
       callback: _getRootWidget,
     );
     _registerObjectGroupServiceExtension(
-      name: WidgetInspectorServiceExtensions.getRootRenderObject.name,
-      callback: _getRootRenderObject,
-    );
-    _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
     );
@@ -1178,10 +1174,6 @@ mixin WidgetInspectorService {
           ),
         };
       },
-    );
-    _registerServiceExtensionWithArg(
-      name: WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
-      callback: _getSelectedRenderObject,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
@@ -1881,17 +1873,6 @@ mixin WidgetInspectorService {
     });
   }
 
-  /// Returns a JSON representation of the [DiagnosticsNode] for the root
-  /// [RenderObject].
-  @protected
-  String getRootRenderObject(String groupName) {
-    return _safeJsonEncode(_getRootRenderObject(groupName));
-  }
-
-  Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
-  }
-
   /// Returns a JSON representation of the subtree rooted at the
   /// [DiagnosticsNode] object that `diagnosticsNodeId` references providing
   /// information needed for the details subtree view.
@@ -1930,23 +1911,6 @@ mixin WidgetInspectorService {
         service: this,
       ),
     );
-  }
-
-  /// Returns a [DiagnosticsNode] representing the currently selected
-  /// [RenderObject].
-  ///
-  /// If the currently selected [RenderObject] is identical to the
-  /// [RenderObject] referenced by `previousSelectionId` then the previous
-  /// [DiagnosticsNode] is reused.
-  @protected
-  String getSelectedRenderObject(String previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedRenderObject(previousSelectionId, groupName));
-  }
-
-  Map<String, Object?>? _getSelectedRenderObject(String? previousSelectionId, String groupName) {
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
-    final RenderObject? current = selection.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].

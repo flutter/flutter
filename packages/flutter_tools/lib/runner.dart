@@ -63,38 +63,54 @@ Future<int> run(
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
+        if (args.contains('--disable-telemetry') &&
+            args.contains('--enable-telemetry')) {
+          throwToolExit(
+              'Both enable and disable telemetry commands were detected '
+              'when only one can be supplied per invocation.',
+              exitCode: 1);
+        }
+
         // Disable analytics if user passes in the `--disable-telemetry` option
         // `flutter --disable-telemetry`
         //
         // Same functionality as `flutter config --no-analytics` for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-telemetry')) {
-          const bool value = false;
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
-          AnalyticsConfigEvent(enabled: value).send();
-          if (!value) {
-            // Normally, the tool waits for the analytics to all send before the
-            // tool exits, but only when analytics are enabled. When reporting that
-            // analytics have been disable, the wait must be done here instead.
-            await globals.flutterUsage.ensureAnalyticsSent();
-          }
-          globals.flutterUsage.enabled = value;
+          AnalyticsConfigEvent(enabled: false).send();
+
+          // Normally, the tool waits for the analytics to all send before the
+          // tool exits, but only when analytics are enabled. When reporting that
+          // analytics have been disable, the wait must be done here instead.
+          await globals.flutterUsage.ensureAnalyticsSent();
+
+          globals.flutterUsage.enabled = false;
           globals.printStatus('Analytics reporting disabled.');
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
           //  fully transitioned to using the new package
-          await globals.analytics.setTelemetry(value);
+          await globals.analytics.setTelemetry(false);
         }
 
-        // If the user has opted out of legacy analytics, we will continue
-        // to opt them out of unified analytics and inform them
-        if (!globals.flutterUsage.enabled && globals.analytics.telemetryEnabled) {
-          await globals.analytics.setTelemetry(false);
-          globals.logger.printStatus(
-              'Please note that analytics reporting was already disabled, and will continue to be disabled.\n');
+        // Enable analytics if user passes in the `--enable-telemetry` option
+        // `flutter --enable-telemetry`
+        //
+        // Same functionality as `flutter config --analytics` for enabling
+        // except with the `value` hard coded as true
+        if (args.contains('--enable-telemetry')) {
+          // The tool sends the analytics event *before* toggling the flag
+          // intentionally to be sure that opt-out events are sent correctly.
+          AnalyticsConfigEvent(enabled: true).send();
+
+          globals.flutterUsage.enabled = true;
+          globals.printStatus('Analytics reporting enabled.');
+
+          await globals.analytics.setTelemetry(true);
         }
+
 
         await runner.run(args);
 
@@ -285,6 +301,11 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
   // Ensure that the consent message has been displayed for unified analytics
   if (globals.analytics.shouldShowMessage) {
     globals.logger.printStatus(globals.analytics.getConsentMessage);
+    if (!globals.flutterUsage.enabled) {
+      globals.printStatus(
+          'Please note that analytics reporting was already disabled, '
+          'and will continue to be disabled.\n');
+    }
 
     // Because the legacy analytics may have also sent a message,
     // the conditional below will print additional messaging informing
@@ -296,8 +317,7 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
               'the flutter tool is migrating to a new analytics system. '
               'Disabling analytics collection will disable both the legacy '
               'and new analytics collection systems. '
-              'You can disable analytics reporting by running either `flutter --disable-telemetry` '
-              'or `flutter config --no-analytics\n');
+              'You can disable analytics reporting by running `flutter --disable-telemetry`\n');
     }
 
     // Invoking this will onboard the flutter tool onto

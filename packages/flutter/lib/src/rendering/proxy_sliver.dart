@@ -451,6 +451,7 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
       constraints.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent)),
       parentUsesSize: true,
     );
-    geometry = child!.geometry;
+    final SliverGeometry childLayoutGeometry = child!.geometry!;
+    geometry = childLayoutGeometry.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent));
   }
 }

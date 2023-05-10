@@ -36,25 +36,10 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>(flutterProjectTypeToString),
+      allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: <String, String>{
-        flutterProjectTypeToString(FlutterProjectType.app): '(default) Generate a Flutter application.',
-        flutterProjectTypeToString(FlutterProjectType.skeleton): 'Generate a List View / Detail View Flutter '
-            'application that follows community best practices.',
-        flutterProjectTypeToString(FlutterProjectType.package): 'Generate a shareable Flutter project containing modular '
-            'Dart code.',
-        flutterProjectTypeToString(FlutterProjectType.plugin): 'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation through method channels for Android, iOS, '
-            'Linux, macOS, Windows, web, or any combination of these.',
-        flutterProjectTypeToString(FlutterProjectType.ffiPlugin):
-            'Generate a shareable Flutter project containing an API '
-            'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
-            'Linux, macOS, Windows, or any combination of these.',
-        flutterProjectTypeToString(FlutterProjectType.module): 'Generate a project to add a Flutter module to an '
-            'existing Android or iOS application.',
-      },
+      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.values),
     );
     argParser.addOption(
       'sample',
@@ -164,7 +149,7 @@ class CreateCommand extends CreateBase {
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     final String? templateArgument = stringArg('template');
     if (templateArgument != null) {
-      template = stringToProjectType(templateArgument);
+      template = FlutterProjectType.fromCliName(templateArgument);
     }
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
@@ -182,8 +167,8 @@ class CreateCommand extends CreateBase {
     if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
       // We can only be definitive that this is the wrong type if the .metadata file
       // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${flutterProjectTypeToString(template)}' doesn't match the "
-          "existing template type of '${flutterProjectTypeToString(detectedProjectType)}'.");
+      throwToolExit("The requested template type '${template.cliName}' doesn't match the "
+          "existing template type of '${detectedProjectType.cliName}'.");
     }
     return template;
   }
@@ -210,9 +195,9 @@ class CreateCommand extends CreateBase {
     final bool emptyArgument = boolArg('empty');
     if (sampleArgument != null) {
       final String? templateArgument = stringArg('template');
-      if (templateArgument != null && stringToProjectType(templateArgument) != FlutterProjectType.app) {
+      if (templateArgument != null && FlutterProjectType.fromCliName(templateArgument) != FlutterProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
-          '"${flutterProjectTypeToString(FlutterProjectType.app)}"');
+          '"${FlutterProjectType.app.cliName}"');
       }
       // Fetch the sample from the server.
       sampleCode = await _fetchSampleFromServer(sampleArgument);
@@ -221,7 +206,7 @@ class CreateCommand extends CreateBase {
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
     final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
-    final bool generateFfiPlugin = template == FlutterProjectType.ffiPlugin;
+    final bool generateFfiPlugin = template == FlutterProjectType.pluginFfi;
     final bool generatePackage = template == FlutterProjectType.package;
 
     final List<String> platforms = stringsArg('platforms');
@@ -278,6 +263,14 @@ class CreateCommand extends CreateBase {
       // The module template only supports iOS and Android.
       includeIos = true;
       includeAndroid = true;
+      includeWeb = false;
+      includeLinux = false;
+      includeMacos = false;
+      includeWindows = false;
+    } else if (template == FlutterProjectType.package) {
+      // The package template does not supports any platform.
+      includeIos = false;
+      includeAndroid = false;
       includeWeb = false;
       includeLinux = false;
       includeMacos = false;
@@ -391,7 +384,7 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
-      case FlutterProjectType.ffiPlugin:
+      case FlutterProjectType.pluginFfi:
         generatedFileCount += await _generateFfiPlugin(
           relativeDir,
           templateContext,
