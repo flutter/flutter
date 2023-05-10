@@ -224,7 +224,11 @@ TEST_P(EntityTest, CanDrawRect) {
 
 TEST_P(EntityTest, CanDrawRRect) {
   auto contents = std::make_shared<SolidColorContents>();
-  contents->SetGeometry(Geometry::MakeRRect({100, 100, 100, 100}, 10.0));
+  auto path = PathBuilder{}
+                  .SetConvexity(Convexity::kConvex)
+                  .AddRoundedRect({100, 100, 100, 100}, 10.0)
+                  .TakePath();
+  contents->SetGeometry(Geometry::MakeFillPath(path));
   contents->SetColor(Color::Red());
 
   Entity entity;
