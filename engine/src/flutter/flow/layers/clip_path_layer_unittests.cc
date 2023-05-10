@@ -12,7 +12,6 @@
 #include "flutter/flow/testing/mock_embedder.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -170,17 +169,19 @@ TEST_F(ClipPathLayerTest, FullyContainedChild) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_path)}));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipPathData{layer_path, ClipOp::kIntersect,
-                                           MockCanvas::kHard_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipPath)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipPath(layer_path);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 TEST_F(ClipPathLayerTest, PartiallyContainedChild) {
@@ -224,17 +225,19 @@ TEST_F(ClipPathLayerTest, PartiallyContainedChild) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(clip_path)}));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipPathData{clip_path, ClipOp::kIntersect,
-                                           MockCanvas::kHard_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (ClipPath)layer::Paint */ {
+    expected_builder.Save();
+    {
+      expected_builder.ClipPath(clip_path);
+      /* mock_layer::Paint */ {
+        expected_builder.DrawPath(child_path, child_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 static bool ReadbackResult(PrerollContext* context,
