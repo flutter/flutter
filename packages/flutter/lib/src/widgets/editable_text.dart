@@ -2672,7 +2672,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
     } else if (oldWidget.readOnly && _hasFocus) {
-      _openInputConnection(canTouchLayoutPhaseData: false);
+      _openInputConnection();
     }
 
     if (kIsWeb && _hasInputConnection) {
@@ -3133,7 +3133,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// default.
   bool get _needsAutofill => _effectiveAutofillClient.textInputConfiguration.autofillConfiguration.enabled;
 
-  void _openInputConnection({bool canTouchLayoutPhaseData = true}) {
+  void _openInputConnection() {
     if (!_shouldCreateInputConnection) {
       return;
     }
@@ -3151,19 +3151,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
-      // It has to be run in post-frame callback, because when the current
-      // function is executed, we may be in build phase, while the
-      // _updateSizeAndTransform may need layout phase information.
-      // See https://github.com/flutter/flutter/issues/126312 for more details.
-      if (canTouchLayoutPhaseData) {
-        _updateSizeAndTransform();
-      } else {
-        SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-          if (_textInputConnection != null) {
-            _updateSizeAndTransform();
-          }
-        });
-      }
+      _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
         ..setStyle(
