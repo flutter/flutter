@@ -478,15 +478,15 @@ void main() {
     ]);
 
     final MemoryFileSystem fs = MemoryFileSystem.test();
-    final Directory flutterRoot = fs.directory('/path/to/flutter')
-        ..createSync(recursive: true);
+    final Directory flutterRoot = fs.directory('/path/to/flutter');
+    flutterRoot.childDirectory('bin').childDirectory('cache').createSync(recursive: true);
     final FlutterVersion flutterVersion = FlutterVersion(
       clock: _testClock,
       fs: fs,
       flutterRoot: flutterRoot.path,
     );
 
-    final File versionFile = fs.file('/path/to/flutter/.version.json');
+    final File versionFile = fs.file('/path/to/flutter/bin/cache/flutter.version.json');
     expect(versionFile.existsSync(), isFalse);
 
     flutterVersion.ensureVersionFile();
@@ -511,7 +511,11 @@ void main() {
 
   testUsingContext('version does not call git if a .version.json file exists', () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
-    final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+    final Directory flutterRoot = fs.directory('/path/to/flutter');
+    final Directory cacheDir = flutterRoot
+        .childDirectory('bin')
+        .childDirectory('cache')
+        ..createSync(recursive: true);
     const String devToolsVersion = '0000000';
     const Map<String, Object> versionJson = <String, Object>{
       'channel': 'stable',
@@ -524,7 +528,7 @@ void main() {
       'devToolsVersion': devToolsVersion,
       'flutterVersion': 'foo',
     };
-    flutterRoot.childFile('.version.json').writeAsStringSync(
+    cacheDir.childFile('flutter.version.json').writeAsStringSync(
       jsonEncode(versionJson),
     );
     final FlutterVersion flutterVersion = FlutterVersion(
@@ -547,9 +551,13 @@ void main() {
 
   testUsingContext('FlutterVersion() falls back to git if .version.json is malformed', () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
-    final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+    final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
+    final Directory cacheDir = flutterRoot
+        .childDirectory('bin')
+        .childDirectory('cache')
+        ..createSync(recursive: true);
     final File legacyVersionFile = flutterRoot.childFile('version');
-    final File versionFile = flutterRoot.childFile('.version.json')..writeAsStringSync(
+    final File versionFile = cacheDir.childFile('flutter.version.json')..writeAsStringSync(
       '{',
     );
 

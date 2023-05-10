@@ -192,7 +192,7 @@ abstract class FlutterVersion {
 
   // This is static as it is called from a constructor.
   static File getVersionFile(FileSystem fs, String flutterRoot) {
-    return fs.file(fs.path.join(flutterRoot, '.version.json'));
+    return fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'flutter.version.json'));
   }
 
   final String flutterRoot;
