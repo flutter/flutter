@@ -82,6 +82,9 @@ void runSemanticsTests() {
   group('group', () {
     _testGroup();
   });
+  group('dialog', () {
+    _testDialog();
+  });
 }
 
 void _testEngineAccessibilityBuilder() {
@@ -847,6 +850,92 @@ void _testContainer() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('descendant nodes are removed from the node map, unless reparented', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3, 4]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3, 4]),
+      );
+      updateNode(
+        builder,
+        id: 2,
+        childrenInTraversalOrder: Int32List.fromList(<int>[5, 6]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[5, 6]),
+      );
+      updateNode(builder, id: 3);
+      updateNode(builder, id: 4);
+      updateNode(builder, id: 5);
+      updateNode(builder, id: 6);
+
+      semantics().updateSemantics(builder.build());
+      expectSemanticsTree('''
+  <sem style="$rootSemanticStyle">
+    <sem-c>
+      <sem style="z-index: 2">
+        <sem-c>
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+        </sem-c>
+      </sem>
+      <sem style="z-index: 1">
+        <sem-c>
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+        </sem-c>
+      </sem>
+    </sem-c>
+  </sem>''');
+
+      expect(EngineSemanticsOwner.instance.debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 2, 3, 4, 5, 6]));
+    }
+
+    // Remove node #2 => expect nodes #2 and #5 to be removed and #6 reparented.
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3, 4, 6]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3, 4, 6]),
+      );
+
+      semantics().updateSemantics(builder.build());
+      expectSemanticsTree('''
+  <sem style="$rootSemanticStyle">
+    <sem-c>
+      <sem style="z-index: 2">
+        <sem-c>
+          <sem style="z-index: 3"></sem>
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+        </sem-c>
+      </sem>
+    </sem-c>
+  </sem>''');
+
+      expect(EngineSemanticsOwner.instance.debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 3, 4, 6]));
+    }
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testVerticalScrolling() {
@@ -951,7 +1040,7 @@ void _testVerticalScrolling() {
       childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
     );
 
-    for (int id = 1; id <= 5; id++) {
+    for (int id = 1; id <= 3; id++) {
       updateNode(
         builder,
         id: id,
@@ -2081,6 +2170,88 @@ void _testGroup() {
     expectSemanticsTree('''
 <sem role="group" aria-label="this is a label for a group of elements" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
 ''');
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+void _testDialog() {
+  test('renders named and labeled routes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      label: 'this is a dialog label',
+      flags: 0 | ui.SemanticsFlag.scopesRoute.index | ui.SemanticsFlag.namesRoute.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+    );
+    updateNode(
+      builder,
+      id: 1,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    semantics().updateSemantics(builder.build());
+    expectSemanticsTree('''
+<sem role="dialog" aria-label="this is a dialog label" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
+''');
+
+    expect(
+      semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
+      isA<Dialog>(),
+    );
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('warns about missing label', () {
+    final List<String> warnings = <String>[];
+    printWarning = warnings.add;
+
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.scopesRoute.index | ui.SemanticsFlag.namesRoute.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+    );
+    updateNode(
+      builder,
+      id: 1,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    semantics().updateSemantics(builder.build());
+    expect(
+      warnings,
+      <String>[
+        'Semantic node 0 was assigned dialog role, but is missing a label. A dialog should contain a label so that a screen reader can communicate to the user that a dialog appeared and a user action is requested.',
+      ],
+    );
+
+    // But still sets the dialog role.
+    expectSemanticsTree('''
+<sem role="dialog" aria-label="" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
+''');
+
+    expect(
+      semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
+      isA<Dialog>(),
+    );
 
     semantics().semanticsEnabled = false;
   });
