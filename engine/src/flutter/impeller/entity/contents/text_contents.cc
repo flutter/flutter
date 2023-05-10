@@ -112,7 +112,6 @@ static bool CommonRender(
   frag_info.text_color = ToVector(color.Premultiply());
   FS::BindFragInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frag_info));
 
-  // Common fragment uniforms for all glyphs.
   FS::BindGlyphAtlasSampler(
       cmd,                  // command
       atlas->GetTexture(),  // texture
@@ -198,9 +197,6 @@ static bool CommonRender(
                                  point * glyph_position.glyph.bounds.size);
         }
         vtx.uv = uv_origin + point * uv_size;
-        vtx.has_color =
-            glyph_position.glyph.type == Glyph::Type::kBitmap ? 1.0 : 0.0;
-
         vertex_builder.AppendVertex(vtx);
       }
     }
@@ -224,16 +220,9 @@ bool TextContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  // This TextContents may be for a frame that doesn't have color, but the
-  // lazy atlas for this scene already does have color.
-  // Benchmarks currently show that creating two atlases per pass regresses
-  // render time. This should get re-evaluated if we start caching atlases
-  // between frames or get significantly faster at creating atlases, because
-  // we're potentially trading memory for time here.
-  auto atlas =
-      ResolveAtlas(lazy_atlas_->HasColor() ? GlyphAtlas::Type::kColorBitmap
-                                           : GlyphAtlas::Type::kAlphaBitmap,
-                   renderer.GetGlyphAtlasContext(), renderer.GetContext());
+  auto type = frame_.GetAtlasType();
+  auto atlas = ResolveAtlas(type, renderer.GetGlyphAtlasContext(type),
+                            renderer.GetContext());
 
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";
@@ -245,7 +234,11 @@ bool TextContents::Render(const ContentContext& renderer,
   cmd.label = "TextFrame";
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = PrimitiveType::kTriangle;
-  cmd.pipeline = renderer.GetGlyphAtlasPipeline(opts);
+  if (type == GlyphAtlas::Type::kAlphaBitmap) {
+    cmd.pipeline = renderer.GetGlyphAtlasPipeline(opts);
+  } else {
+    cmd.pipeline = renderer.GetGlyphAtlasColorPipeline(opts);
+  }
   cmd.stencil_reference = entity.GetStencilDepth();
 
   return CommonRender(renderer, entity, pass, color, frame_, offset_, atlas,
