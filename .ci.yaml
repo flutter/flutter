@@ -119,6 +119,7 @@ platform_properties:
         ]
       os: Mac-12
       device_type: none
+      cpu: x86
       xcode: 14e222b
   mac_android:
     properties:
