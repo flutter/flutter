@@ -39,7 +39,6 @@
 /dev/integration_tests/**/Pods
 /packages/flutter/coverage/
 version
-.version.json
 analysis_benchmark.json
 
 # packages file containing multi-root paths
