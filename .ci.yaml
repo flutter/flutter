@@ -4722,6 +4722,7 @@ targets:
       task_name: platform_view_win_desktop__start_up
 
   - name: Windows_android basic_material_app_win__compile
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/126418
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
