@@ -26,18 +26,6 @@ static constexpr double kUITextInputAccessibilityEnablingDelaySeconds = 0.5;
 // returns kInvalidFirstRect, iOS will not show the IME candidates view.
 const CGRect kInvalidFirstRect = {{-1, -1}, {9999, 9999}};
 
-// The `bounds` value a FlutterTextInputView returns when the floating cursor
-// is activated in that view.
-//
-// DO NOT use extremely large values (such as CGFloat_MAX) in this rect, for that
-// will significantly reduce the precision of the floating cursor's coordinates.
-//
-// It is recommended for this CGRect to be roughly centered at caretRectForPosition
-// (which currently always return CGRectZero), so the initial floating cursor will
-// be placed at (0, 0).
-// See the comments in beginFloatingCursorAtPoint and caretRectForPosition.
-const CGRect kSpacePanBounds = {{-2500, -2500}, {5000, 5000}};
-
 #pragma mark - TextInput channel method names.
 // See https://api.flutter.dev/flutter/services/SystemChannels/textInput-constant.html
 static NSString* const kShowMethod = @"TextInput.show";
@@ -439,44 +427,66 @@ static BOOL IsApproximatelyEqual(float x, float y, float delta) {
 // Checks whether point should be considered closer to selectionRect compared to
 // otherSelectionRect.
 //
-// If checkRightBoundary is set, the right-center point on selectionRect and
-// otherSelectionRect will be used instead of the left-center point.
+// Uses the leading-center point on selectionRect and otherSelectionRect to compare.
+// For left-to-right text, this means the left-center point, and for right-to-left text,
+// this means the right-center point.
+//
+// If useTrailingBoundaryOfSelectionRect is set, the trailing-center point on selectionRect
+// will be used instead of the leading-center point.
 //
 // This uses special (empirically determined using a 1st gen iPad pro, 9.7" model running
 // iOS 14.7.1) logic for determining the closer rect, rather than a simple distance calculation.
 // First, the closer vertical distance is determined. Within the closest y distance, if the point is
 // above the bottom of the closest rect, the x distance will be minimized; however, if the point is
 // below the bottom of the rect, the x value will be maximized.
-static BOOL IsSelectionRectCloserToPoint(CGPoint point,
-                                         CGRect selectionRect,
-                                         CGRect otherSelectionRect,
-                                         BOOL checkRightBoundary) {
-  CGPoint pointForSelectionRect =
-      CGPointMake(selectionRect.origin.x + (checkRightBoundary ? selectionRect.size.width : 0),
-                  selectionRect.origin.y + selectionRect.size.height * 0.5);
+static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
+                                                 CGRect selectionRect,
+                                                 BOOL selectionRectIsRTL,
+                                                 BOOL useTrailingBoundaryOfSelectionRect,
+                                                 CGRect otherSelectionRect,
+                                                 BOOL otherSelectionRectIsRTL,
+                                                 CGFloat verticalPrecision) {
+  if (CGRectContainsPoint(
+          CGRectMake(
+              selectionRect.origin.x + ((useTrailingBoundaryOfSelectionRect ^ selectionRectIsRTL)
+                                            ? 0.5 * selectionRect.size.width
+                                            : 0),
+              selectionRect.origin.y, 0.5 * selectionRect.size.width, selectionRect.size.height),
+          point)) {
+    return YES;
+  }
+  CGPoint pointForSelectionRect = CGPointMake(
+      selectionRect.origin.x +
+          (selectionRectIsRTL ^ useTrailingBoundaryOfSelectionRect ? selectionRect.size.width : 0),
+      selectionRect.origin.y + selectionRect.size.height * 0.5);
   float yDist = fabs(pointForSelectionRect.y - point.y);
   float xDist = fabs(pointForSelectionRect.x - point.x);
 
-  CGPoint pointForOtherSelectionRect =
-      CGPointMake(otherSelectionRect.origin.x + (checkRightBoundary ? selectionRect.size.width : 0),
-                  otherSelectionRect.origin.y + otherSelectionRect.size.height * 0.5);
+  CGPoint pointForOtherSelectionRect = CGPointMake(
+      otherSelectionRect.origin.x + (otherSelectionRectIsRTL ? otherSelectionRect.size.width : 0),
+      otherSelectionRect.origin.y + otherSelectionRect.size.height * 0.5);
   float yDistOther = fabs(pointForOtherSelectionRect.y - point.y);
   float xDistOther = fabs(pointForOtherSelectionRect.x - point.x);
 
   // This serves a similar purpose to IsApproximatelyEqual, allowing a little buffer before
   // declaring something closer vertically to account for the small variations in size and position
   // of SelectionRects, especially when dealing with emoji.
-  BOOL isCloserVertically = yDist < yDistOther - 1;
-  BOOL isEqualVertically = IsApproximatelyEqual(yDist, yDistOther, 1);
+  BOOL isCloserVertically = yDist < yDistOther - verticalPrecision;
+  BOOL isEqualVertically = IsApproximatelyEqual(yDist, yDistOther, verticalPrecision);
   BOOL isAboveBottomOfLine = point.y <= selectionRect.origin.y + selectionRect.size.height;
-  BOOL isCloserHorizontally = xDist <= xDistOther;
+  BOOL isCloserHorizontally = xDist < xDistOther;
   BOOL isBelowBottomOfLine = point.y > selectionRect.origin.y + selectionRect.size.height;
-  BOOL isFartherToRight =
-      selectionRect.origin.x + (checkRightBoundary ? selectionRect.size.width : 0) >
-      otherSelectionRect.origin.x;
+  BOOL isFarther;
+  if (selectionRectIsRTL) {
+    isFarther = selectionRect.origin.x < otherSelectionRect.origin.x;
+  } else {
+    isFarther = selectionRect.origin.x +
+                    (useTrailingBoundaryOfSelectionRect ? selectionRect.size.width : 0) >
+                otherSelectionRect.origin.x;
+  }
   return (isCloserVertically ||
-          (isEqualVertically && ((isAboveBottomOfLine && isCloserHorizontally) ||
-                                 (isBelowBottomOfLine && isFartherToRight))));
+          (isEqualVertically &&
+           ((isAboveBottomOfLine && isCloserHorizontally) || (isBelowBottomOfLine && isFarther))));
 }
 
 #pragma mark - FlutterTextPosition
@@ -484,13 +494,18 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 @implementation FlutterTextPosition
 
 + (instancetype)positionWithIndex:(NSUInteger)index {
-  return [[FlutterTextPosition alloc] initWithIndex:index];
+  return [[FlutterTextPosition alloc] initWithIndex:index affinity:UITextStorageDirectionForward];
 }
 
-- (instancetype)initWithIndex:(NSUInteger)index {
++ (instancetype)positionWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
+  return [[FlutterTextPosition alloc] initWithIndex:index affinity:affinity];
+}
+
+- (instancetype)initWithIndex:(NSUInteger)index affinity:(UITextStorageDirection)affinity {
   self = [super init];
   if (self) {
     _index = index;
+    _affinity = affinity;
   }
   return self;
 }
@@ -514,11 +529,13 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (UITextPosition*)start {
-  return [FlutterTextPosition positionWithIndex:self.range.location];
+  return [FlutterTextPosition positionWithIndex:self.range.location
+                                       affinity:UITextStorageDirectionForward];
 }
 
 - (UITextPosition*)end {
-  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length];
+  return [FlutterTextPosition positionWithIndex:self.range.location + self.range.length
+                                       affinity:UITextStorageDirectionBackward];
 }
 
 - (BOOL)isEmpty {
@@ -628,7 +645,18 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 + (instancetype)selectionRectWithRect:(CGRect)rect position:(NSUInteger)position {
   return [[FlutterTextSelectionRect alloc] initWithRectAndInfo:rect
                                                       position:position
-                                              writingDirection:UITextWritingDirectionNatural
+                                              writingDirection:NSWritingDirectionNatural
+                                                 containsStart:NO
+                                                   containsEnd:NO
+                                                    isVertical:NO];
+}
+
++ (instancetype)selectionRectWithRect:(CGRect)rect
+                             position:(NSUInteger)position
+                     writingDirection:(NSWritingDirection)writingDirection {
+  return [[FlutterTextSelectionRect alloc] initWithRectAndInfo:rect
+                                                      position:position
+                                              writingDirection:writingDirection
                                                  containsStart:NO
                                                    containsEnd:NO
                                                     isVertical:NO];
@@ -650,6 +678,10 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     self.isVertical = isVertical;
   }
   return self;
+}
+
+- (BOOL)isRTL {
+  return _writingDirection == NSWritingDirectionRightToLeft;
 }
 
 @end
@@ -739,6 +771,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   // when the app shows its own in-flutter keyboard.
   bool _isSystemKeyboardEnabled;
   bool _isFloatingCursorActive;
+  CGPoint _floatingCursorOffset;
   bool _enableInteractiveSelection;
   UITextInteraction* _textInteraction API_AVAILABLE(ios(13.0));
 }
@@ -762,7 +795,6 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     // Initialize with the zero matrix which is not
     // an affine transform.
     _editableTransform = CATransform3D();
-    _isFloatingCursorActive = false;
 
     // UITextInputTraits
     _autocapitalizationType = UITextAutocapitalizationTypeSentences;
@@ -1389,11 +1421,12 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 }
 
 - (UITextPosition*)beginningOfDocument {
-  return [FlutterTextPosition positionWithIndex:0];
+  return [FlutterTextPosition positionWithIndex:0 affinity:UITextStorageDirectionForward];
 }
 
 - (UITextPosition*)endOfDocument {
-  return [FlutterTextPosition positionWithIndex:self.text.length];
+  return [FlutterTextPosition positionWithIndex:self.text.length
+                                       affinity:UITextStorageDirectionBackward];
 }
 
 - (NSComparisonResult)comparePosition:(UITextPosition*)position toPosition:(UITextPosition*)other {
@@ -1405,7 +1438,17 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   if (positionIndex > otherIndex) {
     return NSOrderedDescending;
   }
-  return NSOrderedSame;
+  UITextStorageDirection positionAffinity = ((FlutterTextPosition*)position).affinity;
+  UITextStorageDirection otherAffinity = ((FlutterTextPosition*)other).affinity;
+  if (positionAffinity == otherAffinity) {
+    return NSOrderedSame;
+  }
+  if (positionAffinity == UITextStorageDirectionBackward) {
+    // positionAffinity points backwards, otherAffinity points forwards
+    return NSOrderedAscending;
+  }
+  // positionAffinity points forwards, otherAffinity points backwards
+  return NSOrderedDescending;
 }
 
 - (NSInteger)offsetFromPosition:(UITextPosition*)from toPosition:(UITextPosition*)toPosition {
@@ -1415,17 +1458,20 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 - (UITextPosition*)positionWithinRange:(UITextRange*)range
                    farthestInDirection:(UITextLayoutDirection)direction {
   NSUInteger index;
+  UITextStorageDirection affinity;
   switch (direction) {
     case UITextLayoutDirectionLeft:
     case UITextLayoutDirectionUp:
       index = ((FlutterTextPosition*)range.start).index;
+      affinity = UITextStorageDirectionForward;
       break;
     case UITextLayoutDirectionRight:
     case UITextLayoutDirectionDown:
       index = ((FlutterTextPosition*)range.end).index;
+      affinity = UITextStorageDirectionBackward;
       break;
   }
-  return [FlutterTextPosition positionWithIndex:index];
+  return [FlutterTextPosition positionWithIndex:index affinity:affinity];
 }
 
 - (UITextRange*)characterRangeByExtendingPosition:(UITextPosition*)position
@@ -1601,23 +1647,77 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   return CGRectZero;
 }
 
-- (CGRect)caretRectForPosition:(UITextPosition*)position {
-  // TODO(cbracken) Implement.
-
-  // As of iOS 14.4, this call is used by iOS's
-  // _UIKeyboardTextSelectionController to determine the position
-  // of the floating cursor when the user force touches the space
-  // bar to initiate floating cursor.
-  //
-  // It is recommended to return a value that's roughly the
-  // center of kSpacePanBounds to make sure the floating cursor
-  // has ample space in all directions and does not hit kSpacePanBounds.
-  // See the comments in beginFloatingCursorAtPoint.
-  return CGRectZero;
+- (BOOL)isRTLAtPosition:(NSUInteger)position {
+  // _selectionRects is sorted by position already.
+  // We can use binary search.
+  NSInteger min = 0;
+  NSInteger max = [_selectionRects count];
+  while (min <= max) {
+    const NSUInteger mid = min + (max - min) / 2;
+    FlutterTextSelectionRect* rect = _selectionRects[mid];
+    if (rect.position > position) {
+      max = mid - 1;
+    } else if (rect.position == position) {
+      return rect.isRTL;
+    } else {
+      min = mid + 1;
+    }
+  }
+  return NO;
 }
 
-- (CGRect)bounds {
-  return _isFloatingCursorActive ? kSpacePanBounds : super.bounds;
+- (CGRect)caretRectForPosition:(UITextPosition*)position {
+  NSInteger index = ((FlutterTextPosition*)position).index;
+  UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
+  // Get the bounds of the characters before and after the requested caret position.
+  NSArray<UITextSelectionRect*>* rects = [self
+      selectionRectsForRange:[FlutterTextRange
+                                 rangeWithNSRange:fml::RangeForCharactersInRange(
+                                                      self.text,
+                                                      NSMakeRange(
+                                                          MAX(0, index - 1),
+                                                          (index >= (NSInteger)self.text.length)
+                                                              ? 1
+                                                              : 2))]];
+  if (rects.count == 0) {
+    return CGRectZero;
+  }
+  if (index == 0) {
+    // There is no character before the caret, so this will be the bounds of the character after the
+    // caret position.
+    CGRect characterAfterCaret = rects[0].rect;
+    // Return a zero-width rectangle along the upstream edge of the character after the caret
+    // position.
+    if ([self isRTLAtPosition:index]) {
+      return CGRectMake(characterAfterCaret.origin.x + characterAfterCaret.size.width,
+                        characterAfterCaret.origin.y, 0, characterAfterCaret.size.height);
+    } else {
+      return CGRectMake(characterAfterCaret.origin.x, characterAfterCaret.origin.y, 0,
+                        characterAfterCaret.size.height);
+    }
+  } else if (rects.count == 2 && affinity == UITextStorageDirectionForward) {
+    // It's better to use the character after the caret.
+    CGRect characterAfterCaret = rects[1].rect;
+    // Return a zero-width rectangle along the upstream edge of the character after the caret
+    // position.
+    if ([self isRTLAtPosition:index]) {
+      return CGRectMake(characterAfterCaret.origin.x + characterAfterCaret.size.width,
+                        characterAfterCaret.origin.y, 0, characterAfterCaret.size.height);
+    } else {
+      return CGRectMake(characterAfterCaret.origin.x, characterAfterCaret.origin.y, 0,
+                        characterAfterCaret.size.height);
+    }
+  }
+  CGRect characterBeforeCaret = rects[0].rect;
+  // Return a zero-width rectangle along the downstream edge of the character before the caret
+  // position.
+  if ([self isRTLAtPosition:index - 1]) {
+    return CGRectMake(characterBeforeCaret.origin.x, characterBeforeCaret.origin.y, 0,
+                      characterBeforeCaret.size.height);
+  } else {
+    return CGRectMake(characterBeforeCaret.origin.x + characterBeforeCaret.size.width,
+                      characterBeforeCaret.origin.y, 0, characterBeforeCaret.size.height);
+  }
 }
 
 - (UITextPosition*)closestPositionToPoint:(CGPoint)point {
@@ -1626,7 +1726,9 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
              @"Expected a FlutterTextPosition for position (got %@).",
              [_selectedTextRange.start class]);
     NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-    return [FlutterTextPosition positionWithIndex:currentIndex];
+    UITextStorageDirection currentAffinity =
+        ((FlutterTextPosition*)_selectedTextRange.start).affinity;
+    return [FlutterTextPosition positionWithIndex:currentIndex affinity:currentAffinity];
   }
 
   FlutterTextRange* range = [FlutterTextRange
@@ -1649,7 +1751,9 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   NSUInteger end = ((FlutterTextPosition*)range.end).index;
   NSMutableArray* rects = [[NSMutableArray alloc] init];
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
-    if (_selectionRects[i].position >= start && _selectionRects[i].position <= end) {
+    if (_selectionRects[i].position >= start &&
+        (_selectionRects[i].position < end ||
+         (start == end && _selectionRects[i].position <= end))) {
       float width = _selectionRects[i].rect.size.width;
       if (start == end) {
         width = 0;
@@ -1659,7 +1763,7 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
       FlutterTextSelectionRect* selectionRect = [FlutterTextSelectionRect
           selectionRectWithRectAndInfo:rect
                               position:_selectionRects[i].position
-                      writingDirection:UITextWritingDirectionNatural
+                      writingDirection:NSWritingDirectionNatural
                          containsStart:(i == 0)
                            containsEnd:(i == fml::RangeForCharactersInRange(
                                                  self.text, NSMakeRange(0, self.text.length))
@@ -1679,37 +1783,47 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   NSUInteger start = ((FlutterTextPosition*)range.start).index;
   NSUInteger end = ((FlutterTextPosition*)range.end).index;
 
-  NSUInteger _closestIndex = 0;
-  CGRect _closestRect = CGRectZero;
-  NSUInteger _closestPosition = 0;
+  // Selecting text using the floating cursor is not as precise as the pencil.
+  // Allow further vertical deviation and base more of the decision on horizontal comparison.
+  CGFloat verticalPrecision = _isFloatingCursorActive ? 10 : 1;
+
+  BOOL isFirst = YES;
+  NSUInteger _closestRectIndex = 0;
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     NSUInteger position = _selectionRects[i].position;
     if (position >= start && position <= end) {
-      BOOL isFirst = _closestIndex == 0;
-      if (isFirst || IsSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
-                                                  /*checkRightBoundary=*/NO)) {
-        _closestIndex = i;
-        _closestRect = _selectionRects[i].rect;
-        _closestPosition = position;
+      if (isFirst ||
+          IsSelectionRectBoundaryCloserToPoint(
+              point, _selectionRects[i].rect, _selectionRects[i].isRTL,
+              /*useTrailingBoundaryOfSelectionRect=*/NO, _selectionRects[_closestRectIndex].rect,
+              _selectionRects[_closestRectIndex].isRTL, verticalPrecision)) {
+        isFirst = NO;
+        _closestRectIndex = i;
       }
     }
   }
 
-  FlutterTextRange* textRange = [FlutterTextRange
-      rangeWithNSRange:fml::RangeForCharactersInRange(self.text, NSMakeRange(0, self.text.length))];
+  FlutterTextPosition* closestPosition =
+      [FlutterTextPosition positionWithIndex:_selectionRects[_closestRectIndex].position
+                                    affinity:UITextStorageDirectionForward];
 
-  if ([_selectionRects count] > 0 && textRange.range.length == end) {
-    NSUInteger i = [_selectionRects count] - 1;
+  // Check if the far side of the closest rect is a better fit (tapping end of line)
+  for (NSUInteger i = MAX(0, _closestRectIndex - 1);
+       i < MIN(_closestRectIndex + 2, [_selectionRects count]); i++) {
     NSUInteger position = _selectionRects[i].position + 1;
-    if (position <= end) {
-      if (IsSelectionRectCloserToPoint(point, _selectionRects[i].rect, _closestRect,
-                                       /*checkRightBoundary=*/YES)) {
-        _closestPosition = position;
+    if (position >= start && position <= end) {
+      if (IsSelectionRectBoundaryCloserToPoint(
+              point, _selectionRects[i].rect, _selectionRects[i].isRTL,
+              /*useTrailingBoundaryOfSelectionRect=*/YES, _selectionRects[_closestRectIndex].rect,
+              _selectionRects[_closestRectIndex].isRTL, verticalPrecision)) {
+        // This is an upstream position
+        closestPosition = [FlutterTextPosition positionWithIndex:position
+                                                        affinity:UITextStorageDirectionBackward];
       }
     }
   }
 
-  return [FlutterTextPosition positionWithIndex:_closestPosition];
+  return closestPosition;
 }
 
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
@@ -1730,38 +1844,33 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   //     caretRectForPosition boundingBox = self.convertRect(bounds, fromView:textInputView)
   //     bounds = self._selectionClipRect ?? self.bounds
   //
-  // It's tricky to provide accurate "bounds" and "caretRectForPosition" so it's preferred to
-  // bypass the clamping and implement the same clamping logic in the framework where we have easy
-  // access to the bounding box of the input field and the caret location.
-  //
-  // The current implementation returns kSpacePanBounds for "bounds" when
-  // "_isFloatingCursorActive" is true. kSpacePanBounds centers "caretRectForPosition" so the
-  // floating cursor has enough clearance in all directions to move around.
-  //
   // It seems impossible to use a negative "width" or "height", as the "convertRect"
   // call always turns a CGRect's negative dimensions into non-negative values, e.g.,
   // (1, 2, -3, -4) would become (-2, -2, 3, 4).
-  _isFloatingCursorActive = true;
+  _isFloatingCursorActive = YES;
+  _floatingCursorOffset = point;
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateStart
                                     withClient:_textInputClient
-                                  withPosition:@{@"X" : @(point.x), @"Y" : @(point.y)}];
+                                  withPosition:@{@"X" : @0, @"Y" : @0}];
 }
 
 - (void)updateFloatingCursorAtPoint:(CGPoint)point {
-  _isFloatingCursorActive = true;
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateUpdate
                                     withClient:_textInputClient
-                                  withPosition:@{@"X" : @(point.x), @"Y" : @(point.y)}];
+                                  withPosition:@{
+                                    @"X" : @(point.x - _floatingCursorOffset.x),
+                                    @"Y" : @(point.y - _floatingCursorOffset.y)
+                                  }];
 }
 
 - (void)endFloatingCursor {
-  _isFloatingCursorActive = false;
+  _isFloatingCursorActive = NO;
   [self.textInputDelegate flutterTextInputView:self
                           updateFloatingCursor:FlutterFloatingCursorDragStateEnd
                                     withClient:_textInputClient
-                                  withPosition:@{@"X" : @(0), @"Y" : @(0)}];
+                                  withPosition:@{@"X" : @0, @"Y" : @0}];
 }
 
 #pragma mark - UIKeyInput Overrides
@@ -1857,16 +1966,19 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
     NSUInteger rectPosition = _selectionRects[i].position;
     if (rectPosition == insertPosition) {
       for (NSUInteger j = 0; j <= text.length; j++) {
-        [copiedRects
-            addObject:[FlutterTextSelectionRect selectionRectWithRect:_selectionRects[i].rect
-                                                             position:rectPosition + j]];
+        [copiedRects addObject:[FlutterTextSelectionRect
+                                   selectionRectWithRect:_selectionRects[i].rect
+                                                position:rectPosition + j
+                                        writingDirection:_selectionRects[i].writingDirection]];
       }
     } else {
       if (rectPosition > insertPosition) {
         rectPosition = rectPosition + text.length;
       }
-      [copiedRects addObject:[FlutterTextSelectionRect selectionRectWithRect:_selectionRects[i].rect
-                                                                    position:rectPosition]];
+      [copiedRects addObject:[FlutterTextSelectionRect
+                                 selectionRectWithRect:_selectionRects[i].rect
+                                              position:rectPosition
+                                      writingDirection:_selectionRects[i].writingDirection]];
     }
   }
 
@@ -2158,16 +2270,20 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   _activeView.markedRect = rect.size.width < 0 && rect.size.height < 0 ? kInvalidFirstRect : rect;
 }
 
-- (void)setSelectionRects:(NSArray*)rects {
+- (void)setSelectionRects:(NSArray*)encodedRects {
   NSMutableArray<FlutterTextSelectionRect*>* rectsAsRect =
-      [[NSMutableArray alloc] initWithCapacity:[rects count]];
-  for (NSUInteger i = 0; i < [rects count]; i++) {
-    NSArray<NSNumber*>* rect = rects[i];
-    [rectsAsRect
-        addObject:[FlutterTextSelectionRect
-                      selectionRectWithRect:CGRectMake([rect[0] floatValue], [rect[1] floatValue],
-                                                       [rect[2] floatValue], [rect[3] floatValue])
-                                   position:[rect[4] unsignedIntegerValue]]];
+      [[NSMutableArray alloc] initWithCapacity:[encodedRects count]];
+  for (NSUInteger i = 0; i < [encodedRects count]; i++) {
+    NSArray<NSNumber*>* encodedRect = encodedRects[i];
+    [rectsAsRect addObject:[FlutterTextSelectionRect
+                               selectionRectWithRect:CGRectMake([encodedRect[0] floatValue],
+                                                                [encodedRect[1] floatValue],
+                                                                [encodedRect[2] floatValue],
+                                                                [encodedRect[3] floatValue])
+                                            position:[encodedRect[4] unsignedIntegerValue]
+                                    writingDirection:[encodedRect[5] unsignedIntegerValue] == 1
+                                                         ? NSWritingDirectionLeftToRight
+                                                         : NSWritingDirectionRightToLeft]];
   }
   _activeView.selectionRects = rectsAsRect;
 }
