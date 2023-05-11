@@ -79,7 +79,7 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTexture(
 
   GrBackendTexture gr_backend_texture(width, height, GrMipMapped::kNo,
                                       gr_texture_info);
-  SkImage::TextureReleaseProc release_proc = texture->destruction_callback;
+  SkImages::TextureReleaseProc release_proc = texture->destruction_callback;
   auto image =
       SkImages::BorrowTextureFrom(context,                   // context
                                   gr_backend_texture,        // texture handle
