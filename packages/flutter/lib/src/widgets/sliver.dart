@@ -1575,6 +1575,11 @@ class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
   }
 }
 
+/// A sliver that places multiple sliver children in a linear array along
+/// the main axis, one after another.
+///
+/// For pinned sliver children, the behavior is that the pinned sliver should
+/// scroll up after all of the main content has been scrolled through.
 class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
   /// Creates a sliver that places sliver children in a linear array along
   /// the main axis.
