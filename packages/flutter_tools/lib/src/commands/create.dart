@@ -267,6 +267,14 @@ class CreateCommand extends CreateBase {
       includeLinux = false;
       includeMacos = false;
       includeWindows = false;
+    } else if (template == FlutterProjectType.package) {
+      // The package template does not supports any platform.
+      includeIos = false;
+      includeAndroid = false;
+      includeWeb = false;
+      includeLinux = false;
+      includeMacos = false;
+      includeWindows = false;
     } else {
       includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
       includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');

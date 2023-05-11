@@ -296,7 +296,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = getNameForDarwinArch(activeArch);
+    final String activeArchName = activeArch.name;
     buildCommands.add('ONLY_ACTIVE_ARCH=YES');
     // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
     // as it cannot be build for the architecture of the Flutter app.
@@ -578,12 +578,10 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 enum XcodeBuildAction { build, archive }
 
 String xcodeBuildActionToString(XcodeBuildAction action) {
-    switch (action) {
-      case XcodeBuildAction.build:
-        return 'build';
-      case XcodeBuildAction.archive:
-        return 'archive';
-    }
+    return switch (action) {
+      XcodeBuildAction.build => 'build',
+      XcodeBuildAction.archive => 'archive'
+    };
 }
 
 class XcodeBuildResult {

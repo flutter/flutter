@@ -119,7 +119,7 @@ Iterable<String> _apkFilesFor(AndroidBuildInfo androidBuildInfo) {
   final String flavorString = productFlavor.isEmpty ? '' : '-$productFlavor';
   if (androidBuildInfo.splitPerAbi) {
     return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
-      final String abi = getNameForAndroidArch(arch);
+      final String abi = arch.archName;
       return 'app$flavorString-$abi-$buildType.apk';
     });
   }
@@ -147,8 +147,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _platform = platform;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -158,7 +157,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
-  final Platform _platform;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -268,11 +266,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       AndroidStudioJavaGradleConflictMigration(_logger,
           project: project.android,
           androidStudio: _androidStudio,
-          fileSystem: _fileSystem,
-          processUtils: _processUtils,
-          platform: _platform,
-          os: globals.os,
-          androidSdk: globals.androidSdk)
+          java: globals.java)
       ,
     ];
 
@@ -347,7 +341,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo
           .targetArchs
-          .map(getPlatformNameForAndroidArch).join(',');
+          .map((AndroidArch e) => e.platformName).join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
     command.add('-Ptarget=$target');
@@ -428,7 +422,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
-      final String? javaHome = globals.androidSdk?.javaHome;
+      final String? javaHome = globals.java?.javaHome;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -560,7 +554,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       logger: _logger,
       flutterUsage: _usage,
     );
-    final String archName = getNameForAndroidArch(androidBuildInfo.targetArchs.single);
+    final String archName = androidBuildInfo.targetArchs.single.archName;
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final File aotSnapshot = _fileSystem.directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$archName.json');
@@ -688,7 +682,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           localEngineInfo.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
       final String targetPlatforms = androidBuildInfo.targetArchs
-          .map(getPlatformNameForAndroidArch).join(',');
+          .map((AndroidArch e) => e.platformName).join(',');
       command.add('-Ptarget-platform=$targetPlatforms');
     }
 
@@ -698,7 +692,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.androidSdk?.javaHome;
+      final String? javaHome = globals.java?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -751,7 +745,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.androidSdk?.javaHome;
+      final String? javaHome = globals.java?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -939,7 +933,7 @@ Iterable<String> listApkPaths(
       for (AndroidArch androidArch in androidBuildInfo.targetArchs)
         <String>[
           'app',
-          getNameForAndroidArch(androidArch),
+          androidArch.archName,
           ...apkPartialName,
         ].join('-'),
     ];
@@ -1058,7 +1052,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
   assert(project.isNotEmpty);
   for (final XmlElement versionElement in document.findAllElements('version')) {
     if (versionElement.parent == project.first) {
-      return versionElement.text;
+      return versionElement.innerText;
     }
   }
   throwToolExit('Error while parsing the <version> element from $pomPath');
