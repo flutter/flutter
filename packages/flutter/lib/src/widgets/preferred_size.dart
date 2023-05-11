@@ -26,7 +26,7 @@ import 'framework.dart';
 // from being implemented, which is the exact opposite of the spirit of the
 // `avoid_implementing_value_types` lint.)
 // ignore: avoid_implementing_value_types
-abstract class PreferredSizeWidget implements Widget {
+abstract mixin class PreferredSizeWidget implements Widget {
   /// The size this widget would prefer if it were otherwise unconstrained.
   ///
   /// In many cases it's only necessary to define one preferred dimension.
