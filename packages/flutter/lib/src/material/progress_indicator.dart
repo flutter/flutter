@@ -421,6 +421,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     required this.offsetValue,
     required this.rotationValue,
     required this.strokeWidth,
+    required this.strokeAlign,
     this.strokeCap,
   }) : arcStart = value != null
          ? _startAngle
@@ -437,6 +438,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   final double offsetValue;
   final double rotationValue;
   final double strokeWidth;
+  final double strokeAlign;
   final double arcStart;
   final double arcSweep;
   final StrokeCap? strokeCap;
@@ -454,12 +456,27 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
+    // Use the negative operator as intended to keep the exposed constant value
+    // as users are already familiar with.
+    final double strokeOffset = strokeWidth / 2 * -strokeAlign;
+    final Offset arcBaseOffset = Offset(strokeOffset, strokeOffset);
+    final Size arcActualSize = Size(
+      size.width - strokeOffset * 2,
+      size.height - strokeOffset * 2,
+    );
+
     if (backgroundColor != null) {
       final Paint backgroundPaint = Paint()
         ..color = backgroundColor!
         ..strokeWidth = strokeWidth
         ..style = PaintingStyle.stroke;
-      canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
+      canvas.drawArc(
+        arcBaseOffset & arcActualSize,
+        0,
+        _sweep,
+        false,
+        backgroundPaint,
+      );
     }
 
     if (value == null && strokeCap == null) {
@@ -470,7 +487,13 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
       paint.strokeCap = strokeCap ?? StrokeCap.butt;
     }
 
-    canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
+    canvas.drawArc(
+      arcBaseOffset & arcActualSize,
+      arcStart,
+      arcSweep,
+      false,
+      paint,
+    );
   }
 
   @override
@@ -483,6 +506,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
         || oldPainter.offsetValue != offsetValue
         || oldPainter.rotationValue != rotationValue
         || oldPainter.strokeWidth != strokeWidth
+        || oldPainter.strokeAlign != strokeAlign
         || oldPainter.strokeCap != strokeCap;
   }
 }
@@ -538,6 +562,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.color,
     super.valueColor,
     this.strokeWidth = 4.0,
+    this.strokeAlign = strokeAlignCenter,
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,
@@ -560,6 +585,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,
+    this.strokeAlign = strokeAlignCenter,
   }) : _indicatorType = _ActivityIndicatorType.adaptive;
 
   final _ActivityIndicatorType _indicatorType;
@@ -576,6 +602,15 @@ class CircularProgressIndicator extends ProgressIndicator {
 
   /// The width of the line used to draw the circle.
   final double strokeWidth;
+
+  /// The relative position of the stroke on a [CircularProgressIndicator].
+  ///
+  /// Values typically range from -1.0 ([strokeAlignInside], inside stroke)
+  /// to 1.0 ([strokeAlignOutside], outside stroke),
+  /// without any bound constraints (e.g., a value of -2.0 is not typical, but allowed).
+  /// A value of 0 ([strokeAlignCenter], default) will center the border
+  /// on the edge of the widget.
+  final double strokeAlign;
 
   /// The progress indicator's line ending.
   ///
@@ -597,6 +632,25 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// and ends at 270 degrees. With [StrokeCap.square], it could start 85
   /// degrees and end at 275 degrees.
   final StrokeCap? strokeCap;
+
+  /// The indicator stroke is drawn fully inside of the indicator path.
+  ///
+  /// This is a constant for use with [strokeAlign].
+  static const double strokeAlignInside = -1.0;
+
+  /// The indicator stroke is drawn on the center of the indicator path,
+  /// with half of the [strokeWidth] on the inside, and the other half
+  /// on the outside of the path.
+  ///
+  /// This is a constant for use with [strokeAlign].
+  ///
+  /// This is the default value for [strokeAlign].
+  static const double strokeAlignCenter = 0.0;
+
+  /// The indicator stroke is drawn on the outside of the indicator path.
+  ///
+  /// This is a constant for use with [strokeAlign].
+  static const double strokeAlignOutside = 1.0;
 
   @override
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
@@ -677,6 +731,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
             offsetValue: offsetValue,
             rotationValue: rotationValue,
             strokeWidth: widget.strokeWidth,
+            strokeAlign: widget.strokeAlign,
             strokeCap: widget.strokeCap,
           ),
         ),
@@ -735,6 +790,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     required super.offsetValue,
     required super.rotationValue,
     required super.strokeWidth,
+    required super.strokeAlign,
     required this.arrowheadScale,
     required super.strokeCap,
   });
@@ -805,6 +861,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
     super.color,
     super.valueColor,
     super.strokeWidth = defaultStrokeWidth, // Different default than CircularProgressIndicator.
+    super.strokeAlign,
     super.semanticsLabel,
     super.semanticsValue,
     super.strokeCap,
@@ -936,6 +993,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
                     offsetValue: offsetValue,
                     rotationValue: rotationValue,
                     strokeWidth: widget.strokeWidth,
+                    strokeAlign: widget.strokeAlign,
                     arrowheadScale: arrowheadScale,
                     strokeCap: widget.strokeCap,
                   ),
