@@ -189,7 +189,7 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
             SkSafeRef(image.get());
             sk_sp<SkImage> texture_image = SkImages::RasterFromPixmap(
                 pixmap,
-                [](const void* pixels, SkImage::ReleaseContext context) {
+                [](const void* pixels, SkImages::ReleaseContext context) {
                   SkSafeUnref(static_cast<SkImage*>(context));
                 },
                 image.get());
