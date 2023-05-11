@@ -130,7 +130,12 @@ class HtmlFontCollection implements FlutterFontCollection {
     }
 
     try {
-      fontFaces.forEach(domDocument.fonts!.add);
+      // Since we can't use tear-offs for interop members, this code is faster
+      // and easier to read with a for loop instead of forEach.
+      // ignore: prefer_foreach
+      for (final DomFontFace font in fontFaces) {
+        domDocument.fonts!.add(font);
+      }
     } catch (e) {
       return FontInvalidDataError(asset);
     }
