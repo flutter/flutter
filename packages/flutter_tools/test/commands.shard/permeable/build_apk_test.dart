@@ -447,6 +447,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   final Directory directory;
+
+  @override
+  String? get javaHome => 'java';
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {
