@@ -1,4 +1,4 @@
-Signature: 20ca15bc638816ba30bd18f95a6c22de
+Signature: 41a891121d77cca1e1b6e1903d864aa0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -384,6 +384,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/skdrawable_picturesnapshot.md
 FILE: ../../../third_party/skia/relnotes/skgraphics_methods.md
 FILE: ../../../third_party/skia/relnotes/skimage_methods.md
 FILE: ../../../third_party/skia/relnotes/skimage_subset.md
