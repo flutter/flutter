@@ -139,7 +139,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
-    // This pump will throw before https://github.com/flutter/flutter/pull/126324 is fixed
+    // This pump will throw before the https://github.com/flutter/flutter/pull/126324 is fixed
     await tester.pumpWidget(
       MaterialApp(
         home: FractionalTranslation(
