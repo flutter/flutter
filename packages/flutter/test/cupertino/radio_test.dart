@@ -357,7 +357,6 @@ void main() {
         child: CupertinoRadio<int>(
           value: 1,
           groupValue: 1,
-          useCheckmarkStyle: false,
           onChanged: (int? i) { },
         ),
       ),
