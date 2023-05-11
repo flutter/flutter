@@ -311,8 +311,8 @@ abstract class Route {
   /// The future completes with the value given to [Navigator.pop], if any, or
   /// else the value of [currentResult]. See [didComplete] for more discussion
   /// on this topic.
-  Future<dynamic> get popped => _popCompleter.future;
-  final Completer<dynamic> _popCompleter = Completer<dynamic>();
+  Future<Object?> get popped => _popCompleter.future;
+  final Completer<Object?> _popCompleter = Completer<Object?>();
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
