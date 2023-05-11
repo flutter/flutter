@@ -30,7 +30,7 @@ public class LifecycleChannel {
 
   private String lastAndroidState = "";
   private String lastFlutterState = "";
-  private boolean lastFocus = false;
+  private boolean lastFocus = true;
 
   @NonNull private final BasicMessageChannel<String> channel;
 
