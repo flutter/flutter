@@ -122,7 +122,6 @@ void main() {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -131,6 +130,7 @@ void main() {
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -141,7 +141,6 @@ void main() {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -150,6 +149,7 @@ void main() {
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -165,7 +165,6 @@ void main() {
       ], stdout: 'asdasassad',
     ));
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -174,6 +173,7 @@ void main() {
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -194,7 +194,6 @@ All SDK package licenses accepted.
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -203,6 +202,7 @@ All SDK package licenses accepted.
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -224,7 +224,6 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -233,6 +232,7 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -254,7 +254,6 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -263,6 +262,7 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -280,7 +280,6 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -289,6 +288,7 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(await licenseValidator.runLicenseManager(), isTrue);
@@ -299,7 +299,6 @@ Review licenses that have not been accepted (y/N)?
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -308,6 +307,7 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -328,7 +328,6 @@ Review licenses that have not been accepted (y/N)?
     final BufferLogger logger = BufferLogger.test();
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -337,6 +336,7 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     await licenseValidator.runLicenseManager();
@@ -349,7 +349,6 @@ Review licenses that have not been accepted (y/N)?
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -358,6 +357,7 @@ Review licenses that have not been accepted (y/N)?
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -376,7 +376,6 @@ Review licenses that have not been accepted (y/N)?
     );
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
       processManager: processManager,
@@ -385,6 +384,7 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       userMessages: UserMessages(),
       androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     await expectLater(
@@ -620,6 +620,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   List<String> validateSdkWellFormed() => <String>[];
+
+  @override
+  Map<String, String> get sdkManagerEnv => <String, String>{};
 }
 
 class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
