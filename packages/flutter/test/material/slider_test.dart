@@ -1855,6 +1855,20 @@ void main() {
       paints..circle(color: theme.colorScheme.primary.withOpacity(0.08)),
     );
 
+    // Slider still shows correct hovered color after pressing/dragging
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0.0, 100.0));
+    await tester.pumpAndSettle();
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.08)),
+    );
+
     // Slider does not have an overlay when disabled and hovered.
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
