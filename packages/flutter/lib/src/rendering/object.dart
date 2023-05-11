@@ -13,6 +13,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
+import '../../widgets.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'proxy_box.dart';
@@ -3116,6 +3117,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// the parent must return `false` from [paintsChild].
   void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
+    assert(BuildOwner.staticDebugBuilding == false); // HACK ASSERT!
   }
 
   /// Whether the given child would be painted if [paint] were called.
