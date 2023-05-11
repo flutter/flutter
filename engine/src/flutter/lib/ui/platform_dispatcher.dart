@@ -115,7 +115,7 @@ class PlatformDispatcher {
 
   /// The [PlatformDispatcher] singleton.
   ///
-  /// Consider avoiding static references to this singleton though
+  /// Consider avoiding static references to this singleton through
   /// [PlatformDispatcher.instance] and instead prefer using a binding for
   /// dependency resolution such as `WidgetsBinding.instance.platformDispatcher`.
   ///
