@@ -704,7 +704,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
               if (widget.expandOnFocus && hasFocus && !_extent.isAtMax) {
                 _sheetController.animateTo(
                   widget.maxChildSize,
-                  duration: const Duration(milliseconds: 50),
+                  duration: const Duration(milliseconds: 100),
                   curve: Curves.linear,
                 );
               }
