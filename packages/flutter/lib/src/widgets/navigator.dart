@@ -4391,10 +4391,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///
   ///  * [restorablePush], which pushes a route that can be restored during
   ///    state restoration.
-  Future<Object?> push(Route route) {
+  Future<T?> push<T extends Object?>(Route route) {
     assert(_debugCheckIsPagelessRoute(route));
     _pushEntry(_RouteEntry(route, initialState: _RouteLifecycle.push));
-    return route.popped;
+    return route.popped as Future<T?>;
   }
 
   bool _debugCheckIsPagelessRoute(Route route) {

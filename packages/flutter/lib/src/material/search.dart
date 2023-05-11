@@ -67,9 +67,9 @@ Future<T?> showSearch<T>({
   assert(useRootNavigator != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T?>(_SearchPageRoute(
     delegate: delegate,
-  )) as Future<T?>;
+  ));
 }
 
 /// Delegate for [showSearch] to define the content of the search page.
@@ -386,7 +386,7 @@ enum _SearchBody {
   results,
 }
 
-class _SearchPageRoute extends PageRoute {
+class _SearchPageRoute<T> extends PageRoute {
   _SearchPageRoute({
     required this.delegate,
   }) : assert(delegate != null) {
@@ -399,7 +399,7 @@ class _SearchPageRoute extends PageRoute {
     delegate._route = this;
   }
 
-  final SearchDelegate delegate;
+  final SearchDelegate<T> delegate;
 
   @override
   Color? get barrierColor => null;

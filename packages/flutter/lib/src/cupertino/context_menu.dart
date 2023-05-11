@@ -203,7 +203,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
   late AnimationController _openController;
   Rect? _decoyChildEndRect;
   OverlayEntry? _lastOverlayEntry;
-  _ContextMenuRoute<void>? _route;
+  _ContextMenuRoute? _route;
 
   @override
   void initState() {
@@ -248,7 +248,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
       _childHidden = true;
     });
 
-    _route = _ContextMenuRoute<void>(
+    _route = _ContextMenuRoute(
       actions: widget.actions,
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
@@ -514,7 +514,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 }
 
 // The open CupertinoContextMenu modal.
-class _ContextMenuRoute<T> extends PopupRoute<T> {
+class _ContextMenuRoute extends PopupRoute {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
     required List<Widget> actions,

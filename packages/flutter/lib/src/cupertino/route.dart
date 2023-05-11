@@ -1188,7 +1188,7 @@ Future<T?> showCupertinoModalPopup<T>({
   Offset? anchorPoint,
 }) {
   assert(useRootNavigator != null);
-  return Navigator.of(context, rootNavigator: useRootNavigator).push(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T?>(
     CupertinoModalPopupRoute(
       builder: builder,
       filter: filter,
@@ -1198,7 +1198,7 @@ Future<T?> showCupertinoModalPopup<T>({
       settings: routeSettings,
       anchorPoint: anchorPoint,
     ),
-  ) as Future<T?>;
+  );
 }
 
 // The curve and initial scale values were mostly eyeballed from iOS, however
@@ -1295,7 +1295,7 @@ Future<T?> showCupertinoDialog<T>({
   assert(builder != null);
   assert(useRootNavigator != null);
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push(CupertinoDialogRoute(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(CupertinoDialogRoute<T>(
     builder: builder,
     context: context,
     barrierDismissible: barrierDismissible,
@@ -1303,7 +1303,7 @@ Future<T?> showCupertinoDialog<T>({
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
     anchorPoint: anchorPoint,
-  )) as Future<T?>;
+  ));
 }
 
 /// A dialog route that shows an iOS-style dialog.
