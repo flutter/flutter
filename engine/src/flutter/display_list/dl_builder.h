@@ -199,6 +199,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
       DlImageSampling sampling,
       const DlPaint* paint = nullptr,
       SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
+  using DlCanvas::DrawImageRect;
   // |DlCanvas|
   void DrawImageNine(const sk_sp<DlImage>& image,
                      const SkIRect& center,
