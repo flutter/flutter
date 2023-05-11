@@ -180,7 +180,7 @@ class TapSemanticEvent extends SemanticsEvent {
 /// class _MyWidgetState extends State<MyWidget> {
 ///   bool noticeAccepted = false;
 ///   final GlobalKey mykey= GlobalKey();
-
+///
 ///   @override
 ///   void initState() {
 ///     super.initState();
