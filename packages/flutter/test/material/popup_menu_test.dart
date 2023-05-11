@@ -820,7 +820,7 @@ void main() {
             padding: const EdgeInsets.all(8.0),
             child: Navigator(
               onGenerateRoute: (RouteSettings settings) {
-                return MaterialPageRoute<dynamic>(
+                return MaterialPageRoute(
                   builder: (BuildContext context) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -875,7 +875,7 @@ void main() {
           child: Scaffold(
             body: Navigator(
               onGenerateRoute: (RouteSettings settings) {
-                return MaterialPageRoute<dynamic>(
+                return MaterialPageRoute(
                   builder: (BuildContext context) {
                     return Padding(
                       // Position the button in the top-right of the first "virtual screen"
@@ -1909,7 +1909,7 @@ void main() {
       home: Navigator(
         observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return MaterialPageRoute<dynamic>(
+          return MaterialPageRoute(
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
@@ -1947,7 +1947,7 @@ void main() {
       home: Navigator(
         observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return MaterialPageRoute<dynamic>(
+          return MaterialPageRoute(
             builder: (BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
@@ -2541,7 +2541,7 @@ void main() {
                 width: 10,
                 child: Navigator(
                   key: navigator,
-                  onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(
+                  onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(
                     builder: (BuildContext context) => Container(color: Colors.red),
                   ),
                 ),
@@ -2969,7 +2969,7 @@ class _TestAppState extends State<TestApp> {
           child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
-              return MaterialPageRoute<void>(
+              return MaterialPageRoute(
                 settings: settings,
                 builder: (BuildContext context) => Material(
                   child: widget.child,
@@ -2987,7 +2987,7 @@ class MenuObserver extends NavigatorObserver {
   int menuCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route route, Route? previousRoute) {
     if (route.toString().contains('_PopupMenuRoute')) {
       menuCount++;
     }
