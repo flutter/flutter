@@ -3285,10 +3285,11 @@ class _NavigatorReplaceObservation extends _NavigatorObservation {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin, RestorationMixin {
   late GlobalKey<OverlayState> _overlayKey;
   List<_RouteEntry> _history = <_RouteEntry>[];
-  /// A set for entry that is waiting to dispose until its subtree is disposed.
+  /// A set for entries that are waiting to dispose until their subtrees are
+  /// disposed.
   ///
   /// These entries are not considered to be in the _history and will usually
-  /// remove itself from this set once they can dispose.
+  /// remove themselves from this set once they can dispose.
   ///
   /// The navigator keep track of these entries so that, in case the navigator
   /// itself is disposed, it can dispose these entries immediately.
