@@ -263,7 +263,7 @@ void main() {
       expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(channel.name, handler), true);
     });
 
-    test('can send messgae to signal binding initialization', () async {
+    test('can send message on completion of binding initialization', () async {
       bool called = false;
       TestWidgetsFlutterBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall method) async {
         if (method.method == 'System.initializationComplete') {
