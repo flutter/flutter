@@ -1,4 +1,4 @@
-Signature: 41a891121d77cca1e1b6e1903d864aa0
+Signature: 4b16f55af4d58c611f3345e7ae56c470
 
 ====================================================================================================
 LIBRARY: etc1
@@ -6983,7 +6983,6 @@ ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLExpression.h + ../../../third_
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLModifiers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLType.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLVar.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLVar.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.h + ../../../third_party/skia/LICENSE
@@ -7132,7 +7131,6 @@ FILE: ../../../third_party/skia/src/sksl/dsl/DSLExpression.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLModifiers.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLVar.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLVar.h
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/priv/DSLWriter.h
@@ -8865,6 +8863,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.h + ../../
 ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExtension.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/coordclampshader.cpp
@@ -8894,6 +8893,7 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations.cpp
 FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations.h
 FILE: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLExtension.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google Inc.
