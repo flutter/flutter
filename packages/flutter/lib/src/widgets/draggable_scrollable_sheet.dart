@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -304,6 +305,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.minChildSize = 0.25,
     this.maxChildSize = 1.0,
     this.expand = true,
+    this.expandOnFocus = false,
     this.snap = false,
     this.snapSizes,
     this.snapAnimationDuration,
@@ -346,6 +348,12 @@ class DraggableScrollableSheet extends StatefulWidget {
   ///
   /// The default value is true.
   final bool expand;
+
+  /// Whether or not this widget should expand to [maxChildSize] when a widget
+  /// under it obtains focus (eg when the user taps on a [TextField]).
+  ///
+  /// The default value is false.
+  final bool expandOnFocus;
 
   /// Whether the widget should snap between [snapSizes] when the user lifts
   /// their finger during a drag.
@@ -618,6 +626,7 @@ class _DraggableSheetExtent {
 }
 
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
+  late DraggableScrollableController _sheetController;
   late _DraggableScrollableSheetScrollController _scrollController;
   late _DraggableSheetExtent _extent;
 
@@ -632,8 +641,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snapAnimationDuration: widget.snapAnimationDuration,
       initialSize: widget.initialChildSize,
     );
+    _sheetController = widget.controller ?? DraggableScrollableController();
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
-    widget.controller?._attach(_scrollController);
+    _sheetController._attach(_scrollController);
   }
 
   List<double> _impliedSnapSizes() {
@@ -662,8 +672,9 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   void didUpdateWidget(covariant DraggableScrollableSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?._detach();
-      widget.controller?._attach(_scrollController);
+      _sheetController._detach();
+      _sheetController = widget.controller ?? DraggableScrollableController();
+      _sheetController._attach(_scrollController);
     }
     _replaceExtent(oldWidget);
   }
@@ -688,7 +699,18 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
             alignment: Alignment.bottomCenter,
             child: child,
           );
-          return widget.expand ? SizedBox.expand(child: sheet) : sheet;
+          return Focus(
+            onFocusChange: (bool hasFocus) {
+              if (widget.expandOnFocus && hasFocus && !_extent.isAtMax) {
+                _sheetController.animateTo(
+                  widget.maxChildSize,
+                  duration: const Duration(milliseconds: 50),
+                  curve: Curves.linear,
+                );
+              }
+            },
+            child: widget.expand ? SizedBox.expand(child: sheet) : sheet,
+          );
         },
       ),
       child: widget.builder(context, _scrollController),

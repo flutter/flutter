@@ -14,6 +14,7 @@ void main() {
     double maxChildSize = 1.0,
     double minChildSize = .25,
     bool snap = false,
+    bool expandOnFocus = false,
     List<double>? snapSizes,
     Duration? snapAnimationDuration,
     double? itemExtent,
@@ -21,6 +22,7 @@ void main() {
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
     bool ignoreController = false,
+    IndexedWidgetBuilder? itemBuilder,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -40,6 +42,7 @@ void main() {
                 minChildSize: minChildSize,
                 initialChildSize: initialChildSize,
                 snap: snap,
+                expandOnFocus: expandOnFocus,
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
                 builder: (BuildContext context, ScrollController scrollController) {
@@ -52,7 +55,8 @@ void main() {
                         controller: ignoreController ? null : scrollController,
                         itemExtent: itemExtent,
                         itemCount: itemCount,
-                        itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                        itemBuilder: (BuildContext context, int index) =>
+                          itemBuilder?.call(context, index) ?? Text('Item $index'),
                       ),
                     ),
                   );
@@ -1483,6 +1487,35 @@ void main() {
     expect(
       tester.getSize(find.byKey(containerKey)).height / screenHeight,
       closeTo(.6, precisionErrorTolerance),
+    );
+  });
+
+  testWidgets('DraggableScrollableSheet can expand on focus', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/101114
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final FocusNode focusNode = FocusNode();
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+      expandOnFocus: true,
+      itemCount: 1,
+      itemBuilder: (BuildContext context, int index) {
+        return Focus(focusNode: focusNode, child: Container());
+      },
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    // Trigger an expansion by focusing on a child of the sheet.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(1, precisionErrorTolerance),
     );
   });
 
