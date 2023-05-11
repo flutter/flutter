@@ -49,14 +49,3 @@ Future<String> testStringConversion(Int32List twoByteCodes) async {
 
   return converted;
 }
-
-Future<bool> testCanEnableApplicationLifecycle() async {
-  final Completer<bool> completer = Completer<bool>();
-  SystemChannels.platform.setMethodCallHandler((MethodCall call) async {
-    if (call.method == 'success') {
-      completer.complete(true);
-    }
-  });
-  ServicesBinding.instance.initializationComplete();
-  return completer.future;
-}

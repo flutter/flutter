@@ -60,8 +60,6 @@ void main() async {
       return (converted == expected)
         ? 'success'
         : 'error: conversion of UTF16 string to UTF8 failed, expected "${expected.codeUnits}" but got "${converted.codeUnits}"';
-    } else if (message == 'verifyEnableApplicationLifecycle') {
-      return await testCanEnableApplicationLifecycle() ? 'success' : 'failure';
     }
 
     throw 'Unrecognized message: $message';
