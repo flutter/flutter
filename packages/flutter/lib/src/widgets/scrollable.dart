@@ -28,6 +28,7 @@ import 'scrollable_helpers.dart';
 import 'selectable_region.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 import 'viewport.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
@@ -531,6 +532,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   TickerProvider get vsync => this;
 
   @override
+  double get devicePixelRatio => _devicePixelRatio;
+  late double _devicePixelRatio;
+
+  @override
   BuildContext? get notificationContext => _gestureDetectorKey.currentContext;
 
   @override
@@ -596,6 +601,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void didChangeDependencies() {
     _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    _devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -980,7 +986,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
+    properties.add(DiagnosticsProperty<ScrollPosition>('position', _position));
     properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
   }
 }
