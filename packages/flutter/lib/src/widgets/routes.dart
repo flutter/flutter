@@ -190,6 +190,8 @@ abstract class TransitionRoute extends OverlayRoute {
     return _controller!.view;
   }
 
+  Object? _result;
+
   void _handleStatusChanged(AnimationStatus status) {
     switch (status) {
       case AnimationStatus.completed:
@@ -260,6 +262,7 @@ abstract class TransitionRoute extends OverlayRoute {
   bool didPop(dynamic result) {
     assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
+    _result = result;
     _controller!.reverse();
     return super.didPop(result);
   }
