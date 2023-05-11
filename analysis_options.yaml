@@ -42,7 +42,7 @@ linter:
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
     # - avoid_catching_errors # blocked on https://github.com/dart-lang/linter/issues/3023
-    # avoid_classes_with_only_static_members # # we do this commonly for `abstract final class`es
+    # - avoid_classes_with_only_static_members # we do this commonly for `abstract final class`es
     - avoid_double_and_int_checks
     - avoid_dynamic_calls
     - avoid_empty_else
@@ -93,6 +93,7 @@ linter:
     - dangling_library_doc_comments
     - depend_on_referenced_packages
     - deprecated_consistency
+    # - deprecated_member_use_from_same_package # we allow self-references to deprecated members
     # - diagnostic_describe_all_properties # enabled only at the framework level (packages/flutter/lib)
     - directives_ordering
     # - discarded_futures # too many false positives, similar to unawaited_futures
@@ -107,6 +108,7 @@ linter:
     - hash_and_equals
     - implementation_imports
     - implicit_call_tearoffs
+    - implicit_reopen
     - invalid_case_patterns
     - iterable_contains_unrelated_type
     # - join_return_with_assignment # not required by flutter style
@@ -118,12 +120,14 @@ linter:
     # - lines_longer_than_80_chars # not required by flutter style
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/linter/issues/453
+    # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
     - no_duplicate_case_values
     - no_leading_underscores_for_library_prefixes
     - no_leading_underscores_for_local_identifiers
+    # - no_literal_bool_comparisons # needs quick fix, https://github.com/dart-lang/linter/issues/4333
     - no_logic_in_create_state
     # - no_runtimeType_toString # ok in tests; we enable this only in packages/
     - non_constant_identifier_names
@@ -194,6 +198,7 @@ linter:
     - tighten_type_of_initializing_formals
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
+    - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works
     - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
