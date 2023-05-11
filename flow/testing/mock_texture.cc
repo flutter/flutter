@@ -9,27 +9,41 @@
 namespace flutter {
 namespace testing {
 
-MockTexture::MockTexture(int64_t textureId) : Texture(textureId) {}
+sk_sp<DlImage> MockTexture::MakeTestTexture(int w, int h, int checker_size) {
+  sk_sp<SkSurface> surface = SkSurface::MakeRasterN32Premul(w, h);
+  SkCanvas* canvas = surface->getCanvas();
+  SkPaint p0, p1;
+  p0.setStyle(SkPaint::kFill_Style);
+  p0.setColor(SK_ColorGREEN);
+  p1.setStyle(SkPaint::kFill_Style);
+  p1.setColor(SK_ColorBLUE);
+  p1.setAlpha(128);
+  for (int y = 0; y < w; y += checker_size) {
+    for (int x = 0; x < h; x += checker_size) {
+      SkPaint& cellp = ((x + y) & 1) == 0 ? p0 : p1;
+      canvas->drawRect(SkRect::MakeXYWH(x, y, checker_size, checker_size),
+                       cellp);
+    }
+  }
+  return DlImage::Make(surface->makeImageSnapshot());
+}
+
+MockTexture::MockTexture(int64_t textureId, const sk_sp<DlImage>& texture)
+    : Texture(textureId), texture_(texture) {}
 
 void MockTexture::Paint(PaintContext& context,
                         const SkRect& bounds,
                         bool freeze,
                         const DlImageSampling sampling) {
-  paint_calls_.emplace_back(PaintCall{*(context.canvas), bounds, freeze,
-                                      context.gr_context, sampling,
-                                      context.paint});
-}
-
-bool operator==(const MockTexture::PaintCall& a,
-                const MockTexture::PaintCall& b) {
-  return &a.canvas == &b.canvas && a.bounds == b.bounds &&
-         a.context == b.context && a.freeze == b.freeze &&
-         a.sampling == b.sampling && a.paint == b.paint;
-}
-
-std::ostream& operator<<(std::ostream& os, const MockTexture::PaintCall& data) {
-  return os << &data.canvas << " " << data.bounds << " " << data.context << " "
-            << data.freeze << " " << data.sampling << " " << data.paint;
+  // MockTexture objects that are not painted are allowed to have a null
+  // texture, but when we get to this method we must have a non-null texture.
+  FML_DCHECK(texture_ != nullptr);
+  SkRect src = SkRect::Make(texture_->bounds());
+  if (freeze) {
+    FML_DCHECK(src.width() > 2.0f && src.height() > 2.0f);
+    src = src.makeInset(1.0f, 1.0f);
+  }
+  context.canvas->DrawImageRect(texture_, src, bounds, sampling, context.paint);
 }
 
 }  // namespace testing

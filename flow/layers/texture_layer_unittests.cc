@@ -9,7 +9,7 @@
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/flow/testing/mock_texture.h"
 #include "flutter/fml/macros.h"
-#include "flutter/testing/mock_canvas.h"
+#include "flutter/testing/display_list_testing.h"
 
 namespace flutter {
 namespace testing {
@@ -28,8 +28,8 @@ TEST_F(TextureLayerTest, InvalidTexture) {
                  .makeOffset(layer_offset.fX, layer_offset.fY)));
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
+  layer->Paint(display_list_paint_context());
+  EXPECT_TRUE(display_list()->Equals(DisplayList()));
 }
 
 #ifndef NDEBUG
@@ -72,8 +72,11 @@ TEST_F(TextureLayerTest, PaintBeforePrerollDies) {
 TEST_F(TextureLayerTest, PaintingWithLinearSampling) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const SkRect layer_bounds =
+      SkRect::MakeSize(layer_size).makeOffset(layer_offset.fX, layer_offset.fY);
   const int64_t texture_id = 0;
-  auto mock_texture = std::make_shared<MockTexture>(texture_id);
+  const auto texture_image = MockTexture::MakeTestTexture(20, 20, 5);
+  auto mock_texture = std::make_shared<MockTexture>(texture_id, texture_image);
   auto layer = std::make_shared<TextureLayer>(
       layer_offset, layer_size, texture_id, false, DlImageSampling::kLinear);
 
@@ -81,17 +84,16 @@ TEST_F(TextureLayerTest, PaintingWithLinearSampling) {
   preroll_context()->texture_registry->RegisterTexture(mock_texture);
 
   layer->Preroll(preroll_context());
-  EXPECT_EQ(layer->paint_bounds(),
-            (SkRect::MakeSize(layer_size)
-                 .makeOffset(layer_offset.fX, layer_offset.fY)));
+  EXPECT_EQ(layer->paint_bounds(), layer_bounds);
   EXPECT_TRUE(layer->needs_painting(paint_context()));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(mock_texture->paint_calls(),
-            std::vector({MockTexture::PaintCall{
-                mock_canvas(), layer->paint_bounds(), false, nullptr,
-                DlImageSampling::kLinear}}));
-  EXPECT_EQ(mock_canvas().draw_calls(), std::vector<MockCanvas::DrawCall>());
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (Texture)layer::Paint */ {
+    expected_builder.DrawImageRect(texture_image, layer_bounds,
+                                   DlImageSampling::kLinear);
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 using TextureLayerDiffTest = DiffContextTest;
@@ -118,24 +120,50 @@ TEST_F(TextureLayerDiffTest, TextureInRetainedLayer) {
 TEST_F(TextureLayerTest, OpacityInheritance) {
   const SkPoint layer_offset = SkPoint::Make(0.0f, 0.0f);
   const SkSize layer_size = SkSize::Make(8.0f, 8.0f);
+  const SkRect layer_bounds =
+      SkRect::MakeSize(layer_size).makeOffset(layer_offset.fX, layer_offset.fY);
   const int64_t texture_id = 0;
-  auto mock_texture = std::make_shared<MockTexture>(texture_id);
-  auto layer = std::make_shared<TextureLayer>(
+  const auto texture_image = MockTexture::MakeTestTexture(20, 20, 5);
+  auto mock_texture = std::make_shared<MockTexture>(texture_id, texture_image);
+  SkAlpha alpha = 0x7f;
+  auto texture_layer = std::make_shared<TextureLayer>(
       layer_offset, layer_size, texture_id, false, DlImageSampling::kLinear);
+  auto layer = std::make_shared<OpacityLayer>(alpha, SkPoint::Make(0.0f, 0.0f));
+  layer->Add(texture_layer);
 
   // Ensure the texture is located by the Layer.
-  preroll_context()->texture_registry->RegisterTexture(mock_texture);
-
-  // The texture layer always reports opacity compatibility.
   PrerollContext* context = preroll_context();
   context->texture_registry->RegisterTexture(mock_texture);
+
+  // The texture layer always reports opacity compatibility.
+  texture_layer->Preroll(context);
+  EXPECT_EQ(context->renderable_state_flags,
+            LayerStateStack::kCallerCanApplyOpacity);
+
+  // Reset has_texture_layer since it is not supposed to be sent as we
+  // descend a tree in Preroll, but it was set by the previous test.
+  context->has_texture_layer = false;
   layer->Preroll(context);
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
 
-  // MockTexture has no actual textur to render into the
-  // PaintContext canvas so we have no way to verify its
-  // rendering.
+  DlPaint texture_paint;
+  texture_paint.setAlpha(alpha);
+
+  layer->Paint(display_list_paint_context());
+  DisplayListBuilder expected_builder;
+  /* (Opacity)layer::Paint */ {
+    expected_builder.Save();
+    {
+      /* texture_layer::Paint */ {
+        expected_builder.DrawImageRect(texture_image, layer_bounds,
+                                       DlImageSampling::kLinear,
+                                       &texture_paint);
+      }
+    }
+    expected_builder.Restore();
+  }
+  EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
 }
 
 }  // namespace testing
