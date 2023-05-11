@@ -2625,6 +2625,8 @@ class BuildOwner {
   bool _debugBuilding = false;
   Element? _debugCurrentBuildTarget;
 
+  static bool staticDebugBuilding = false;
+
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
   /// calls the given `callback`.
   ///
@@ -2685,6 +2687,7 @@ class BuildOwner {
       }
       _debugStateLockLevel += 1;
       _debugBuilding = true;
+      staticDebugBuilding = true;
       return true;
     }());
     if (!kReleaseMode) {
@@ -2837,6 +2840,7 @@ class BuildOwner {
       assert(_debugBuilding);
       assert(() {
         _debugBuilding = false;
+        staticDebugBuilding = false;
         _debugStateLockLevel -= 1;
         if (debugPrintBuildScope) {
           debugPrint('buildScope finished');
