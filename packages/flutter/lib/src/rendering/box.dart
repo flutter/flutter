@@ -2538,6 +2538,7 @@ abstract class RenderBox extends RenderObject {
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     assert(child.parent == this);
     assert(() {
       if (child.parentData is! BoxParentData) {

@@ -3117,7 +3117,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// the parent must return `false` from [paintsChild].
   void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
-    assert(BuildOwner.staticDebugBuilding == false); // HACK ASSERT!
+    sanityCheckNotBuilding();
+  }
+
+  void sanityCheckNotBuilding() {
+    assert(!BuildOwner.staticDebugBuilding); // HACK ASSERT!
   }
 
   /// Whether the given child would be painted if [paint] were called.

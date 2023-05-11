@@ -1776,6 +1776,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     // child is always at our origin
   }
 

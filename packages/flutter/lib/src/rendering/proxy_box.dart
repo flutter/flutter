@@ -138,7 +138,9 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) { }
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    sanityCheckNotBuilding();
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -2606,6 +2608,7 @@ class RenderTransform extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     transform.multiply(_effectiveTransform!);
   }
 
@@ -2888,6 +2891,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     if (!paintsChild(child)) {
       transform.setZero();
     } else {
@@ -2984,6 +2988,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     transform.translate(
       translation.dx * size.width,
       translation.dy * size.height,
@@ -5000,6 +5005,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     transform.multiply(getCurrentTransform());
   }
 

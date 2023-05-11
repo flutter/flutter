@@ -2083,6 +2083,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+sanityCheckNotBuilding();
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);

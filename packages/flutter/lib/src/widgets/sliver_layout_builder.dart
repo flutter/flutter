@@ -52,6 +52,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     assert(child == this.child);
     // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }

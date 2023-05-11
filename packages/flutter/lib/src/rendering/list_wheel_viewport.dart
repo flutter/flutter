@@ -1088,6 +1088,7 @@ class RenderListWheelViewport
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
     final Matrix4? paintTransform = parentData.transform;
     assert(_debugAssertValidPaintTransform(parentData));

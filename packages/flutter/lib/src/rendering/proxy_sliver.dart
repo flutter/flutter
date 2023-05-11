@@ -81,6 +81,7 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }

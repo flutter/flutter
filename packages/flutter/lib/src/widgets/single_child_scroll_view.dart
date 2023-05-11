@@ -561,6 +561,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    sanityCheckNotBuilding();
     final Offset paintOffset = _paintOffset;
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
