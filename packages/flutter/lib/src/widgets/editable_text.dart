@@ -5097,6 +5097,7 @@ class _CodePointBoundary extends TextBoundary {
   // Returns true if the given position falls in the middle of a single code
   // point in _text.
   bool _breaksCodePoint(int position) {
+    assert(position > 0 && position < _text.length && _text.length > 1);
     // A string containing the two code units that surround the given position.
     final String surroundingCodeUnits = _text.substring(
       position - 1,
@@ -5115,6 +5116,10 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getLeadingTextBoundaryAt(int position) {
+    if (position > _text.length) {
+      // Nonsense.
+      return null;
+    }
     if (position < 0) {
       return null;
     }
@@ -5130,14 +5135,21 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getTrailingTextBoundaryAt(int position) {
+    if (position < 0) {
+      // Nonsense.
+      return null;
+    }
     if (position >= _text.length) {
       return null;
+    }
+    if (position == _text.length - 1) {
+      return _text.length;
     }
     if (_text.length <= 1) {
       return position;
     }
 
-    return _breaksCodePoint(position) ? position + 1 : position;
+    return _breaksCodePoint(position + 1) ? position + 2 : position + 1;
   }
 }
 
