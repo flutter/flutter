@@ -159,6 +159,10 @@ void main() {
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.12));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.08));
+    expect(m3.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered, MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m3.todayForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
     expect(m3.todayForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}), colorScheme.primary.withOpacity(0.38));
     expect(m3.todayBorder, BorderSide(color: colorScheme.primary));
@@ -224,6 +228,8 @@ void main() {
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered}), colorScheme.onPrimary.withOpacity(0.08));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.12));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
+    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.focused}), colorScheme.onPrimary.withOpacity(0.08));
+    expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.selected, MaterialState.hovered, MaterialState.pressed}), colorScheme.onPrimary.withOpacity(0.38));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.hovered}), colorScheme.onSurfaceVariant.withOpacity(0.08));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.focused}), colorScheme.onSurfaceVariant.withOpacity(0.12));
     expect(m2.dayOverlayColor?.resolve(<MaterialState>{MaterialState.pressed}), colorScheme.onSurfaceVariant.withOpacity(0.12));
