@@ -1519,6 +1519,34 @@ void main() {
     );
   });
 
+  testWidgets('DraggableScrollableSheet will not expand on focus by default', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/101114
+    const Key stackKey = ValueKey<String>('stack');
+    const Key containerKey = ValueKey<String>('container');
+    final FocusNode focusNode = FocusNode();
+    final DraggableScrollableController controller = DraggableScrollableController();
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      controller: controller,
+      stackKey: stackKey,
+      containerKey: containerKey,
+      itemCount: 1,
+      itemBuilder: (BuildContext context, int index) {
+        return Focus(focusNode: focusNode, child: Container());
+      },
+    ));
+    await tester.pumpAndSettle();
+    final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byKey(containerKey)).height / screenHeight,
+      closeTo(.5, precisionErrorTolerance),
+    );
+  });
+
+
   testWidgets('DraggableScrollableSheet should respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/121021
     final DraggableScrollableController controller = DraggableScrollableController();
