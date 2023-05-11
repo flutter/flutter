@@ -1117,23 +1117,23 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurfaceVariant.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurfaceVariant.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurfaceVariant.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSurfaceVariant.withOpacity(0.12);
       }
       return Colors.transparent;
@@ -1254,34 +1254,34 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.12);
-        }
       }
       if (toggleable) { // toggleable but unselected case
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onPrimary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onPrimary.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onPrimary.withOpacity(0.12);
       }
       return Colors.transparent;
@@ -1402,34 +1402,34 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSecondaryContainer.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSecondaryContainer.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onSecondaryContainer.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSecondaryContainer.withOpacity(0.12);
-        }
       }
       if (toggleable) { // toggleable but unselected case
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSecondaryContainer.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSecondaryContainer.withOpacity(0.12);
       }
       return Colors.transparent;
@@ -1546,24 +1546,24 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
  @override
   MaterialStateProperty<Color?>? get overlayColor =>    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onInverseSurface.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onInverseSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onInverseSurface.withOpacity(0.08);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onInverseSurface.withOpacity(0.12);
-        }
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurfaceVariant.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
         return _colors.onSurfaceVariant.withOpacity(0.08);
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.12);
       }
       return Colors.transparent;
     });
