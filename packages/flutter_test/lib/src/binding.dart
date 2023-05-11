@@ -422,6 +422,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [LiveTestWidgetsFlutterBinding] (tests running using `flutter run`).
   test_package.Timeout get defaultTestTimeout;
 
+  /// Is async tasks being run.
+  bool get runningAsyncTasks;
+
   /// The current time.
   ///
   /// In the automated test environment (`flutter test`), this is a fake clock
@@ -1201,6 +1204,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Completer<void>? _pendingAsyncTasks;
 
   @override
+  bool get runningAsyncTasks => _pendingAsyncTasks != null;
+
+  @override
   Clock get clock {
     assert(inTest);
     return _clock!;
@@ -1700,6 +1706,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   bool _expectingFrameToReassemble = false;
   bool _viewNeedsPaint = false;
   bool _runningAsyncTasks = false;
+
+  @override
+  bool get runningAsyncTasks => _runningAsyncTasks;
 
   /// The strategy for [pump]ing and requesting new frames.
   ///
