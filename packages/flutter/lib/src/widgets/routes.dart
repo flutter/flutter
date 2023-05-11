@@ -1689,10 +1689,6 @@ abstract class ModalRoute extends TransitionRoute with LocalHistoryRoute {
   String toString() => '${objectRuntimeType(this, 'ModalRoute')}($settings, animation: $_animation)';
 }
 
-class ResultRoute<T> {
-  T? _result;
-}
-
 /// A modal route that overlays a widget over the current route.
 ///
 /// {@macro flutter.widgets.ModalRoute.barrierDismissible}
@@ -1707,7 +1703,7 @@ class ResultRoute<T> {
 ///
 ///   * [ModalRoute], which is the base class for this class.
 ///   * [Navigator.pop], which is used to dismiss the route.
-abstract class PopupRoute<T> extends ModalRoute with ResultRoute<T> {
+abstract class PopupRoute extends ModalRoute {
   /// Initializes the [PopupRoute].
   PopupRoute({
     super.settings,
@@ -2091,7 +2087,7 @@ class RawDialogRoute extends PopupRoute {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-Future<void> showGeneralDialog({
+Future<T> showGeneralDialog<T>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,
   bool barrierDismissible = false,
@@ -2115,7 +2111,7 @@ Future<void> showGeneralDialog({
     transitionBuilder: transitionBuilder,
     settings: routeSettings,
     anchorPoint: anchorPoint,
-  ));
+  )) as Future<T>;
 }
 
 /// Signature for the function that builds a route's primary contents.
