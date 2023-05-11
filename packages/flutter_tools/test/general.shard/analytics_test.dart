@@ -389,8 +389,6 @@ class FakeDoctor extends Fake implements Doctor {
   }
 }
 
-class FakeAndroidStudio extends Fake implements AndroidStudio {}
-
 class FakeClock extends Fake implements SystemClock {
   List<int> times = <int>[];
 

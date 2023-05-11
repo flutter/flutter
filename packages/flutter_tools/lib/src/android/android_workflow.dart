@@ -11,7 +11,6 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/user_messages.dart' hide userMessages;
 import '../base/version.dart';
@@ -20,6 +19,7 @@ import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
+import 'java.dart';
 
 const int kAndroidSdkMinVersion = 29;
 final Version kAndroidJavaMinVersion = Version(1, 8, 0);
@@ -86,12 +86,6 @@ class AndroidValidator extends DoctorValidator {
        _androidStudio = androidStudio,
        _fileSystem = fileSystem,
        _logger = logger,
-       _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
        _platform = platform,
        _processManager = processManager,
        _userMessages = userMessages,
@@ -101,7 +95,6 @@ class AndroidValidator extends DoctorValidator {
   final AndroidStudio? _androidStudio;
   final FileSystem _fileSystem;
   final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final ProcessManager _processManager;
   final UserMessages _userMessages;
@@ -138,6 +131,8 @@ class AndroidValidator extends DoctorValidator {
       }
       String? javaVersionText;
       try {
+        // TODO(andrewkolos): Use Java class to find version instead of using duplicate
+        // code. See https://github.com/flutter/flutter/issues/124252.
         _logger.printTrace('java -version');
         final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
         if (result.exitCode == 0) {
@@ -240,12 +235,13 @@ class AndroidValidator extends DoctorValidator {
 
     _task = 'Finding Java binary';
     // Now check for the JDK.
-    final String? javaBinary = AndroidSdk.findJavaBinary(
+    final String? javaBinary = Java.find(
+      logger: _logger,
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
-      operatingSystemUtils: _operatingSystemUtils,
       platform: _platform,
-    );
+      processManager: _processManager,
+    )?.binaryPath;
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
@@ -266,18 +262,18 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
+    required Java? java,
     required AndroidSdk? androidSdk,
     required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
     required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
     required AndroidStudio? androidStudio,
     required Stdio stdio,
     required UserMessages userMessages,
-  }) : _androidSdk = androidSdk,
+  }) : _java = java,
+       _androidSdk = androidSdk,
        _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
@@ -286,10 +282,10 @@ class AndroidLicenseValidator extends DoctorValidator {
        _userMessages = userMessages,
        super('Android license subvalidator');
 
+  final Java? _java;
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
   final Stdio _stdio;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessManager _processManager;
@@ -330,12 +326,13 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String? javaBinary = AndroidSdk.findJavaBinary(
+    final String? javaBinary = Java.find(
+      logger: _logger,
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,
-      operatingSystemUtils: _operatingSystemUtils,
       platform: _platform,
-    );
+      processManager: _processManager,
+    )?.binaryPath;
     if (javaBinary == null) {
       return false;
     }
@@ -387,7 +384,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     try {
       final Process process = await _processManager.start(
         <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
-        environment: _androidSdk!.sdkManagerEnv,
+        environment: _java?.environment,
       );
       process.stdin.write('n\n');
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -427,7 +424,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     try {
       final Process process = await _processManager.start(
         <String>[_androidSdk!.sdkManagerPath!, '--licenses'],
-        environment: _androidSdk!.sdkManagerEnv,
+        environment: _java?.environment,
       );
 
       // The real stdin will never finish streaming. Pipe until the child process

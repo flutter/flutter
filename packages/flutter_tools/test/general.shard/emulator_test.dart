@@ -67,6 +67,7 @@ void main() {
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -89,6 +90,7 @@ void main() {
     testUsingContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -109,6 +111,7 @@ void main() {
 
     testWithoutContext('getEmulatorsById', () async {
       final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators,
+        java: FakeJava(),
         logger: BufferLogger.test(),
         processManager: fakeProcessManager,
         androidWorkflow: AndroidWorkflow(
@@ -129,6 +132,7 @@ void main() {
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -152,6 +156,7 @@ void main() {
     // iOS discovery uses context.
     testUsingContext('create emulator with an empty name does not fail', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -191,6 +196,7 @@ void main() {
 
     testWithoutContext('create emulator with a unique name does not throw', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -227,6 +233,7 @@ void main() {
 
     testWithoutContext('create emulator with an existing name errors', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -266,6 +273,7 @@ void main() {
     // iOS discovery uses context.
     testUsingContext('create emulator without a name but when default exists adds a suffix', () async {
       final EmulatorManager emulatorManager = EmulatorManager(
+        java: FakeJava(),
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -342,6 +350,7 @@ void main() {
 
 class TestEmulatorManager extends EmulatorManager {
   TestEmulatorManager(this.allEmulators, {
+    required super.java,
     required super.logger,
     required super.processManager,
     required super.androidWorkflow,
@@ -393,7 +402,4 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   String getAvdPath() => 'avd';
-
-  @override
-  Map<String, String> get sdkManagerEnv => <String, String>{};
 }
