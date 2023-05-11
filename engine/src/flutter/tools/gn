@@ -1116,6 +1116,14 @@ def parse_args(args):
   # Verbose output.
   parser.add_argument('--verbose', default=False, action='store_true')
 
+  parser.add_argument(
+      '--gn-args',
+      action='append',
+      help='Additional gn args to be passed to gn. If you '
+      'need to use this, it should probably be another switch '
+      'in //flutter/tools/gn.',
+  )
+
   return parser.parse_args(args)
 
 
@@ -1171,6 +1179,7 @@ def main(argv):
   command.append('--export-compile-commands=default')
 
   gn_args = to_command_line(to_gn_args(args))
+  gn_args.extend(args.gn_args or [])
   out_dir = get_out_dir(args)
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
