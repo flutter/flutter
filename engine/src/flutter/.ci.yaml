@@ -304,6 +304,7 @@ targets:
     properties:
       release_build: "true"
       config_name: linux_license
+      clobber: "true"
 
   - name: Linux linux_web_engine
     recipe: engine_v2/engine_v2
