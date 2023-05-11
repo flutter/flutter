@@ -69,7 +69,6 @@ class SkwasmFontCollection implements FlutterFontCollection {
   @override
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest) async {
     final List<Future<void>> fontFutures = <Future<void>>[];
-    final List<String> loadedFonts = <String>[];
     final Map<String, FontLoadError> fontFailures = <String, FontLoadError>{};
 
     /// We need a default fallback font for Skwasm, in order to avoid crashing
@@ -81,13 +80,13 @@ class SkwasmFontCollection implements FlutterFontCollection {
       );
     }
 
+    final List<String> loadedFonts = <String>[];
     for (final FontFamily family in manifest.families) {
       for (final FontAsset fontAsset in family.fontAssets) {
+        loadedFonts.add(fontAsset.asset);
         fontFutures.add(() async {
           final FontLoadError? error = await _downloadFontAsset(fontAsset, family.name);
-          if (error == null) {
-            loadedFonts.add(fontAsset.asset);
-          } else {
+          if (error != null) {
             fontFailures[fontAsset.asset] = error;
           }
         }());
@@ -95,6 +94,8 @@ class SkwasmFontCollection implements FlutterFontCollection {
     }
 
     await Future.wait(fontFutures);
+
+    loadedFonts.removeWhere((String assetName) => fontFailures.containsKey(assetName));
     return AssetFontsResult(loadedFonts, fontFailures);
   }
 
