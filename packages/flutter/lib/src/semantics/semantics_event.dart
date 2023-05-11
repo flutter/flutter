@@ -160,12 +160,53 @@ class TapSemanticEvent extends SemanticsEvent {
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
 
-/// An event which triggers focus semantic.
+/// An event which to move the accessibility focus.
 ///
 /// This is generally not recommended to use, it may break the consistency of the
 /// accessibiliy focus of the platform.
 ///
-/// Used in android and iOS.
+/// {@tool snippet}
+///
+/// The following code snippet shows how you can request focus on a
+/// certain widget.
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   const MyWidget({super.key});
+///
+///   @override
+///   State<MyWidget> createState() => _MyWidgetState();
+/// }
+///
+/// class _MyWidgetState extends State<MyWidget> {
+///   bool noticeAccepted = false;
+///   final GlobalKey mykey= GlobalKey();
+
+///   @override
+///   void initState() {
+///     super.initState();
+///     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+///       mykey.currentContext?.findRenderObject()?.sendSemanticsEvent(const FocusSemanticEvent());
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: const Text('example'),
+///       ),
+///       body:Column(
+///         children:[
+///           Text('Hello World'),
+///           const SizedBox(height: 50),
+///           Text("set focus here", key: mykey),
+///         ],
+///     ),);
+///   }
+/// }
+/// ```
+/// {@end-tool}
+/// This currently only supports android and iOS..
 class FocusSemanticEvent extends SemanticsEvent {
   /// Constructs an event that triggers a focus change by the platform.
   const FocusSemanticEvent() : super('focus');
