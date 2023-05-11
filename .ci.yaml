@@ -318,6 +318,8 @@ targets:
     recipe: flutter/flutter
     presubmit: false
     timeout: 90 # https://github.com/flutter/flutter/issues/120901
+    dimensions:
+      os: "Linux"
     properties:
       cores: "32"
       dependencies: >-
@@ -4878,6 +4880,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+    dimensions:
+      os: "Linux"
 
   - name: Mac flutter_packaging
     recipe: packaging/packaging
@@ -4893,6 +4897,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     dimensions:
       cpu: "x86"
+      os: "Mac"
 
 
   - name: Mac_arm64 flutter_packaging
@@ -4909,6 +4914,7 @@ targets:
         ["framework", "hostonly", "shard", "mac"]
     dimensions:
       cpu: "arm64"
+      os: "Mac"
 
   - name: Windows flutter_packaging
     recipe: packaging/packaging
@@ -4922,6 +4928,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
+    dimensions:
+      os: "Windows"
 
 
   - name: Linux docs_deploy_beta
@@ -4944,6 +4952,8 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: master-docs-flutter-dev
+    dimensions:
+      os: "Linux"
 
   - name: Linux docs_deploy_stable
     recipe: flutter/flutter
@@ -4965,3 +4975,5 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
+    dimensions:
+      os: "Linux"
