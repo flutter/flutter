@@ -480,6 +480,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
+  /// Like [runAsync], but allow it to be re-enter.
+  Future<T?> runAsyncReentrant<T>(Future<T> Function() callback) {
+    return runningAsyncTasks ? callback() : runAsync(callback);
+  }
+
   /// Artificially calls dispatchLocalesChanged on the Widget binding,
   /// then flushes microtasks.
   ///
