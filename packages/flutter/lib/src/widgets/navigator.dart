@@ -3051,7 +3051,7 @@ class _RouteEntry extends RouteTransitionRecord {
   }
 
   void forcedDispose() {
-    assert(currentState.index < _RouteLifecycle.disposing.index);
+    assert(currentState.index < _RouteLifecycle.disposed.index);
     currentState = _RouteLifecycle.disposed;
     route.dispose();
   }
