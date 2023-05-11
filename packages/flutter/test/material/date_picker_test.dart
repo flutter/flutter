@@ -65,10 +65,11 @@ void main() {
     Future<void> Function(Future<DateTime?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
     bool useMaterial3 = false,
+    ThemeData? theme,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: useMaterial3),
+      theme: theme ?? ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -784,6 +785,38 @@ void main() {
           paints..circle(color: todayColor, style: PaintingStyle.stroke, strokeWidth: 1.0),
         );
       });
+    });
+
+    testWidgets('Date picker dayOverlayColor resolves pressed state', (WidgetTester tester) async {
+      today = DateTime(2023, 5, 4);
+      final ThemeData theme = ThemeData();
+      final bool material3 = theme.useMaterial3;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.pump();
+
+        // Hovered.
+        final Offset center = tester.getCenter(find.text('30'));
+        final TestGesture gesture = await tester.createGesture(
+          kind: PointerDeviceKind.mouse,
+        );
+        await gesture.addPointer();
+        await gesture.moveTo(center);
+        await tester.pumpAndSettle();
+        expect(
+          Material.of(tester.element(find.text('30'))),
+          paints..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.08) : theme.colorScheme.onSurfaceVariant.withOpacity(0.08)),
+        );
+
+        // Highlighted (pressed).
+        await gesture.down(center);
+        await tester.pumpAndSettle();
+        expect(
+          Material.of(tester.element(find.text('30'))),
+          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.12) : theme.colorScheme.onSurfaceVariant.withOpacity(0.12))
+        );
+        await gesture.up();
+        await tester.pumpAndSettle();
+      }, theme: theme);
     });
 
     testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
