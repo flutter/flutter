@@ -149,7 +149,6 @@ void main() {
             backgroundCursorColor: Colors.grey,
             controller: TextEditingController(text: 'blah blah'),
             focusNode: focusNode,
-            readOnly: false,
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
