@@ -372,6 +372,71 @@ TEST(FlTextInputPluginTest, PerformAction) {
   send_key_event(plugin, GDK_KEY_Return);
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/125879.
+TEST(FlTextInputPluginTest, MultilineWithSendAction) {
+  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
+  ::testing::NiceMock<flutter::testing::MockIMContext> context;
+  ::testing::NiceMock<flutter::testing::MockTextInputViewDelegate> delegate;
+
+  g_autoptr(FlTextInputPlugin) plugin =
+      fl_text_input_plugin_new(messenger, context, delegate);
+  EXPECT_NE(plugin, nullptr);
+
+  // Set input config.
+  g_autoptr(FlValue) config = build_input_config({
+      .client_id = 1,
+      .input_type = "TextInputType.multiline",
+      .input_action = "TextInputAction.send",
+  });
+  g_autoptr(FlJsonMethodCodec) codec = fl_json_method_codec_new();
+  g_autoptr(GBytes) set_client = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), "TextInput.setClient", config, nullptr);
+
+  g_autoptr(FlValue) null = fl_value_new_null();
+  EXPECT_CALL(messenger, fl_binary_messenger_send_response(
+                             ::testing::Eq<FlBinaryMessenger*>(messenger),
+                             ::testing::_, SuccessResponse(null), ::testing::_))
+      .WillOnce(::testing::Return(true));
+
+  messenger.ReceiveMessage("flutter/textinput", set_client);
+
+  // Set editing state.
+  g_autoptr(FlValue) state = build_editing_state({
+      .text = "Flutter",
+      .selection_base = 7,
+      .selection_extent = 7,
+  });
+  g_autoptr(GBytes) set_state = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), "TextInput.setEditingState", state, nullptr);
+
+  EXPECT_CALL(messenger, fl_binary_messenger_send_response(
+                             ::testing::Eq<FlBinaryMessenger*>(messenger),
+                             ::testing::_, SuccessResponse(null), ::testing::_))
+      .WillOnce(::testing::Return(true));
+
+  messenger.ReceiveMessage("flutter/textinput", set_state);
+
+  // Perform action.
+  g_autoptr(FlValue) action = build_list({
+      fl_value_new_int(1),  // client_id
+      fl_value_new_string("TextInputAction.send"),
+  });
+
+  // Because the input action is not set to TextInputAction.newline, the next
+  // expected call is "TextInputClient.performAction". If the input action was
+  // set to TextInputAction.newline the next call would be
+  // "TextInputClient.updateEditingState" (this case is tested in the test named
+  // 'PerformAction').
+  EXPECT_CALL(messenger, fl_binary_messenger_send_on_channel(
+                             ::testing::Eq<FlBinaryMessenger*>(messenger),
+                             ::testing::StrEq("flutter/textinput"),
+                             MethodCall("TextInputClient.performAction",
+                                        FlValueEq(action)),
+                             ::testing::_, ::testing::_, ::testing::_));
+
+  send_key_event(plugin, GDK_KEY_Return);
+}
+
 TEST(FlTextInputPluginTest, MoveCursor) {
   ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
   ::testing::NiceMock<flutter::testing::MockIMContext> context;

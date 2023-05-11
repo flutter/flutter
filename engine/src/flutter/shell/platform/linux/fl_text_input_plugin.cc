@@ -47,6 +47,8 @@ static constexpr char kTextAffinityDownstream[] = "TextAffinity.downstream";
 static constexpr char kMultilineInputType[] = "TextInputType.multiline";
 static constexpr char kNoneInputType[] = "TextInputType.none";
 
+static constexpr char kNewlineInputAction[] = "TextInputAction.newline";
+
 static constexpr int64_t kClientIdUnset = -1;
 
 typedef enum {
@@ -642,7 +644,8 @@ static gboolean fl_text_input_plugin_filter_keypress_default(
       case GDK_KEY_Return:
       case GDK_KEY_KP_Enter:
       case GDK_KEY_ISO_Enter:
-        if (priv->input_type == kFlTextInputTypeMultiline) {
+        if (priv->input_type == kFlTextInputTypeMultiline &&
+            strcmp(priv->input_action, kNewlineInputAction) == 0) {
           priv->text_model->AddCodePoint('\n');
           text = "\n";
           changed = TRUE;
