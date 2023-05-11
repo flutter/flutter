@@ -63,23 +63,10 @@ bool FlutterWindow::OnCreate() {
     visible = true;
   });
 
-  auto messenger = flutter_controller_->engine()->messenger();
-
   // Create a method channel to check the window's visibility.
   flutter::MethodChannel<> channel(
-      messenger, "tests.flutter.dev/windows_startup_test",
+      flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",
       &flutter::StandardMethodCodec::GetInstance());
-
-  messenger->SetMessageHandler("flutter/platform", [=](const uint8_t* message, size_t message_size, flutter::BinaryReply reply){
-    std::string call(message, message + message_size);
-    constexpr char needle[] = "\"method\":\"System.initializationComplete\"";
-    if (call.find(needle) != std::string::npos) {
-      constexpr char rep_method[] = "{\"method\":\"success\",\"args\":null}";
-      size_t len = strlen(rep_method);
-      messenger->Send("flutter/platform", reinterpret_cast<const uint8_t*>(rep_method), len);
-    }
-    reply(reinterpret_cast<const uint8_t*>(""), 0);
-  });
 
   channel.SetMethodCallHandler(
     [&](const flutter::MethodCall<>& call,
