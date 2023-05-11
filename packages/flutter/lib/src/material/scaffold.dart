@@ -547,7 +547,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     _accessibleNavigation = mediaQuery.accessibleNavigation;
 
     if (_snackBars.isNotEmpty) {
-      final ModalRoute<dynamic>? route = ModalRoute.of(context);
+      final ModalRoute? route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;

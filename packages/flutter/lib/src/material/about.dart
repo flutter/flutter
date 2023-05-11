@@ -229,7 +229,7 @@ void showLicensePage({
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
-  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
+  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
@@ -1163,7 +1163,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   Widget _nestedUI(BuildContext context) {
     _builtLayout = _LayoutMode.nested;
-    final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
+    final MaterialPageRoute masterPageRoute = _masterPageRoute(context);
 
     return WillPopScope(
       // Push pop check into nested navigator.
@@ -1202,8 +1202,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     );
   }
 
-  MaterialPageRoute<void> _masterPageRoute(BuildContext context) {
-    return MaterialPageRoute<dynamic>(
+  MaterialPageRoute _masterPageRoute(BuildContext context) {
+    return MaterialPageRoute(
       builder: (BuildContext c) => BlockSemantics(
         child: _MasterPage(
                 leading: widget.automaticallyImplyLeading && Navigator.of(context).canPop()
@@ -1217,8 +1217,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     );
   }
 
-  MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
-    return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+  MaterialPageRoute _detailPageRoute(Object? arguments) {
+    return MaterialPageRoute(builder: (BuildContext context) {
       return WillPopScope(
         onWillPop: () async {
           // No need for setState() as rebuild happens on navigation pop.
@@ -1392,7 +1392,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               builder: (BuildContext context, Object? value, Widget? child) {
                 return AnimatedSwitcher(
                   transitionBuilder: (Widget child, Animation<double> animation) =>
-                    const FadeUpwardsPageTransitionsBuilder().buildTransitions<void>(
+                    const FadeUpwardsPageTransitionsBuilder().buildTransitions(
                       null,
                       null,
                       animation,

@@ -18,7 +18,7 @@ void main() {
             onPressed: () {
               Navigator.push(
                 context,
-                CupertinoPageRoute<void>(builder: (BuildContext context) {
+                CupertinoPageRoute(builder: (BuildContext context) {
                   return const Hero(tag: 'a', child: Text('foo'));
                 }),
               );
@@ -89,8 +89,8 @@ void main() {
         navigatorKey: navigatorKey,
         onGenerateInitialRoutes: (String initialRoute) {
           expect(initialRoute, '/abc');
-          return <Route<void>>[
-            PageRouteBuilder<void>(
+          return <Route>[
+            PageRouteBuilder(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
@@ -99,7 +99,7 @@ void main() {
                 return const Text('non-regular page one');
               },
             ),
-            PageRouteBuilder<void>(
+            PageRouteBuilder(
               pageBuilder: (
                 BuildContext context,
                 Animation<double> animation,
@@ -155,7 +155,7 @@ void main() {
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location!);
       },
-      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+      onPopPage: (Route route, dynamic result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
@@ -181,7 +181,7 @@ void main() {
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location!);
       },
-      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+      onPopPage: (Route route, dynamic result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
@@ -206,7 +206,7 @@ void main() {
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location!);
       },
-      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+      onPopPage: (Route route, dynamic result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
@@ -231,7 +231,7 @@ void main() {
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.location!);
       },
-      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+      onPopPage: (Route route, dynamic result, SimpleNavigatorRouterDelegate delegate) {
         delegate.routeInformation = const RouteInformation(
           location: 'popped',
         );
@@ -259,7 +259,7 @@ void main() {
           builder: (BuildContext context, RouteInformation information) {
             return Text(information.location!);
           },
-          onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+          onPopPage: (Route route, dynamic result, SimpleNavigatorRouterDelegate delegate) {
             delegate.routeInformation = const RouteInformation(
               location: 'popped',
             );
@@ -342,7 +342,7 @@ class MockScrollBehavior extends ScrollBehavior {
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
-typedef SimpleNavigatorRouterDelegatePopPage<T> = bool Function(Route<T> route, T result, SimpleNavigatorRouterDelegate delegate);
+typedef SimpleNavigatorRouterDelegatePopPage = bool Function(Route route, dynamic result, SimpleNavigatorRouterDelegate delegate);
 
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
@@ -375,15 +375,15 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
   }
 
   SimpleRouterDelegateBuilder builder;
-  SimpleNavigatorRouterDelegatePopPage<void>? onPopPage;
+  SimpleNavigatorRouterDelegatePopPage? onPopPage;
 
   @override
   Future<void> setNewRoutePath(RouteInformation configuration) {
     _routeInformation = configuration;
-    return SynchronousFuture<void>(null);
+    return SynchronousFuture(null);
   }
 
-  bool _handlePopPage(Route<void> route, void data) {
+  bool _handlePopPage(Route route, dynamic data) {
     return onPopPage!(route, data, this);
   }
 
@@ -392,13 +392,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
     return Navigator(
       key: navigatorKey,
       onPopPage: _handlePopPage,
-      pages: <Page<void>>[
+      pages: <Page>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const CupertinoPage<void>(
+        const CupertinoPage(
           child:  Text('base'),
         ),
-        CupertinoPage<void>(
+        CupertinoPage(
           key: ValueKey<String?>(routeInformation.location),
           child: builder(context, routeInformation),
         ),

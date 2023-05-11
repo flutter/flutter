@@ -264,7 +264,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         return widget.previewBuilder!(context, animation, widget.child);
       },
     );
-    Navigator.of(context, rootNavigator: true).push<void>(_route!);
+    Navigator.of(context, rootNavigator: true).push(_route!);
     _route!.animation!.addStatusListener(_routeAnimationStatusListener);
   }
 
@@ -696,7 +696,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  bool didPop(T? result) {
+  bool didPop(dynamic result) {
     _updateTweenRects();
     return super.didPop(result);
   }

@@ -4051,7 +4051,7 @@ void main() {
                   ),
                   Expanded(
                     child: Navigator(
-                      onGenerateRoute: (_) => CupertinoPageRoute<void>(
+                      onGenerateRoute: (_) => CupertinoPageRoute(
                         builder: (_) => CupertinoTextField(
                           controller: controller,
                         ),

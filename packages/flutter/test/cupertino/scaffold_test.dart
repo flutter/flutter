@@ -322,7 +322,7 @@ void main() {
                       child: const Text('Next'),
                       onPressed: () {
                         Navigator.of(context).push(
-                          CupertinoPageRoute<void>(
+                          CupertinoPageRoute(
                             builder: (BuildContext context) {
                               return CupertinoPageScaffold(
                                 navigationBar: CupertinoNavigationBar(

@@ -67,9 +67,9 @@ Future<T?> showSearch<T>({
   assert(useRootNavigator != null);
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute(
     delegate: delegate,
-  ));
+  )) as Future<T?>;
 }
 
 /// Delegate for [showSearch] to define the content of the search page.
@@ -310,7 +310,7 @@ abstract class SearchDelegate<T> {
     _currentBody = null;
     _focusNode?.unfocus();
     Navigator.of(context)
-      ..popUntil((Route<dynamic> route) => route == _route)
+      ..popUntil((Route route) => route == _route)
       ..pop(result);
   }
 
@@ -369,7 +369,7 @@ abstract class SearchDelegate<T> {
     _currentBodyNotifier.value = value;
   }
 
-  _SearchPageRoute<T>? _route;
+  _SearchPageRoute? _route;
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
@@ -386,7 +386,7 @@ enum _SearchBody {
   results,
 }
 
-class _SearchPageRoute<T> extends PageRoute<T> {
+class _SearchPageRoute extends PageRoute {
   _SearchPageRoute({
     required this.delegate,
   }) : assert(delegate != null) {
@@ -399,7 +399,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
     delegate._route = this;
   }
 
-  final SearchDelegate<T> delegate;
+  final SearchDelegate delegate;
 
   @override
   Color? get barrierColor => null;
@@ -439,15 +439,15 @@ class _SearchPageRoute<T> extends PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return _SearchPage<T>(
+    return _SearchPage(
       delegate: delegate,
       animation: animation,
     );
   }
 
   @override
-  void didComplete() {
-    super.didComplete();
+  void didComplete(dynamic result) {
+    super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
     delegate._currentBody = null;

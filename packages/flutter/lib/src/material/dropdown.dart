@@ -1315,12 +1315,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     );
 
     focusNode?.requestFocus();
-    navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
+    navigator.push(_dropdownRoute!).then<void>((Object? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null) {
         return;
       }
-      widget.onChanged?.call(newValue.result);
+      widget.onChanged?.call((newValue as _DropdownRouteResult<T>).result);
     });
 
     widget.onTap?.call();

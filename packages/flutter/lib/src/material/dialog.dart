@@ -1164,7 +1164,7 @@ Future<T?> showDialog<T>({
     ).context,
   );
 
-  return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(DialogRoute(
     context: context,
     builder: builder,
     barrierColor: barrierColor,
@@ -1174,7 +1174,7 @@ Future<T?> showDialog<T>({
     settings: routeSettings,
     themes: themes,
     anchorPoint: anchorPoint,
-  ));
+  )) as Future<T>;
 }
 
 bool _debugIsActive(BuildContext context) {
@@ -1238,7 +1238,7 @@ bool _debugIsActive(BuildContext context) {
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-class DialogRoute<T> extends RawDialogRoute<T> {
+class DialogRoute extends RawDialogRoute {
   /// A dialog route with Material entrance and exit animations,
   /// modal barrier color, and modal barrier behavior (dialog is dismissible
   /// with a tap on the barrier).

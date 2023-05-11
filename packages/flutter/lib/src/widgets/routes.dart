@@ -68,8 +68,8 @@ abstract class OverlayRoute extends Route {
   bool get finishedWhenPopped => true;
 
   @override
-  bool didPop() {
-    final bool returnValue = super.didPop();
+  bool didPop(dynamic result) {
+    final bool returnValue = super.didPop(result);
     assert(returnValue);
     if (finishedWhenPopped) {
       navigator!.finalizeRoute(this);
@@ -257,11 +257,11 @@ abstract class TransitionRoute extends OverlayRoute {
   }
 
   @override
-  bool didPop() {
+  bool didPop(dynamic result) {
     assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _controller!.reverse();
-    return super.didPop();
+    return super.didPop(result);
   }
 
   @override
@@ -678,7 +678,7 @@ mixin LocalHistoryRoute on Route {
   }
 
   @override
-  bool didPop() {
+  bool didPop(dynamic result) {
     if (_localHistory != null && _localHistory!.isNotEmpty) {
       final LocalHistoryEntry entry = _localHistory!.removeLast();
       assert(entry._owner == this);
@@ -694,7 +694,7 @@ mixin LocalHistoryRoute on Route {
       }
       return false;
     }
-    return super.didPop();
+    return super.didPop(result);
   }
 
   @override
@@ -1689,15 +1689,8 @@ abstract class ModalRoute extends TransitionRoute with LocalHistoryRoute {
   String toString() => '${objectRuntimeType(this, 'ModalRoute')}($settings, animation: $_animation)';
 }
 
-mixin ResultRouteMixin<T> {
+class ResultRoute<T> {
   T? _result;
-
-  T? get result => _result;
-
-  set result(T? newValue) {
-    assert(_result == null, 'Result should only be set once.');
-    _result = result;
-  }
 }
 
 /// A modal route that overlays a widget over the current route.
@@ -1714,7 +1707,7 @@ mixin ResultRouteMixin<T> {
 ///
 ///   * [ModalRoute], which is the base class for this class.
 ///   * [Navigator.pop], which is used to dismiss the route.
-abstract class PopupRoute<T> extends ModalRoute with ResultRouteMixin<T> {
+abstract class PopupRoute<T> extends ModalRoute with ResultRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
     super.settings,

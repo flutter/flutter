@@ -29,7 +29,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -59,7 +59,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -124,7 +124,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -139,7 +139,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         title: 'A Phone',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -170,7 +170,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -185,7 +185,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         title: 'A Phone',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -212,7 +212,7 @@ void main() {
       ),
     );
 
-    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute route2 = CupertinoPageRoute(
       title: 'An iPod',
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
@@ -222,7 +222,7 @@ void main() {
       },
     );
 
-    final CupertinoPageRoute<void> route3 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute route3 = CupertinoPageRoute(
       title: 'A Phone',
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
@@ -244,7 +244,7 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).replace(
       oldRoute: route2,
-      newRoute: CupertinoPageRoute<void>(
+      newRoute: CupertinoPageRoute(
         title: 'An Internet communicator',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -279,7 +279,7 @@ void main() {
           child: Center(
             child: CupertinoButton(
               onPressed: () {
-                Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+                Navigator.push(scaffoldKey.currentContext!, CupertinoPageRoute(
                   builder: (BuildContext context) {
                     return const CupertinoPageScaffold(
                       child: Center(child: Text('route')),
@@ -357,7 +357,7 @@ void main() {
     // Use the navigator to push a route instead of tapping the 'push' button.
     // The topmost route (the one that's animating away), ignores input while
     // the pop is underway because route.navigator.userGestureInProgress.
-    Navigator.push<void>(scaffoldKey.currentContext!, CupertinoPageRoute<void>(
+    Navigator.push(scaffoldKey.currentContext!, CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
           child: Center(child: Text('route')),
@@ -382,7 +382,7 @@ void main() {
             return CupertinoButton(
               child: const Text('Button'),
               onPressed: () {
-                Navigator.push<void>(context, CupertinoPageRoute<void>(
+                Navigator.push(context, CupertinoPageRoute(
                   fullscreenDialog: true,
                   builder: (BuildContext context) {
                     return Column(
@@ -391,7 +391,7 @@ void main() {
                         CupertinoButton(
                           child: const Text('Close'),
                           onPressed: () {
-                            Navigator.pop<void>(context);
+                            Navigator.pop(context);
                           },
                         ),
                       ],
@@ -477,10 +477,10 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dy, moreOrLessEquals(600.0, epsilon: 0.1));
   });
 
-  Future<void> testParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
+  Future testParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async {
     await tester.pumpWidget(
       CupertinoApp(
-        onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+        onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute(
           fullscreenDialog: fromFullscreenDialog,
           settings: settings,
           builder: (BuildContext context) {
@@ -490,12 +490,12 @@ void main() {
                 CupertinoButton(
                   child: const Text('Button'),
                   onPressed: () {
-                    Navigator.push<void>(context, CupertinoPageRoute<void>(
+                    Navigator.push(context, CupertinoPageRoute(
                       builder: (BuildContext context) {
                         return CupertinoButton(
                           child: const Text('Close'),
                           onPressed: () {
-                            Navigator.pop<void>(context);
+                            Navigator.pop(context);
                           },
                         );
                       },
@@ -569,7 +569,7 @@ void main() {
   Future<void> testNoParallax(WidgetTester tester, {required bool fromFullscreenDialog}) async{
     await tester.pumpWidget(
       CupertinoApp(
-        onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+        onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute(
           fullscreenDialog: fromFullscreenDialog,
           builder: (BuildContext context) {
             return Column(
@@ -578,13 +578,13 @@ void main() {
                 CupertinoButton(
                   child: const Text('Button'),
                   onPressed: () {
-                    Navigator.push<void>(context, CupertinoPageRoute<void>(
+                    Navigator.push(context, CupertinoPageRoute(
                       fullscreenDialog: true,
                       builder: (BuildContext context) {
                         return CupertinoButton(
                           child: const Text('Close'),
                           onPressed: () {
-                            Navigator.pop<void>(context);
+                            Navigator.pop(context);
                           },
                         );
                       },
@@ -662,7 +662,7 @@ void main() {
       ),
     );
 
-    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute route2 = CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
           child: Text('2'),
@@ -714,7 +714,7 @@ void main() {
       ),
     );
 
-    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute route2 = CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
           child: Text('2'),
@@ -760,7 +760,7 @@ void main() {
       ),
     );
 
-    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute route2 = CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
           child: Text('2'),
@@ -810,7 +810,7 @@ void main() {
       ),
     );
 
-    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+    final CupertinoPageRoute route2 = CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
           child: Text('2'),
@@ -859,7 +859,7 @@ void main() {
       CupertinoApp(
         navigatorObservers: <NavigatorObserver>[navigatorObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -896,7 +896,7 @@ void main() {
       CupertinoApp(
         navigatorObservers: <NavigatorObserver>[navigatorObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -941,8 +941,8 @@ void main() {
   });
 
   group('Cupertino page transitions', () {
-    CupertinoPageRoute<void> buildRoute({required bool fullscreenDialog}) {
-      return CupertinoPageRoute<void>(
+    CupertinoPageRoute buildRoute({required bool fullscreenDialog}) {
+      return CupertinoPageRoute(
         fullscreenDialog: fullscreenDialog,
         builder: (_) => const SizedBox(),
       );
@@ -1208,7 +1208,7 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 0);
 
-    Navigator.push<void>(homeScaffoldKey.currentContext!, CupertinoPageRoute<void>(
+    Navigator.push(homeScaffoldKey.currentContext!, CupertinoPageRoute(
       builder: (BuildContext context) {
         return CupertinoPageScaffold(
           key: pageScaffoldKey,
@@ -1255,7 +1255,7 @@ void main() {
       home: Navigator(
         observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1358,7 +1358,7 @@ void main() {
       home: Navigator(
         observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1392,7 +1392,7 @@ void main() {
       home: Navigator(
         observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1425,7 +1425,7 @@ void main() {
       home: Navigator(
         observers: <NavigatorObserver>[nestedObserver],
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1456,7 +1456,7 @@ void main() {
     await tester.pumpWidget(CupertinoApp(
       home: Navigator(
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1490,7 +1490,7 @@ void main() {
     await tester.pumpWidget(CupertinoApp(
       home: Navigator(
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1526,7 +1526,7 @@ void main() {
       navigatorObservers: <NavigatorObserver>[routeSettingsObserver],
       home: Navigator(
         onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
+          return PageRouteBuilder(
             pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
               return GestureDetector(
                 onTap: () async {
@@ -1686,8 +1686,8 @@ void main() {
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      CupertinoPage<void>(
+    List<Page> myPages = <Page>[
+      CupertinoPage(
         key: pageKey,
         title: 'title one',
         child: CupertinoPageScaffold(
@@ -1699,7 +1699,7 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) {
+        onPopPage: (Route route, dynamic result) {
           assert(false); // The test shouldn't call this.
           return true;
         },
@@ -1711,8 +1711,8 @@ void main() {
     expect(find.widgetWithText(CupertinoNavigationBar, 'title one'), findsOneWidget);
     expect(find.text('first'), findsOneWidget);
 
-    myPages = <Page<void>>[
-      CupertinoPage<void>(
+    myPages = <Page>[
+      CupertinoPage(
         key: pageKey,
         title: 'title two',
         child: CupertinoPageScaffold(
@@ -1725,7 +1725,7 @@ void main() {
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) {
+        onPopPage: (Route route, dynamic result) {
           assert(false); // The test shouldn't call this.
           return true;
         },
@@ -1746,14 +1746,14 @@ void main() {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
+    List<Page> myPages = <Page>[
+      CupertinoPage(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      CupertinoPage(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) {
+        onPopPage: (Route route, dynamic result) {
           assert(false); // The test shouldn't call this.
           return true;
         },
@@ -1766,15 +1766,15 @@ void main() {
     expect(find.text('first', skipOffstage: false), findsNothing);
     expect(find.text('second'), findsOneWidget);
 
-    myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, child: const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
+    myPages = <Page>[
+      CupertinoPage(key: pageKeyOne, child: const Text('first')),
+      CupertinoPage(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
       buildNavigator(
         pages: myPages,
-        onPopPage: (Route<dynamic> route, dynamic result) {
+        onPopPage: (Route route, dynamic result) {
           assert(false); // The test shouldn't call this.
           return true;
         },
@@ -1811,7 +1811,7 @@ void main() {
   testWidgets('Popping routes during back swipe should not crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63984#issuecomment-675679939
 
-    final CupertinoPageRoute<void> r = CupertinoPageRoute<void>(builder: (BuildContext context) {
+    final CupertinoPageRoute r = CupertinoPageRoute(builder: (BuildContext context) {
       return const Scaffold(
         body: Center(
           child: Text('child'),
@@ -1829,7 +1829,7 @@ void main() {
             onPressed: () {
               navigator = Navigator.of(context);
               assert(navigator != null);
-              navigator.push<void>(r);
+              navigator.push(r);
             },
           );
         }),
@@ -2128,17 +2128,17 @@ class MockNavigatorObserver extends NavigatorObserver {
   final List<NavigatorInvocation> invocations = <NavigatorInvocation>[];
 
   @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didStartUserGesture(Route route, Route? previousRoute) {
     invocations.add(NavigatorInvocation.didStartUserGesture);
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPop(Route route, Route? previousRoute) {
     invocations.add(NavigatorInvocation.didPop);
   }
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route route, Route? previousRoute) {
     invocations.add(NavigatorInvocation.didPush);
   }
 
@@ -2159,7 +2159,7 @@ class PopupObserver extends NavigatorObserver {
   int popupCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route route, Route? previousRoute) {
     if (route is CupertinoModalPopupRoute) {
       popupCount++;
     }
@@ -2171,7 +2171,7 @@ class DialogObserver extends NavigatorObserver {
   int dialogCount = 0;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route route, Route? previousRoute) {
     if (route is CupertinoDialogRoute) {
       dialogCount++;
     }
@@ -2183,7 +2183,7 @@ class RouteSettingsObserver extends NavigatorObserver {
   String? routeName;
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didPush(Route route, Route? previousRoute) {
     if (route is CupertinoModalPopupRoute) {
       routeName = route.settings.name;
     }
@@ -2191,7 +2191,7 @@ class RouteSettingsObserver extends NavigatorObserver {
   }
 }
 
-class TransitionDetector extends DefaultTransitionDelegate<void> {
+class TransitionDetector extends DefaultTransitionDelegate {
   bool hasTransition = false;
   @override
   Iterable<RouteTransitionRecord> resolve({
@@ -2209,10 +2209,10 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 }
 
 Widget buildNavigator({
-  required List<Page<dynamic>> pages,
+  required List<Page> pages,
   PopPageCallback? onPopPage,
   GlobalKey<NavigatorState>? key,
-  TransitionDelegate<dynamic>? transitionDelegate,
+  TransitionDelegate? transitionDelegate,
 }) {
   return MediaQuery(
     data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
@@ -2228,7 +2228,7 @@ Widget buildNavigator({
           key: key,
           pages: pages,
           onPopPage: onPopPage,
-          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate<dynamic>(),
+          transitionDelegate: transitionDelegate ?? const DefaultTransitionDelegate(),
         ),
       ),
     ),
@@ -2263,7 +2263,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
     return Center(
       child: CupertinoButton(
         child: Text('PointerCancelEvents: $counter'),
-        onPressed: () => Navigator.pushNamed<void>(context, 'sub'),
+        onPressed: () => Navigator.pushNamed(context, 'sub'),
       ),
     );
   }
@@ -2291,7 +2291,7 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
     return CupertinoApp(
       initialRoute: 'home',
       onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute<void>(
+        return CupertinoPageRoute(
           settings: settings,
           builder: (BuildContext context) {
             switch (settings.name) {
@@ -2312,8 +2312,8 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
 class _RestorableModalTestWidget extends StatelessWidget {
   const _RestorableModalTestWidget();
 
-  static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
-    return CupertinoModalPopupRoute<void>(
+  static Route _modalBuilder(BuildContext context, Object? arguments) {
+    return CupertinoModalPopupRoute(
       builder: (BuildContext context) {
         return CupertinoActionSheet(
           title: const Text('Title'),

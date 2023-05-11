@@ -145,7 +145,7 @@ void main() {
                 height: 500,
                 child: Navigator(
                   onGenerateRoute: (RouteSettings settings) {
-                    return CupertinoPageRoute<void>(
+                    return CupertinoPageRoute(
                       builder: (BuildContext context) => Align(
                         child: CupertinoContextMenu(
                           actions: const <CupertinoContextMenuAction>[

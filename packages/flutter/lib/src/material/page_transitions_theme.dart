@@ -397,8 +397,8 @@ abstract class PageTransitionsBuilder {
   /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
   /// and delegates to this method with a [PageTransitionsBuilder] based
   /// on the theme's [ThemeData.platform].
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
+  Widget buildTransitions(
+    PageRoute route,
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
@@ -426,8 +426,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   const FadeUpwardsPageTransitionsBuilder();
 
   @override
-  Widget buildTransitions<T>(
-    PageRoute<T>? route,
+  Widget buildTransitions(
+    PageRoute? route,
     BuildContext? context,
     Animation<double> animation,
     Animation<double>? secondaryAnimation,
@@ -455,8 +455,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   const OpenUpwardsPageTransitionsBuilder();
 
   @override
-  Widget buildTransitions<T>(
-    PageRoute<T>? route,
+  Widget buildTransitions(
+    PageRoute? route,
     BuildContext? context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
@@ -488,8 +488,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   const ZoomPageTransitionsBuilder();
 
   @override
-  Widget buildTransitions<T>(
-    PageRoute<T>? route,
+  Widget buildTransitions(
+    PageRoute? route,
     BuildContext? context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
@@ -519,14 +519,14 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const CupertinoPageTransitionsBuilder();
 
   @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
+  Widget buildTransitions(
+    PageRoute route,
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return CupertinoRouteTransitionMixin.buildPageTransitions<T>(route, context, animation, secondaryAnimation, child);
+    return CupertinoRouteTransitionMixin.buildPageTransitions(route, context, animation, secondaryAnimation, child);
   }
 }
 
@@ -575,8 +575,8 @@ class PageTransitionsTheme with Diagnosticable {
   /// or [ZoomPageTransitionsBuilder].
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to this method.
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
+  Widget buildTransitions(
+    PageRoute route,
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
@@ -590,7 +590,7 @@ class PageTransitionsTheme with Diagnosticable {
 
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
-    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+    return matchingBuilder.buildTransitions(route, context, animation, secondaryAnimation, child);
   }
 
   // Just used to the builders Map to a list with one PageTransitionsBuilder per platform

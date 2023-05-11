@@ -361,7 +361,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   }) : assert(isScrollControlled != null),
        assert(enableDrag != null);
 
-  final _ModalBottomSheetRoute<T>? route;
+  final _ModalBottomSheetRoute? route;
   final bool isScrollControlled;
   final Color? backgroundColor;
   final double? elevation;
@@ -453,7 +453,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 }
 
-class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
+class _ModalBottomSheetRoute extends PopupRoute {
   _ModalBottomSheetRoute({
     this.builder,
     required this.capturedThemes,
@@ -529,7 +529,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         child: Builder(
           builder: (BuildContext context) {
             final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
-            return _ModalBottomSheet<T>(
+            return _ModalBottomSheet(
               route: this,
               backgroundColor: backgroundColor ?? sheetTheme.modalBackgroundColor ?? sheetTheme.backgroundColor,
               elevation: elevation ?? sheetTheme.modalElevation ?? sheetTheme.elevation,
@@ -704,7 +704,7 @@ Future<T?> showModalBottomSheet<T>({
   assert(debugCheckHasMaterialLocalizations(context));
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
-  return navigator.push(_ModalBottomSheetRoute<T>(
+  return navigator.push(_ModalBottomSheetRoute(
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
@@ -720,7 +720,7 @@ Future<T?> showModalBottomSheet<T>({
     settings: routeSettings,
     transitionAnimationController: transitionAnimationController,
     anchorPoint: anchorPoint,
-  ));
+  )) as Future<T>;
 }
 
 /// Shows a Material Design bottom sheet in the nearest [Scaffold] ancestor. If

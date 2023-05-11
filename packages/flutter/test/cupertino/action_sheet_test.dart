@@ -1123,7 +1123,7 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
       child: Builder(builder: (BuildContext context) {
         return CupertinoButton(
           onPressed: () {
-            showCupertinoModalPopup<void>(
+            showCupertinoModalPopup(
               context: context,
               builder: (BuildContext context) {
                 return actionSheet;

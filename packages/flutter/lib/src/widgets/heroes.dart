@@ -317,7 +317,7 @@ class Hero extends StatefulWidget {
           // the Hero is inside a nested Navigator and should only be
           // considered for animation if it is part of the top-most route in
           // that nested Navigator and if that route is also a PageRoute.
-          final ModalRoute<Object?>? heroRoute = ModalRoute.of(hero);
+          final ModalRoute? heroRoute = ModalRoute.of(hero);
           if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
             inviteHero(hero, tag);
           }
@@ -451,8 +451,8 @@ class _HeroFlightManifest {
   final HeroFlightDirection type;
   final OverlayState overlay;
   final Size navigatorSize;
-  final PageRoute<dynamic> fromRoute;
-  final PageRoute<dynamic> toRoute;
+  final PageRoute fromRoute;
+  final PageRoute toRoute;
   final _HeroState fromHero;
   final _HeroState toHero;
   final CreateRectTween? createRectTween;
@@ -863,9 +863,9 @@ class HeroController extends NavigatorObserver {
     HeroFlightDirection flightType,
     bool isUserGestureTransition,
   ) {
-    if (toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {
-      final PageRoute<dynamic> from = fromRoute;
-      final PageRoute<dynamic> to = toRoute;
+    if (toRoute != fromRoute && toRoute is PageRoute && fromRoute is PageRoute) {
+      final PageRoute from = fromRoute;
+      final PageRoute to = toRoute;
 
       // A user gesture may have already completed the pop, or we might be the initial route
       switch (flightType) {
@@ -905,8 +905,8 @@ class HeroController extends NavigatorObserver {
   // Find the matching pairs of heroes in from and to and either start or a new
   // hero flight, or divert an existing one.
   void _startHeroTransition(
-    PageRoute<dynamic> from,
-    PageRoute<dynamic> to,
+    PageRoute from,
+    PageRoute to,
     HeroFlightDirection flightType,
     bool isUserGestureTransition,
   ) {

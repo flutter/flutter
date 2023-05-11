@@ -184,7 +184,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
       routeBuilder = widget.routes![name];
     }
     if (routeBuilder != null) {
-      return CupertinoPageRoute<dynamic>(
+      return CupertinoPageRoute(
         builder: routeBuilder,
         title: title,
         settings: settings,

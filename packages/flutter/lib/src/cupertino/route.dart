@@ -1176,7 +1176,7 @@ class CupertinoModalPopupRoute extends PopupRoute {
 ///  * [CupertinoActionSheet], which is the widget usually returned by the
 ///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-Future<void> showCupertinoModalPopup({
+Future<T?> showCupertinoModalPopup<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   ImageFilter? filter,
@@ -1198,7 +1198,7 @@ Future<void> showCupertinoModalPopup({
       settings: routeSettings,
       anchorPoint: anchorPoint,
     ),
-  );
+  ) as Future<T?>;
 }
 
 // The curve and initial scale values were mostly eyeballed from iOS, however
@@ -1283,7 +1283,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-Future<T?> showCupertinoDialog({
+Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   String? barrierLabel,
@@ -1303,7 +1303,7 @@ Future<T?> showCupertinoDialog({
     barrierColor: CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
     settings: routeSettings,
     anchorPoint: anchorPoint,
-  ));
+  )) as Future<T?>;
 }
 
 /// A dialog route that shows an iOS-style dialog.

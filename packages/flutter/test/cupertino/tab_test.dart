@@ -64,7 +64,7 @@ void main() {
         home: CupertinoTabView(
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == Navigator.defaultRouteName) {
-              return CupertinoPageRoute<void>(
+              return CupertinoPageRoute(
                 settings: settings,
                 builder: (BuildContext context) {
                   return const Text('generated home');

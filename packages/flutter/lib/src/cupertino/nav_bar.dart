@@ -174,7 +174,7 @@ Widget _wrapWithBackground({
 
 // Whether the current route supports nav bar hero transitions from or to.
 bool _isTransitionable(BuildContext context) {
-  final ModalRoute<dynamic>? route = ModalRoute.of(context);
+  final ModalRoute? route = ModalRoute.of(context);
 
   // Fullscreen dialogs never transitions their nav bar with other push-style
   // pages' nav bars or with other fullscreen dialog pages on the way in or on
@@ -1019,7 +1019,7 @@ class _NavigationBarStaticComponentsKeys {
 class _NavigationBarStaticComponents {
   _NavigationBarStaticComponents({
     required _NavigationBarStaticComponentsKeys keys,
-    required ModalRoute<dynamic>? route,
+    required ModalRoute? route,
     required Widget? userLeading,
     required bool automaticallyImplyLeading,
     required bool automaticallyImplyTitle,
@@ -1072,7 +1072,7 @@ class _NavigationBarStaticComponents {
 
   static Widget? _derivedTitle({
     required bool automaticallyImplyTitle,
-    ModalRoute<dynamic>? currentRoute,
+    ModalRoute? currentRoute,
   }) {
     // Auto use the CupertinoPageRoute's title if middle not provided.
     if (automaticallyImplyTitle &&
@@ -1088,7 +1088,7 @@ class _NavigationBarStaticComponents {
   static KeyedSubtree? createLeading({
     required GlobalKey leadingKey,
     required Widget? userLeading,
-    required ModalRoute<dynamic>? route,
+    required ModalRoute? route,
     required bool automaticallyImplyLeading,
     required EdgeInsetsDirectional? padding,
   }) {
@@ -1133,7 +1133,7 @@ class _NavigationBarStaticComponents {
   static KeyedSubtree? createBackChevron({
     required GlobalKey backChevronKey,
     required Widget? userLeading,
-    required ModalRoute<dynamic>? route,
+    required ModalRoute? route,
     required bool automaticallyImplyLeading,
   }) {
     if (
@@ -1155,7 +1155,7 @@ class _NavigationBarStaticComponents {
   static KeyedSubtree? createBackLabel({
     required GlobalKey backLabelKey,
     required Widget? userLeading,
-    required ModalRoute<dynamic>? route,
+    required ModalRoute? route,
     required bool automaticallyImplyLeading,
     required String? previousPageTitle,
   }) {
@@ -1187,7 +1187,7 @@ class _NavigationBarStaticComponents {
     required Widget? userLargeTitle,
     required bool large,
     required bool automaticallyImplyTitle,
-    required ModalRoute<dynamic>? route,
+    required ModalRoute? route,
   }) {
     Widget? middleContent = userMiddle;
 
@@ -1244,7 +1244,7 @@ class _NavigationBarStaticComponents {
     required Widget? userLargeTitle,
     required bool large,
     required bool automaticImplyTitle,
-    required ModalRoute<dynamic>? route,
+    required ModalRoute? route,
   }) {
     if (!large) {
       return null;
@@ -1330,7 +1330,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
+    final ModalRoute? currentRoute = ModalRoute.of(context);
     if (onPressed == null) {
       assert(
         currentRoute?.canPop ?? false,
@@ -1434,7 +1434,7 @@ class _BackLabel extends StatelessWidget {
   });
 
   final String? specifiedPreviousTitle;
-  final ModalRoute<dynamic>? route;
+  final ModalRoute? route;
 
   // `child` is never passed in into ValueListenableBuilder so it's always
   // null here and unused.
@@ -1464,8 +1464,8 @@ class _BackLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
-    } else if (route is CupertinoRouteTransitionMixin<dynamic> && !route!.isFirst) {
-      final CupertinoRouteTransitionMixin<dynamic> cupertinoRoute = route! as CupertinoRouteTransitionMixin<dynamic>;
+    } else if (route is CupertinoRouteTransitionMixin && !route!.isFirst) {
+      final CupertinoRouteTransitionMixin cupertinoRoute = route! as CupertinoRouteTransitionMixin;
       // There is no timing issue because the previousTitle Listenable changes
       // happen during route modifications before the ValueListenableBuilder
       // is built.

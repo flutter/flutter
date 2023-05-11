@@ -37,7 +37,7 @@ Future<void> startTransitionBetween(
 
   tester
       .state<NavigatorState>(find.byType(Navigator))
-      .push(CupertinoPageRoute<void>(
+      .push(CupertinoPageRoute(
         title: fromTitle,
         builder: (BuildContext context) => scaffoldForNavBar(from)!,
       ));
@@ -47,7 +47,7 @@ Future<void> startTransitionBetween(
 
   tester
       .state<NavigatorState>(find.byType(Navigator))
-      .push(CupertinoPageRoute<void>(
+      .push(CupertinoPageRoute(
         title: toTitle,
         builder: (BuildContext context) => scaffoldForNavBar(to)!,
       ));
@@ -293,7 +293,7 @@ void main() {
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute(
           title: 'Page 1',
           builder: (BuildContext context) => scaffoldForNavBar(null)!,
         ));
@@ -303,7 +303,7 @@ void main() {
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute(
           title: 'Page 2',
           fullscreenDialog: true,
           builder: (BuildContext context) => scaffoldForNavBar(null)!,
@@ -470,7 +470,7 @@ void main() {
                     child: CupertinoButton(
                       child: const Text('Next'),
                       onPressed: () {
-                        Navigator.push<void>(context, CupertinoPageRoute<void>(
+                        Navigator.push(context, CupertinoPageRoute(
                           title: 'Tab ${tab + 1} Page 2',
                           builder: (BuildContext context) {
                             return const CupertinoPageScaffold(
@@ -606,7 +606,7 @@ void main() {
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute(
           title: 'Page 1',
           builder: (BuildContext context) => scaffoldForNavBar(null)!,
         ));
@@ -645,7 +645,7 @@ void main() {
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute(
           title: 'Page 1',
           builder: (BuildContext context) => scaffoldForNavBar(null)!,
         ));
@@ -795,7 +795,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute(
           title: 'Page 3',
           builder: (BuildContext context) => scaffoldForNavBar(null)!,
         ));
@@ -832,7 +832,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute(
           title: 'Page 3',
           builder: (BuildContext context) => scaffoldForNavBar(null)!,
         ));

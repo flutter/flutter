@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -86,7 +86,7 @@ void main() {
           RtlOverrideWidgetsDelegate(),
         ],
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -159,7 +159,7 @@ void main() {
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute(
       builder: (BuildContext context) {
         return const Center(child: Text('Page 2'));
       },
@@ -214,7 +214,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -285,7 +285,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) => const Center(child: Text('Page 1')),
       ),
     );
@@ -294,7 +294,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) => const Center(child: Text('Page 2')),
       ),
     );
@@ -332,7 +332,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) => const Center(child: Text('Page 1')),
       ),
     );
@@ -341,7 +341,7 @@ void main() {
     await tester.pumpAndSettle();
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) => const Center(child: Text('Page 2')),
       ),
     );
@@ -370,7 +370,7 @@ void main() {
           RtlOverrideWidgetsDelegate(),
         ],
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -432,7 +432,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -485,16 +485,16 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Navigator(
-              onPopPage: (Route<dynamic> route, dynamic result) { return false; },
-              pages: const <Page<Object?>>[
-                CupertinoPage<void>(
+              onPopPage: (Route route, dynamic result) { return false; },
+              pages: const <Page>[
+                CupertinoPage(
                   restorationId: 'p1',
                   child: TestRestorableWidget(restorationId: 'p1'),
                 ),
               ],
               restorationScopeId: 'nav',
               onGenerateRoute: (RouteSettings settings) {
-                return CupertinoPageRoute<void>(
+                return CupertinoPageRoute(
                   settings: settings,
                   builder: (BuildContext context) {
                     return TestRestorableWidget(restorationId: settings.name!);
@@ -572,11 +572,11 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
     return CupertinoApp(
       home: Navigator(
         key: widget.navigatorKey,
-        pages: <Page<void>>[
-          const CupertinoPage<void>(child: Text('home')),
-          if (_subpage != null) CupertinoPage<void>(child: Text(_subpage!)),
+        pages: <Page>[
+          const CupertinoPage(child: Text('home')),
+          if (_subpage != null) CupertinoPage(child: Text(_subpage!)),
         ],
-        onPopPage: (Route<dynamic> route, dynamic result) {
+        onPopPage: (Route route, dynamic result) {
           if (!route.didPop(result)) {
             return false;
           }

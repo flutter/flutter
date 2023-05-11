@@ -43,7 +43,7 @@ void main() {
       ),
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
           middle: Text('Page 2'),
@@ -110,7 +110,7 @@ void main() {
         ),
       ),
     );
-    navigator.currentState!.push<void>(CupertinoPageRoute<void>(
+    navigator.currentState!.push(CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
           middle: Text('Page 2'),
@@ -607,7 +607,7 @@ void main() {
 
     expect(find.byType(CupertinoButton), findsNothing);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
           middle: Text('Page 2'),
@@ -621,7 +621,7 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute(
       fullscreenDialog: true,
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
@@ -659,7 +659,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
@@ -677,7 +677,7 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, '012345678901'), findsOneWidget);
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
@@ -962,7 +962,7 @@ void main() {
       WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -982,7 +982,7 @@ void main() {
       WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
+          return CupertinoPageRoute(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -1047,7 +1047,7 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
+        CupertinoPageRoute(
           title: 'An iPod',
           builder: (BuildContext context) {
             return const CupertinoPageScaffold(
@@ -1062,7 +1062,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
+        CupertinoPageRoute(
           title: 'A Phone',
           builder: (BuildContext context) {
             return const CupertinoNavigationBarBackButton();
@@ -1088,7 +1088,7 @@ void main() {
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
+        CupertinoPageRoute(
           title: 'An iPod',
           builder: (BuildContext context) {
             return const CupertinoPageScaffold(
@@ -1103,7 +1103,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(
-        CupertinoPageRoute<void>(
+        CupertinoPageRoute(
           title: 'A Phone',
           builder: (BuildContext context) {
             return CupertinoPageScaffold(
@@ -1179,7 +1179,7 @@ void main() {
     expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
 
     // Also works with implicitly added widgets.
-    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute(
       title: 'title',
       builder: (BuildContext context) {
         return MediaQuery(
@@ -1335,7 +1335,7 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      CupertinoPageRoute<void>(
+      CupertinoPageRoute(
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
