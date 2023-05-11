@@ -31,29 +31,29 @@ public class LifecycleChannelTest {
     lifecycleChannel.appIsResumed();
     ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     verify(mockChannel, times(1)).send(stringArgumentCaptor.capture());
-    assertEquals("AppLifecycleState.inactive", stringArgumentCaptor.getValue());
-
-    lifecycleChannel.aWindowIsFocused();
-    stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockChannel, times(2)).send(stringArgumentCaptor.capture());
     assertEquals("AppLifecycleState.resumed", stringArgumentCaptor.getValue());
 
     lifecycleChannel.noWindowsAreFocused();
     stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockChannel, times(3)).send(stringArgumentCaptor.capture());
+    verify(mockChannel, times(2)).send(stringArgumentCaptor.capture());
     assertEquals("AppLifecycleState.inactive", stringArgumentCaptor.getValue());
-
-    // Stays inactive, so no event is sent.
-    lifecycleChannel.appIsInactive();
-    verify(mockChannel, times(3)).send(any(String.class));
-
-    // Stays inactive, so no event is sent.
-    lifecycleChannel.appIsResumed();
-    verify(mockChannel, times(3)).send(any(String.class));
 
     lifecycleChannel.aWindowIsFocused();
     stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockChannel, times(4)).send(stringArgumentCaptor.capture());
+    verify(mockChannel, times(3)).send(stringArgumentCaptor.capture());
+    assertEquals("AppLifecycleState.resumed", stringArgumentCaptor.getValue());
+
+    // Stays inactive, so no event is sent.
+    lifecycleChannel.appIsInactive();
+    verify(mockChannel, times(4)).send(any(String.class));
+
+    // Stays inactive, so no event is sent.
+    lifecycleChannel.appIsResumed();
+    verify(mockChannel, times(5)).send(any(String.class));
+
+    lifecycleChannel.aWindowIsFocused();
+    stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockChannel, times(5)).send(stringArgumentCaptor.capture());
     assertEquals("AppLifecycleState.resumed", stringArgumentCaptor.getValue());
   }
 
