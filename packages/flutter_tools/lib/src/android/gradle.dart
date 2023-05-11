@@ -147,7 +147,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       _platform = platform;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -157,6 +158,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
+  final Platform _platform;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -266,7 +268,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       AndroidStudioJavaGradleConflictMigration(_logger,
           project: project.android,
           androidStudio: _androidStudio,
-          java: globals.java)
+          fileSystem: _fileSystem,
+          processUtils: _processUtils,
+          platform: _platform,
+          os: globals.os,
+          androidSdk: globals.androidSdk)
       ,
     ];
 
@@ -422,7 +428,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
-      final String? javaHome = globals.java?.javaHome;
+      final String? javaHome = globals.androidSdk?.javaHome;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -692,7 +698,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.java?.javaHome;
+      final String? javaHome = globals.androidSdk?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
@@ -745,7 +751,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.java?.javaHome;
+      final String? javaHome = globals.androidSdk?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
