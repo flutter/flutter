@@ -1,4 +1,4 @@
-Signature: 3931987c8847e0b901bf372320eb0e5c
+Signature: 20ca15bc638816ba30bd18f95a6c22de
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9004,6 +9004,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/DispatchGroup.cpp + .
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/DispatchGroup.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.h + ../../../third_party/skia/LICENSE
@@ -9112,6 +9114,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/compute/DispatchGroup.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/DispatchGroup.h
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.h
+FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/EdgeAAQuad.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorPool.h
