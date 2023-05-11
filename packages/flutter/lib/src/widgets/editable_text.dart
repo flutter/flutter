@@ -2672,7 +2672,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_shouldCreateInputConnection) {
       _closeInputConnectionIfNeeded();
     } else if (oldWidget.readOnly && _hasFocus) {
-      // We have to wait because of #126324
+      // _openInputConnection must be called after layout information is available.
+      // See https://github.com/flutter/flutter/issues/126312
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         _openInputConnection();
       });
@@ -3136,6 +3137,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// default.
   bool get _needsAutofill => _effectiveAutofillClient.textInputConfiguration.autofillConfiguration.enabled;
 
+  // Must be called after layout.
+  // See https://github.com/flutter/flutter/issues/126312
   void _openInputConnection() {
     if (!_shouldCreateInputConnection) {
       return;
@@ -3789,6 +3792,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _updateSizeAndTransform();
   }
 
+  // Must be called after layout.
+  // See https://github.com/flutter/flutter/issues/126312
   void _updateSizeAndTransform() {
     final Size size = renderEditable.size;
     final Matrix4 transform = renderEditable.getTransformTo(null);

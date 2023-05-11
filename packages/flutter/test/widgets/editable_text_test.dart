@@ -118,6 +118,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
 
@@ -139,7 +140,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
-    // This pump will throw before https://github.com/flutter/flutter/pull/126324 is fixed
+    // Reparent the EditableText, so that the parent has not yet been laid
+    // out when didUpdateWidget is called.
     await tester.pumpWidget(
       MaterialApp(
         home: FractionalTranslation(
