@@ -308,6 +308,8 @@ enum class IndexType {
   kUnknown,
   k16bit,
   k32bit,
+  /// Does not use the index buffer.
+  kNone,
 };
 
 enum class PrimitiveType {

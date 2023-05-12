@@ -330,6 +330,8 @@ constexpr vk::IndexType ToVKIndexType(IndexType index_type) {
       return vk::IndexType::eUint32;
     case IndexType::kUnknown:
       return vk::IndexType::eUint32;
+    case IndexType::kNone:
+      FML_UNREACHABLE();
   }
 
   FML_UNREACHABLE();
