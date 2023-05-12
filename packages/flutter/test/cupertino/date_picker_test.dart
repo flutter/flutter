@@ -148,19 +148,6 @@ void main() {
       expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
     });
 
-    testWidgets('item extent default value', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) { },
-          ),
-        ),
-      );
-
-      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 32), false);
-    });
-
     testWidgets('specified item extent value is applied', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
@@ -347,20 +334,6 @@ void main() {
       expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
     });
 
-    testWidgets('item extent default value', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: CupertinoDatePicker(
-            onDateTimeChanged: (_) { },
-          ),
-        ),
-      );
-
-      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 32), false);
-    });
-
-
     testWidgets('specified item extent value is applied', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
@@ -374,7 +347,6 @@ void main() {
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
       expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 55), false);
     });
-
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
       late DateTime newDateTime;

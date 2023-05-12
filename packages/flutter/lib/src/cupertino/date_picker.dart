@@ -293,10 +293,10 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showDayOfWeek = false,
     this.itemExtent = _kItemExtent,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
-        assert(
-          itemExtent > 0,
-          'item extent should be greater than 0',
-        ),
+       assert(
+         itemExtent > 0,
+         'item extent should be greater than 0',
+       ),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
@@ -411,10 +411,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Whether to to show day of week alongside day. Defaults to false.
   final bool showDayOfWeek;
 
-  /// The uniform height of all children.
+  /// {@macro flutter.cupertino.picker.itemExtent}
   ///
-  /// All children will be given the [BoxConstraints] to match this exact
-  /// height. Must not be null and must be positive.
   /// Defaults to a value that matches the default iOS date picker wheel.
   final double itemExtent;
 
@@ -1915,9 +1913,10 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
        assert(initialTimerDuration.inSeconds % secondInterval == 0),
-        assert(itemExtent > 0,
-        'item extent should be greater than 0'
-        );
+       assert(
+         itemExtent > 0,
+         'item extent should be greater than 0'
+       );
 
   /// The mode of the timer picker.
   final CupertinoTimerPickerMode mode;
@@ -1946,11 +1945,9 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Defaults to null, which disables background painting entirely.
   final Color? backgroundColor;
 
-  /// The uniform height of all children.
+  /// {@macro flutter.cupertino.picker.itemExtent}
   ///
-  /// All children will be given the [BoxConstraints] to match this exact
-  /// height. Must be a positive value.
-  /// Defaults to a value that matches the default iOS date picker wheel.
+  /// Defaults to a value that matches the default iOS timer picker wheel.
   final double itemExtent;
 
   @override
