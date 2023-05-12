@@ -24,6 +24,8 @@ class GoldenPlaygroundTest
 
   void SetUp();
 
+  void TearDown();
+
   PlaygroundBackend GetBackend() const;
 
   bool OpenPlaygroundHere(const Picture& picture);
