@@ -960,6 +960,34 @@ void main() {
         expect(find.text(errorInvalidText!), findsOneWidget);
       });
     });
+
+    testWidgets('Invalid entered text shows error on autovalidate', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/126397.
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        final TextField field = textField(tester);
+        field.controller!.clear();
+
+        // Enter some text to trigger autovalidate.
+        await tester.enterText(find.byType(TextField), 'xyz');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+
+        // Invalid format validation error should be shown.
+        expect(find.text('Invalid format.'), findsOneWidget);
+
+        // Clear the text.
+        field.controller!.clear();
+
+        // Enter an invalid date that is too long while autovalidate is still on.
+        await tester.enterText(find.byType(TextField), '10/05/2023666777889');
+        await tester.pump();
+
+        // Invalid format validation error should be shown.
+        expect(find.text('Invalid format.'), findsOneWidget);
+        // Should not throw an exception.
+        expect(tester.takeException(), null);
+      });
+    });
   });
 
   group('Semantics', () {
