@@ -31,37 +31,29 @@ namespace flutter {
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    bool enable_impeller,
-    bool enable_vulkan_validation)
-    : android_context_(context),
-      jni_facade_(std::move(jni_facade)),
-      enable_impeller_(enable_impeller),
-      enable_vulkan_validation_(enable_vulkan_validation) {}
+    bool enable_impeller)
+    : android_context_(context), enable_impeller_(enable_impeller) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
   switch (android_context_->RenderingApi()) {
     case AndroidRenderingAPI::kSoftware:
-      return std::make_unique<AndroidSurfaceSoftware>(android_context_,
-                                                      jni_facade_);
+      return std::make_unique<AndroidSurfaceSoftware>();
     case AndroidRenderingAPI::kOpenGLES:
       if (enable_impeller_) {
-// TODO(kaushikiska@): Enable this after wiring a preference for Vulkan backend.
-#if false
-        return std::make_unique<AndroidSurfaceVulkanImpeller>(
-            android_context_, jni_facade_, enable_vulkan_validation_);
-
-#else
         return std::make_unique<AndroidSurfaceGLImpeller>(
-            android_context_, jni_facade_,
-            std::make_unique<impeller::egl::Display>());
-#endif
+            std::static_pointer_cast<AndroidContextGLImpeller>(
+                android_context_));
       } else {
-        return std::make_unique<AndroidSurfaceGLSkia>(android_context_,
-                                                      jni_facade_);
+        return std::make_unique<AndroidSurfaceGLSkia>(
+            std::static_pointer_cast<AndroidContextGLSkia>(android_context_));
       }
+    case AndroidRenderingAPI::kVulkan:
+      FML_DCHECK(enable_impeller_);
+      return std::make_unique<AndroidSurfaceVulkanImpeller>(
+          std::static_pointer_cast<AndroidContextVulkanImpeller>(
+              android_context_));
     default:
       FML_DCHECK(false);
       return nullptr;
@@ -72,12 +64,20 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     bool use_software_rendering,
     const flutter::TaskRunners& task_runners,
     uint8_t msaa_samples,
-    bool enable_impeller) {
+    bool enable_impeller,
+    bool enable_vulkan_validation) {
   if (use_software_rendering) {
     return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
   }
   if (enable_impeller) {
-    return std::make_unique<AndroidContextGLImpeller>();
+    // TODO(kaushikiska@): Enable this after wiring a preference for Vulkan
+    // backend.
+#if false
+    return std::make_unique<AndroidContextVulkanImpeller>(enable_vulkan_validation);
+#else
+    return std::make_unique<AndroidContextGLImpeller>(
+        std::make_unique<impeller::egl::Display>());
+#endif
   }
   return std::make_unique<AndroidContextGLSkia>(
       AndroidRenderingAPI::kOpenGLES,               //
@@ -101,7 +101,8 @@ PlatformViewAndroid::PlatformViewAndroid(
               use_software_rendering,
               task_runners,
               msaa_samples,
-              delegate.OnPlatformViewGetSettings().enable_impeller)) {}
+              delegate.OnPlatformViewGetSettings().enable_impeller,
+              delegate.OnPlatformViewGetSettings().enable_vulkan_validation)) {}
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
@@ -117,10 +118,8 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_,                                              //
-        jni_facade_,                                                   //
-        delegate.OnPlatformViewGetSettings().enable_impeller,          //
-        delegate.OnPlatformViewGetSettings().enable_vulkan_validation  //
+        android_context_,                                     //
+        delegate.OnPlatformViewGetSettings().enable_impeller  //
     );
     android_surface_ = surface_factory_->CreateSurface();
     FML_CHECK(android_surface_ && android_surface_->IsValid())

@@ -21,14 +21,13 @@ constexpr char kEmulatorRendererPrefix[] =
 }  // anonymous namespace
 
 AndroidSurfaceGLSkia::AndroidSurfaceGLSkia(
-    const std::shared_ptr<AndroidContext>& android_context,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : AndroidSurface(android_context),
+    const std::shared_ptr<AndroidContextGLSkia>& android_context)
+    : android_context_(android_context),
       native_window_(nullptr),
       onscreen_surface_(nullptr),
       offscreen_surface_(nullptr) {
   // Acquire the offscreen surface.
-  offscreen_surface_ = GLContextPtr()->CreateOffscreenSurface();
+  offscreen_surface_ = android_context_->CreateOffscreenSurface();
   if (!offscreen_surface_->IsValid()) {
     offscreen_surface_ = nullptr;
   }
@@ -40,12 +39,12 @@ void AndroidSurfaceGLSkia::TeardownOnScreenContext() {
   // When the onscreen surface is destroyed, the context and the surface
   // instance should be deleted. Issue:
   // https://github.com/flutter/flutter/issues/64414
-  GLContextPtr()->ClearCurrent();
+  android_context_->ClearCurrent();
   onscreen_surface_ = nullptr;
 }
 
 bool AndroidSurfaceGLSkia::IsValid() const {
-  return offscreen_surface_ && GLContextPtr()->IsValid();
+  return offscreen_surface_ && android_context_->IsValid();
 }
 
 std::unique_ptr<Surface> AndroidSurfaceGLSkia::CreateGPUSurface(
@@ -55,10 +54,10 @@ std::unique_ptr<Surface> AndroidSurfaceGLSkia::CreateGPUSurface(
                                               true);
   } else {
     sk_sp<GrDirectContext> main_skia_context =
-        GLContextPtr()->GetMainSkiaContext();
+        android_context_->GetMainSkiaContext();
     if (!main_skia_context) {
       main_skia_context = GPUSurfaceGLSkia::MakeGLContext(this);
-      GLContextPtr()->SetMainSkiaContext(main_skia_context);
+      android_context_->SetMainSkiaContext(main_skia_context);
     }
     return std::make_unique<GPUSurfaceGLSkia>(main_skia_context, this, true);
   }
@@ -73,12 +72,12 @@ bool AndroidSurfaceGLSkia::OnScreenSurfaceResize(const SkISize& size) {
     return true;
   }
 
-  GLContextPtr()->ClearCurrent();
+  android_context_->ClearCurrent();
 
   // Ensure the destructor is called since it destroys the `EGLSurface` before
   // creating a new onscreen surface.
   onscreen_surface_ = nullptr;
-  onscreen_surface_ = GLContextPtr()->CreateOnscreenSurface(native_window_);
+  onscreen_surface_ = android_context_->CreateOnscreenSurface(native_window_);
   if (!onscreen_surface_->IsValid()) {
     FML_LOG(ERROR) << "Unable to create EGL window surface on resize.";
     return false;
@@ -109,7 +108,7 @@ bool AndroidSurfaceGLSkia::SetNativeWindow(
   // creating a new onscreen surface.
   onscreen_surface_ = nullptr;
   // Create the onscreen surface.
-  onscreen_surface_ = GLContextPtr()->CreateOnscreenSurface(window);
+  onscreen_surface_ = android_context_->CreateOnscreenSurface(window);
   if (!onscreen_surface_->IsValid()) {
     return false;
   }
@@ -127,7 +126,7 @@ std::unique_ptr<GLContextResult> AndroidSurfaceGLSkia::GLContextMakeCurrent() {
 
 bool AndroidSurfaceGLSkia::GLContextClearCurrent() {
   FML_DCHECK(IsValid());
-  return GLContextPtr()->ClearCurrent();
+  return android_context_->ClearCurrent();
 }
 
 SurfaceFrame::FramebufferInfo AndroidSurfaceGLSkia::GLContextFramebufferInfo()
@@ -186,7 +185,7 @@ sk_sp<const GrGLInterface> AndroidSurfaceGLSkia::GetGLInterface() const {
       reinterpret_cast<const char*>(glGetString(GL_RENDERER));
   if (gl_renderer && strncmp(gl_renderer, kEmulatorRendererPrefix,
                              strlen(kEmulatorRendererPrefix)) == 0) {
-    EGLContext new_context = GLContextPtr()->CreateNewContext();
+    EGLContext new_context = android_context_->CreateNewContext();
     if (new_context != EGL_NO_CONTEXT) {
       EGLContext old_context = eglGetCurrentContext();
       EGLDisplay display = eglGetCurrentDisplay();
@@ -205,19 +204,15 @@ sk_sp<const GrGLInterface> AndroidSurfaceGLSkia::GetGLInterface() const {
   return GPUSurfaceGLDelegate::GetGLInterface();
 }
 
-AndroidContextGLSkia* AndroidSurfaceGLSkia::GLContextPtr() const {
-  return reinterpret_cast<AndroidContextGLSkia*>(android_context_.get());
-}
-
 std::unique_ptr<Surface> AndroidSurfaceGLSkia::CreateSnapshotSurface() {
   if (!onscreen_surface_ || !onscreen_surface_->IsValid()) {
-    onscreen_surface_ = GLContextPtr()->CreatePbufferSurface();
+    onscreen_surface_ = android_context_->CreatePbufferSurface();
   }
   sk_sp<GrDirectContext> main_skia_context =
-      GLContextPtr()->GetMainSkiaContext();
+      android_context_->GetMainSkiaContext();
   if (!main_skia_context) {
     main_skia_context = GPUSurfaceGLSkia::MakeGLContext(this);
-    GLContextPtr()->SetMainSkiaContext(main_skia_context);
+    android_context_->SetMainSkiaContext(main_skia_context);
   }
 
   return std::make_unique<GPUSurfaceGLSkia>(main_skia_context, this, true);
