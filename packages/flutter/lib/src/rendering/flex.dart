@@ -183,6 +183,12 @@ enum CrossAxisAlignment {
   /// cross axis.
   stretch,
 
+  /// Require the children to match the largest intrinsic cross axis size.
+  ///
+  /// This causes the constraints passed to the children to be tight in the
+  /// cross axis.
+  stretchToMaxIntrinsic,
+
   /// Place the children along the cross axis such that their baselines match.
   ///
   /// Because baselines are always horizontal, this alignment is intended for
@@ -770,6 +776,31 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return result;
   }
 
+  double _getMaxCrossIntrinsicSize(){
+    double maxIntrinsic = 0.0;
+
+    RenderBox? child = firstChild;
+    if (direction==Axis.horizontal) {
+      while (child!=null) {
+        final double value = child.getMaxIntrinsicHeight(double.infinity);
+        if (value > maxIntrinsic) {
+          maxIntrinsic = value;
+        }
+        child = (child.parentData! as FlexParentData).nextSibling;
+      }
+    } else {
+      while (child!=null) {
+        final double value = child.getMaxIntrinsicWidth(double.infinity);
+        if (value > maxIntrinsic) {
+          maxIntrinsic = value;
+        }
+        child = (child.parentData! as FlexParentData).nextSibling;
+      }
+    }
+
+    return maxIntrinsic;
+  }
+
   _LayoutSizes _computeSizes({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
     assert(_debugHasNecessaryDirections);
 
@@ -790,7 +821,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         lastFlexChild = child;
       } else {
         final BoxConstraints innerConstraints;
-        if (crossAxisAlignment == CrossAxisAlignment.stretch) {
+        if (crossAxisAlignment == CrossAxisAlignment.stretch || crossAxisAlignment == CrossAxisAlignment.stretchToMaxIntrinsic) {
           switch (_direction) {
             case Axis.horizontal:
               innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
@@ -900,10 +931,27 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return true;
     }());
 
-    final _LayoutSizes sizes = _computeSizes(
-      layoutChild: ChildLayoutHelper.layoutChild,
-      constraints: constraints,
-    );
+    final _LayoutSizes sizes;
+    if (crossAxisAlignment==CrossAxisAlignment.stretchToMaxIntrinsic) {
+      final double maxIntrinsic = _getMaxCrossIntrinsicSize();
+      assert(
+        maxIntrinsic > 0 && maxIntrinsic < double.infinity,
+        'crossAxisAlignment is `CrossAxisAlignment.stretchToMaxIntrinsic` '
+        'but no child has valid non-zero intrinsic size',
+      );
+      sizes = _computeSizes(
+        layoutChild: ChildLayoutHelper.layoutChild,
+        constraints: constraints.tighten(
+          width: direction==Axis.vertical? maxIntrinsic : null,
+          height: direction==Axis.horizontal? maxIntrinsic : null,
+        ),
+      );
+    } else {
+      sizes = _computeSizes(
+        layoutChild: ChildLayoutHelper.layoutChild,
+        constraints: constraints,
+      );
+    }
 
     final double allocatedSize = sizes.allocatedSize;
     double actualSize = sizes.mainSize;
@@ -996,6 +1044,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                              : crossSize - _getCrossSize(child.size);
         case CrossAxisAlignment.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child.size) / 2.0;
+        case CrossAxisAlignment.stretchToMaxIntrinsic:
         case CrossAxisAlignment.stretch:
           childCrossPosition = 0.0;
         case CrossAxisAlignment.baseline:
