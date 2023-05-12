@@ -225,7 +225,7 @@ abstract class SliverChildDelegate {
 }
 
 class _SaltedValueKey extends ValueKey<Key> {
-  const _SaltedValueKey(super.key);
+  const _SaltedValueKey(super.value);
 }
 
 /// Called to find the new index of a child based on its `key` in case of

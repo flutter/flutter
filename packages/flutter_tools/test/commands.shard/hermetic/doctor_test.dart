@@ -842,7 +842,7 @@ class NoOpDoctor implements Doctor {
 }
 
 class PassingValidator extends DoctorValidator {
-  PassingValidator(super.name);
+  PassingValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -1082,7 +1082,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(super.name);
+  PassingGroupedValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -1094,7 +1094,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(super.name);
+  MissingGroupedValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -1106,7 +1106,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(super.name);
+  PartialGroupedValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -1118,7 +1118,7 @@ class PartialGroupedValidator extends DoctorValidator {
 }
 
 class PassingGroupedValidatorWithStatus extends DoctorValidator {
-  PassingGroupedValidatorWithStatus(super.name);
+  PassingGroupedValidatorWithStatus(super.title);
 
   @override
   Future<ValidationResult> validate() async {
