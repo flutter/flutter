@@ -309,6 +309,7 @@ class IOSDeployDebugger {
   // (lldb) Process 6152 resuming
   static final RegExp _lldbProcessResuming = RegExp(r'Process \d+ resuming');
 
+  // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
   static final RegExp _symbolsPathPattern = RegExp(r'.*Symbol Path: ');
 
   // Send signal to stop (pause) the app. Used before a backtrace dump.
@@ -384,6 +385,7 @@ class IOSDeployDebugger {
         if (lldbRun.hasMatch(line)) {
           _logger.printTrace(line);
           _debuggerState = _IOSDeployDebuggerState.launching;
+          // TODO(vashworth): Remove all debugger state comments when https://github.com/flutter/flutter/issues/126412 is resolved.
           _logger.printTrace('Debugger state set to launching.');
           return;
         }
