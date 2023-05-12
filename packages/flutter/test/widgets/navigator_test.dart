@@ -5169,7 +5169,6 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
         },
         child: Navigator(
           key: _navigatorKey,
-          onHistoryChanged: null,
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
             switch (settings.name) {

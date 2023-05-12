@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This sample demonstrates using CanPopScope to get the correct behavior from
-// system back gestures when there are nested Navigator widgets.
-
 import 'package:flutter/material.dart';
+
+/// This sample demonstrates using [CanPopScope] to get the correct behavior
+/// from system back gestures when there are nested [Navigator] widgets.
 
 void main() => runApp(const MyApp());
 
@@ -73,37 +73,40 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
         }
         _nestedNavigatorKey.currentState!.pop();
       },
-      child: Navigator(
-        key: _nestedNavigatorKey,
-        onHistoryChanged: () {
-          final bool nextPopEnabled = !_nestedNavigatorKey.currentState!.canPop();
+      child: NotificationListener<NavigationNotification>(
+        onNotification: (NavigationNotification notification) {
+          final bool nextPopEnabled = !notification.canPop;
           if (nextPopEnabled != popEnabled) {
             setState(() {
               popEnabled = nextPopEnabled;
             });
           }
+          return false;
         },
-        initialRoute: 'nested_navigators/one',
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case 'nested_navigators/one':
-              final BuildContext rootContext = context;
-              return MaterialPageRoute(
-                builder: (BuildContext context) => NestedNavigatorsPageOne(
-                  onBack: () {
-                    Navigator.of(rootContext).pop();
-                  },
-                ),
-              );
-            case 'nested_navigators/one/another_one':
-              return MaterialPageRoute(
-                builder: (BuildContext context) => const NestedNavigatorsPageTwo(
-                ),
-              );
-            default:
-              throw Exception('Invalid route: ${settings.name}');
-          }
-        },
+        child: Navigator(
+          key: _nestedNavigatorKey,
+          initialRoute: 'nested_navigators/one',
+          onGenerateRoute: (RouteSettings settings) {
+            switch (settings.name) {
+              case 'nested_navigators/one':
+                final BuildContext rootContext = context;
+                return MaterialPageRoute(
+                  builder: (BuildContext context) => NestedNavigatorsPageOne(
+                    onBack: () {
+                      Navigator.of(rootContext).pop();
+                    },
+                  ),
+                );
+              case 'nested_navigators/one/another_one':
+                return MaterialPageRoute(
+                  builder: (BuildContext context) => const NestedNavigatorsPageTwo(
+                  ),
+                );
+              default:
+                throw Exception('Invalid route: ${settings.name}');
+            }
+          },
+        ),
       ),
     );
   }

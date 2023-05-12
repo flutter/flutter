@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This sample demonstrates showing a confirmation dialog when the user attempts
-// to navigate away from a page with unsaved form data.
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// This sample demonstrates showing a confirmation dialog when the user
+/// attempts to navigate away from a page with unsaved [Form] data.
 
 void main() => runApp(_MyApp());
 
@@ -44,7 +44,7 @@ class _HomePageState extends State<_HomePage> {
     setState(() {});
   }
 
-  void _showDialog() async {
+  Future<void> _showDialog() async {
     final bool? shouldDiscard = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -69,7 +69,7 @@ class _HomePageState extends State<_HomePage> {
       },
     );
 
-    if (shouldDiscard == true) {
+    if (shouldDiscard ?? false) {
       SystemNavigator.pop();
     }
   }
@@ -91,9 +91,8 @@ class _HomePageState extends State<_HomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            const Text('If the field below is invalid, a confirmation dialog will be shown on back.'),
+            const Text('If the field below is unsaved, a confirmation dialog will be shown on back.'),
             const SizedBox(height: 20.0),
             Form(
               popEnabled: !_isDirty,
@@ -105,7 +104,6 @@ class _HomePageState extends State<_HomePage> {
               },
               autovalidateMode: AutovalidateMode.always,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextFormField(

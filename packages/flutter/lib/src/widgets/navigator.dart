@@ -1118,12 +1118,6 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
   ? TraversalEdgeBehavior.leaveFlutterView
   : TraversalEdgeBehavior.closedLoop;
 
-/// A function that informs when a [Navigator]'s history has changed.
-///
-/// See also:
-///   * [NavigatorState.onHistoryChanged]
-typedef HistoryChangedCallback = void Function(NavigatorState navigatorState);
-
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
 /// Many apps have a navigator near the top of their widget hierarchy in order
@@ -1435,7 +1429,6 @@ class Navigator extends StatefulWidget {
     // TODO(justinmc): Is this something else I need to worry about? It returns a bool.
     this.onPopPage,
     this.initialRoute,
-    this.onHistoryChanged = defaultOnHistoryChanged,
     this.onGenerateInitialRoutes = Navigator.defaultGenerateInitialRoutes,
     this.onGenerateRoute,
     this.onUnknownRoute,
@@ -1575,10 +1568,6 @@ class Navigator extends StatefulWidget {
   ///  * [dart:ui.PlatformDispatcher.defaultRouteName], which reflects the route that the
   ///    application was started with.
   static const String defaultRouteName = '/';
-
-  /// Called whenever anything changes in the [Navigator]'s history, including
-  /// navigation.
-  final HistoryChangedCallback? onHistoryChanged;
 
   /// Called when the widget is created to generate the initial list of [Route]
   /// objects if [initialRoute] is not null.
@@ -2784,37 +2773,6 @@ class Navigator extends StatefulWidget {
     return result.cast<Route<dynamic>>();
   }
 
-  /// Updates [SystemNavigator] with the [Navigator]'s status, if it is the root
-  /// [Navigator].
-  ///
-  /// The default value of [Navigator.onHistoryChanged].
-  static void defaultOnHistoryChanged(NavigatorState navigatorState) {
-    // TODO(justinmc): Also should probably set this on app start, because it
-    // will otherwise carry over during shift+r restart.
-    // If this is the root NavigatorState, then update the SystemNavigator with
-    // its status.
-    if (!navigatorState._isRoot) {
-      return;
-    }
-    // If canPop is true then CanPopScopes aren't going to have any effect.
-    if (navigatorState.canPop()) {
-      SystemNavigator.updateNavigationStackStatus(true);
-      return;
-    }
-
-    final _RouteEntry currentRouteEntry =
-        navigatorState._history.value.firstWhere(_RouteEntry.isPresentPredicate);
-    // If the currentRouteEntry isn't active, such as for the first route on app
-    // start, then the framework can't handle back.
-    if (!currentRouteEntry.route.isActive) {
-      SystemNavigator.updateNavigationStackStatus(false);
-      return;
-    }
-    final bool canPopScopeIsDisablingPop =
-        currentRouteEntry.route.popEnabled() == RoutePopDisposition.doNotPop;
-    SystemNavigator.updateNavigationStackStatus(canPopScopeIsDisablingPop);
-  }
-
   @override
   NavigatorState createState() => NavigatorState();
 }
@@ -3403,24 +3361,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _onHistoryChanged() {
-    if (widget.onHistoryChanged == null || true) {
-      // TODO(justinmc): I'm adding the notification logic here in the case that
-      // onHistoryChanged is explicitly passed null. We'll have to decide
-      // whether we want ether the onHistoryChanged approach or the Notification
-      // approach.
-      //return;
-
-      final NavigationNotification notification = NavigationNotification(
-        canPop: _usingPagesAPI
-            ? widget.pages.length > 1
-            : canPop(),
-      );
-      print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot. History: $_history');
-      notification.dispatch(context);
-      return;
-    }
+    final NavigationNotification notification = NavigationNotification(
+      canPop: _usingPagesAPI
+          ? widget.pages.length > 1
+          : canPop(),
+    );
+    print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot. History: $_history');
+    notification.dispatch(context);
     return;
-    widget.onHistoryChanged!(this);
   }
 
   @override
