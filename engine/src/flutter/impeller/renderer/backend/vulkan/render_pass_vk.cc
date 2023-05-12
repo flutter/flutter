@@ -522,7 +522,6 @@ static bool EncodeCommand(const Context& context,
                            0u                       // first instance
     );
   } else {
-    FML_LOG(ERROR) << "HERE!!!";
     cmd_buffer.draw(command.vertex_count,    // vertex count
                     command.instance_count,  // instance count
                     command.base_vertex,     // vertex offset
