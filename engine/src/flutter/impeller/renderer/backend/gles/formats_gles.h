@@ -33,6 +33,7 @@ constexpr GLenum ToMode(PrimitiveType primitive_type) {
 constexpr GLenum ToIndexType(IndexType type) {
   switch (type) {
     case IndexType::kUnknown:
+    case IndexType::kNone:
       FML_UNREACHABLE();
     case IndexType::k16bit:
       return GL_UNSIGNED_SHORT;

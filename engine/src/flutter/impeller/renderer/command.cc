@@ -21,7 +21,7 @@ bool Command::BindVertices(const VertexBuffer& buffer) {
   vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] = {
       nullptr, buffer.vertex_buffer};
   index_buffer = buffer.index_buffer;
-  index_count = buffer.index_count;
+  vertex_count = buffer.vertex_count;
   index_type = buffer.index_type;
   return true;
 }
