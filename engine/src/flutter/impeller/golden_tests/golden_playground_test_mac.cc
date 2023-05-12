@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <dlfcn.h>
+#include <filesystem>
+
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
 
 #include "flutter/impeller/aiks/picture.h"
@@ -14,18 +17,30 @@ namespace impeller {
 // to also be a golden test, then add the test name here.
 static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CanRenderLinearGradientManyColorsUnevenStops_Metal",
+    "impeller_Play_AiksTest_CanRenderLinearGradientManyColorsUnevenStops_"
+    "Vulkan",
     "impeller_Play_AiksTest_CanRenderRadialGradient_Metal",
+    "impeller_Play_AiksTest_CanRenderRadialGradient_Vulkan",
     "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Metal",
+    "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Vulkan",
     "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Metal",
+    "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Vulkan",
     "impeller_Play_AiksTest_ColorWheel_Metal",
+    "impeller_Play_AiksTest_ColorWheel_Vulkan",
     "impeller_Play_AiksTest_SolidStrokesRenderCorrectly_Metal",
+    "impeller_Play_AiksTest_SolidStrokesRenderCorrectly_Vulkan",
     "impeller_Play_AiksTest_GradientStrokesRenderCorrectly_Metal",
+    "impeller_Play_AiksTest_GradientStrokesRenderCorrectly_Vulkan",
     "impeller_Play_AiksTest_CoverageOriginShouldBeAccountedForInSubpasses_"
     "Metal",
+    "impeller_Play_AiksTest_CoverageOriginShouldBeAccountedForInSubpasses_"
+    "Vulkan",
     "impeller_Play_AiksTest_SceneColorSource_Metal",
+    "impeller_Play_AiksTest_SceneColorSource_Vulkan",
     // TextRotated is flakey and we can't seem to get it to stabilize on Skia
     // Gold.
     "impeller_Play_AiksTest_TextRotated_Metal",
+    "impeller_Play_AiksTest_TextRotated_Vulkan",
 };
 
 namespace {
@@ -68,8 +83,22 @@ struct GoldenPlaygroundTest::GoldenPlaygroundTestImpl {
 GoldenPlaygroundTest::GoldenPlaygroundTest()
     : pimpl_(new GoldenPlaygroundTest::GoldenPlaygroundTestImpl()) {}
 
+void GoldenPlaygroundTest::TearDown() {
+  ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
+}
+
 void GoldenPlaygroundTest::SetUp() {
-  if (GetBackend() != PlaygroundBackend::kMetal) {
+  std::filesystem::path testing_assets_path =
+      flutter::testing::GetTestingAssetsPath();
+  std::filesystem::path target_path = testing_assets_path.parent_path()
+                                          .parent_path()
+                                          .parent_path()
+                                          .parent_path();
+  std::filesystem::path icd_path = target_path / "vk_swiftshader_icd.json";
+  setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
+
+  if (GetBackend() != PlaygroundBackend::kMetal &&
+      GetBackend() != PlaygroundBackend::kVulkan) {
     GTEST_SKIP_("GoldenPlaygroundTest doesn't support this backend type.");
     return;
   }

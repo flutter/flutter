@@ -146,7 +146,8 @@
                 "release",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--build-embedder-examples"
+                "--build-embedder-examples",
+                "--enable-impeller-vulkan"
             ],
             "name": "host_release",
             "ninja": {
