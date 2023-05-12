@@ -8,6 +8,8 @@ namespace impeller {
 
 GoldenPlaygroundTest::GoldenPlaygroundTest() {}
 
+void GoldenPlaygroundTest::TearDown() {}
+
 void GoldenPlaygroundTest::SetUp() {
   GTEST_SKIP_("GoldenPlaygroundTest doesn't support this backend type.");
 }
