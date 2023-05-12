@@ -30,13 +30,16 @@ class VertexBufferBuilder {
   ~VertexBufferBuilder() = default;
 
   constexpr impeller::IndexType GetIndexType() const {
+    if (indices_.size() == 0) {
+      return impeller::IndexType::kNone;
+    }
     if constexpr (sizeof(IndexType) == 2) {
       return impeller::IndexType::k16bit;
-    } else if (sizeof(IndexType) == 4) {
-      return impeller::IndexType::k32bit;
-    } else {
-      return impeller::IndexType::kUnknown;
     }
+    if (sizeof(IndexType) == 4) {
+      return impeller::IndexType::k32bit;
+    }
+    return impeller::IndexType::kUnknown;
   }
 
   void SetLabel(std::string label) { label_ = std::move(label); }
@@ -121,22 +124,13 @@ class VertexBufferBuilder {
     return buffer->AsBufferView();
   }
 
-  std::vector<IndexType> CreateIndexBuffer() const {
-    if (indices_.size() > 0) {
-      return indices_;
-    }
-
-    // So dumb! We don't actually need an index buffer right now. But we will
-    // once de-duplication is done. So assume this is always done.
-    std::vector<IndexType> index_buffer;
-    for (size_t i = 0; i < vertices_.size(); i++) {
-      index_buffer.push_back(i);
-    }
-    return index_buffer;
-  }
+  std::vector<IndexType> CreateIndexBuffer() const { return indices_; }
 
   BufferView CreateIndexBufferView(HostBuffer& buffer) const {
     const auto index_buffer = CreateIndexBuffer();
+    if (index_buffer.size() == 0) {
+      return {};
+    }
     return buffer.Emplace(index_buffer.data(),
                           index_buffer.size() * sizeof(IndexType),
                           alignof(IndexType));
@@ -144,6 +138,9 @@ class VertexBufferBuilder {
 
   BufferView CreateIndexBufferView(Allocator& allocator) const {
     const auto index_buffer = CreateIndexBuffer();
+    if (index_buffer.size() == 0) {
+      return {};
+    }
     auto buffer = allocator.CreateBufferWithCopy(
         reinterpret_cast<const uint8_t*>(index_buffer.data()),
         index_buffer.size() * sizeof(IndexType));

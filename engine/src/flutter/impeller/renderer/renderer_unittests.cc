@@ -1007,7 +1007,16 @@ TEST_P(RendererTest, DefaultIndexSize) {
   // Default to 16bit index buffer size, as this is a reasonable default and
   // supported on all backends without extensions.
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
+  vertex_builder.AppendIndex(0u);
   ASSERT_EQ(vertex_builder.GetIndexType(), IndexType::k16bit);
+}
+
+TEST_P(RendererTest, DefaultIndexBehavior) {
+  using VS = BoxFadeVertexShader;
+
+  // Do not create any index buffer if no indices were provided.
+  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
+  ASSERT_EQ(vertex_builder.GetIndexType(), IndexType::kNone);
 }
 
 TEST_P(RendererTest, VertexBufferBuilder) {
