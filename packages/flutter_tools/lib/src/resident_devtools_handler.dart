@@ -88,10 +88,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       assert(!_readyToAnnounce);
       return;
     }
-    final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
-    await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
-    await _callConnectedVmServiceUriExtension(devicesWithExtension);
-
     if (_shutdown) {
       // If we're shutting down, no point reporting the debugger list.
       return;
@@ -101,7 +97,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
     final Uri? devToolsUrl = _devToolsLauncher!.devToolsUrl;
     if (devToolsUrl != null) {
-      for (final FlutterDevice? device in devicesWithExtension) {
+      for (final FlutterDevice? device in flutterDevices) {
         if (device == null) {
           continue;
         }
@@ -116,6 +112,10 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
       // report their URLs yet. Do so now.
       _residentRunner.printDebuggerList(includeVmService: false);
     }
+
+    final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
+    await _maybeCallDevToolsUriServiceExtension(devicesWithExtension);
+    await _callConnectedVmServiceUriExtension(devicesWithExtension);
   }
 
   // This must be guaranteed not to return a Future that fails.
