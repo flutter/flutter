@@ -184,6 +184,7 @@ enum CrossAxisAlignment {
   stretch,
 
   /// Require the children to match the largest intrinsic cross axis size.
+  /// This option is computationally expensive.
   ///
   /// This causes the constraints passed to the children to be tight in the
   /// cross axis.
