@@ -84,6 +84,7 @@ class RunSuiteStep implements PipelineStep {
       '--platform=${browserEnvironment.packageTestRuntime.identifier}',
       '--precompiled=$bundleBuildPath',
       '--configuration=$configurationFilePath',
+      if (AnsiColors.shouldEscape) '--color' else '--no-color',
 
       // TODO(jacksongardner): Set the default timeout to five minutes when
       // https://github.com/dart-lang/test/issues/2006 is fixed.
