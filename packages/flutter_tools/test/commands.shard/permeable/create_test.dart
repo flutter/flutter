@@ -2848,6 +2848,77 @@ void main() {
     expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
   });
 
+  testUsingContext('Android Java plugin contains namespace', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'java',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    // The namespace should be conditionalized for AGP <4.2.
+    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+  });
+
+  testUsingContext('Android FFI plugin contains namespace', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin_ffi',
+      '--org', 'com.bar.foo',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    // The namespace should be conditionalized for AGP <4.2.
+    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+  });
+
+  testUsingContext('Android Kotlin plugin contains namespace', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'kotlin',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    // The namespace should be conditionalized for AGP <4.2.
+    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+  });
+
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
 
