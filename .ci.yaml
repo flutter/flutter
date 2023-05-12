@@ -203,6 +203,7 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      test_timeout_secs: "3600"
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
