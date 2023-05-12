@@ -157,17 +157,22 @@ void testMain() {
   });
 
   group('browserSupportsCanvasKitChromium', () {
-    late dynamic oldV8BreakIterator = v8BreakIterator;
+    dynamic oldV8BreakIterator = v8BreakIterator;
+    dynamic oldIntlSegmenter = intlSegmenter;
+
     setUp(() {
       oldV8BreakIterator = v8BreakIterator;
+      oldIntlSegmenter = intlSegmenter;
     });
     tearDown(() {
       v8BreakIterator = oldV8BreakIterator;
+      intlSegmenter = oldIntlSegmenter;
       debugResetBrowserSupportsImageDecoder();
     });
 
     test('Detect browsers that support CanvasKit Chromium', () {
       v8BreakIterator = Object(); // Any non-null value.
+      intlSegmenter = Object(); // Any non-null value.
       browserSupportsImageDecoder = true;
 
       expect(browserSupportsCanvaskitChromium, isTrue);
@@ -175,6 +180,7 @@ void testMain() {
 
     test('Detect browsers that do not support image codecs', () {
       v8BreakIterator = Object(); // Any non-null value.
+      intlSegmenter = Object(); // Any non-null value.
       browserSupportsImageDecoder = false;
 
       // TODO(mdebbar): we don't check image codecs for now.
@@ -184,6 +190,7 @@ void testMain() {
 
     test('Detect browsers that do not support v8BreakIterator', () {
       v8BreakIterator = null;
+      intlSegmenter = Object(); // Any non-null value.
       browserSupportsImageDecoder = true;
 
       expect(browserSupportsCanvaskitChromium, isFalse);
@@ -191,7 +198,15 @@ void testMain() {
 
     test('Detect browsers that support neither', () {
       v8BreakIterator = null;
+      intlSegmenter = Object(); // Any non-null value.
       browserSupportsImageDecoder = false;
+
+      expect(browserSupportsCanvaskitChromium, isFalse);
+    });
+
+    test('Detect browsers that support v8BreakIterator but no Intl.Segmenter', () {
+      v8BreakIterator = Object(); // Any non-null value.
+      intlSegmenter = null;
 
       expect(browserSupportsCanvaskitChromium, isFalse);
     });
@@ -211,3 +226,9 @@ external dynamic get v8BreakIterator;
 
 @JS('window.Intl.v8BreakIterator')
 external set v8BreakIterator(dynamic x);
+
+@JS('window.Intl.Segmenter')
+external dynamic get intlSegmenter;
+
+@JS('window.Intl.Segmenter')
+external set intlSegmenter(dynamic x);
