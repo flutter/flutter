@@ -293,8 +293,9 @@ class CupertinoDatePicker extends StatefulWidget {
     this.showDayOfWeek = false,
     this.itemExtent = _kItemExtent,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
-        assert(itemExtent > 0,
-        'item extent should be greater than 0'
+        assert(
+          itemExtent > 0,
+          'item extent should be greater than 0',
         ),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
