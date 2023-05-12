@@ -336,6 +336,21 @@ TEST(GeometryTest, MatrixGetMaxBasisLength) {
   }
 }
 
+TEST(GeometryTest, MatrixGetMaxBasisLengthXY) {
+  {
+    auto m = Matrix::MakeScale({3, 1, 1});
+    ASSERT_EQ(m.GetMaxBasisLengthXY(), 3);
+
+    m = m * Matrix::MakeSkew(0, 4);
+    ASSERT_EQ(m.GetMaxBasisLengthXY(), 5);
+  }
+
+  {
+    auto m = Matrix::MakeScale({-3, 4, 7});
+    ASSERT_EQ(m.GetMaxBasisLengthXY(), 4);
+  }
+}
+
 TEST(GeometryTest, MatrixMakeOrthographic) {
   {
     auto m = Matrix::MakeOrthographic(Size(100, 200));
