@@ -512,17 +512,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }) {
     assert(scrollOffset.isFinite);
     assert(scrollOffset >= 0.0);
-    final double initialLayoutOffset = layoutOffset; // 0
-    final ScrollDirection adjustedUserScrollDirection = applyGrowthDirectionToScrollDirection(
-      offset.userScrollDirection,
-      growthDirection,
-    );
-    double maxPaintOffset = layoutOffset + overlap; // 0
+    final double initialLayoutOffset = layoutOffset;
+    final ScrollDirection adjustedUserScrollDirection = applyGrowthDirectionToScrollDirection(offset.userScrollDirection, growthDirection);
+    double maxPaintOffset = layoutOffset + overlap;
     double precedingScrollExtent = 0.0;
-    int count = 0;
     while (child != null) {
-      print(count);
-      count++;
       final double sliverScrollOffset = scrollOffset <= 0.0 ? 0.0 : scrollOffset;
       // If the scrollOffset is too small we adjust the paddedOrigin because it
       // doesn't make sense to ask a sliver for content before its scroll
