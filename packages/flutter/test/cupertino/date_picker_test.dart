@@ -161,7 +161,7 @@ void main() {
       expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 32), false);
     });
 
-    testWidgets('specified item extent default value is applied', (WidgetTester tester) async {
+    testWidgets('specified item extent value is applied', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoTimerPicker(
