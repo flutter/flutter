@@ -413,13 +413,39 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
-    final bool overlapsContent = constraints.overlap > 0.0;
-    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
-    final double effectiveRemainingPaintExtent = math.max(0, constraints.remainingPaintExtent - constraints.overlap);
-    final double layoutExtent = clampDouble(maxExtent - constraints.scrollOffset, 0.0, effectiveRemainingPaintExtent);
-    final double stretchOffset = stretchConfiguration != null ?
-      constraints.overlap.abs() :
-      0.0;
+
+    // constraints.overlap represents preceding slivers that may be pinned or
+    // floating, overlapping slivers that follow such as this one.
+    final double effectiveOverlap = constraints.overlap > 0.0 ? constraints.overlap : 0.0;
+
+    // If there is a preceding pinned sliver, this allows this sliver to
+    // properly expand/collapse between minExtent and maxExtent with the scroll
+    // offset, accounting for the offset of a previously pinned sliver through
+    // the overlap.
+    final double effectiveOffset = constraints.scrollOffset + effectiveOverlap;
+
+    // Whether or not this sliver itself will overlap subsequent slivers.
+    final bool overlapsContent = constraints.overlap + constraints.scrollOffset > 0.0
+      // Handles case of first sliver, since constraints.overlap refers to
+      // preceding slivers.
+      || (constraints.precedingScrollExtent == 0 && constraints.scrollOffset > 0.0);
+
+    layoutChild(effectiveOffset, maxExtent, overlapsContent: overlapsContent);
+
+    final double effectiveRemainingPaintExtent = math.max(
+      0, constraints.remainingPaintExtent - constraints.overlap,
+    );
+    final double layoutExtent = clampDouble(
+      maxExtent - effectiveOffset,
+      0.0,
+      effectiveRemainingPaintExtent,
+    );
+
+    // Represents how much further the sliver will extend when stretching.
+    final double stretchOffset = stretchConfiguration != null
+      ? constraints.overlap.abs()
+      : 0.0;
+
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
