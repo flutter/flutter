@@ -249,4 +249,46 @@ void main() {
     );
   });
 
+  testWidgets('ContinuousRectangleBorder with non-zero width border', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/78855
+    const double borderWidth = 20.0;
+    const ContinuousRectangleBorder border = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(50.0)),
+      side: BorderSide(width: borderWidth),
+    );
+
+    const Rect outerRect = Rect.fromLTWH(10.0, 10.0, 100.0, 100.0);
+    final Rect innerRect = outerRect.deflate(borderWidth);
+
+    // Verify that the border is painted using two paths (outer and inner).
+    expect(
+      (Canvas canvas) => border.paint(canvas, outerRect),
+      paints
+        ..path(
+          // The middle of each side of outerRect should be included
+          includes: <Offset>[
+            outerRect.centerLeft,
+            outerRect.topCenter,
+            outerRect.centerRight,
+            outerRect.bottomCenter,
+          ],
+        )
+        ..path(
+          // The middle of each side of innerRect should be included
+          includes: <Offset>[
+            innerRect.centerLeft,
+            innerRect.topCenter,
+            innerRect.centerRight,
+            innerRect.bottomCenter,
+          ],
+          // The middle of each side of outerRect should be excluded
+          excludes: <Offset>[
+            outerRect.centerLeft,
+            outerRect.topCenter,
+            outerRect.centerRight,
+            outerRect.bottomCenter,
+          ],
+        ),
+    );
+  });
 }

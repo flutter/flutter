@@ -145,10 +145,14 @@ class ContinuousRectangleBorder extends OutlinedBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        canvas.drawPath(
-          getOuterPath(rect, textDirection: textDirection),
-          side.toPaint(),
-        );
+        final Path outer = getOuterPath(rect, textDirection: textDirection);
+        final Path inner = getInnerPath(rect, textDirection: textDirection);
+        final Paint paint = Paint()..color = side.color;
+        canvas.saveLayer(rect, paint);
+        canvas.drawPath(outer, paint);
+        final Paint paintInner = Paint()..blendMode = BlendMode.srcOut;
+        canvas.drawPath(inner, paintInner);
+        canvas.restore();
     }
   }
 
