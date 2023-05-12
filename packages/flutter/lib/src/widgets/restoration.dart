@@ -120,10 +120,10 @@ class RestorationScope extends StatefulWidget {
             '  $context'
           ),
           ErrorHint(
-            'State restoration must be enabled for a RestorationScope. This can '
-            'be done for an app by setting a restorationScopeId in the app '
-            'widget, or by inserting a RootRestorationScope in a given subtree '
-            'of the app.'
+            'State restoration must be enabled for a RestorationScope to exist. '
+            'This can be done by passing a restorationScopeId to MaterialApp, '
+            'CupertinoApp, or WidgetsApp at the root of the widget tree or by '
+            'wrapping the widget tree in a RootRestorationScope.'
           ),
         ],
         );
