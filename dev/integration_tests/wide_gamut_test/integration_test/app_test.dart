@@ -27,9 +27,9 @@ double _decodeHalf(int x) {
   if (x == 0xfc00) {
     return -double.infinity;
   }
-  double sign = x & 0x8000 == 0 ? 1.0 : -1.0;
-  int exponent = (x >> 10) & 0x1f;
-  int fraction = x & 0x3ff;
+  final double sign = x & 0x8000 == 0 ? 1.0 : -1.0;
+  final int exponent = (x >> 10) & 0x1f;
+  final int fraction = x & 0x3ff;
   if (exponent == 0) {
     return sign * math.pow(2.0, -14) * (fraction / 1024.0);
   } else {
