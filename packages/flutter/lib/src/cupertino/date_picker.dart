@@ -1948,7 +1948,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// The uniform height of all children.
   ///
   /// All children will be given the [BoxConstraints] to match this exact
-  /// height. Must not be null and must be positive.
+  /// height. Must be a positive value.
   /// Defaults to a value that matches the default iOS date picker wheel.
   final double itemExtent;
 
