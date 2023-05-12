@@ -97,7 +97,7 @@ class Radio<T> extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _radioType = _RadioType.material,
-       useAdaptiveCheckmarkStyle = false;
+       useCupertinoCheckmarkStyle = false;
 
   /// Creates an adaptive [Radio] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -112,7 +112,7 @@ class Radio<T> extends StatefulWidget {
   /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity].
   ///
-  /// [useAdaptiveCheckmarkStyle] is used only if a [CupertinoRadio] is created.
+  /// [useCupertinoCheckmarkStyle] is used only if a [CupertinoRadio] is created.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Radio.adaptive({
@@ -132,7 +132,7 @@ class Radio<T> extends StatefulWidget {
     this.visualDensity,
     this.focusNode,
     this.autofocus = false,
-    this.useAdaptiveCheckmarkStyle = false
+    this.useCupertinoCheckmarkStyle = false
   }) : _radioType = _RadioType.adaptive;
 
   /// The value represented by this radio button.
@@ -349,13 +349,13 @@ class Radio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Controls wether the checkmark style is used in an iOS style radio.
+  /// Controls whether the checkmark style is used in an iOS style radio.
   ///
   /// This property will only be used if [Radio.adaptive] shows the Cupertino
   /// widget.
   ///
   /// Defaults to false.
-  final bool useAdaptiveCheckmarkStyle;
+  final bool useCupertinoCheckmarkStyle;
 
   final _RadioType _radioType;
 
@@ -439,7 +439,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
               focusColor: widget.focusColor,
               focusNode: widget.focusNode,
               autofocus: widget.autofocus,
-              useCheckmarkStyle: widget.useAdaptiveCheckmarkStyle,
+              useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
             );
         }
     }

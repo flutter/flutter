@@ -189,7 +189,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
   }) : _radioType = _RadioType.material,
-       useAdaptiveCheckmarkStyle = false,
+       useCupertinoCheckmarkStyle = false,
        assert(!isThreeLine || subtitle != null);
 
   /// Creates a combination of a list tile and a platform adaptive radio.
@@ -227,7 +227,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
-    this.useAdaptiveCheckmarkStyle = false,
+    this.useCupertinoCheckmarkStyle = false,
   }) : _radioType = _RadioType.adaptive,
        assert(!isThreeLine || subtitle != null);
 
@@ -440,10 +440,10 @@ class RadioListTile<T> extends StatelessWidget {
   /// Determines wether or not to use the checkbox style for the [CupertinoRadio]
   /// control.
   ///
-  /// Only usuable under the [RadioListTile.adaptive] constructor. If set to
+  /// Only usable under the [RadioListTile.adaptive] constructor. If set to
   /// true, on Apple platforms the radio button will appear as an iOS styled
   /// checkmark.
-  final bool useAdaptiveCheckmarkStyle;
+  final bool useCupertinoCheckmarkStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -478,7 +478,7 @@ class RadioListTile<T> extends StatelessWidget {
           hoverColor: hoverColor,
           overlayColor: overlayColor,
           splashRadius: splashRadius,
-          useAdaptiveCheckmarkStyle: useAdaptiveCheckmarkStyle,
+          useCupertinoCheckmarkStyle: useCupertinoCheckmarkStyle,
         );
     }
 
