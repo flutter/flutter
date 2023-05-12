@@ -1,5 +1,4 @@
-#include "flutter/shell/platform/android/android_surface_gl_impeller.h"
-#include "flutter/shell/platform/android/jni/jni_mock.h"
+#include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -24,10 +23,7 @@ class MockDisplay : public impeller::egl::Display {
 };
 }  // namespace
 
-TEST(AndroidSurfaceGLImpeller, MSAAFirstAttempt) {
-  auto context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-  auto jni = std::make_shared<JNIMock>();
+TEST(AndroidContextGLImpeller, MSAAFirstAttempt) {
   auto display = std::make_unique<MockDisplay>();
   EXPECT_CALL(*display, IsValid).WillRepeatedly(Return(true));
   auto first_result = std::make_unique<Config>(ConfigDescriptor(), EGLConfig());
@@ -46,15 +42,11 @@ TEST(AndroidSurfaceGLImpeller, MSAAFirstAttempt) {
       .WillOnce(Return(ByMove(std::move(second_result))));
   ON_CALL(*display, ChooseConfig(_))
       .WillByDefault(Return(ByMove(std::unique_ptr<Config>())));
-  auto surface = std::make_unique<AndroidSurfaceGLImpeller>(context, jni,
-                                                            std::move(display));
-  ASSERT_TRUE(surface);
+  auto context = std::make_unique<AndroidContextGLImpeller>(std::move(display));
+  ASSERT_TRUE(context);
 }
 
-TEST(AndroidSurfaceGLImpeller, FallbackForEmulator) {
-  auto context =
-      std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-  auto jni = std::make_shared<JNIMock>();
+TEST(AndroidContextGLImpeller, FallbackForEmulator) {
   auto display = std::make_unique<MockDisplay>();
   EXPECT_CALL(*display, IsValid).WillRepeatedly(Return(true));
   std::unique_ptr<Config> first_result;
@@ -81,9 +73,8 @@ TEST(AndroidSurfaceGLImpeller, FallbackForEmulator) {
       .WillOnce(Return(ByMove(std::move(third_result))));
   ON_CALL(*display, ChooseConfig(_))
       .WillByDefault(Return(ByMove(std::unique_ptr<Config>())));
-  auto surface = std::make_unique<AndroidSurfaceGLImpeller>(context, jni,
-                                                            std::move(display));
-  ASSERT_TRUE(surface);
+  auto context = std::make_unique<AndroidContextGLImpeller>(std::move(display));
+  ASSERT_TRUE(context);
 }
 }  // namespace testing
 }  // namespace flutter

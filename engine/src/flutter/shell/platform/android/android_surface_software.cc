@@ -40,10 +40,7 @@ bool GetSkColorType(int32_t buffer_format,
 
 }  // anonymous namespace
 
-AndroidSurfaceSoftware::AndroidSurfaceSoftware(
-    const std::shared_ptr<AndroidContext>& android_context,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : AndroidSurface(android_context) {
+AndroidSurfaceSoftware::AndroidSurfaceSoftware() {
   GetSkColorType(WINDOW_FORMAT_RGBA_8888, &target_color_type_,
                  &target_alpha_type_);
 }

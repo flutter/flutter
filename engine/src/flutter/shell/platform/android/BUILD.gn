@@ -39,9 +39,9 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "android_context_gl_impeller_unittests.cc",
     "android_context_gl_unittests.cc",
     "android_shell_holder_unittests.cc",
-    "android_surface_gl_impeller_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
   ]
@@ -72,6 +72,8 @@ source_set("flutter_shell_native_src") {
     "android_context_gl_impeller.h",
     "android_context_gl_skia.cc",
     "android_context_gl_skia.h",
+    "android_context_vulkan_impeller.cc",
+    "android_context_vulkan_impeller.h",
     "android_display.cc",
     "android_display.h",
     "android_egl_surface.cc",

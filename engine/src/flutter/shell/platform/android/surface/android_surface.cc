@@ -7,11 +7,7 @@
 
 namespace flutter {
 
-AndroidSurface::AndroidSurface(
-    const std::shared_ptr<AndroidContext>& android_context) {
-  FML_DCHECK(android_context->IsValid());
-  android_context_ = android_context;
-}
+AndroidSurface::AndroidSurface() = default;
 
 AndroidSurface::~AndroidSurface() = default;
 

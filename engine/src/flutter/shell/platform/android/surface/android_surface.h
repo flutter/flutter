@@ -46,9 +46,7 @@ class AndroidSurface {
   virtual std::shared_ptr<impeller::Context> GetImpellerContext();
 
  protected:
-  explicit AndroidSurface(
-      const std::shared_ptr<AndroidContext>& android_context);
-  std::shared_ptr<AndroidContext> android_context_;
+  AndroidSurface();
 };
 
 class AndroidSurfaceFactory {
