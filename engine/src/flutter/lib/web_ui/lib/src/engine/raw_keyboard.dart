@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import '../engine.dart'  show registerHotRestartListener;
+import 'browser_detection.dart';
 import 'dom.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
@@ -133,6 +134,9 @@ class RawKeyboard {
         _lastMetaState |= modifierNumLock;
       } else if (event.key == 'ScrollLock') {
         _lastMetaState |= modifierScrollLock;
+      } else if (event.key == 'Meta' && operatingSystem == OperatingSystem.linux) {
+        // On Chrome Linux, metaState can be wrong when a Meta key is pressed.
+        _lastMetaState |= _modifierMeta;
       }
     }
     final Map<String, dynamic> eventData = <String, dynamic>{
