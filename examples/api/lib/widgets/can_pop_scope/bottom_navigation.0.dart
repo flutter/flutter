@@ -6,42 +6,32 @@
 
 import 'package:flutter/material.dart';
 
-enum _Page {
+// There are three possible tabs.
+enum _Tab {
   home,
   one,
   two,
 }
 
-void main() => runApp(MyApp());
+// Each tab has two possible pages.
+enum _TabPage {
+  home,
+  one,
+}
+
+typedef _TabPageCallback = void Function(List<_TabPage> pages);
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final GlobalKey key = GlobalKey();
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    /*
-    const _BottomNavPage page = _BottomNavPage(
-      page: _Page.home,
-    );
-    */
-    // TODO(justinmc): Navigating between tabs should push a route, but it
-    // shouldn't like place a whole new visible page on the screen.
     return MaterialApp(
       initialRoute: '/home',
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => _BottomNavPage(
-          key: key,
-          page: _Page.home,
-        ),
-        '/one': (BuildContext context) => _BottomNavPage(
-          key: key,
-          page: _Page.one,
-        ),
-        '/two': (BuildContext context) => _BottomNavPage(
-          key: key,
-          page: _Page.two,
+        '/home': (BuildContext context) => const _BottomNavPage(
         ),
       },
     );
@@ -49,33 +39,36 @@ class MyApp extends StatelessWidget {
 }
 
 class _BottomNavPage extends StatefulWidget {
-  const _BottomNavPage({
-    super.key,
-    required this.page,
-  });
-
-  final _Page page;
+  const _BottomNavPage();
 
   @override
   State<_BottomNavPage> createState() => _BottomNavPageState();
 }
 
 class _BottomNavPageState extends State<_BottomNavPage> {
-  //_Page _page = _Page.home;
+  _Tab _tab = _Tab.home;
 
-  BottomNavigationBarItem _itemForPage(_Page page) {
+  final GlobalKey _tabHomeKey = GlobalKey();
+  final GlobalKey _tabOneKey = GlobalKey();
+  final GlobalKey _tabTwoKey = GlobalKey();
+
+  List<_TabPage> _tabHomePages = <_TabPage>[_TabPage.home];
+  List<_TabPage> _tabOnePages = <_TabPage>[_TabPage.home];
+  List<_TabPage> _tabTwoPages = <_TabPage>[_TabPage.home];
+
+  BottomNavigationBarItem _itemForPage(_Tab page) {
     switch (page) {
-      case _Page.home:
+      case _Tab.home:
         return const BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Home',
         );
-      case _Page.one:
+      case _Tab.one:
         return const BottomNavigationBarItem(
           icon: Icon(Icons.one_k),
           label: 'One',
         );
-      case _Page.two:
+      case _Tab.two:
         return const BottomNavigationBarItem(
           icon: Icon(Icons.two_k),
           label: 'Two',
@@ -83,33 +76,62 @@ class _BottomNavPageState extends State<_BottomNavPage> {
     }
   }
 
-  Widget _getPage(_Page page) {
+  Widget _getPage(_Tab page) {
     switch (page) {
-      case _Page.home:
-        return const _BottomNavTabHome(
+      case _Tab.home:
+        return _BottomNavTab(
+          key: _tabHomeKey,
+          title: 'Home',
+          color: Colors.brown,
+          pages: _tabHomePages,
+          onChangedPages: (List<_TabPage> pages) {
+            setState(() {
+              _tabHomePages = pages;
+            });
+          },
         );
-      case _Page.one:
-        return const _BottomNavTabOne(
+      case _Tab.one:
+        return _BottomNavTab(
+          key: _tabOneKey,
+          title: 'One',
+          color: Colors.deepPurple,
+          pages: _tabOnePages,
+          onChangedPages: (List<_TabPage> pages) {
+            setState(() {
+              _tabOnePages = pages;
+            });
+          },
         );
-      case _Page.two:
-        return const _BottomNavTabTwo(
+      case _Tab.two:
+        return _BottomNavTab(
+          key: _tabTwoKey,
+          title: 'Two',
+          color: Colors.blueGrey,
+          pages: _tabTwoPages,
+          onChangedPages: (List<_TabPage> pages) {
+            setState(() {
+              _tabTwoPages = pages;
+            });
+          },
         );
     }
   }
 
   void _onItemTapped(int index) {
-    Navigator.of(context).pushNamed('/home/${_Page.values.elementAt(index).toString().substring('_Page.'.length)}');
+    setState(() {
+      _tab = _Tab.values.elementAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _getPage(widget.page),
+        child: _getPage(_tab),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: _Page.values.map(_itemForPage).toList(),
-        currentIndex: _Page.values.indexOf(widget.page),
+        items: _Tab.values.map(_itemForPage).toList(),
+        currentIndex: _Tab.values.indexOf(_tab),
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
@@ -117,217 +139,83 @@ class _BottomNavPageState extends State<_BottomNavPage> {
   }
 }
 
-class _BottomNavTabHome extends StatefulWidget {
-  const _BottomNavTabHome();
+class _BottomNavTab extends StatelessWidget {
+  const _BottomNavTab({
+    super.key,
+    required this.color,
+    required this.onChangedPages,
+    required this.pages,
+    required this.title,
+  });
 
-  @override
-  State<_BottomNavTabHome> createState() => _BottomNavTabHomeState();
-}
+  final Color color;
+  final _TabPageCallback onChangedPages;
+  final List<_TabPage> pages;
+  final String title;
 
-class _BottomNavTabHomeState extends State<_BottomNavTabHome> {
-  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
-  bool popEnabled = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return CanPopScope(
-      popEnabled: popEnabled,
-      onPop: () {
-        if (popEnabled) {
-          return;
-        }
-        _nestedNavigatorKey.currentState!.pop();
-      },
-      child: NotificationListener<NavigationNotification>(
-        onNotification: (NavigationNotification notification) {
-          final bool nextPopEnabled = !notification.canPop;
-          if (nextPopEnabled != popEnabled) {
-            setState(() {
-              popEnabled = nextPopEnabled;
-            });
-          }
-          return false;
-        },
-        child: Navigator(
-          key: _nestedNavigatorKey,
-          initialRoute: 'original',
-          onGenerateRoute: (RouteSettings settings) {
-            switch (settings.name) {
-              case 'original':
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return _LinksPage(
-                      title: 'Bottom nav - tab home - home route',
-                      backgroundColor: Colors.limeAccent,
-                      buttons: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('original/one');
-                          },
-                          child: const Text('Go to another route in this nested Navigator'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              case 'original/one':
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return _LinksPage(
-                      backgroundColor: Colors.limeAccent.withRed(255),
-                      title: 'Bottom nav - tab home - page one',
-                    );
-                  },
-                );
-              default:
-                throw Exception('Invalid route: ${settings.name}');
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavTabOne extends StatefulWidget {
-  const _BottomNavTabOne();
-
-  @override
-  State<_BottomNavTabOne> createState() => _BottomNavTabOneState();
-}
-
-class _BottomNavTabOneState extends State<_BottomNavTabOne> {
-  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
-  bool popEnabled = true;
+  bool get _popEnabled => pages.length <= 1;
 
   @override
   Widget build(BuildContext context) {
     return CanPopScope(
-      popEnabled: popEnabled,
+      popEnabled: _popEnabled,
       onPop: () {
-        if (popEnabled) {
+        if (_popEnabled) {
           return;
         }
-        _nestedNavigatorKey.currentState!.pop();
+        onChangedPages(<_TabPage>[
+          ...pages,
+        ]..removeLast());
       },
-      child: NotificationListener<NavigationNotification>(
-        onNotification: (NavigationNotification notification) {
-          final bool nextPopEnabled = !notification.canPop;
-          if (nextPopEnabled != popEnabled) {
-            setState(() {
-              popEnabled = nextPopEnabled;
-            });
+      child: Navigator(
+        onPopPage: (Route<void> route, void result) {
+          if (!route.didPop(null)) {
+            return false;
           }
-          return false;
+          onChangedPages(<_TabPage>[
+            ...pages,
+          ]..removeLast());
+          return true;
         },
-        child: Navigator(
-          key: _nestedNavigatorKey,
-          initialRoute: 'tabone',
-          onGenerateRoute: (RouteSettings settings) {
-            switch (settings.name) {
-              case 'tabone':
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return _LinksPage(
-                      title: 'Bottom nav - tab one - home route',
-                      backgroundColor: Colors.deepPurpleAccent,
-                      buttons: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('tabone/one');
-                          },
-                          child: const Text('Go to another route in this nested Navigator'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              case 'tabone/one':
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return _LinksPage(
-                      backgroundColor: Colors.deepPurpleAccent.withRed(255),
-                      title: 'Bottom nav - tab one - page one',
-                    );
-                  },
-                );
-              default:
-                throw Exception('Invalid route: ${settings.name}');
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNavTabTwo extends StatefulWidget {
-  const _BottomNavTabTwo();
-
-  @override
-  State<_BottomNavTabTwo> createState() => _BottomNavTabTwoState();
-}
-
-class _BottomNavTabTwoState extends State<_BottomNavTabTwo> {
-  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
-  bool popEnabled = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return CanPopScope(
-      popEnabled: popEnabled,
-      onPop: () {
-        if (popEnabled) {
-          return;
-        }
-        _nestedNavigatorKey.currentState!.pop();
-      },
-      child: NotificationListener<NavigationNotification>(
-        onNotification: (NavigationNotification notification) {
-          final bool nextPopEnabled = !notification.canPop;
-          if (nextPopEnabled != popEnabled) {
-            setState(() {
-              popEnabled = nextPopEnabled;
-            });
+        pages: pages.map((_TabPage page) {
+          switch (page) {
+            case _TabPage.home:
+              return MaterialPage(
+                child: _LinksPage(
+                  title: 'Bottom nav - tab $title - route $page',
+                  backgroundColor: color,
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        onChangedPages(<_TabPage>[
+                          ...pages,
+                          _TabPage.one,
+                        ]);
+                      },
+                      child: const Text('Go to another route in this nested Navigator'),
+                    ),
+                  ],
+                ),
+              );
+            case _TabPage.one:
+              return MaterialPage(
+                child: _LinksPage(
+                  backgroundColor: color,
+                  title: 'Bottom nav - tab $title - route $page',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        onChangedPages(<_TabPage>[
+                          ...pages,
+                        ]..removeLast());
+                      },
+                      child: const Text('Go back'),
+                    ),
+                  ],
+                ),
+              );
           }
-          return false;
-        },
-        child: Navigator(
-          key: _nestedNavigatorKey,
-          initialRoute: 'again',
-          onGenerateRoute: (RouteSettings settings) {
-            switch (settings.name) {
-              case 'again':
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return _LinksPage(
-                      title: 'Bottom nav - tab two - home route',
-                      backgroundColor: Colors.lightBlue,
-                      buttons: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('again/one');
-                          },
-                          child: const Text('Go to another route in this nested Navigator'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              case 'again/one':
-                return MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return _LinksPage(
-                      backgroundColor: Colors.lightBlue.withRed(255),
-                      title: 'Bottom nav - tab two - page one',
-                    );
-                  },
-                );
-              default:
-                throw Exception('Invalid route: ${settings.name}');
-            }
-          },
-        ),
+        }).toList(),
       ),
     );
   }
@@ -354,17 +242,9 @@ class _LinksPage extends StatelessWidget {
           children: <Widget>[
             Text(title),
             ...buttons,
-            if (Navigator.of(context).canPop())
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Go back'),
-              ),
           ],
         ),
       ),
     );
   }
 }
-
