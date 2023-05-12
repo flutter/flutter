@@ -1184,11 +1184,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       event = SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset, granularity: event.granularity);
     }
     final SelectionResult result = super.handleSelectionEdgeUpdate(event);
-    // Update the drag location from geometries when the granularity that the
-    // selection edge moves by is not precise.
-    if (event.granularity != TextGranularity.character) {
-      _updateDragLocationsFromGeometries();
-    }
 
     // Result may be pending if one of the selectable child is also a scrollable.
     // In that case, the parent scrollable needs to wait for the child to finish
@@ -1429,7 +1424,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   void ensureChildUpdated(Selectable selectable) {
     final double newRecord = state.position.pixels;
     final double? previousStartRecord = _selectableStartEdgeUpdateRecords[selectable];
-    debugPrint('${selectable.hashCode} ${selectable.getSelectedContent()?.plainText}, $_currentDragStartRelatedToOrigin $previousStartRecord $newRecord does not previousStartRecord ${previousStartRecord == null}, ${previousStartRecord != null && ((newRecord - previousStartRecord!).abs() > precisionErrorTolerance)}');
     if (_currentDragStartRelatedToOrigin != null &&
         (previousStartRecord == null || (newRecord - previousStartRecord).abs() > precisionErrorTolerance)) {
       // Make sure the selectable has up to date events.
@@ -1438,7 +1432,6 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset));
     }
     final double? previousEndRecord = _selectableEndEdgeUpdateRecords[selectable];
-    debugPrint('${selectable.hashCode} ${selectable.getSelectedContent()?.plainText}, $_currentDragEndRelatedToOrigin $previousEndRecord $newRecord does not have previousEndRecord ${previousEndRecord == null}, ${previousEndRecord != null && ((newRecord - previousEndRecord!).abs() > precisionErrorTolerance)}');
     if (_currentDragEndRelatedToOrigin != null &&
         (previousEndRecord == null || (newRecord - previousEndRecord).abs() > precisionErrorTolerance)) {
       // Make sure the selectable has up to date events.

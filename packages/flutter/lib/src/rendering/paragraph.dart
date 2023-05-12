@@ -1629,15 +1629,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
               // This case applies when the origin word is at the beginning of
               // the origin selectable, and the adjustedPosition is at the beginning
-              // of the rect, to keep the origin word in bounds, the end edge should
-              // stay at the end of the origin word.
+              // of the rect, to keep the origin word in bounds, the start edge should
+              // move to the end the origin word.
               //
               // This is only done when the current selectable contains the origin word,
               // if it does not then we are okay with the selection being collapsed
               // as a result of the adjustedPosition.
               final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-              targetPosition = localWordBoundary.$2;
+              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
             }
           } else {
             // The end of the selection is before the start.
