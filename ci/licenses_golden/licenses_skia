@@ -1,4 +1,4 @@
-Signature: 7a9c900c7b174e2304a215673ad5dc1d
+Signature: d1e787597d6021b2a22ac573e8e8aa8a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/skdrawable_picturesnapshot.md
 FILE: ../../../third_party/skia/relnotes/skgraphics_methods.md
+FILE: ../../../third_party/skia/relnotes/skimage_graphite.md
 FILE: ../../../third_party/skia/relnotes/skimage_methods.md
 FILE: ../../../third_party/skia/relnotes/skimage_subset.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_magnifier.md
@@ -4041,8 +4042,8 @@ ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLDoStatement.h + ../../../third
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExpression.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExpressionStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExtension.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLField.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFieldAccess.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFieldSymbol.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLForStatement.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionCall.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.h + ../../../third_party/skia/LICENSE
@@ -4355,8 +4356,8 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLDoStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpression.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExpressionStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExtension.h
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLField.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFieldAccess.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLFieldSymbol.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLForStatement.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionCall.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionDeclaration.h
@@ -8989,6 +8990,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinnable.cp
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinnable.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/surface/SkSurface_AndroidFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Descriptors.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/ImageFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/Image_YUVA_Graphite.cpp + ../../../third_party/skia/LICENSE
@@ -9099,6 +9101,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinnable.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinnable.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/surface/SkSurface_AndroidFactories.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Descriptors.h
+FILE: ../../../third_party/skia/src/gpu/graphite/ImageFactories.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_Base_Graphite.h
 FILE: ../../../third_party/skia/src/gpu/graphite/Image_YUVA_Graphite.cpp
