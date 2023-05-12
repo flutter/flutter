@@ -202,6 +202,14 @@ Scalar Matrix::GetMaxBasisLength() const {
   return std::sqrt(max);
 }
 
+Scalar Matrix::GetMaxBasisLengthXY() const {
+  Scalar max = 0;
+  for (int i = 0; i < 3; i++) {
+    max = std::max(max, e[i][0] * e[i][0] + e[i][1] * e[i][1]);
+  }
+  return std::sqrt(max);
+}
+
 /*
  *  Adapted for Impeller from Graphics Gems:
  *  http://www.realtimerendering.com/resources/GraphicsGems/gemsii/unmatrix.c

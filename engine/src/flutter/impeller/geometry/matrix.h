@@ -290,6 +290,8 @@ struct Matrix {
 
   Scalar GetMaxBasisLength() const;
 
+  Scalar GetMaxBasisLengthXY() const;
+
   constexpr Vector3 GetBasisX() const { return Vector3(m[0], m[1], m[2]); }
 
   constexpr Vector3 GetBasisY() const { return Vector3(m[4], m[5], m[6]); }
