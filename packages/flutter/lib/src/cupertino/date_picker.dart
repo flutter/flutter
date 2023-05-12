@@ -414,7 +414,7 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// All children will be given the [BoxConstraints] to match this exact
   /// height. Must not be null and must be positive.
-  /// Default to a value that matches the default iOS date picker wheel.
+  /// Defaults to a value that matches the default iOS date picker wheel.
   final double itemExtent;
 
   @override
