@@ -102,12 +102,15 @@ struct Command : public ResourceBinder {
   ///
   BufferView index_buffer;
   //----------------------------------------------------------------------------
-  /// The number of indices to use from the index buffer. Set the vertex and
+  /// The number of vertices to draw.
+  ///
+  /// If the index_type is `IndexType::kNone`, this is a count into the vertex
+  /// buffer. Otherwise, it is a count into the index buffer. Set the vertex and
   /// index buffers as well as the index count using a call to `BindVertices`.
   ///
   /// @see         `BindVertices`
   ///
-  size_t index_count = 0u;
+  size_t vertex_count = 0u;
   //----------------------------------------------------------------------------
   /// The type of indices in the index buffer. The indices must be tightly
   /// packed in the index buffer.

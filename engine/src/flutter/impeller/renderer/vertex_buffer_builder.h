@@ -76,7 +76,7 @@ class VertexBufferBuilder {
     VertexBuffer buffer;
     buffer.vertex_buffer = CreateVertexBufferView(host_buffer);
     buffer.index_buffer = CreateIndexBufferView(host_buffer);
-    buffer.index_count = GetIndexCount();
+    buffer.vertex_count = GetIndexCount();
     buffer.index_type = GetIndexType();
     return buffer;
   };
@@ -86,7 +86,7 @@ class VertexBufferBuilder {
     // This can be merged into a single allocation.
     buffer.vertex_buffer = CreateVertexBufferView(device_allocator);
     buffer.index_buffer = CreateIndexBufferView(device_allocator);
-    buffer.index_count = GetIndexCount();
+    buffer.vertex_count = GetIndexCount();
     buffer.index_type = GetIndexType();
     return buffer;
   };

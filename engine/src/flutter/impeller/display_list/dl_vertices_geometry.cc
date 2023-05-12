@@ -175,7 +175,7 @@ GeometryResult DlVerticesGeometry::GetPositionBuffer(
               .index_buffer = {.buffer = buffer,
                                .range =
                                    Range{total_vtx_bytes, total_idx_bytes}},
-              .index_count = index_count,
+              .vertex_count = index_count,
               .index_type = IndexType::k16bit,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
@@ -244,7 +244,7 @@ GeometryResult DlVerticesGeometry::GetPositionColorBuffer(
               .index_buffer = {.buffer = buffer,
                                .range =
                                    Range{total_vtx_bytes, total_idx_bytes}},
-              .index_count = index_count,
+              .vertex_count = index_count,
               .index_type = IndexType::k16bit,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
@@ -321,7 +321,7 @@ GeometryResult DlVerticesGeometry::GetPositionUVBuffer(
               .index_buffer = {.buffer = buffer,
                                .range =
                                    Range{total_vtx_bytes, total_idx_bytes}},
-              .index_count = index_count,
+              .vertex_count = index_count,
               .index_type = IndexType::k16bit,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *

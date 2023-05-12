@@ -91,7 +91,6 @@ static GeometryResult ComputeUVGeometryForRect(Rect source_rect,
                                                const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) {
-  constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
   auto& host_buffer = pass.GetTransientsBuffer();
 
   std::vector<Point> data(8);
@@ -108,10 +107,8 @@ static GeometryResult ComputeUVGeometryForRect(Rect source_rect,
           {
               .vertex_buffer = host_buffer.Emplace(
                   data.data(), 16 * sizeof(float), alignof(float)),
-              .index_buffer = host_buffer.Emplace(
-                  kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
-              .index_count = 4,
-              .index_type = IndexType::k16bit,
+              .vertex_count = 4,
+              .index_type = IndexType::kNone,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation(),
@@ -141,7 +138,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
         points.data(), points.size() * sizeof(Point), alignof(Point));
     vertex_buffer.index_buffer = host_buffer.Emplace(
         indices.data(), indices.size() * sizeof(uint16_t), alignof(uint16_t));
-    vertex_buffer.index_count = indices.size();
+    vertex_buffer.vertex_count = indices.size();
     vertex_buffer.index_type = IndexType::k16bit;
 
     return GeometryResult{
@@ -163,7 +160,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
             vertices, vertices_count * sizeof(float), alignof(float));
         vertex_buffer.index_buffer = host_buffer.Emplace(
             indices, indices_count * sizeof(uint16_t), alignof(uint16_t));
-        vertex_buffer.index_count = indices_count;
+        vertex_buffer.vertex_count = indices_count;
         vertex_buffer.index_type = IndexType::k16bit;
         return true;
       });
@@ -729,7 +726,7 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
                   rect.GetPoints().data(), 8 * sizeof(float), alignof(float)),
               .index_buffer = host_buffer.Emplace(
                   kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
-              .index_count = 4,
+              .vertex_count = 4,
               .index_type = IndexType::k16bit,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()),
@@ -766,7 +763,6 @@ RectGeometry::~RectGeometry() = default;
 GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) {
-  constexpr uint16_t kRectIndicies[4] = {0, 1, 2, 3};
   auto& host_buffer = pass.GetTransientsBuffer();
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
@@ -774,10 +770,8 @@ GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
           {
               .vertex_buffer = host_buffer.Emplace(
                   rect_.GetPoints().data(), 8 * sizeof(float), alignof(float)),
-              .index_buffer = host_buffer.Emplace(
-                  kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
-              .index_count = 4,
-              .index_type = IndexType::k16bit,
+              .vertex_count = 4,
+              .index_type = IndexType::kNone,
           },
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation(),

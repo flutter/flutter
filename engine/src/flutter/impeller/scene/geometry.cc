@@ -113,7 +113,7 @@ std::shared_ptr<Geometry> Geometry::MakeFromFlatbuffer(
       .vertex_buffer = {.buffer = buffer, .range = Range(0, vertices_bytes)},
       .index_buffer = {.buffer = buffer,
                        .range = Range(vertices_bytes, indices_bytes)},
-      .index_count = mesh.indices()->count(),
+      .vertex_count = mesh.indices()->count(),
       .index_type = index_type,
   };
   return MakeVertexBuffer(std::move(vertex_buffer), is_skinned);

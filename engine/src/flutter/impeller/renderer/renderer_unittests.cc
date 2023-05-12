@@ -163,7 +163,7 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     vertex_buffer.index_buffer = {
         .buffer = device_buffer,
         .range = Range(offsetof(Cube, indices), sizeof(Cube::indices))};
-    vertex_buffer.index_count = 36;
+    vertex_buffer.vertex_count = 36;
     vertex_buffer.index_type = IndexType::k16bit;
   }
 
