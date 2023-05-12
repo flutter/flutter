@@ -74,7 +74,7 @@ void main() {
         throwsA(isA<FlutterError>().having(
           (FlutterError error) => error.message,
           'message',
-          contains('State restoration must be enabled for a RestorationScope.'),
+          contains('State restoration must be enabled for a RestorationScope'),
         )),
       );
 
