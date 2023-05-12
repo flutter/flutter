@@ -262,18 +262,6 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, handler);
       expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(channel.name, handler), true);
     });
-
-    test('can send message on completion of binding initialization', () async {
-      bool called = false;
-      TestWidgetsFlutterBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall method) async {
-        if (method.method == 'System.initializationComplete') {
-          called = true;
-        }
-        return null;
-      });
-      await TestWidgetsFlutterBinding.instance.initializationComplete();
-      expect(called, isTrue);
-    });
   });
 
   group('EventChannel', () {

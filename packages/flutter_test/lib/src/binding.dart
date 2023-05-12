@@ -544,12 +544,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     );
   }
 
-  /// Expose this method for testing.
-  @override
-  Future<void> initializationComplete() async {
-    return super.initializationComplete();
-  }
-
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
