@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -2656,6 +2657,108 @@ void main() {
     expect(await previousFocus(), true);
     expect(okNode.hasFocus, true);
     expect(cancelNode.hasFocus, false);
+  });
+
+  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+    final AlertDialog dialog = AlertDialog.adaptive(
+      content: Container(
+        height: 5000.0,
+        width: 300.0,
+        color: Colors.green[500],
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {},
+          child: const Text('OK'),
+        ),
+      ],
+    );
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+  });
+
+  testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: const Material(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: null,
+              child: Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog1'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsNothing);
+
+    showAdaptiveDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog2'),
+        );
+      },
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog2'), findsOneWidget);
+
+    // Tap on the barrier, which shouldn't do anything this time.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog2'), findsOneWidget);
   });
 
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {

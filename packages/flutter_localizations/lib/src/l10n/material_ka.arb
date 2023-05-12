@@ -133,5 +133,11 @@
   "scrimLabel": "სკრიმი",
   "bottomSheetLabel": "ქვედა ფურცელი",
   "scrimOnTapHint": "$modalRouteContentName-ის დახურვა",
-  "keyboardKeyShift": "ცვლა"
+  "keyboardKeyShift": "ცვლა",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

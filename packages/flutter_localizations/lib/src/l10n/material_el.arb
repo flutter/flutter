@@ -134,5 +134,11 @@
   "scrimLabel": "Επικάλυψη",
   "bottomSheetLabel": "Φύλλο κάτω μέρους",
   "scrimOnTapHint": "Κλείσιμο $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

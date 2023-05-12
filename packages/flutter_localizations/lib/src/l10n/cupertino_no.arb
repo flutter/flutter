@@ -21,5 +21,6 @@
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
   "modalBarrierDismissLabel": "Avvis",
-  "searchTextFieldPlaceholderLabel": "Søk"
+  "searchTextFieldPlaceholderLabel": "Søk",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

@@ -192,12 +192,12 @@ class _DefaultUsage implements Usage {
     if (!skipAnalyticsSessionSetup) {
       // Report a more detailed OS version string than package:usage does by default.
       analytics.setSessionValue(
-        cdKey(CustomDimensionsEnum.sessionHostOsDetails),
+        CustomDimensionsEnum.sessionHostOsDetails.cdKey,
         globals.os.name,
       );
       // Send the branch name as the "channel".
       analytics.setSessionValue(
-        cdKey(CustomDimensionsEnum.sessionChannelName),
+        CustomDimensionsEnum.sessionChannelName.cdKey,
         flutterVersion.getBranchName(redactUnknownBranches: true),
       );
       // For each flutter experimental feature, record a session value in a comma
@@ -210,7 +210,7 @@ class _DefaultUsage implements Usage {
           .map((Feature feature) => feature.configSetting)
           .join(',');
       analytics.setSessionValue(
-        cdKey(CustomDimensionsEnum.enabledFlutterFeatures),
+        CustomDimensionsEnum.enabledFlutterFeatures.cdKey,
         enabledFeatures,
       );
 

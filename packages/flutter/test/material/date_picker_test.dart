@@ -65,10 +65,11 @@ void main() {
     Future<void> Function(Future<DateTime?> date) callback, {
     TextDirection textDirection = TextDirection.ltr,
     bool useMaterial3 = false,
+    ThemeData? theme,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: useMaterial3),
+      theme: theme ?? ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
           builder: (BuildContext context) {
@@ -461,6 +462,119 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
     });
+
+    testWidgets('honors switchToInputEntryModeIcon', (WidgetTester tester) async {
+      Widget buildApp({bool? useMaterial3, Icon? switchToInputEntryModeIcon}) {
+       return MaterialApp(
+          theme: ThemeData(
+            useMaterial3: useMaterial3 ?? false,
+          ),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Click X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.edit), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildApp(useMaterial3: true));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(
+        buildApp(
+          switchToInputEntryModeIcon: const Icon(Icons.keyboard),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.keyboard), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('honors switchToCalendarEntryModeIcon', (WidgetTester tester) async {
+      Widget buildApp({bool? useMaterial3, Icon? switchToCalendarEntryModeIcon}) {
+       return MaterialApp(
+          theme: ThemeData(
+            useMaterial3: useMaterial3 ?? false,
+          ),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Click X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+                      initialEntryMode: DatePickerEntryMode.input,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildApp(useMaterial3: true));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(
+        buildApp(
+          switchToCalendarEntryModeIcon: const Icon(Icons.favorite),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    });
   });
 
   group('Calendar mode', () {
@@ -673,6 +787,38 @@ void main() {
       });
     });
 
+    testWidgets('Date picker dayOverlayColor resolves pressed state', (WidgetTester tester) async {
+      today = DateTime(2023, 5, 4);
+      final ThemeData theme = ThemeData();
+      final bool material3 = theme.useMaterial3;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.pump();
+
+        // Hovered.
+        final Offset center = tester.getCenter(find.text('30'));
+        final TestGesture gesture = await tester.createGesture(
+          kind: PointerDeviceKind.mouse,
+        );
+        await gesture.addPointer();
+        await gesture.moveTo(center);
+        await tester.pumpAndSettle();
+        expect(
+          Material.of(tester.element(find.text('30'))),
+          paints..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.08) : theme.colorScheme.onSurfaceVariant.withOpacity(0.08)),
+        );
+
+        // Highlighted (pressed).
+        await gesture.down(center);
+        await tester.pumpAndSettle();
+        expect(
+          Material.of(tester.element(find.text('30'))),
+          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.12) : theme.colorScheme.onSurfaceVariant.withOpacity(0.12))
+        );
+        await gesture.up();
+        await tester.pumpAndSettle();
+      }, theme: theme);
+    });
+
     testWidgets('Selecting date does not switch picker to year selection', (WidgetTester tester) async {
       initialDate = DateTime(2020, DateTime.may, 10);
       initialCalendarMode = DatePickerMode.year;
@@ -812,6 +958,34 @@ void main() {
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
         expect(find.text(errorInvalidText!), findsOneWidget);
+      });
+    });
+
+    testWidgets('Invalid entered text shows error on autovalidate', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/126397.
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        final TextField field = textField(tester);
+        field.controller!.clear();
+
+        // Enter some text to trigger autovalidate.
+        await tester.enterText(find.byType(TextField), 'xyz');
+        await tester.tap(find.text('OK'));
+        await tester.pumpAndSettle();
+
+        // Invalid format validation error should be shown.
+        expect(find.text('Invalid format.'), findsOneWidget);
+
+        // Clear the text.
+        field.controller!.clear();
+
+        // Enter an invalid date that is too long while autovalidate is still on.
+        await tester.enterText(find.byType(TextField), '10/05/2023666777889');
+        await tester.pump();
+
+        // Invalid format validation error should be shown.
+        expect(find.text('Invalid format.'), findsOneWidget);
+        // Should not throw an exception.
+        expect(tester.takeException(), null);
       });
     });
   });

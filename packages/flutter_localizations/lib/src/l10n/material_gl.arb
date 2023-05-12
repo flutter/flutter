@@ -135,5 +135,11 @@
   "scrimLabel": "Sombreado",
   "bottomSheetLabel": "Panel inferior",
   "scrimOnTapHint": "Pechar $modalRouteContentName",
-  "keyboardKeyShift": "Maiús"
+  "keyboardKeyShift": "Maiús",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

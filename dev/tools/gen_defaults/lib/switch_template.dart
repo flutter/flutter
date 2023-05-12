@@ -127,6 +127,9 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
   }
 
   @override
+  MaterialStatePropertyAll<double> get trackOutlineWidth => const MaterialStatePropertyAll<double>(${tokens['md.comp.switch.track.outline.width']});
+
+  @override
   double get splashRadius => ${tokens['md.comp.switch.state-layer.size']} / 2;
 }
 

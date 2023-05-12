@@ -82,18 +82,7 @@ class FlutterCommandResult {
   final DateTime? endTimeOverride;
 
   @override
-  String toString() {
-    switch (exitStatus) {
-      case ExitStatus.success:
-        return 'success';
-      case ExitStatus.warning:
-        return 'warning';
-      case ExitStatus.fail:
-        return 'fail';
-      case ExitStatus.killed:
-        return 'killed';
-    }
-  }
+  String toString() => exitStatus.name;
 }
 
 /// Common flutter command line options.
@@ -130,7 +119,7 @@ abstract final class FlutterOptions {
 }
 
 /// flutter command categories for usage.
-class FlutterCommandCategory {
+abstract final class FlutterCommandCategory {
   static const String sdk = 'Flutter SDK';
   static const String project = 'Project';
   static const String tools = 'Tools & Devices';
@@ -156,30 +145,6 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
-
-  /// Maps command line web renderer strings to the corresponding web renderer mode
-  static const Map<String, WebRendererMode> _webRendererModeMap =
-  <String, WebRendererMode> {
-    'auto': WebRendererMode.autoDetect,
-    'canvaskit': WebRendererMode.canvaskit,
-    'html': WebRendererMode.html,
-  };
-
-  /// The map used to convert web renderer mode to a List of dart-defines.
-  static const Map<WebRendererMode, Iterable<String>> _webRendererDartDefines =
-  <WebRendererMode, Iterable<String>> {
-    WebRendererMode.autoDetect: <String>[
-      'FLUTTER_WEB_AUTO_DETECT=true',
-    ],
-    WebRendererMode.canvaskit: <String>[
-      'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=true',
-    ],
-    WebRendererMode.html: <String>[
-      'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=false',
-    ],
-  };
 
   @override
   ArgParser get argParser => _argParser;
@@ -638,8 +603,8 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDartDefinesOption,
       aliases: <String>[ kDartDefines ], // supported for historical reasons
       help: 'Additional key-value pairs that will be available as constants '
-            'from the String.fromEnvironment, bool.fromEnvironment, int.fromEnvironment, '
-            'and double.fromEnvironment constructors.\n'
+            'from the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment '
+            'constructors.\n'
             'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefinesOption}" multiple times.',
       valueHelp: 'foo=bar',
       splitCommas: false,
@@ -652,7 +617,7 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDartDefineFromFileOption,
       help: 'The path of a json format file where flutter define a global constant pool. '
           'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.\n'
+          'and int.fromEnvironment constructors; the key and field are json values.\n'
           'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
       valueHelp: 'use-define-config.json',
       splitCommas: false,
@@ -662,14 +627,10 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebRendererOption() {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
-      defaultsTo: 'auto',
-      allowed: <String>['auto', 'canvaskit', 'html'],
+      defaultsTo: WebRendererMode.auto.name,
+      allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
-      allowedHelp: <String, String>{
-        'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
-        'canvaskit': 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
-        'auto': 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
-      }
+      allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }
 
@@ -1229,12 +1190,9 @@ abstract class FlutterCommand extends Command<void> {
     final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
     List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    WebRendererMode webRenderer = WebRendererMode.autoDetect;
+    WebRendererMode webRenderer = WebRendererMode.auto;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      final WebRendererMode? mappedMode = _webRendererModeMap[stringArg(FlutterOptions.kWebRendererFlag)!];
-      if (mappedMode != null) {
-        webRenderer = mappedMode;
-      }
+      webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
       dartDefines = updateDartDefines(dartDefines, webRenderer);
     }
 
@@ -1420,10 +1378,7 @@ abstract class FlutterCommand extends Command<void> {
         && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
       dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
-    final Iterable<String>? webRendererDefine = _webRendererDartDefines[webRenderer];
-    if (webRendererDefine != null) {
-      dartDefinesSet.addAll(webRendererDefine);
-    }
+    dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
   }
 
@@ -1456,7 +1411,7 @@ abstract class FlutterCommand extends Command<void> {
 
     // Send timing.
     final List<String?> labels = <String?>[
-      getEnumName(commandResult.exitStatus),
+      commandResult.exitStatus.name,
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];

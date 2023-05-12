@@ -13,9 +13,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:matcher/expect.dart' show fail;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
-import 'package:test_api/expect.dart' show fail;
-import 'package:test_api/test_api.dart' as test_package show Timeout; // ignore: deprecated_member_use
+import 'package:test_api/scaffolding.dart' as test_package show Timeout;
 import 'package:vector_math/vector_math_64.dart';
 
 import '_binding_io.dart' if (dart.library.html) '_binding_web.dart' as binding;
@@ -107,7 +107,13 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
 
   @override
   TestDefaultBinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+    Future<ByteData?> keyboardHandler(ByteData? message) async {
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{});
+    }
+    return TestDefaultBinaryMessenger(
+      super.createBinaryMessenger(),
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
+    );
   }
 }
 
@@ -759,6 +765,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
+    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
+    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   });
 
@@ -1430,6 +1438,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
+    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
+    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   }) {
     assert(!inTest);
@@ -1927,6 +1937,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
+    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
+    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   }) {
     assert(!inTest);

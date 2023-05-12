@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -498,10 +499,24 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         ? effectiveActivePressedOverlayColor
         : effectiveInactivePressedOverlayColor;
     }
+    final bool? accessibilitySelected;
+    // Apple devices also use `selected` to annotate radio button's semantics
+    // state.
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        accessibilitySelected = null;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        accessibilitySelected = widget._selected;
+    }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget._selected,
+      selected: accessibilitySelected,
       child: buildToggleable(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
@@ -576,11 +591,11 @@ class _RadioDefaultsM2 extends RadioThemeData {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
-      if (states.contains(MaterialState.focused)) {
-        return _theme.focusColor;
-      }
       if (states.contains(MaterialState.hovered)) {
         return _theme.hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _theme.focusColor;
       }
       return Colors.transparent;
     });

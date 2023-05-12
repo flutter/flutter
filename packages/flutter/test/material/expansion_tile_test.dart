@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
@@ -695,6 +696,200 @@ void main() {
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
   });
+
+  testWidgets('Nested ListTile Semantics', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('First Expansion Tile'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Second Expansion Tile'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    // Focus the first ExpansionTile.
+    tester.binding.focusManager.primaryFocus?.nextFocus();
+    await tester.pumpAndSettle();
+
+    // The first list tile is focused.
+    expect(
+      tester.getSemantics(find.byType(ListTile).first),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocused: true,
+        isFocusable: true,
+        label: 'First Expansion Tile',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    // The first list tile is not focused.
+    expect(
+      tester.getSemantics(find.byType(ListTile).last),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocusable: true,
+        label: 'Second Expansion Tile',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('ExpansionTile Semantics announcement', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: Text('Title'),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // There is no semantics announcement without tap action.
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    // Tap the title to expand ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    // The announcement should be the opposite of the current state.
+    // The ExpansionTile is expanded, so the announcement should be
+    // "Expanded".
+    expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+    // Tap the title to collapse ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    // The announcement should be the opposite of the current state.
+    // The ExpansionTile is collapsed, so the announcement should be
+    // "Collapsed".
+    expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+    handle.dispose();
+  });
+
+  testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/pull/121624
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('First Expansion Tile'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Second Expansion Tile'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    SemanticsNode semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).first,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+    expect(semantics, isNotNull);
+    // The onTapHint is passed to semantics properties's hintOverrides.
+    expect(semantics.hintOverrides, isNotNull);
+    // The hint should be the opposite of the current state.
+    // The first ExpansionTile is collapsed, so the hint should be
+    // "double tap to expand".
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileCollapsedTapHint);
+
+    semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).last,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+
+    expect(semantics, isNotNull);
+    // The onTapHint is passed to semantics properties's hintOverrides.
+    expect(semantics.hintOverrides, isNotNull);
+    // The hint should be the opposite of the current state.
+    // The second ExpansionTile is expanded, so the hint should be
+    // "double tap to collapse".
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileExpandedTapHint);
+    handle.dispose();
+  });
+
+  testWidgets('Semantics hint for iOS and macOS', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('First Expansion Tile'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Second Expansion Tile'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    SemanticsNode semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).first,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+
+    expect(semantics, isNotNull);
+    expect(
+      semantics.hint,
+      '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+    );
+
+    semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).last,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+
+    expect(semantics, isNotNull);
+    expect(
+      semantics.hint,
+      '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
+    );
+    handle.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3

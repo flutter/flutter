@@ -616,7 +616,7 @@ class Text extends StatelessWidget {
     );
     if (registrar != null) {
       result = MouseRegion(
-        cursor: SystemMouseCursors.text,
+        cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: result,
       );
     }

@@ -41,5 +41,6 @@
   "selectAllButtonLabel": "اختيار الكل",
   "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
   "modalBarrierDismissLabel": "رفض",
-  "searchTextFieldPlaceholderLabel": "بحث"
+  "searchTextFieldPlaceholderLabel": "بحث",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

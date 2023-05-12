@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -274,6 +275,8 @@ abstract interface class DeletableChipAttributes {
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
+///  * [ChoiceChip], allows a single selection from a set of options. Choice
+///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * <https://material.io/design/components/chips.html>
 abstract interface class CheckmarkableChipAttributes {
@@ -1210,7 +1213,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget? child) {
-            return Container(
+            return Ink(
               decoration: ShapeDecoration(
                 shape: resolvedShape,
                 color: _getBackgroundColor(theme, chipTheme, chipDefaults),
