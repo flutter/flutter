@@ -7,8 +7,8 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/impeller/renderer/context.h"
-#include "flutter/impeller/toolkit/egl/display.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
+#include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 
@@ -17,10 +17,8 @@ namespace flutter {
 class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
                                        public AndroidSurface {
  public:
-  AndroidSurfaceGLImpeller(
-      const std::shared_ptr<AndroidContext>& android_context,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      std::unique_ptr<impeller::egl::Display> display);
+  explicit AndroidSurfaceGLImpeller(
+      const std::shared_ptr<AndroidContextGLImpeller>& android_context);
 
   // |AndroidSurface|
   ~AndroidSurfaceGLImpeller() override;
@@ -75,17 +73,9 @@ class AndroidSurfaceGLImpeller final : public GPUSurfaceGLDelegate,
   sk_sp<const GrGLInterface> GetGLInterface() const override;
 
  private:
-  class ReactorWorker;
-
-  std::shared_ptr<ReactorWorker> reactor_worker_;
-  std::unique_ptr<impeller::egl::Display> display_;
-  std::unique_ptr<impeller::egl::Config> onscreen_config_;
-  std::unique_ptr<impeller::egl::Config> offscreen_config_;
+  std::shared_ptr<AndroidContextGLImpeller> android_context_;
   std::unique_ptr<impeller::egl::Surface> onscreen_surface_;
   std::unique_ptr<impeller::egl::Surface> offscreen_surface_;
-  std::unique_ptr<impeller::egl::Context> onscreen_context_;
-  std::unique_ptr<impeller::egl::Context> offscreen_context_;
-  std::shared_ptr<impeller::Context> impeller_context_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
 
   bool is_valid_ = false;
