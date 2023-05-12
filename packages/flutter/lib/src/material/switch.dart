@@ -570,22 +570,22 @@ class Switch extends StatelessWidget {
 
   Widget _buildCupertinoSwitch(BuildContext context) {
     final Size size = _getSwitchSize(context);
-    return Focus(
-      focusNode: focusNode,
-      onFocusChange: onFocusChange,
-      autofocus: autofocus,
-      child: Container(
-        width: size.width, // Same size as the Material switch.
-        height: size.height,
-        alignment: Alignment.center,
-        child: CupertinoSwitch(
-          dragStartBehavior: dragStartBehavior,
-          value: value,
-          onChanged: onChanged,
-          activeColor: activeColor,
-          trackColor: inactiveTrackColor,
-          applyTheme: applyCupertinoTheme,
-        ),
+    return Container(
+      width: size.width, // Same size as the Material switch.
+      height: size.height,
+      alignment: Alignment.center,
+      child: CupertinoSwitch(
+        dragStartBehavior: dragStartBehavior,
+        value: value,
+        onChanged: onChanged,
+        activeColor: activeColor,
+        trackColor: inactiveTrackColor,
+        thumbColor: thumbColor?.resolve(<MaterialState>{}),
+        applyTheme: applyCupertinoTheme,
+        focusColor: focusColor,
+        focusNode: focusNode,
+        onFocusChange: onFocusChange,
+        autofocus: autofocus,
       ),
     );
   }
