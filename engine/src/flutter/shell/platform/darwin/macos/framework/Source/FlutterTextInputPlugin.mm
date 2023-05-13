@@ -61,6 +61,9 @@ static NSString* const kAutofillHints = @"hints";
 static NSString* const kTextAffinityDownstream = @"TextAffinity.downstream";
 static NSString* const kTextAffinityUpstream = @"TextAffinity.upstream";
 
+// TextInputAction types
+static NSString* const kInputActionNewline = @"TextInputAction.newline";
+
 #pragma mark - Enums
 /**
  * The affinity of the current cursor position. If the cursor is at a position representing
@@ -820,7 +823,8 @@ static char markerKey;
     _activeModel->CommitComposing();
     _activeModel->EndComposing();
   }
-  if ([self.inputType isEqualToString:kMultilineInputType]) {
+  if ([self.inputType isEqualToString:kMultilineInputType] &&
+      [self.inputAction isEqualToString:kInputActionNewline]) {
     [self insertText:@"\n" replacementRange:self.selectedRange];
   }
   [_channel invokeMethod:kPerformAction arguments:@[ self.clientID, self.inputAction ]];
