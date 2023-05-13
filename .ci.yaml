@@ -3973,7 +3973,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name:   - name: Mac_ios draw_points_perf_ios__timeline_summary
+      task_name: draw_points_perf_ios__timeline_summary
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
