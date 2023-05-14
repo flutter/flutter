@@ -90,7 +90,7 @@ static sk_sp<DlImage> MakeTestImage(int w, int h, int checker_size) {
 
 static auto TestImage1 = MakeTestImage(40, 40, 5);
 static auto TestImage2 = MakeTestImage(50, 50, 5);
-static auto TestSkImage = MakeTestImage(30, 30, 5) -> skia_image();
+static auto TestSkImage = MakeTestImage(30, 30, 5)->skia_image();
 
 static const DlImageColorSource kTestSource1(TestImage1,
                                              DlTileMode::kClamp,
@@ -150,9 +150,9 @@ static const DlBlurImageFilter kTestBlurImageFilter4(5.0,
 static const DlDilateImageFilter kTestDilateImageFilter1(5.0, 5.0);
 static const DlDilateImageFilter kTestDilateImageFilter2(6.0, 5.0);
 static const DlDilateImageFilter kTestDilateImageFilter3(5.0, 6.0);
-static const DlErodeImageFilter kTestErodeImageFilter1(5.0, 5.0);
-static const DlErodeImageFilter kTestErodeImageFilter2(6.0, 5.0);
-static const DlErodeImageFilter kTestErodeImageFilter3(5.0, 6.0);
+static const DlErodeImageFilter kTestErodeImageFilter1(4.0, 4.0);
+static const DlErodeImageFilter kTestErodeImageFilter2(4.0, 3.0);
+static const DlErodeImageFilter kTestErodeImageFilter3(3.0, 4.0);
 static const DlMatrixImageFilter kTestMatrixImageFilter1(
     SkMatrix::RotateDeg(45),
     kNearestSampling);

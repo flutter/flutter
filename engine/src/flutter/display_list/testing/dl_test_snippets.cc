@@ -515,7 +515,7 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
             }},
            {1, 16, 1, 24,
             [](DlOpReceiver& r) {
-              r.drawColor(SK_ColorBLUE, DlBlendMode::kDstIn);
+              r.drawColor(SK_ColorBLUE, DlBlendMode::kDstOut);
             }},
            {1, 16, 1, 24,
             [](DlOpReceiver& r) {

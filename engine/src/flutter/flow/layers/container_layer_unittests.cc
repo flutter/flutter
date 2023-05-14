@@ -561,9 +561,9 @@ using ContainerLayerDiffTest = DiffContextTest;
 
 // Insert PictureLayer amongst container layers
 TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
-  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50), 1);
-  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50), 1);
-  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50), 1);
+  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50));
+  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50));
+  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t1;
 
@@ -613,9 +613,9 @@ TEST_F(ContainerLayerDiffTest, PictureLayerInsertion) {
 
 // Insert picture layer amongst other picture layers
 TEST_F(ContainerLayerDiffTest, PictureInsertion) {
-  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50), 1);
-  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50), 1);
-  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50), 1);
+  auto pic1 = CreateDisplayList(SkRect::MakeLTRB(0, 0, 50, 50));
+  auto pic2 = CreateDisplayList(SkRect::MakeLTRB(100, 0, 150, 50));
+  auto pic3 = CreateDisplayList(SkRect::MakeLTRB(200, 0, 250, 50));
 
   MockLayerTree t1;
   t1.root()->Add(CreateDisplayListLayer(pic1));
