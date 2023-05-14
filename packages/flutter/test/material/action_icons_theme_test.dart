@@ -15,6 +15,29 @@ void main() {
         const ActionIconThemeData().copyWith().hashCode);
   });
 
+  test('ActionIconThemeData copyWith to replace given fields with the new values', () {
+    const ActionIconThemeData a = ActionIconThemeData();
+    Widget buttonIconBuilder(BuildContext context) {
+      return const SizedBox();
+    }
+    expect(a, isNot(a.copyWith(backButtonIconBuilder: buttonIconBuilder)));
+    expect(a, isNot(a.copyWith(closeButtonIconBuilder: buttonIconBuilder)));
+    expect(a, isNot(a.copyWith(drawerButtonIconBuilder: buttonIconBuilder)));
+    expect(a, isNot(a.copyWith(endDrawerButtonIconBuilder: buttonIconBuilder)));
+
+    // To ensure that using blank copyWith on object that isn't
+    // `const ActionIconThemeData()` returns object with same values.
+    ActionIconThemeData b;
+    b = a.copyWith(backButtonIconBuilder: buttonIconBuilder);
+    expect(b, b.copyWith());
+    b = a.copyWith(closeButtonIconBuilder: buttonIconBuilder);
+    expect(b, b.copyWith());
+    b = a.copyWith(drawerButtonIconBuilder: buttonIconBuilder);
+    expect(b, b.copyWith());
+    b = a.copyWith(endDrawerButtonIconBuilder: buttonIconBuilder);
+    expect(b, b.copyWith());
+  });
+
   test('ActionIconThemeData defaults', () {
     const ActionIconThemeData themeData = ActionIconThemeData();
     expect(themeData.backButtonIconBuilder, null);
