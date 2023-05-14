@@ -461,6 +461,52 @@ void main() {
     );
   });
 
+  testWidgets('Switch default overlayColor resolves hovered/focused state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final bool material3 = theme.useMaterial3;
+
+    Finder findSwitch() {
+      return find.byWidgetPredicate((Widget widget) => widget is Switch);
+    }
+
+    MaterialInkController? getSwitchMaterial(WidgetTester tester) {
+      return Material.of(tester.element(findSwitch()));
+    }
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: Switch(
+          focusNode: focusNode,
+          value: true,
+          onChanged: (_) { },
+        ),
+      ),
+    ));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getSwitchMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.primary.withOpacity(0.12) : theme.focusColor)
+    );
+
+    // On both hovered and focused, the overlay color should show hovered overlay color.
+    final Offset center = tester.getCenter(find.byType(Switch));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(getSwitchMaterial(tester),
+      paints..circle(color: material3 ? theme.colorScheme.primary.withOpacity(0.08) : theme.hoverColor)
+    );
+  });
+
   testWidgets('Switch can be set color', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
@@ -745,7 +791,10 @@ void main() {
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
     bool value = false;
-    const Color inactiveTrackColor = Colors.pink;
+    const Color activeTrackColor =  Color(0xffff1200);
+    const Color inactiveTrackColor =  Color(0xffff12ff);
+    const Color thumbColor = Color(0xffffff00);
+    const Color focusColor = Color(0xff00ff00);
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
@@ -756,7 +805,10 @@ void main() {
               child: Center(
                 child: Switch.adaptive(
                   value: value,
+                  activeColor: activeTrackColor,
                   inactiveTrackColor: inactiveTrackColor,
+                  thumbColor: const MaterialStatePropertyAll<Color?>(thumbColor),
+                  focusColor: focusColor,
                   onChanged: (bool newValue) {
                     setState(() {
                       value = newValue;
@@ -776,7 +828,10 @@ void main() {
       expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${platform.name}');
 
       final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+      expect(adaptiveSwitch.activeColor, activeTrackColor, reason: 'on ${platform.name}');
       expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.thumbColor, thumbColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.focusColor, focusColor, reason: 'on ${platform.name}');
 
       expect(value, isFalse, reason: 'on ${platform.name}');
       await tester.tap(find.byType(Switch));
@@ -1320,7 +1375,7 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x1f000000))
+        ..circle() // Radial reaction
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -1341,7 +1396,7 @@ void main() {
             color: const Color(0x802196f3),
             rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
           )
-        ..circle(color: const Color(0x1f000000))
+        ..circle()
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -3231,6 +3286,89 @@ void main() {
           ..rrect()..rrect()..rrect()..restore(),
       );
     });
+  });
+
+  testWidgets('Switch.adaptive(Cupertino) is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch.adaptive');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    const Color focusColor = Color(0xffff0000);
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Material(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: Switch.adaptive(
+                  value: value,
+                  onChanged: enabled ? (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  } : null,
+                  focusColor: focusColor,
+                  focusNode: focusNode,
+                  autofocus: true,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0xff34c759))
+        ..rrect(color: focusColor)
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+
+    // Check the false value.
+    value = false;
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0x28787880))
+        ..rrect(color: focusColor)
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+
+    // Check what happens when disabled.
+    value = false;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0x28787880))
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
   });
 }
 
