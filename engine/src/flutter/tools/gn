@@ -300,6 +300,8 @@ def to_gn_args(args):
   gn_args['skia_use_wuffs'] = True
   gn_args['skia_use_expat'] = args.target_os == 'android'
   gn_args['skia_use_fontconfig'] = args.enable_fontconfig
+  gn_args['skia_use_legacy_layer_bounds'
+         ] = True  # Temporary: See skbug.com/12083, skbug.com/12303.
   gn_args['skia_use_icu'] = True
   gn_args['is_official_build'] = True  # Disable Skia test utilities.
   gn_args['android_full_debug'
