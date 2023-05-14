@@ -830,18 +830,12 @@ TEST_P(DisplayListTest, CanDrawShadow) {
 }
 
 TEST_P(DisplayListTest, TransparentShadowProducesCorrectColor) {
-  flutter::DisplayListBuilder builder;
-  {
-    builder.Save();
-    builder.Scale(1.618, 1.618);
-    builder.DrawShadow(SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
-                       SK_ColorTRANSPARENT, 15, false, 1);
-    builder.Restore();
-  }
-  auto dl = builder.Build();
-
   DlDispatcher dispatcher;
-  dispatcher.drawDisplayList(dl, 1);
+  dispatcher.save();
+  dispatcher.scale(1.618, 1.618);
+  dispatcher.drawShadow(SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
+                        SK_ColorTRANSPARENT, 15, false, 1);
+  dispatcher.restore();
   auto picture = dispatcher.EndRecordingAsPicture();
 
   std::shared_ptr<RRectShadowContents> rrect_shadow;
