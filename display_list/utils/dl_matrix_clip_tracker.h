@@ -38,6 +38,7 @@ class DisplayListMatrixClipTracker {
   bool content_culled(const SkRect& content_bounds) const {
     return current_->content_culled(content_bounds);
   }
+  bool is_cull_rect_empty() const { return current_->is_cull_rect_empty(); }
 
   void save();
   void restore();
@@ -81,9 +82,10 @@ class DisplayListMatrixClipTracker {
     virtual SkMatrix matrix_3x3() const = 0;
     virtual SkM44 matrix_4x4() const = 0;
 
-    virtual SkRect device_cull_rect() const { return cull_rect_; }
+    SkRect device_cull_rect() const { return cull_rect_; }
     virtual SkRect local_cull_rect() const = 0;
     virtual bool content_culled(const SkRect& content_bounds) const;
+    bool is_cull_rect_empty() const { return cull_rect_.isEmpty(); }
 
     virtual void translate(SkScalar tx, SkScalar ty) = 0;
     virtual void scale(SkScalar sx, SkScalar sy) = 0;
