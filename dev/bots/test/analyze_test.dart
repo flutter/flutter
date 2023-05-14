@@ -124,6 +124,24 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifySpacesAfterFlowControlStatements', () async {
+    final String result = await capture(() => verifySpacesAfterFlowControlStatements(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:10: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:14: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:18: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:22: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:28: no space after flow control statement',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
