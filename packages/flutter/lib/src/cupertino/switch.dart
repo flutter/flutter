@@ -75,6 +75,9 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.applyTheme,
     this.focusColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
   });
 
@@ -129,6 +132,15 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
   /// Whether to apply the ambient [CupertinoThemeData].
@@ -356,6 +368,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
           onShowFocusHighlight: _onShowFocusHighlight,
           actions: _actionMap,
           enabled: isInteractive,
+          focusNode: widget.focusNode,
+          onFocusChange: widget.onFocusChange,
+          autofocus: widget.autofocus,
           child: _CupertinoSwitchRenderObjectWidget(
             value: widget.value,
             activeColor: activeColor,
