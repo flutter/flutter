@@ -1203,6 +1203,15 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanDrawPaintWithAdvancedBlend) {
+  Canvas canvas;
+  canvas.Scale(Vector2(0.2, 0.2));
+  canvas.DrawPaint({.color = Color::MediumTurquoise()});
+  canvas.DrawPaint({.color = Color::Color::OrangeRed().WithAlpha(0.5),
+                    .blend_mode = BlendMode::kHue});
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, PaintBlendModeIsRespected) {
   Paint paint;
   Canvas canvas;
