@@ -424,9 +424,11 @@ class _MacOSUtils extends _PosixUtils {
     return _hostPlatform!;
   }
 
-  /// Unzip into a temporary directory. For every file/directory/link in the
-  /// unzipped file, delete the corresponding entity in the [targetDirectory]
-  /// before moving from the temporary directory to the [targetDirectory].
+  /// Unzip into a temporary directory.
+  ///
+  /// For every file/directory/link in the unzipped file, delete the
+  /// corresponding entity in the [targetDirectory] before moving from the
+  /// temporary directory to the [targetDirectory].
   @override
   void unzip(File file, Directory targetDirectory) {
     if (!_processManager.canRun('unzip')) {
