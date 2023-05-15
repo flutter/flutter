@@ -76,6 +76,7 @@ std::optional<Rect> TextureContents::GetCoverage(const Entity& entity) const {
 std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
+    std::optional<Rect> coverage_limit,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     const std::string& label) const {
@@ -95,8 +96,12 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
         .opacity = opacity};
   }
   return Contents::RenderToSnapshot(
-      renderer, entity, sampler_descriptor.value_or(sampler_descriptor_), true,
-      label);
+      renderer,                                          // renderer
+      entity,                                            // entity
+      std::nullopt,                                      // coverage_limit
+      sampler_descriptor.value_or(sampler_descriptor_),  // sampler_descriptor
+      true,                                              // msaa_enabled
+      label);                                            // label
 }
 
 static TextureFillVertexShader::PerVertexData ComputeVertexData(

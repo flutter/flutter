@@ -27,8 +27,12 @@ std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     const Entity& entity) const {
   if (!snapshot_.has_value()) {
     snapshot_ = contents_->RenderToSnapshot(
-        renderer, entity, std::nullopt, msaa_enabled_,
-        SPrintF("Contents to %s Filter Snapshot", label.c_str()));
+        renderer,       // renderer
+        entity,         // entity
+        std::nullopt,   // coverage_limit
+        std::nullopt,   // sampler_descriptor
+        msaa_enabled_,  // msaa_enabled
+        SPrintF("Contents to %s Filter Snapshot", label.c_str()));  // label
   }
   return snapshot_;
 }

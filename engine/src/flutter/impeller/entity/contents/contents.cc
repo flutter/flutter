@@ -59,10 +59,14 @@ Contents::StencilCoverage Contents::GetStencilCoverage(
 std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
+    std::optional<Rect> coverage_limit,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     const std::string& label) const {
   auto coverage = GetCoverage(entity);
+  if (coverage_limit.has_value()) {
+    coverage = coverage->Intersection(*coverage_limit);
+  }
   if (!coverage.has_value()) {
     return std::nullopt;
   }
