@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
@@ -39,15 +40,16 @@ final RegExp _dotHomeStudioVersionMatcher =
 // See https://github.com/flutter/flutter/issues/124252.
 String? get javaPath => globals.androidStudio?.javaPath;
 
-class AndroidStudio implements Comparable<AndroidStudio> {
+class AndroidStudio {
+  /// A [version] value of null represents an unknown version.
   AndroidStudio(
     this.directory, {
-    Version? version,
-    this.configured,
+    this.version,
+    this.configuredPath,
     this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
-  }) : version = version ?? Version.unknown {
-    _init(version: version);
+  }) {
+    _initAndValidate();
   }
 
   static AndroidStudio? fromMacOSBundle(String bundlePath) {
@@ -147,8 +149,13 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   final String directory;
   final String studioAppName;
-  final Version version;
-  final String? configured;
+
+  /// The version of Android Studio.
+  ///
+  /// A null value represents an unknown version.
+  final Version? version;
+
+  final String? configuredPath;
   final String? presetPluginsPath;
 
   String? _javaPath;
@@ -163,8 +170,12 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (presetPluginsPath != null) {
       return presetPluginsPath!;
     }
-    final int major = version.major;
-    final int minor = version.minor;
+
+    // TODO(andrewkolos): This is a bug. We shouldn't treat an unknown
+    // version as equivalent to 0.0.
+    // See https://github.com/flutter/flutter/issues/121468.
+    final int major = version?.major ?? 0;
+    final int minor = version?.minor ?? 0;
     final String? homeDirPath = globals.fsUtils.homeDirPath;
     if (homeDirPath == null) {
       return null;
@@ -217,25 +228,31 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   List<String> get validationMessages => _validationMessages;
 
-  @override
-  int compareTo(AndroidStudio other) {
-    final int result = version.compareTo(other.version);
-    if (result == 0) {
-      return directory.compareTo(other.directory);
-    }
-    return result;
-  }
-
   /// Locates the newest, valid version of Android Studio.
+  ///
+  /// In the case that `--android-studio-dir` is configured, the version of
+  /// Android Studio found at that location is always returned, even if it is
+  /// invalid.
   static AndroidStudio? latestValid() {
-    final String? configuredStudio = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudio != null) {
-      String configuredStudioPath = configuredStudio;
-      if (globals.platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
-        configuredStudioPath = globals.fs.path.join(configuredStudioPath, 'Contents');
+    final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
+    if (configuredStudioPath != null) {
+      String correctedConfiguredStudioPath = configuredStudioPath;
+      if (globals.platform.isMacOS && !correctedConfiguredStudioPath.endsWith('Contents')) {
+        correctedConfiguredStudioPath = globals.fs.path.join(correctedConfiguredStudioPath, 'Contents');
       }
-      return AndroidStudio(configuredStudioPath,
-          configured: configuredStudio);
+
+      if (!globals.fs.directory(correctedConfiguredStudioPath).existsSync()) {
+        throwToolExit('''
+Could not find the Android Studio installation at the manually configured path "$configuredStudioPath".
+Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
+
+To have flutter search for Android Studio installations automatically, remove
+the configured path by running this command: flutter config --android-studio-dir ''
+''');
+      }
+
+      return AndroidStudio(correctedConfiguredStudioPath,
+          configuredPath: configuredStudioPath);
     }
 
     // Find all available Studio installations.
@@ -245,7 +262,19 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     AndroidStudio? newest;
     for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
-      if (newest == null || studio.compareTo(newest) > 0) {
+      if (newest == null) {
+        newest = studio;
+        continue;
+      }
+
+      // We prefer installs with known versions.
+      if (studio.version != null && newest.version == null) {
+        newest = studio;
+      } else if (studio.version != null && newest.version != null &&
+          studio.version! > newest.version!) {
+        newest = studio;
+      } else if (studio.version == null && newest.version == null &&
+            studio.directory.compareTo(newest.directory) > 0) {
         newest = studio;
       }
     }
@@ -331,13 +360,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool hasStudioAt(String path, { Version? newerThan }) {
+    bool alreadyFoundStudioAt(String path, { Version? newerThan }) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path) {
           return false;
         }
         if (newerThan != null) {
-          return studio.version.compareTo(newerThan) >= 0;
+          if (studio.version == null) {
+            return false;
+          }
+          return studio.version!.compareTo(newerThan) >= 0;
         }
         return true;
       });
@@ -373,7 +405,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
       for (final Directory entity in entities) {
         final AndroidStudio? studio = AndroidStudio.fromHomeDot(entity);
-        if (studio != null && !hasStudioAt(studio.directory, newerThan: studio.version)) {
+        if (studio != null && !alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
           studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
           studios.add(studio);
         }
@@ -404,7 +436,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
                 version: Version.parse(version),
                 studioAppName: title,
               );
-              if (!hasStudioAt(studio.directory, newerThan: studio.version)) {
+              if (!alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
                 studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
                 studios.add(studio);
               }
@@ -415,14 +447,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioDir != null && !hasStudioAt(configuredStudioDir)) {
+    if (configuredStudioDir != null && !alreadyFoundStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
-          configured: configuredStudioDir));
+          configuredPath: configuredStudioDir));
     }
 
     if (globals.platform.isLinux) {
       void checkWellKnownPath(String path) {
-        if (globals.fs.isDirectorySync(path) && !hasStudioAt(path)) {
+        if (globals.fs.isDirectorySync(path) && !alreadyFoundStudioAt(path)) {
           studios.add(AndroidStudio(path));
         }
       }
@@ -438,12 +470,12 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 
-  void _init({Version? version}) {
+  void _initAndValidate() {
     _isValid = false;
     _validationMessages.clear();
 
-    if (configured != null) {
-      _validationMessages.add('android-studio-dir = $configured');
+    if (configuredPath != null) {
+      _validationMessages.add('android-studio-dir = $configuredPath');
     }
 
     if (!globals.fs.isDirectorySync(directory)) {
@@ -453,15 +485,15 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     final String javaPath;
     if (globals.platform.isMacOS) {
-      if (version != null && version.major < 2020) {
+      if (version != null && version!.major < 2020) {
         javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version.major == 2022) {
+      } else if (version != null && version!.major == 2022) {
         javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
       } else {
         javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
       }
     } else {
-      if (version != null && version.major == 2022) {
+      if (version != null && version!.major == 2022) {
         javaPath = globals.fs.path.join(directory, 'jbr');
       } else {
         javaPath = globals.fs.path.join(directory, 'jre');

@@ -387,7 +387,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         OperatingSystemUtils: () => FakeOperatingSystemUtilsWithJava(),
         Platform: () => FakePlatform(environment: <String, String>{
-          'JAVA_HOME': 'java-home-path',
+          AndroidSdk.javaHomeEnvironmentVariable: 'java-home-path',
         }),
         Config: () => Config,
         AndroidStudio: () => FakeAndroidStudioWithoutJdk(),

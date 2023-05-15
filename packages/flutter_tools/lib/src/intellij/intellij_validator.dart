@@ -125,11 +125,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
-    // Ignore unknown versions.
-    if (minVersion == Version.unknown) {
-      return;
-    }
-
     final Version? installedVersion = Version.parse(version);
     if (installedVersion == null) {
       return;

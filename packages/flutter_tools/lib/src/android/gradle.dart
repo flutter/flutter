@@ -26,14 +26,29 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
+
+/// The regex to grab variant names from printVariants gradle task
+///
+/// The task is defined in flutter/packages/flutter_tools/gradle/flutter.gradle.
+///
+/// The expected output from the task should be similar to:
+///
+/// BuildVariant: debug
+/// BuildVariant: release
+/// BuildVariant: profile
+final RegExp _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
+const String _kBuildVariantRegexGroupName = 'variant';
 
 /// The directory where the APK artifact is generated.
 Directory getApkDirectory(FlutterProject project) {
@@ -124,13 +139,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Usage usage,
     required GradleUtils gradleUtils,
     required Platform platform,
+    required AndroidStudio? androidStudio,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _usage = usage,
        _gradleUtils = gradleUtils,
+       _androidStudio = androidStudio,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       _platform = platform;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -139,6 +157,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final Usage _usage;
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
+  final AndroidStudio? _androidStudio;
+  final Platform _platform;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -243,6 +263,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, _logger),
+      AndroidStudioJavaGradleConflictMigration(_logger,
+          project: project.android,
+          androidStudio: _androidStudio,
+          fileSystem: _fileSystem,
+          processUtils: _processUtils,
+          platform: _platform,
+          os: globals.os,
+          androidSdk: globals.androidSdk)
+      ,
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
@@ -397,13 +426,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
+      final String? javaHome = globals.androidSdk?.javaHome;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+          if (javaHome != null)
+            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
         },
         mapFunction: consumeLog,
       );
@@ -666,13 +696,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
+      final String? javaHome = globals.androidSdk?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: <String, String>{
-          if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+          if (javaHome != null)
+            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
         },
       );
     } finally {
@@ -701,6 +732,51 @@ class AndroidGradleBuilder implements AndroidBuilder {
       '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(repoDirectory.path)}.',
       color: TerminalColor.green,
     );
+  }
+
+  @override
+  Future<List<String>> getBuildVariants({required FlutterProject project}) async {
+    final Status status = _logger.startProgress(
+      "Running Gradle task 'printBuildVariants'...",
+    );
+    final List<String> command = <String>[
+      _gradleUtils.getExecutable(project),
+      '-q', // suppresses gradle output.
+      'printBuildVariants',
+    ];
+
+    final Stopwatch sw = Stopwatch()
+      ..start();
+    RunResult result;
+    try {
+      final String? javaHome = globals.androidSdk?.javaHome;
+      result = await _processUtils.run(
+        command,
+        workingDirectory: project.android.hostAppGradleRoot.path,
+        allowReentrantFlutter: true,
+        environment: <String, String>{
+          if (javaHome != null)
+            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
+        },
+      );
+    } finally {
+      status.stop();
+    }
+    _usage.sendTiming('print', 'android build variants', sw.elapsed);
+
+    if (result.exitCode != 0) {
+      _logger.printStatus(result.stdout, wrap: false);
+      _logger.printError(result.stderr, wrap: false);
+      return const <String>[];
+    }
+    final List<String> options = <String>[];
+    for (final String line in LineSplitter.split(result.stdout)) {
+      final RegExpMatch? match = _kBuildVariantRegex.firstMatch(line);
+      if (match != null) {
+        options.add(match.namedGroup(_kBuildVariantRegexGroupName)!);
+      }
+    }
+    return options;
   }
 }
 
