@@ -301,7 +301,7 @@ class _RadioPainter extends ToggleablePainter {
   bool get checkmarkStyle => _checkmarkStyle;
   bool _checkmarkStyle = false;
   set checkmarkStyle(bool value) {
-    if(value == _checkmarkStyle) {
+    if (value == _checkmarkStyle) {
       return;
     }
     _checkmarkStyle = value;
@@ -319,7 +319,7 @@ class _RadioPainter extends ToggleablePainter {
         ..strokeWidth = 0.1;
 
     if (checkmarkStyle) {
-      if(value ?? false) {
+      if (value ?? false) {
         final Path path = Path();
         final Paint checkPaint = Paint()
           ..color = activeColor
