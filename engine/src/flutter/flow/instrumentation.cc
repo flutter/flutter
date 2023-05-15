@@ -102,7 +102,7 @@ void Stopwatch::InitVisualizeSurface(SkISize size) const {
 
   // TODO(garyq): Use a GPU surface instead of a CPU surface.
   visualize_cache_surface_ =
-      SkSurface::MakeRasterN32Premul(size.width(), size.height());
+      SkSurfaces::Raster(SkImageInfo::MakeN32Premul(size));
 
   SkCanvas* cache_canvas = visualize_cache_surface_->getCanvas();
 

@@ -83,15 +83,15 @@ bool EmbedderTestBackingStoreProducer::CreateFramebuffer(
   const auto image_info =
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height);
 
-  auto surface = SkSurface::MakeRenderTarget(
-      context_.get(),               // context
-      skgpu::Budgeted::kNo,         // budgeted
-      image_info,                   // image info
-      1,                            // sample count
-      kBottomLeft_GrSurfaceOrigin,  // surface origin
-      nullptr,                      // surface properties
-      false                         // mipmaps
-  );
+  auto surface =
+      SkSurfaces::RenderTarget(context_.get(),               // context
+                               skgpu::Budgeted::kNo,         // budgeted
+                               image_info,                   // image info
+                               1,                            // sample count
+                               kBottomLeft_GrSurfaceOrigin,  // surface origin
+                               nullptr,  // surface properties
+                               false     // mipmaps
+      );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create render target for compositor layer.";
@@ -136,15 +136,15 @@ bool EmbedderTestBackingStoreProducer::CreateTexture(
   const auto image_info =
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height);
 
-  auto surface = SkSurface::MakeRenderTarget(
-      context_.get(),               // context
-      skgpu::Budgeted::kNo,         // budgeted
-      image_info,                   // image info
-      1,                            // sample count
-      kBottomLeft_GrSurfaceOrigin,  // surface origin
-      nullptr,                      // surface properties
-      false                         // mipmaps
-  );
+  auto surface =
+      SkSurfaces::RenderTarget(context_.get(),               // context
+                               skgpu::Budgeted::kNo,         // budgeted
+                               image_info,                   // image info
+                               1,                            // sample count
+                               kBottomLeft_GrSurfaceOrigin,  // surface origin
+                               nullptr,  // surface properties
+                               false     // mipmaps
+      );
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not create render target for compositor layer.";
@@ -186,7 +186,7 @@ bool EmbedderTestBackingStoreProducer::CreateTexture(
 bool EmbedderTestBackingStoreProducer::CreateSoftware(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
-  auto surface = SkSurface::MakeRaster(
+  auto surface = SkSurfaces::Raster(
       SkImageInfo::MakeN32Premul(config->size.width, config->size.height));
 
   if (!surface) {
@@ -224,7 +224,7 @@ bool EmbedderTestBackingStoreProducer::CreateSoftware2(
     return false;
   }
 
-  auto surface = SkSurface::MakeRaster(SkImageInfo::Make(
+  auto surface = SkSurfaces::Raster(SkImageInfo::Make(
       SkISize::Make(config->size.width, config->size.height), *color_info));
   if (!surface) {
     FML_LOG(ERROR)
@@ -261,7 +261,7 @@ bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
 #ifdef SHELL_ENABLE_METAL
-  // TODO(gw280): Use SkSurface::MakeRenderTarget instead of generating our
+  // TODO(gw280): Use SkSurfaces::RenderTarget instead of generating our
   // own MTLTexture and wrapping it.
   auto surface_size = SkISize::Make(config->size.width, config->size.height);
   auto texture_info = test_metal_context_->CreateMetalTexture(surface_size);
@@ -271,7 +271,7 @@ bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
   GrBackendTexture backend_texture(surface_size.width(), surface_size.height(),
                                    GrMipmapped::kNo, skia_texture_info);
 
-  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
+  sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
       context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,
       kBGRA_8888_SkColorType, nullptr, nullptr);
 
@@ -326,11 +326,11 @@ bool EmbedderTestBackingStoreProducer::CreateVulkanImage(
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
-  SkSurface::TextureReleaseProc release_vktexture = [](void* user_data) {
+  SkSurfaces::TextureReleaseProc release_vktexture = [](void* user_data) {
     delete reinterpret_cast<TestVulkanImage*>(user_data);
   };
 
-  sk_sp<SkSurface> surface = SkSurface::MakeFromBackendTexture(
+  sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
       context_.get(),            // context
       backend_texture,           // back-end texture
       kTopLeft_GrSurfaceOrigin,  // surface origin

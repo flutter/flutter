@@ -6,6 +6,7 @@
 
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 namespace flutter {
 namespace testing {
@@ -34,7 +35,7 @@ std::shared_ptr<DlSurfaceInstance>
 DlOpenGLSurfaceProvider::MakeOffscreenSurface(size_t width,
                                               size_t height,
                                               PixelFormat format) const {
-  auto offscreen_surface = SkSurface::MakeRenderTarget(
+  auto offscreen_surface = SkSurfaces::RenderTarget(
       (GrRecordingContext*)gl_surface_->GetGrContext().get(),
       skgpu::Budgeted::kNo, MakeInfo(format, width, height), 1,
       kTopLeft_GrSurfaceOrigin, nullptr, false);

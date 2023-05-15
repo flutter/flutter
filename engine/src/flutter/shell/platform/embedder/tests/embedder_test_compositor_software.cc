@@ -24,7 +24,7 @@ bool EmbedderTestCompositorSoftware::UpdateOffscrenComposition(
 
   const auto image_info = SkImageInfo::MakeN32Premul(surface_size_);
 
-  auto surface = SkSurface::MakeRaster(image_info);
+  auto surface = SkSurfaces::Raster(image_info);
 
   if (!surface) {
     FML_LOG(ERROR) << "Could not update the off-screen composition.";

@@ -23,7 +23,7 @@ std::shared_ptr<DlSurfaceInstance>
 DlSoftwareSurfaceProvider::MakeOffscreenSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) const {
-  auto surface = SkSurface::MakeRaster(MakeInfo(format, width, height));
+  auto surface = SkSurfaces::Raster(MakeInfo(format, width, height));
   surface->getCanvas()->clear(SK_ColorTRANSPARENT);
   return std::make_shared<DlSurfaceInstanceBase>(surface);
 }

@@ -22,6 +22,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
@@ -280,7 +281,7 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
             std::to_string(image_info.height()));
   };
 
-  sk_sp<SkSurface> surface = SkSurface::MakeRaster(image_info);
+  sk_sp<SkSurface> surface = SkSurfaces::Raster(image_info);
   auto canvas = DlSkCanvasAdapter(surface->getCanvas());
   canvas.Clear(DlColor::kTransparent());
   canvas.DrawDisplayList(display_list);
@@ -341,7 +342,7 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
               return;
             }
 
-            sk_sp<SkSurface> sk_surface = SkSurface::MakeFromBackendTexture(
+            sk_sp<SkSurface> sk_surface = SkSurfaces::WrapBackendTexture(
                 context, texture, kTopLeft_GrSurfaceOrigin, /*sampleCnt=*/0,
                 image_info.colorType(), image_info.refColorSpace(), nullptr);
             if (!sk_surface) {

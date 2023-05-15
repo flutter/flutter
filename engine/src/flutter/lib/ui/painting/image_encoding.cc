@@ -88,7 +88,7 @@ sk_sp<SkData> CopyImageByteData(const sk_sp<SkImage>& raster_image,
   }
 
   // Perform swizzle if the type doesnt match the specification.
-  auto surface = SkSurface::MakeRaster(
+  auto surface = SkSurfaces::Raster(
       SkImageInfo::Make(raster_image->width(), raster_image->height(),
                         color_type, alpha_type, nullptr));
 

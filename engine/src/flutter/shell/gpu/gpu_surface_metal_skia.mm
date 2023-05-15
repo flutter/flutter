@@ -25,6 +25,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceProps.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
 static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
@@ -39,12 +40,12 @@ sk_sp<SkSurface> CreateSurfaceFromMetalTexture(GrDirectContext* context,
                                                SkColorType color_type,
                                                sk_sp<SkColorSpace> color_space,
                                                const SkSurfaceProps* props,
-                                               SkSurface::TextureReleaseProc release_proc,
+                                               SkSurfaces::TextureReleaseProc release_proc,
                                                SkSurface::ReleaseContext release_context) {
   GrMtlTextureInfo info;
   info.fTexture.reset([texture retain]);
   GrBackendTexture backend_texture(texture.width, texture.height, GrMipmapped::kNo, info);
-  return SkSurface::MakeFromBackendTexture(
+  return SkSurfaces::WrapBackendTexture(
       context, backend_texture, origin, static_cast<int>(sample_cnt), color_type,
       std::move(color_space), props, release_proc, release_context);
 }
@@ -209,7 +210,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromMTLTexture(
 
   sk_sp<SkSurface> surface = CreateSurfaceFromMetalTexture(
       context_.get(), mtl_texture, kTopLeft_GrSurfaceOrigin, msaa_samples_, kBGRA_8888_SkColorType,
-      nullptr, nullptr, static_cast<SkSurface::TextureReleaseProc>(texture.destruction_callback),
+      nullptr, nullptr, static_cast<SkSurfaces::TextureReleaseProc>(texture.destruction_callback),
       texture.destruction_context);
 
   if (!surface) {

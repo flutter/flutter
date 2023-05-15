@@ -10,6 +10,7 @@
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "vulkan/vulkan_core.h"
 
 namespace flutter {
@@ -119,7 +120,7 @@ sk_sp<SkSurface> GPUSurfaceVulkan::CreateSurfaceFromVulkanImage(
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
-  return SkSurface::MakeFromBackendTexture(
+  return SkSurfaces::WrapBackendTexture(
       skia_context_.get(),          // context
       backend_texture,              // back-end texture
       kTopLeft_GrSurfaceOrigin,     // surface origin

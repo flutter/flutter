@@ -246,7 +246,7 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
                                               image_info);
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-  return SkSurface::MakeFromBackendRenderTarget(
+  return SkSurfaces::WrapBackendRenderTarget(
       gr_context,                // context
       backend_render_target,     // backend render target
       kTopLeft_GrSurfaceOrigin,  // origin
