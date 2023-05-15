@@ -23,7 +23,8 @@ FilterInput::Variant TextureFilterInput::GetInput() const {
 std::optional<Snapshot> TextureFilterInput::GetSnapshot(
     const std::string& label,
     const ContentContext& renderer,
-    const Entity& entity) const {
+    const Entity& entity,
+    std::optional<Rect> coverage_limit) const {
   auto snapshot =
       Snapshot{.texture = texture_, .transform = GetTransform(entity)};
   if (texture_->GetMipCount() > 1) {

@@ -24,14 +24,15 @@ FilterInput::Variant ContentsFilterInput::GetInput() const {
 std::optional<Snapshot> ContentsFilterInput::GetSnapshot(
     const std::string& label,
     const ContentContext& renderer,
-    const Entity& entity) const {
+    const Entity& entity,
+    std::optional<Rect> coverage_limit) const {
   if (!snapshot_.has_value()) {
     snapshot_ = contents_->RenderToSnapshot(
-        renderer,       // renderer
-        entity,         // entity
-        std::nullopt,   // coverage_limit
-        std::nullopt,   // sampler_descriptor
-        msaa_enabled_,  // msaa_enabled
+        renderer,        // renderer
+        entity,          // entity
+        coverage_limit,  // coverage_limit
+        std::nullopt,    // sampler_descriptor
+        msaa_enabled_,   // msaa_enabled
         SPrintF("Contents to %s Filter Snapshot", label.c_str()));  // label
   }
   return snapshot_;

@@ -27,7 +27,8 @@ std::optional<Entity> MatrixFilterContents::RenderFilter(
     const ContentContext& renderer,
     const Entity& entity,
     const Matrix& effect_transform,
-    const Rect& coverage) const {
+    const Rect& coverage,
+    const std::optional<Rect>& coverage_hint) const {
   auto snapshot = inputs[0]->GetSnapshot("Matrix", renderer, entity);
   if (!snapshot.has_value()) {
     return std::nullopt;
