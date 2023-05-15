@@ -85,6 +85,7 @@ wasm_toolchain("skwasm") {
 
     # skwasm is multithreaded
     wasm_use_pthreads = true
+    wasm_prioritize_size = true
   }
 }
 
