@@ -21,6 +21,7 @@
 #include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -64,9 +65,9 @@ static sk_sp<SkSurface> GetSurfaceFromTexture(const sk_sp<GrDirectContext>& skia
   GrBackendTexture backend_texture(texture_size.width(), texture_size.height(), GrMipmapped::kNo,
                                    info);
 
-  return SkSurface::MakeFromBackendTexture(skia_context.get(), backend_texture,
-                                           kTopLeft_GrSurfaceOrigin, 1, kBGRA_8888_SkColorType,
-                                           nullptr, nullptr);
+  return SkSurfaces::WrapBackendTexture(skia_context.get(), backend_texture,
+                                        kTopLeft_GrSurfaceOrigin, 1, kBGRA_8888_SkColorType,
+                                        nullptr, nullptr);
 }
 
 TEST_F(EmbedderTest, ExternalTextureMetal) {

@@ -295,12 +295,12 @@ bool SoftwareSurface::SetupSkiaSurface(
   const size_t vmo_stride =
       BytesPerRow(buffer_collection_info.settings, 4u, size.width());
   SkSurfaceProps sk_surface_props(0, kUnknown_SkPixelGeometry);
-  sk_surface_ = SkSurface::MakeRasterDirect(
+  sk_surface_ = SkSurfaces::WrapPixels(
       SkImageInfo::Make(size, kSkiaColorType, kPremul_SkAlphaType,
                         SkColorSpace::MakeSRGB()),
       vmo_base + vmo_offset, vmo_stride, &sk_surface_props);
   if (!sk_surface_ || sk_surface_->getCanvas() == nullptr) {
-    FML_LOG(ERROR) << "SkSurface::MakeRasterDirect failed.";
+    FML_LOG(ERROR) << "SkSurfaces::WrapPixels failed.";
     return false;
   }
 

@@ -12,6 +12,7 @@
 #include "third_party/skia/include/core/SkSerialProcs.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
@@ -23,14 +24,14 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrDirectContext* surface_context,
   if (surface_context) {
     // There is a rendering surface that may contain textures that are going to
     // be referenced in the layer tree about to be drawn.
-    return SkSurface::MakeRenderTarget(
+    return SkSurfaces::RenderTarget(
         reinterpret_cast<GrRecordingContext*>(surface_context),
         skgpu::Budgeted::kNo, image_info);
   }
 
   // There is no rendering surface, assume no GPU textures are present and
   // create a raster surface.
-  return SkSurface::MakeRaster(image_info);
+  return SkSurfaces::Raster(image_info);
 }
 
 /// Returns a buffer containing a snapshot of the surface.

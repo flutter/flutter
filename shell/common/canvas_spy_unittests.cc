@@ -30,11 +30,11 @@ TEST(CanvasSpyTest, DrawingIsTracked) {
 
 TEST(CanvasSpyTest, SpiedCanvasIsDrawing) {
   auto actual_surface =
-      SkSurface::MakeRaster(SkImageInfo::MakeN32Premul(100, 100));
+      SkSurfaces::Raster(SkImageInfo::MakeN32Premul(100, 100));
   SkCanvas* actual_canvas = actual_surface->getCanvas();
 
   auto expected_surface =
-      SkSurface::MakeRaster(SkImageInfo::MakeN32Premul(100, 100));
+      SkSurfaces::Raster(SkImageInfo::MakeN32Premul(100, 100));
   SkCanvas* expected_canvas = expected_surface->getCanvas();
 
   CanvasSpy canvas_spy = CanvasSpy(actual_canvas);

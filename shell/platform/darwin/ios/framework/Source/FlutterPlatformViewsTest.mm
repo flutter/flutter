@@ -2397,7 +2397,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   // SKSurface is required if the root FlutterView is present.
   const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       std::move(mock_sk_surface), framebuffer_info,
@@ -2426,7 +2426,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutterPlatformViewsController->PrerollCompositeEmbeddedView(0, std::move(embeddedViewParams1));
   flutterPlatformViewsController->CompositeEmbeddedView(0);
 
-  mock_sk_surface = SkSurface::MakeRaster(image_info);
+  mock_sk_surface = SkSurfaces::Raster(image_info);
   mock_surface = std::make_unique<flutter::SurfaceFrame>(
       std::move(mock_sk_surface), framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
@@ -2493,7 +2493,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   // SKSurface is required if the root FlutterView is present.
   const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       std::move(mock_sk_surface), framebuffer_info,
@@ -2522,7 +2522,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   flutterPlatformViewsController->PrerollCompositeEmbeddedView(1, std::move(embeddedViewParams2));
   flutterPlatformViewsController->CompositeEmbeddedView(1);
 
-  mock_sk_surface = SkSurface::MakeRaster(image_info);
+  mock_sk_surface = SkSurfaces::Raster(image_info);
   mock_surface = std::make_unique<flutter::SurfaceFrame>(
       std::move(mock_sk_surface), framebuffer_info,
       [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
@@ -2854,7 +2854,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     [self waitForExpectationsWithTimeout:30 handler:nil];
 
     const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-    sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+    sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
     flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
     auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
         std::move(mock_sk_surface), framebuffer_info,
@@ -2881,7 +2881,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
     flutterPlatformViewsController->CompositeEmbeddedView(1);
 
     const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-    sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+    sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
     flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
     auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
         std::move(mock_sk_surface), framebuffer_info,

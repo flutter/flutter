@@ -20,6 +20,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 namespace flutter {
 
@@ -64,9 +65,9 @@ std::unique_ptr<RasterCacheResult> RasterCache::Rasterize(
 
   sk_sp<SkSurface> surface =
       context.gr_context
-          ? SkSurface::MakeRenderTarget(context.gr_context,
-                                        skgpu::Budgeted::kYes, image_info)
-          : SkSurface::MakeRaster(image_info);
+          ? SkSurfaces::RenderTarget(context.gr_context, skgpu::Budgeted::kYes,
+                                     image_info)
+          : SkSurfaces::Raster(image_info);
 
   if (!surface) {
     return nullptr;
