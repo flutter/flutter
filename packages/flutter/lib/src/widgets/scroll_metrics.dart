@@ -27,6 +27,14 @@ import 'package:flutter/rendering.dart';
 /// [extentInside], and [extentAfter], which may be more useful for use cases
 /// such as scroll bars; for example, see [Scrollbar].
 ///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the [ScrollMetrics] changed as a result of resizing the [Viewport].
+/// Press the floating action button to increase the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [FixedScrollMetrics], which is an immutable object that implements this
@@ -135,6 +143,14 @@ mixin ScrollMetrics {
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
 ///
 /// For details, see [ScrollMetrics], which defines this object's interfaces.
+///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the [ScrollMetrics] changed as a result of resizing the [Viewport].
+/// Press the floating action button to increase the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
 class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
