@@ -261,7 +261,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   OutlinedBorder? _shape;
   set shape(OutlinedBorder? value){
     assert(radius == null || value == null);
-    if(shape == value) {
+    if (shape == value) {
       return;
     }
 
@@ -384,7 +384,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
   double get _leadingTrackMainAxisOffset {
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
         return padding.top;
@@ -402,7 +402,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Thumb Offsets
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset {
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
         return padding.top + mainAxisMargin;
@@ -558,7 +558,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
     _debugAssertIsValidOrientation(_resolvedOrientation);
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
@@ -1711,7 +1711,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       // The physics may allow overscroll when actually *scrolling*, but
       // dragging on the scrollbar does not always allow us to enter overscroll.
-      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+      switch (ScrollConfiguration.of(context).getPlatform(context)) {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -2133,7 +2133,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               gestures: _gestures,
               child: MouseRegion(
                 onExit: (PointerExitEvent event) {
-                  switch(event.kind) {
+                  switch (event.kind) {
                     case PointerDeviceKind.mouse:
                     case PointerDeviceKind.trackpad:
                       if (enableGestures) {
@@ -2147,7 +2147,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   }
                 },
                 onHover: (PointerHoverEvent event) {
-                  switch(event.kind) {
+                  switch (event.kind) {
                     case PointerDeviceKind.mouse:
                     case PointerDeviceKind.trackpad:
                       if (enableGestures) {

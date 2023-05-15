@@ -285,7 +285,7 @@ void main() {
       await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0) {
           expect(logs[i], 'down $b');
         } else if (i != logs.length - 1) {
@@ -342,7 +342,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0) {
           expect(logs[i], 'down $b');
         } else if (i != logs.length - 1) {
@@ -374,7 +374,7 @@ void main() {
       await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0) {
           expect(logs[i], 'down $b');
         } else if (i != logs.length - 1) {
@@ -408,7 +408,7 @@ void main() {
 
       await tester.drag(find.text('test'), const Offset(-150.0, 200.0), kind: PointerDeviceKind.trackpad);
 
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0) {
           expect(logs[i], 'panZoomStart');
         } else if (i != logs.length - 1) {
@@ -441,7 +441,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0) {
           expect(logs[i], 'down $b');
         } else if (i != logs.length - 1) {
@@ -506,7 +506,7 @@ void main() {
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
-      for(int i = 0; i < logs.length; i++) {
+      for (int i = 0; i < logs.length; i++) {
         if (i == 0) {
           expect(logs[i], 'down $b');
         } else if (i != logs.length - 1) {

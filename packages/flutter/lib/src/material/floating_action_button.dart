@@ -556,7 +556,7 @@ class FloatingActionButton extends StatelessWidget {
       data: IconThemeData(size: iconSize),
       child: child!,
     ) : child;
-    switch(_floatingActionButtonType) {
+    switch (_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
       case _FloatingActionButtonType.small:

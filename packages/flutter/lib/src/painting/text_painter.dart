@@ -1199,7 +1199,7 @@ class TextPainter {
       // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
       return null;
     }
-    return switch(_computeCaretMetrics(position)) {
+    return switch (_computeCaretMetrics(position)) {
       _LineCaretMetrics(:final double fullHeight) => fullHeight,
       _EmptyLineCaretMetrics() => null,
     };

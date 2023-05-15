@@ -1322,7 +1322,7 @@ class ContainerLayer extends Layer {
     }
     final List<Layer> children = <Layer>[];
     Layer? child = firstChild;
-    while(child != null) {
+    while (child != null) {
       children.add(child);
       if (child is ContainerLayer) {
         children.addAll(child.depthFirstIterateChildren());

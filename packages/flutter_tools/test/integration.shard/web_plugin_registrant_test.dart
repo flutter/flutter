@@ -357,11 +357,11 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
         for (i++; i < lines.length; i++) {
           final String innerLine = lines[i];
           final String sdkLine = "  sdk: '$version'";
-          if(innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
+          if (innerLine.isNotEmpty && !innerLine.startsWith('  ')) {
             lines.insert(i, sdkLine);
             break;
           }
-          if(innerLine.startsWith('  sdk:')) {
+          if (innerLine.startsWith('  sdk:')) {
             lines[i] = sdkLine;
             break;
           }

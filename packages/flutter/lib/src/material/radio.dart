@@ -502,7 +502,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     final bool? accessibilitySelected;
     // Apple devices also use `selected` to annotate radio button's semantics
     // state.
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

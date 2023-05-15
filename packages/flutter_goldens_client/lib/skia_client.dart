@@ -221,7 +221,7 @@ class SkiaGoldClient {
       final File resultFile = workDirectory.childFile(fs.path.join(
         'result-state.json',
       ));
-      if(await resultFile.exists()) {
+      if (await resultFile.exists()) {
         resultContents = await resultFile.readAsString();
       }
 
@@ -344,7 +344,7 @@ class SkiaGoldClient {
       final File resultFile = workDirectory.childFile(fs.path.join(
         'result-state.json',
       ));
-      if(await resultFile.exists()) {
+      if (await resultFile.exists()) {
         resultContents = await resultFile.readAsString();
       }
       final StringBuffer buf = StringBuffer()
@@ -514,7 +514,7 @@ class SkiaGoldClient {
       'auth_opt.json',
     ))/*!*/;
 
-    if(await authFile.exists()) {
+    if (await authFile.exists()) {
       final String contents = await authFile.readAsString();
       final Map<String, dynamic> decoded = json.decode(contents) as Map<String, dynamic>;
       return !(decoded['GSUtil'] as bool/*!*/);

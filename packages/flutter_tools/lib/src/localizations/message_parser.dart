@@ -131,7 +131,7 @@ $indent])''';
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
   bool operator==(covariant Node other) {
-    if(value != other.value
+    if (value != other.value
       || type != other.type
       || positionInMessage != other.positionInMessage
       || children.length != other.children.length
@@ -305,7 +305,7 @@ class Parser {
         } else {
           // Handle keywords separately. Otherwise, lexer will assume parts of identifiers may be keywords.
           final String tokenStr = match.group(0)!;
-          switch(tokenStr) {
+          switch (tokenStr) {
             case 'plural':
               matchedType = ST.plural;
             case 'select':
@@ -351,7 +351,7 @@ class Parser {
       final ST symbol = parsingStack.removeLast();
 
       // Figure out which production rule to use.
-      switch(symbol) {
+      switch (symbol) {
         case ST.message:
           if (tokens.isEmpty) {
             parseAndConstructNode(ST.message, 4);
@@ -530,7 +530,7 @@ class Parser {
   // plural parts and select parts.
   void checkExtraRules(Node syntaxTree) {
     final List<Node> children = syntaxTree.children;
-    switch(syntaxTree.type) {
+    switch (syntaxTree.type) {
       case ST.pluralParts:
         // Must have an "other" case.
         if (children.every((Node node) => node.children[0].type != ST.other)) {

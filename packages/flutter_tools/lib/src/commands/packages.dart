@@ -316,8 +316,8 @@ class PackagesGetCommand extends FlutterCommand {
           name,
           ...subArgs,
           // `dart pub get` and friends defaults to `--no-example`.
-          if(!exampleWasParsed && target != null) '--example',
-          if(directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
+          if (!exampleWasParsed && target != null) '--example',
+          if (directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
         ],
         project: rootProject,
         context: _context,
