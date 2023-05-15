@@ -147,6 +147,19 @@ std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
   return result;
 }
 
+std::shared_ptr<RuntimeStage> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
+    const char* asset_name) const {
+  auto fixture = flutter::testing::OpenFixtureAsMapping(asset_name);
+  if (!fixture || fixture->GetSize() == 0) {
+    return nullptr;
+  }
+  auto stage = std::make_unique<RuntimeStage>(std::move(fixture));
+  if (!stage->IsValid()) {
+    return nullptr;
+  }
+  return stage;
+}
+
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
   return pimpl_->screenshoter->GetContext().GetContext();
 }

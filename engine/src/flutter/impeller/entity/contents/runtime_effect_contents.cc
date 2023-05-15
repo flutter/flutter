@@ -124,7 +124,10 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
   desc.SetVertexDescriptor(std::move(vertex_descriptor));
   desc.SetColorAttachmentDescriptor(
       0u, {.format = color_attachment_format, .blending_enabled = true});
-  desc.SetStencilAttachmentDescriptors({});
+
+  StencilAttachmentDescriptor stencil0;
+  stencil0.stencil_compare = CompareFunction::kEqual;
+  desc.SetStencilAttachmentDescriptors(stencil0);
   desc.SetStencilPixelFormat(stencil_attachment_format);
 
   auto options = OptionsFromPassAndEntity(pass, entity);
