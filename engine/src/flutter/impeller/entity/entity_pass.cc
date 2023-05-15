@@ -481,9 +481,6 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       return EntityPass::EntityResult::Failure();
     }
 
-    FML_LOG(ERROR) << "Origin: " << subpass_coverage->origin
-                   << " Size: " << subpass_coverage->size;
-
     // Stencil textures aren't shared between EntityPasses (as much of the
     // time they are transient).
     if (!subpass->OnRender(renderer,                  // renderer
