@@ -51,9 +51,16 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       }
     case AndroidRenderingAPI::kVulkan:
       FML_DCHECK(enable_impeller_);
-      return std::make_unique<AndroidSurfaceVulkanImpeller>(
+      // TODO(kaushikiska@): Enable this after wiring a preference for Vulkan
+      // backend.
+#if false
+    return std::make_unique<AndroidSurfaceVulkanImpeller>(
           std::static_pointer_cast<AndroidContextVulkanImpeller>(
               android_context_));
+#else
+      return std::make_unique<AndroidSurfaceGLImpeller>(
+          std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
+#endif
     default:
       FML_DCHECK(false);
       return nullptr;
