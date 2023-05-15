@@ -774,22 +774,24 @@ def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
       ]
       if test_filter is not None:
         test_command[0] = test_command[0] + ' -only-testing:%s' % test_filter
-      run_cmd(test_command, cwd=ios_unit_test_dir, shell=True)
+      try:
+        run_cmd(test_command, cwd=ios_unit_test_dir, shell=True)
 
-      # except:
-      # The LUCI environment may provide a variable containing a directory path
-      # for additional output files that will be uploaded to cloud storage.
-      # Upload the xcresult when the tests fail.
-      luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
-      xcresult_bundle = os.path.join(
-          result_bundle_temp, 'ios_embedding.xcresult'
-      )
-      if luci_test_outputs_path and os.path.exists(xcresult_bundle):
-        dump_path = os.path.join(
-            luci_test_outputs_path, 'ios_embedding.xcresult'
+      except:
+        # The LUCI environment may provide a variable containing a directory path
+        # for additional output files that will be uploaded to cloud storage.
+        # Upload the xcresult when the tests fail.
+        luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
+        xcresult_bundle = os.path.join(
+            result_bundle_temp, 'ios_embedding.xcresult'
         )
-        # xcresults contain many little files. Archive the bundle before upload.
-        shutil.make_archive(dump_path, 'zip', root_dir=xcresult_bundle)
+        if luci_test_outputs_path and os.path.exists(xcresult_bundle):
+          dump_path = os.path.join(
+              luci_test_outputs_path, 'ios_embedding.xcresult'
+          )
+          # xcresults contain many little files. Archive the bundle before upload.
+          shutil.make_archive(dump_path, 'zip', root_dir=xcresult_bundle)
+        raise
 
   finally:
     delete_simulator(new_simulator_name)
