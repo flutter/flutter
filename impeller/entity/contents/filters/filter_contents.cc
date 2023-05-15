@@ -241,6 +241,7 @@ std::optional<Entity> FilterContents::GetEntity(const ContentContext& renderer,
 std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
+    std::optional<Rect> coverage_limit,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
     bool msaa_enabled,
     const std::string& label) const {
@@ -248,8 +249,13 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
   // snapshot.
   if (std::optional<Entity> result = GetEntity(renderer, entity);
       result.has_value()) {
-    return result->GetContents()->RenderToSnapshot(renderer, result.value(),
-                                                   std::nullopt, true, label);
+    return result->GetContents()->RenderToSnapshot(
+        renderer,        // renderer
+        result.value(),  // entity
+        std::nullopt,    // coverage_limit
+        std::nullopt,    // sampler_descriptor
+        true,            // msaa_enabled
+        label);          // label
   }
 
   return std::nullopt;
