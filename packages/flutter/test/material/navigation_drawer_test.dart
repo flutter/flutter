@@ -160,7 +160,7 @@ void main() {
         scaffoldKey,
         NavigationDrawer(
           children: <Widget>[
-            for(int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
               NavigationDrawerDestination(
                 icon: const Icon(Icons.ac_unit),
                 label: Text('Label$i'),
@@ -213,7 +213,7 @@ void main() {
             key: scaffoldKey,
             drawer: NavigationDrawer(
                   children: <Widget>[
-                    for(int i = 0; i < 10; i++)
+                    for (int i = 0; i < 10; i++)
                       NavigationDrawerDestination(
                         icon: const Icon(Icons.ac_unit),
                         label: Text('Label$i'),
