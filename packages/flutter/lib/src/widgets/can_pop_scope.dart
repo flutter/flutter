@@ -4,6 +4,7 @@
 
 import 'framework.dart';
 import 'navigator.dart';
+import 'notification_listener.dart';
 import 'routes.dart';
 
 // TODO(justinmc): Change name to match popEnabled  more?
@@ -97,4 +98,49 @@ class _CanPopScopeState extends State<CanPopScope> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+// TODO(justinmc): Think this through as a shortcut for setting up a nested
+// navigator.
+class CanPopCombo extends StatefulWidget {
+  const CanPopCombo({
+    super.key,
+    required this.navigatorKey,
+  });
+
+  final GlobalKey<NavigatorState> navigatorKey;
+
+  @override
+  State<CanPopCombo> createState() => _CanPopComboState();
+}
+
+class _CanPopComboState extends State<CanPopCombo> {
+  bool _popEnabled = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return CanPopScope(
+      popEnabled: _popEnabled,
+      onPop: () {
+        if (_popEnabled) {
+          return;
+        }
+        widget.navigatorKey.currentState!.pop();
+      },
+      child: NotificationListener<NavigationNotification>(
+        onNotification: (NavigationNotification notification) {
+          final bool nextPopEnabled = !notification.canPop;
+          if (nextPopEnabled != _popEnabled) {
+            setState(() {
+              _popEnabled = nextPopEnabled;
+            });
+          }
+          return false;
+        },
+        child: Navigator(
+          key: widget.navigatorKey,
+        ),
+      ),
+    );
+  }
 }
