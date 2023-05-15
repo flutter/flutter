@@ -7,6 +7,8 @@ import 'dart:ui' show Color, lerpDouble;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
+import 'action_buttons.dart';
+import 'action_icons_theme.dart';
 import 'app_bar_theme.dart';
 import 'badge_theme.dart';
 import 'banner_theme.dart';
@@ -51,6 +53,8 @@ import 'popup_menu_theme.dart';
 import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
 import 'scrollbar_theme.dart';
+import 'search_bar_theme.dart';
+import 'search_view_theme.dart';
 import 'segmented_button_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
@@ -159,7 +163,7 @@ enum MaterialTapTargetSize {
 /// or a widget subtree within the app.
 ///
 /// The [MaterialApp] theme property can be used to configure the appearance
-/// of the entire app. Widget subtree's within an app can override the app's
+/// of the entire app. Widget subtrees within an app can override the app's
 /// theme by including a [Theme] widget at the top of the subtree.
 ///
 /// Widgets whose appearance should align with the overall theme can obtain the
@@ -337,6 +341,7 @@ class ThemeData with Diagnosticable {
     TextTheme? textTheme,
     Typography? typography,
     // COMPONENT THEMES
+    ActionIconThemeData? actionIconTheme,
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
@@ -370,6 +375,8 @@ class ThemeData with Diagnosticable {
     PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
+    SearchBarThemeData? searchBarTheme,
+    SearchViewThemeData? searchViewTheme,
     SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
@@ -434,16 +441,14 @@ class ThemeData with Diagnosticable {
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         materialTapTargetSize ??= MaterialTapTargetSize.padded;
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
          materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
-        break;
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    visualDensity ??= VisualDensity.adaptivePlatformDensity;
+    visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= useMaterial3
@@ -586,6 +591,8 @@ class ThemeData with Diagnosticable {
     popupMenuTheme ??= const PopupMenuThemeData();
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     radioTheme ??= const RadioThemeData();
+    searchBarTheme ??= const SearchBarThemeData();
+    searchViewTheme ??= const SearchViewThemeData();
     segmentedButtonTheme ??= const SegmentedButtonThemeData();
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
@@ -649,6 +656,7 @@ class ThemeData with Diagnosticable {
       typography: typography,
       primaryIconTheme: primaryIconTheme,
       // COMPONENT THEMES
+      actionIconTheme: actionIconTheme,
       appBarTheme: appBarTheme,
       badgeTheme: badgeTheme,
       bannerTheme: bannerTheme,
@@ -682,6 +690,8 @@ class ThemeData with Diagnosticable {
       popupMenuTheme: popupMenuTheme,
       progressIndicatorTheme: progressIndicatorTheme,
       radioTheme: radioTheme,
+      searchBarTheme: searchBarTheme,
+      searchViewTheme: searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme,
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
@@ -759,6 +769,7 @@ class ThemeData with Diagnosticable {
     required this.textTheme,
     required this.typography,
     // COMPONENT THEMES
+    required this.actionIconTheme,
     required this.appBarTheme,
     required this.badgeTheme,
     required this.bannerTheme,
@@ -792,6 +803,8 @@ class ThemeData with Diagnosticable {
     required this.popupMenuTheme,
     required this.progressIndicatorTheme,
     required this.radioTheme,
+    required this.searchBarTheme,
+    required this.searchViewTheme,
     required this.segmentedButtonTheme,
     required this.sliderTheme,
     required this.snackBarTheme,
@@ -1356,6 +1369,10 @@ class ThemeData with Diagnosticable {
 
   // COMPONENT THEMES
 
+  /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon],
+  /// [DrawerButtonIcon], or [EndDrawerButtonIcon].
+  final ActionIconThemeData? actionIconTheme;
+
   /// A theme for customizing the color, elevation, brightness, iconTheme and
   /// textTheme of [AppBar]s.
   final AppBarTheme appBarTheme;
@@ -1476,6 +1493,12 @@ class ThemeData with Diagnosticable {
 
   /// A theme for customizing the appearance and layout of [Radio] widgets.
   final RadioThemeData radioTheme;
+
+  /// A theme for customizing the appearance and layout of [SearchBar] widgets.
+  final SearchBarThemeData searchBarTheme;
+
+  /// A theme for customizing the appearance and layout of search views created by [SearchAnchor] widgets.
+  final SearchViewThemeData searchViewTheme;
 
   /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
   final SegmentedButtonThemeData segmentedButtonTheme;
@@ -1654,6 +1677,7 @@ class ThemeData with Diagnosticable {
     TextTheme? textTheme,
     Typography? typography,
     // COMPONENT THEMES
+    ActionIconThemeData? actionIconTheme,
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
@@ -1687,6 +1711,8 @@ class ThemeData with Diagnosticable {
     PopupMenuThemeData? popupMenuTheme,
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
+    SearchBarThemeData? searchBarTheme,
+    SearchViewThemeData? searchViewTheme,
     SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
@@ -1787,6 +1813,7 @@ class ThemeData with Diagnosticable {
       textTheme: textTheme ?? this.textTheme,
       typography: typography ?? this.typography,
       // COMPONENT THEMES
+      actionIconTheme: actionIconTheme ?? this.actionIconTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       badgeTheme: badgeTheme ?? this.badgeTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
@@ -1820,6 +1847,8 @@ class ThemeData with Diagnosticable {
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       radioTheme: radioTheme ?? this.radioTheme,
+      searchBarTheme: searchBarTheme ?? this.searchBarTheme,
+      searchViewTheme: searchViewTheme ?? this.searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
@@ -1980,6 +2009,7 @@ class ThemeData with Diagnosticable {
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       // COMPONENT THEMES
+      actionIconTheme: ActionIconThemeData.lerp(a.actionIconTheme, b.actionIconTheme, t),
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       badgeTheme: BadgeThemeData.lerp(a.badgeTheme, b.badgeTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
@@ -2013,6 +2043,8 @@ class ThemeData with Diagnosticable {
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t)!,
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
+      searchBarTheme: SearchBarThemeData.lerp(a.searchBarTheme, b.searchBarTheme, t)!,
+      searchViewTheme: SearchViewThemeData.lerp(a.searchViewTheme, b.searchViewTheme, t)!,
       segmentedButtonTheme: SegmentedButtonThemeData.lerp(a.segmentedButtonTheme, b.segmentedButtonTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
@@ -2085,6 +2117,7 @@ class ThemeData with Diagnosticable {
         other.textTheme == textTheme &&
         other.typography == typography &&
         // COMPONENT THEMES
+        other.actionIconTheme == actionIconTheme &&
         other.appBarTheme == appBarTheme &&
         other.badgeTheme == badgeTheme &&
         other.bannerTheme == bannerTheme &&
@@ -2118,6 +2151,8 @@ class ThemeData with Diagnosticable {
         other.popupMenuTheme == popupMenuTheme &&
         other.progressIndicatorTheme == progressIndicatorTheme &&
         other.radioTheme == radioTheme &&
+        other.searchBarTheme == searchBarTheme &&
+        other.searchViewTheme == searchViewTheme &&
         other.segmentedButtonTheme == segmentedButtonTheme &&
         other.sliderTheme == sliderTheme &&
         other.snackBarTheme == snackBarTheme &&
@@ -2187,6 +2222,7 @@ class ThemeData with Diagnosticable {
       textTheme,
       typography,
       // COMPONENT THEMES
+      actionIconTheme,
       appBarTheme,
       badgeTheme,
       bannerTheme,
@@ -2220,6 +2256,8 @@ class ThemeData with Diagnosticable {
       popupMenuTheme,
       progressIndicatorTheme,
       radioTheme,
+      searchBarTheme,
+      searchViewTheme,
       segmentedButtonTheme,
       sliderTheme,
       snackBarTheme,
@@ -2291,6 +2329,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.debug));
     // COMPONENT THEMES
+    properties.add(DiagnosticsProperty<ActionIconThemeData>('actionIconTheme', actionIconTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<BadgeThemeData>('badgeTheme', badgeTheme, defaultValue: defaultData.badgeTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.debug));
@@ -2324,6 +2363,8 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SearchBarThemeData>('searchBarTheme', searchBarTheme, defaultValue: defaultData.searchBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SearchViewThemeData>('searchViewTheme', searchViewTheme, defaultValue: defaultData.searchViewTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SegmentedButtonThemeData>('segmentedButtonTheme', segmentedButtonTheme, defaultValue: defaultData.segmentedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
@@ -2605,12 +2646,32 @@ class VisualDensity with Diagnosticable {
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
 
-  /// Returns a visual density that is adaptive based on the [defaultTargetPlatform].
+  /// Returns a [VisualDensity] that is adaptive based on the current platform
+  /// on which the framework is executing, from [defaultTargetPlatform].
   ///
-  /// For desktop platforms, this returns [compact], and for other platforms,
-  /// it returns a default-constructed [VisualDensity].
-  static VisualDensity get adaptivePlatformDensity {
-    switch (defaultTargetPlatform) {
+  /// When [defaultTargetPlatform] is a desktop platform, this returns
+  /// [compact], and for other platforms, it returns a default-constructed
+  /// [VisualDensity].
+  ///
+  /// See also:
+  ///
+  /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is
+  ///   adaptive based on the platform given to it.
+  /// * [defaultTargetPlatform] which returns the platform on which the
+  ///   framework is currently executing.
+  static VisualDensity get adaptivePlatformDensity => defaultDensityForPlatform(defaultTargetPlatform);
+
+  /// Returns a [VisualDensity] that is adaptive based on the given [platform].
+  ///
+  /// For desktop platforms, this returns [compact], and for other platforms, it
+  /// returns a default-constructed [VisualDensity].
+  ///
+  /// See also:
+  ///
+  /// * [adaptivePlatformDensity] which returns a [VisualDensity] that is
+  ///   adaptive based on [defaultTargetPlatform].
+  static VisualDensity defaultDensityForPlatform(TargetPlatform platform) {
+    switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
@@ -2740,7 +2801,7 @@ class VisualDensity with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,

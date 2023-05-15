@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
@@ -25,7 +26,6 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -65,6 +65,52 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => BufferLogger.test(),
+    });
+
+    testUsingContext('does not support --no-sound-null-safety by default', () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+
+      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>[
+          'run',
+          '--use-application-binary=app/bar/faz',
+          '--no-sound-null-safety',
+        ]),
+        throwsA(isException.having(
+          (Exception exception) => exception.toString(),
+          'toString',
+          contains('Could not find an option named "no-sound-null-safety"'),
+        )),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+    });
+
+    testUsingContext('supports --no-sound-null-safety with an overridden NonNullSafeBuilds', () async {
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('.packages').createSync();
+
+      final FakeDevice device = FakeDevice(isLocalEmulator: true, platformType: PlatformType.android);
+
+      testDeviceManager.devices = <Device>[device];
+      final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+      await createTestCommandRunner(command).run(const <String>[
+        'run',
+        '--use-application-binary=app/bar/faz',
+        '--no-sound-null-safety',
+      ]);
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => testDeviceManager,
+      FileSystem: () => fileSystem,
+      Logger: () => BufferLogger.test(),
+      NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
@@ -182,7 +228,7 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -358,11 +404,11 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
+          containsIgnoringWhitespace('The following devices were found, but are not supported by this project:'),
         );
         expect(
           testLogger.statusText,
@@ -428,9 +474,45 @@ void main() {
           TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
             'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
             'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
-            'cd56': 'false', 'cd57': 'usb',
+            'cd57': 'usb',
+            'cd58': 'false',
           })
         )));
+      }, overrides: <Type, Generator>{
+        AnsiTerminal: () => fakeTerminal,
+        Artifacts: () => artifacts,
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        DeviceManager: () => testDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Stdio: () => FakeStdio(),
+        Usage: () => usage,
+      });
+
+      testUsingContext('correctly reports tests to usage', () async {
+        fs.currentDirectory.childDirectory('test').childFile('widget_test.dart').createSync(recursive: true);
+        fs.currentDirectory.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
+        final RunCommand command = RunCommand();
+        final FakeDevice mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')
+          ..startAppSuccess = false;
+
+        testDeviceManager.devices = <Device>[mockDevice];
+
+        await expectToolExitLater(createTestCommandRunner(command).run(<String>[
+          'run',
+          '--no-pub',
+          '--no-hot',
+          'test/widget_test.dart',
+        ]), isNull);
+
+        expect(usage.commands, contains(
+          TestUsageCommand('run', parameters: CustomDimensions.fromMap(<String, String>{
+            'cd3': 'false', 'cd4': 'ios', 'cd22': 'iOS 13',
+            'cd23': 'debug', 'cd18': 'false', 'cd15': 'swift', 'cd31': 'true',
+            'cd57': 'usb',
+            'cd58': 'true',
+          })),
+        ));
       }, overrides: <Type, Generator>{
         AnsiTerminal: () => fakeTerminal,
         Artifacts: () => artifacts,
@@ -673,6 +755,23 @@ void main() {
           FakeDevice(targetPlatform: TargetPlatform.android_arm, platformType: PlatformType.android),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -682,7 +781,7 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -693,9 +792,26 @@ void main() {
 
       testUsingContext('with only iOS usb device', () async {
         final List<Device> devices = <Device>[
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -705,8 +821,8 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'usb',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -715,11 +831,31 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with only iOS network device', () async {
+      testUsingContext('with only iOS wireless device', () async {
         final List<Device> devices = <Device>[
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(
+            connectionInterface: DeviceConnectionInterface.wireless,
+            sdkNameAndVersion: 'iOS 16.2',
+          ),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
+
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -729,8 +865,8 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -739,12 +875,31 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with both iOS usb and network devices', () async {
+      testUsingContext('with both iOS usb and wireless devices', () async {
         final List<Device> devices = <Device>[
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.network, sdkNameAndVersion: 'iOS 16.2'),
-          FakeIOSDevice(interfaceType: IOSDeviceConnectionInterface.usb, sdkNameAndVersion: 'iOS 16.2'),
+          FakeIOSDevice(
+            connectionInterface: DeviceConnectionInterface.wireless,
+            sdkNameAndVersion: 'iOS 16.2',
+          ),
+          FakeIOSDevice(sdkNameAndVersion: 'iOS 16.2'),
         ];
         final TestRunCommandForUsageValues command = TestRunCommandForUsageValues(devices: devices);
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        try {
+          // run the command so that CLI args are parsed
+          await runner.run(<String>['run']);
+        } on ToolExit catch (error) {
+          // we can ignore the ToolExit, as we are only interested in
+          // command.usageValues.
+          expect(
+            error,
+            isA<ToolExit>().having(
+              (ToolExit exception) => exception.message,
+              'message',
+              contains('No pubspec.yaml file found'),
+            ),
+          );
+        }
         final CustomDimensions dimensions = await command.usageValues;
 
         expect(dimensions, const CustomDimensions(
@@ -754,8 +909,8 @@ void main() {
           commandRunModeName: 'debug',
           commandRunProjectModule: false,
           commandRunProjectHostLanguage: '',
-          commandRunEnableImpeller: false,
           commandRunIOSInterfaceType: 'wireless',
+          commandRunIsTest: false,
         ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -774,7 +929,7 @@ void main() {
     });
 
     test('auto web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
@@ -790,7 +945,7 @@ void main() {
 
     test('auto web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
@@ -935,9 +1090,12 @@ void main() {
       '--null-assertions',
       '--native-null-assertions',
       '--enable-impeller',
+      '--enable-vulkan-validation',
+      '--impeller-force-gl',
       '--trace-systrace',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
+      '--enable-embedder-api',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -951,7 +1109,9 @@ void main() {
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
     expect(options.traceSystrace, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
+    expect(options.enableVulkanValidation, true);
+    expect(options.impellerForceGL, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
   }, overrides: <Type, Generator>{
@@ -1054,6 +1214,16 @@ class FakeDevice extends Fake implements Device {
   @override
   bool get supportsFastStart => false;
 
+  @override
+  bool get ephemeral => true;
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
   bool supported = true;
 
   @override
@@ -1137,7 +1307,7 @@ class FakeDevice extends Fake implements Device {
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
-    this.interfaceType = IOSDeviceConnectionInterface.none,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     bool isLocalEmulator = false,
     String sdkNameAndVersion = '',
   }): _isLocalEmulator = isLocalEmulator,
@@ -1153,7 +1323,11 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  final IOSDeviceConnectionInterface interfaceType;
+  final DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;

@@ -344,7 +344,6 @@ class RenderWrap extends RenderBox
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null, 'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
-          break;
         case Axis.vertical:
           break;
       }
@@ -353,7 +352,6 @@ class RenderWrap extends RenderBox
       switch (direction) {
         case Axis.horizontal:
           assert(textDirection != null, 'Horizontal $runtimeType with alignment $alignment has a null textDirection, so the alignment cannot be resolved.');
-          break;
         case Axis.vertical:
           break;
       }
@@ -364,7 +362,6 @@ class RenderWrap extends RenderBox
           break;
         case Axis.vertical:
           assert(textDirection != null, 'Vertical $runtimeType with runAlignment $runAlignment has a null textDirection, so the alignment cannot be resolved.');
-          break;
       }
     }
     if (crossAxisAlignment == WrapCrossAlignment.start || crossAxisAlignment == WrapCrossAlignment.end) {
@@ -373,7 +370,6 @@ class RenderWrap extends RenderBox
           break;
         case Axis.vertical:
           assert(textDirection != null, 'Vertical $runtimeType with crossAxisAlignment $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
-          break;
       }
     }
     return true;
@@ -508,11 +504,9 @@ class RenderWrap extends RenderBox
       case Axis.horizontal:
         childConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
         mainAxisLimit = constraints.maxWidth;
-        break;
       case Axis.vertical:
         childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
         mainAxisLimit = constraints.maxHeight;
-        break;
     }
 
     double mainAxisExtent = 0.0;
@@ -576,7 +570,6 @@ class RenderWrap extends RenderBox
         if (verticalDirection == VerticalDirection.up) {
           flipCrossAxis = true;
         }
-        break;
       case Axis.vertical:
         childConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
         mainAxisLimit = constraints.maxHeight;
@@ -586,7 +579,6 @@ class RenderWrap extends RenderBox
         if (textDirection == TextDirection.rtl) {
           flipCrossAxis = true;
         }
-        break;
     }
     final double spacing = this.spacing;
     final double runSpacing = this.runSpacing;
@@ -641,12 +633,10 @@ class RenderWrap extends RenderBox
         size = constraints.constrain(Size(mainAxisExtent, crossAxisExtent));
         containerMainAxisExtent = size.width;
         containerCrossAxisExtent = size.height;
-        break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossAxisExtent, mainAxisExtent));
         containerMainAxisExtent = size.height;
         containerCrossAxisExtent = size.width;
-        break;
     }
 
     _hasVisualOverflow = containerMainAxisExtent < mainAxisExtent || containerCrossAxisExtent < crossAxisExtent;
@@ -659,21 +649,16 @@ class RenderWrap extends RenderBox
         break;
       case WrapAlignment.end:
         runLeadingSpace = crossAxisFreeSpace;
-        break;
       case WrapAlignment.center:
         runLeadingSpace = crossAxisFreeSpace / 2.0;
-        break;
       case WrapAlignment.spaceBetween:
         runBetweenSpace = runCount > 1 ? crossAxisFreeSpace / (runCount - 1) : 0.0;
-        break;
       case WrapAlignment.spaceAround:
         runBetweenSpace = crossAxisFreeSpace / runCount;
         runLeadingSpace = runBetweenSpace / 2.0;
-        break;
       case WrapAlignment.spaceEvenly:
         runBetweenSpace = crossAxisFreeSpace / (runCount + 1);
         runLeadingSpace = runBetweenSpace;
-        break;
     }
 
     runBetweenSpace += runSpacing;
@@ -695,21 +680,16 @@ class RenderWrap extends RenderBox
           break;
         case WrapAlignment.end:
           childLeadingSpace = mainAxisFreeSpace;
-          break;
         case WrapAlignment.center:
           childLeadingSpace = mainAxisFreeSpace / 2.0;
-          break;
         case WrapAlignment.spaceBetween:
           childBetweenSpace = childCount > 1 ? mainAxisFreeSpace / (childCount - 1) : 0.0;
-          break;
         case WrapAlignment.spaceAround:
           childBetweenSpace = mainAxisFreeSpace / childCount;
           childLeadingSpace = childBetweenSpace / 2.0;
-          break;
         case WrapAlignment.spaceEvenly:
           childBetweenSpace = mainAxisFreeSpace / (childCount + 1);
           childLeadingSpace = childBetweenSpace;
-          break;
       }
 
       childBetweenSpace += spacing;

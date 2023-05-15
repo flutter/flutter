@@ -360,14 +360,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBars.isNotEmpty) {
           _snackBarController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         setState(() {
           assert(_snackBarTimer == null);
           // build will create a new timer if necessary to dismiss the snackBar.
         });
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -497,10 +495,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_materialBanners.isNotEmpty) {
           _materialBannerController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -1158,9 +1154,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
 
       assert((){
-        // Whether a floating SnackBar has been offsetted too high.
+        // Whether a floating SnackBar has been offset too high.
         //
-        // To improve the developper experience, this assert is done after the call to positionChild.
+        // To improve the developer experience, this assert is done after the call to positionChild.
         // if we assert sooner the SnackBar is visible because its defaults position is (0,0) and
         // it can cause confusion to the user as the error message states that the SnackBar is off screen.
         if (isSnackBarFloating) {
@@ -1440,8 +1436,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
 /// callback that increments a counter.
 ///
-/// ![The Scaffold has a white background with a blue AppBar at the top. A blue FloatingActionButton is positioned at the bottom right corner of the Scaffold.](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
-///
 /// ** See code in examples/api/lib/material/scaffold/scaffold.0.dart **
 /// {@end-tool}
 ///
@@ -1488,6 +1482,19 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// cause the body to avoid the padding. The [SafeArea]
 /// widget can be used within the scaffold's body to avoid areas
 /// like display notches.
+///
+/// ## Floating action button with a draggable scrollable bottom sheet
+///
+/// If [Scaffold.bottomSheet] is a [DraggableScrollableSheet],
+/// [Scaffold.floatingActionButton] is set, and the bottom sheet is dragged to
+/// cover greater than 70% of the Scaffold's height, two things happen in parallel:
+///
+///   * Scaffold starts to show scrim (see [ScaffoldState.showBodyScrim]), and
+///   * [Scaffold.floatingActionButton] is scaled down through an animation with a [Curves.easeIn], and
+///     disappears when the bottom sheet covers the entire Scaffold.
+///
+/// And as soon as the bottom sheet is dragged down to cover less than 70% of the [Scaffold], the scrim
+/// disappears and [Scaffold.floatingActionButton] animates back to its normal size.
 ///
 /// ## Troubleshooting
 ///
@@ -2425,7 +2432,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
+  ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+  ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2926,7 +2934,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           removeRightPadding: false,
           removeBottomPadding: true,
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

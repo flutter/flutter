@@ -71,7 +71,13 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.dataRowHeight = kMinInteractiveDimension,
+    @Deprecated(
+      'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
+      'This feature was deprecated after v3.7.0-5.0.pre.',
+    )
+    double? dataRowHeight,
+    double? dataRowMinHeight,
+    double? dataRowMaxHeight,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -91,6 +97,11 @@ class PaginatedDataTable extends StatefulWidget {
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
+       assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
+       assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight ?? kMinInteractiveDimension,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight ?? kMinInteractiveDimension,
        assert(rowsPerPage > 0),
        assert(() {
          if (onRowsPerPageChanged != null) {
@@ -147,7 +158,23 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// This value is optional and defaults to kMinInteractiveDimension if not
   /// specified.
-  final double dataRowHeight;
+  @Deprecated(
+    'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
+    'This feature was deprecated after v3.7.0-5.0.pre.',
+  )
+  double? get dataRowHeight => dataRowMinHeight == dataRowMaxHeight ? dataRowMinHeight : null;
+
+  /// The minimum height of each row (excluding the row that contains column headings).
+  ///
+  /// This value is optional and defaults to [kMinInteractiveDimension] if not
+  /// specified.
+  final double dataRowMinHeight;
+
+  /// The maximum height of each row (excluding the row that contains column headings).
+  ///
+  /// This value is optional and defaults to kMinInteractiveDimension if not
+  /// specified.
+  final double dataRowMaxHeight;
 
   /// The height of the heading row.
   ///
@@ -518,7 +545,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     // Make sure no decoration is set on the DataTable
                     // from the theme, as its already wrapped in a Card.
                     decoration: const BoxDecoration(),
-                    dataRowHeight: widget.dataRowHeight,
+                    dataRowMinHeight: widget.dataRowMinHeight,
+                    dataRowMaxHeight: widget.dataRowMaxHeight,
                     headingRowHeight: widget.headingRowHeight,
                     horizontalMargin: widget.horizontalMargin,
                     checkboxHorizontalMargin: widget.checkboxHorizontalMargin,

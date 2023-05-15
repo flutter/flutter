@@ -2,38 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Navigator.restorablePushReplacement].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Navigator.restorablePushReplacement].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RestorablePushReplacementExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class RestorablePushReplacementExampleApp extends StatelessWidget {
+  const RestorablePushReplacementExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: RestorablePushReplacementExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RestorablePushReplacementExample extends StatefulWidget {
+  const RestorablePushReplacementExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RestorablePushReplacementExample> createState() => _RestorablePushReplacementExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RestorablePushReplacementExampleState extends State<RestorablePushReplacementExample> {
   @pragma('vm:entry-point')
   static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const MyStatefulWidget(),
+      builder: (BuildContext context) => const RestorablePushReplacementExample(),
     );
   }
 
@@ -44,8 +41,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         title: const Text('Sample Code'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.restorablePushReplacement(context, _myRouteBuilder),
+        onPressed: () => Navigator.restorablePushReplacement(context, _myRouteBuilder),
         tooltip: 'Increment Counter',
         child: const Icon(Icons.add),
       ),

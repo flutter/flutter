@@ -165,6 +165,20 @@ void main() {
     expect(result.exitCode, 1);
   });
 
+  testWithoutContext('flutter test should run a test with an exact name in URI format', () async {
+    final ProcessResult result = await _runFlutterTest('uri_format', automatedTestsDirectory, flutterTestDirectory,
+      query: 'full-name=exactTestName');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('flutter test should run a test by line number in URI format', () async {
+    final ProcessResult result = await _runFlutterTest('uri_format', automatedTestsDirectory, flutterTestDirectory,
+      query: 'line=11');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
+    expect(result.exitCode, 0);
+  });
+
   testWithoutContext('flutter test should test runs to completion', () async {
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--verbose']);
@@ -208,7 +222,7 @@ void main() {
       final Completer<Uri> completer = Completer<Uri>();
       final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
       sub = process.stdout.transform(utf8.decoder).listen((String e) {
-        if (vmServiceUriRegExp.hasMatch(e)) {
+        if (!completer.isCompleted && vmServiceUriRegExp.hasMatch(e)) {
           completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
         }
       });
@@ -218,6 +232,31 @@ void main() {
       final HttpClientResponse response = await request.close();
       final String content = await response.transform(utf8.decoder).join();
       expect(content.contains('Dart VM Observatory'), true);
+    } finally {
+      await sub.cancel();
+      process.kill();
+    }
+  });
+
+  testWithoutContext('flutter test should serve DevTools', () async {
+    late final Process process;
+    late final StreamSubscription<String> sub;
+    try {
+      process = await _runFlutterTestConcurrent('trivial', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--start-paused']);
+      final Completer<Uri> completer = Completer<Uri>();
+      final RegExp devToolsUriRegExp = RegExp(r'The Flutter DevTools debugger and profiler is available at: (http://[^\s]+)');
+      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+        if (!completer.isCompleted && devToolsUriRegExp.hasMatch(e)) {
+          completer.complete(Uri.parse(devToolsUriRegExp.firstMatch(e)!.group(1)!));
+        }
+      });
+      final Uri devToolsUri = await completer.future;
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(devToolsUri);
+      final HttpClientResponse response = await request.close();
+      final String content = await response.transform(utf8.decoder).join();
+      expect(content.contains('DevTools'), true);
     } finally {
       await sub.cancel();
       process.kill();
@@ -315,6 +354,7 @@ Future<ProcessResult> _runFlutterTest(
   String workingDirectory,
   String testDirectory, {
   List<String> extraArguments = const <String>[],
+  String? query,
 }) async {
 
   String testPath;
@@ -342,7 +382,8 @@ Future<ProcessResult> _runFlutterTest(
     '--reporter',
     'compact',
     ...extraArguments,
-    testPath,
+    if (query != null) Uri.file(testPath).replace(query: query).toString()
+    else testPath,
   ];
 
   return Process.run(

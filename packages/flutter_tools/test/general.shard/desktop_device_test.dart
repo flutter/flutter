@@ -96,7 +96,7 @@ void main() {
       );
 
       expect(result.started, true);
-      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
@@ -371,7 +371,7 @@ class FakeDesktopDevice extends DesktopDevice {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return getNameForBuildMode(buildInfo.mode);
+    return buildInfo.mode.cliName;
   }
 }
 

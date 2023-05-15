@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -505,13 +506,13 @@ void main() {
     final MemoryIOSink frontendServerStdIn = MemoryIOSink();
     Stream<List<int>> frontendServerStdOut() async* {
       int processed = 0;
-      while(true) {
-        while(frontendServerStdIn.writes.length == processed) {
+      while (true) {
+        while (frontendServerStdIn.writes.length == processed) {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
         String? boundaryKey;
-        while(processed < frontendServerStdIn.writes.length) {
+        while (processed < frontendServerStdIn.writes.length) {
           final List<int> data = frontendServerStdIn.writes[processed];
           final String stringData = utf8.decode(data);
           if (stringData.startsWith('compile ')) {
@@ -807,7 +808,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) async {

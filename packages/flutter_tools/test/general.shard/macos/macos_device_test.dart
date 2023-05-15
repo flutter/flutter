@@ -93,7 +93,7 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: linux,
       ),
-    ).devices, isEmpty);
+    ).devices(), isEmpty);
   });
 
   testWithoutContext('No devices listed if platform is supported and feature is disabled', () async {
@@ -109,7 +109,7 @@ void main() {
       ),
     );
 
-    expect(await macOSDevices.devices, isEmpty);
+    expect(await macOSDevices.devices(), isEmpty);
   });
 
   testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
@@ -125,7 +125,7 @@ void main() {
       ),
     );
 
-    expect(await macOSDevices.devices, hasLength(1));
+    expect(await macOSDevices.devices(), hasLength(1));
   });
 
   testWithoutContext('has a well known device id macos', () async {
@@ -252,15 +252,11 @@ FlutterProject setUpFlutterProject(Directory directory) {
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
   String executable(BuildInfo buildInfo) {
-    switch (buildInfo) {
-      case BuildInfo.debug:
-        return 'debug/executable';
-      case BuildInfo.profile:
-        return 'profile/executable';
-      case BuildInfo.release:
-        return 'release/executable';
-      default:
-        throw StateError('');
-    }
+    return switch (buildInfo) {
+      BuildInfo.debug => 'debug/executable',
+      BuildInfo.profile => 'profile/executable',
+      BuildInfo.release => 'release/executable',
+      _ => throw StateError('')
+    };
   }
 }

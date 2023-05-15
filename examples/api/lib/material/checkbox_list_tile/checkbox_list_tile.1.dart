@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CheckboxListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [CheckboxListTile].
 
 void main() => runApp(const CheckboxListTileApp());
 
@@ -57,7 +57,8 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
               });
             },
             title: const Text('Headline'),
-            subtitle: const Text('Longer supporting text to demonstrate how the text wraps and the checkbox is centered vertically with the text.'),
+            subtitle: const Text(
+                'Longer supporting text to demonstrate how the text wraps and the checkbox is centered vertically with the text.'),
           ),
           const Divider(height: 0),
           CheckboxListTile(
@@ -68,7 +69,8 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
               });
             },
             title: const Text('Headline'),
-            subtitle: const Text("Longer supporting text to demonstrate how the text wraps and how setting 'CheckboxListTile.isThreeLine = true' aligns the checkbox to the top vertically with the text."),
+            subtitle: const Text(
+                "Longer supporting text to demonstrate how the text wraps and how setting 'CheckboxListTile.isThreeLine = true' aligns the checkbox to the top vertically with the text."),
             isThreeLine: true,
           ),
           const Divider(height: 0),

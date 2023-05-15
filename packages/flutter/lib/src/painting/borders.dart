@@ -260,6 +260,9 @@ class BorderSide with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     if (t == 0.0) {
       return a;
     }
@@ -282,18 +285,14 @@ class BorderSide with Diagnosticable {
     switch (a.style) {
       case BorderStyle.solid:
         colorA = a.color;
-        break;
       case BorderStyle.none:
         colorA = a.color.withAlpha(0x00);
-        break;
     }
     switch (b.style) {
       case BorderStyle.solid:
         colorB = b.color;
-        break;
       case BorderStyle.none:
         colorB = b.color.withAlpha(0x00);
-        break;
     }
     if (a.strokeAlign != b.strokeAlign) {
       return BorderSide(
@@ -519,6 +518,9 @@ abstract class ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder? lerp(ShapeBorder? a, ShapeBorder? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     ShapeBorder? result;
     if (b != null) {
       result = b.lerpFrom(a, t);
@@ -708,6 +710,9 @@ abstract class OutlinedBorder extends ShapeBorder {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static OutlinedBorder? lerp(OutlinedBorder? a, OutlinedBorder? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     ShapeBorder? result;
     if (b != null) {
       result = b.lerpFrom(a, t);
@@ -918,7 +923,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -937,7 +941,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.top + top.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -956,7 +959,6 @@ void paintBorder(
         path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }
@@ -975,7 +977,6 @@ void paintBorder(
         path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
       }
       canvas.drawPath(path, paint);
-      break;
     case BorderStyle.none:
       break;
   }

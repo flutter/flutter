@@ -11,6 +11,7 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'scrollbar.dart';
 
 const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
@@ -162,6 +163,7 @@ class ScrollBehavior {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        assert(details.controller != null);
         return RawScrollbar(
           controller: details.controller,
           child: child,
@@ -192,16 +194,16 @@ class ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            continue glow;
+            break;
         }
-      glow:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          axisDirection: details.direction,
-          color: _kDefaultGlowColor,
-          child: child,
-        );
+        break;
     }
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: _kDefaultGlowColor,
+      child: child,
+    );
   }
 
   /// Specifies the type of velocity tracker to use in the descendant

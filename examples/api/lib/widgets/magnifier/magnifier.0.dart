@@ -4,18 +4,17 @@
 
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const MagnifierExampleApp());
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-  static const Size loupeSize = Size(200, 200);
+class MagnifierExampleApp extends StatefulWidget {
+  const MagnifierExampleApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MagnifierExampleApp> createState() => _MagnifierExampleAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  Offset dragGesturePositon = Offset.zero;
+class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
+  Offset dragGesturePosition = Offset.zero;
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +31,14 @@ class _MyAppState extends State<MyApp> {
                     GestureDetector(
                       onPanUpdate: (DragUpdateDetails details) => setState(
                         () {
-                          dragGesturePositon = details.localPosition;
+                          dragGesturePosition = details.localPosition;
                         },
                       ),
                       child: const FlutterLogo(size: 200),
                     ),
                     Positioned(
-                      left: dragGesturePositon.dx,
-                      top: dragGesturePositon.dy,
+                      left: dragGesturePosition.dx,
+                      top: dragGesturePosition.dy,
                       child: const RawMagnifier(
                         decoration: MagnifierDecoration(
                           shape: CircleBorder(

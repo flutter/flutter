@@ -12,10 +12,10 @@ class SwitchTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends SwitchThemeData {
-  _${blockName}DefaultsM3(BuildContext context)
-    : _colors = Theme.of(context).colorScheme;
+  _${blockName}DefaultsM3(this.context);
 
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   MaterialStateProperty<Color> get thumbColor {
@@ -125,6 +125,9 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
       return null;
     });
   }
+
+  @override
+  MaterialStatePropertyAll<double> get trackOutlineWidth => const MaterialStatePropertyAll<double>(${tokens['md.comp.switch.track.outline.width']});
 
   @override
   double get splashRadius => ${tokens['md.comp.switch.state-layer.size']} / 2;

@@ -40,7 +40,7 @@ import 'framework.dart';
 ///    recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
-  const StreamBuilderBase({ super.key, this.stream });
+  const StreamBuilderBase({ super.key, required this.stream });
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using
@@ -391,7 +391,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   const StreamBuilder({
     super.key,
     this.initialData,
-    super.stream,
+    required super.stream,
     required this.builder,
   });
 
@@ -441,8 +441,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 
 /// A widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=ek8ZPdWj4Qo}
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zEdw_1B7JHY}
 ///
@@ -516,7 +514,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ** See code in examples/api/lib/widgets/async/future_builder.0.dart **
 /// {@end-tool}
-// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/sdk/issues/35520 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
@@ -524,7 +521,7 @@ class FutureBuilder<T> extends StatefulWidget {
   /// The [builder] must not be null.
   const FutureBuilder({
     super.key,
-    this.future,
+    required this.future,
     this.initialData,
     required this.builder,
   });
@@ -637,12 +634,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
           });
         }
         assert(() {
-          if(FutureBuilder.debugRethrowError) {
+          if (FutureBuilder.debugRethrowError) {
             Future<Object>.error(error, stackTrace);
           }
           return true;
         }());
-
       });
       // An implementation like `SynchronousFuture` may have already called the
       // .then closure. Do not overwrite it in that case.

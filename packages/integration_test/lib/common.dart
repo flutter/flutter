@@ -26,7 +26,7 @@ import 'dart:convert';
 typedef ScreenshotCallback = Future<bool> Function(String name, List<int> image, [Map<String, Object?>? args]);
 
 /// Classes shared between `integration_test.dart` and `flutter drive` based
-/// adoptor (ex: `integration_test_driver.dart`).
+/// adaptor (ex: `integration_test_driver.dart`).
 
 /// An object sent from integration_test back to the Flutter Driver in response to
 /// `request_data` command.

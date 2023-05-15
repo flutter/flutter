@@ -232,7 +232,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         }
         _performanceModeRequestHandle?.dispose();
         _performanceModeRequestHandle = null;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty) {
@@ -241,7 +240,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         _performanceModeRequestHandle ??=
           SchedulerBinding.instance
             .requestPerformanceMode(ui.DartPerformanceMode.latency);
-        break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
         // transition and hits the dismissed status. For example, the iOS
@@ -253,7 +251,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           _performanceModeRequestHandle?.dispose();
           _performanceModeRequestHandle = null;
         }
-        break;
     }
   }
 
@@ -371,7 +368,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
                   _trainHoppingListenerRemover!();
                   _trainHoppingListenerRemover = null;
                 }
-                break;
               case AnimationStatus.forward:
               case AnimationStatus.reverse:
                 break;
@@ -1959,7 +1955,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 ///
 /// This is used with [RouteObserver] to make a widget aware of changes to the
 /// [Navigator]'s session history.
-abstract class RouteAware {
+abstract mixin class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.
   void didPopNext() { }

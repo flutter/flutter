@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [TextEditingController].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [TextEditingController].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TextEditingControllerExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class TextEditingControllerExampleApp extends StatelessWidget {
+  const TextEditingControllerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: TextEditingControllerExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class TextEditingControllerExample extends StatefulWidget {
+  const TextEditingControllerExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<TextEditingControllerExample> createState() => _TextEditingControllerExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _TextEditingControllerExampleState extends State<TextEditingControllerExample> {
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -39,8 +36,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       final String text = _controller.text.toLowerCase();
       _controller.value = _controller.value.copyWith(
         text: text,
-        selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
+        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
         composing: TextRange.empty,
       );
     });

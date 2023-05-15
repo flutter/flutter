@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
@@ -329,17 +330,17 @@ void main() {
     const Key child0Key = Key('child0');
     const Key child1Key = Key('child1');
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
           child: ExpansionTile(
-            title: const Text('title'),
+            title: Text('title'),
             // Set the column's alignment to Alignment.centerRight to test CrossAxisAlignment
             // of children widgets. This helps distinguish the effect of expandedAlignment
             // and expandedCrossAxisAlignment later in the test.
             expandedAlignment: Alignment.centerRight,
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            children: const <Widget>[
+            children: <Widget>[
               SizedBox(height: 100, width: 100, key: child0Key),
               SizedBox(height: 100, width: 80, key: child1Key),
             ],
@@ -522,6 +523,35 @@ void main() {
     expect(shapeDecoration.color, backgroundColor);
   });
 
+  testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Material(
+        child: ExpansionTile(
+          title: TestText('title'),
+          trailing: TestIcon(),
+          children: <Widget>[
+            SizedBox(height: 100, width: 100),
+          ],
+        ),
+      ),
+    ));
+
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+    expect(getIconColor(), theme.colorScheme.onSurfaceVariant);
+    expect(getTextColor(), theme.colorScheme.onSurface);
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    expect(getIconColor(), theme.colorScheme.primary);
+    expect(getTextColor(), theme.colorScheme.onSurface);
+  });
+
   testWidgets('ExpansionTile iconColor, textColor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/78281
 
@@ -665,5 +695,348 @@ void main() {
     final ListTile listTile = tester.widget(find.byType(ListTile));
     expect(listTile.leading.runtimeType, Icon);
     expect(listTile.trailing, isNull);
+  });
+
+  testWidgets('Nested ListTile Semantics', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('First Expansion Tile'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Second Expansion Tile'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    // Focus the first ExpansionTile.
+    tester.binding.focusManager.primaryFocus?.nextFocus();
+    await tester.pumpAndSettle();
+
+    // The first list tile is focused.
+    expect(
+      tester.getSemantics(find.byType(ListTile).first),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocused: true,
+        isFocusable: true,
+        label: 'First Expansion Tile',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    // The first list tile is not focused.
+    expect(
+      tester.getSemantics(find.byType(ListTile).last),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        isFocusable: true,
+        label: 'Second Expansion Tile',
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    handle.dispose();
+  });
+
+  testWidgets('ExpansionTile Semantics announcement', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: Text('Title'),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // There is no semantics announcement without tap action.
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    // Tap the title to expand ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    // The announcement should be the opposite of the current state.
+    // The ExpansionTile is expanded, so the announcement should be
+    // "Expanded".
+    expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+    // Tap the title to collapse ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pumpAndSettle();
+
+    // The announcement should be the opposite of the current state.
+    // The ExpansionTile is collapsed, so the announcement should be
+    // "Collapsed".
+    expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+    handle.dispose();
+  });
+
+  testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/pull/121624
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('First Expansion Tile'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Second Expansion Tile'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    SemanticsNode semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).first,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+    expect(semantics, isNotNull);
+    // The onTapHint is passed to semantics properties's hintOverrides.
+    expect(semantics.hintOverrides, isNotNull);
+    // The hint should be the opposite of the current state.
+    // The first ExpansionTile is collapsed, so the hint should be
+    // "double tap to expand".
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileCollapsedTapHint);
+
+    semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).last,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+
+    expect(semantics, isNotNull);
+    // The onTapHint is passed to semantics properties's hintOverrides.
+    expect(semantics.hintOverrides, isNotNull);
+    // The hint should be the opposite of the current state.
+    // The second ExpansionTile is expanded, so the hint should be
+    // "double tap to collapse".
+    expect(semantics.hintOverrides!.onTapHint, localizations.expansionTileExpandedTapHint);
+    handle.dispose();
+  });
+
+  testWidgets('Semantics hint for iOS and macOS', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('First Expansion Tile'),
+            ),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Second Expansion Tile'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    SemanticsNode semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).first,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+
+    expect(semantics, isNotNull);
+    expect(
+      semantics.hint,
+      '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
+    );
+
+    semantics = tester.getSemantics(
+      find.ancestor(
+        of: find.byType(ListTile).last,
+        matching: find.byType(Semantics),
+      ).first,
+    );
+
+    expect(semantics, isNotNull);
+    expect(
+      semantics.hint,
+      '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}',
+    );
+    handle.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: ExpansionTile(
+            title: TestText('title'),
+            trailing: TestIcon(),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ));
+
+      Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+      Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+      expect(getIconColor(), theme.unselectedWidgetColor);
+      expect(getTextColor(), theme.textTheme.titleMedium!.color);
+
+      await tester.tap(find.text('title'));
+      await tester.pumpAndSettle();
+
+      expect(getIconColor(), theme.colorScheme.primary);
+      expect(getTextColor(), theme.colorScheme.primary);
+    });
+  });
+
+  testWidgets('ExpansionTileController isExpanded, expand() and collapse()', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          controller: controller,
+          title: const Text('Title'),
+          children: const <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsNothing);
+    expect(controller.isExpanded, isFalse);
+    controller.expand();
+    expect(controller.isExpanded, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    controller.collapse();
+    expect(controller.isExpanded, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text('Child 0'), findsNothing);
+  });
+
+  testWidgets('Calling ExpansionTileController.expand/collapsed has no effect if it is already expanded/collapsed', (WidgetTester tester) async {
+    final ExpansionTileController controller = ExpansionTileController();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          controller: controller,
+          title: const Text('Title'),
+          initiallyExpanded: true,
+          children: const <Widget>[
+            Text('Child 0'),
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.text('Child 0'), findsOneWidget);
+    expect(controller.isExpanded, isTrue);
+    controller.expand();
+    expect(controller.isExpanded, isTrue);
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(find.text('Child 0'), findsOneWidget);
+    controller.collapse();
+    expect(controller.isExpanded, isFalse);
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle();
+    expect(controller.isExpanded, isFalse);
+    expect(find.text('Child 0'), findsNothing);
+    controller.collapse();
+    expect(controller.isExpanded, isFalse);
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('Call to ExpansionTileController.of()', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey childKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          title: Text('Title', key: titleKey),
+          children: <Widget>[
+            Text('Child 0', key: childKey),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileController controller1 = ExpansionTileController.of(childKey.currentContext!);
+    expect(controller1.isExpanded, isTrue);
+
+    final ExpansionTileController controller2 = ExpansionTileController.of(titleKey.currentContext!);
+    expect(controller2.isExpanded, isTrue);
+
+    expect(controller1, controller2);
+  });
+
+  testWidgets('Call to ExpansionTile.maybeOf()', (WidgetTester tester) async {
+    final GlobalKey titleKey = GlobalKey();
+    final GlobalKey nonDescendantKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Column(
+          children: <Widget>[
+            ExpansionTile(
+              title: Text('Title', key: titleKey),
+              children: const <Widget>[
+                Text('Child 0'),
+              ],
+            ),
+            Text('Non descendant', key: nonDescendantKey),
+          ],
+        ),
+      ),
+    ));
+
+    final ExpansionTileController? controller1 = ExpansionTileController.maybeOf(titleKey.currentContext!);
+    expect(controller1, isNotNull);
+    expect(controller1?.isExpanded, isFalse);
+
+    final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
+    expect(controller2, isNull);
   });
 }

@@ -136,7 +136,7 @@ class WebFlutterDriver extends FlutterDriver {
       }
 
       _logCommunication('<<< $response');
-    } on DriverError catch(_) {
+    } on DriverError catch (_) {
       rethrow;
     } catch (error, stackTrace) {
       throw DriverError(
@@ -273,11 +273,12 @@ class FlutterWebConnection {
     final String sessionId = settings['session-id'].toString();
     final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
     final async_io.WebDriver driver = async_io.WebDriver(
-        sessionUri,
-        sessionId,
-        json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
-        async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
-        _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+      sessionUri,
+      sessionId,
+      json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
+      async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
+      async_io.WebDriverSpec.W3c,
+    );
     if (settings['android-chrome-on-emulator'] == true) {
       final Uri localUri = Uri.parse(url);
       // Converts to Android Emulator Uri.
@@ -310,7 +311,7 @@ class FlutterWebConnection {
         'If the test uses VM service extensions provided by the Flutter SDK, '
         'then this error is likely caused by a bug in Flutter. Please report it '
         'by filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         error,
         stackTrace,
       );
@@ -360,15 +361,4 @@ Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? ti
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
-}
-
-async_io.WebDriverSpec _convertToSpec(String specString) {
-  switch (specString.toLowerCase()) {
-    case 'webdriverspec.w3c':
-      return async_io.WebDriverSpec.W3c;
-    case 'webdriverspec.jsonwire':
-      return async_io.WebDriverSpec.JsonWire;
-    default:
-      return async_io.WebDriverSpec.Auto;
-  }
 }

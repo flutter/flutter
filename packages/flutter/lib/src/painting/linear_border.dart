@@ -59,8 +59,8 @@ class LinearBorderEdge {
   /// is null then we interpolate from `a` varying size from `a.size` to zero.
   /// Otherwise both values are interpolated.
   static LinearBorderEdge? lerp(LinearBorderEdge? a, LinearBorderEdge? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
 
     a ??= LinearBorderEdge(alignment: b!.alignment, size: 0);

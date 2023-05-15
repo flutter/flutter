@@ -69,4 +69,12 @@ void main() {
     expect(approx(fit.confidence, 1.0), isTrue);
   });
 
+  test('Least-squares fit: toString', () {
+    final PolynomialFit fit = PolynomialFit(2);
+    fit.coefficients[0] = 123.45;
+    fit.coefficients[1] = 54.321;
+    fit.coefficients[2] = 1.3579;
+    fit.confidence = 0.9876;
+    expect(fit.toString(), 'PolynomialFit([123, 54.3, 1.36], confidence: 0.988)');
+  });
 }

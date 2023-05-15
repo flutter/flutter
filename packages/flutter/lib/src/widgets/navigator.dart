@@ -454,6 +454,7 @@ abstract class Route<T> {
   @protected
   void dispose() {
     _navigator = null;
+    _restorationScopeId.dispose();
   }
 
   /// Whether this route is the top-most route on the navigator.
@@ -463,10 +464,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    final _RouteEntry? currentRouteEntry = _navigator!._history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? currentRouteEntry = _navigator!._lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (currentRouteEntry == null) {
       return false;
     }
@@ -481,10 +479,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    final _RouteEntry? currentRouteEntry = _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? currentRouteEntry = _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (currentRouteEntry == null) {
       return false;
     }
@@ -521,10 +516,7 @@ abstract class Route<T> {
     if (_navigator == null) {
       return false;
     }
-    return _navigator!._history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isRoutePredicate(this)(e),
-      orElse: () => null,
-    )?.isPresent ?? false;
+    return _navigator!._firstRouteEntryWhereOrNull(_RouteEntry.isRoutePredicate(this))?.isPresent ?? false;
   }
 }
 
@@ -1108,6 +1100,23 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
 /// around in the overlay. Similarly, the navigator can be used to show a dialog
 /// by positioning the dialog widget above the current page.
 ///
+/// ## Using the Pages API
+///
+/// The [Navigator] will convert its [Navigator.pages] into a stack of [Route]s
+/// if it is provided. A change in [Navigator.pages] will trigger an update to
+/// the stack of [Route]s. The [Navigator] will update its routes to match the
+/// new configuration of its [Navigator.pages]. To use this API, one can create
+/// a [Page] subclass and defines a list of [Page]s for [Navigator.pages]. A
+/// [Navigator.onPopPage] callback is also required to properly clean up the
+/// input pages in case of a pop.
+///
+/// By Default, the [Navigator] will use [DefaultTransitionDelegate] to decide
+/// how routes transition in or out of the screen. To customize it, define a
+/// [TransitionDelegate] subclass and provide it to the
+/// [Navigator.transitionDelegate].
+///
+/// For more information on using the pages API, see the [Router] widget.
+///
 /// ## Using the Navigator API
 ///
 /// Mobile apps typically reveal their contents via full-screen elements
@@ -1126,21 +1135,6 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
 /// have this build-in navigation mechanism, the use of an [AppBar] (typically
 /// used in the [Scaffold.appBar] property) can automatically add a back
 /// button for user navigation.
-///
-/// ## Using the Pages API
-///
-/// The [Navigator] will convert its [Navigator.pages] into a stack of [Route]s
-/// if it is provided. A change in [Navigator.pages] will trigger an update to
-/// the stack of [Route]s. The [Navigator] will update its routes to match the
-/// new configuration of its [Navigator.pages]. To use this API, one can create
-/// a [Page] subclass and defines a list of [Page]s for [Navigator.pages]. A
-/// [Navigator.onPopPage] callback is also required to properly clean up the
-/// input pages in case of a pop.
-///
-/// By Default, the [Navigator] will use [DefaultTransitionDelegate] to decide
-/// how routes transition in or out of the screen. To customize it, define a
-/// [TransitionDelegate] subclass and provide it to the
-/// [Navigator.transitionDelegate].
 ///
 /// ### Displaying a full-screen route
 ///
@@ -1363,6 +1357,14 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
 /// [Navigator], especially in large `build` methods where nested [Navigator]s
 /// are created. The [Builder] widget can be used to access a [BuildContext] at
 /// a desired location in the widget subtree.
+///
+/// ### Finding the enclosing route
+///
+/// In the common case of a modal route, the enclosing route can be obtained
+/// from inside a build method using [ModalRoute.of]. To determine if the
+/// enclosing route is the active route (e.g. so that controls can be dimmed
+/// when the route is not active), the [Route.isCurrent] property can be checked
+/// on the returned route.
 ///
 /// ## State Restoration
 ///
@@ -3596,6 +3598,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     for (final _RouteEntry entry in _history) {
       entry.dispose();
     }
+    _rawNextPagelessRestorationScopeId.dispose();
+    _serializableHistory.dispose();
+    userGestureInProgressNotifier.dispose();
     super.dispose();
     // don't unlock, so that the object becomes unusable
     assert(_debugLocked);
@@ -3717,7 +3722,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
       // We found the page for all the consecutive pageless routes below. Attach these
       // pageless routes to the page.
-      if(unattachedPagelessRoutes.isNotEmpty) {
+      if (unattachedPagelessRoutes.isNotEmpty) {
          pageRouteToPagelessRoutes.putIfAbsent(
           oldEntry,
           () =>  List<_RouteEntry>.from(unattachedPagelessRoutes),
@@ -3934,7 +3939,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             assert(entry.currentState == _RouteLifecycle.idle);
             continue;
           }
-          break;
         case _RouteLifecycle.push:
         case _RouteLifecycle.pushReplace:
         case _RouteLifecycle.replace:
@@ -3951,13 +3955,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           if (entry.currentState == _RouteLifecycle.idle) {
             continue;
           }
-          break;
         case _RouteLifecycle.pushing: // Will exit this state when animation completes.
           if (!seenTopActiveRoute && poppedRoute != null) {
             entry.handleDidPopNext(poppedRoute);
           }
           seenTopActiveRoute = true;
-          break;
         case _RouteLifecycle.idle:
           if (!seenTopActiveRoute && poppedRoute != null) {
             entry.handleDidPopNext(poppedRoute);
@@ -3966,7 +3968,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // This route is idle, so we are allowed to remove subsequent (earlier)
           // routes that are waiting to be removed silently:
           canRemoveOrAdd = true;
-          break;
         case _RouteLifecycle.pop:
           if (!entry.handlePop(
                 navigator: this,
@@ -3990,7 +3991,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           }
           assert(entry.currentState == _RouteLifecycle.popping);
           canRemoveOrAdd = true;
-          break;
         case _RouteLifecycle.popping:
           // Will exit this state when animation completes.
           break;
@@ -4022,11 +4022,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           // Delay disposal until didChangeNext/didChangePrevious have been sent.
           toBeDisposed.add(_history.removeAt(index));
           entry = next;
-          break;
         case _RouteLifecycle.disposed:
         case _RouteLifecycle.staging:
           assert(false);
-          break;
       }
       index -= 1;
       next = entry;
@@ -4042,12 +4040,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Announce route name changes.
     if (widget.reportsRouteUpdateToEngine) {
-      final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e), orElse: () => null,
-      );
+      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
       final String? routeName = lastEntry?.route.settings.name;
       if (routeName != null && routeName != _lastAnnouncedRouteName) {
-        SystemNavigator.routeInformationUpdated(location: routeName);
+        SystemNavigator.routeInformationUpdated(uri: Uri.parse(routeName));
         _lastAnnouncedRouteName = routeName;
       }
     }
@@ -4117,7 +4113,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   int _getIndexBefore(int index, _RouteEntryPredicate predicate) {
-    while(index >= 0 && !predicate(_history[index])) {
+    while (index >= 0 && !predicate(_history[index])) {
       index -= 1;
     }
     return index;
@@ -4922,10 +4918,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object?>([ T? result ]) async {
-    final _RouteEntry? lastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry == null) {
       return false;
     }
@@ -4935,10 +4928,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       // Forget about this pop, we were disposed in the meantime.
       return true;
     }
-    final _RouteEntry? newLastEntry = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
+    final _RouteEntry? newLastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     if (lastEntry != newLastEntry) {
       // Forget about this pop, something happened to our history in the meantime.
       return true;
@@ -5022,19 +5012,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// ```
   /// {@end-tool}
   void popUntil(RoutePredicate predicate) {
-    _RouteEntry? candidate = _history.cast<_RouteEntry?>().lastWhere(
-      (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-      orElse: () => null,
-    );
-    while(candidate != null) {
+    _RouteEntry? candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    while (candidate != null) {
       if (predicate(candidate.route)) {
         return;
       }
       pop();
-      candidate = _history.cast<_RouteEntry?>().lastWhere(
-        (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-        orElse: () => null,
-      );
+      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
     }
   }
 
@@ -5058,10 +5042,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     if (wasCurrent) {
       _afterNavigation(
-        _history.cast<_RouteEntry?>().lastWhere(
-          (_RouteEntry? e) => e != null && _RouteEntry.isPresentPredicate(e),
-          orElse: () => null,
-        )?.route,
+        _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate)?.route,
       );
     }
   }
@@ -5135,10 +5116,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   @optionalTypeArgs
   Route<T>? _getRouteById<T>(String id) {
-    return _history.cast<_RouteEntry?>().firstWhere(
-      (_RouteEntry? entry) => entry!.restorationId == id,
-      orElse: () => null,
-    )?.route as Route<T>?;
+    return _firstRouteEntryWhereOrNull((_RouteEntry entry) => entry.restorationId == id)?.route as Route<T>?;
   }
 
   int get _userGesturesInProgress => _userGesturesInProgressCount;
@@ -5224,6 +5202,27 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       });
     }
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
+  }
+
+  /// Gets first route entry satisfying the predicate, or null if not found.
+  _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+    for (final _RouteEntry element in _history) {
+      if (test(element)) {
+        return element;
+      }
+    }
+    return null;
+  }
+
+  /// Gets last route entry satisfying the predicate, or null if not found.
+  _RouteEntry? _lastRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
+    _RouteEntry? result;
+    for (final _RouteEntry element in _history) {
+      if (test(element)) {
+        result = element;
+      }
+    }
+    return result;
   }
 
   @override

@@ -533,7 +533,6 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
         } else {
           nextState = RefreshIndicatorMode.inactive;
         }
-        break;
     }
 
     return nextState;

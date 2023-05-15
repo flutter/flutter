@@ -1077,7 +1077,7 @@ class TextStyle with Diagnosticable {
   /// implementation uses the non-null value throughout the transition for
   /// lerpable fields such as colors (for example, if one [TextStyle] specified
   /// `fontSize` but the other didn't, the returned [TextStyle] will use the
-  /// `fontSize` from the [TextStyle] that specified it, regarless of the `t`
+  /// `fontSize` from the [TextStyle] that specified it, regardless of the `t`
   /// value).
   ///
   /// This method throws when the given [TextStyle]s don't have the same
@@ -1094,10 +1094,9 @@ class TextStyle with Diagnosticable {
   /// as if they have a [background] paint (creating a new [Paint] if necessary
   /// based on the [backgroundColor] property).
   static TextStyle? lerp(TextStyle? a, TextStyle? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
-
     String? lerpDebugLabel;
     assert(() {
       lerpDebugLabel = 'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
