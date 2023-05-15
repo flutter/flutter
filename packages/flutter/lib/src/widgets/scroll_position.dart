@@ -66,6 +66,94 @@ enum ScrollPositionAlignmentPolicy {
 /// This object is a [Listenable] that notifies its listeners when [pixels]
 /// changes.
 ///
+/// {@template flutter.widgets.scrollPosition.listening}
+/// ### Accessing Scrolling Information
+///
+/// There are several ways to acquire information about scrolling and
+/// scrollable widgets, but each provides different types of information about
+/// the scrolling activity, the position, and the dimensions of the [Viewport].
+///
+/// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
+/// any of the attached [ScrollPosition]s notify _their_ listeners, such as when
+/// scrolling occurs. This is very similar to using a [NotificationListener] of
+/// type [ScrollNotification] to listen to changes in the scroll position, with
+/// the difference being that a notification listener will provide information
+/// about the scrolling activity. A notification listener can further listen to
+/// specific subclasses of [ScrollNotification], like [UserScrollNotification].
+///
+/// {@tool dartpad}
+/// This sample shows the difference between using a [ScrollController] or a
+/// [NotificationListener] of type [ScrollNotification] to listen to scrolling
+/// activities. Toggling the [Radio] button switches between the two.
+/// Using a [ScrollNotification] will provide details about the scrolling
+/// activity, along with the metrics of the [ScrollPosition], but not the scroll
+/// position object itself. By listening with a [ScrollController], the position
+/// object is directly accessible.
+/// Both of these types of notifications are only triggered by scrolling.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_controller_notification.0.dart **
+/// {@end-tool}
+///
+/// [ScrollController] does not notify its listeners when the list of
+/// [ScrollPosition]s attached to the scroll controller changes. To listen to
+/// the attaching and detaching of scroll positions to the controller, use the
+/// [ScrollController.onAttach] and [ScrollController.onDetach] methods. This is
+/// also useful for adding a listener to the
+/// [ScrollPosition.isScrollingNotifier] when the position is created during the
+/// build method of the [Scrollable].
+///
+/// At the time that a scroll position is attached, the [ScrollMetrics], such as
+/// the [ScrollMetrics.maxScrollExtent], are not yet available. These are not
+/// determined until the [Scrollable] has finished laying out its contents and
+/// computing things like the full extent of that content.
+/// [ScrollPosition.hasContentDimensions] can be used to know when the
+/// metrics are available, or a [ScrollMetricsNotification] can be used,
+/// discussed further below.
+///
+/// {@tool dartpad}
+/// This sample shows how to apply a listener to the
+/// [ScrollPosition.isScrollingNotifier] using [ScrollController.onAttach].
+/// This is used to change the [AppBar]'s color when scrolling is occurring.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_controller_on_attach.0.dart **
+/// {@end-tool}
+///
+/// #### From a different context
+///
+/// When needing to access scrolling information from a context that is within
+/// the scrolling widget itself, use [Scrollable.of] to access the
+/// [ScrollableState] and the [ScrollableState.position]. This would be the same
+/// [ScrollPosition] attached to a [ScrollController].
+///
+/// When needing to access scrolling information from a context that is not an
+/// ancestor of the scrolling widget, use [ScrollNotificationObserver]. This is
+/// used by [AppBar] to create the scrolled under effect. Since [Scaffold.appBar]
+/// is a separate subtree from the [Scaffold.body], scroll notifications would
+/// not bubble up to the app bar. Use
+/// [ScrollNotificationObserverState.addListener] to listen to scroll
+/// notifications happening outside of the current context.
+///
+/// #### Dimension changes
+///
+/// Lastly, listening to a [ScrollController] or a [ScrollPosition] will
+/// _not_ notify when the [ScrollMetrics] of a given scroll position changes,
+/// such as when the window is resized, changing the dimensions of the
+/// [Viewport] and the previously mentioned extents of the scrollable. In order
+/// to listen to changes in scroll metrics, use a [NotificationListener] of type
+/// [ScrollMetricsNotification]. This type of notification differs from
+/// [ScrollNotification], as it is not associated with the activity of
+/// scrolling, but rather the dimensions of the scrollable area, such as the
+/// window size.
+///
+/// {@tool dartpad}
+/// This sample shows how a [ScrollMetricsNotification] is dispatched when
+/// the `windowSize` is changed. Press the floating action button to increase
+/// the scrollable window's size.
+///
+/// ** See code in examples/api/lib/widgets/scroll_position/scroll_metrics_notification.0.dart **
+/// {@end-tool}
+/// {@endtemplate}
+///
 /// ## Subclassing ScrollPosition
 ///
 /// Over time, a [Scrollable] might have many different [ScrollPosition]
