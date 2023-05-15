@@ -159,7 +159,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
             prompt: 'Do you want to continue with adding multidex support for Android?',
             defaultChoiceIndex: 0,
           );
-        } on StateError catch(e) {
+        } on StateError catch (e) {
           globals.printError(
             e.message,
             indent: 0,
@@ -273,7 +273,7 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
           defaultChoiceIndex: 0,
         );
         shouldDeleteUserGradle = selection == 'y';
-      } on StateError catch(e) {
+      } on StateError catch (e) {
         globals.printError(
           e.message,
           indent: 0,

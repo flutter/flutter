@@ -2098,7 +2098,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     double maxWidth = double.negativeInfinity;
     for (int i = 0; i < labels.length; i++) {
       final String? label = labels[i];
-      if(label == null) {
+      if (label == null) {
         continue;
       }
 
