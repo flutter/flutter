@@ -3955,6 +3955,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
 
+  - name: Mac_ios draw_points_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_points_perf_ios__timeline_summary
+
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
     presubmit: false
