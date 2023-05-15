@@ -3366,7 +3366,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           ? widget.pages.length > 1
           : canPop(),
     );
-    print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot. History: $_history');
+    print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. History: $_history');
     notification.dispatch(context);
     return;
   }
@@ -5316,10 +5316,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
-  // TODO(justinmc): This isn't necessary for the NavigationNotification approach,
-  // so remove it if that's the solution.
-  bool get _isRoot => context.findAncestorStateOfType<NavigatorState>() == null;
-
   /// Gets first route entry satisfying the predicate, or null if not found.
   _RouteEntry? _firstRouteEntryWhereOrNull<T>(_RouteEntryPredicate test) {
     for (final _RouteEntry element in _history.value) {
@@ -5352,7 +5348,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return HeroControllerScope.none(
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          print('justin received notification in Navigator. canPop here: ${canPop()}, canPop from notification: ${notification.canPop}');//, isRoot? $_isRoot');
+          print('justin received notification in Navigator. canPop here: ${canPop()}, canPop from notification: ${notification.canPop}');
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification.
           if (notification.canPop || !canPop()) {
