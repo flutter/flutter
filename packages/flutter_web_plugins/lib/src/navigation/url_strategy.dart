@@ -6,7 +6,13 @@ import 'dart:ui_web' as ui_web;
 
 import 'utils.dart';
 
-export 'dart:ui_web' show BrowserPlatformLocation, PlatformLocation, urlStrategy, UrlStrategy, HashUrlStrategy;
+export 'dart:ui_web'
+    show
+        BrowserPlatformLocation,
+        HashUrlStrategy,
+        PlatformLocation,
+        UrlStrategy,
+        urlStrategy;
 
 /// Change the strategy to use for handling browser URL.
 ///
@@ -37,10 +43,12 @@ class PathUrlStrategy extends ui_web.HashUrlStrategy {
   /// interactions.
   PathUrlStrategy([
     super.platformLocation,
-  ])  : _basePath = stripTrailingSlash(extractPathname(checkBaseHref(
+  ])  : _platformLocation = platformLocation,
+        _basePath = stripTrailingSlash(extractPathname(checkBaseHref(
           platformLocation.getBaseHref(),
         )));
 
+  final ui_web.PlatformLocation _platformLocation;
   final String _basePath;
 
   @override
