@@ -171,7 +171,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 400));
     verifyPaintPosition(key1, Offset.zero, false);
     verifyPaintPosition(key2, Offset.zero, true);
-    verifyPaintPosition(key3, const Offset(0.0, 100.0), true);
+    verifyPaintPosition(key3, const Offset(0.0, 100.0), true);//
     verifyActualBoxPosition(tester, find.byType(Container), 1, const Rect.fromLTWH(0.0, 100.0, 800.0, 200.0));
     verifyPaintPosition(key4, const Offset(0.0, 250.0), true);
     verifyPaintPosition(key5, const Offset(0.0, 800.0), false);
