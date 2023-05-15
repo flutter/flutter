@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 class TestAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.bin') {
+    if (key == 'AssetManifest.smcbin') {
       final Map<String, List<Object>> binManifestData = <String, List<Object>>{
         'assets/foo.png': <Object>[
           <String, Object>{

@@ -41,7 +41,7 @@ class TestAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) {
     late ByteData data;
     switch (key) {
-      case 'AssetManifest.bin':
+      case 'AssetManifest.smcbin':
         data = manifest;
       case 'assets/image.png':
         data = testByteData(1.0);
