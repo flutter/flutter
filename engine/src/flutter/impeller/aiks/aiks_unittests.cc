@@ -1212,6 +1212,59 @@ TEST_P(AiksTest, CanDrawPaintWithAdvancedBlend) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+#define BLEND_MODE_TUPLE(blend_mode) {#blend_mode, BlendMode::k##blend_mode},
+
+struct BlendModeSelection {
+  std::vector<const char*> blend_mode_names;
+  std::vector<BlendMode> blend_mode_values;
+};
+
+static BlendModeSelection GetBlendModeSelection() {
+  std::vector<const char*> blend_mode_names;
+  std::vector<BlendMode> blend_mode_values;
+  {
+    const std::vector<std::tuple<const char*, BlendMode>> blends = {
+        IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TUPLE)};
+    assert(blends.size() ==
+           static_cast<size_t>(Entity::kLastAdvancedBlendMode) + 1);
+    for (const auto& [name, mode] : blends) {
+      blend_mode_names.push_back(name);
+      blend_mode_values.push_back(mode);
+    }
+  }
+
+  return {blend_mode_names, blend_mode_values};
+}
+
+TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
+  auto modes = GetBlendModeSelection();
+
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    static Color background = Color::MediumTurquoise();
+    static Color foreground = Color::Color::OrangeRed().WithAlpha(0.5);
+    static int current_blend_index = 3;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::ColorEdit4("Background", reinterpret_cast<float*>(&background));
+      ImGui::ColorEdit4("Foreground", reinterpret_cast<float*>(&foreground));
+      ImGui::ListBox("Blend mode", &current_blend_index,
+                     modes.blend_mode_names.data(),
+                     modes.blend_mode_names.size());
+    }
+    ImGui::End();
+
+    Canvas canvas;
+    canvas.Scale(Vector2(0.2, 0.2));
+    canvas.DrawPaint({.color = background});
+    canvas.DrawPaint(
+        {.color = foreground,
+         .blend_mode = static_cast<BlendMode>(current_blend_index)});
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, PaintBlendModeIsRespected) {
   Paint paint;
   Canvas canvas;
@@ -1231,23 +1284,10 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-#define BLEND_MODE_TUPLE(blend_mode) {#blend_mode, BlendMode::k##blend_mode},
-
 TEST_P(AiksTest, ColorWheel) {
   // Compare with https://fiddle.skia.org/c/@BlendModes
 
-  std::vector<const char*> blend_mode_names;
-  std::vector<BlendMode> blend_mode_values;
-  {
-    const std::vector<std::tuple<const char*, BlendMode>> blends = {
-        IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TUPLE)};
-    assert(blends.size() ==
-           static_cast<size_t>(Entity::kLastAdvancedBlendMode) + 1);
-    for (const auto& [name, mode] : blends) {
-      blend_mode_names.push_back(name);
-      blend_mode_values.push_back(mode);
-    }
-  }
+  BlendModeSelection blend_modes = GetBlendModeSelection();
 
   auto draw_color_wheel = [](Canvas& canvas) {
     /// color_wheel_sampler: r=0 -> fuchsia, r=2pi/3 -> yellow, r=4pi/3 ->
@@ -1303,7 +1343,8 @@ TEST_P(AiksTest, ColorWheel) {
     {
       ImGui::Checkbox("Cache the wheel", &cache_the_wheel);
       ImGui::ListBox("Blending mode", &current_blend_index,
-                     blend_mode_names.data(), blend_mode_names.size());
+                     blend_modes.blend_mode_names.data(),
+                     blend_modes.blend_mode_names.size());
       ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
       ImGui::ColorEdit4("Color A", reinterpret_cast<float*>(&color0));
       ImGui::ColorEdit4("Color B", reinterpret_cast<float*>(&color1));
@@ -1356,8 +1397,9 @@ TEST_P(AiksTest, ColorWheel) {
     canvas.Scale(Vector2(3, 3));
 
     // Draw 3 circles to a subpass and blend it in.
-    canvas.SaveLayer({.color = Color::White().WithAlpha(src_alpha),
-                      .blend_mode = blend_mode_values[current_blend_index]});
+    canvas.SaveLayer(
+        {.color = Color::White().WithAlpha(src_alpha),
+         .blend_mode = blend_modes.blend_mode_values[current_blend_index]});
     {
       Paint paint;
       paint.blend_mode = BlendMode::kPlus;
