@@ -539,7 +539,7 @@ class XCDevice {
           }
         }
 
-        devices.add(IOSDevice(
+        final IOSDevice iosDevice = IOSDevice(
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
@@ -552,8 +552,11 @@ class XCDevice {
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
           platform: globals.platform,
-          devModeEnabled: devModeEnabled
-        ));
+        );
+
+        iosDevice.devModeEnabled = devModeEnabled;
+
+        devices.add(iosDevice);
       }
     }
     return devices;

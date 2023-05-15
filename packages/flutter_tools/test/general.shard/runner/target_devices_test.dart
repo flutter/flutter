@@ -1268,7 +1268,7 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use \'target-device\' for development, enable Developer Mode in Settings → Privacy & Security. 
+To use \'target-device\' for development, enable Developer Mode in Settings → Privacy & Security.
 
 The following devices were found:
 target-device (mobile) • xxx • ios • iOS 16
@@ -1287,8 +1287,8 @@ target-device (mobile) • xxx • ios • iOS 16
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use \'target-device-1\' for development, enable Developer Mode in Settings → Privacy & Security. 
-To use \'target-device-2\' for development, enable Developer Mode in Settings → Privacy & Security. 
+To use \'target-device-1\' for development, enable Developer Mode in Settings → Privacy & Security.
+To use \'target-device-2\' for development, enable Developer Mode in Settings → Privacy & Security.
 
 The following devices were found:
 target-device-1 (mobile) • xxx • ios • iOS 16

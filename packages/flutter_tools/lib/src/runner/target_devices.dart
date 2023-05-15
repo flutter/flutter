@@ -218,7 +218,22 @@ class TargetDevices {
     return null;
   }
 
-  Future<List<Device>?> _handleDisabledIosDevice(Device device) async {
+  Future<void> _printUnsupportedDevices() async {
+    // Get connected devices from cache, including unsupported ones.
+    final List<Device> unsupportedDevices = await _deviceManager.getAllDevices(
+        filter: DeviceDiscoveryFilter(
+          deviceConnectionInterface: deviceConnectionInterface,
+        )
+    );
+
+    if (unsupportedDevices.isNotEmpty) {
+      _logger.printStatus('');
+      _logger.printStatus('The following devices were found:');
+      await Device.printDevices(unsupportedDevices, _logger);
+    }
+  }
+
+  Future<List<Device>?> _handleDevModeDisabledIosDevice(IOSDevice device) async {
     // Get connected devices from cache, including unsupported ones.
     final List<Device> unsupportedDevices = await _deviceManager.getAllDevices(
         filter: DeviceDiscoveryFilter(
@@ -235,7 +250,6 @@ class TargetDevices {
       _logger.printStatus('The following devices were found:');
       await Device.printDevices(unsupportedDevices, _logger);
     }
-    return null;
   }
 
   /// Determine which device to use when multiple found.
@@ -514,8 +528,8 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       if (devices.length == 1) {
         Device? matchedDevice = devices.first;
 
-        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled) {
-          return _handleDisabledIosDevice(matchedDevice);
+        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled! ) {
+          return _handleDevModeDisabledIosDevice(matchedDevice);
         }
 
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
@@ -529,19 +543,23 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
       if (devices.length > 1) {
         final List<Device> disabledDevices = [];
+
         for (final Device device in devices) {
-          if (device is IOSDevice && !device.devModeEnabled) {
+          if (device is IOSDevice && !device.devModeEnabled!) {
             disabledDevices.add(device);
-            if (disabledDevices.length == devices.length) {
-              // all matching devices have dev mode disabled, so print other
-              // available devices
-              return _handleDisabledIosDevice(device);
-            }
+
             // otherwise, just show the error and move on
             _logger.printStatus(
               userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
             );
           }
+        }
+
+        if (disabledDevices.length == devices.length) {
+          // all matching devices have dev mode disabled, so print other
+          // available devices
+          await _printUnsupportedDevices();
+          return null;
         }
       }
     }

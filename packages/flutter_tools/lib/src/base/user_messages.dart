@@ -270,7 +270,7 @@ class UserMessages {
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
   String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
-      "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security. ";
+      "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
   String get flutterNoDevicesFound => 'No devices found.';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>

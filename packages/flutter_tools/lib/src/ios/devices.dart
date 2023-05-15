@@ -262,7 +262,6 @@ class IOSDevice extends Device {
     required this.connectionInterface,
     required this.isConnected,
     String? sdkVersion,
-    this.devModeEnabled = true,
     required Platform platform,
     required IOSDeploy iosDeploy,
     required IMobileDevice iMobileDevice,
@@ -304,8 +303,6 @@ class IOSDevice extends Device {
   @override
   final String name;
 
-  final bool devModeEnabled;
-
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
@@ -325,6 +322,8 @@ class IOSDevice extends Device {
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
+
+  bool? devModeEnabled;
 
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;
