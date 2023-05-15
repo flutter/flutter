@@ -74,7 +74,7 @@ class PointsPainter extends CustomPainter {
     canvas.drawPaint(Paint()..color = Colors.white);
     for (int i = 0; i < 8; i++) {
       final double x = ((size.width / i) + tick) % size.width;
-      for (int j = 0; j <  8000; j += 2) {
+      for (int j = 0; j < data.length; j += 2) {
         data[j] = x;
         data[j + 1] = (size.height / j) + 200;
       }
