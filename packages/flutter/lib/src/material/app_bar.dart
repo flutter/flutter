@@ -1259,17 +1259,15 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
-    final Widget? effectiveTitle;
-    if (variant == _SliverAppVariant.small) {
-      effectiveTitle = title;
-    } else {
-      effectiveTitle = AnimatedOpacity(
+    final Widget? effectiveTitle = switch (variant) {
+      _SliverAppVariant.small => title,
+      _SliverAppVariant.large || _SliverAppVariant.medium => AnimatedOpacity(
         opacity: isScrolledUnder ? 1 : 0,
         duration: const Duration(milliseconds: 500),
         curve: const Cubic(0.2, 0.0, 0.0, 1.0),
         child: title,
-      );
-    }
+      ),
+    };
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
