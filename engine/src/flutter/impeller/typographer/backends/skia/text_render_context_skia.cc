@@ -211,7 +211,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   TRACE_EVENT0("impeller", __FUNCTION__);
   FML_DCHECK(bitmap != nullptr);
 
-  auto surface = SkSurface::MakeRasterDirect(bitmap->pixmap());
+  auto surface = SkSurfaces::WrapPixels(bitmap->pixmap());
   if (!surface) {
     return false;
   }
@@ -252,7 +252,7 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
     return nullptr;
   }
 
-  auto surface = SkSurface::MakeRasterDirect(bitmap->pixmap());
+  auto surface = SkSurfaces::WrapPixels(bitmap->pixmap());
   if (!surface) {
     return nullptr;
   }

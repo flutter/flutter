@@ -20,11 +20,11 @@ namespace testing {
 static sk_sp<DlImage> MakeTestImage(int w, int h, SkColor color) {
   sk_sp<SkSurface> surface;
   if (SkColorGetA(color) < 255) {
-    surface = SkSurface::MakeRasterN32Premul(w, h);
+    surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(w, h));
   } else {
     SkImageInfo info =
         SkImageInfo::MakeN32(w, h, SkAlphaType::kOpaque_SkAlphaType);
-    surface = SkSurface::MakeRaster(info);
+    surface = SkSurfaces::Raster(info);
   }
   SkCanvas* canvas = surface->getCanvas();
   canvas->drawColor(color);

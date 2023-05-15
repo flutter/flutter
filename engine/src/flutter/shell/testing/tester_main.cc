@@ -101,7 +101,7 @@ class TesterPlatformView : public PlatformView,
     SkImageInfo info =
         SkImageInfo::MakeN32(size.fWidth, size.fHeight, kPremul_SkAlphaType,
                              SkColorSpace::MakeSRGB());
-    sk_surface_ = SkSurface::MakeRaster(info, nullptr);
+    sk_surface_ = SkSurfaces::Raster(info, nullptr);
 
     if (sk_surface_ == nullptr) {
       FML_LOG(ERROR)

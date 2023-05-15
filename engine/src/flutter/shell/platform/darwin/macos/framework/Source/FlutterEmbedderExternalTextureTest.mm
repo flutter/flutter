@@ -19,6 +19,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 @interface TestExternalTexture : NSObject <FlutterTexture>
 
@@ -76,7 +77,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestTextureResolution) {
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurfaces::RenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   MTLTextureDescriptor* textureDescriptor = [[MTLTextureDescriptor alloc] init];
@@ -135,7 +136,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTexture) {
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurfaces::RenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   TestExternalTexture* testExternalTexture =
@@ -188,7 +189,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA) {
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurfaces::RenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   TestExternalTexture* testExternalTexture =
@@ -243,7 +244,7 @@ TEST(FlutterEmbedderExternalTextureUnittests, TestPopulateExternalTextureYUVA2) 
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
   GrDirectContext* grContext = darwinContextMetal.mainContext.get();
-  sk_sp<SkSurface> gpuSurface(SkSurface::MakeRenderTarget(grContext, skgpu::Budgeted::kNo, info));
+  sk_sp<SkSurface> gpuSurface(SkSurfaces::RenderTarget(grContext, skgpu::Budgeted::kNo, info));
 
   // Create a texture.
   TestExternalTexture* testExternalTexture =
