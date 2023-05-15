@@ -349,10 +349,11 @@ class Radio<T> extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// Controls whether the checkmark style is used in an iOS style radio.
+  /// Controls whether the checkmark style is used in an iOS-style radio.
   ///
-  /// This property will only be used if [Radio.adaptive] shows the Cupertino
-  /// widget.
+  /// Only usable under the [Radio.adaptive] constructor. If set to true, on
+  /// Apple platforms the radio button will appear as an iOS styled checkmark.
+  /// Controls the [CupertinoRadio] through [CupertinoRadio.useCheckmarkStyle].
   ///
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;

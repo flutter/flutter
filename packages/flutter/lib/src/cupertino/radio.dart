@@ -78,8 +78,8 @@ class CupertinoRadio<T> extends StatefulWidget {
     this.fillColor,
     this.focusColor,
     this.focusNode,
-    this.useCheckmarkStyle = false,
     this.autofocus = false,
+    this.useCheckmarkStyle = false,
   });
 
   /// The value represented by this radio button.

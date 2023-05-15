@@ -442,7 +442,10 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// Only usable under the [RadioListTile.adaptive] constructor. If set to
   /// true, on Apple platforms the radio button will appear as an iOS styled
-  /// checkmark.
+  /// checkmark. Controls the [CupertinoRadio] through
+  /// [CupertinoRadio.useCheckmarkStyle].
+  ///
+  /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
   @override
