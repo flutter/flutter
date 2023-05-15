@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
+import 'dart:js_interop';
 import 'dart:ui' as ui;
 import 'dart:ui_web' as ui_web;
+
+import 'package:web/web.dart' as web;
 
 import '../navigation_common/platform_location.dart';
 import 'utils.dart';
@@ -70,8 +72,8 @@ class HashUrlStrategy extends ui_web.UrlStrategy {
   @override
   ui.VoidCallback addPopStateListener(ui_web.PopStateListener fn) {
     void wrappedFn(Object event) {
-      // `fn` expects `event.state`, not a `html.Event`.
-      fn((event as html.PopStateEvent).state);
+      // `fn` expects `event.state`, not a `web.Event`.
+      fn((event as web.PopStateEvent).state);
     }
     _platformLocation.addPopStateListener(wrappedFn);
     return () => _platformLocation.removePopStateListener(wrappedFn);
@@ -177,58 +179,57 @@ class PathUrlStrategy extends HashUrlStrategy {
   }
 }
 
+final Map<EventListener, JSFunction> _listeners = <EventListener, JSFunction>{};
+
 /// Delegates to real browser APIs to provide platform location functionality.
 class BrowserPlatformLocation extends PlatformLocation {
   /// Default constructor for [BrowserPlatformLocation].
   const BrowserPlatformLocation();
 
-  // Default value for [pathname] when it's not set in window.location.
-  // According to MDN this should be ''. Chrome seems to return '/'.
-  static const String _defaultPathname = '';
+  web.Location get _location => web.window.location;
 
-  // Default value for [search] when it's not set in window.location.
-  // According to both chrome, and the MDN, this is ''.
-  static const String _defaultSearch = '';
-
-  html.Location get _location => html.window.location;
-
-  html.History get _history => html.window.history;
+  web.History get _history => web.window.history;
 
   @override
-  void addPopStateListener(html.EventListener fn) {
-    html.window.addEventListener('popstate', fn);
+  void addPopStateListener(EventListener fn) {
+    JSFunction? jsFn = _listeners[fn];
+    if (jsFn == null) {
+      jsFn = fn.toJS;
+      _listeners[fn] = jsFn;
+    }
+    web.window.addEventListener('popstate'.toJS, jsFn);
   }
 
   @override
-  void removePopStateListener(html.EventListener fn) {
-    html.window.removeEventListener('popstate', fn);
+  void removePopStateListener(EventListener fn) {
+    web.window.removeEventListener('popstate'.toJS, _listeners[fn]);
   }
 
   @override
-  String get pathname => _location.pathname ?? _defaultPathname;
+  String get pathname => _location.pathname.toDart;
 
   @override
-  String get search => _location.search ?? _defaultSearch;
+  String get search => _location.search.toDart;
 
   @override
-  String get hash => _location.hash;
+  String get hash => _location.hash.toDart;
 
   @override
   Object? get state => _history.state;
 
   @override
   void pushState(Object? state, String title, String url) {
-    _history.pushState(state, title, url);
+    _history.pushState(state?.toJS, title.toJS, url.toJS);
   }
 
   @override
   void replaceState(Object? state, String title, String url) {
-    _history.replaceState(state, title, url);
+    _history.replaceState(state?.toJS, title.toJS, url.toJS);
   }
 
   @override
   void go(int count) {
-    _history.go(count);
+    _history.go(count.toJS);
   }
 
   @override
