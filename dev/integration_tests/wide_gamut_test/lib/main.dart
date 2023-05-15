@@ -201,7 +201,7 @@ class _SaveLayerDrawer extends CustomPainter {
 
 Future<ui.Image> _drawImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Size markerSize = Size(120, 120);
+  const Size markerSize = Size(120, 120);
   final double canvasSize = markerSize.height + 3;
   final Canvas canvas = Canvas(
     recorder,
@@ -225,7 +225,7 @@ Future<ui.Image> _drawImage() async {
   );
   final ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawExtendedRgba128);
-  Completer<ui.Image> completer = Completer<ui.Image>();
+  final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(Uint8List.view(byteData!.buffer),
       canvasSize.toInt(),
       canvasSize.toInt(),
