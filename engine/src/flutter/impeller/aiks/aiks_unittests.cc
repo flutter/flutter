@@ -2263,5 +2263,39 @@ TEST_P(AiksTest, CanRenderBackdropBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/126701 .
+TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP_("This backend doesn't support runtime effects.");
+  }
+
+  auto runtime_stage =
+      OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  struct FragUniforms {
+    Vector2 iResolution;
+    Scalar iTime;
+  } frag_uniforms = {.iResolution = Vector2(400, 400), .iTime = 100.0};
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(FragUniforms));
+  memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
+
+  std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
+
+  Paint paint;
+  paint.color_source = ColorSource::MakeRuntimeEffect(
+      runtime_stage, uniform_data, texture_inputs);
+
+  Canvas canvas;
+  canvas.Save();
+  canvas.ClipRRect(Rect{0, 0, 400, 400}, 10.0,
+                   Entity::ClipOperation::kIntersect);
+  canvas.DrawRect(Rect{0, 0, 400, 400}, paint);
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

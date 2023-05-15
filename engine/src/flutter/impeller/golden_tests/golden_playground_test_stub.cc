@@ -33,6 +33,11 @@ std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
   return nullptr;
 }
 
+std::shared_ptr<RuntimeStage> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
+    const char* asset_name) const {
+  return nullptr;
+}
+
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
   return nullptr;
 }
