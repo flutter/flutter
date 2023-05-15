@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkBBHFactory.h"
+#include "third_party/skia/include/core/SkRect.h"
 
 namespace flutter {
 
