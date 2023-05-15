@@ -2081,7 +2081,7 @@ void main() {
     Widget buildApp() {
       final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          for(final TargetPlatform platform in TargetPlatform.values)
+          for (final TargetPlatform platform in TargetPlatform.values)
             platform: const CupertinoPageTransitionsBuilder(),
         },
       );
