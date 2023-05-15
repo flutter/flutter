@@ -370,7 +370,7 @@ class IOSDeployDebugger {
 
         // Symbol Path: /Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols
         if (_symbolsPathPattern.hasMatch(line)) {
-          _logger.printTrace(line);
+          _logger.printTrace('Detected path to iOS debug symbols: "$line"');
           final String prefix = _symbolsPathPattern.stringMatch(line) ?? '';
           if (prefix.isEmpty) {
             return;
