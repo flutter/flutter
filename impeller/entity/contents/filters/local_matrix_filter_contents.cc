@@ -24,7 +24,8 @@ std::optional<Entity> LocalMatrixFilterContents::RenderFilter(
     const ContentContext& renderer,
     const Entity& entity,
     const Matrix& effect_transform,
-    const Rect& coverage) const {
+    const Rect& coverage,
+    const std::optional<Rect>& coverage_hint) const {
   return Entity::FromSnapshot(
       inputs[0]->GetSnapshot("LocalMatrix", renderer, entity),
       entity.GetBlendMode(), entity.GetStencilDepth());

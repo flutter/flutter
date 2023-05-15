@@ -153,10 +153,6 @@ void FilterContents::SetInputs(FilterInput::Vector inputs) {
   inputs_ = std::move(inputs);
 }
 
-void FilterContents::SetCoverageCrop(std::optional<Rect> coverage_crop) {
-  coverage_crop_ = coverage_crop;
-}
-
 void FilterContents::SetEffectTransform(Matrix effect_transform) {
   effect_transform_ = effect_transform;
 }
@@ -171,7 +167,7 @@ bool FilterContents::Render(const ContentContext& renderer,
 
   // Run the filter.
 
-  auto maybe_entity = GetEntity(renderer, entity);
+  auto maybe_entity = GetEntity(renderer, entity, GetCoverageHint());
   if (!maybe_entity.has_value()) {
     return true;
   }
@@ -181,8 +177,8 @@ bool FilterContents::Render(const ContentContext& renderer,
 std::optional<Rect> FilterContents::GetLocalCoverage(
     const Entity& local_entity) const {
   auto coverage = GetFilterCoverage(inputs_, local_entity, effect_transform_);
-  if (coverage_crop_.has_value() && coverage.has_value()) {
-    coverage = coverage->Intersection(coverage_crop_.value());
+  if (GetCoverageHint().has_value() && coverage.has_value()) {
+    coverage = coverage->Intersection(*GetCoverageHint());
   }
 
   return coverage;
@@ -223,8 +219,10 @@ std::optional<Rect> FilterContents::GetFilterCoverage(
   return result;
 }
 
-std::optional<Entity> FilterContents::GetEntity(const ContentContext& renderer,
-                                                const Entity& entity) const {
+std::optional<Entity> FilterContents::GetEntity(
+    const ContentContext& renderer,
+    const Entity& entity,
+    const std::optional<Rect>& coverage_hint) const {
   Entity entity_with_local_transform = entity;
   entity_with_local_transform.SetTransformation(
       GetTransform(entity.GetTransformation()));
@@ -235,7 +233,7 @@ std::optional<Entity> FilterContents::GetEntity(const ContentContext& renderer,
   }
 
   return RenderFilter(inputs_, renderer, entity_with_local_transform,
-                      effect_transform_, coverage.value());
+                      effect_transform_, coverage.value(), coverage_hint);
 }
 
 std::optional<Snapshot> FilterContents::RenderToSnapshot(
@@ -247,12 +245,13 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const std::string& label) const {
   // Resolve the render instruction (entity) from the filter and render it to a
   // snapshot.
-  if (std::optional<Entity> result = GetEntity(renderer, entity);
+  if (std::optional<Entity> result =
+          GetEntity(renderer, entity, coverage_limit);
       result.has_value()) {
     return result->GetContents()->RenderToSnapshot(
         renderer,        // renderer
         result.value(),  // entity
-        std::nullopt,    // coverage_limit
+        coverage_limit,  // coverage_limit
         std::nullopt,    // sampler_descriptor
         true,            // msaa_enabled
         label);          // label
