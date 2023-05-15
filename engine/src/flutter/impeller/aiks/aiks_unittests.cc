@@ -2174,5 +2174,52 @@ TEST_P(AiksTest, CanRenderDestructiveSaveLayer) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
+    auto [a, b] = IMPELLER_PLAYGROUND_LINE(Point(50, 50), Point(300, 200), 30,
+                                           Color::White(), Color::White());
+
+    Canvas canvas;
+    canvas.DrawCircle({100, 100}, 50, {.color = Color::CornflowerBlue()});
+    canvas.DrawCircle({300, 200}, 100, {.color = Color::GreenYellow()});
+    canvas.DrawCircle({140, 170}, 75, {.color = Color::DarkMagenta()});
+    canvas.DrawCircle({180, 120}, 100, {.color = Color::OrangeRed()});
+    canvas.ClipRRect(Rect::MakeLTRB(a.x, a.y, b.x, b.y), 20);
+    canvas.SaveLayer({.blend_mode = BlendMode::kSource}, std::nullopt,
+                     [](const FilterInput::Ref& input,
+                        const Matrix& effect_transform, bool is_subpass) {
+                       return FilterContents::MakeGaussianBlur(
+                           input, Sigma(20.0), Sigma(20.0),
+                           FilterContents::BlurStyle::kNormal,
+                           Entity::TileMode::kClamp, effect_transform);
+                     });
+    canvas.Restore();
+
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderBackdropBlur) {
+  Canvas canvas;
+  canvas.DrawCircle({100, 100}, 50, {.color = Color::CornflowerBlue()});
+  canvas.DrawCircle({300, 200}, 100, {.color = Color::GreenYellow()});
+  canvas.DrawCircle({140, 170}, 75, {.color = Color::DarkMagenta()});
+  canvas.DrawCircle({180, 120}, 100, {.color = Color::OrangeRed()});
+  canvas.ClipRRect(Rect::MakeLTRB(75, 50, 375, 275), 20);
+  canvas.SaveLayer({.blend_mode = BlendMode::kSource}, std::nullopt,
+                   [](const FilterInput::Ref& input,
+                      const Matrix& effect_transform, bool is_subpass) {
+                     return FilterContents::MakeGaussianBlur(
+                         input, Sigma(30.0), Sigma(30.0),
+                         FilterContents::BlurStyle::kNormal,
+                         Entity::TileMode::kClamp, effect_transform);
+                   });
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller

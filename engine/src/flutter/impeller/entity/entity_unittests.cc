@@ -202,7 +202,7 @@ TEST_P(EntityTest, FilterCoverageRespectsCropRect) {
   // With the crop rect.
   {
     auto expected = Rect::MakeLTRB(50, 50, 100, 100);
-    filter->SetCoverageCrop(expected);
+    filter->SetCoverageHint(expected);
     auto actual = filter->GetCoverage({});
 
     ASSERT_TRUE(actual.has_value());

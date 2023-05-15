@@ -124,6 +124,14 @@ bool Contents::ShouldRender(const Entity& entity,
   return stencil_coverage->IntersectsWithRect(coverage.value());
 }
 
+void Contents::SetCoverageHint(std::optional<Rect> coverage_hint) {
+  coverage_hint_ = coverage_hint;
+}
+
+const std::optional<Rect>& Contents::GetCoverageHint() const {
+  return coverage_hint_;
+}
+
 std::optional<Size> Contents::GetColorSourceSize() const {
   return color_source_size_;
 };

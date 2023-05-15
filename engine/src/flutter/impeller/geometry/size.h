@@ -82,6 +82,8 @@ struct TSize {
     };
   }
 
+  constexpr TSize Abs() const { return {std::fabs(width), std::fabs(height)}; }
+
   constexpr TSize Floor() const {
     return {std::floor(width), std::floor(height)};
   }
