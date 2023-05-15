@@ -36,6 +36,9 @@ class GoldenPlaygroundTest
       const char* fixture_name,
       bool enable_mipmapping = false) const;
 
+  std::shared_ptr<RuntimeStage> OpenAssetAsRuntimeStage(
+      const char* asset_name) const;
+
   std::shared_ptr<Context> GetContext() const;
 
   Point GetContentScale() const;
