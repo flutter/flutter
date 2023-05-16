@@ -269,7 +269,7 @@ enum _DiagonalSlot {
   bottomRight,
 }
 
-class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot?> {
+class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot?, RenderBox> {
   const _Diagonal({
     this.topLeft,
     this.bottomRight,
@@ -296,14 +296,14 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_DiagonalSlot?> createRenderObject(
+  SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> createRenderObject(
     BuildContext context,
   ) {
     return _RenderDiagonal();
   }
 }
 
-class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_DiagonalSlot?> {
+class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> {
   RenderBox? get _topLeft => childForSlot(_DiagonalSlot.topLeft);
   RenderBox? get _bottomRight => childForSlot(_DiagonalSlot.bottomRight);
   RenderBox? get _nullSlot => childForSlot(null);
@@ -370,6 +370,6 @@ class _Slot {
   String toString() => describeIdentity(this);
 }
 
-class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot> {
+class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot, RenderBox> {
   String publicNameForSlot(_Slot slot) => debugNameForSlot(slot);
 }
