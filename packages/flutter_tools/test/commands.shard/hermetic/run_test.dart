@@ -1278,10 +1278,10 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
-    if (startAppSuccess == false) {
+    if (!startAppSuccess) {
       return LaunchResult.failed();
     }
-    if (startAppSuccess == true) {
+    if (startAppSuccess) {
       return LaunchResult.succeeded();
     }
     final String dartFlags = debuggingOptions.dartFlags;

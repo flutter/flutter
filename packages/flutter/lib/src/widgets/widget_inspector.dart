@@ -3010,7 +3010,7 @@ class _InspectorOverlayLayer extends Layer {
       inDebugMode = true;
       return true;
     }());
-    if (inDebugMode == false) {
+    if (!inDebugMode) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
@@ -3627,7 +3627,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
     if (maxDescendantsTruncatableNode >= 0 &&
-        owner!.allowTruncate == true &&
+        owner!.allowTruncate &&
         nodes.length > maxDescendantsTruncatableNode) {
       nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }

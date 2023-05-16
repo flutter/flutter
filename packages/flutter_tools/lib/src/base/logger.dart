@@ -1101,7 +1101,7 @@ class PrefixedErrorLogger extends DelegatingLogger {
     bool? wrap,
   }) {
     hadErrorOutput = true;
-    if (message.trim().isNotEmpty == true) {
+    if (message.trim().isNotEmpty) {
       message = 'ERROR: $message';
     }
     super.printError(

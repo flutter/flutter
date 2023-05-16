@@ -124,7 +124,7 @@ void verifyCommand(Command<Object?> runner) {
   final String firstDescriptionLine = runner.description.split('\n').first;
   expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with");
 
-  if (runner.hidden == false && runner.parent == null) {
+  if (!runner.hidden && runner.parent == null) {
     expect(
       runner.category,
       anyOf(

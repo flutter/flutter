@@ -163,7 +163,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.trim())
-        .where((String line) => line.isNotEmpty == true)
+        .where((String line) => line.isNotEmpty)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
@@ -194,7 +194,7 @@ void main() {
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
         .map((String line) => line.trim())
-        .where((String line) => line.isNotEmpty == true)
+        .where((String line) => line.isNotEmpty)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);

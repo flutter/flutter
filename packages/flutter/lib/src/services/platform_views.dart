@@ -1158,10 +1158,10 @@ abstract class _AndroidViewControllerInternals {
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
-      if (hybrid == true) 'hybrid': hybrid,
+      if (hybrid) 'hybrid': hybrid,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
-      if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (hybridFallback) 'hybridFallback': hybridFallback,
       if (position != null) 'left': position.dx,
       if (position != null) 'top': position.dy,
     };

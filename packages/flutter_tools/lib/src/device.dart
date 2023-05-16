@@ -283,7 +283,7 @@ abstract class DeviceManager {
     bool includeDevicesUnsupportedByProject = false,
   }) {
     FlutterProject? flutterProject;
-    if (includeDevicesUnsupportedByProject == false) {
+    if (!includeDevicesUnsupportedByProject) {
       flutterProject = FlutterProject.current();
     }
     if (hasSpecifiedAllDevices) {
@@ -312,7 +312,7 @@ abstract class DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices){
     if (!hasSpecifiedDeviceId) {
       try {
-        return devices.singleWhere((Device device) => device.ephemeral == true);
+        return devices.singleWhere((Device device) => device.ephemeral);
       } on StateError {
         return null;
       }

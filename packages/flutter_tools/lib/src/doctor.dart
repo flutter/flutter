@@ -410,7 +410,7 @@ class Doctor {
       }
 
       for (final ValidationMessage message in result.messages) {
-        if (!message.isInformation || verbose == true) {
+        if (!message.isInformation || verbose) {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;

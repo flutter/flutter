@@ -690,7 +690,7 @@ class Actions extends StatefulWidget {
   static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     while (actionsElement != null) {
-      if (visitor(actionsElement) == true) {
+      if (visitor(actionsElement)) {
         break;
       }
       // _getParent is needed here because

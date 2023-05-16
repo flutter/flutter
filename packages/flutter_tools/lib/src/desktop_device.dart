@@ -149,7 +149,7 @@ abstract class DesktopDevice extends Device {
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
     _deviceLogReader.initializeProcess(process);
-    if (debuggingOptions.buildInfo.isRelease == true) {
+    if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
     final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
