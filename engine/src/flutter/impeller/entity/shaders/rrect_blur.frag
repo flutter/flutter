@@ -62,7 +62,7 @@ float16_t RRectShadow(f16vec2 sample_position, f16vec2 half_size) {
     float16_t y = begin_y + interval * (float16_t(sample_i) + 0.5hf);
     result += RRectShadowX(f16vec2(sample_position.x, sample_position.y - y),
                            half_size) *
-              IPGaussian(y, frag_info.blur_sigma) * interval;
+              IPHalfGaussian(y, frag_info.blur_sigma) * interval;
   }
 
   return result;

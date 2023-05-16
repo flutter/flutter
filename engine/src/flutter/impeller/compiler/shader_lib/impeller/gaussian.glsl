@@ -9,7 +9,13 @@
 #include <impeller/types.glsl>
 
 /// Gaussian distribution function.
-float16_t IPGaussian(float16_t x, float16_t sigma) {
+float IPGaussian(float x, float sigma) {
+  float variance = sigma * sigma;
+  return exp(-0.5f * x * x / variance) / (kSqrtTwoPi * sigma);
+}
+
+/// Gaussian distribution function.
+float16_t IPHalfGaussian(float16_t x, float16_t sigma) {
   float16_t variance = sigma * sigma;
   return exp(-0.5hf * x * x / variance) / (float16_t(kSqrtTwoPi) * sigma);
 }

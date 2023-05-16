@@ -27,7 +27,7 @@ uniform BlurInfo {
   // host-side, but both are useful controls here. Sigma (pixels per standard
   // deviation) is used to define the gaussian function itself, whereas the
   // radius is used to limit how much of the function is integrated.
-  float16_t blur_sigma;
+  float blur_sigma;
   float16_t blur_radius;
 }
 blur_info;
@@ -62,7 +62,11 @@ void main() {
 
   for (float16_t i = -blur_info.blur_radius; i <= blur_info.blur_radius;
        i += 2.0hf) {
-    float16_t gaussian = IPGaussian(i, blur_info.blur_sigma);
+    // Use the 32 bit Gaussian function because the 16 bit variation results in
+    // quality loss/visible banding. Also, 16 bit variation internally breaks
+    // down at a moderately high (but still reasonable) blur sigma of >255 when
+    // computing sigma^2 due to the exponent only having 5 bits.
+    float16_t gaussian = float16_t(IPGaussian(float(i), blur_info.blur_sigma));
     gaussian_integral += gaussian;
     total_color +=
         gaussian * Sample(texture_sampler,  // sampler
