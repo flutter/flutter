@@ -44,6 +44,9 @@ class FlutterViewController {
   // Returns the view managed by this controller.
   FlutterView* view() { return view_.get(); }
 
+  // Requests new frame from the engine and repaints the view.
+  void ForceRedraw();
+
   // Allows the Flutter engine and any interested plugins an opportunity to
   // handle the given message.
   //

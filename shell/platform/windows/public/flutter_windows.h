@@ -107,7 +107,7 @@ FLUTTER_EXPORT FlutterDesktopEngineRef FlutterDesktopViewControllerGetEngine(
 FLUTTER_EXPORT FlutterDesktopViewRef
 FlutterDesktopViewControllerGetView(FlutterDesktopViewControllerRef controller);
 
-// Requests new frame from engine and repaints the view
+// Requests new frame from the engine and repaints the view.
 FLUTTER_EXPORT void FlutterDesktopViewControllerForceRedraw(
     FlutterDesktopViewControllerRef controller);
 
