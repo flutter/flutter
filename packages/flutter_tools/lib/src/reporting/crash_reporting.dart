@@ -15,6 +15,7 @@ import '../base/platform.dart';
 import '../doctor.dart';
 import '../project.dart';
 import 'github_template.dart';
+import 'pii_regexp.dart';
 import 'reporting.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
@@ -175,7 +176,7 @@ class CrashReportSender {
       req.fields['osVersion'] = _operatingSystemUtils.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
-      req.fields['error_message'] = '$error';
+      req.fields['error_message'] = filterPiiFromErrorMessage('$error');
       req.fields['comments'] = command;
 
       req.files.add(http.MultipartFile.fromString(

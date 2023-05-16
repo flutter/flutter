@@ -150,6 +150,27 @@ void main() {
       await verifyCrashReportSent(requestInfo);
     });
 
+    testWithoutContext('should filter messages in crash reports', () async {
+      final RequestInfo requestInfo = RequestInfo();
+
+      final CrashReportSender crashReportSender = CrashReportSender(
+        client: MockCrashReportSender(requestInfo),
+        usage: testUsage,
+        platform: platform,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+      );
+
+      await crashReportSender.sendReport(
+        error: Exception('I have an error involving a path: /Users/hello'),
+        stackTrace: stackTrace,
+        getFlutterVersion: () => 'test-version',
+        command: 'crash',
+      );
+
+      expect(requestInfo.fields?['error_message'], 'Exception: I have an error involving a path: <path>');
+    });
+
     testWithoutContext('should print an explanatory message when there is a SocketException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const SocketException('no internets')),
