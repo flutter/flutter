@@ -380,7 +380,7 @@ void main() {
     await gesture.moveTo(endPos);
     expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 8));
     // Only Android vibrate when dragging the handle.
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expect(
           log.last,
@@ -1273,7 +1273,7 @@ void main() {
 
       final bool alt;
       final bool control;
-      switch(defaultTargetPlatform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1381,7 +1381,7 @@ void main() {
 
       final bool alt;
       final bool meta;
-      switch(defaultTargetPlatform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1470,7 +1470,7 @@ void main() {
 
       final bool alt;
       final bool meta;
-      switch(defaultTargetPlatform) {
+      switch (defaultTargetPlatform) {
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
@@ -1759,7 +1759,7 @@ void main() {
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
     // In Android copy should clear the selection.
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(regionState.selectionOverlay, isNull);
@@ -1812,7 +1812,7 @@ void main() {
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
