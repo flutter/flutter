@@ -65,7 +65,11 @@ FlutterDesktopViewRef FlutterDesktopViewControllerGetView(
 }
 
 void FlutterDesktopViewControllerForceRedraw(
-    FlutterDesktopViewControllerRef controller) {}
+    FlutterDesktopViewControllerRef controller) {
+  if (s_stub_implementation) {
+    s_stub_implementation->ViewControllerForceRedraw();
+  }
+}
 
 bool FlutterDesktopViewControllerHandleTopLevelWindowProc(
     FlutterDesktopViewControllerRef controller,
