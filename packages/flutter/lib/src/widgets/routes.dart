@@ -1499,7 +1499,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
-      if (await callback() != true) {
+      if (!await callback()) {
         return RoutePopDisposition.doNotPop;
       }
     }

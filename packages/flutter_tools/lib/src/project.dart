@@ -515,7 +515,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   File get appManifestFile {
-    if(isUsingGradle) {
+    if (isUsingGradle) {
       return hostAppGradleRoot
         .childDirectory('app')
         .childDirectory('src')

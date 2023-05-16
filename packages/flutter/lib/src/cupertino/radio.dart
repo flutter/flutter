@@ -236,7 +236,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
     final bool? accessibilitySelected;
     // Apple devices also use `selected` to annotate radio button's semantics
     // state.
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:

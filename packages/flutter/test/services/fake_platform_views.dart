@@ -188,7 +188,7 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -400,7 +400,7 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
@@ -490,7 +490,7 @@ class FakeHtmlPlatformViewsController {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'create':
         return _create(call);
       case 'dispose':
