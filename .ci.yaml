@@ -2480,39 +2480,6 @@ targets:
       validation: analyze
       validation_name: Analyze
 
-  - name: Staging_build_linux framework_tests_misc
-    presubmit: false
-    bringup: true
-    recipe: flutter/flutter_drone
-    timeout: 60
-    properties:
-      ignore_flakiness: "true"
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"},
-          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
-          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
-          {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "android_sdk", "version": "version:33v6"}
-        ]
-      shard: framework_tests
-      subshard: misc
-      tags: >
-        ["framework", "hostonly", "shard", "linux"]
-    runIf:
-      - dev/**
-      - packages/flutter/**
-      - packages/flutter_driver/**
-      - packages/integration_test/**
-      - packages/flutter_localizations/**
-      - packages/fuchsia_remote_debug_protocol/**
-      - packages/flutter_test/**
-      - packages/flutter_goldens/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac_benchmark animated_complex_opacity_perf_macos__e2e_summary
     presubmit: false
     recipe: devicelab/devicelab_drone
