@@ -165,6 +165,15 @@ class TapSemanticEvent extends SemanticsEvent {
 /// This is generally not recommended to use, it may break the consistency of the
 /// accessibiliy focus of the platform.
 ///
+/// Some possibile use cases:
+/// For example, if the current focus rendering object is removed and replace with another
+/// rendering object. Such design sshould avoid if possible. But it is a reasonable use case
+/// for this API if needed.
+///
+/// Some examples that are not recommended:
+/// When a new popup or dropdown opens, moving the focus in these cases may confuse users
+/// and make it less accessible.
+///
 /// {@tool snippet}
 ///
 /// The following code snippet shows how you can request focus on a
@@ -201,7 +210,8 @@ class TapSemanticEvent extends SemanticsEvent {
 ///           const SizedBox(height: 50),
 ///           Text("set focus here", key: mykey),
 ///         ],
-///     ),);
+///       ),
+///     );
 ///   }
 /// }
 /// ```
