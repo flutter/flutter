@@ -9,9 +9,9 @@ import 'dart:ffi';
 
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-final class CanvasWrapper extends Opaque {}
+final class RawCanvas extends Opaque {}
 
-typedef CanvasHandle = Pointer<CanvasWrapper>;
+typedef CanvasHandle = Pointer<RawCanvas>;
 
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_destroy', isLeaf: true)
 external void canvasDestroy(CanvasHandle canvas);
@@ -125,6 +125,57 @@ external void canvasDrawPath(
 @Native<Void Function(CanvasHandle, PictureHandle)>(
     symbol: 'canvas_drawPicture', isLeaf: true)
 external void canvasDrawPicture(CanvasHandle canvas, PictureHandle picture);
+
+@Native<Void Function(
+  CanvasHandle,
+  ImageHandle,
+  Float,
+  Float,
+  PaintHandle,
+  Int
+)>(symbol: 'canvas_drawImage', isLeaf: true)
+external void canvasDrawImage(
+  CanvasHandle handle,
+  ImageHandle image,
+  double offsetX,
+  double offsetY,
+  PaintHandle paint,
+  int filterQuality,
+);
+
+@Native<Void Function(
+  CanvasHandle,
+  ImageHandle,
+  Pointer<Float>,
+  Pointer<Float>,
+  PaintHandle,
+  Int,
+)>(symbol: 'canvas_drawImageRect', isLeaf: true)
+external void canvasDrawImageRect(
+  CanvasHandle handle,
+  ImageHandle image,
+  Pointer<Float> sourceRect,
+  Pointer<Float> destRect,
+  PaintHandle paint,
+  int filterQuality,
+);
+
+@Native<Void Function(
+  CanvasHandle,
+  ImageHandle,
+  Pointer<Int32>,
+  Pointer<Float>,
+  PaintHandle,
+  Int,
+)>(symbol: 'canvas_drawImageNine', isLeaf: true)
+external void canvasDrawImageNine(
+  CanvasHandle handle,
+  ImageHandle image,
+  Pointer<Int32> centerRect,
+  Pointer<Float> destRect,
+  PaintHandle paint,
+  int filterQuality,
+);
 
 @Native<Void Function(CanvasHandle, PathHandle, Float, Float, Int32, Bool)>(
     symbol: 'canvas_drawShadow', isLeaf: true)

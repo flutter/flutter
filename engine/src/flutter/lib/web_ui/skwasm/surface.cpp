@@ -8,11 +8,13 @@
 #include <emscripten/html5_webgl.h>
 #include <emscripten/threading.h>
 #include <webgl/webgl1.h>
+#include <cassert>
 #include "export.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
@@ -21,20 +23,38 @@
 
 using namespace Skwasm;
 
-using OnRenderCompleteCallback = void(uint32_t);
-
 namespace {
+
+// This must be kept in sync with the `ImageByteFormat` enum in dart:ui.
+enum class ImageByteFormat {
+  rawRgba,
+  rawStraightRgba,
+  rawUnmodified,
+  png,
+};
+
 class Surface;
 void fDispose(Surface* surface);
 void fSetCanvasSize(Surface* surface, int width, int height);
 void fRenderPicture(Surface* surface, SkPicture* picture);
-void fNotifyRenderComplete(Surface* surface, uint32_t renderId);
-void fOnRenderComplete(Surface* surface, uint32_t renderId);
+void fNotifyRenderComplete(Surface* surface, uint32_t callbackId);
+void fOnRenderComplete(Surface* surface, uint32_t callbackId);
+void fRasterizeImage(Surface* surface,
+                     SkImage* image,
+                     ImageByteFormat format,
+                     uint32_t callbackId);
+void fOnRasterizeComplete(Surface* surface,
+                          SkData* imageData,
+                          uint32_t callbackId);
 
 class Surface {
  public:
+  using CallbackHandler = void(uint32_t, void*);
+
   // Main thread only
   Surface(const char* canvasID) : _canvasID(canvasID) {
+    assert(emscripten_is_main_browser_thread());
+
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -51,6 +71,7 @@ class Surface {
 
   // Main thread only
   void dispose() {
+    assert(emscripten_is_main_browser_thread());
     emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VI,
                                   reinterpret_cast<void*>(fDispose), nullptr,
                                   this);
@@ -58,6 +79,7 @@ class Surface {
 
   // Main thread only
   void setCanvasSize(int width, int height) {
+    assert(emscripten_is_main_browser_thread());
     emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VIII,
                                   reinterpret_cast<void*>(fSetCanvasSize),
                                   nullptr, this, width, height);
@@ -65,7 +87,8 @@ class Surface {
 
   // Main thread only
   uint32_t renderPicture(SkPicture* picture) {
-    uint32_t renderId = ++_currentRenderId;
+    assert(emscripten_is_main_browser_thread());
+    uint32_t callbackId = ++_currentCallbackId;
     picture->ref();
     emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VII,
                                   reinterpret_cast<void*>(fRenderPicture),
@@ -78,13 +101,24 @@ class Surface {
     emscripten_dispatch_to_thread(
         _thread, EM_FUNC_SIG_VII,
         reinterpret_cast<void*>(fNotifyRenderComplete), nullptr, this,
-        renderId);
-    return renderId;
+        callbackId);
+    return callbackId;
+  }
+
+  uint32_t rasterizeImage(SkImage* image, ImageByteFormat format) {
+    uint32_t callbackId = ++_currentCallbackId;
+    image->ref();
+
+    emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VIIII,
+                                  reinterpret_cast<void*>(fRasterizeImage),
+                                  nullptr, this, image, format, callbackId);
+    return callbackId;
   }
 
   // Main thread only
-  void setOnRenderCallback(OnRenderCompleteCallback* callback) {
-    _onRenderCompleteCallback = callback;
+  void setCallbackHandler(CallbackHandler* callbackHandler) {
+    assert(emscripten_is_main_browser_thread());
+    _callbackHandler = callbackHandler;
   }
 
  private:
@@ -177,20 +211,54 @@ class Surface {
     _surface->flush();
   }
 
+  void _rasterizeImage(SkImage* image,
+                       ImageByteFormat format,
+                       uint32_t callbackId) {
+    sk_sp<SkData> data;
+    if (format == ImageByteFormat::png) {
+      data = SkPngEncoder::Encode(_grContext.get(), image, {});
+    } else {
+      SkAlphaType alphaType = format == ImageByteFormat::rawStraightRgba
+                                  ? SkAlphaType::kUnpremul_SkAlphaType
+                                  : SkAlphaType::kPremul_SkAlphaType;
+      SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
+                                           SkColorType::kRGBA_8888_SkColorType,
+                                           alphaType, SkColorSpace::MakeSRGB());
+      size_t bytesPerRow = 4 * image->width();
+      size_t byteSize = info.computeByteSize(bytesPerRow);
+      data = SkData::MakeUninitialized(byteSize);
+      uint8_t* pixels = reinterpret_cast<uint8_t*>(data->writable_data());
+      bool success = image->readPixels(_grContext.get(), image->imageInfo(),
+                                       pixels, bytesPerRow, 0, 0);
+      if (!success) {
+        printf("Failed to read pixels from image!\n");
+        data = nullptr;
+      }
+    }
+    emscripten_sync_run_in_main_runtime_thread(EM_FUNC_SIG_VIII,
+                                               fOnRasterizeComplete, this,
+                                               data.release(), callbackId);
+  }
+
+  void _onRasterizeComplete(SkData* data, uint32_t callbackId) {
+    _callbackHandler(callbackId, data);
+  }
+
   // Worker thread only
-  void _notifyRenderComplete(uint32_t renderId) {
+  void _notifyRenderComplete(uint32_t callbackId) {
     emscripten_sync_run_in_main_runtime_thread(
-        EM_FUNC_SIG_VII, fOnRenderComplete, this, renderId);
+        EM_FUNC_SIG_VII, fOnRenderComplete, this, callbackId);
   }
 
   // Main thread only
-  void _onRenderComplete(uint32_t renderId) {
-    _onRenderCompleteCallback(renderId);
+  void _onRenderComplete(uint32_t callbackId) {
+    assert(emscripten_is_main_browser_thread());
+    _callbackHandler(callbackId, nullptr);
   }
 
   std::string _canvasID;
-  OnRenderCompleteCallback* _onRenderCompleteCallback = nullptr;
-  uint32_t _currentRenderId = 0;
+  CallbackHandler* _callbackHandler = nullptr;
+  uint32_t _currentCallbackId = 0;
 
   int _canvasWidth = 0;
   int _canvasHeight = 0;
@@ -207,8 +275,15 @@ class Surface {
   friend void fDispose(Surface* surface);
   friend void fSetCanvasSize(Surface* surface, int width, int height);
   friend void fRenderPicture(Surface* surface, SkPicture* picture);
-  friend void fNotifyRenderComplete(Surface* surface, uint32_t renderId);
-  friend void fOnRenderComplete(Surface* surface, uint32_t renderId);
+  friend void fNotifyRenderComplete(Surface* surface, uint32_t callbackId);
+  friend void fOnRenderComplete(Surface* surface, uint32_t callbackId);
+  friend void fRasterizeImage(Surface* surface,
+                              SkImage* image,
+                              ImageByteFormat format,
+                              uint32_t callbackId);
+  friend void fOnRasterizeComplete(Surface* surface,
+                                   SkData* imageData,
+                                   uint32_t callbackId);
 };
 
 void fDispose(Surface* surface) {
@@ -224,12 +299,26 @@ void fRenderPicture(Surface* surface, SkPicture* picture) {
   picture->unref();
 }
 
-void fNotifyRenderComplete(Surface* surface, uint32_t renderId) {
-  surface->_notifyRenderComplete(renderId);
+void fNotifyRenderComplete(Surface* surface, uint32_t callbackId) {
+  surface->_notifyRenderComplete(callbackId);
 }
 
-void fOnRenderComplete(Surface* surface, uint32_t renderId) {
-  surface->_onRenderComplete(renderId);
+void fOnRenderComplete(Surface* surface, uint32_t callbackId) {
+  surface->_onRenderComplete(callbackId);
+}
+
+void fOnRasterizeComplete(Surface* surface,
+                          SkData* imageData,
+                          uint32_t callbackId) {
+  surface->_onRasterizeComplete(imageData, callbackId);
+}
+
+void fRasterizeImage(Surface* surface,
+                     SkImage* image,
+                     ImageByteFormat format,
+                     uint32_t callbackId) {
+  surface->_rasterizeImage(image, format, callbackId);
+  image->unref();
 }
 }  // namespace
 
@@ -237,10 +326,10 @@ SKWASM_EXPORT Surface* surface_createFromCanvas(const char* canvasID) {
   return new Surface(canvasID);
 }
 
-SKWASM_EXPORT void surface_setOnRenderCallback(
+SKWASM_EXPORT void surface_setCallbackHandler(
     Surface* surface,
-    OnRenderCompleteCallback* callback) {
-  surface->setOnRenderCallback(callback);
+    Surface::CallbackHandler* callbackHandler) {
+  surface->setCallbackHandler(callbackHandler);
 }
 
 SKWASM_EXPORT void surface_destroy(Surface* surface) {
@@ -256,4 +345,10 @@ SKWASM_EXPORT void surface_setCanvasSize(Surface* surface,
 SKWASM_EXPORT uint32_t surface_renderPicture(Surface* surface,
                                              SkPicture* picture) {
   return surface->renderPicture(picture);
+}
+
+SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
+                                              SkImage* image,
+                                              ImageByteFormat format) {
+  return surface->rasterizeImage(image, format);
 }

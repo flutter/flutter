@@ -48,11 +48,20 @@ Future<void> testMain() async {
 
   const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
 
-  test('fragment shader', () async {
-    fakeAssetManager.setAsset(
+  late FakeAssetScope assetScope;
+  setUp(() {
+    assetScope = fakeAssetManager.pushAssetScope();
+    assetScope.setAsset(
       'voronoi_shader',
       Uint8List.fromList(utf8.encode(kVoronoiShaderSksl)).buffer.asByteData()
     );
+  });
+
+  tearDown(() {
+    fakeAssetManager.popAssetScope(assetScope);
+  });
+
+  test('fragment shader', () async {
     final ui.FragmentProgram program = await renderer.createFragmentProgram('voronoi_shader');
     final ui.FragmentShader shader = program.fragmentShader();
 

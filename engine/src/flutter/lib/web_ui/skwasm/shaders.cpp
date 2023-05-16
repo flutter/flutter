@@ -4,6 +4,7 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 #include "wrappers.h"
@@ -135,4 +136,22 @@ SKWASM_EXPORT SkShader* shader_createRuntimeEffectShader(
       ->makeShader(SkData::MakeWithCopy(uniforms->data(), uniforms->size()),
                    childPointers.data(), childCount, nullptr)
       .release();
+}
+
+SKWASM_EXPORT SkShader* shader_createFromImage(SkImage* image,
+                                               SkTileMode tileModeX,
+                                               SkTileMode tileModeY,
+                                               FilterQuality quality,
+                                               SkScalar* matrix33) {
+  if (matrix33) {
+    SkMatrix localMatrix = createMatrix(matrix33);
+    return image
+        ->makeShader(tileModeX, tileModeY, samplingOptionsForQuality(quality),
+                     &localMatrix)
+        .release();
+  } else {
+    return image
+        ->makeShader(tileModeX, tileModeY, samplingOptionsForQuality(quality))
+        .release();
+  }
 }

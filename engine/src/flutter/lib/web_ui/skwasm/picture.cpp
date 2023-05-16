@@ -19,10 +19,10 @@ SKWASM_EXPORT void pictureRecorder_dispose(SkPictureRecorder* recorder) {
   delete recorder;
 }
 
-SKWASM_EXPORT CanvasWrapper* pictureRecorder_beginRecording(
+SKWASM_EXPORT SkCanvas* pictureRecorder_beginRecording(
     SkPictureRecorder* recorder,
     const SkRect* cullRect) {
-  return new CanvasWrapper{0, recorder->beginRecording(*cullRect, &bbhFactory)};
+  return recorder->beginRecording(*cullRect, &bbhFactory);
 }
 
 SKWASM_EXPORT SkPicture* pictureRecorder_endRecording(
