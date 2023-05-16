@@ -216,7 +216,8 @@ class TapSemanticEvent extends SemanticsEvent {
 /// }
 /// ```
 /// {@end-tool}
-/// This currently only supports android and iOS..
+///
+/// This currently only supports android and iOS.
 class FocusSemanticEvent extends SemanticsEvent {
   /// Constructs an event that triggers a focus change by the platform.
   const FocusSemanticEvent() : super('focus');
