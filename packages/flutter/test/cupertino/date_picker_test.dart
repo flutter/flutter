@@ -148,6 +148,20 @@ void main() {
       expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
     });
 
+    testWidgets('specified item extent value is applied', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
+            itemExtent: 42,
+            onTimerDurationChanged: (_) { },
+          ),
+        ),
+      );
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 42), false);
+    });
+
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
@@ -318,6 +332,20 @@ void main() {
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
       expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.black), false);
+    });
+
+    testWidgets('specified item extent value is applied', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
+            itemExtent: 55,
+            onDateTimeChanged: (_) { },
+          ),
+        ),
+      );
+
+      final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
+      expect(pickers.any((CupertinoPicker picker) => picker.itemExtent != 55), false);
     });
 
     testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
