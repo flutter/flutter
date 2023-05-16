@@ -702,7 +702,7 @@ TEST_F(FlutterEngineTest, ManageControllersIfInitiatedByEngine) {
 TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
   id engineMock = CreateMockFlutterEngine(nil);
   __block NSString* nextResponse = @"exit";
-  __block BOOL triedToTerminate = FALSE;
+  __block BOOL triedToTerminate = NO;
   FlutterEngineTerminationHandler* terminationHandler =
       [[FlutterEngineTerminationHandler alloc] initWithEngine:engineMock
                                                    terminator:^(id sender) {
@@ -744,14 +744,24 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
       [FlutterMethodCall methodCallWithMethodName:@"System.exitApplication"
                                         arguments:@{@"type" : @"cancelable"}];
 
-  triedToTerminate = FALSE;
+  // Always terminate when the binding isn't ready (which is the default).
+  triedToTerminate = NO;
+  calledAfterTerminate = @"";
+  nextResponse = @"cancel";
+  [engineMock handleMethodCall:methodExitApplication result:appExitResult];
+  EXPECT_STREQ([calledAfterTerminate UTF8String], "");
+  EXPECT_TRUE(triedToTerminate);
+
+  // Once the binding is ready, handle the request.
+  terminationHandler.acceptingRequests = YES;
+  triedToTerminate = NO;
   calledAfterTerminate = @"";
   nextResponse = @"exit";
   [engineMock handleMethodCall:methodExitApplication result:appExitResult];
   EXPECT_STREQ([calledAfterTerminate UTF8String], "exit");
   EXPECT_TRUE(triedToTerminate);
 
-  triedToTerminate = FALSE;
+  triedToTerminate = NO;
   calledAfterTerminate = @"";
   nextResponse = @"cancel";
   [engineMock handleMethodCall:methodExitApplication result:appExitResult];
@@ -759,7 +769,7 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
   EXPECT_FALSE(triedToTerminate);
 
   // Check that it doesn't crash on error.
-  triedToTerminate = FALSE;
+  triedToTerminate = NO;
   calledAfterTerminate = @"";
   nextResponse = @"error";
   [engineMock handleMethodCall:methodExitApplication result:appExitResult];
@@ -768,7 +778,7 @@ TEST_F(FlutterEngineTest, HandlesTerminationRequest) {
 }
 
 TEST_F(FlutterEngineTest, HandleAccessibilityEvent) {
-  __block BOOL announced = FALSE;
+  __block BOOL announced = NO;
   id engineMock = CreateMockFlutterEngine(nil);
 
   OCMStub([engineMock announceAccessibilityMessage:[OCMArg any]

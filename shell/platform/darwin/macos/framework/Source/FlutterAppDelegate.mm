@@ -55,7 +55,7 @@
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication* _Nonnull)sender {
   // If the framework has already told us to terminate, terminate immediately.
-  if ([[self terminationHandler] shouldTerminate]) {
+  if ([self terminationHandler] == nil || [[self terminationHandler] shouldTerminate]) {
     return NSTerminateNow;
   }
 
