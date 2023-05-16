@@ -160,7 +160,7 @@ class TapSemanticEvent extends SemanticsEvent {
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }
 
-/// An event which to move the accessibility focus.
+/// An event to move the accessibility focus.
 ///
 /// Using this API is generally not recommended, as it may break the consistency of the
 /// accessibiliy focus of the platform.
