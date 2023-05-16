@@ -46,6 +46,7 @@ struct _FlPlatformPlugin {
   FlMethodChannel* channel;
   FlMethodCall* exit_application_method_call;
   GCancellable* cancellable;
+  bool app_initialization_complete;
 };
 
 G_DEFINE_TYPE(FlPlatformPlugin, fl_platform_plugin, G_TYPE_OBJECT)
@@ -236,13 +237,30 @@ static void request_app_exit_response_cb(GObject* object,
   }
 }
 
-// Send a request to Flutter to exit the application.
+// Send a request to Flutter to exit the application, but only if it's ready for
+// a request.
 static void request_app_exit(FlPlatformPlugin* self, const char* type) {
   g_autoptr(FlValue) args = fl_value_new_map();
+  if (!self->app_initialization_complete ||
+      g_str_equal(type, kExitTypeRequired)) {
+    quit_application();
+    return;
+  }
+
   fl_value_set_string_take(args, kExitTypeKey, fl_value_new_string(type));
   fl_method_channel_invoke_method(self->channel, kRequestAppExitMethod, args,
                                   self->cancellable,
                                   request_app_exit_response_cb, self);
+}
+
+// Called when the Dart app has finished initialization and is ready to handle
+// requests. For the Flutter framework, this means after the ServicesBinding has
+// been initialized and it sends a System.initializationComplete message.
+static FlMethodResponse* system_intitialization_complete(
+    FlPlatformPlugin* self,
+    FlMethodCall* method_call) {
+  self->app_initialization_complete = TRUE;
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 // Called when Flutter wants to exit the application.
@@ -270,8 +288,10 @@ static FlMethodResponse* system_exit_application(FlPlatformPlugin* self,
   self->exit_application_method_call =
       FL_METHOD_CALL(g_object_ref(method_call));
 
-  // Requested to immediately quit.
-  if (g_str_equal(type, kExitTypeRequired)) {
+  // Requested to immediately quit if the app hasn't yet signaled that it is
+  // ready to handle requests, or if the type of exit requested is "required".
+  if (!self->app_initialization_complete ||
+      g_str_equal(type, kExitTypeRequired)) {
     quit_application();
     g_autoptr(FlValue) exit_result = fl_value_new_map();
     fl_value_set_string_take(exit_result, kExitResponseKey,
@@ -333,14 +353,12 @@ static void method_call_cb(FlMethodChannel* channel,
     response = clipboard_has_strings_async(self, method_call);
   } else if (strcmp(method, kExitApplicationMethod) == 0) {
     response = system_exit_application(self, method_call);
+  } else if (strcmp(method, kInitializationCompleteMethod) == 0) {
+    response = system_intitialization_complete(self, method_call);
   } else if (strcmp(method, kPlaySoundMethod) == 0) {
     response = system_sound_play(self, args);
   } else if (strcmp(method, kSystemNavigatorPopMethod) == 0) {
     response = system_navigator_pop(self);
-  } else if (strcmp(method, kInitializationCompleteMethod) == 0) {
-    // TODO(gspencergoog): Handle this message to enable exit message listening.
-    // https://github.com/flutter/flutter/issues/126033
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
@@ -381,6 +399,7 @@ FlPlatformPlugin* fl_platform_plugin_new(FlBinaryMessenger* messenger) {
       fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(self->channel, method_call_cb, self,
                                             nullptr);
+  self->app_initialization_complete = FALSE;
 
   return self;
 }
