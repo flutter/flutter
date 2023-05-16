@@ -30,6 +30,10 @@ group '{{androidIdentifier}}'
 version '1.0'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace '{{androidIdentifier}}'
+    }
+
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

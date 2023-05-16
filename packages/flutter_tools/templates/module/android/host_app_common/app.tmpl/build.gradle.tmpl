@@ -3,6 +3,10 @@ def flutterPluginVersion = 'managed'
 apply plugin: 'com.android.application'
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace '{{androidIdentifier}}'
+    }
+
     compileSdkVersion {{compileSdkVersion}}
 
     compileOptions {

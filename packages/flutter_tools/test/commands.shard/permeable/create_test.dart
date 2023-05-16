@@ -2919,6 +2919,45 @@ void main() {
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
 
+  testUsingContext('Flutter module Android project contains namespace', () async {
+    const String moduleBuildGradleFilePath = '.android/build.gradle';
+    const String moduleAppBuildGradleFlePath = '.android/app/build.gradle';
+    const String moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
+    await _createProject(
+      projectDir,
+      <String>['--template=module', '--org', 'com.bar.foo'],
+      <String>[moduleBuildGradleFilePath,
+        moduleAppBuildGradleFlePath,
+        moduleFlutterBuildGradleFilePath,
+      ],
+    );
+
+    final String moduleBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleBuildGradleFilePath)).readAsString();
+    final String moduleAppBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath)).readAsString();
+    final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
+
+    // Each build file should contain namespace.
+    expect(moduleBuildGradleFileContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(moduleAppBuildGradleFileContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    expect(moduleFlutterBuildGradleFileContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+
+    // The namespaces should be conditionalized for AGP <4.2.
+    expect(moduleBuildGradleFileContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+    expect(moduleAppBuildGradleFileContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+    expect(moduleFlutterBuildGradleFileContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: mockStdio,
+    ),
+  });
+
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
 
