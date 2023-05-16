@@ -35,6 +35,13 @@ SKWASM_EXPORT void paragraphBuilder_addText(ParagraphBuilder* builder,
   builder->addText(*text);
 }
 
+SKWASM_EXPORT char* paragraphBuilder_getUtf8Text(ParagraphBuilder* builder,
+                                                 uint32_t* outLength) {
+  auto span = builder->getText();
+  *outLength = span.size();
+  return span.data();
+}
+
 SKWASM_EXPORT void paragraphBuilder_pushStyle(ParagraphBuilder* builder,
                                               TextStyle* style) {
   builder->pushStyle(*style);
@@ -46,4 +53,53 @@ SKWASM_EXPORT void paragraphBuilder_pop(ParagraphBuilder* builder) {
 
 SKWASM_EXPORT Paragraph* paragraphBuilder_build(ParagraphBuilder* builder) {
   return builder->Build().release();
+}
+
+SKWASM_EXPORT std::vector<SkUnicode::Position>* unicodePositionBuffer_create(
+    size_t length) {
+  return new std::vector<SkUnicode::Position>(length);
+}
+
+SKWASM_EXPORT SkUnicode::Position* unicodePositionBuffer_getDataPointer(
+    std::vector<SkUnicode::Position>* buffer) {
+  return buffer->data();
+}
+
+SKWASM_EXPORT void unicodePositionBuffer_free(
+    std::vector<SkUnicode::Position>* buffer) {
+  delete buffer;
+}
+
+SKWASM_EXPORT std::vector<SkUnicode::LineBreakBefore>* lineBreakBuffer_create(
+    size_t length) {
+  return new std::vector<SkUnicode::LineBreakBefore>(
+      length, {0, SkUnicode::LineBreakType::kSoftLineBreak});
+}
+
+SKWASM_EXPORT SkUnicode::LineBreakBefore* lineBreakBuffer_getDataPointer(
+    std::vector<SkUnicode::LineBreakBefore>* buffer) {
+  return buffer->data();
+}
+
+SKWASM_EXPORT void lineBreakBuffer_free(
+    std::vector<SkUnicode::LineBreakBefore>* buffer) {
+  delete buffer;
+}
+
+SKWASM_EXPORT void paragraphBuilder_setGraphemeBreaksUtf16(
+    ParagraphBuilder* builder,
+    std::vector<SkUnicode::Position>* breaks) {
+  builder->setGraphemeBreaksUtf16(std::move(*breaks));
+}
+
+SKWASM_EXPORT void paragraphBuilder_setWordBreaksUtf16(
+    ParagraphBuilder* builder,
+    std::vector<SkUnicode::Position>* breaks) {
+  builder->setWordsUtf16(std::move(*breaks));
+}
+
+SKWASM_EXPORT void paragraphBuilder_setLineBreaksUtf16(
+    ParagraphBuilder* builder,
+    std::vector<SkUnicode::LineBreakBefore>* breaks) {
+  builder->setLineBreaksUtf16(std::move(*breaks));
 }

@@ -3298,8 +3298,8 @@ class DomSegmenter {
 
 extension DomSegmenterExtension on DomSegmenter {
   @JS('segment')
-  external DomSegments _segment(JSString text);
-  DomSegments segment(String text) => _segment(text.toJS);
+  external DomSegments segmentRaw(JSString text);
+  DomSegments segment(String text) => segmentRaw(text.toJS);
 }
 
 @JS()
@@ -3398,8 +3398,7 @@ class DomV8BreakIterator {
 
 extension DomV8BreakIteratorExtension on DomV8BreakIterator {
   @JS('adoptText')
-  external JSVoid _adoptText(JSString text);
-  void adoptText(String text) => _adoptText(text.toJS);
+  external JSVoid adoptText(JSString text);
 
   @JS('first')
   external JSNumber _first();
@@ -3425,4 +3424,14 @@ DomV8BreakIterator createV8BreakIterator() {
 
   return DomV8BreakIterator(
       <JSAny?>[].toJS, const <String, String>{'type': 'line'}.toJSAnyDeep);
+}
+
+@JS('TextDecoder')
+@staticInterop
+class DomTextDecoder {
+  external factory DomTextDecoder();
+}
+
+extension DomTextDecoderExtension on DomTextDecoder {
+  external JSString decode(JSTypedArray buffer);
 }

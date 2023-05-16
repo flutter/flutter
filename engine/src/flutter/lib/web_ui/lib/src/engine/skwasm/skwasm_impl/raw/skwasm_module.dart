@@ -4,14 +4,12 @@
 
 import 'dart:js_interop';
 
-import 'package:ui/src/engine.dart';
-
 @JS()
 @staticInterop
 class WebAssemblyMemory {}
 
 extension WebAssemblyMemoryExtension on WebAssemblyMemory {
-  external ArrayBuffer get buffer;
+  external JSArrayBuffer get buffer;
 }
 
 @JS()

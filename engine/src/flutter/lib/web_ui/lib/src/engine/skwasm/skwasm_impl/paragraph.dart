@@ -2,11 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ffi';
+import 'dart:js_interop';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
+
+const int _kSoftLineBreak = 0;
+const int _kHardLineBreak = 100;
 
 class SkwasmLineMetrics implements ui.LineMetrics {
   factory SkwasmLineMetrics({
@@ -592,8 +597,96 @@ class SkwasmParagraphBuilder implements ui.ParagraphBuilder {
     skString16Free(stringHandle);
   }
 
+  static final DomV8BreakIterator _v8BreakIterator = createV8BreakIterator();
+  static final DomSegmenter _graphemeSegmenter = createIntlSegmenter(granularity: 'grapheme');
+  static final DomSegmenter _wordSegmenter = createIntlSegmenter(granularity: 'word');
+  static final DomTextDecoder _utf8Decoder = DomTextDecoder();
+
+  void _addSegmenterData() => withStackScope((StackScope scope) {
+    // Because some of the string processing is dealt with manually in dart,
+    // and some is handled by the browser, we actually need both a dart string
+    // and a JS string. Converting from linear memory to Dart strings or JS
+    // strings is more efficient than directly converting to each other, so we
+    // just create both up front here.
+    final Pointer<Uint32> outSize = scope.allocUint32Array(1);
+    final Pointer<Uint8> utf8Data = paragraphBuilderGetUtf8Text(handle, outSize);
+    if (utf8Data == nullptr) {
+      return;
+    }
+
+    // TODO(jacksongardner): We could make a subclass of `List<int>` here to
+    // avoid this copy.
+    final List<int> codeUnitList = List<int>.generate(
+      outSize.value,
+      (int index) => utf8Data[index]
+    );
+    final String text = utf8.decode(codeUnitList);
+    final JSString jsText = _utf8Decoder.decode(
+      // In an ideal world we would just use a subview of wasm memory rather
+      // than a slice, but the TextDecoder API doesn't work on shared buffer
+      // sources yet.
+      // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
+      createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer).slice(
+        utf8Data.address.toJS,
+        (utf8Data.address + outSize.value).toJS
+      ));
+
+    _addGraphemeBreakData(text, jsText);
+    _addWordBreakData(text, jsText);
+    _addLineBreakData(text, jsText);
+  });
+
+  UnicodePositionBufferHandle _createBreakPositionBuffer(String text, JSString jsText, DomSegmenter segmenter) {
+    final DomIteratorWrapper<DomSegment> iterator = segmenter.segmentRaw(jsText).iterator();
+    final List<int> breaks = <int>[];
+    while (iterator.moveNext()) {
+      breaks.add(iterator.current.index);
+    }
+    breaks.add(text.length);
+
+    final UnicodePositionBufferHandle positionBuffer = unicodePositionBufferCreate(breaks.length);
+    final Pointer<Uint32> buffer = unicodePositionBufferGetDataPointer(positionBuffer);
+    for (int i = 0; i < breaks.length; i++) {
+      buffer[i] = breaks[i];
+    }
+    return positionBuffer;
+  }
+
+  void _addGraphemeBreakData(String text, JSString jsText) {
+    final UnicodePositionBufferHandle positionBuffer =
+      _createBreakPositionBuffer(text, jsText, _graphemeSegmenter);
+    paragraphBuilderSetGraphemeBreaksUtf16(handle, positionBuffer);
+    unicodePositionBufferFree(positionBuffer);
+  }
+
+  void _addWordBreakData(String text, JSString jsText) {
+    final UnicodePositionBufferHandle positionBuffer =
+      _createBreakPositionBuffer(text, jsText, _wordSegmenter);
+    paragraphBuilderSetWordBreaksUtf16(handle, positionBuffer);
+    unicodePositionBufferFree(positionBuffer);
+  }
+
+  void _addLineBreakData(String text, JSString jsText) {
+    final List<LineBreakFragment> lineBreaks = breakLinesUsingV8BreakIterator(text, jsText, _v8BreakIterator);
+    final LineBreakBufferHandle lineBreakBuffer = lineBreakBufferCreate(lineBreaks.length + 1);
+    final Pointer<LineBreak> lineBreakPointer = lineBreakBufferGetDataPointer(lineBreakBuffer);
+
+    // First line break is always zero. The buffer is zero initialized, so we can just
+    // skip the first one.
+    for (int i = 0; i < lineBreaks.length; i++) {
+      final LineBreakFragment fragment = lineBreaks[i];
+      lineBreakPointer[i + 1].position = fragment.end;
+      lineBreakPointer[i + 1].lineBreakType = fragment.type == LineBreakType.mandatory
+        ? _kHardLineBreak
+        : _kSoftLineBreak;
+    }
+    paragraphBuilderSetLineBreaksUtf16(handle, lineBreakBuffer);
+    lineBreakBufferFree(lineBreakBuffer);
+  }
+
   @override
   ui.Paragraph build() {
+    _addSegmenterData();
     return SkwasmParagraph(paragraphBuilderBuild(handle));
   }
 

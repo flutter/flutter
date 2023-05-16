@@ -50,6 +50,15 @@ external void paragraphBuilderAddText(
   SkString16Handle text,
 );
 
+@Native<Pointer<Uint8> Function(
+  ParagraphBuilderHandle,
+  Pointer<Uint32>
+)>(symbol: 'paragraphBuilder_getUtf8Text', isLeaf: true)
+external Pointer<Uint8> paragraphBuilderGetUtf8Text(
+  ParagraphBuilderHandle handle,
+  Pointer<Uint32> outSize
+);
+
 @Native<Void Function(
   ParagraphBuilderHandle,
   TextStyleHandle,
@@ -64,3 +73,48 @@ external void paragraphBuilderPop(ParagraphBuilderHandle handle);
 
 @Native<ParagraphHandle Function(ParagraphBuilderHandle)>(symbol: 'paragraphBuilder_build', isLeaf: true)
 external ParagraphHandle paragraphBuilderBuild(ParagraphBuilderHandle handle);
+
+@Native<UnicodePositionBufferHandle Function(Size)>(
+  symbol: 'unicodePositionBuffer_create', isLeaf: true)
+external UnicodePositionBufferHandle unicodePositionBufferCreate(int size);
+
+@Native<Pointer<Uint32> Function(UnicodePositionBufferHandle)>(
+  symbol: 'unicodePositionBuffer_getDataPointer', isLeaf: true)
+external Pointer<Uint32> unicodePositionBufferGetDataPointer(UnicodePositionBufferHandle handle);
+
+@Native<Void Function(UnicodePositionBufferHandle)>(
+  symbol: 'unicodePositionBuffer_free', isLeaf: true)
+external void unicodePositionBufferFree(UnicodePositionBufferHandle handle);
+
+@Native<LineBreakBufferHandle Function(Size)>(
+  symbol: 'lineBreakBuffer_create', isLeaf: true)
+external LineBreakBufferHandle lineBreakBufferCreate(int size);
+
+@Native<Pointer<LineBreak> Function(LineBreakBufferHandle)>(
+  symbol: 'lineBreakBuffer_getDataPointer', isLeaf: true)
+external Pointer<LineBreak> lineBreakBufferGetDataPointer(LineBreakBufferHandle handle);
+
+@Native<Void Function(LineBreakBufferHandle)>(
+  symbol: 'lineBreakBuffer_free', isLeaf: true)
+external void lineBreakBufferFree(LineBreakBufferHandle handle);
+
+@Native<Void Function(ParagraphBuilderHandle, UnicodePositionBufferHandle)>(
+  symbol: 'paragraphBuilder_setGraphemeBreaksUtf16', isLeaf: true)
+external void paragraphBuilderSetGraphemeBreaksUtf16(
+  ParagraphBuilderHandle handle,
+  UnicodePositionBufferHandle positionBuffer,
+);
+
+@Native<Void Function(ParagraphBuilderHandle, UnicodePositionBufferHandle)>(
+  symbol: 'paragraphBuilder_setWordBreaksUtf16', isLeaf: true)
+external void paragraphBuilderSetWordBreaksUtf16(
+  ParagraphBuilderHandle handle,
+  UnicodePositionBufferHandle positionBuffer,
+);
+
+@Native<Void Function(ParagraphBuilderHandle, LineBreakBufferHandle)>(
+  symbol: 'paragraphBuilder_setLineBreaksUtf16', isLeaf: true)
+external void paragraphBuilderSetLineBreaksUtf16(
+  ParagraphBuilderHandle handle,
+  LineBreakBufferHandle positionBuffer,
+);

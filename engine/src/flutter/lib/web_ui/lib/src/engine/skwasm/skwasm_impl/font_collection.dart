@@ -110,15 +110,15 @@ class SkwasmFontCollection implements FlutterFontCollection {
       return FontNotFoundError(assetManager.getAssetUrl(asset.asset));
     }
     int length = 0;
-    final List<JSUint8Array1> chunks = <JSUint8Array1>[];
-    await response.read((JSUint8Array1 chunk) {
+    final List<JSUint8Array> chunks = <JSUint8Array>[];
+    await response.read((JSUint8Array chunk) {
       length += chunk.length.toDart.toInt();
       chunks.add(chunk);
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
-    final JSUint8Array1 wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
-    for (final JSUint8Array1 chunk in chunks) {
+    final JSUint8Array wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
+    for (final JSUint8Array chunk in chunks) {
       wasmMemory.set(chunk, dataAddress.toJS);
       dataAddress += chunk.length.toDart.toInt();
     }
@@ -138,15 +138,15 @@ class SkwasmFontCollection implements FlutterFontCollection {
   Future<bool> loadFontFromUrl(String familyName, String url) async {
     final HttpFetchResponse response = await httpFetch(url);
     int length = 0;
-    final List<JSUint8Array1> chunks = <JSUint8Array1>[];
-    await response.read((JSUint8Array1 chunk) {
+    final List<JSUint8Array> chunks = <JSUint8Array>[];
+    await response.read((JSUint8Array chunk) {
       length += chunk.length.toDart.toInt();
       chunks.add(chunk);
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
-    final JSUint8Array1 wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
-    for (final JSUint8Array1 chunk in chunks) {
+    final JSUint8Array wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
+    for (final JSUint8Array chunk in chunks) {
       wasmMemory.set(chunk, dataAddress.toJS);
       dataAddress += chunk.length.toDart.toInt();
     }
