@@ -176,7 +176,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///
 /// {@tool snippet}
 ///
-/// The following code snippet shows how you can request focus on a
+/// The following code snippet shows how one can request focus on a
 /// certain widget.
 /// ```dart
 /// class MyWidget extends StatefulWidget {
