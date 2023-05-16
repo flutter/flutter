@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
+import 'error_handling_io.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
@@ -340,7 +341,7 @@ class _LinuxUtils extends _PosixUtils {
     for (String entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
-      if(entryKeyValuePair[0] == key) {
+      if (entryKeyValuePair[0] == key) {
         final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
@@ -423,7 +424,11 @@ class _MacOSUtils extends _PosixUtils {
     return _hostPlatform!;
   }
 
-  // unzip, then rsync
+  /// Unzip into a temporary directory.
+  ///
+  /// For every file/directory/link in the unzipped file, delete the
+  /// corresponding entity in the [targetDirectory] before moving from the
+  /// temporary directory to the [targetDirectory].
   @override
   void unzip(File file, Directory targetDirectory) {
     if (!_processManager.canRun('unzip')) {
@@ -431,35 +436,35 @@ class _MacOSUtils extends _PosixUtils {
       // error in bin/internal/update_dart_sdk.sh
       throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
     }
-    if (_processManager.canRun('rsync')) {
-      final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
-      try {
-        // Unzip to a temporary directory.
-        _processUtils.runSync(
-          <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
-          throwOnError: true,
-          verboseExceptions: true,
-        );
-        for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
-          // rsync --delete the unzipped files so files removed from the archive are also removed from the target.
-          // Add the '-8' parameter to avoid mangling filenames with encodings that do not match the current locale.
-          _processUtils.runSync(
-            <String>['rsync', '-8', '-av', '--delete', unzippedFile.path, targetDirectory.path],
-            throwOnError: true,
-            verboseExceptions: true,
-          );
-        }
-      } finally {
-        tempDirectory.deleteSync(recursive: true);
-      }
-    } else {
-      // Fall back to just unzipping.
-      _logger.printTrace('Unable to find rsync, falling back to direct unzipping.');
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
+    try {
+      // Unzip to a temporary directory.
       _processUtils.runSync(
-        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+        <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
         throwOnError: true,
         verboseExceptions: true,
       );
+      for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
+        final FileSystemEntityType fileType = targetDirectory.fileSystem.typeSync(
+          targetDirectory.fileSystem.path.join(targetDirectory.path, unzippedFile.basename),
+          followLinks: false,
+        );
+        final FileSystemEntity fileToReplace;
+        if (fileType == FileSystemEntityType.directory) {
+          fileToReplace = targetDirectory.childDirectory(unzippedFile.basename);
+        } else if (fileType == FileSystemEntityType.link) {
+          fileToReplace = targetDirectory.childLink(unzippedFile.basename);
+        } else {
+          fileToReplace = targetDirectory.childFile(unzippedFile.basename);
+        }
+        // Delete existing version before moving.
+        ErrorHandlingFileSystem.deleteIfExists(fileToReplace, recursive: true);
+        unzippedFile.renameSync(fileToReplace.path);
+      }
+    } on FileSystemException catch (e) {
+      _logger.printTrace('${e.message}: ${e.osError}');
+    } finally {
+      tempDirectory.deleteSync(recursive: true);
     }
   }
 }
@@ -607,20 +612,25 @@ enum HostPlatform {
   darwin_arm64,
   linux_x64,
   linux_arm64,
-  windows_x64,
+  windows_x64;
+
+  String get platformName {
+    return switch (this) {
+      HostPlatform.darwin_x64 => 'x64',
+      HostPlatform.darwin_arm64 => 'arm64',
+      HostPlatform.linux_x64 => 'x64',
+      HostPlatform.linux_arm64 => 'arm64',
+      HostPlatform.windows_x64 => 'x64'
+    };
+  }
 }
 
 String getNameForHostPlatform(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'darwin-x64';
-    case HostPlatform.darwin_arm64:
-      return 'darwin-arm64';
-    case HostPlatform.linux_x64:
-      return 'linux-x64';
-    case HostPlatform.linux_arm64:
-      return 'linux-arm64';
-    case HostPlatform.windows_x64:
-      return 'windows-x64';
-  }
+  return switch (platform) {
+    HostPlatform.darwin_x64 => 'darwin-x64',
+    HostPlatform.darwin_arm64 => 'darwin-arm64',
+    HostPlatform.linux_x64 => 'linux-x64',
+    HostPlatform.linux_arm64 => 'linux-arm64',
+    HostPlatform.windows_x64 => 'windows-x64'
+  };
 }

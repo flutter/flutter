@@ -399,7 +399,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _updateSelectionStatus() {
     final TextSelection selection;
     final SelectionGeometry geometry = _selectionDelegate.value;
-    switch(geometry.status) {
+    switch (geometry.status) {
       case SelectionStatus.uncollapsed:
       case SelectionStatus.collapsed:
         selection = const TextSelection(baseOffset: 0, extentOffset: 1);
@@ -1961,7 +1961,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
     if (currentSelectionStartIndex == -1) {
-      switch(event.direction) {
+      switch (event.direction) {
         case SelectionExtendDirection.previousLine:
         case SelectionExtendDirection.backward:
           currentSelectionStartIndex = currentSelectionEndIndex = selectables.length;

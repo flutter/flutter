@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -264,6 +266,84 @@ void main() {
     )));
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
+  });
+
+  testWidgets('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
+    final DraggableScrollableController draggableController = DraggableScrollableController();
+    const double kBottomSheetDominatesPercentage = 0.3;
+
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      floatingActionButton: const FloatingActionButton(
+        key: Key('one'),
+        onPressed: null,
+        child: Text('1'),
+      ),
+      bottomSheet: DraggableScrollableSheet(
+        expand: false,
+        controller: draggableController,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(),
+          );
+        },
+      ),
+    )));
+
+    double getScale() => tester.firstWidget<ScaleTransition>(find.byType(ScaleTransition)).scale.value;
+
+    for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {
+      draggableController.jumpTo(extent);
+
+      final double extentRemaining = 1.0 - extent;
+      if (extentRemaining < kBottomSheetDominatesPercentage) {
+        final double visValue = extentRemaining * kBottomSheetDominatesPercentage * 10;
+        // since FAB uses easeIn curve, we're testing this by using the fact that
+        // easeIn curve is always less than or equal to x=y curve.
+        expect(getScale(), lessThanOrEqualTo(visValue));
+      } else {
+        expect(getScale(), equals(1.0));
+      }
+    }
+  });
+
+  testWidgets('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
+    final DraggableScrollableController draggableController = DraggableScrollableController();
+    const double kBottomSheetDominatesPercentage = 0.3;
+    const double kMinBottomSheetScrimOpacity = 0.1;
+    const double kMaxBottomSheetScrimOpacity = 0.6;
+
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      bottomSheet: DraggableScrollableSheet(
+        expand: false,
+        controller: draggableController,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(),
+          );
+        },
+      ),
+    )));
+
+    Finder findModalBarrier() => find.descendant(of: find.byType(Scaffold), matching: find.byType(ModalBarrier));
+    double getOpacity() => tester.firstWidget<ModalBarrier>(findModalBarrier()).color!.opacity;
+    double getExpectedOpacity(double visValue) => math.max(kMinBottomSheetScrimOpacity, kMaxBottomSheetScrimOpacity - visValue);
+
+    for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {
+      draggableController.jumpTo(extent);
+      await tester.pump();
+
+      final double extentRemaining = 1.0 - extent;
+      if (extentRemaining < kBottomSheetDominatesPercentage) {
+        final double visValue = extentRemaining * kBottomSheetDominatesPercentage * 10;
+
+        expect(findModalBarrier(), findsOneWidget);
+        expect(getOpacity(), moreOrLessEquals(getExpectedOpacity(visValue), epsilon: 0.02));
+      } else {
+        expect(findModalBarrier(), findsNothing);
+      }
+    }
   });
 
   testWidgets('Floating action button directionality', (WidgetTester tester) async {

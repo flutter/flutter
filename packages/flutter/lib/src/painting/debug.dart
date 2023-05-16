@@ -185,7 +185,7 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
         debugOnPaintImage != null ||
-        debugInvertOversizedImages == true ||
+        debugInvertOversizedImages ||
         debugImageOverheadAllowance != _imageOverheadAllowanceDefault) {
       throw FlutterError(reason);
     }

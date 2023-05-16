@@ -3115,6 +3115,42 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['readOnly'], isFalse);
   });
 
+  testWidgets('Sends "updateConfig" when obscureText is flipped', (WidgetTester tester) async {
+    bool obscureText = true;
+    late StateSetter setState;
+    final TextEditingController controller = TextEditingController(text: 'Lorem');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return EditableText(
+              obscureText: obscureText,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            );
+          },
+        ),
+      ),
+    );
+
+    // Interact with the field to establish the input connection.
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['obscureText'], isTrue);
+
+    setState(() { obscureText = false; });
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
+  });
+
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     late String changedValue;
     final Widget widget = MaterialApp(
