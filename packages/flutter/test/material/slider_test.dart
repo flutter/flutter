@@ -2399,7 +2399,7 @@ void main() {
     };
   }
 
-testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values on single event calls', (WidgetTester tester) async
+testWidgets('Slider calls onChangeStart and onChangeEnd when adjusted with a single press of arrow key', (WidgetTester tester) async
 {
     final Map<ShortcutActivator, Intent> shortcuts = setUpKeyShortcuts();
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2452,7 +2452,7 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    expect(onChangeStartVal, 0.5, reason: 'the value onChangeStart was initial slider value as expected');
+    expect(onChangeStartVal, 0.5, reason: 'the value onChangeStart was initial slider value, as expected');
     expect(sliderValue, 0.55, reason: 'slider increased after first arrowRight');
     expect(onChangeEndVal, 0.55, reason: 'the value onChangeEnd increased as expected');
 
@@ -2463,7 +2463,7 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
     expect(onChangeEndVal, 0.50, reason: 'the value onChangeEnd decreased as expected');
 });
 
-testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd callbacks are activated and display correct values on multiple event calls', (WidgetTester tester) async
+testWidgets('Slider calls onChangeStart and onChangeEnd when adjusted with multiple presses of arrow keys', (WidgetTester tester) async
 {
     final Map<ShortcutActivator, Intent> shortcuts = setUpKeyShortcuts();
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
@@ -2521,9 +2521,9 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
     }
 
     //Im rounding to fixed because the .6 segment always returns a long double whereas the others don't
-     expect(onChangeStartVal, 0.55, reason: 'the value onChangeStart should be where last change ended');
+     expect(onChangeStartVal, 0.55, reason: 'the value onChangeStart should be where last change started');
      expect(num.parse(sliderValue.toStringAsFixed(1)), 0.6, reason: 'slider increased by two steps');
-     expect(num.parse(onChangeEndVal.toStringAsFixed(1)), 0.6, reason: 'the value onChangeEnd increased as expected');
+     expect(num.parse(onChangeEndVal.toStringAsFixed(1)), 0.6, reason: 'the value onChangeEnd increased, as expected');
 
     for(int i =0; i<15; i++)
     {
@@ -2531,7 +2531,7 @@ testWidgets('When adjusting slider with arrow keys onChangeStart and onChangeEnd
       await tester.pumpAndSettle();
     }
 
-     expect(onChangeStartVal, 0.0, reason: 'the slider should be at furthest left segment and cant move past zero down');
+     expect(onChangeStartVal, 0.0, reason: 'the slider should be at furthest left segment and cant move past zero ');
      expect(sliderValue, 0.0, reason: 'slider decreased to zero as expected');
      expect(onChangeEndVal, 0.0,reason: 'the value onChangeEnd decreased to zero as expected');
 });
