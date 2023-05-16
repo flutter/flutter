@@ -21,6 +21,7 @@ export 'skwasm_impl/picture.dart';
 export 'skwasm_impl/raw/raw_canvas.dart';
 export 'skwasm_impl/raw/raw_fonts.dart';
 export 'skwasm_impl/raw/raw_geometry.dart';
+export 'skwasm_impl/raw/raw_image.dart';
 export 'skwasm_impl/raw/raw_memory.dart';
 export 'skwasm_impl/raw/raw_paint.dart';
 export 'skwasm_impl/raw/raw_path.dart';

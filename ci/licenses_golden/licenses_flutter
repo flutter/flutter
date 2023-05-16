@@ -2007,6 +2007,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/picture.da
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_canvas.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_fonts.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_geometry.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_image.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_memory.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_paint.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_path.dart + ../../../flutter/LICENSE
@@ -2077,6 +2078,7 @@ ORIGIN: ../../../flutter/lib/web_ui/skwasm/data.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/export.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/fonts.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/helpers.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/web_ui/skwasm/image.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/paint.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/path.cpp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/skwasm/picture.cpp + ../../../flutter/LICENSE
@@ -4626,6 +4628,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_fonts.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_geometry.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_image.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_memory.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_paint.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/skwasm/skwasm_impl/raw/raw_path.dart
@@ -4696,6 +4699,7 @@ FILE: ../../../flutter/lib/web_ui/skwasm/data.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/export.h
 FILE: ../../../flutter/lib/web_ui/skwasm/fonts.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/helpers.h
+FILE: ../../../flutter/lib/web_ui/skwasm/image.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/paint.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/path.cpp
 FILE: ../../../flutter/lib/web_ui/skwasm/picture.cpp

@@ -14,6 +14,14 @@ SKWASM_EXPORT void* skData_getPointer(SkData* data) {
   return data->writable_data();
 }
 
+SKWASM_EXPORT const void* skData_getConstPointer(SkData* data) {
+  return data->data();
+}
+
+SKWASM_EXPORT size_t skData_getSize(SkData* data) {
+  return data->size();
+}
+
 SKWASM_EXPORT void skData_dispose(SkData* data) {
   return data->unref();
 }

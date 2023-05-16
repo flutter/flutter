@@ -18,11 +18,11 @@ class FakeAssetManager implements AssetManager {
 
   @override
   Future<ByteData> load(String assetKey) async {
-    final ByteData? data = _assetMap[assetKey];
-    if (data == null) {
+    final ByteData? assetData = await _currentScope?.getAssetData(assetKey);
+    if (assetData == null) {
       throw HttpFetchNoPayloadError(assetKey, status: 404);
     }
-    return data;
+    return assetData;
   }
 
   @override
@@ -55,12 +55,7 @@ class FakeAssetManager implements AssetManager {
     _currentScope = scope._parent;
   }
 
-  void setAsset(String assetKey, ByteData assetData) {
-    _assetMap[assetKey] = assetData;
-  }
-
   FakeAssetScope? _currentScope;
-  final Map<String, ByteData> _assetMap = <String, ByteData>{};
 }
 
 class FakeAssetScope {

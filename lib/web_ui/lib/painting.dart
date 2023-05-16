@@ -398,6 +398,7 @@ class MaskFilter {
   String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
 }
 
+// This needs to be kept in sync with the "_FilterQuality" enum in skwasm's canvas.cpp
 enum FilterQuality {
   none,
   low,
@@ -438,6 +439,7 @@ enum ColorSpace {
   extendedSRGB,
 }
 
+// This must be kept in sync with the `ImageByteFormat` enum in Skwasm's surface.cpp.
 enum ImageByteFormat {
   rawRgba,
   rawStraightRgba,
@@ -445,9 +447,11 @@ enum ImageByteFormat {
   png,
 }
 
+// This must be kept in sync with the `PixelFormat` enum in Skwasm's image.cpp.
 enum PixelFormat {
   rgba8888,
   bgra8888,
+  rgbaFloat32,
 }
 
 typedef ImageDecoderCallback = void Function(Image result);
@@ -561,6 +565,8 @@ Future<Codec> createBmp(
       swapRedBlue = true;
     case PixelFormat.rgba8888:
       swapRedBlue = false;
+    case PixelFormat.rgbaFloat32:
+      throw UnimplementedError('RGB conversion from rgbaFloat32 data is not implemented');
   }
 
   // See https://en.wikipedia.org/wiki/BMP_file_format for format examples.
@@ -737,9 +743,19 @@ class Shadow {
 }
 
 abstract class ImageShader implements Shader {
-  factory ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4, {
+  factory ImageShader(
+    Image image,
+    TileMode tmx,
+    TileMode tmy,
+    Float64List matrix4, {
     FilterQuality? filterQuality,
-  }) => engine.renderer.createImageShader(image, tmx, tmy, matrix4, filterQuality);
+  }) => engine.renderer.createImageShader(
+    image,
+    tmx,
+    tmy,
+    matrix4,
+    filterQuality
+  );
 
   @override
   void dispose();

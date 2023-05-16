@@ -187,12 +187,10 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
 
   @override
   void setCheckerboardOffscreenLayers(bool checkerboard) {
-    // TODO(jacksongardner): implement setCheckerboardOffscreenLayers
   }
 
   @override
   void setCheckerboardRasterCacheImages(bool checkerboard) {
-    // TODO(jacksongardner): implement setCheckerboardRasterCacheImages
   }
 
   @override
@@ -205,12 +203,10 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     double insetLeft,
     bool focusable
   ) {
-    // TODO(jacksongardner): implement setProperties
   }
 
   @override
   void setRasterizerTracingThreshold(int frameInterval) {
-    // TODO(jacksongardner): implement setRasterizerTracingThreshold
   }
 
   @override

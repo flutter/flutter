@@ -76,22 +76,6 @@ class SkwasmPaint implements ui.Paint {
   @override
   set strokeMiterLimit(double limit) => paintSetMiterLimit(_handle, limit);
 
-  // Unimplemented stuff below
-  @override
-  ui.ColorFilter? colorFilter;
-
-  @override
-  ui.FilterQuality filterQuality = ui.FilterQuality.none;
-
-  @override
-  ui.ImageFilter? imageFilter;
-
-  @override
-  bool invertColors = false;
-
-  @override
-  ui.MaskFilter? maskFilter;
-
   @override
   ui.Shader? get shader => _shader;
 
@@ -103,4 +87,20 @@ class SkwasmPaint implements ui.Paint {
       skwasmShader != null ? skwasmShader.handle : nullptr;
     paintSetShader(_handle, shaderHandle);
   }
+
+  @override
+  ui.FilterQuality filterQuality = ui.FilterQuality.none;
+
+  // Unimplemented stuff below
+  @override
+  ui.ColorFilter? colorFilter;
+
+  @override
+  ui.ImageFilter? imageFilter;
+
+  @override
+  bool invertColors = false;
+
+  @override
+  ui.MaskFilter? maskFilter;
 }
