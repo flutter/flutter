@@ -112,6 +112,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Trailing spaces...');
   await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
 
+  printProgress('Spaces after flow control statements...');
+  await verifySpacesAfterFlowControlStatements(flutterRoot);
+
   printProgress('Deprecations...');
   await verifyDeprecations(flutterRoot);
 
@@ -1033,6 +1036,38 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     }
     if (lines.isNotEmpty && lines.last == '') {
       problems.add('${file.path}:${lines.length}: trailing blank line');
+    }
+  }
+  if (problems.isNotEmpty) {
+    foundError(problems);
+  }
+}
+
+final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|for|do|while|catch)\(', multiLine: true);
+
+Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
+  const Set<String> extensions = <String>{
+    '.dart',
+    '.java',
+    '.js',
+    '.kt',
+    '.swift',
+    '.c',
+    '.cc',
+    '.cpp',
+    '.h',
+    '.m',
+  };
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+    .where((File file) => extensions.contains(path.extension(file.path)))
+    .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      if (lines[index].contains(_flowControlStatementWithoutSpace)) {
+        problems.add('${file.path}:${index + 1}: no space after flow control statement');
+      }
     }
   }
   if (problems.isNotEmpty) {

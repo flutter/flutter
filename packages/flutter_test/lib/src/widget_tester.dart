@@ -149,7 +149,7 @@ void testWidgets(
         tester._testDescription = combinedDescription;
         SemanticsHandle? semanticsHandle;
         tester._recordNumberOfSemanticsHandles();
-        if (semanticsEnabled == true) {
+        if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
@@ -420,7 +420,7 @@ Future<void> benchmarkWidgets(
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle? semanticsHandle;
-  if (semanticsEnabled == true) {
+  if (semanticsEnabled) {
     semanticsHandle = tester.ensureSemantics();
   }
   tester._recordNumberOfSemanticsHandles();
