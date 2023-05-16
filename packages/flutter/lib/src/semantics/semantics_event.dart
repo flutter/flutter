@@ -166,9 +166,9 @@ class TapSemanticEvent extends SemanticsEvent {
 /// accessibiliy focus of the platform.
 ///
 /// Some possibile use cases:
-/// For example, if the current focus rendering object is removed and replace with another
-/// rendering object. Such design sshould avoid if possible. But it is a reasonable use case
-/// for this API if needed.
+/// For example, the currently focused rendering object is replaced by another rendering
+/// object. In general, such design should be avoided if possible. If not, one may want
+/// to refocus the newly added rendering object.
 ///
 /// Some examples that are not recommended:
 /// When a new popup or dropdown opens, moving the focus in these cases may confuse users
