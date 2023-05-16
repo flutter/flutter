@@ -39,6 +39,11 @@ FlPlatformPlugin* fl_platform_plugin_new(FlBinaryMessenger* messenger);
  *
  * Request the application exits (i.e. due to the window being requested to be
  * closed).
+ *
+ * Calling this will only send an exit request to the framework if the framework
+ * has already indicated that it is ready to receive requests by sending a
+ * "System.initializationComplete" method call on the platform channel. Calls
+ * before initialization is complete will result in an immediate exit.
  */
 void fl_platform_plugin_request_app_exit(FlPlatformPlugin* plugin);
 

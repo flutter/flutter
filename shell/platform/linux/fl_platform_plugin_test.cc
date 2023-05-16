@@ -112,22 +112,33 @@ TEST(FlPlatformPluginTest, ExitApplication) {
 
   g_autoptr(FlPlatformPlugin) plugin = fl_platform_plugin_new(messenger);
   EXPECT_NE(plugin, nullptr);
-
-  g_autoptr(FlValue) args = fl_value_new_map();
-  fl_value_set_string_take(args, "type", fl_value_new_string("cancelable"));
   g_autoptr(FlJsonMethodCodec) codec = fl_json_method_codec_new();
-  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
-      FL_METHOD_CODEC(codec), "System.exitApplication", args, nullptr);
 
-  g_autoptr(FlValue) requestArgs = fl_value_new_map();
-  fl_value_set_string_take(requestArgs, "type",
+  g_autoptr(FlValue) null = fl_value_new_null();
+  ON_CALL(messenger, fl_binary_messenger_send_response(
+                         ::testing::Eq<FlBinaryMessenger*>(messenger),
+                         ::testing::_, SuccessResponse(null), ::testing::_))
+      .WillByDefault(testing::Return(TRUE));
+
+  // Indicate that the binding is initialized.
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(GBytes) init_message = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), "System.initializationComplete", nullptr, &error);
+  messenger.ReceiveMessage("flutter/platform", init_message);
+
+  g_autoptr(FlValue) request_args = fl_value_new_map();
+  fl_value_set_string_take(request_args, "type",
                            fl_value_new_string("cancelable"));
   EXPECT_CALL(messenger,
               fl_binary_messenger_send_on_channel(
                   ::testing::Eq<FlBinaryMessenger*>(messenger),
                   ::testing::StrEq("flutter/platform"),
-                  MethodCall("System.requestAppExit", FlValueEq(requestArgs)),
+                  MethodCall("System.requestAppExit", FlValueEq(request_args)),
                   ::testing::_, ::testing::_, ::testing::_));
 
+  g_autoptr(FlValue) args = fl_value_new_map();
+  fl_value_set_string_take(args, "type", fl_value_new_string("cancelable"));
+  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), "System.exitApplication", args, nullptr);
   messenger.ReceiveMessage("flutter/platform", message);
 }
