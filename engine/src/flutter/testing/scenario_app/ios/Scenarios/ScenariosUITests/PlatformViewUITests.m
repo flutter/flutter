@@ -254,60 +254,6 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 @end
 
-@interface TwoPlatformViewClipRectTests : GoldenPlatformViewTests
-
-@end
-
-@implementation TwoPlatformViewClipRectTests
-
-- (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--two-platform-view-clip-rect"];
-  return [super initWithManager:manager invocation:invocation];
-}
-
-- (void)testPlatformView {
-  [self checkPlatformViewGolden];
-}
-
-@end
-
-@interface TwoPlatformViewClipRRectTests : GoldenPlatformViewTests
-
-@end
-
-@implementation TwoPlatformViewClipRRectTests
-
-- (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--two-platform-view-clip-rrect"];
-  return [super initWithManager:manager invocation:invocation];
-}
-
-- (void)testPlatformView {
-  [self checkPlatformViewGolden];
-}
-
-@end
-
-@interface TwoPlatformViewClipPathTests : GoldenPlatformViewTests
-
-@end
-
-@implementation TwoPlatformViewClipPathTests
-
-- (instancetype)initWithInvocation:(NSInvocation*)invocation {
-  GoldenTestManager* manager =
-      [[GoldenTestManager alloc] initWithLaunchArg:@"--two-platform-view-clip-path"];
-  return [super initWithManager:manager invocation:invocation];
-}
-
-- (void)testPlatformView {
-  [self checkPlatformViewGolden];
-}
-
-@end
-
 @interface PlatformViewMutationTransformTests : GoldenPlatformViewTests
 
 @end
