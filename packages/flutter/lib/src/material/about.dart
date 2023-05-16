@@ -1164,9 +1164,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       final double availableWidth = constraints.maxWidth;
       if (availableWidth >= _materialWideDisplayThreshold) {
         return _lateralUI(context);
-      } else {
-        return _nestedUI(context);
       }
+      return _nestedUI(context);
     });
   }
 
