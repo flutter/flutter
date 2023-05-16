@@ -26,6 +26,11 @@ vec4 ReadDestination() {
 
 uniform sampler2D texture_sampler_src;
 
+uniform FragInfo {
+  float16_t src_input_alpha;
+}
+frag_info;
+
 in vec2 v_src_texture_coords;
 
 out vec4 frag_color;
@@ -36,7 +41,8 @@ void main() {
   f16vec4 src = IPHalfUnpremultiply(
       f16vec4(texture(texture_sampler_src,  // sampler
                       v_src_texture_coords  // texture coordinates
-                      )));
+                      )) *
+      frag_info.src_input_alpha);
 
   f16vec4 blended = f16vec4(Blend(dst.rgb, src.rgb), 1.0hf) * dst.a;
 

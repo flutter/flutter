@@ -133,6 +133,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   }
 
   VS::FrameInfo frame_info;
+  FS::FragInfo frag_info;
 
   auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
   if (!renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
@@ -148,9 +149,10 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    src_snapshot->transform;
   frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
+  VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
-  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
-  VS::BindFrameInfo(cmd, uniform_view);
+  frag_info.src_input_alpha = src_snapshot->opacity;
+  FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
   return pass.AddCommand(cmd);
 }
