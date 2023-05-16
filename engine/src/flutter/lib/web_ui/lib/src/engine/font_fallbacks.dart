@@ -120,15 +120,19 @@ class FontFallbackManager {
       registry.getMissingCodePoints(codePoints, fontFamilies);
 
     if (missingCodePoints.isNotEmpty) {
-      _codePointsToCheckAgainstFallbackFonts.addAll(missingCodePoints);
-      if (!_scheduledCodePointCheck) {
-        _scheduledCodePointCheck = true;
-        _idleFuture = Future<void>.delayed(Duration.zero, () async {
-          _ensureFallbackFonts();
-          _scheduledCodePointCheck = false;
-          await downloadQueue.waitForIdle();
-        });
-      }
+      addMissingCodePoints(codePoints);
+    }
+  }
+
+  void addMissingCodePoints(List<int> codePoints) {
+    _codePointsToCheckAgainstFallbackFonts.addAll(codePoints);
+    if (!_scheduledCodePointCheck) {
+      _scheduledCodePointCheck = true;
+      _idleFuture = Future<void>.delayed(Duration.zero, () async {
+        _ensureFallbackFonts();
+        _scheduledCodePointCheck = false;
+        await downloadQueue.waitForIdle();
+      });
     }
   }
 
@@ -144,8 +148,7 @@ class FontFallbackManager {
     }
     final List<int> codePoints = _codePointsToCheckAgainstFallbackFonts.toList();
     _codePointsToCheckAgainstFallbackFonts.clear();
-    final List<int> missingCodePoints = registry.getMissingCodePoints(codePoints, globalFontFallbacks);
-    findFontsForMissingCodePoints(missingCodePoints);
+    findFontsForMissingCodePoints(codePoints);
   }
 
   void registerFallbackFont(String family) {

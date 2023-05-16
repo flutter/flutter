@@ -50,3 +50,8 @@ external void fontCollectionRegisterTypeface(
   TypefaceHandle typeface,
   SkStringHandle fontName,
 );
+
+@Native<Void Function(
+  FontCollectionHandle
+)>(symbol: 'fontCollection_clearCaches', isLeaf: true)
+external void fontCollectionClearCaches(FontCollectionHandle handle);

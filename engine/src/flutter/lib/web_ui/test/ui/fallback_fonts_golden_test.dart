@@ -62,6 +62,7 @@ void testMain() {
         ui.ParagraphStyle(),
       );
       pb.addText('مرحبا');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
@@ -100,6 +101,7 @@ void testMain() {
         ui.ParagraphStyle(),
       );
       pb.addText('مرحبا');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
@@ -134,6 +136,7 @@ void testMain() {
         ui.ParagraphStyle(),
       );
       pb.addText('Hello 😊');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
 
@@ -170,7 +173,10 @@ void testMain() {
         () async {
       // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
 
-      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('ヽಠ');
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText('ヽಠ');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
       expect(
         downloadedFontFamilies,
@@ -182,7 +188,9 @@ void testMain() {
 
       // Do the same thing but this time with loaded fonts.
       downloadedFontFamilies.clear();
-      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('ヽಠ');
+      pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText('ヽಠ');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
       expect(downloadedFontFamilies, isEmpty);
     });
@@ -190,7 +198,10 @@ void testMain() {
     test('can find glyph for 2/3 symbol', () async {
       // Try rendering text that requires fallback fonts, initially before the fonts are loaded.
 
-      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('⅔');
+      ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText('⅔');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
       expect(
         downloadedFontFamilies,
@@ -201,7 +212,10 @@ void testMain() {
 
       // Do the same thing but this time with loaded fonts.
       downloadedFontFamilies.clear();
-      ui.ParagraphBuilder(ui.ParagraphStyle()).addText('⅔');
+      pb = ui.ParagraphBuilder(ui.ParagraphStyle());
+      pb.addText('⅔');
+      pb.build().layout(const ui.ParagraphConstraints(width: 1000));
+
       await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
       expect(downloadedFontFamilies, isEmpty);
     });
