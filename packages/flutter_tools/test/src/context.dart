@@ -181,7 +181,8 @@ void _printBufferedErrors(AppContext testContext) {
 }
 
 class FakeDeviceManager implements DeviceManager {
-  List<Device> devices = <Device>[];
+  List<Device> attachedDevices = <Device>[];
+  List<Device> wirelessDevices = <Device>[];
 
   String? _specifiedDeviceId;
 
@@ -209,20 +210,27 @@ class FakeDeviceManager implements DeviceManager {
   @override
   Future<List<Device>> getAllDevices({
     DeviceDiscoveryFilter? filter,
-  }) async => devices;
+  }) async => filteredDevices(filter);
 
   @override
   Future<List<Device>> refreshAllDevices({
     Duration? timeout,
     DeviceDiscoveryFilter? filter,
-  }) async => devices;
+  }) async => filteredDevices(filter);
+
+  @override
+  Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => filteredDevices(filter);
 
   @override
   Future<List<Device>> getDevicesById(
     String deviceId, {
     DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
   }) async {
-    return devices.where((Device device) {
+    return filteredDevices(filter).where((Device device) {
       return device.id == deviceId || device.id.startsWith(deviceId);
     }).toList();
   }
@@ -230,13 +238,15 @@ class FakeDeviceManager implements DeviceManager {
   @override
   Future<List<Device>> getDevices({
     DeviceDiscoveryFilter? filter,
+    bool waitForDeviceToConnect = false,
   }) {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId!, filter: filter)
         : getAllDevices(filter: filter);
   }
 
-  void addDevice(Device device) => devices.add(device);
+  void addAttachedDevice(Device device) => attachedDevices.add(device);
+  void addWirelessDevice(Device device) => wirelessDevices.add(device);
 
   @override
   bool get canListAnything => true;
@@ -257,6 +267,16 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   Device? getSingleEphemeralDevice(List<Device> devices) => null;
+
+  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
+      return attachedDevices;
+    }
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return wirelessDevices;
+    }
+    return attachedDevices + wirelessDevices;
+  }
 }
 
 class TestDeviceDiscoverySupportFilter extends Fake implements DeviceDiscoverySupportFilter {
@@ -306,13 +326,13 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 13';
+  String get versionText => 'Xcode 14';
 
   @override
-  Version get version => Version(13, null, null);
+  Version get version => Version(14, null, null);
 
   @override
-  String get build => '13C100';
+  String get build => '14A309';
 
   @override
   Future<Map<String, String>> getBuildSettings(

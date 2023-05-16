@@ -179,7 +179,7 @@ class WebAssetServer implements AssetReader {
   static Future<WebAssetServer> start(
     ChromiumLauncher? chromiumLauncher,
     String hostname,
-    int? port,
+    int port,
     UrlTunneller? urlTunneller,
     bool useSseForDebugProxy,
     bool useSseForDebugBackend,
@@ -203,7 +203,7 @@ class WebAssetServer implements AssetReader {
     const int kMaxRetries = 4;
     for (int i = 0; i <= kMaxRetries; i++) {
       try {
-        httpServer = await HttpServer.bind(address, port ?? await globals.os.findFreePort());
+        httpServer = await HttpServer.bind(address, port);
         break;
       } on SocketException catch (e, s) {
         if (i >= kMaxRetries) {
@@ -296,6 +296,9 @@ class WebAssetServer implements AssetReader {
         PackageUriMapper(packageConfig),
         digestProvider,
         server.basePath,
+        packageConfig.toPackageUri(
+          globals.fs.file(entrypoint).absolute.uri,
+        ),
       ).strategy,
       expressionCompiler: expressionCompiler,
       spawnDds: enableDds,
@@ -417,12 +420,13 @@ class WebAssetServer implements AssetReader {
     File file = _resolveDartFile(requestPath);
 
     if (!file.existsSync() && requestPath.startsWith('canvaskit/')) {
-      final String canvasKitPath = globals.artifacts!.getArtifactPath(
-        Artifact.canvasKitPath,
-        platform: TargetPlatform.web_javascript,
+      final Directory canvasKitDirectory = globals.fs.directory(
+        globals.fs.path.join(
+          globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk).path,
+          'canvaskit',
+        )
       );
-      final Uri potential = globals.fs
-          .directory(canvasKitPath)
+      final Uri potential = canvasKitDirectory
           .uri
           .resolve(requestPath.replaceFirst('canvaskit/', ''));
       file = globals.fs.file(potential);
@@ -638,7 +642,7 @@ class WebDevFS implements DevFS {
   /// server.
   WebDevFS({
     required this.hostname,
-    required int? port,
+    required int port,
     required this.packagesFilePath,
     required this.urlTunneller,
     required this.useSseForDebugProxy,
@@ -671,7 +675,7 @@ class WebDevFS implements DevFS {
   final ChromiumLauncher? chromiumLauncher;
   final bool nullAssertions;
   final bool nativeNullAssertions;
-  final int? _port;
+  final int _port;
   final NullSafetyMode nullSafetyMode;
 
   late WebAssetServer webAssetServer;
@@ -774,7 +778,7 @@ class WebDevFS implements DevFS {
 
     final int selectedPort = webAssetServer.selectedPort;
     if (buildInfo.dartDefines.contains('FLUTTER_WEB_AUTO_DETECT=true')) {
-      webAssetServer.webRenderer = WebRendererMode.autoDetect;
+      webAssetServer.webRenderer = WebRendererMode.auto;
     } else if (buildInfo.dartDefines.contains('FLUTTER_WEB_USE_SKIA=true')) {
       webAssetServer.webRenderer = WebRendererMode.canvaskit;
     }

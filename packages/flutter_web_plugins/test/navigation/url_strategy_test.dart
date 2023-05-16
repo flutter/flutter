@@ -6,7 +6,9 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+
+import 'common.dart';
 
 void main() {
   group('$HashUrlStrategy', () {
@@ -43,6 +45,23 @@ void main() {
 
       location.hash = '#';
       expect(strategy.getPath(), '/');
+    });
+
+    test('allows location path/search before fragment', () {
+      const String internalUrl = '/menu?foo=bar';
+      final HashUrlStrategy strategy = HashUrlStrategy(location);
+
+      location.pathname = '/';
+      expect(strategy.prepareExternalUrl(internalUrl), '/#/menu?foo=bar');
+
+      location.pathname = '/main';
+      expect(strategy.prepareExternalUrl(internalUrl), '/main#/menu?foo=bar');
+
+      location.search = '?foo=bar';
+      expect(
+        strategy.prepareExternalUrl(internalUrl),
+        '/main?foo=bar#/menu?foo=bar',
+      );
     });
   });
 
@@ -141,46 +160,4 @@ void main() {
       expect(strategy.prepareExternalUrl('/bar/'), '/foo/bar/');
     });
   });
-}
-
-/// A mock implementation of [PlatformLocation] that doesn't access the browser.
-class TestPlatformLocation extends PlatformLocation {
-  @override
-  String pathname = '';
-
-  @override
-  String search = '';
-
-  @override
-  String hash = '';
-
-  @override
-  Object? get state => null;
-
-  /// Mocks the base href of the document.
-  String baseHref = '';
-
-  @override
-  void addPopStateListener(EventListener fn) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void removePopStateListener(EventListener fn) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void pushState(Object? state, String title, String url) {}
-
-  @override
-  void replaceState(Object? state, String title, String url) {}
-
-  @override
-  void go(int count) {
-    throw UnimplementedError();
-  }
-
-  @override
-  String getBaseHref() => baseHref;
 }

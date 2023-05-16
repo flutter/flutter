@@ -144,6 +144,12 @@ class Table extends RenderObjectWidget {
                'Otherwise, the table will contain holes.',
              );
            }
+           if (children.any((TableRow row) => row.children.isEmpty)) {
+             throw FlutterError(
+               'One or more TableRow have no children.\n'
+               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
+             );
+           }
          }
          return true;
        }()),

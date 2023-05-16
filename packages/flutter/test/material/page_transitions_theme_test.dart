@@ -23,7 +23,6 @@ void main() {
             isNotNull,
             reason: 'theme builder for $platform is null',
           );
-          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
@@ -32,7 +31,6 @@ void main() {
             isNull,
             reason: 'theme builder for $platform is not null',
           );
-          break;
       }
     }
   });

@@ -32,9 +32,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
-  // Could potentially break color scheme tests on upgrade,
-  // so pin and manually update as needed.
-  'material_color_utilities': '0.2.0',
+  // Keep pinned to latest until 1.0.0.
+  'material_color_utilities': '0.5.0',
   // https://github.com/flutter/flutter/issues/111304
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
@@ -43,6 +42,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'path_provider_android': '2.0.21',
   // https://github.com/flutter/flutter/issues/122039
   'flutter_plugin_android_lifecycle': '2.0.8',
+  // https://github.com/flutter/flutter/issues/126710
+  'camera_android': '0.10.7',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -954,7 +955,6 @@ class PubspecYaml {
               endOfDirectDependencies = output.length;
             }
             endOfDevDependencies = output.length;
-            break;
           case Section.builders:
           case Section.dependencyOverrides:
           case Section.header:
@@ -964,7 +964,6 @@ class PubspecYaml {
             if (data.lockLine != null) {
               output.add(data.lockLine!);
             }
-            break;
         }
       } else {
         // Not a header, not a dependency, just pass that through unmodified.
@@ -1377,12 +1376,10 @@ class PubspecDependency extends PubspecLine {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
         assert(kind != DependencyKind.unknown);
-        break;
       case DependencyKind.normal:
         if (!kManuallyPinnedDependencies.containsKey(name)) {
           dependencies.writeln('  $name: $versionToUse');
         }
-        break;
       case DependencyKind.path:
         if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
@@ -1392,7 +1389,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    path: $_lockTarget');
         }
-        break;
       case DependencyKind.sdk:
         if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
@@ -1402,7 +1398,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    sdk: $_lockTarget');
         }
-        break;
       case DependencyKind.git:
         if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
@@ -1412,7 +1407,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln(lockLine);
         }
-        break;
     }
   }
 
@@ -1648,7 +1642,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: ">=2.7.0 <4.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 ''');
 
     output.writeln('dependencies:');
@@ -1680,7 +1674,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=1.11.0 <4.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
 ''');
 
   return directory;

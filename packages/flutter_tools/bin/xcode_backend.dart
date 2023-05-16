@@ -49,17 +49,14 @@ class Context {
     switch (subCommand) {
       case 'build':
         buildApp();
-        break;
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
       case 'embed':
         embedFlutterFrameworks();
-        break;
       case 'embed_and_thin':
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks();
-        break;
       case 'test_vm_service_bonjour_service':
         // Exposed for integration testing only.
         addVmServiceBonjourService();

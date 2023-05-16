@@ -13,6 +13,8 @@
   "md.comp.primary-navigation-tab.container.elevation": "md.sys.elevation.level0",
   "md.comp.primary-navigation-tab.container.height": 48.0,
   "md.comp.primary-navigation-tab.container.shape": "md.sys.shape.corner.none",
+  "md.comp.primary-navigation-tab.divider.color": "surfaceVariant",
+  "md.comp.primary-navigation-tab.divider.height": 1.0,
   "md.comp.primary-navigation-tab.inactive.focus.state-layer.color": "onSurface",
   "md.comp.primary-navigation-tab.inactive.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.primary-navigation-tab.inactive.hover.state-layer.color": "onSurface",

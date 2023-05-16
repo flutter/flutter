@@ -12,8 +12,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -73,7 +73,7 @@ void main () {
         bundlePath: '/',
         appDeltaDirectory: appDeltaDirectory,
         launchArguments: <String>['--enable-dart-profiling'],
-        interfaceType: IOSDeviceConnectionInterface.network,
+        interfaceType: DeviceConnectionInterface.wireless,
         uninstallFirst: true,
       );
 
@@ -427,6 +427,93 @@ process continue
         '\n',
         'process detach',
       ]);
+    });
+
+    group('Check for symbols', () {
+      late String symbolsDirectoryPath;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+        symbolsDirectoryPath = '/Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols';
+      });
+
+      testWithoutContext('and no path provided', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'ios-deploy',
+            ],
+            stdout:
+            '(lldb) Process 6156 stopped',
+          ),
+        ]);
+        final BufferLogger logger = BufferLogger.test();
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        await iosDeployDebugger.checkForSymbolsFiles(fileSystem);
+        expect(iosDeployDebugger.symbolsDirectoryPath, isNull);
+        expect(logger.traceText, contains('No path provided for Symbols directory.'));
+      });
+
+      testWithoutContext('and unable to find directory', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'ios-deploy',
+            ],
+            stdout:
+            '[ 95%] Developer disk image mounted successfully\n'
+            'Symbol Path: $symbolsDirectoryPath\n'
+            '[100%] Connecting to remote debug server',
+          ),
+        ]);
+        final BufferLogger logger = BufferLogger.test();
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        await iosDeployDebugger.checkForSymbolsFiles(fileSystem);
+        expect(iosDeployDebugger.symbolsDirectoryPath, symbolsDirectoryPath);
+        expect(logger.traceText, contains('Unable to find Symbols directory'));
+      });
+
+      testWithoutContext('and find status', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'ios-deploy',
+            ],
+            stdout:
+            '[ 95%] Developer disk image mounted successfully\n'
+            'Symbol Path: $symbolsDirectoryPath\n'
+            '[100%] Connecting to remote debug server',
+          ),
+        ]);
+        final BufferLogger logger = BufferLogger.test();
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final Directory symbolsDirectory = fileSystem.directory(symbolsDirectoryPath);
+        symbolsDirectory.createSync(recursive: true);
+
+        final File copyingStatusFile = symbolsDirectory.parent.childFile('.copying_lock');
+        copyingStatusFile.createSync();
+
+        final File processingStatusFile = symbolsDirectory.parent.childFile('.processing_lock');
+        processingStatusFile.createSync();
+
+        await iosDeployDebugger.launchAndAttach();
+        await iosDeployDebugger.checkForSymbolsFiles(fileSystem);
+        expect(iosDeployDebugger.symbolsDirectoryPath, symbolsDirectoryPath);
+        expect(logger.traceText, contains('Symbol files:'));
+        expect(logger.traceText, contains('.copying_lock'));
+        expect(logger.traceText, contains('.processing_lock'));
+      });
     });
   });
 

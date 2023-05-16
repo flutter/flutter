@@ -17,13 +17,14 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/signals.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
+import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -112,25 +113,12 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'Whether the driver browser is going to be launched in headless mode.',
       )
-      ..addOption('browser-name',
-        defaultsTo: 'chrome',
+      ..addOption(
+        'browser-name',
+        defaultsTo: Browser.chrome.cliName,
         help: 'Name of the browser where tests will be executed.',
-        allowed: <String>[
-          'android-chrome',
-          'chrome',
-          'edge',
-          'firefox',
-          'ios-safari',
-          'safari',
-        ],
-        allowedHelp: <String, String>{
-          'android-chrome': 'Chrome on Android (see also "--android-emulator").',
-          'chrome': 'Google Chrome on this computer (see also "--chrome-binary").',
-          'edge': 'Microsoft Edge on this computer (Windows only).',
-          'firefox': 'Mozilla Firefox on this computer.',
-          'ios-safari': 'Apple Safari on an iOS device.',
-          'safari': 'Apple Safari on this computer (macOS only).',
-        },
+        allowed: Browser.values.map((Browser e) => e.cliName),
+        allowedHelp: CliEnum.allowedHelp(Browser.values),
       )
       ..addOption('browser-dimension',
         defaultsTo: '1600,1024',
@@ -213,16 +201,16 @@ class DriveCommand extends RunCommandBase {
     );
   }
 
-  // Network devices need `publish-port` to be enabled because it requires mDNS.
-  // If the flag wasn't provided as an actual argument and it's a network device,
+  // Wireless iOS devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a wireless device,
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
-    final bool isNetworkDevice = device is IOSDevice && device.interfaceType == IOSDeviceConnectionInterface.network;
-    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
-      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+    final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
+    if (isWirelessIOSDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('A wireless iOS device is being used. Changing `publish-port` to be enabled.');
       return false;
     }
     return !boolArg('publish-port');
@@ -354,7 +342,7 @@ class DriveCommand extends RunCommandBase {
       if (testResult != 0) {
         throwToolExit(null);
       }
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       // On exceptions, including ToolExit, take a screenshot on the device
       // unless a screenshot was already taken on test failure.
       if (!screenshotTaken && screenshot != null) {

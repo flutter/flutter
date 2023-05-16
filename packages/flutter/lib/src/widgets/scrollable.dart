@@ -28,6 +28,7 @@ import 'scrollable_helpers.dart';
 import 'selectable_region.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
+import 'view.dart';
 import 'viewport.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
@@ -99,18 +100,21 @@ class Scrollable extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
+  /// {@template flutter.widgets.Scrollable.axisDirection}
   /// The direction in which this widget scrolls.
   ///
-  /// For example, if the [axisDirection] is [AxisDirection.down], increasing
-  /// the scroll position will cause content below the bottom of the viewport to
-  /// become visible through the viewport. Similarly, if [axisDirection] is
-  /// [AxisDirection.right], increasing the scroll position will cause content
-  /// beyond the right edge of the viewport to become visible through the
-  /// viewport.
+  /// For example, if the [Scrollable.axisDirection] is [AxisDirection.down],
+  /// increasing the scroll position will cause content below the bottom of the
+  /// viewport to become visible through the viewport. Similarly, if the
+  /// axisDirection is [AxisDirection.right], increasing the scroll position
+  /// will cause content beyond the right edge of the viewport to become visible
+  /// through the viewport.
   ///
   /// Defaults to [AxisDirection.down].
+  /// {@endtemplate}
   final AxisDirection axisDirection;
 
+  /// {@template flutter.widgets.Scrollable.controller}
   /// An object that can be used to control the position to which this widget is
   /// scrolled.
   ///
@@ -122,12 +126,17 @@ class Scrollable extends StatefulWidget {
   /// scroll position (see [ScrollController.offset]), or change it (see
   /// [ScrollController.animateTo]).
   ///
+  /// If null, a [ScrollController] will be created internally by [Scrollable]
+  /// in order to create and manage the [ScrollPosition].
+  ///
   /// See also:
   ///
-  ///  * [ensureVisible], which animates the scroll position to reveal a given
-  ///    [BuildContext].
+  ///  * [Scrollable.ensureVisible], which animates the scroll position to
+  ///    reveal a given [BuildContext].
+  /// {@endtemplate}
   final ScrollController? controller;
 
+  /// {@template flutter.widgets.Scrollable.physics}
   /// How the widgets should respond to user input.
   ///
   /// For example, determines how the widget continues to animate after the
@@ -136,9 +145,9 @@ class Scrollable extends StatefulWidget {
   /// Defaults to matching platform conventions via the physics provided from
   /// the ambient [ScrollConfiguration].
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// If an explicit [ScrollBehavior] is provided to
+  /// [Scrollable.scrollBehavior], the [ScrollPhysics] provided by that behavior
+  /// will take precedence after [Scrollable.physics].
   ///
   /// The physics can be changed dynamically, but new physics will only take
   /// effect if the _class_ of the provided object changes. Merely constructing
@@ -153,6 +162,7 @@ class Scrollable extends StatefulWidget {
   ///  * [AlwaysScrollableScrollPhysics], which can be used to indicate that the
   ///    scrollable should react to scroll requests (and possible overscroll)
   ///    even if the scrollable's contents fit without scrolling being necessary.
+  /// {@endtemplate}
   final ScrollPhysics? physics;
 
   /// Builds the viewport through which the scrollable content is displayed.
@@ -291,16 +301,35 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState? scrollable = Scrollable.maybeOf(context);
   /// ```
   ///
-  /// Calling this method will create a dependency on the closest [Scrollable]
-  /// in the [context], if there is one.
+  /// Calling this method will create a dependency on the [ScrollableState]
+  /// that is returned, if there is one. This is typically the closest
+  /// [Scrollable], but may be a more distant ancestor if [axis] is used to
+  /// target a specific [Scrollable].
+  ///
+  /// Using the optional [Axis] is useful when Scrollables are nested and the
+  /// target [Scrollable] is not the closest instance. When [axis] is provided,
+  /// the nearest enclosing [ScrollableState] in that [Axis] is returned, or
+  /// null if there is none.
   ///
   /// See also:
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState? maybeOf(BuildContext context) {
-    final _ScrollableScope? widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
-    return widget?.scrollable;
+  static ScrollableState? maybeOf(BuildContext context, { Axis? axis }) {
+    // This is the context that will need to establish the dependency.
+    final BuildContext originalContext = context;
+    InheritedElement? element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+    while (element != null) {
+      final ScrollableState scrollable = (element.widget as _ScrollableScope).scrollable;
+      if (axis == null || axisDirectionToAxis(scrollable.axisDirection) == axis) {
+        // Establish the dependency on the correct context.
+        originalContext.dependOnInheritedElement(element);
+        return scrollable;
+      }
+      context = scrollable.context;
+      element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+    }
+    return null;
   }
 
   /// The state from the closest instance of this class that encloses the given
@@ -312,8 +341,14 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
   ///
-  /// Calling this method will create a dependency on the closest [Scrollable]
-  /// in the [context].
+  /// Calling this method will create a dependency on the [ScrollableState]
+  /// that is returned, if there is one. This is typically the closest
+  /// [Scrollable], but may be a more distant ancestor if [axis] is used to
+  /// target a specific [Scrollable].
+  ///
+  /// Using the optional [Axis] is useful when Scrollables are nested and the
+  /// target [Scrollable] is not the closest instance. When [axis] is provided,
+  /// the nearest enclosing [ScrollableState] in that [Axis] is returned.
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
@@ -322,20 +357,29 @@ class Scrollable extends StatefulWidget {
   ///
   /// * [Scrollable.maybeOf], which is similar to this method, but returns null
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState of(BuildContext context) {
-    final ScrollableState? scrollableState = maybeOf(context);
+  static ScrollableState of(BuildContext context, { Axis? axis }) {
+    final ScrollableState? scrollableState = maybeOf(context, axis: axis);
     assert(() {
       if (scrollableState == null) {
-        throw FlutterError(
-          'Scrollable.of() was called with a context that does not contain a '
-          'Scrollable widget.\n'
-          'No Scrollable widget ancestor could be found starting from the '
-          'context that was passed to Scrollable.of(). This can happen '
-          'because you are using a widget that looks for a Scrollable '
-          'ancestor, but no such ancestor exists.\n'
-          'The context used was:\n'
-          '  $context',
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'Scrollable.of() was called with a context that does not contain a '
+            'Scrollable widget.',
+          ),
+          ErrorDescription(
+            'No Scrollable widget ancestor could be found '
+            '${axis == null ? '' : 'for the provided Axis: $axis '}'
+            'starting from the context that was passed to Scrollable.of(). This '
+            'can happen because you are using a widget that looks for a Scrollable '
+            'ancestor, but no such ancestor exists.\n'
+            'The context used was:\n'
+            '  $context',
+          ),
+          if (axis != null) ErrorHint(
+            'When specifying an axis, this method will only look for a Scrollable '
+            'that matches the given Axis.',
+          ),
+        ]);
       }
       return true;
     }());
@@ -353,14 +397,23 @@ class Scrollable extends StatefulWidget {
   /// via [ScrollPhysics.recommendDeferredLoading]. That method is called with
   /// the current [ScrollPosition.activity]'s [ScrollActivity.velocity].
   ///
+  /// The optional [Axis] allows targeting of a specific [Scrollable] of that
+  /// axis, useful when Scrollables are nested. When [axis] is provided,
+  /// [ScrollPosition.recommendDeferredLoading] is called for the nearest
+  /// [Scrollable] in that [Axis].
+  ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
-  static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
-    if (widget == null) {
-      return false;
+  static bool recommendDeferredLoadingForContext(BuildContext context, { Axis? axis }) {
+    _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
+    while (widget != null) {
+      if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
+        return widget.position.recommendDeferredLoading(context);
+      }
+      context = widget.scrollable.context;
+      widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     }
-    return widget.position.recommendDeferredLoading(context);
+    return false;
   }
 
   /// Scrolls the scrollables that enclose the given context so as to make the
@@ -479,6 +532,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   TickerProvider get vsync => this;
 
   @override
+  double get devicePixelRatio => _devicePixelRatio;
+  late double _devicePixelRatio;
+
+  @override
   BuildContext? get notificationContext => _gestureDetectorKey.currentContext;
 
   @override
@@ -544,6 +601,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void didChangeDependencies() {
     _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+    _devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -666,7 +724,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
               },
             ),
           };
-          break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
@@ -688,7 +745,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
               },
             ),
           };
-          break;
       }
     }
     _lastCanDrag = value;
@@ -800,7 +856,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         delta = flipAxes
           ? event.scrollDelta.dy
           : event.scrollDelta.dx;
-        break;
       case Axis.vertical:
         delta = flipAxes
           ? event.scrollDelta.dx
@@ -849,6 +904,20 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return false;
   }
 
+  Widget _buildChrome(BuildContext context, Widget child) {
+    final ScrollableDetails details = ScrollableDetails(
+      direction: widget.axisDirection,
+      controller: _effectiveScrollController,
+      decorationClipBehavior: widget.clipBehavior,
+    );
+
+    return _configuration.buildScrollbar(
+      context,
+      _configuration.buildOverscrollIndicator(context, child, details),
+      details,
+    );
+  }
+
   // DESCRIPTION
 
   @override
@@ -878,7 +947,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
             child: IgnorePointer(
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
-              ignoringSemantics: false,
               child: widget.viewportBuilder(context, position),
             ),
           ),
@@ -899,17 +967,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       );
     }
 
-    final ScrollableDetails details = ScrollableDetails(
-      direction: widget.axisDirection,
-      controller: _effectiveScrollController,
-      clipBehavior: widget.clipBehavior,
-    );
-
-    result = _configuration.buildScrollbar(
-      context,
-      _configuration.buildOverscrollIndicator(context, result, details),
-      details,
-    );
+    result = _buildChrome(context, result);
 
     // Selection is only enabled when there is a parent registrar.
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
@@ -928,7 +986,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
+    properties.add(DiagnosticsProperty<ScrollPosition>('position', _position));
     properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
   }
 }
@@ -1319,26 +1377,21 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       case SelectionEventType.startEdgeUpdate:
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.endEdgeUpdate:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
         ensureChildUpdated(selectable);
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
-        break;
       case SelectionEventType.clear:
         _selectableEndEdgeUpdateRecords.remove(selectable);
         _selectableStartEdgeUpdateRecords.remove(selectable);
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
-        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }

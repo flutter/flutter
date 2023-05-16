@@ -151,7 +151,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   bool _keptAlive = false;
 
   @override
-  String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
+  String toString() => 'index=$index; ${keepAlive ? "keepAlive; " : ""}${super.toString()}';
 }
 
 /// A sliver with multiple box children.
@@ -615,25 +615,21 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset + Offset(0.0, geometry!.paintExtent);
         addExtent = true;
-        break;
       case AxisDirection.right:
         mainAxisUnit = const Offset(1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset;
         addExtent = false;
-        break;
       case AxisDirection.down:
         mainAxisUnit = const Offset(0.0, 1.0);
         crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset;
         addExtent = false;
-        break;
       case AxisDirection.left:
         mainAxisUnit = const Offset(-1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset + Offset(geometry!.paintExtent, 0.0);
         addExtent = true;
-        break;
     }
     RenderBox? child = firstChild;
     while (child != null) {

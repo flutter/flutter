@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
@@ -68,7 +67,7 @@ void main() {
 
     final Device screenshotDevice = ThrowingScreenshotDevice()
       ..supportsScreenshot = false;
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -104,7 +103,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final Device screenshotDevice = ThrowingScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -142,7 +141,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final Device screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -184,7 +183,7 @@ void main() {
     fileSystem.file('drive_screenshots').createSync();
 
     final Device screenshotDevice = ThrowingScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(
       <String>[
@@ -222,7 +221,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final ScreenshotDevice screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     expect(screenshotDevice.screenshots, isEmpty);
     bool caughtToolExit = false;
@@ -293,7 +292,7 @@ void main() {
     fileSystem.directory('drive_screenshots').createSync();
 
     final ScreenshotDevice screenshotDevice = ScreenshotDevice();
-    fakeDeviceManager.devices = <Device>[screenshotDevice];
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
 
     expect(screenshotDevice.screenshots, isEmpty);
 
@@ -400,7 +399,7 @@ void main() {
     expect(options.verboseSystemLogs, true);
     expect(options.nullAssertions, true);
     expect(options.nativeNullAssertions, true);
-    expect(options.enableImpeller, true);
+    expect(options.enableImpeller, ImpellerStatus.enabled);
     expect(options.traceSystrace, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
@@ -410,7 +409,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('Port publication not disabled for network device', () async {
+  testUsingContext('Port publication not disabled for wireless device', () async {
     final DriveCommand command = DriveCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -422,9 +421,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
-      ..interfaceType = IOSDeviceConnectionInterface.network;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    final Device wirelessDevice = FakeIosDevice()
+      ..connectionInterface = DeviceConnectionInterface.wireless;
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -456,8 +455,8 @@ void main() {
     ]), throwsToolExit());
 
     final Device usbDevice = FakeIosDevice()
-      ..interfaceType = IOSDeviceConnectionInterface.usb;
-    fakeDeviceManager.devices = <Device>[usbDevice];
+      ..connectionInterface = DeviceConnectionInterface.attached;
+    fakeDeviceManager.attachedDevices = <Device>[usbDevice];
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
     expect(options.disablePortPublication, true);
@@ -468,7 +467,7 @@ void main() {
     DeviceManager: () => fakeDeviceManager,
   });
 
-  testUsingContext('Port publication does not default to enabled for network device if flag manually added', () async {
+  testUsingContext('Port publication does not default to enabled for wireless device if flag manually added', () async {
     final DriveCommand command = DriveCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -480,9 +479,9 @@ void main() {
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
     fileSystem.file('pubspec.yaml').createSync();
 
-    final Device networkDevice = FakeIosDevice()
-      ..interfaceType = IOSDeviceConnectionInterface.network;
-    fakeDeviceManager.devices = <Device>[networkDevice];
+    final Device wirelessDevice = FakeIosDevice()
+      ..connectionInterface = DeviceConnectionInterface.wireless;
+    fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
 
     await expectLater(() => createTestCommandRunner(command).run(<String>[
       'drive',
@@ -543,6 +542,9 @@ class ScreenshotDevice extends Fake implements Device {
 
   @override
   bool supportsScreenshot = true;
+
+  @override
+  bool get isConnected => true;
 
   @override
   Future<LaunchResult> startApp(
@@ -661,7 +663,11 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 // ignore: avoid_implementing_value_types
 class FakeIosDevice extends Fake implements IOSDevice {
   @override
-  IOSDeviceConnectionInterface interfaceType = IOSDeviceConnectionInterface.usb;
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;

@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
+import 'package:flutter/foundation.dart' show isCanvasKit, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
-const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
 // A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
 // for a given TextSelection.
@@ -148,7 +148,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'First ',
-        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0),
+        style: TextStyle(fontSize: 10.0),
         children: <InlineSpan>[
           TextSpan(text: 'smallsecond ', style: TextStyle(fontSize: 5.0)),
           TextSpan(text: 'third fourth fifth'),
@@ -187,7 +187,7 @@ void main() {
     expect(boxes[2], const TextBox.fromLTRBD(0.0, 10.0, 130.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[3], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
-  }, skip: !isLinux); // mac typography values can differ https://github.com/flutter/flutter/issues/12357
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
 
   test('getBoxesForSelection test with boxHeightStyle and boxWidthStyle set to max', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -414,10 +414,7 @@ void main() {
         textScaleFactor: 1.3,
     );
     paragraph.layout(const BoxConstraints());
-    // anyOf is needed here because Linux and Mac have different text
-    // rendering widths in tests.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(paragraph.size.width, anyOf(79.0, 78.0));
+    expect(paragraph.size.width, 78.0);
     expect(paragraph.size.height, 26.0);
 
     // Test the sizes of nested spans.
@@ -430,17 +427,14 @@ void main() {
     ];
     expect(boxes.length, equals(4));
 
-    // anyOf is needed here and below because Linux and Mac have different text
-    // rendering widths in tests.
-    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
-    expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[1].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
-    expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[2].toRect().height, moreOrLessEquals(26.0, epsilon: 0.0001));
-    expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, moreOrLessEquals(13.0, epsilon: 0.0001));
+    expect(boxes[0].toRect().width, 13.0);
+    expect(boxes[0].toRect().height, 13.0);
+    expect(boxes[1].toRect().width, 26.0);
+    expect(boxes[1].toRect().height, 26.0);
+    expect(boxes[2].toRect().width, 26.0);
+    expect(boxes[2].toRect().height, 26.0);
+    expect(boxes[3].toRect().width, 13.0);
+    expect(boxes[3].toRect().height, 13.0);
   });
 
   test('toStringDeep', () {

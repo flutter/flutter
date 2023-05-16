@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/ios/iproxy.dart';
 import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -236,12 +235,12 @@ void main() {
         ),
       });
 
-      testUsingContext('succeeds with iOS device with mDNS network device', () async {
+      testUsingContext('succeeds with iOS device with mDNS wireless device', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
-          interfaceType: IOSDeviceConnectionInterface.network,
+          connectionInterface: DeviceConnectionInterface.wireless,
         );
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
@@ -308,12 +307,12 @@ void main() {
         ),
       });
 
-      testUsingContext('succeeds with iOS device with mDNS network device with debug-port', () async {
+      testUsingContext('succeeds with iOS device with mDNS wireless device with debug-port', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
-          interfaceType: IOSDeviceConnectionInterface.network,
+          connectionInterface: DeviceConnectionInterface.wireless,
         );
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
@@ -384,12 +383,12 @@ void main() {
         ),
       });
 
-      testUsingContext('succeeds with iOS device with mDNS network device with debug-url', () async {
+      testUsingContext('succeeds with iOS device with mDNS wireless device with debug-url', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
           majorSdkVersion: 16,
-          interfaceType: IOSDeviceConnectionInterface.network,
+          connectionInterface: DeviceConnectionInterface.wireless,
         );
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
@@ -592,7 +591,7 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
-      testUsingContext('exits when ipv6 is specified and debug-port is not', () async {
+      testUsingContext('exits when ipv6 is specified and debug-port is not on non-iOS device', () async {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
@@ -616,7 +615,63 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => testDeviceManager,
-      },);
+      });
+
+      testUsingContext('succeeds when ipv6 is specified and debug-port is not on iOS device', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          logReader: fakeLogReader,
+          portForwarder: portForwarder,
+          majorSdkVersion: 12,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://[::1]:$devicePort');
+            return fakeLogReader;
+          },
+        );
+        testDeviceManager.devices = <Device>[device];
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+            completer.complete();
+          }
+        });
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          artifacts: artifacts,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach', '--ipv6']);
+        await completer.future;
+
+        expect(portForwarder.devicePort, devicePort);
+        expect(portForwarder.hostPort, hostPort);
+
+        await fakeLogReader.dispose();
+        await loggerSubscription.cancel();
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
 
       testUsingContext('exits when vm-service-port is specified and debug-port is not', () async {
         device.onGetLogReader = () {
@@ -1138,6 +1193,7 @@ class StreamLogger extends Logger {
     VoidCallback? onFinish,
     Duration? timeout,
     SlowWarningCallback? slowWarningCallback,
+    TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
@@ -1238,6 +1294,10 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
+  DeviceConnectionInterface get connectionInterface =>
+      DeviceConnectionInterface.attached;
+
+  @override
   bool isSupported() => true;
 
   @override
@@ -1291,7 +1351,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     DevicePortForwarder? portForwarder,
     DeviceLogReader? logReader,
     this.onGetLogReader,
-    this.interfaceType = IOSDeviceConnectionInterface.none,
+    this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
   }) : _portForwarder = portForwarder, _logReader = logReader;
 
@@ -1300,7 +1360,11 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   int majorSdkVersion;
 
   @override
-  final IOSDeviceConnectionInterface interfaceType;
+  final DeviceConnectionInterface connectionInterface;
+
+  @override
+  bool get isWirelesslyConnected =>
+      connectionInterface == DeviceConnectionInterface.wireless;
 
   @override
   DevicePortForwarder get portForwarder => _portForwarder!;
@@ -1346,6 +1410,9 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   bool get isConnected => true;
+
+  @override
+  bool get ephemeral => true;
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {

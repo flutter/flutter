@@ -34,6 +34,9 @@ def flutter_additional_ios_build_settings(target)
   # [target.deployment_target] is a [String] formatted as "8.0".
   inherit_deployment_target = target.deployment_target[/\d+/].to_i < 11
 
+  # ARC code targeting iOS 8 does not build on Xcode 14.3.
+  force_to_arc_supported_min = target.deployment_target[/\d+/].to_i < 9
+
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
   artifacts_dir = File.join('..', '..', '..', '..', 'bin', 'cache', 'artifacts', 'engine')
@@ -61,6 +64,9 @@ def flutter_additional_ios_build_settings(target)
       build_configuration.build_settings['CODE_SIGNING_IDENTITY'] = '-'
       build_configuration.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = '-'
     end
+
+    # ARC code targeting iOS 8 does not build on Xcode 14.3. Force to at least iOS 9.
+    build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
     # Skip other updates if it's not a Flutter plugin (transitive dependency).
     next unless target.dependencies.any? { |dependency| dependency.name == 'Flutter' }
@@ -99,11 +105,13 @@ end
 def flutter_additional_macos_build_settings(target)
   return unless target.platform_name == :osx
 
-  # Return if it's not a Flutter plugin (transitive dependency).
-  return unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
-
   # [target.deployment_target] is a [String] formatted as "10.8".
   deployment_target_major, deployment_target_minor = target.deployment_target.match(/(\d+).?(\d*)/).captures
+
+  # ARC code targeting macOS 10.10 does not build on Xcode 14.3.
+  force_to_arc_supported_min = !target.deployment_target.blank? &&
+                                  (deployment_target_major.to_i < 10) ||
+                                  (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 11)
 
   # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.14).
   # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
@@ -123,6 +131,12 @@ def flutter_additional_macos_build_settings(target)
   end
 
   target.build_configurations.each do |build_configuration|
+    # ARC code targeting macOS 10.10 does not build on Xcode 14.3. Force to at least macOS 10.11.
+    build_configuration.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.11' if force_to_arc_supported_min
+
+    # Skip other updates if it's not a Flutter plugin (transitive dependency).
+    next unless target.dependencies.any? { |dependency| dependency.name == 'FlutterMacOS' }
+
     # Profile can't be derived from the CocoaPods build configuration. Use release framework (for linking only).
     configuration_engine_dir = build_configuration.type == :debug ? debug_framework_dir : release_framework_dir
     build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}\" $(inherited)"

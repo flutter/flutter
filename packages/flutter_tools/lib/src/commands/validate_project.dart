@@ -99,20 +99,16 @@ class ValidateProject {
 
   String getStringResult(ProjectValidatorResult result) {
     final String icon;
-    switch(result.status) {
+    switch (result.status) {
       case StatusProjectValidator.error:
         icon = '[✗]';
-        break;
       case StatusProjectValidator.info:
       case StatusProjectValidator.success:
         icon = '[✓]';
-        break;
       case StatusProjectValidator.warning:
         icon = '[!]';
-        break;
       case StatusProjectValidator.crash:
         icon = '[☠]';
-        break;
     }
 
     return '$icon $result';

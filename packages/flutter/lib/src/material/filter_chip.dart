@@ -7,8 +7,10 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -198,7 +200,7 @@ class FilterChip extends StatelessWidget
 // Token database version: v0_162
 
 class _FilterChipDefaultsM3 extends ChipThemeData {
-  const _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
+  _FilterChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -208,9 +210,11 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   final BuildContext context;
   final bool isEnabled;
   final bool isSelected;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
@@ -219,36 +223,36 @@ class _FilterChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get selectedColor => isEnabled
-    ? Theme.of(context).colorScheme.secondaryContainer
-    : Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
+    ? _colors.secondaryContainer
+    : _colors.onSurface.withOpacity(0.12);
 
   @override
-  Color? get checkmarkColor => Theme.of(context).colorScheme.onSecondaryContainer;
+  Color? get checkmarkColor => _colors.onSecondaryContainer;
 
   @override
   Color? get disabledColor => isSelected
-   ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12)
+   ? _colors.onSurface.withOpacity(0.12)
    : null;
 
   @override
-  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
+  Color? get deleteIconColor => _colors.onSecondaryContainer;
 
   @override
   BorderSide? get side => !isSelected
     ? isEnabled
-      ? BorderSide(color: Theme.of(context).colorScheme.outline)
-      : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12))
+      ? BorderSide(color: _colors.outline)
+      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
       ? null
-      : Theme.of(context).colorScheme.onSurface,
+      : _colors.onSurface,
     size: 18.0,
   );
 

@@ -198,10 +198,9 @@ void main() {
 
     await tester.pumpAndSettle();
     final String? expectedLabel;
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Back';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -242,10 +241,9 @@ void main() {
 
     await tester.pumpAndSettle();
     final String? expectedLabel;
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expectedLabel = 'Close';
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:

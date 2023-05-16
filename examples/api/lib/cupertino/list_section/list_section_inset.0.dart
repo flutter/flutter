@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for inset [CupertinoListSection] and [CupertinoListTile].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for inset [CupertinoListSection] and [CupertinoListTile].
 
 void main() => runApp(const CupertinoListSectionInsetApp());
 
 class CupertinoListSectionInsetApp extends StatelessWidget {
   const CupertinoListSectionInsetApp({super.key});
 
-  static const String _title = 'Flutter Code Sample';
-
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      title: _title,
-      home: MyStatelessWidget(),
+      home: ListSectionInsetExample(),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ListSectionInsetExample extends StatelessWidget {
+  const ListSectionInsetExample({super.key});
 
   @override
   Widget build(BuildContext context) {

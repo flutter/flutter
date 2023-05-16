@@ -556,16 +556,13 @@ class FloatingActionButton extends StatelessWidget {
       data: IconThemeData(size: iconSize),
       child: child!,
     ) : child;
-    switch(_floatingActionButtonType) {
+    switch (_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
-        break;
       case _FloatingActionButtonType.small:
         sizeConstraints = floatingActionButtonTheme.smallSizeConstraints ?? defaults.smallSizeConstraints!;
-        break;
       case _FloatingActionButtonType.large:
         sizeConstraints = floatingActionButtonTheme.largeSizeConstraints ?? defaults.largeSizeConstraints!;
-        break;
       case _FloatingActionButtonType.extended:
         sizeConstraints = floatingActionButtonTheme.extendedSizeConstraints ?? defaults.extendedSizeConstraints!;
         final double iconLabelSpacing = extendedIconLabelSpacing ?? floatingActionButtonTheme.extendedIconLabelSpacing ?? 8.0;
@@ -588,7 +585,6 @@ class FloatingActionButton extends StatelessWidget {
             ),
           ),
         );
-        break;
     }
 
     Widget result = RawMaterialButton(

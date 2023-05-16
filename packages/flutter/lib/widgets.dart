@@ -106,6 +106,7 @@ export 'src/widgets/scroll_aware_image_provider.dart';
 export 'src/widgets/scroll_configuration.dart';
 export 'src/widgets/scroll_context.dart';
 export 'src/widgets/scroll_controller.dart';
+export 'src/widgets/scroll_delegate.dart';
 export 'src/widgets/scroll_metrics.dart';
 export 'src/widgets/scroll_notification.dart';
 export 'src/widgets/scroll_notification_observer.dart';

@@ -55,6 +55,13 @@ abstract class AssetBundle {
   /// Retrieve a binary resource from the asset bundle as a data stream.
   ///
   /// Throws an exception if the asset is not found.
+  ///
+  /// The returned [ByteData] can be converted to a [Uint8List] (a list of bytes)
+  /// using [ByteData.buffer] to obtain a [ByteBuffer], and then
+  /// [ByteBuffer.asUint8List] to obtain the byte list. Lists of bytes can be
+  /// used with APIs that accept [Uint8List] objects, such as
+  /// [decodeImageFromList], as well as any API that accepts a [List<int>], such
+  /// as [File.writeAsBytes] or [Utf8Codec.decode] (accessible via [utf8]).
   Future<ByteData> load(String key);
 
   /// Retrieve a binary resource from the asset bundle as an immutable
@@ -266,6 +273,7 @@ abstract class CachingAssetBundle extends AssetBundle {
       .then<T>(parser)
       .then<void>((T value) {
         result = SynchronousFuture<T>(value);
+        _structuredBinaryDataCache[key] = result!;
         if (completer != null) {
           // The load and parse operation ran asynchronously. We already returned
           // from the loadStructuredBinaryData function and therefore the caller
@@ -278,7 +286,6 @@ abstract class CachingAssetBundle extends AssetBundle {
 
     if (result != null) {
       // The above code ran synchronously. We can synchronously return the result.
-      _structuredBinaryDataCache[key] = result!;
       return result!;
     }
 
@@ -316,7 +323,10 @@ class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
-    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData())?.then((ByteData? asset) {
+    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send(
+      'flutter/assets',
+      encoded.buffer.asByteData(),
+    )?.then((ByteData? asset) {
       if (asset == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           _errorSummaryWithKey(key),
@@ -327,9 +337,9 @@ class PlatformAssetBundle extends CachingAssetBundle {
     });
     if (future == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-          _errorSummaryWithKey(key),
-          ErrorDescription('The asset does not exist or has empty data.'),
-        ]);
+        _errorSummaryWithKey(key),
+        ErrorDescription('The asset does not exist or has empty data.'),
+      ]);
     }
     return future;
   }

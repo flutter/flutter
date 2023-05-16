@@ -269,6 +269,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final bool ephemeral = false;
 
   @override
+  bool get isConnected => true;
+
+  @override
   Future<String> get sdkNameAndVersion async => 'Android 12';
 
   @override

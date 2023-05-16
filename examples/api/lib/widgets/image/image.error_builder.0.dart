@@ -2,32 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Image.errorBuilder].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Image.errorBuilder].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ErrorBuilderExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ErrorBuilderExampleApp extends StatelessWidget {
+  const ErrorBuilderExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
       home: Scaffold(
         body: Center(
-          child: MyStatelessWidget(),
+          child: ErrorBuilderExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ErrorBuilderExample extends StatelessWidget {
+  const ErrorBuilderExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +36,7 @@ class MyStatelessWidget extends StatelessWidget {
       ),
       child: Image.network(
         'https://example.does.not.exist/image.jpg',
-        errorBuilder:
-            (BuildContext context, Object exception, StackTrace? stackTrace) {
+        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
           // Appropriate logging or analytics, e.g.
           // myAnalytics.recordError(
           //   'An error occurred loading "https://example.does.not.exist/image.jpg"',

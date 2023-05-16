@@ -152,7 +152,7 @@ GOTO :after_subroutine
       SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
         ECHO Running pub upgrade... 1>&2
-        "%dart%" --no-analytics pub upgrade
+        "%dart%" pub upgrade --suppress-analytics
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
         ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left) 1>&2
         timeout /t 5 /nobreak 2>NUL

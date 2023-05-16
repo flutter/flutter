@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [FittedBox].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [FittedBox].
 
 void main() => runApp(const FittedBoxApp());
 
@@ -32,12 +32,12 @@ class FittedBoxExample extends StatelessWidget {
     return Container(
       height: 400,
       width: 300,
-      color: Colors.red,
-      child: FittedBox(
+      color: Colors.blue,
+      child: const FittedBox(
+        // TRY THIS: Try changing the fit types to see how they change the way
+        // the placeholder fits into the container.
         fit: BoxFit.fill,
-        child: Image.network(
-          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-        ),
+        child: Placeholder(),
       ),
     );
   }

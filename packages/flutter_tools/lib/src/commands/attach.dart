@@ -24,7 +24,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../fuchsia/fuchsia_device.dart';
 import '../ios/devices.dart';
-import '../ios/iproxy.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
@@ -141,6 +140,7 @@ class AttachCommand extends FlutterCommand {
     addDevToolsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   final HotRunnerFactory _hotRunnerFactory;
@@ -175,6 +175,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   int? get debugPort {
     if (argResults!['debug-port'] == null) {
@@ -216,11 +219,19 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     MacOSDesignedForIPadDevices.allowDiscovery = true;
 
     await super.validateCommand();
-    if (await findTargetDevice() == null) {
+
+    final Device? targetDevice = await findTargetDevice();
+    if (targetDevice == null) {
       throwToolExit(null);
     }
+
     debugPort;
-    if (debugPort == null && debugUri == null && argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
+    // Allow --ipv6 for iOS devices even if --debug-port and --debug-url
+    // are unknown.
+    if (!_isIOSDevice(targetDevice) &&
+        debugPort == null &&
+        debugUri == null &&
+        argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command determines '
         'the value of --ipv6 on its own.',
@@ -287,9 +298,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
-    final bool isNetworkDevice = (device is IOSDevice) && device.interfaceType == IOSDeviceConnectionInterface.network;
+    final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
-    if ((debugPort == null && debugUri == null) || isNetworkDevice) {
+    if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
       if (device is FuchsiaDevice) {
         final String? module = stringArg('module');
         if (module == null) {
@@ -308,14 +319,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           }
           rethrow;
         }
-      } else if ((device is IOSDevice) || (device is IOSSimulator) || (device is MacOSDesignedForIPadDevice)) {
+      } else if (_isIOSDevice(device)) {
         // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
         // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
         // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.
-        // Also, network devices must be found using mDNS and cannot use Protocol Discovery.
+        // Also, wireless devices must be found using mDNS and cannot use Protocol Discovery.
         final bool compatibleWithProtocolDiscovery = (device is IOSDevice) &&
           device.majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
-          !isNetworkDevice;
+          !isWirelessIOSDevice;
 
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         final Status discoveryStatus = _logger.startSpinner(
@@ -346,7 +357,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           appId,
           device,
           usesIpv6: usesIpv6,
-          isNetworkDevice: isNetworkDevice,
+          useDeviceIPAsHost: isWirelessIOSDevice,
           deviceVmservicePort: devicePort,
         );
 
@@ -392,8 +403,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           );
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         vmServiceUri = vmServiceDiscovery.uris;
-        // Determine ipv6 status from the scanned logs.
-        usesIpv6 = vmServiceDiscovery.ipv6;
       }
     } else {
       vmServiceUri = Stream<Uri>
@@ -541,6 +550,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _validateArguments() async { }
+
+  bool _isIOSDevice(Device device) {
+    return (device is IOSDevice) ||
+        (device is IOSSimulator) ||
+        (device is MacOSDesignedForIPadDevice);
+  }
 }
 
 class HotRunnerFactory {

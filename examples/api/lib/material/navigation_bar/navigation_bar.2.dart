@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [NavigationBar] with nested [Navigator] destinations.
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [NavigationBar] with nested [Navigator] destinations.
 
 void main() {
   runApp(const MaterialApp(home: Home()));
 }
 
 class Home extends StatefulWidget {
-  const Home({ super.key });
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -32,10 +32,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   int selectedIndex = 0;
 
   AnimationController buildFaderController() {
-    final AnimationController controller =  AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    final AnimationController controller =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     controller.addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
-        setState(() { }); // Rebuild unselected destinations offstage.
+        setState(() {}); // Rebuild unselected destinations offstage.
       }
     });
     return controller;
@@ -44,8 +45,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   @override
   void initState() {
     super.initState();
-    navigatorKeys = List<GlobalKey<NavigatorState>>.generate(allDestinations.length, (int index) => GlobalKey()).toList();
-    destinationFaders = List<AnimationController>.generate(allDestinations.length, (int index) => buildFaderController()).toList();
+    navigatorKeys =
+        List<GlobalKey<NavigatorState>>.generate(allDestinations.length, (int index) => GlobalKey()).toList();
+    destinationFaders =
+        List<AnimationController>.generate(allDestinations.length, (int index) => buildFaderController()).toList();
     destinationFaders[selectedIndex].value = 1.0;
     destinationViews = allDestinations.map((Destination destination) {
       return FadeTransition(
@@ -53,7 +56,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
         child: DestinationView(
           destination: destination,
           navigatorKey: navigatorKeys[destination.index],
-        )
+        ),
       );
     }).toList();
   }
@@ -126,7 +129,7 @@ class Destination {
 }
 
 class RootPage extends StatelessWidget {
-  const RootPage({ super.key, required this.destination });
+  const RootPage({super.key, required this.destination});
 
   final Destination destination;
 
@@ -135,7 +138,9 @@ class RootPage extends StatelessWidget {
       title: Text('${destination.title} AlertDialog'),
       actions: <Widget>[
         TextButton(
-          onPressed: () { Navigator.pop(context); },
+          onPressed: () {
+            Navigator.pop(context);
+          },
           child: const Text('OK'),
         ),
       ],
@@ -228,7 +233,7 @@ class RootPage extends StatelessWidget {
 }
 
 class ListPage extends StatelessWidget {
-  const ListPage({ super.key, required this.destination });
+  const ListPage({super.key, required this.destination});
 
   final Destination destination;
 
@@ -255,7 +260,7 @@ class ListPage extends StatelessWidget {
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
                   backgroundColor: MaterialStatePropertyAll<Color>(
-                    Color.lerp(destination.color[100], Colors.white, index / itemCount)!
+                    Color.lerp(destination.color[100], Colors.white, index / itemCount)!,
                   ),
                 ),
                 onPressed: () {
@@ -272,7 +277,7 @@ class ListPage extends StatelessWidget {
 }
 
 class TextPage extends StatefulWidget {
-  const TextPage({ super.key, required this.destination });
+  const TextPage({super.key, required this.destination});
 
   final Destination destination;
 
@@ -349,7 +354,7 @@ class _DestinationViewState extends State<DestinationView> {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) {
-            switch(settings.name) {
+            switch (settings.name) {
               case '/':
                 return RootPage(destination: widget.destination);
               case '/list':

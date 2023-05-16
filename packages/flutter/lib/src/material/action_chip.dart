@@ -7,8 +7,10 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -178,7 +180,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Token database version: v0_162
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
-  const _ActionChipDefaultsM3(this.context, this.isEnabled)
+  _ActionChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -187,9 +189,11 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
 
   final BuildContext context;
   final bool isEnabled;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
@@ -198,7 +202,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get selectedColor => null;
@@ -214,14 +218,14 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
 
   @override
   BorderSide? get side => isEnabled
-    ? BorderSide(color: Theme.of(context).colorScheme.outline)
-    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+    ? BorderSide(color: _colors.outline)
+    : BorderSide(color: _colors.onSurface.withOpacity(0.12));
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? Theme.of(context).colorScheme.primary
-      : Theme.of(context).colorScheme.onSurface,
+      ? _colors.primary
+      : _colors.onSurface,
     size: 18.0,
   );
 

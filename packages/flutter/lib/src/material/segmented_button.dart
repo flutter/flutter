@@ -354,6 +354,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final List<Widget> buttons = segments.map(buttonFor).toList();
 
     return Material(
+      type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
       elevation: resolve<double?>((ButtonStyle? style) => style?.elevation)!,
       shadowColor: resolve<Color?>((ButtonStyle? style) => style?.shadowColor),
@@ -595,14 +596,12 @@ class _RenderSegmentedButton<T> extends RenderBox with
           lastChild,
           firstChild,
         );
-        break;
       case TextDirection.ltr:
         _layoutRects(
           childAfter,
           firstChild,
           lastChild,
         );
-        break;
     }
 
     size = _computeOverallSizeFromChildSize(childSize);
@@ -638,12 +637,10 @@ class _RenderSegmentedButton<T> extends RenderBox with
           segmentLeft = child == lastChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == firstChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentRight;
-          break;
         case TextDirection.ltr:
           segmentLeft = child == firstChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == lastChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentLeft;
-          break;
       }
       final Rect segmentClipRect = Rect.fromLTRB(
         segmentLeft, borderRect.top - borderOutset,
@@ -766,23 +763,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
+          if (states.contains(MaterialState.pressed)) {
+            return _colors.onSecondaryContainer.withOpacity(0.12);
+          }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSecondaryContainer.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
             return _colors.onSecondaryContainer.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.pressed)) {
-            return _colors.onSecondaryContainer.withOpacity(0.12);
-          }
         } else {
+          if (states.contains(MaterialState.pressed)) {
+            return _colors.onSurface.withOpacity(0.12);
+          }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSurface.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSurface.withOpacity(0.12);
-          }
-          if (states.contains(MaterialState.pressed)) {
             return _colors.onSurface.withOpacity(0.12);
           }
         }

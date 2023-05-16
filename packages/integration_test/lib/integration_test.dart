@@ -118,11 +118,12 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return TestViewConfiguration.fromView(
       size: size,
-      view: window,
+      view: view,
     );
   }
 
@@ -262,7 +263,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       final String address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
       try {
         _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
-      } on SocketException catch(e, s) {
+      } on SocketException catch (e, s) {
         throw StateError(
           'Failed to connect to VM Service at $address.\n'
           'This may happen if DDS is enabled. If this test was launched via '

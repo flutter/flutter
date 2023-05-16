@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [IconButton].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [IconButton].
 
 void main() {
   runApp(const IconButtonApp());
@@ -45,7 +45,7 @@ class ButtonTypesExample extends StatelessWidget {
 }
 
 class ButtonTypesGroup extends StatelessWidget {
-  const ButtonTypesGroup({ super.key, required this.enabled });
+  const ButtonTypesGroup({super.key, required this.enabled});
 
   final bool enabled;
 

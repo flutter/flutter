@@ -1107,12 +1107,10 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
           expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-          break;
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-          break;
       }
     }, variant: TargetPlatformVariant.all());
 

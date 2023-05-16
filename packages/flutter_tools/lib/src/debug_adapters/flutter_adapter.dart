@@ -173,14 +173,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         final bool isFullRestart = request.command == 'hotRestart';
         await _performRestart(isFullRestart, args?.args['reason'] as String?);
         sendResponse(null);
-        break;
 
       // Handle requests (from the client) that provide responses to reverse-requests
       // that we forwarded from `flutter run --machine`.
       case 'flutter.sendForwardedRequestResponse':
         _handleForwardedResponse(args);
         sendResponse(null);
-        break;
 
       default:
         await super.customRequest(request, args, sendResponse);
@@ -196,12 +194,9 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
         switch (event.extensionKind) {
           case 'Flutter.ServiceExtensionStateChanged':
             _sendServiceExtensionStateChanged(event.extensionData);
-            break;
           case 'Flutter.Error':
             _handleFlutterErrorEvent(event.extensionData);
-            break;
         }
-        break;
     }
   }
 
@@ -398,6 +393,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     // session (which is much slower, but required for profile/release mode).
     final bool supportsRestart = (params['supportsRestart'] as bool?) ?? false;
     sendEvent(CapabilitiesEventBody(capabilities: Capabilities(supportsRestartRequest: supportsRestart)));
+
+    // Send a custom event so the editor has info about the app starting.
+    //
+    // This message contains things like the `deviceId` and `mode` that the
+    // client might not know about if they were inferred or set by users custom
+    // args.
+    sendEvent(
+      RawEventBody(params),
+      eventType: 'flutter.appStart',
+    );
   }
 
   /// Handles the app.started event from Flutter.
@@ -457,16 +462,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     switch (event) {
       case 'daemon.connected':
         _handleDaemonConnected(params);
-        break;
       case 'app.debugPort':
         _handleDebugPort(params);
-        break;
       case 'app.start':
         _handleAppStart(params);
-        break;
       case 'app.started':
         _handleAppStarted();
-        break;
     }
 
     if (_eventsToForwardToClient.contains(event)) {
