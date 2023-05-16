@@ -1,0 +1,94 @@
+{
+    "builds": [
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gn": [
+                "--android",
+                "--android-cpu",
+                "arm64",
+                "--no-lto"
+            ],
+            "name": "android_debug_arm64",
+            "ninja": {
+                "config": "android_debug_arm64"
+            }
+        },
+        {
+            "archives": [],
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "gn": [
+                "--runtime-mode",
+                "debug",
+                "--prebuilt-dart-sdk",
+                "--no-lto"
+            ],
+            "name": "host_debug",
+            "ninja": {
+                "config": "host_debug"
+            }
+        }
+    ],
+    "tests": [
+        {
+            "name": "test: lint host_debug",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux",
+                "cores=32"
+            ],
+            "gclient_variables": {
+                "download_android_deps": false
+            },
+            "dependencies": [
+                "host_debug",
+                "android_debug_arm64"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--lint-all",
+                        "--shard-id=1",
+                        "--shard-variants=android_debug_arm64"
+                    ],
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        },
+        {
+            "name": "test: lint android_debug_arm64",
+            "recipe": "engine_v2/tester_engine",
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Linux"
+            ],
+            "dependencies": [
+                "host_debug",
+                "android_debug_arm64"
+            ],
+            "tasks": [
+                {
+                    "name": "test: lint android_debug_arm64",
+                    "parameters": [
+                        "--variant",
+                        "android_debug_arm64",
+                        "--lint-all",
+                        "--shard-id=0",
+                        "--shard-variants=host_debug"
+                    ],
+                    "script": "flutter/ci/lint.sh"
+                }
+            ]
+        }
+    ]
+}
