@@ -84,3 +84,8 @@ SKWASM_EXPORT void fontCollection_registerTypeface(
     collection->provider->registerTypeface(sk_sp<SkTypeface>(typeface));
   }
 }
+
+SKWASM_EXPORT void fontCollection_clearCaches(
+    FlutterFontCollection* collection) {
+  collection->collection->clearCaches();
+}

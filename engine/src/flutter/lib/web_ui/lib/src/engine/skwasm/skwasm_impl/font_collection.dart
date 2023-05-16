@@ -188,8 +188,9 @@ class SkwasmFontCollection implements FlutterFontCollection {
 
   @override
   void debugResetFallbackFonts() {
-    setDefaultFontFamilies(<String>[]);
+    setDefaultFontFamilies(<String>['Roboto']);
     fontFallbackManager = FontFallbackManager(SkwasmFallbackRegistry(this));
+    fontCollectionClearCaches(handle);
   }
 }
 

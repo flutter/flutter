@@ -74,8 +74,9 @@ class SkwasmLineMetrics implements ui.LineMetrics {
 class SkwasmParagraph implements ui.Paragraph {
   SkwasmParagraph(this.handle);
 
-  ParagraphHandle handle;
+  final ParagraphHandle handle;
   bool _isDisposed = false;
+  bool _hasCheckedForMissingCodePoints = false;
 
   @override
   double get width => paragraphGetWidth(handle);
@@ -102,8 +103,30 @@ class SkwasmParagraph implements ui.Paragraph {
   bool get didExceedMaxLines => paragraphGetDidExceedMaxLines(handle);
 
   @override
-  void layout(ui.ParagraphConstraints constraints) =>
+  void layout(ui.ParagraphConstraints constraints) {
     paragraphLayout(handle, constraints.width);
+    if (!_hasCheckedForMissingCodePoints) {
+      _hasCheckedForMissingCodePoints = true;
+      final int missingCodePointCount = paragraphGetUnresolvedCodePoints(handle, nullptr, 0);
+      if (missingCodePointCount > 0) {
+        withStackScope((StackScope scope) {
+          final Pointer<Uint32> codePointBuffer = scope.allocUint32Array(missingCodePointCount);
+          final int returnedCodePointCount = paragraphGetUnresolvedCodePoints(
+            handle,
+            codePointBuffer,
+            missingCodePointCount
+          );
+          assert(missingCodePointCount == returnedCodePointCount);
+          renderer.fontCollection.fontFallbackManager!.addMissingCodePoints(
+            List<int>.generate(
+              missingCodePointCount,
+              (int index) => codePointBuffer[index]
+            )
+          );
+        });
+      }
+    }
+  }
 
   List<ui.TextBox> _convertTextBoxList(TextBoxListHandle listHandle) {
     final int length = textBoxListGetLength(listHandle);
@@ -562,30 +585,8 @@ class SkwasmParagraphBuilder implements ui.ParagraphBuilder {
     placeholderScales.add(scale);
   }
 
-  List<String> _getEffectiveFonts() {
-    final List<String> fallbackFonts = renderer.fontCollection.fontFallbackManager!.globalFontFallbacks;
-    final List<String>? currentFonts =
-      textStyleStack.isEmpty ? null : textStyleStack.last.style.fontFamilies;
-    if (currentFonts != null) {
-      return <String>[
-        ...currentFonts,
-        ...fallbackFonts,
-      ];
-    } else if (style.defaultFontFamily != null) {
-      return <String>[
-        style.defaultFontFamily!,
-        ...fallbackFonts,
-      ];
-    } else {
-      return fallbackFonts;
-    }
-  }
-
   @override
   void addText(String text) {
-    renderer.fontCollection.fontFallbackManager!.ensureFontsSupportText(
-      text, _getEffectiveFonts()
-    );
     final SkString16Handle stringHandle = skString16FromDartString(text);
     paragraphBuilderAddText(handle, stringHandle);
     skString16Free(stringHandle);

@@ -118,3 +118,28 @@ SKWASM_EXPORT TextBoxList* paragraph_getBoxesForPlaceholders(
     Paragraph* paragraph) {
   return new TextBoxList{paragraph->getRectsForPlaceholders()};
 }
+
+// Returns a list of the code points that were unable to be rendered with the
+// selected fonts. The list is deduplicated, so each code point in the output
+// is unique.
+// If `nullptr` is passed in for `outCodePoints`, we simply return the count
+// of the code points.
+// Note: This must be called after the paragraph has been laid out at least
+// once in order to get valid data.
+SKWASM_EXPORT int paragraph_getUnresolvedCodePoints(Paragraph* paragraph,
+                                                    SkUnichar* outCodePoints,
+                                                    int outLength) {
+  if (!outCodePoints) {
+    return paragraph->unresolvedCodepoints().size();
+  }
+  int outIndex = 0;
+  for (SkUnichar character : paragraph->unresolvedCodepoints()) {
+    if (outIndex < outLength) {
+      outCodePoints[outIndex] = character;
+      outIndex++;
+    } else {
+      break;
+    }
+  }
+  return outIndex;
+}
