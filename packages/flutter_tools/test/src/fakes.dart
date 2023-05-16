@@ -324,7 +324,7 @@ class FakeBotDetector implements BotDetector {
 
 class FakeFlutterVersion implements FlutterVersion {
   FakeFlutterVersion({
-    this.channel = 'unknown',
+    this.branch = 'master',
     this.dartSdkVersion = '12',
     this.devToolsVersion = '2.8.0',
     this.engineRevision = 'abcdefghijklmnopqrstuvwxyz',
@@ -338,6 +338,8 @@ class FakeFlutterVersion implements FlutterVersion {
     this.gitTagVersion = const GitTagVersion.unknown(),
   });
 
+  final String branch;
+
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   bool _didFetchTagsAndUpdate = false;
 
@@ -345,7 +347,12 @@ class FakeFlutterVersion implements FlutterVersion {
   bool _didCheckFlutterVersionFreshness = false;
 
   @override
-  final String channel;
+  String get channel {
+    if (kOfficialChannels.contains(branch) || kObsoleteBranches.containsKey(branch)) {
+      return branch;
+    }
+    return kUserBranch;
+  }
 
   @override
   final String devToolsVersion;
@@ -398,7 +405,10 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
-    return 'master';
+    if (!redactUnknownBranches || kOfficialChannels.contains(branch) || kObsoleteBranches.containsKey(branch)) {
+      return branch;
+    }
+    return kUserBranch;
   }
 
   @override
