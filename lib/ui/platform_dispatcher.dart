@@ -820,10 +820,10 @@ class PlatformDispatcher {
     semantics, use PlatformDispatcher.instance.views to get a [FlutterView] and
     call `updateSemantics`.
   ''')
-  void updateSemantics(SemanticsUpdate update) => _updateSemantics(update);
+  void updateSemantics(SemanticsUpdate update) => _updateSemantics(update as _NativeSemanticsUpdate);
 
   @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
-  external static void _updateSemantics(SemanticsUpdate update);
+  external static void _updateSemantics(_NativeSemanticsUpdate update);
 
   /// The system-reported default locale of the device.
   ///
