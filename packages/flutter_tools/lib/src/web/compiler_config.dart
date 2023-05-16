@@ -194,7 +194,7 @@ enum WasmOptLevel implements CliEnum {
   String get cliName => name;
 
   @override
-  String get helpText => switch(this) {
+  String get helpText => switch (this) {
     WasmOptLevel.none => 'wasm-opt is not run. Fastest build; bigger, slower output.',
     WasmOptLevel.debug => 'Similar to `${WasmOptLevel.full.name}`, but member names are preserved. Debugging is easier, but size is a bit bigger.',
     WasmOptLevel.full => 'wasm-opt is run. Build time is slower, but output is smaller and faster.',
