@@ -596,7 +596,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                       color: widget.color,
                     );
 
-                    switch(widget._indicatorType) {
+                    switch (widget._indicatorType) {
                       case _IndicatorType.material:
                         return materialIndicator;
 

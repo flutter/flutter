@@ -706,7 +706,7 @@ class CustomDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    if (supportsScreenshot == false) {
+    if (!supportsScreenshot) {
       throw UnsupportedError('Screenshotting is not supported for this device.');
     }
 
@@ -874,7 +874,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     );
 
     // remove all the devices we couldn't reach.
-    pingedDevices.removeWhere((_, bool value) => value == false);
+    pingedDevices.removeWhere((_, bool value) => !value);
 
     // return only the devices.
     return pingedDevices.keys.toList();

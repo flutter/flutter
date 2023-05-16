@@ -151,7 +151,7 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 }
 
 bool _assertOutOfExtent(double extent) {
-  if(extent <= 0.0) {
+  if (extent <= 0.0) {
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('SliverCrossAxisGroup ran out of extent before child could be laid out.'),
       ErrorDescription(
