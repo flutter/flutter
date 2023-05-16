@@ -2087,7 +2087,7 @@ debugPrint(retrievedRouteSettings.toString());
 
       final ModalBarrier modalBarrier =
           tester.widget(find.byType(ModalBarrier).last);
-      expect(modalBarrier.semanticsLabel, MaterialLocalizations.of(scaffoldKey.currentContext!).modalBarrierDismissLabel);
+      expect(modalBarrier.semanticsLabel, MaterialLocalizations.of(scaffoldKey.currentContext!).scrimLabel);
     });
   });
 }
