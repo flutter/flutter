@@ -70,7 +70,7 @@ $assetsSection
     bool expectExists = true,
   }) async {
     Future<String> extractAssetManifestBinFromBundleAsJson(AssetBundle bundle) async {
-      final List<int> manifestBytes = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
+      final List<int> manifestBytes = await bundle.entries['AssetManifest.smcbin']!.contentsAsBytes();
       return json.encode(const StandardMessageCodec().decodeMessage(
         ByteData.sublistView(Uint8List.fromList(manifestBytes))
       ));
@@ -135,7 +135,7 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(
-        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
+        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.smcbin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
@@ -161,7 +161,7 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(
-        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
+        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.smcbin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
