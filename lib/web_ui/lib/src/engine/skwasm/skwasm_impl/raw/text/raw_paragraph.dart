@@ -119,3 +119,21 @@ external TextBoxListHandle paragraphGetBoxesForRange(
 @Native<TextBoxListHandle Function(ParagraphHandle)>(
   symbol: 'paragraph_getBoxesForPlaceholders', isLeaf: true)
 external TextBoxListHandle paragraphGetBoxesForPlaceholders(ParagraphHandle handle);
+
+// Returns a list of the code points that were unable to be rendered with the
+// selected fonts. The list is deduplicated, so each code point in the output
+// is unique.
+// If `nullptr` is passed in for `outCodePoints`, we simply return the count
+// of the code points.
+// Note: This must be called after the paragraph has been laid out at least
+// once in order to get valid data.
+@Native<Int Function(
+  ParagraphHandle,
+  Pointer<Uint32>,
+  Int,
+)>(symbol: 'paragraph_getUnresolvedCodePoints', isLeaf: true)
+external int paragraphGetUnresolvedCodePoints(
+  ParagraphHandle handle,
+  Pointer<Uint32> outCodePoints,
+  int outLength,
+);
