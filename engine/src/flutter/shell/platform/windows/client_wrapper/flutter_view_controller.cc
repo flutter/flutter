@@ -29,6 +29,10 @@ FlutterViewController::~FlutterViewController() {
   }
 }
 
+void FlutterViewController::ForceRedraw() {
+  FlutterDesktopViewControllerForceRedraw(controller_);
+}
+
 std::optional<LRESULT> FlutterViewController::HandleTopLevelWindowProc(
     HWND hwnd,
     UINT message,

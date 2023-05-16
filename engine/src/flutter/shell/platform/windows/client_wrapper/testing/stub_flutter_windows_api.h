@@ -38,6 +38,9 @@ class StubFlutterWindowsApi {
   // Called for FlutterDesktopViewControllerDestroy.
   virtual void ViewControllerDestroy() {}
 
+  // Called for FlutterDesktopViewControllerForceRedraw.
+  virtual void ViewControllerForceRedraw() {}
+
   // Called for FlutterDesktopViewControllerHandleTopLevelWindowProc.
   virtual bool ViewControllerHandleTopLevelWindowProc(HWND hwnd,
                                                       UINT message,
