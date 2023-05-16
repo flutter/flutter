@@ -4,7 +4,7 @@
 part of dart.ui;
 
 /// A composable [SceneNode].
-class SceneNode extends NativeFieldWrapperClass1 {
+base class SceneNode extends NativeFieldWrapperClass1 {
   @pragma('vm:entry-point')
   SceneNode._create() {
     _constructor();
@@ -178,7 +178,7 @@ class SceneNodeValue {
 ///
 /// Instances of this class can be obtained from the
 /// [SceneNode.sceneShader] method.
-class SceneShader extends Shader {
+base class SceneShader extends Shader {
   SceneShader._(SceneNode node, { String? debugName }) : _debugName = debugName, super._() {
     _constructor(node);
   }

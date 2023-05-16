@@ -127,7 +127,7 @@ void callEchoVector() {
 
 // Test helpers for calls with DartWrappable through Tonic.
 
-class MyNativeClass extends NativeFieldWrapperClass1 {
+base class MyNativeClass extends NativeFieldWrapperClass1 {
   MyNativeClass(int value) {
     _Create(this, value);
   }

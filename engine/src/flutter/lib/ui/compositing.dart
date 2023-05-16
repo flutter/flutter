@@ -9,18 +9,40 @@ part of dart.ui;
 ///
 /// Scene objects can be displayed on the screen using the [FlutterView.render]
 /// method.
+abstract class Scene {
+  /// Synchronously creates a handle to an image from this scene.
+  ///
+  /// {@macro dart.ui.painting.Picture.toImageSync}
+  Image toImageSync(int width, int height);
+
+  /// Creates a raster image representation of the current state of the scene.
+  ///
+  /// This is a slow operation that is performed on a background thread.
+  ///
+  /// Callers must dispose the [Image] when they are done with it. If the result
+  /// will be shared with other methods or classes, [Image.clone] should be used
+  /// and each handle created must be disposed.
+  Future<Image> toImage(int width, int height);
+
+  /// Releases the resources used by this scene.
+  ///
+  /// After calling this function, the scene is cannot be used further.
+  ///
+  /// This can't be a leaf call because the native function calls Dart API
+  /// (Dart_SetNativeInstanceField).
+  void dispose();
+}
+
 @pragma('vm:entry-point')
-class Scene extends NativeFieldWrapperClass1 {
+base class _NativeScene extends NativeFieldWrapperClass1 implements Scene {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
   /// To create a Scene object, use a [SceneBuilder].
   @pragma('vm:entry-point')
-  Scene._();
+  _NativeScene._();
 
-  /// Synchronously creates a handle to an image from this scene.
-  ///
-  /// {@macro dart.ui.painting.Picture.toImageSync}
+  @override
   Image toImageSync(int width, int height) {
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
@@ -37,13 +59,7 @@ class Scene extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Uint32, Uint32, Handle)>(symbol: 'Scene::toImageSync')
   external String? _toImageSync(int width, int height, _Image outImage);
 
-  /// Creates a raster image representation of the current state of the scene.
-  ///
-  /// This is a slow operation that is performed on a background thread.
-  ///
-  /// Callers must dispose the [Image] when they are done with it. If the result
-  /// will be shared with other methods or classes, [Image.clone] should be used
-  /// and each handle created must be disposed.
+  @override
   Future<Image> toImage(int width, int height) {
     if (width <= 0 || height <= 0) {
       throw Exception('Invalid image dimensions.');
@@ -61,12 +77,7 @@ class Scene extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Uint32, Uint32, Handle)>(symbol: 'Scene::toImage')
   external String? _toImage(int width, int height, _Callback<_Image?> callback);
 
-  /// Releases the resources used by this scene.
-  ///
-  /// After calling this function, the scene is cannot be used further.
-  ///
-  /// This can't be a leaf call because the native function calls Dart API
-  /// (Dart_SetNativeInstanceField).
+  @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'Scene::dispose')
   external void dispose();
 }
@@ -219,10 +230,352 @@ class ShaderMaskEngineLayer extends _EngineLayerWrapper {
 /// To draw graphical operations onto a [Scene], first create a
 /// [Picture] using a [PictureRecorder] and a [Canvas], and then add
 /// it to the scene using [addPicture].
-class SceneBuilder extends NativeFieldWrapperClass1 {
+abstract class SceneBuilder {
+  factory SceneBuilder() = _NativeSceneBuilder;
+
+  /// Pushes a transform operation onto the operation stack.
+  ///
+  /// The objects are transformed by the given matrix before rasterization.
+  ///
+  /// {@template dart.ui.sceneBuilder.oldLayer}
+  /// If `oldLayer` is not null the engine will attempt to reuse the resources
+  /// allocated for the old layer when rendering the new layer. This is purely
+  /// an optimization. It has no effect on the correctness of rendering.
+  /// {@endtemplate}
+  ///
+  /// {@template dart.ui.sceneBuilder.oldLayerVsRetained}
+  /// Passing a layer to [addRetained] or as `oldLayer` argument to a push
+  /// method counts as _usage_. A layer can be used no more than once in a scene.
+  /// For example, it may not be passed simultaneously to two push methods, or
+  /// to a push method and to `addRetained`.
+  ///
+  /// When a layer is passed to [addRetained] all descendant layers are also
+  /// considered as used in this scene. The same single-usage restriction
+  /// applies to descendants.
+  ///
+  /// When a layer is passed as an `oldLayer` argument to a push method, it may
+  /// no longer be used in subsequent frames. If you would like to continue
+  /// reusing the resources associated with the layer, store the layer object
+  /// returned by the push method and use that in the next frame instead of the
+  /// original object.
+  /// {@endtemplate}
+  ///
+  /// See [pop] for details about the operation stack.
+  TransformEngineLayer pushTransform(
+    Float64List matrix4, {
+    TransformEngineLayer? oldLayer,
+  });
+
+  /// Pushes an offset operation onto the operation stack.
+  ///
+  /// This is equivalent to [pushTransform] with a matrix with only translation.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  OffsetEngineLayer pushOffset(
+    double dx,
+    double dy, {
+    OffsetEngineLayer? oldLayer,
+  });
+
+  /// Pushes a rectangular clip operation onto the operation stack.
+  ///
+  /// Rasterization outside the given rectangle is discarded.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
+  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  ClipRectEngineLayer pushClipRect(
+    Rect rect, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRectEngineLayer? oldLayer,
+  });
+
+  /// Pushes a rounded-rectangular clip operation onto the operation stack.
+  ///
+  /// Rasterization outside the given rounded rectangle is discarded.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
+  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  ClipRRectEngineLayer pushClipRRect(
+    RRect rrect, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRRectEngineLayer? oldLayer,
+  });
+
+  /// Pushes a path clip operation onto the operation stack.
+  ///
+  /// Rasterization outside the given path is discarded.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack. See [Clip] for different clip modes.
+  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  ClipPathEngineLayer pushClipPath(
+    Path path, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipPathEngineLayer? oldLayer,
+  });
+
+  /// Pushes an opacity operation onto the operation stack.
+  ///
+  /// The given alpha value is blended into the alpha value of the objects'
+  /// rasterization. An alpha value of 0 makes the objects entirely invisible.
+  /// An alpha value of 255 has no effect (i.e., the objects retain the current
+  /// opacity).
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  OpacityEngineLayer pushOpacity(
+    int alpha, {
+    Offset? offset = Offset.zero,
+    OpacityEngineLayer? oldLayer,
+  });
+
+  /// Pushes a color filter operation onto the operation stack.
+  ///
+  /// The given color is applied to the objects' rasterization using the given
+  /// blend mode.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  ColorFilterEngineLayer pushColorFilter(
+    ColorFilter filter, {
+    ColorFilterEngineLayer? oldLayer,
+  });
+
+  /// Pushes an image filter operation onto the operation stack.
+  ///
+  /// The given filter is applied to the children's rasterization before compositing them into
+  /// the scene.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  ImageFilterEngineLayer pushImageFilter(
+    ImageFilter filter, {
+    Offset offset = Offset.zero,
+    ImageFilterEngineLayer? oldLayer,
+  });
+
+  /// Pushes a backdrop filter operation onto the operation stack.
+  ///
+  /// The given filter is applied to the current contents of the scene as far back as
+  /// the most recent save layer and rendered back to the scene using the indicated
+  /// [blendMode] prior to rasterizing the child layers.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  BackdropFilterEngineLayer pushBackdropFilter(
+    ImageFilter filter, {
+    BlendMode blendMode = BlendMode.srcOver,
+    BackdropFilterEngineLayer? oldLayer,
+  });
+
+  /// Pushes a shader mask operation onto the operation stack.
+  ///
+  /// The given shader is applied to the object's rasterization in the given
+  /// rectangle using the given blend mode.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  ShaderMaskEngineLayer pushShaderMask(
+    Shader shader,
+    Rect maskRect,
+    BlendMode blendMode, {
+    ShaderMaskEngineLayer? oldLayer,
+    FilterQuality filterQuality = FilterQuality.low,
+  });
+
+  /// Ends the effect of the most recently pushed operation.
+  ///
+  /// Internally the scene builder maintains a stack of operations. Each of the
+  /// operations in the stack applies to each of the objects added to the scene.
+  /// Calling this function removes the most recently added operation from the
+  /// stack.
+  void pop();
+
+  /// Add a retained engine layer subtree from previous frames.
+  ///
+  /// All the engine layers that are in the subtree of the retained layer will
+  /// be automatically appended to the current engine layer tree.
+  ///
+  /// Therefore, when implementing a subclass of the [Layer] concept defined in
+  /// the rendering layer of Flutter's framework, once this is called, there's
+  /// no need to call [Layer.addToScene] for its children layers.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  void addRetained(EngineLayer retainedLayer);
+
+  /// Adds an object to the scene that displays performance statistics.
+  ///
+  /// Useful during development to assess the performance of the application.
+  /// The enabledOptions controls which statistics are displayed. The bounds
+  /// controls where the statistics are displayed.
+  ///
+  /// enabledOptions is a bit field with the following bits defined:
+  ///  - 0x01: displayRasterizerStatistics - show raster thread frame time
+  ///  - 0x02: visualizeRasterizerStatistics - graph raster thread frame times
+  ///  - 0x04: displayEngineStatistics - show UI thread frame time
+  ///  - 0x08: visualizeEngineStatistics - graph UI thread frame times
+  /// Set enabledOptions to 0x0F to enable all the currently defined features.
+  ///
+  /// The "UI thread" is the thread that includes all the execution of the main
+  /// Dart isolate (the isolate that can call [FlutterView.render]). The UI
+  /// thread frame time is the total time spent executing the
+  /// [PlatformDispatcher.onBeginFrame] callback. The "raster thread" is the
+  /// thread (running on the CPU) that subsequently processes the [Scene]
+  /// provided by the Dart code to turn it into GPU commands and send it to the
+  /// GPU.
+  ///
+  /// See also the [PerformanceOverlayOption] enum in the rendering library.
+  /// for more details.
+  // Values above must match constants in //engine/src/sky/compositor/performance_overlay_layer.h
+  void addPerformanceOverlay(int enabledOptions, Rect bounds);
+
+  /// Adds a [Picture] to the scene.
+  ///
+  /// The picture is rasterized at the given `offset`.
+  ///
+  /// The rendering _may_ be cached to reduce the cost of painting the picture
+  /// if it is reused in subsequent frames. Whether a picture is cached or not
+  /// depends on the backend implementation. When caching is considered, the
+  /// choice to cache or not cache is a heuristic based on how often the picture
+  /// is being painted and the cost of painting the picture. To disable this
+  /// caching, set `willChangeHint` to true. To force the caching to happen (in
+  /// backends that do caching), set `isComplexHint` to true. When both are set,
+  /// `willChangeHint` prevails.
+  ///
+  /// In general, setting these hints is not very useful. Backends that cache
+  /// pictures only do so for pictures that have been rendered three times
+  /// already; setting `willChangeHint` to true to avoid caching an animating
+  /// picture that changes every frame is therefore redundant, the picture
+  /// wouldn't have been cached anyway. Similarly, backends that cache pictures
+  /// are relatively aggressive about doing so, such that any image complicated
+  /// enough to warrant caching is probably already being cached even without
+  /// `isComplexHint` being set to true.
+  void addPicture(
+    Offset offset,
+    Picture picture, {
+    bool isComplexHint = false,
+    bool willChangeHint = false,
+  });
+
+  /// Adds a backend texture to the scene.
+  ///
+  /// The texture is scaled to the given size and rasterized at the given offset.
+  ///
+  /// If `freeze` is true the texture that is added to the scene will not
+  /// be updated with new frames. `freeze` is used when resizing an embedded
+  /// Android view: When resizing an Android view there is a short period during
+  /// which the framework cannot tell if the newest texture frame has the
+  /// previous or new size, to workaround this the framework "freezes" the
+  /// texture just before resizing the Android view and un-freezes it when it is
+  /// certain that a frame with the new size is ready.
+  void addTexture(
+    int textureId, {
+    Offset offset = Offset.zero,
+    double width = 0.0,
+    double height = 0.0,
+    bool freeze = false,
+    FilterQuality filterQuality = FilterQuality.low,
+  });
+
+  /// Adds a platform view (e.g an iOS UIView) to the scene.
+  ///
+  /// On iOS this layer splits the current output surface into two surfaces, one for the scene nodes
+  /// preceding the platform view, and one for the scene nodes following the platform view.
+  ///
+  /// ## Performance impact
+  ///
+  /// Adding an additional surface doubles the amount of graphics memory directly used by Flutter
+  /// for output buffers. Quartz might allocated extra buffers for compositing the Flutter surfaces
+  /// and the platform view.
+  ///
+  /// With a platform view in the scene, Quartz has to composite the two Flutter surfaces and the
+  /// embedded UIView. In addition to that, on iOS versions greater than 9, the Flutter frames are
+  /// synchronized with the UIView frames adding additional performance overhead.
+  ///
+  /// The `offset` argument is not used for iOS and Android.
+  void addPlatformView(
+    int viewId, {
+    Offset offset = Offset.zero,
+    double width = 0.0,
+    double height = 0.0,
+  });
+
+  /// Sets a threshold after which additional debugging information should be recorded.
+  ///
+  /// Currently this interface is difficult to use by end-developers. If you're
+  /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
+  /// We'll hopefully be able to figure out how to make this feature more useful
+  /// to you.
+  void setRasterizerTracingThreshold(int frameInterval);
+
+  /// Sets whether the raster cache should checkerboard cached entries. This is
+  /// only useful for debugging purposes.
+  ///
+  /// The compositor can sometimes decide to cache certain portions of the
+  /// widget hierarchy. Such portions typically don't change often from frame to
+  /// frame and are expensive to render. This can speed up overall rendering. However,
+  /// there is certain upfront cost to constructing these cache entries. And, if
+  /// the cache entries are not used very often, this cost may not be worth the
+  /// speedup in rendering of subsequent frames. If the developer wants to be certain
+  /// that populating the raster cache is not causing stutters, this option can be
+  /// set. Depending on the observations made, hints can be provided to the compositor
+  /// that aid it in making better decisions about caching.
+  ///
+  /// Currently this interface is difficult to use by end-developers. If you're
+  /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
+  void setCheckerboardRasterCacheImages(bool checkerboard);
+
+  /// Sets whether the compositor should checkerboard layers that are rendered
+  /// to offscreen bitmaps.
+  ///
+  /// This is only useful for debugging purposes.
+  void setCheckerboardOffscreenLayers(bool checkerboard);
+
+  /// Finishes building the scene.
+  ///
+  /// Returns a [Scene] containing the objects that have been added to
+  /// this scene builder. The [Scene] can then be displayed on the
+  /// screen with [FlutterView.render].
+  ///
+  /// After calling this function, the scene builder object is invalid and
+  /// cannot be used further.
+  Scene build();
+}
+
+base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements SceneBuilder {
   /// Creates an empty [SceneBuilder] object.
   @pragma('vm:entry-point')
-  SceneBuilder() {
+  _NativeSceneBuilder() {
     _constructor();
   }
 
@@ -282,41 +635,14 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     return true;
   }
 
-  /// Pushes a transform operation onto the operation stack.
-  ///
-  /// The objects are transformed by the given matrix before rasterization.
-  ///
-  /// {@template dart.ui.sceneBuilder.oldLayer}
-  /// If `oldLayer` is not null the engine will attempt to reuse the resources
-  /// allocated for the old layer when rendering the new layer. This is purely
-  /// an optimization. It has no effect on the correctness of rendering.
-  /// {@endtemplate}
-  ///
-  /// {@template dart.ui.sceneBuilder.oldLayerVsRetained}
-  /// Passing a layer to [addRetained] or as `oldLayer` argument to a push
-  /// method counts as _usage_. A layer can be used no more than once in a scene.
-  /// For example, it may not be passed simultaneously to two push methods, or
-  /// to a push method and to `addRetained`.
-  ///
-  /// When a layer is passed to [addRetained] all descendant layers are also
-  /// considered as used in this scene. The same single-usage restriction
-  /// applies to descendants.
-  ///
-  /// When a layer is passed as an `oldLayer` argument to a push method, it may
-  /// no longer be used in subsequent frames. If you would like to continue
-  /// reusing the resources associated with the layer, store the layer object
-  /// returned by the push method and use that in the next frame instead of the
-  /// original object.
-  /// {@endtemplate}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   TransformEngineLayer pushTransform(
     Float64List matrix4, {
     TransformEngineLayer? oldLayer,
   }) {
     assert(_matrix4IsValid(matrix4));
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushTransform'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushTransform(engineLayer, matrix4, oldLayer?._nativeLayer);
     final TransformEngineLayer layer = TransformEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -326,22 +652,14 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'SceneBuilder::pushTransformHandle')
   external void _pushTransform(EngineLayer layer, Float64List matrix4, EngineLayer? oldLayer);
 
-  /// Pushes an offset operation onto the operation stack.
-  ///
-  /// This is equivalent to [pushTransform] with a matrix with only translation.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   OffsetEngineLayer pushOffset(
     double dx,
     double dy, {
     OffsetEngineLayer? oldLayer,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushOffset'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushOffset(engineLayer, dx, dy, oldLayer?._nativeLayer);
     final OffsetEngineLayer layer = OffsetEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -351,16 +669,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Double, Double, Handle)>(symbol: 'SceneBuilder::pushOffset')
   external void _pushOffset(EngineLayer layer, double dx, double dy, EngineLayer? oldLayer);
 
-  /// Pushes a rectangular clip operation onto the operation stack.
-  ///
-  /// Rasterization outside the given rectangle is discarded.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
-  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  @override
   ClipRectEngineLayer pushClipRect(
     Rect rect, {
     Clip clipBehavior = Clip.antiAlias,
@@ -368,7 +677,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   }) {
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipRect'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipRect(engineLayer, rect.left, rect.right, rect.top, rect.bottom, clipBehavior.index,
         oldLayer?._nativeLayer);
     final ClipRectEngineLayer layer = ClipRectEngineLayer._(engineLayer);
@@ -386,16 +695,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
       int clipBehavior,
       EngineLayer? oldLayer);
 
-  /// Pushes a rounded-rectangular clip operation onto the operation stack.
-  ///
-  /// Rasterization outside the given rounded rectangle is discarded.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
-  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  @override
   ClipRRectEngineLayer pushClipRRect(
     RRect rrect, {
     Clip clipBehavior = Clip.antiAlias,
@@ -403,7 +703,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   }) {
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipRRect'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushClipRRect(engineLayer, rrect._getValue32(), clipBehavior.index, oldLayer?._nativeLayer);
     final ClipRRectEngineLayer layer = ClipRRectEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -413,16 +713,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Handle, Int32, Handle)>(symbol: 'SceneBuilder::pushClipRRect')
   external void _pushClipRRect(EngineLayer layer, Float32List rrect, int clipBehavior, EngineLayer? oldLayer);
 
-  /// Pushes a path clip operation onto the operation stack.
-  ///
-  /// Rasterization outside the given path is discarded.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack. See [Clip] for different clip modes.
-  /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
+  @override
   ClipPathEngineLayer pushClipPath(
     Path path, {
     Clip clipBehavior = Clip.antiAlias,
@@ -430,35 +721,24 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   }) {
     assert(clipBehavior != Clip.none);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushClipPath'));
-    final EngineLayer engineLayer = EngineLayer._();
-    _pushClipPath(engineLayer, path, clipBehavior.index, oldLayer?._nativeLayer);
+    final EngineLayer engineLayer = _NativeEngineLayer._();
+    _pushClipPath(engineLayer, path as _NativePath, clipBehavior.index, oldLayer?._nativeLayer);
     final ClipPathEngineLayer layer = ClipPathEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
     return layer;
   }
 
   @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>(symbol: 'SceneBuilder::pushClipPath')
-  external void _pushClipPath(EngineLayer layer, Path path, int clipBehavior, EngineLayer? oldLayer);
+  external void _pushClipPath(EngineLayer layer, _NativePath path, int clipBehavior, EngineLayer? oldLayer);
 
-  /// Pushes an opacity operation onto the operation stack.
-  ///
-  /// The given alpha value is blended into the alpha value of the objects'
-  /// rasterization. An alpha value of 0 makes the objects entirely invisible.
-  /// An alpha value of 255 has no effect (i.e., the objects retain the current
-  /// opacity).
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   OpacityEngineLayer pushOpacity(
     int alpha, {
     Offset? offset = Offset.zero,
     OpacityEngineLayer? oldLayer,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushOpacity'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushOpacity(engineLayer, alpha, offset!.dx, offset.dy, oldLayer?._nativeLayer);
     final OpacityEngineLayer layer = OpacityEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -468,23 +748,14 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Int32, Double, Double, Handle)>(symbol: 'SceneBuilder::pushOpacity')
   external void _pushOpacity(EngineLayer layer, int alpha, double dx, double dy, EngineLayer? oldLayer);
 
-  /// Pushes a color filter operation onto the operation stack.
-  ///
-  /// The given color is applied to the objects' rasterization using the given
-  /// blend mode.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   ColorFilterEngineLayer pushColorFilter(
     ColorFilter filter, {
     ColorFilterEngineLayer? oldLayer,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushColorFilter'));
     final _ColorFilter nativeFilter = filter._toNativeColorFilter()!;
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushColorFilter(engineLayer, nativeFilter, oldLayer?._nativeLayer);
     final ColorFilterEngineLayer layer = ColorFilterEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -494,16 +765,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Handle)>(symbol: 'SceneBuilder::pushColorFilter')
   external void _pushColorFilter(EngineLayer layer, _ColorFilter filter, EngineLayer? oldLayer);
 
-  /// Pushes an image filter operation onto the operation stack.
-  ///
-  /// The given filter is applied to the children's rasterization before compositing them into
-  /// the scene.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   ImageFilterEngineLayer pushImageFilter(
     ImageFilter filter, {
     Offset offset = Offset.zero,
@@ -511,7 +773,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushImageFilter'));
     final _ImageFilter nativeFilter = filter._toNativeImageFilter();
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushImageFilter(engineLayer, nativeFilter, offset.dx, offset.dy, oldLayer?._nativeLayer);
     final ImageFilterEngineLayer layer = ImageFilterEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -521,24 +783,14 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Double, Double, Handle)>(symbol: 'SceneBuilder::pushImageFilter')
   external void _pushImageFilter(EngineLayer outEngineLayer, _ImageFilter filter, double dx, double dy, EngineLayer? oldLayer);
 
-  /// Pushes a backdrop filter operation onto the operation stack.
-  ///
-  /// The given filter is applied to the current contents of the scene as far back as
-  /// the most recent save layer and rendered back to the scene using the indicated
-  /// [blendMode] prior to rasterizing the child layers.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   BackdropFilterEngineLayer pushBackdropFilter(
     ImageFilter filter, {
     BlendMode blendMode = BlendMode.srcOver,
     BackdropFilterEngineLayer? oldLayer,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushBackdropFilter'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushBackdropFilter(engineLayer, filter._toNativeImageFilter(), blendMode.index, oldLayer?._nativeLayer);
     final BackdropFilterEngineLayer layer = BackdropFilterEngineLayer._(engineLayer);
     assert(_debugPushLayer(layer));
@@ -548,16 +800,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle, Pointer<Void>, Int32, Handle)>(symbol: 'SceneBuilder::pushBackdropFilter')
   external void _pushBackdropFilter(EngineLayer outEngineLayer, _ImageFilter filter, int blendMode, EngineLayer? oldLayer);
 
-  /// Pushes a shader mask operation onto the operation stack.
-  ///
-  /// The given shader is applied to the object's rasterization in the given
-  /// rectangle using the given blend mode.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayer}
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
-  ///
-  /// See [pop] for details about the operation stack.
+  @override
   ShaderMaskEngineLayer pushShaderMask(
     Shader shader,
     Rect maskRect,
@@ -566,7 +809,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
     FilterQuality filterQuality = FilterQuality.low,
   }) {
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushShaderMask'));
-    final EngineLayer engineLayer = EngineLayer._();
+    final EngineLayer engineLayer = _NativeEngineLayer._();
     _pushShaderMask(
       engineLayer,
       shader,
@@ -595,12 +838,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
       int filterQualityIndex,
       EngineLayer? oldLayer);
 
-  /// Ends the effect of the most recently pushed operation.
-  ///
-  /// Internally the scene builder maintains a stack of operations. Each of the
-  /// operations in the stack applies to each of the objects added to the scene.
-  /// Calling this function removes the most recently added operation from the
-  /// stack.
+  @override
   void pop() {
     if (_layerStack.isNotEmpty) {
       _layerStack.removeLast();
@@ -611,16 +849,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>)>(symbol: 'SceneBuilder::pop', isLeaf: true)
   external void _pop();
 
-  /// Add a retained engine layer subtree from previous frames.
-  ///
-  /// All the engine layers that are in the subtree of the retained layer will
-  /// be automatically appended to the current engine layer tree.
-  ///
-  /// Therefore, when implementing a subclass of the [Layer] concept defined in
-  /// the rendering layer of Flutter's framework, once this is called, there's
-  /// no need to call [Layer.addToScene] for its children layers.
-  ///
-  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  @override
   void addRetained(EngineLayer retainedLayer) {
     assert(retainedLayer is _EngineLayerWrapper);
     assert(() {
@@ -651,30 +880,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SceneBuilder::addRetained')
   external void _addRetained(EngineLayer retainedLayer);
 
-  /// Adds an object to the scene that displays performance statistics.
-  ///
-  /// Useful during development to assess the performance of the application.
-  /// The enabledOptions controls which statistics are displayed. The bounds
-  /// controls where the statistics are displayed.
-  ///
-  /// enabledOptions is a bit field with the following bits defined:
-  ///  - 0x01: displayRasterizerStatistics - show raster thread frame time
-  ///  - 0x02: visualizeRasterizerStatistics - graph raster thread frame times
-  ///  - 0x04: displayEngineStatistics - show UI thread frame time
-  ///  - 0x08: visualizeEngineStatistics - graph UI thread frame times
-  /// Set enabledOptions to 0x0F to enable all the currently defined features.
-  ///
-  /// The "UI thread" is the thread that includes all the execution of the main
-  /// Dart isolate (the isolate that can call [FlutterView.render]). The UI
-  /// thread frame time is the total time spent executing the
-  /// [PlatformDispatcher.onBeginFrame] callback. The "raster thread" is the
-  /// thread (running on the CPU) that subsequently processes the [Scene]
-  /// provided by the Dart code to turn it into GPU commands and send it to the
-  /// GPU.
-  ///
-  /// See also the [PerformanceOverlayOption] enum in the rendering library.
-  /// for more details.
-  // Values above must match constants in //engine/src/sky/compositor/performance_overlay_layer.h
+  @override
   void addPerformanceOverlay(int enabledOptions, Rect bounds) {
     _addPerformanceOverlay(enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
   }
@@ -682,27 +888,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Uint64, Double, Double, Double, Double)>(symbol: 'SceneBuilder::addPerformanceOverlay', isLeaf: true)
   external void _addPerformanceOverlay(int enabledOptions, double left, double right, double top, double bottom);
 
-  /// Adds a [Picture] to the scene.
-  ///
-  /// The picture is rasterized at the given `offset`.
-  ///
-  /// The rendering _may_ be cached to reduce the cost of painting the picture
-  /// if it is reused in subsequent frames. Whether a picture is cached or not
-  /// depends on the backend implementation. When caching is considered, the
-  /// choice to cache or not cache is a heuristic based on how often the picture
-  /// is being painted and the cost of painting the picture. To disable this
-  /// caching, set `willChangeHint` to true. To force the caching to happen (in
-  /// backends that do caching), set `isComplexHint` to true. When both are set,
-  /// `willChangeHint` prevails.
-  ///
-  /// In general, setting these hints is not very useful. Backends that cache
-  /// pictures only do so for pictures that have been rendered three times
-  /// already; setting `willChangeHint` to true to avoid caching an animating
-  /// picture that changes every frame is therefore redundant, the picture
-  /// wouldn't have been cached anyway. Similarly, backends that cache pictures
-  /// are relatively aggressive about doing so, such that any image complicated
-  /// enough to warrant caching is probably already being cached even without
-  /// `isComplexHint` being set to true.
+  @override
   void addPicture(
     Offset offset,
     Picture picture, {
@@ -711,23 +897,13 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   }) {
     assert(!picture.debugDisposed);
     final int hints = (isComplexHint ? 1 : 0) | (willChangeHint ? 2 : 0);
-    _addPicture(offset.dx, offset.dy, picture, hints);
+    _addPicture(offset.dx, offset.dy, picture as _NativePicture, hints);
   }
 
   @Native<Void Function(Pointer<Void>, Double, Double, Pointer<Void>, Int32)>(symbol: 'SceneBuilder::addPicture')
-  external void _addPicture(double dx, double dy, Picture picture, int hints);
+  external void _addPicture(double dx, double dy, _NativePicture picture, int hints);
 
-  /// Adds a backend texture to the scene.
-  ///
-  /// The texture is scaled to the given size and rasterized at the given offset.
-  ///
-  /// If `freeze` is true the texture that is added to the scene will not
-  /// be updated with new frames. `freeze` is used when resizing an embedded
-  /// Android view: When resizing an Android view there is a short period during
-  /// which the framework cannot tell if the newest texture frame has the
-  /// previous or new size, to workaround this the framework "freezes" the
-  /// texture just before resizing the Android view and un-freezes it when it is
-  /// certain that a frame with the new size is ready.
+  @override
   void addTexture(
     int textureId, {
     Offset offset = Offset.zero,
@@ -742,22 +918,7 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Int64, Bool, Int32)>(symbol: 'SceneBuilder::addTexture', isLeaf: true)
   external void _addTexture(double dx, double dy, double width, double height, int textureId, bool freeze, int filterQuality);
 
-  /// Adds a platform view (e.g an iOS UIView) to the scene.
-  ///
-  /// On iOS this layer splits the current output surface into two surfaces, one for the scene nodes
-  /// preceding the platform view, and one for the scene nodes following the platform view.
-  ///
-  /// ## Performance impact
-  ///
-  /// Adding an additional surface doubles the amount of graphics memory directly used by Flutter
-  /// for output buffers. Quartz might allocated extra buffers for compositing the Flutter surfaces
-  /// and the platform view.
-  ///
-  /// With a platform view in the scene, Quartz has to composite the two Flutter surfaces and the
-  /// embedded UIView. In addition to that, on iOS versions greater than 9, the Flutter frames are
-  /// synchronized with the UIView frames adding additional performance overhead.
-  ///
-  /// The `offset` argument is not used for iOS and Android.
+  @override
   void addPlatformView(
     int viewId, {
     Offset offset = Offset.zero,
@@ -770,50 +931,21 @@ class SceneBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Int64)>(symbol: 'SceneBuilder::addPlatformView', isLeaf: true)
   external void _addPlatformView(double dx, double dy, double width, double height, int viewId);
 
-  /// Sets a threshold after which additional debugging information should be recorded.
-  ///
-  /// Currently this interface is difficult to use by end-developers. If you're
-  /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
-  /// We'll hopefully be able to figure out how to make this feature more useful
-  /// to you.
+  @override
   @Native<Void Function(Pointer<Void>, Uint32)>(symbol: 'SceneBuilder::setRasterizerTracingThreshold', isLeaf: true)
   external void setRasterizerTracingThreshold(int frameInterval);
 
-  /// Sets whether the raster cache should checkerboard cached entries. This is
-  /// only useful for debugging purposes.
-  ///
-  /// The compositor can sometimes decide to cache certain portions of the
-  /// widget hierarchy. Such portions typically don't change often from frame to
-  /// frame and are expensive to render. This can speed up overall rendering. However,
-  /// there is certain upfront cost to constructing these cache entries. And, if
-  /// the cache entries are not used very often, this cost may not be worth the
-  /// speedup in rendering of subsequent frames. If the developer wants to be certain
-  /// that populating the raster cache is not causing stutters, this option can be
-  /// set. Depending on the observations made, hints can be provided to the compositor
-  /// that aid it in making better decisions about caching.
-  ///
-  /// Currently this interface is difficult to use by end-developers. If you're
-  /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
+  @override
   @Native<Void Function(Pointer<Void>, Bool)>(symbol: 'SceneBuilder::setCheckerboardRasterCacheImages', isLeaf: true)
   external void setCheckerboardRasterCacheImages(bool checkerboard);
 
-  /// Sets whether the compositor should checkerboard layers that are rendered
-  /// to offscreen bitmaps.
-  ///
-  /// This is only useful for debugging purposes.
+  @override
   @Native<Void Function(Pointer<Void>, Bool)>(symbol: 'SceneBuilder::setCheckerboardOffscreenLayers', isLeaf: true)
   external void setCheckerboardOffscreenLayers(bool checkerboard);
 
-  /// Finishes building the scene.
-  ///
-  /// Returns a [Scene] containing the objects that have been added to
-  /// this scene builder. The [Scene] can then be displayed on the
-  /// screen with [FlutterView.render].
-  ///
-  /// After calling this function, the scene builder object is invalid and
-  /// cannot be used further.
+  @override
   Scene build() {
-    final Scene scene = Scene._();
+    final Scene scene = _NativeScene._();
     _build(scene);
     return scene;
   }

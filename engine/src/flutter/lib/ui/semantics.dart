@@ -585,7 +585,7 @@ class SemanticsFlag {
 ///    spell out the string character by character when announcing the string.
 ///  * [LocaleStringAttribute], which causes the assistive technologies to
 ///    treat the string in the specific language.
-abstract class StringAttribute extends NativeFieldWrapperClass1 {
+abstract base class StringAttribute extends NativeFieldWrapperClass1 {
   StringAttribute._({
     required this.range,
   });
@@ -611,7 +611,7 @@ abstract class StringAttribute extends NativeFieldWrapperClass1 {
 ///  * [AttributedString], where the string attributes are used.
 ///  * [LocaleStringAttribute], which causes the assistive technologies to
 ///    treat the string in the specific language.
-class SpellOutStringAttribute extends StringAttribute {
+base class SpellOutStringAttribute extends StringAttribute {
   /// Creates a string attribute that denotes the text in [range] must be
   /// spell out when the assistive technologies announce the string.
   SpellOutStringAttribute({
@@ -642,7 +642,7 @@ class SpellOutStringAttribute extends StringAttribute {
 ///  * [AttributedString], where the string attributes are used.
 ///  * [SpellOutStringAttribute], which causes the assistive technologies to
 ///    spell out the string character by character when announcing the string.
-class LocaleStringAttribute extends StringAttribute {
+base class LocaleStringAttribute extends StringAttribute {
   /// Creates a string attribute that denotes the text in [range] must be
   /// treated as the language specified by the [locale] when the assistive
   /// technologies announce the string.
@@ -675,14 +675,9 @@ class LocaleStringAttribute extends StringAttribute {
 /// Once created, the [SemanticsUpdate] objects can be passed to
 /// [PlatformDispatcher.updateSemantics] to update the semantics conveyed to the
 /// user.
-@pragma('vm:entry-point')
-class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
+abstract class SemanticsUpdateBuilder {
   /// Creates an empty [SemanticsUpdateBuilder] object.
-  @pragma('vm:entry-point')
-  SemanticsUpdateBuilder() { _constructor(); }
-
-  @Native<Void Function(Handle)>(symbol: 'SemanticsUpdateBuilder::Create')
-  external void _constructor();
+  factory SemanticsUpdateBuilder() = _NativeSemanticsUpdateBuilder;
 
   /// Update the information associated with the node with the given `id`.
   ///
@@ -765,6 +760,77 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
   /// z-direction starting at `elevation`. Basically, in the z-direction the
   /// node starts at `elevation` above the parent and ends at `elevation` +
   /// `thickness` above the parent.
+  void updateNode({
+    required int id,
+    required int flags,
+    required int actions,
+    required int maxValueLength,
+    required int currentValueLength,
+    required int textSelectionBase,
+    required int textSelectionExtent,
+    required int platformViewId,
+    required int scrollChildren,
+    required int scrollIndex,
+    required double scrollPosition,
+    required double scrollExtentMax,
+    required double scrollExtentMin,
+    required double elevation,
+    required double thickness,
+    required Rect rect,
+    required String label,
+    required List<StringAttribute> labelAttributes,
+    required String value,
+    required List<StringAttribute> valueAttributes,
+    required String increasedValue,
+    required List<StringAttribute> increasedValueAttributes,
+    required String decreasedValue,
+    required List<StringAttribute> decreasedValueAttributes,
+    required String hint,
+    required List<StringAttribute> hintAttributes,
+    String? tooltip,
+    TextDirection? textDirection,
+    required Float64List transform,
+    required Int32List childrenInTraversalOrder,
+    required Int32List childrenInHitTestOrder,
+    required Int32List additionalActions,
+  });
+
+  /// Update the custom semantics action associated with the given `id`.
+  ///
+  /// The name of the action exposed to the user is the `label`. For overridden
+  /// standard actions this value is ignored.
+  ///
+  /// The `hint` should describe what happens when an action occurs, not the
+  /// manner in which a tap is accomplished. For example, use "delete" instead
+  /// of "double tap to delete".
+  ///
+  /// The text direction of the `hint` and `label` is the same as the global
+  /// window.
+  ///
+  /// For overridden standard actions, `overrideId` corresponds with a
+  /// [SemanticsAction.index] value. For custom actions this argument should not be
+  /// provided.
+  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1});
+
+  /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
+  /// by this object.
+  ///
+  /// The returned object can be passed to [PlatformDispatcher.updateSemantics]
+  /// to actually update the semantics retained by the system.
+  ///
+  /// This object is unusable after calling build.
+  SemanticsUpdate build();
+}
+
+@pragma('vm:entry-point')
+base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implements SemanticsUpdateBuilder {
+  @pragma('vm:entry-point')
+  _NativeSemanticsUpdateBuilder() { _constructor(); }
+
+  @Native<Void Function(Handle)>(symbol: 'SemanticsUpdateBuilder::Create')
+  external void _constructor();
+
+  @override
   void updateNode({
     required int id,
     required int flags,
@@ -913,41 +979,21 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
       Int32List childrenInHitTestOrder,
       Int32List additionalActions);
 
-  /// Update the custom semantics action associated with the given `id`.
-  ///
-  /// The name of the action exposed to the user is the `label`. For overridden
-  /// standard actions this value is ignored.
-  ///
-  /// The `hint` should describe what happens when an action occurs, not the
-  /// manner in which a tap is accomplished. For example, use "delete" instead
-  /// of "double tap to delete".
-  ///
-  /// The text direction of the `hint` and `label` is the same as the global
-  /// window.
-  ///
-  /// For overridden standard actions, `overrideId` corresponds with a
-  /// [SemanticsAction.index] value. For custom actions this argument should not be
-  /// provided.
+  @override
   void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) {
     _updateCustomAction(id, label ?? '', hint ?? '', overrideId);
   }
   @Native<Void Function(Pointer<Void>, Int32, Handle, Handle, Int32)>(symbol: 'SemanticsUpdateBuilder::updateCustomAction')
   external void _updateCustomAction(int id, String label, String hint, int overrideId);
 
-  /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
-  /// by this object.
-  ///
-  /// The returned object can be passed to [PlatformDispatcher.updateSemantics]
-  /// to actually update the semantics retained by the system.
-  ///
-  /// This object is unusable after calling build.
+  @override
   SemanticsUpdate build() {
-    final SemanticsUpdate semanticsUpdate = SemanticsUpdate._();
+    final _NativeSemanticsUpdate semanticsUpdate = _NativeSemanticsUpdate._();
     _build(semanticsUpdate);
     return semanticsUpdate;
   }
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'SemanticsUpdateBuilder::build')
-  external void _build(SemanticsUpdate outSemanticsUpdate);
+  external void _build(_NativeSemanticsUpdate outSemanticsUpdate);
 }
 
 /// An opaque object representing a batch of semantics updates.
@@ -956,15 +1002,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass1 {
 ///
 /// Semantics updates can be applied to the system's retained semantics tree
 /// using the [PlatformDispatcher.updateSemantics] method.
-@pragma('vm:entry-point')
-class SemanticsUpdate extends NativeFieldWrapperClass1 {
-  /// This class is created by the engine, and should not be instantiated
-  /// or extended directly.
-  ///
-  /// To create a SemanticsUpdate object, use a [SemanticsUpdateBuilder].
-  @pragma('vm:entry-point')
-  SemanticsUpdate._();
-
+abstract class SemanticsUpdate {
   /// Releases the resources used by this semantics update.
   ///
   /// After calling this function, the semantics update is cannot be used
@@ -972,6 +1010,19 @@ class SemanticsUpdate extends NativeFieldWrapperClass1 {
   ///
   /// This can't be a leaf call because the native function calls Dart API
   /// (Dart_SetNativeInstanceField).
+  void dispose();
+}
+
+@pragma('vm:entry-point')
+base class _NativeSemanticsUpdate extends NativeFieldWrapperClass1 implements SemanticsUpdate {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  ///
+  /// To create a SemanticsUpdate object, use a [SemanticsUpdateBuilder].
+  @pragma('vm:entry-point')
+  _NativeSemanticsUpdate._();
+
+  @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'SemanticsUpdate::dispose')
   external void dispose();
 }
