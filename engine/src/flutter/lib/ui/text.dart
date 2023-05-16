@@ -2677,59 +2677,42 @@ class LineMetrics {
 ///
 /// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
 /// method.
-@pragma('vm:entry-point')
-class Paragraph extends NativeFieldWrapperClass1 {
-  /// This class is created by the engine, and should not be instantiated
-  /// or extended directly.
-  ///
-  /// To create a [Paragraph] object, use a [ParagraphBuilder].
-  @pragma('vm:entry-point')
-  Paragraph._();
-
-  bool _needsLayout = true;
-
+abstract class Paragraph {
   /// The amount of horizontal space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::width', isLeaf: true)
-  external double get width;
+  double get width;
 
   /// The amount of vertical space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::height', isLeaf: true)
-  external double get height;
+  double get height;
 
   /// The distance from the left edge of the leftmost glyph to the right edge of
   /// the rightmost glyph in the paragraph.
   ///
   /// Valid only after [layout] has been called.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::longestLine', isLeaf: true)
-  external double get longestLine;
+  double get longestLine;
 
   /// The minimum width that this paragraph could be without failing to paint
   /// its contents within itself.
   ///
   /// Valid only after [layout] has been called.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::minIntrinsicWidth', isLeaf: true)
-  external double get minIntrinsicWidth;
+  double get minIntrinsicWidth;
 
   /// Returns the smallest width beyond which increasing the width never
   /// decreases the height.
   ///
   /// Valid only after [layout] has been called.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::maxIntrinsicWidth', isLeaf: true)
-  external double get maxIntrinsicWidth;
+  double get maxIntrinsicWidth;
 
   /// The distance from the top of the paragraph to the alphabetic
   /// baseline of the first line, in logical pixels.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::alphabeticBaseline', isLeaf: true)
-  external double get alphabeticBaseline;
+  double get alphabeticBaseline;
 
   /// The distance from the top of the paragraph to the ideographic
   /// baseline of the first line, in logical pixels.
-  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::ideographicBaseline', isLeaf: true)
-  external double get ideographicBaseline;
+  double get ideographicBaseline;
 
   /// True if there is more vertical content, but the text was truncated, either
   /// because we reached `maxLines` lines of text or because the `maxLines` was
@@ -2738,12 +2721,128 @@ class Paragraph extends NativeFieldWrapperClass1 {
   ///
   /// See the discussion of the `maxLines` and `ellipsis` arguments at
   /// [ParagraphStyle.new].
-  @Native<Bool Function(Pointer<Void>)>(symbol: 'Paragraph::didExceedMaxLines', isLeaf: true)
-  external bool get didExceedMaxLines;
+  bool get didExceedMaxLines;
 
   /// Computes the size and position of each glyph in the paragraph.
   ///
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
+  void layout(ParagraphConstraints constraints);
+
+  /// Returns a list of text boxes that enclose the given text range.
+  ///
+  /// The [boxHeightStyle] and [boxWidthStyle] parameters allow customization
+  /// of how the boxes are bound vertically and horizontally. Both style
+  /// parameters default to the tight option, which will provide close-fitting
+  /// boxes and will not account for any line spacing.
+  ///
+  /// Coordinates of the TextBox are relative to the upper-left corner of the paragraph,
+  /// where positive y values indicate down.
+  ///
+  /// The [boxHeightStyle] and [boxWidthStyle] parameters must not be null.
+  ///
+  /// See [BoxHeightStyle] and [BoxWidthStyle] for full descriptions of each option.
+  List<TextBox> getBoxesForRange(int start, int end, {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight, BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight});
+
+  /// Returns a list of text boxes that enclose all placeholders in the paragraph.
+  ///
+  /// The order of the boxes are in the same order as passed in through
+  /// [ParagraphBuilder.addPlaceholder].
+  ///
+  /// Coordinates of the [TextBox] are relative to the upper-left corner of the paragraph,
+  /// where positive y values indicate down.
+  List<TextBox> getBoxesForPlaceholders();
+
+  /// Returns the text position closest to the given offset.
+  TextPosition getPositionForOffset(Offset offset);
+
+  /// Returns the [TextRange] of the word at the given [TextPosition].
+  ///
+  /// Characters not part of a word, such as spaces, symbols, and punctuation,
+  /// have word breaks on both sides. In such cases, this method will return
+  /// (offset, offset+1). Word boundaries are defined more precisely in Unicode
+  /// Standard Annex #29 http://www.unicode.org/reports/tr29/#Word_Boundaries
+  ///
+  /// The [TextPosition] is treated as caret position, its [TextPosition.affinity]
+  /// is used to determine which character this position points to. For example,
+  /// the word boundary at `TextPosition(offset: 5, affinity: TextPosition.upstream)`
+  /// of the `string = 'Hello word'` will return range (0, 5) because the position
+  /// points to the character 'o' instead of the space.
+  TextRange getWordBoundary(TextPosition position);
+
+  /// Returns the [TextRange] of the line at the given [TextPosition].
+  ///
+  /// The newline (if any) is returned as part of the range.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially be expensive, since it needs to compute the line
+  /// metrics, so use it sparingly.
+  TextRange getLineBoundary(TextPosition position);
+
+  /// Returns the full list of [LineMetrics] that describe in detail the various
+  /// metrics of each laid out line.
+  ///
+  /// Not valid until after layout.
+  ///
+  /// This can potentially return a large amount of data, so it is not recommended
+  /// to repeatedly call this. Instead, cache the results.
+  List<LineMetrics> computeLineMetrics();
+
+  /// Release the resources used by this object. The object is no longer usable
+  /// after this method is called.
+  void dispose();
+
+  /// Whether this reference to the underlying picture is [dispose]d.
+  ///
+  /// This only returns a valid value if asserts are enabled, and must not be
+  /// used otherwise.
+  bool get debugDisposed;
+ }
+
+@pragma('vm:entry-point')
+base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragraph {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  ///
+  /// To create a [Paragraph] object, use a [ParagraphBuilder].
+  @pragma('vm:entry-point')
+  _NativeParagraph._();
+
+  bool _needsLayout = true;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::width', isLeaf: true)
+  external double get width;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::height', isLeaf: true)
+  external double get height;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::longestLine', isLeaf: true)
+  external double get longestLine;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::minIntrinsicWidth', isLeaf: true)
+  external double get minIntrinsicWidth;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::maxIntrinsicWidth', isLeaf: true)
+  external double get maxIntrinsicWidth;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::alphabeticBaseline', isLeaf: true)
+  external double get alphabeticBaseline;
+
+  @override
+  @Native<Double Function(Pointer<Void>)>(symbol: 'Paragraph::ideographicBaseline', isLeaf: true)
+  external double get ideographicBaseline;
+
+  @override
+  @Native<Bool Function(Pointer<Void>)>(symbol: 'Paragraph::didExceedMaxLines', isLeaf: true)
+  external bool get didExceedMaxLines;
+
+  @override
   void layout(ParagraphConstraints constraints) {
     _layout(constraints.width);
     assert(() {
@@ -2770,19 +2869,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
     return boxes;
   }
 
-  /// Returns a list of text boxes that enclose the given text range.
-  ///
-  /// The [boxHeightStyle] and [boxWidthStyle] parameters allow customization
-  /// of how the boxes are bound vertically and horizontally. Both style
-  /// parameters default to the tight option, which will provide close-fitting
-  /// boxes and will not account for any line spacing.
-  ///
-  /// Coordinates of the TextBox are relative to the upper-left corner of the paragraph,
-  /// where positive y values indicate down.
-  ///
-  /// The [boxHeightStyle] and [boxWidthStyle] parameters must not be null.
-  ///
-  /// See [BoxHeightStyle] and [BoxWidthStyle] for full descriptions of each option.
+  @override
   List<TextBox> getBoxesForRange(int start, int end, {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight, BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight}) {
     return _decodeTextBoxes(_getBoxesForRange(start, end, boxHeightStyle.index, boxWidthStyle.index));
   }
@@ -2791,13 +2878,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Uint32, Uint32, Uint32, Uint32)>(symbol: 'Paragraph::getRectsForRange')
   external Float32List _getBoxesForRange(int start, int end, int boxHeightStyle, int boxWidthStyle);
 
-  /// Returns a list of text boxes that enclose all placeholders in the paragraph.
-  ///
-  /// The order of the boxes are in the same order as passed in through
-  /// [ParagraphBuilder.addPlaceholder].
-  ///
-  /// Coordinates of the [TextBox] are relative to the upper-left corner of the paragraph,
-  /// where positive y values indicate down.
+  @override
   List<TextBox> getBoxesForPlaceholders() {
     return _decodeTextBoxes(_getBoxesForPlaceholders());
   }
@@ -2805,7 +2886,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>)>(symbol: 'Paragraph::getRectsForPlaceholders')
   external Float32List _getBoxesForPlaceholders();
 
-  /// Returns the text position closest to the given offset.
+  @override
   TextPosition getPositionForOffset(Offset offset) {
     final List<int> encoded = _getPositionForOffset(offset.dx, offset.dy);
     return TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
@@ -2814,18 +2895,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Double, Double)>(symbol: 'Paragraph::getPositionForOffset')
   external List<int> _getPositionForOffset(double dx, double dy);
 
-  /// Returns the [TextRange] of the word at the given [TextPosition].
-  ///
-  /// Characters not part of a word, such as spaces, symbols, and punctuation,
-  /// have word breaks on both sides. In such cases, this method will return
-  /// (offset, offset+1). Word boundaries are defined more precisely in Unicode
-  /// Standard Annex #29 http://www.unicode.org/reports/tr29/#Word_Boundaries
-  ///
-  /// The [TextPosition] is treated as caret position, its [TextPosition.affinity]
-  /// is used to determine which character this position points to. For example,
-  /// the word boundary at `TextPosition(offset: 5, affinity: TextPosition.upstream)`
-  /// of the `string = 'Hello word'` will return range (0, 5) because the position
-  /// points to the character 'o' instead of the space.
+  @override
   TextRange getWordBoundary(TextPosition position) {
     final int characterPosition;
     switch (position.affinity) {
@@ -2841,14 +2911,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Uint32)>(symbol: 'Paragraph::getWordBoundary')
   external List<int> _getWordBoundary(int offset);
 
-  /// Returns the [TextRange] of the line at the given [TextPosition].
-  ///
-  /// The newline (if any) is returned as part of the range.
-  ///
-  /// Not valid until after layout.
-  ///
-  /// This can potentially be expensive, since it needs to compute the line
-  /// metrics, so use it sparingly.
+  @override
   TextRange getLineBoundary(TextPosition position) {
     final List<int> boundary = _getLineBoundary(position.offset);
     final TextRange line = TextRange(start: boundary[0], end: boundary[1]);
@@ -2877,15 +2940,9 @@ class Paragraph extends NativeFieldWrapperClass1 {
   // in the C++ code. If we straighten out the C++ dependencies, we can remove
   // this indirection.
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Double, Double)>(symbol: 'Paragraph::paint')
-  external void _paint(Canvas canvas, double x, double y);
+  external void _paint(_NativeCanvas canvas, double x, double y);
 
-  /// Returns the full list of [LineMetrics] that describe in detail the various
-  /// metrics of each laid out line.
-  ///
-  /// Not valid until after layout.
-  ///
-  /// This can potentially return a large amount of data, so it is not recommended
-  /// to repeatedly call this. Instead, cache the results.
+  @override
   List<LineMetrics> computeLineMetrics() {
     final Float64List encoded = _computeLineMetrics();
     final int count = encoded.length ~/ 9;
@@ -2910,8 +2967,7 @@ class Paragraph extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>)>(symbol: 'Paragraph::computeLineMetrics')
   external Float64List _computeLineMetrics();
 
-  /// Release the resources used by this object. The object is no longer usable
-  /// after this method is called.
+  @override
   void dispose() {
     assert(!_disposed);
     assert(() {
@@ -2927,10 +2983,8 @@ class Paragraph extends NativeFieldWrapperClass1 {
   external void _dispose();
 
   bool _disposed = false;
-  /// Whether this reference to the underlying picture is [dispose]d.
-  ///
-  /// This only returns a valid value if asserts are enabled, and must not be
-  /// used otherwise.
+
+  @override
   bool get debugDisposed {
     bool? disposed;
     assert(() {
@@ -2955,12 +3009,99 @@ class Paragraph extends NativeFieldWrapperClass1 {
 ///
 /// After constructing a [Paragraph], call [Paragraph.layout] on it and then
 /// paint it with [Canvas.drawParagraph].
-class ParagraphBuilder extends NativeFieldWrapperClass1 {
-
+abstract class ParagraphBuilder {
   /// Creates a new [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
+  factory ParagraphBuilder(ParagraphStyle style) = _NativeParagraphBuilder;
+
+  /// The number of placeholders currently in the paragraph.
+  int get placeholderCount;
+
+  /// The scales of the placeholders in the paragraph.
+  List<double> get placeholderScales;
+
+  /// Applies the given style to the added text until [pop] is called.
+  ///
+  /// See [pop] for details.
+  void pushStyle(TextStyle style);
+
+  /// Ends the effect of the most recent call to [pushStyle].
+  ///
+  /// Internally, the paragraph builder maintains a stack of text styles. Text
+  /// added to the paragraph is affected by all the styles in the stack. Calling
+  /// [pop] removes the topmost style in the stack, leaving the remaining styles
+  /// in effect.
+  void pop();
+
+  /// Adds the given text to the paragraph.
+  ///
+  /// The text will be styled according to the current stack of text styles.
+  void addText(String text);
+
+  /// Adds an inline placeholder space to the paragraph.
+  ///
+  /// The paragraph will contain a rectangular space with no text of the dimensions
+  /// specified.
+  ///
+  /// The `width` and `height` parameters specify the size of the placeholder rectangle.
+  ///
+  /// The `alignment` parameter specifies how the placeholder rectangle will be vertically
+  /// aligned with the surrounding text. When [PlaceholderAlignment.baseline],
+  /// [PlaceholderAlignment.aboveBaseline], and [PlaceholderAlignment.belowBaseline]
+  /// alignment modes are used, the baseline needs to be set with the `baseline`.
+  /// When using [PlaceholderAlignment.baseline], `baselineOffset` indicates the distance
+  /// of the baseline down from the top of the rectangle. The default `baselineOffset`
+  /// is the `height`.
+  ///
+  /// Examples:
+  ///
+  /// * For a 30x50 placeholder with the bottom edge aligned with the bottom of the text, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.bottom);`
+  /// * For a 30x50 placeholder that is vertically centered around the text, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.middle);`.
+  /// * For a 30x50 placeholder that sits completely on top of the alphabetic baseline, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.aboveBaseline, baseline: TextBaseline.alphabetic)`.
+  /// * For a 30x50 placeholder with 40 pixels above and 10 pixels below the alphabetic baseline, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic, baselineOffset: 40)`.
+  ///
+  /// Lines are permitted to break around each placeholder.
+  ///
+  /// Decorations will be drawn based on the font defined in the most recently
+  /// pushed [TextStyle]. The decorations are drawn as if unicode text were present
+  /// in the placeholder space, and will draw the same regardless of the height and
+  /// alignment of the placeholder. To hide or manually adjust decorations to fit,
+  /// a text style with the desired decoration behavior should be pushed before
+  /// adding a placeholder.
+  ///
+  /// Any decorations drawn through a placeholder will exist on the same canvas/layer
+  /// as the text. This means any content drawn on top of the space reserved by
+  /// the placeholder will be drawn over the decoration, possibly obscuring the
+  /// decoration.
+  ///
+  /// Placeholders are represented by a unicode 0xFFFC "object replacement character"
+  /// in the text buffer. For each placeholder, one object replacement character is
+  /// added on to the text buffer.
+  ///
+  /// The `scale` parameter will scale the `width` and `height` by the specified amount,
+  /// and keep track of the scale. The scales of placeholders added can be accessed
+  /// through [placeholderScales]. This is primarily used for accessibility scaling.
+  void addPlaceholder(double width, double height, PlaceholderAlignment alignment, {
+    double scale = 1.0,
+    double? baselineOffset,
+    TextBaseline? baseline,
+  });
+
+  /// Applies the given paragraph style and returns a [Paragraph] containing the
+  /// added text and associated styling.
+  ///
+  /// After calling this function, the paragraph builder object is invalid and
+  /// cannot be used further.
+  Paragraph build();
+}
+
+base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements ParagraphBuilder {
   @pragma('vm:entry-point')
-  ParagraphBuilder(ParagraphStyle style)
+  _NativeParagraphBuilder(ParagraphStyle style)
     : _defaultLeadingDistribution = style._leadingDistribution {
       List<String>? strutFontFamilies;
       final StrutStyle? strutStyle = style._strutStyle;
@@ -3005,18 +3146,17 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
       String ellipsis,
       String locale);
 
-  /// The number of placeholders currently in the paragraph.
+  @override
   int get placeholderCount => _placeholderCount;
   int _placeholderCount = 0;
 
-  /// The scales of the placeholders in the paragraph.
+  @override
   List<double> get placeholderScales => _placeholderScales;
   final List<double> _placeholderScales = <double>[];
 
   final TextLeadingDistribution _defaultLeadingDistribution;
-  /// Applies the given style to the added text until [pop] is called.
-  ///
-  /// See [pop] for details.
+
+  @override
   void pushStyle(TextStyle style) {
     final List<String> fullFontFamilies = <String>[];
     fullFontFamilies.add(style._fontFamily);
@@ -3112,18 +3252,11 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
 
   static String _encodeLocale(Locale? locale) => locale?.toString() ?? '';
 
-  /// Ends the effect of the most recent call to [pushStyle].
-  ///
-  /// Internally, the paragraph builder maintains a stack of text styles. Text
-  /// added to the paragraph is affected by all the styles in the stack. Calling
-  /// [pop] removes the topmost style in the stack, leaving the remaining styles
-  /// in effect.
+  @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'ParagraphBuilder::pop', isLeaf: true)
   external void pop();
 
-  /// Adds the given text to the paragraph.
-  ///
-  /// The text will be styled according to the current stack of text styles.
+  @override
   void addText(String text) {
     final String? error = _addText(text);
     if (error != null) {
@@ -3134,53 +3267,7 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'ParagraphBuilder::addText')
   external String? _addText(String text);
 
-  /// Adds an inline placeholder space to the paragraph.
-  ///
-  /// The paragraph will contain a rectangular space with no text of the dimensions
-  /// specified.
-  ///
-  /// The `width` and `height` parameters specify the size of the placeholder rectangle.
-  ///
-  /// The `alignment` parameter specifies how the placeholder rectangle will be vertically
-  /// aligned with the surrounding text. When [PlaceholderAlignment.baseline],
-  /// [PlaceholderAlignment.aboveBaseline], and [PlaceholderAlignment.belowBaseline]
-  /// alignment modes are used, the baseline needs to be set with the `baseline`.
-  /// When using [PlaceholderAlignment.baseline], `baselineOffset` indicates the distance
-  /// of the baseline down from the top of the rectangle. The default `baselineOffset`
-  /// is the `height`.
-  ///
-  /// Examples:
-  ///
-  /// * For a 30x50 placeholder with the bottom edge aligned with the bottom of the text, use:
-  /// `addPlaceholder(30, 50, PlaceholderAlignment.bottom);`
-  /// * For a 30x50 placeholder that is vertically centered around the text, use:
-  /// `addPlaceholder(30, 50, PlaceholderAlignment.middle);`.
-  /// * For a 30x50 placeholder that sits completely on top of the alphabetic baseline, use:
-  /// `addPlaceholder(30, 50, PlaceholderAlignment.aboveBaseline, baseline: TextBaseline.alphabetic)`.
-  /// * For a 30x50 placeholder with 40 pixels above and 10 pixels below the alphabetic baseline, use:
-  /// `addPlaceholder(30, 50, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic, baselineOffset: 40)`.
-  ///
-  /// Lines are permitted to break around each placeholder.
-  ///
-  /// Decorations will be drawn based on the font defined in the most recently
-  /// pushed [TextStyle]. The decorations are drawn as if unicode text were present
-  /// in the placeholder space, and will draw the same regardless of the height and
-  /// alignment of the placeholder. To hide or manually adjust decorations to fit,
-  /// a text style with the desired decoration behavior should be pushed before
-  /// adding a placeholder.
-  ///
-  /// Any decorations drawn through a placeholder will exist on the same canvas/layer
-  /// as the text. This means any content drawn on top of the space reserved by
-  /// the placeholder will be drawn over the decoration, possibly obscuring the
-  /// decoration.
-  ///
-  /// Placeholders are represented by a unicode 0xFFFC "object replacement character"
-  /// in the text buffer. For each placeholder, one object replacement character is
-  /// added on to the text buffer.
-  ///
-  /// The `scale` parameter will scale the `width` and `height` by the specified amount,
-  /// and keep track of the scale. The scales of placeholders added can be accessed
-  /// through [placeholderScales]. This is primarily used for accessibility scaling.
+  @override
   void addPlaceholder(double width, double height, PlaceholderAlignment alignment, {
     double scale = 1.0,
     double? baselineOffset,
@@ -3201,19 +3288,15 @@ class ParagraphBuilder extends NativeFieldWrapperClass1 {
   @Native<Void Function(Pointer<Void>, Double, Double, Uint32, Double, Uint32)>(symbol: 'ParagraphBuilder::addPlaceholder')
   external void _addPlaceholder(double width, double height, int alignment, double baselineOffset, int baseline);
 
-  /// Applies the given paragraph style and returns a [Paragraph] containing the
-  /// added text and associated styling.
-  ///
-  /// After calling this function, the paragraph builder object is invalid and
-  /// cannot be used further.
+  @override
   Paragraph build() {
-    final Paragraph paragraph = Paragraph._();
+    final _NativeParagraph paragraph = _NativeParagraph._();
     _build(paragraph);
     return paragraph;
   }
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'ParagraphBuilder::build')
-  external void _build(Paragraph outParagraph);
+  external void _build(_NativeParagraph outParagraph);
 }
 
 /// Loads a font from a buffer and makes it available for rendering text.
