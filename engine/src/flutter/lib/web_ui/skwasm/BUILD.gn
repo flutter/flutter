@@ -12,6 +12,7 @@ wasm_lib("skwasm") {
     "export.h",
     "fonts.cpp",
     "helpers.h",
+    "image.cpp",
     "paint.cpp",
     "path.cpp",
     "picture.cpp",

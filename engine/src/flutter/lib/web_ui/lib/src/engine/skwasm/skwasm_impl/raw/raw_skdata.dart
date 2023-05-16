@@ -16,5 +16,11 @@ external SkDataHandle skDataCreate(int size);
 @Native<Pointer<Void> Function(SkDataHandle)>(symbol: 'skData_getPointer', isLeaf: true)
 external Pointer<Void> skDataGetPointer(SkDataHandle handle);
 
+@Native<Pointer<Void> Function(SkDataHandle)>(symbol: 'skData_getConstPointer', isLeaf: true)
+external Pointer<Void> skDataGetConstPointer(SkDataHandle handle);
+
+@Native<Size Function(SkDataHandle)>(symbol: 'skData_getSize', isLeaf: true)
+external int skDataGetSize(SkDataHandle handle);
+
 @Native<Void Function(SkDataHandle)>(symbol: 'skData_dispose', isLeaf: true)
 external void skDataDispose(SkDataHandle handle);

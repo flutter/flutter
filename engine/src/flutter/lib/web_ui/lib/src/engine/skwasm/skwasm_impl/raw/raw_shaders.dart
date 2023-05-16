@@ -121,3 +121,18 @@ external ShaderHandle shaderCreateRuntimeEffectShader(
   Pointer<ShaderHandle> childShaders,
   int childCount
 );
+
+@Native<ShaderHandle Function(
+  ImageHandle,
+  Int,
+  Int,
+  Int,
+  RawMatrix33,
+)>(symbol: 'shader_createFromImage', isLeaf: true)
+external ShaderHandle shaderCreateFromImage(
+  ImageHandle handle,
+  int tileModeX,
+  int tileModeY,
+  int quality,
+  RawMatrix33 localMatrix,
+);

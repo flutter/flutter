@@ -75,9 +75,19 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  ui.ImageShader createImageShader(ui.Image image, ui.TileMode tmx, ui.TileMode tmy, Float64List matrix4, ui.FilterQuality? filterQuality) {
-    throw UnimplementedError('createImageShader not yet implemented');
-  }
+  ui.ImageShader createImageShader(
+    ui.Image image,
+    ui.TileMode tmx,
+    ui.TileMode tmy,
+    Float64List matrix4,
+    ui.FilterQuality? filterQuality
+  ) => SkwasmImageShader.imageShader(
+    image as SkwasmImage,
+    tmx,
+    tmy,
+    matrix4,
+    filterQuality
+  );
 
   @override
   ui.Gradient createLinearGradient(
@@ -285,9 +295,81 @@ class SkwasmRenderer implements Renderer {
       indices: indices
     );
 
+  ui.Size? _scaledSize(
+    int width,
+    int height,
+    int? targetWidth,
+    int? targetHeight,
+  ) {
+    if (targetWidth == width && targetHeight == height) {
+      // Not scaled
+      return null;
+    }
+    if (targetWidth == null) {
+      if (targetHeight == null || targetHeight == height) {
+        // Not scaled.
+        return null;
+      }
+      targetWidth = (width * targetHeight / height).round();
+    } else if (targetHeight == null) {
+      if (targetWidth == targetWidth) {
+        // Not scaled.
+        return null;
+      }
+      targetHeight = (height * targetWidth / width).round();
+    }
+    return ui.Size(targetWidth.toDouble(), targetHeight.toDouble());
+  }
+
   @override
-  void decodeImageFromPixels(Uint8List pixels, int width, int height, ui.PixelFormat format, ui.ImageDecoderCallback callback, {int? rowBytes, int? targetWidth, int? targetHeight, bool allowUpscaling = true}) {
-    throw UnimplementedError('decodeImageFromPixels not yet implemented');
+  void decodeImageFromPixels(
+    Uint8List pixels,
+    int width,
+    int height,
+    ui.PixelFormat format,
+    ui.ImageDecoderCallback callback, {
+    int? rowBytes,
+    int? targetWidth,
+    int? targetHeight,
+    bool allowUpscaling = true
+  }) {
+    ui.Size? scaledSize = _scaledSize(
+      width,
+      height,
+      targetWidth,
+      targetHeight
+    );
+    if (!allowUpscaling && scaledSize != null &&
+      (scaledSize.width > width || scaledSize.height > height)) {
+        scaledSize = null;
+    }
+    final SkwasmImage pixelImage = SkwasmImage.fromPixels(
+      pixels,
+      width,
+      height,
+      format
+    );
+    if (scaledSize == null) {
+      callback(pixelImage);
+      return;
+    }
+
+    final ui.Rect outputRect = ui.Rect.fromLTWH(0, 0, scaledSize.width, scaledSize.height);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, outputRect);
+
+    canvas.drawImageRect(
+      pixelImage,
+      ui.Rect.fromLTWH(0, 0, width.toDouble(), width.toDouble()),
+      outputRect,
+      ui.Paint(),
+    );
+    final ui.Image finalImage = recorder.endRecording().toImageSync(
+      scaledSize.width.round(),
+      scaledSize.height.round()
+    );
+    pixelImage.dispose();
+    callback(finalImage);
   }
 
   @override

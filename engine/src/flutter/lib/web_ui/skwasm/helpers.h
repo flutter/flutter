@@ -6,6 +6,7 @@
 
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkRRect.h"
+#include "third_party/skia/include/core/SkSamplingOptions.h"
 
 namespace Skwasm {
 
@@ -23,4 +24,37 @@ inline SkRRect createRRect(const SkScalar* f) {
   return rr;
 }
 
+// This needs to be kept in sync with the "FilterQuality" enum in dart:ui
+enum class FilterQuality {
+  none,
+  low,
+  medium,
+  high,
+};
+
+inline SkFilterMode filterModeForQuality(FilterQuality quality) {
+  switch (quality) {
+    case FilterQuality::none:
+    case FilterQuality::low:
+      return SkFilterMode::kNearest;
+    case FilterQuality::medium:
+    case FilterQuality::high:
+      return SkFilterMode::kLinear;
+  }
+}
+
+inline SkSamplingOptions samplingOptionsForQuality(FilterQuality quality) {
+  switch (quality) {
+    case FilterQuality::none:
+      return SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    case FilterQuality::low:
+      return SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNearest);
+    case FilterQuality::medium:
+      return SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+    case FilterQuality::high:
+      // Cubic equation coefficients recommended by Mitchell & Netravali
+      // in their paper on cubic interpolation.
+      return SkSamplingOptions(SkCubicResampler::Mitchell());
+  }
+}
 }  // namespace Skwasm

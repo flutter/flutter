@@ -62,9 +62,7 @@ void skiaDecodeImageFromPixels(
     }
 
     if (targetWidth != null || targetHeight != null) {
-      if (!validUpscale(allowUpscaling, targetWidth, targetHeight, width, height)) {
-        domWindow.console.warn('Cannot apply targetWidth/targetHeight when allowUpscaling is false.');
-      } else {
+      if (validUpscale(allowUpscaling, targetWidth, targetHeight, width, height)) {
         return callback(scaleImage(skImage, targetWidth, targetHeight));
       }
     }

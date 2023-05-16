@@ -12,9 +12,7 @@ class SkwasmPicture implements ui.Picture {
   PictureHandle get handle => _handle;
 
   @override
-  Future<ui.Image> toImage(int width, int height) {
-    throw UnimplementedError();
-  }
+  Future<ui.Image> toImage(int width, int height) async => toImageSync(width, height);
 
   @override
   void dispose() {
@@ -30,10 +28,8 @@ class SkwasmPicture implements ui.Picture {
   bool debugDisposed = false;
 
   @override
-  ui.Image toImageSync(int width, int height) {
-    // TODO(jacksongardner): implement toImageSync
-    throw UnimplementedError();
-  }
+  ui.Image toImageSync(int width, int height) =>
+    SkwasmImage(imageCreateFromPicture(handle, width, height));
 
   ui.Rect get cullRect {
     return withStackScope((StackScope s) {

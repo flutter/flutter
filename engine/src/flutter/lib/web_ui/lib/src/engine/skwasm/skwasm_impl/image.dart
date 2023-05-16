@@ -2,25 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
 class SkwasmImage implements ui.Image {
-  @override
-  int get width {
-    throw UnimplementedError();
+  SkwasmImage(this.handle);
+
+  factory SkwasmImage.fromPixels(
+    Uint8List pixels,
+    int width,
+    int height,
+    ui.PixelFormat format, {
+    int? rowBytes,
+  }) {
+    final SkDataHandle dataHandle = skDataCreate(pixels.length);
+    final Pointer<Uint8> dataPointer = skDataGetPointer(dataHandle).cast<Uint8>();
+    for (int i = 0; i < pixels.length; i++) {
+      dataPointer[i] = pixels[i];
+    }
+    final ImageHandle imageHandle = imageCreateFromPixels(
+      dataHandle,
+      width,
+      height,
+      format.index,
+      rowBytes ?? 4 * width,
+    );
+    skDataDispose(dataHandle);
+    return SkwasmImage(imageHandle);
   }
 
+  final ImageHandle handle;
+  bool _isDisposed = false;
+
   @override
-  int get height {
-    throw UnimplementedError();
-  }
+  int get width => imageGetWidth(handle);
+
+  @override
+  int get height => imageGetHeight(handle);
 
   @override
   Future<ByteData?> toByteData(
       {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    throw UnimplementedError();
+    return (renderer as SkwasmRenderer).surface.rasterizeImage(this, format);
   }
 
   @override
@@ -28,13 +55,14 @@ class SkwasmImage implements ui.Image {
 
   @override
   void dispose() {
-    throw UnimplementedError();
+    if (!_isDisposed) {
+      imageDispose(handle);
+      _isDisposed = true;
+    }
   }
 
   @override
-  bool get debugDisposed {
-    throw UnimplementedError();
-  }
+  bool get debugDisposed => _isDisposed;
 
   @override
   SkwasmImage clone() => this;

@@ -18,11 +18,6 @@ struct SurfaceWrapper {
   sk_sp<SkSurface> surface;
 };
 
-struct CanvasWrapper {
-  EMSCRIPTEN_WEBGL_CONTEXT_HANDLE context;
-  SkCanvas* canvas;
-};
-
 inline void makeCurrent(EMSCRIPTEN_WEBGL_CONTEXT_HANDLE handle) {
   if (!handle)
     return;
