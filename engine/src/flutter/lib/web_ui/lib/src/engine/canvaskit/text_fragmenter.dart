@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import '../dom.dart';
@@ -153,7 +154,7 @@ final DomV8BreakIterator _v8LineBreaker = createV8BreakIterator();
 
 Uint32List fragmentUsingV8LineBreaker(String text) {
   final List<LineBreakFragment> fragments =
-      breakLinesUsingV8BreakIterator(text, _v8LineBreaker);
+      breakLinesUsingV8BreakIterator(text, text.toJS, _v8LineBreaker);
 
   final int size = (fragments.length + 1) * 2;
   final Uint32List typedArray = Uint32List(size);
