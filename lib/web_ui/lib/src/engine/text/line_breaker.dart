@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import '../dom.dart';
 import 'fragmenter.dart';
 import 'line_break_properties.dart';
@@ -71,15 +73,15 @@ class V8LineBreakFragmenter extends TextFragmenter implements LineBreakFragmente
 
   @override
   List<LineBreakFragment> fragment() {
-    return breakLinesUsingV8BreakIterator(text, _v8BreakIterator);
+    return breakLinesUsingV8BreakIterator(text, text.toJS, _v8BreakIterator);
   }
 }
 
-List<LineBreakFragment> breakLinesUsingV8BreakIterator(String text, DomV8BreakIterator iterator) {
+List<LineBreakFragment> breakLinesUsingV8BreakIterator(String text, JSString jsText, DomV8BreakIterator iterator) {
   final List<LineBreakFragment> breaks = <LineBreakFragment>[];
   int fragmentStart = 0;
 
-  iterator.adoptText(text);
+  iterator.adoptText(jsText);
   iterator.first();
   while (iterator.next() != -1) {
     final LineBreakType type = _getV8BreakType(text, iterator);

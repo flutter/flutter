@@ -15,6 +15,20 @@ typedef ParagraphHandle = Pointer<RawParagraph>;
 final class RawTextBoxList extends Opaque {}
 typedef TextBoxListHandle = Pointer<RawTextBoxList>;
 
+final class RawUnicodePositionBuffer extends Opaque {}
+typedef UnicodePositionBufferHandle = Pointer<RawUnicodePositionBuffer>;
+
+final class RawLineBreakBuffer extends Opaque {}
+typedef LineBreakBufferHandle = Pointer<RawLineBreakBuffer>;
+
+final class LineBreak extends Struct {
+  @Int32()
+  external int position;
+
+  @Int32()
+  external int lineBreakType;
+}
+
 @Native<Void Function(ParagraphHandle)>(symbol: 'paragraph_dispose', isLeaf: true)
 external void paragraphDispose(ParagraphHandle handle);
 
