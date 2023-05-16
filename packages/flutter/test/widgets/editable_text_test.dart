@@ -16301,7 +16301,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
 
     await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
     await tester.pump();
-    expect(state.textEditingValue.text, '👨‍👩‍�');
+    expect(state.textEditingValue.text, '👨‍👩‍');
     expect(
       state.textEditingValue.selection,
       const TextSelection.collapsed(offset: 6),
