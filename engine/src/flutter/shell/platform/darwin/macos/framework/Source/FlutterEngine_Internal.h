@@ -53,6 +53,7 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 @interface FlutterEngineTerminationHandler : NSObject
 
 @property(nonatomic, readonly) BOOL shouldTerminate;
+@property(nonatomic, readwrite) BOOL acceptingRequests;
 
 - (instancetype)initWithEngine:(FlutterEngine*)engine
                     terminator:(nullable FlutterTerminationCallback)terminator;

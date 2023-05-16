@@ -168,6 +168,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (instancetype)initWithEngine:(FlutterEngine*)engine
                     terminator:(FlutterTerminationCallback)terminator {
   self = [super init];
+  _acceptingRequests = NO;
   _engine = engine;
   _terminator = terminator ? terminator : ^(id sender) {
     // Default to actually terminating the application. The terminator exists to
@@ -205,6 +206,11 @@ constexpr char kTextPlainFormat[] = "text/plain";
                              exitType:(FlutterAppExitType)type
                                result:(nullable FlutterResult)result {
   _shouldTerminate = YES;
+  if (![self acceptingRequests]) {
+    // Until the Dart application has signaled that it is ready to handle
+    // termination requests, the app will just terminate when asked.
+    type = kFlutterAppExitTypeRequired;
+  }
   switch (type) {
     case kFlutterAppExitTypeCancelable: {
       FlutterJSONMethodCodec* codec = [FlutterJSONMethodCodec sharedInstance];
@@ -1032,8 +1038,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   } else if ([call.method isEqualToString:@"System.exitApplication"]) {
     [[self terminationHandler] handleRequestAppExitMethodCall:call.arguments result:result];
   } else if ([call.method isEqualToString:@"System.initializationComplete"]) {
-    // TODO(gspencergoog): Handle this message to enable exit message listening.
-    // https://github.com/flutter/flutter/issues/126033
+    [self terminationHandler].acceptingRequests = YES;
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);
