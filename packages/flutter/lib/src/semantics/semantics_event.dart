@@ -162,7 +162,7 @@ class TapSemanticEvent extends SemanticsEvent {
 
 /// An event which to move the accessibility focus.
 ///
-/// This is generally not recommended to use, it may break the consistency of the
+/// Using this API is generally not recommended, as it may break the consistency of the
 /// accessibiliy focus of the platform.
 ///
 /// Some possibile use cases:
