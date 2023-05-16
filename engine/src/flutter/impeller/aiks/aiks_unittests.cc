@@ -2131,6 +2131,18 @@ TEST_P(AiksTest,
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, TranslucentSaveLayerWithAdvancedBlendModeDrawsCorrectly) {
+  Canvas canvas;
+  canvas.DrawRect({0, 0, 400, 400}, {.color = Color::Red()});
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .blend_mode = BlendMode::kLighten,
+  });
+  canvas.DrawCircle({200, 200}, 100, {.color = Color::Green()});
+  canvas.Restore();
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 /// This is a regression check for https://github.com/flutter/engine/pull/41129
 /// The entire screen is green if successful. If failing, no frames will render,
 /// or the entire screen will be transparent black.
