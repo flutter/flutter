@@ -216,7 +216,7 @@ class _DebounceTimer {
   }
 }
 
-// An excpetion indicating that the timer was canceled.
+// An exception indicating that the timer was canceled.
 class _CancelException implements Exception {
   const _CancelException();
 }
