@@ -608,7 +608,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     late final Offset alignedTranslation;
 
     if (_currentAxis != null) {
-      switch(widget.panAxis){
+      switch (widget.panAxis){
         case PanAxis.horizontal:
           alignedTranslation = _alignAxis(translation, Axis.horizontal);
         case PanAxis.vertical:

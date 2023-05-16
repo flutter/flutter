@@ -32,9 +32,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_gallery_assets': '1.0.2', // Tests depend on the exact version.
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'video_player': '2.2.11',
-  // Could potentially break color scheme tests on upgrade,
-  // so pin and manually update as needed.
-  'material_color_utilities': '0.3.0',
+  // Keep pinned to latest until 1.0.0.
+  'material_color_utilities': '0.5.0',
   // https://github.com/flutter/flutter/issues/111304
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
@@ -43,6 +42,8 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'path_provider_android': '2.0.21',
   // https://github.com/flutter/flutter/issues/122039
   'flutter_plugin_android_lifecycle': '2.0.8',
+  // https://github.com/flutter/flutter/issues/126710
+  'camera_android': '0.10.7',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

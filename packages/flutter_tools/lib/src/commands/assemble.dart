@@ -260,7 +260,7 @@ class AssembleCommand extends FlutterCommand {
 
     final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
-    if(dartDefines.isNotEmpty){
+    if (dartDefines.isNotEmpty){
       results[kDartDefines] = dartDefines.join(',');
     }
 

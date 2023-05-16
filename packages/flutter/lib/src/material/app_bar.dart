@@ -132,7 +132,8 @@ class _PreferredAppBarSize extends Size {
 /// be visible if their foreground (text) color is the same as the
 /// app bar's background color.
 ///
-/// The default app bar [backgroundColor] is the overall theme's
+/// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+/// the default app bar [backgroundColor] is the overall theme's
 /// [ColorScheme.primary] if the overall theme's brightness is
 /// [Brightness.light]. Unfortunately this is the same as the default
 /// [ButtonStyle.foregroundColor] for [TextButton] for light themes.
@@ -827,7 +828,6 @@ class _AppBarState extends State<AppBar> {
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
-    final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     final double toolbarHeight = widget.toolbarHeight ?? appBarTheme.toolbarHeight ?? kToolbarHeight;
@@ -897,10 +897,7 @@ class _AppBarState extends State<AppBar> {
         leading = DrawerButton(
           style: IconButton.styleFrom(iconSize: overallIconTheme.size ?? 24),
         );
-        // TODO(chunhtai): remove (!hasEndDrawer && canPop) once internal tests
-        // are migrated.
-        // https://github.com/flutter/flutter/issues/80256.
-      } else if ((!hasEndDrawer && canPop) || (parentRoute?.impliesAppBarDismissal ?? false)) {
+      } else if (parentRoute?.impliesAppBarDismissal ?? false) {
         leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
@@ -1400,6 +1397,13 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// Here is an example of [SliverAppBar] when using [stretch] and [onStretchTrigger].
+///
+///  ** See code in examples/api/lib/material/app_bar/sliver_app_bar.4.dart **
+/// {@end-tool}
+///
 ///
 /// {@tool dartpad}
 /// This sample shows a [SliverAppBar] and it's behavior when using the
