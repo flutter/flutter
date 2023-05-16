@@ -285,11 +285,11 @@ targets:
   - name: Linux linux_host_engine
     recipe: engine_v2/engine_v2
     timeout: 60
-    dimensions:
-      os: "Linux"
     properties:
       release_build: "true"
       config_name: linux_host_engine
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux linux_host_desktop_engine
     recipe: engine_v2/engine_v2
