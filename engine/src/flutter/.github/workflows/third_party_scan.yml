@@ -22,5 +22,19 @@ jobs:
         uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b
         with:
           python-version: '3.7.7' # install the python version needed
-      - name: "execute py script"
+      - name: "extract and flatten deps"
         run: python ci/deps_parser.py
+      - name: "scan deps for vulnerabilities"
+        run: python ci/scan_flattened_deps.py
+      # Upload the results as artifacts.
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
+        with:
+          name: SARIF file
+          path: osvReport.sarif
+          retention-days: 5
+      # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to security tab"
+        uses: github/codeql-action/upload-sarif@29b1f65c5e92e24fe6b6647da1eaabe529cec70f
+        with:
+          sarif_file: osvReport.sarif
