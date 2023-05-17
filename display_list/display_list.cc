@@ -22,8 +22,7 @@ DisplayList::DisplayList()
       unique_id_(0),
       bounds_({0, 0, 0, 0}),
       can_apply_group_opacity_(true),
-      is_ui_thread_safe_(true),
-      affects_transparent_surface_(false) {}
+      is_ui_thread_safe_(true) {}
 
 DisplayList::DisplayList(DisplayListStorage&& storage,
                          size_t byte_count,
@@ -33,7 +32,6 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          const SkRect& bounds,
                          bool can_apply_group_opacity,
                          bool is_ui_thread_safe,
-                         bool affects_transparent_surface,
                          sk_sp<const DlRTree> rtree)
     : storage_(std::move(storage)),
       byte_count_(byte_count),
@@ -44,7 +42,6 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
       bounds_(bounds),
       can_apply_group_opacity_(can_apply_group_opacity),
       is_ui_thread_safe_(is_ui_thread_safe),
-      affects_transparent_surface_(affects_transparent_surface),
       rtree_(std::move(rtree)) {}
 
 DisplayList::~DisplayList() {

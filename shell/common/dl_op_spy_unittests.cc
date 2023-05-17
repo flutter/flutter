@@ -7,38 +7,13 @@
 #include "flutter/shell/common/dl_op_spy.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkBitmap.h"
-#include "third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter {
 namespace testing {
 
-// The following macros demonstrate that the DlOpSpy class is equivalent
-// to DisplayList::affects_transparent_surface() now that DisplayListBuilder
-// implements operation culling.
-// See https://github.com/flutter/flutter/issues/125403
-#define ASSERT_DID_DRAW(spy, dl)                    \
-  do {                                              \
-    ASSERT_TRUE(spy.did_draw());                    \
-    ASSERT_TRUE(dl->affects_transparent_surface()); \
-  } while (0)
-
-#define ASSERT_NO_DRAW(spy, dl)                      \
-  do {                                               \
-    ASSERT_FALSE(spy.did_draw());                    \
-    ASSERT_FALSE(dl->affects_transparent_surface()); \
-  } while (0)
-
 TEST(DlOpSpy, DidDrawIsFalseByDefault) {
   DlOpSpy dl_op_spy;
   ASSERT_FALSE(dl_op_spy.did_draw());
-}
-
-TEST(DlOpSpy, EmptyDisplayList) {
-  DisplayListBuilder builder;
-  sk_sp<DisplayList> dl = builder.Build();
-  DlOpSpy dl_op_spy;
-  dl->Dispatch(dl_op_spy);
-  ASSERT_NO_DRAW(dl_op_spy, dl);
 }
 
 TEST(DlOpSpy, SetColor) {
@@ -49,7 +24,7 @@ TEST(DlOpSpy, SetColor) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // Set transparent color.
     DisplayListBuilder builder;
@@ -58,7 +33,7 @@ TEST(DlOpSpy, SetColor) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
   {  // Set black color.
     DisplayListBuilder builder;
@@ -67,7 +42,7 @@ TEST(DlOpSpy, SetColor) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
 }
 
@@ -80,7 +55,7 @@ TEST(DlOpSpy, SetColorSource) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // Set transparent color.
     DisplayListBuilder builder;
@@ -92,7 +67,7 @@ TEST(DlOpSpy, SetColorSource) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
   {  // Set black color.
     DisplayListBuilder builder;
@@ -104,7 +79,7 @@ TEST(DlOpSpy, SetColorSource) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
 }
 
@@ -116,25 +91,16 @@ TEST(DlOpSpy, DrawColor) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
-  {  // Transparent color with kSrc.
+  {  // Transparent color source.
     DisplayListBuilder builder;
     auto color = DlColor::kTransparent();
     builder.DrawColor(color, DlBlendMode::kSrc);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
-  }
-  {  // Transparent color with kSrcOver.
-    DisplayListBuilder builder;
-    auto color = DlColor::kTransparent();
-    builder.DrawColor(color, DlBlendMode::kSrcOver);
-    sk_sp<DisplayList> dl = builder.Build();
-    DlOpSpy dl_op_spy;
-    dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
@@ -146,7 +112,7 @@ TEST(DlOpSpy, DrawPaint) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
   {  // black color in paint.
     DisplayListBuilder builder;
@@ -155,7 +121,7 @@ TEST(DlOpSpy, DrawPaint) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
 }
 
@@ -167,7 +133,7 @@ TEST(DlOpSpy, DrawLine) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -176,7 +142,7 @@ TEST(DlOpSpy, DrawLine) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
@@ -188,7 +154,7 @@ TEST(DlOpSpy, DrawRect) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -197,11 +163,11 @@ TEST(DlOpSpy, DrawRect) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawOval) {
+TEST(DlOpSpy, drawOval) {
   {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
@@ -209,7 +175,7 @@ TEST(DlOpSpy, DrawOval) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -218,11 +184,11 @@ TEST(DlOpSpy, DrawOval) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawCircle) {
+TEST(DlOpSpy, drawCircle) {
   {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
@@ -230,7 +196,7 @@ TEST(DlOpSpy, DrawCircle) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -239,11 +205,11 @@ TEST(DlOpSpy, DrawCircle) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawRRect) {
+TEST(DlOpSpy, drawRRect) {
   {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
@@ -251,7 +217,7 @@ TEST(DlOpSpy, DrawRRect) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -260,49 +226,34 @@ TEST(DlOpSpy, DrawRRect) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawPath) {
-  {  // black line
+TEST(DlOpSpy, drawPath) {
+  {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
-    paint.setDrawStyle(DlDrawStyle::kStroke);
     builder.DrawPath(SkPath::Line(SkPoint::Make(0, 1), SkPoint::Make(1, 1)),
                      paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
-  {  // triangle
-    DisplayListBuilder builder;
-    DlPaint paint(DlColor::kBlack());
-    SkPath path;
-    path.moveTo({0, 0});
-    path.lineTo({1, 0});
-    path.lineTo({0, 1});
-    builder.DrawPath(path, paint);
-    sk_sp<DisplayList> dl = builder.Build();
-    DlOpSpy dl_op_spy;
-    dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
-  }
-  {  // transparent line
+  {  // transparent
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
-    paint.setDrawStyle(DlDrawStyle::kStroke);
     builder.DrawPath(SkPath::Line(SkPoint::Make(0, 1), SkPoint::Make(1, 1)),
                      paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawArc) {
+TEST(DlOpSpy, drawArc) {
   {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
@@ -310,7 +261,7 @@ TEST(DlOpSpy, DrawArc) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -319,11 +270,11 @@ TEST(DlOpSpy, DrawArc) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawPoints) {
+TEST(DlOpSpy, drawPoints) {
   {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
@@ -332,7 +283,7 @@ TEST(DlOpSpy, DrawPoints) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
@@ -342,62 +293,38 @@ TEST(DlOpSpy, DrawPoints) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawVertices) {
+TEST(DlOpSpy, drawVertices) {
   {  // black
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
-    const SkPoint vertices[] = {
-        SkPoint::Make(5, 5),
-        SkPoint::Make(5, 15),
-        SkPoint::Make(15, 5),
-    };
-    const SkPoint texture_coordinates[] = {
-        SkPoint::Make(5, 5),
-        SkPoint::Make(15, 5),
-        SkPoint::Make(5, 15),
-    };
-    const DlColor colors[] = {
-        DlColor::kBlack(),
-        DlColor::kRed(),
-        DlColor::kGreen(),
-    };
-    auto dl_vertices = DlVertices::Make(DlVertexMode::kTriangles, 3, vertices,
+    const SkPoint vertices[] = {SkPoint::Make(5, 5)};
+    const SkPoint texture_coordinates[] = {SkPoint::Make(5, 5)};
+    const DlColor colors[] = {DlColor::kBlack()};
+    auto dl_vertices = DlVertices::Make(DlVertexMode::kTriangles, 1, vertices,
                                         texture_coordinates, colors, 0);
     builder.DrawVertices(dl_vertices.get(), DlBlendMode::kSrc, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
-    const SkPoint vertices[] = {
-        SkPoint::Make(5, 5),
-        SkPoint::Make(5, 15),
-        SkPoint::Make(15, 5),
-    };
-    const SkPoint texture_coordinates[] = {
-        SkPoint::Make(5, 5),
-        SkPoint::Make(15, 5),
-        SkPoint::Make(5, 15),
-    };
-    const DlColor colors[] = {
-        DlColor::kBlack(),
-        DlColor::kRed(),
-        DlColor::kGreen(),
-    };
-    auto dl_vertices = DlVertices::Make(DlVertexMode::kTriangles, 3, vertices,
+    const SkPoint vertices[] = {SkPoint::Make(5, 5)};
+    const SkPoint texture_coordinates[] = {SkPoint::Make(5, 5)};
+    const DlColor colors[] = {DlColor::kBlack()};
+    auto dl_vertices = DlVertices::Make(DlVertexMode::kTriangles, 1, vertices,
                                         texture_coordinates, colors, 0);
     builder.DrawVertices(dl_vertices.get(), DlBlendMode::kSrc, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
@@ -416,7 +343,7 @@ TEST(DlOpSpy, Images) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // DrawImageRect
     DisplayListBuilder builder;
@@ -432,7 +359,7 @@ TEST(DlOpSpy, Images) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // DrawImageNine
     DisplayListBuilder builder;
@@ -448,7 +375,7 @@ TEST(DlOpSpy, Images) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // DrawAtlas
     DisplayListBuilder builder;
@@ -459,19 +386,20 @@ TEST(DlOpSpy, Images) {
     SkBitmap bitmap;
     bitmap.allocPixels(info, 0);
     auto sk_image = SkImages::RasterFromBitmap(bitmap);
-    const SkRSXform xform[] = {SkRSXform::Make(1, 0, 0, 0)};
-    const SkRect tex[] = {SkRect::MakeXYWH(10, 10, 10, 10)};
+    const SkRSXform xform[] = {};
+    const SkRect tex[] = {};
+    const DlColor colors[] = {};
     SkRect cull_rect = SkRect::MakeWH(5, 5);
-    builder.DrawAtlas(DlImage::Make(sk_image), xform, tex, nullptr, 1,
+    builder.DrawAtlas(DlImage::Make(sk_image), xform, tex, colors, 0,
                       DlBlendMode::kSrc, DlImageSampling::kLinear, &cull_rect);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawDisplayList) {
+TEST(DlOpSpy, drawDisplayList) {
   {  // Recursive Transparent DisplayList
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
@@ -486,7 +414,7 @@ TEST(DlOpSpy, DrawDisplayList) {
 
     DlOpSpy dl_op_spy;
     dl2->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl2);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
   {  // Sub non-transparent DisplayList,
     DisplayListBuilder builder;
@@ -502,7 +430,7 @@ TEST(DlOpSpy, DrawDisplayList) {
 
     DlOpSpy dl_op_spy;
     dl2->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl2);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
 
   {  // Sub non-transparent DisplayList, 0 opacity
@@ -519,7 +447,7 @@ TEST(DlOpSpy, DrawDisplayList) {
 
     DlOpSpy dl_op_spy;
     dl2->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl2);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 
   {  // Parent non-transparent DisplayList
@@ -536,11 +464,11 @@ TEST(DlOpSpy, DrawDisplayList) {
 
     DlOpSpy dl_op_spy;
     dl2->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl2);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawTextBlob) {
+TEST(DlOpSpy, drawTextBlob) {
   {  // Non-transparent color.
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
@@ -551,7 +479,7 @@ TEST(DlOpSpy, DrawTextBlob) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent color.
     DisplayListBuilder builder;
@@ -563,11 +491,11 @@ TEST(DlOpSpy, DrawTextBlob) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
-TEST(DlOpSpy, DrawShadow) {
+TEST(DlOpSpy, drawShadow) {
   {  // valid shadow
     DisplayListBuilder builder;
     DlPaint paint;
@@ -577,7 +505,7 @@ TEST(DlOpSpy, DrawShadow) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_DID_DRAW(dl_op_spy, dl);
+    ASSERT_TRUE(dl_op_spy.did_draw());
   }
   {  // transparent color
     DisplayListBuilder builder;
@@ -588,7 +516,7 @@ TEST(DlOpSpy, DrawShadow) {
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
-    ASSERT_NO_DRAW(dl_op_spy, dl);
+    ASSERT_FALSE(dl_op_spy.did_draw());
   }
 }
 
