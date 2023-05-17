@@ -315,14 +315,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker(_hitTestForMouseTracker);
-  }
-
-  HitTestResult _hitTestForMouseTracker(Offset offset) {
-    final HitTestResult result = HitTestResult();
-    renderView.hitTest(result, position: offset);
-    result.add(HitTestEntry(this));
-    return result;
+    _mouseTracker = tracker ?? MouseTracker((Offset position) {
+      final HitTestResult result = HitTestResult();
+      hitTest(result, position);
+      return result;
+    });
   }
 
   @override // from GestureBinding
