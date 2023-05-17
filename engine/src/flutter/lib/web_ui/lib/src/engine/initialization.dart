@@ -8,6 +8,7 @@ import 'dart:js_interop';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_test_fonts/web_test_fonts.dart';
 
 /// The mode the app is running in.
@@ -265,7 +266,7 @@ Future<void> _downloadAssetFonts() async {
 void _addUrlStrategyListener() {
   jsSetUrlStrategy = allowInterop((JsUrlStrategy? jsStrategy) {
     if (jsStrategy == null) {
-      customUrlStrategy = null;
+      ui_web.urlStrategy = null;
     } else {
       // Because `JSStrategy` could be anything, we check for the
       // `addPopStateListener` property and throw if it is missing.
@@ -274,7 +275,7 @@ void _addUrlStrategyListener() {
             'Unexpected JsUrlStrategy: $jsStrategy is missing '
             '`addPopStateListener` property');
       }
-      customUrlStrategy = CustomUrlStrategy.fromJs(jsStrategy);
+      ui_web.urlStrategy = CustomUrlStrategy.fromJs(jsStrategy);
     }
   });
   registerHotRestartListener(() {
