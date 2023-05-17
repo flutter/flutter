@@ -514,6 +514,7 @@ class XCDevice {
             if (errorMessage.contains('not paired')) {
               UsageEvent('device', 'ios-trust-failure', flutterUsage: globals.flutterUsage).send();
             }
+            _logger.printTrace(errorMessage);
           }
 
           final int? code = _errorCode(errorProperties);
