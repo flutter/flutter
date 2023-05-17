@@ -34,7 +34,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 backgroundColor: Colors.transparent,
                 floating: true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  suggestionsBuilder: (BuildContext context, SearchController controller) async {
                     return List<Widget>.generate(
                       5,
                       (int index) {
