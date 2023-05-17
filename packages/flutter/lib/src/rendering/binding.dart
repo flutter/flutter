@@ -324,13 +324,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
-    final bool hitTestResultWasCached = event is PointerMoveEvent || event is PointerPanZoomUpdateEvent;
     _mouseTracker!.updateWithEvent(
       event,
       // When the button is pressed, normal hit test uses a cached result, but
       // MouseTracker requires that the hit test is re-executed to update the
       // hovering events.
-      hitTestResultWasCached ? null : hitTestResult,
+      useCachedHitTestResult(event) ? null : hitTestResult,
     );
     super.dispatchEvent(event, hitTestResult);
   }
