@@ -115,11 +115,12 @@ mixin ScrollMetrics {
   /// This is the content above the content described by [extentInside].
   double get extentBefore => math.max(pixels - minScrollExtent, 0.0);
 
-  /// The quantity of content conceptually "inside" the viewport in the scrollable.
+  /// The quantity of content conceptually "inside" the viewport in the
+  /// scrollable (including empty space if the total amount of content is less
+  /// than the [viewportDimension]).
   ///
-  /// The value is typically the height of the viewport when [outOfRange] is false.
-  /// It could be less if there is less content visible than the size of the
-  /// viewport, such as when overscrolling.
+  /// The value is typically the extent of the viewport ([viewportDimension])
+  /// when [outOfRange] is false. It can be less when overscrolling.
   ///
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
@@ -134,6 +135,12 @@ mixin ScrollMetrics {
   /// The quantity of content conceptually "below" the viewport in the scrollable.
   /// This is the content below the content described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
+
+  /// The total quantity of content available.
+  ///
+  /// This is the sum of [extentBefore], [extentInside], and [extentAfter], modulo
+  /// any rounding errors.
+  double get extentTotal => maxScrollExtent - minScrollExtent + viewportDimension;
 
   /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable]
   /// associated with this metrics object is drawn into.
