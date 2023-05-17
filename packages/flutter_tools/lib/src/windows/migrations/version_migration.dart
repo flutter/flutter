@@ -115,7 +115,7 @@ This indicates non-trivial changes have been made to the Windows runner in the
     );
     if (originalResourceFileContents != newResourceFileContents) {
       logger.printStatus(
-        'windows/runner/Runner.rc does not define use Flutter version information, updating.',
+        'windows/runner/Runner.rc does not use Flutter version information, updating.',
       );
       _resourceFile.writeAsStringSync(newResourceFileContents);
     }

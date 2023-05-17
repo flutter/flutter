@@ -246,7 +246,7 @@ void main () {
       );
 
       expect(testLogger.statusText, contains('windows/runner/CMakeLists.txt does not define version information, updating.'));
-      expect(testLogger.statusText, contains('windows/runner/Runner.rc does not define use Flutter version information, updating.'));
+      expect(testLogger.statusText, contains('windows/runner/Runner.rc does not use Flutter version information, updating.'));
     });
 
     testWithoutContext('migrates project to set version information (CRLF)', () {
@@ -308,7 +308,7 @@ void main () {
       );
 
       expect(testLogger.statusText, contains('windows/runner/CMakeLists.txt does not define version information, updating.'));
-      expect(testLogger.statusText, contains('windows/runner/Runner.rc does not define use Flutter version information, updating.'));
+      expect(testLogger.statusText, contains('windows/runner/Runner.rc does not use Flutter version information, updating.'));
     });
   });
 }
