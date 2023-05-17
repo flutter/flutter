@@ -326,7 +326,7 @@ class IOSDevice extends Device {
 
   DevicePortForwarder? _portForwarder;
 
-  bool? devModeEnabled;
+  bool devModeEnabled = false;
 
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;

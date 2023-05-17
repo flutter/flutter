@@ -233,14 +233,6 @@ class TargetDevices {
     }
   }
 
-  Future<List<Device>?> _handleDevModeDisabledIosDevice(IOSDevice device) async {
-    _logger.printStatus(
-      userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
-    );
-
-    await _printUnsupportedDevices();
-  }
-
   /// Determine which device to use when multiple found.
   ///
   /// If user has not specified a device id/name, attempt to prioritize
@@ -509,17 +501,15 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       // If there are multiple matches, continue on to wait for all attached
       // and wireless devices to load so the user can select between all
       // connected matches.
-      final List<Device> devices = await _getDeviceById(
+      List<Device> specifiedDevices = await _getDeviceById(
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         includeDisconnected: true,
       );
 
-      if (devices.length == 1) {
-        Device? matchedDevice = devices.first;
+      specifiedDevices = await _removeDevDisabledIOSDevices(specifiedDevices);
 
-        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled! ) {
-          return _handleDevModeDisabledIosDevice(matchedDevice);
-        }
+      if (specifiedDevices.length == 1) {
+        Device? matchedDevice = specifiedDevices.first;
 
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
           matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
@@ -529,35 +519,13 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
           return <Device>[matchedDevice];
         }
       }
-
-      if (devices.length > 1) {
-        final List<Device> disabledDevices = <Device>[];
-
-        for (final Device device in devices) {
-          if (device is IOSDevice && !device.devModeEnabled!) {
-            disabledDevices.add(device);
-
-            // otherwise, just show the error and move on
-            _logger.printStatus(
-              userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
-            );
-          } else {
-            // return <Device>[device];
-          }
-        }
-
-        if (disabledDevices.length == devices.length) {
-          // all matching devices have dev mode disabled, so print other
-          // available devices
-          await _printUnsupportedDevices();
-          return null;
-        }
-      }
     }
 
-    final List<Device> attachedDevices = await _getAttachedDevices(
+    List<Device> attachedDevices = await _getAttachedDevices(
       supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
     );
+
+    attachedDevices = await _removeDevDisabledIOSDevices(attachedDevices, printWarning: false);
 
     // _getRefreshedWirelessDevices must be run after _getAttachedDevices is
     // finished to prevent non-iOS discoverers from running simultaneously.
@@ -617,6 +585,27 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     _logger.printStatus(_checkingForWirelessDevicesMessage);
     final List<Device> wirelessDevices = await futureWirelessDevices;
     return devices + wirelessDevices;
+  }
+
+  Future<List<Device>> _removeDevDisabledIOSDevices(
+      List<Device> devices,
+      {bool printWarning = true}
+      ) async {
+    final List<Device> disabledDevices = <Device>[];
+
+    for (final Device device in devices) {
+      if (device is IOSDevice && !device.devModeEnabled) {
+        disabledDevices.add(device);
+        if (printWarning) {
+          _logger.printStatus(
+              userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name)
+          );
+        }
+      }
+    }
+
+    devices.removeWhere((Device element) => disabledDevices.contains(element));
+    return devices;
   }
 
   /// Determine which device to use when one or more are found.
