@@ -234,22 +234,11 @@ class TargetDevices {
   }
 
   Future<List<Device>?> _handleDevModeDisabledIosDevice(IOSDevice device) async {
-    // Get connected devices from cache, including unsupported ones.
-    final List<Device> unsupportedDevices = await _deviceManager.getAllDevices(
-        filter: DeviceDiscoveryFilter(
-          deviceConnectionInterface: deviceConnectionInterface,
-        )
-    );
-
     _logger.printStatus(
       userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
     );
 
-    if (unsupportedDevices.isNotEmpty) {
-      _logger.printStatus('');
-      _logger.printStatus('The following devices were found:');
-      await Device.printDevices(unsupportedDevices, _logger);
-    }
+    await _printUnsupportedDevices();
   }
 
   /// Determine which device to use when multiple found.
@@ -542,7 +531,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       }
 
       if (devices.length > 1) {
-        final List<Device> disabledDevices = [];
+        final List<Device> disabledDevices = <Device>[];
 
         for (final Device device in devices) {
           if (device is IOSDevice && !device.devModeEnabled!) {
@@ -552,6 +541,8 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
             _logger.printStatus(
               userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name),
             );
+          } else {
+            // return <Device>[device];
           }
         }
 

@@ -1268,13 +1268,34 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use \'target-device\' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device' for development, enable Developer Mode in Settings → Privacy & Security.
 
 The following devices were found:
 target-device (mobile) • xxx • ios • iOS 16
 '''));
           expect(devices, isNull);
           expect(deviceManager.iosDiscoverer.devicesCalled, 2);
+          expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
+          expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
+        });
+
+        testUsingContext('when one of the matching devices has dev mode disabled', () async {
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device-1', devModeEnabled: false),
+            FakeIOSDevice(deviceName: 'target-device-2', devModeEnabled: true)];
+
+          final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+          expect(logger.statusText, equals('''
+To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
+Checking for wireless devices...
+
+Found 2 devices with name or id matching target-device:
+target-device-1 (mobile) • xxx • ios • iOS 16
+target-device-2 (mobile) • xxx • ios • iOS 16
+'''));
+          expect(devices, isNotNull);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 1);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
@@ -1287,8 +1308,8 @@ target-device (mobile) • xxx • ios • iOS 16
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
           expect(logger.statusText, equals('''
-To use \'target-device-1\' for development, enable Developer Mode in Settings → Privacy & Security.
-To use \'target-device-2\' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-1' for development, enable Developer Mode in Settings → Privacy & Security.
+To use 'target-device-2' for development, enable Developer Mode in Settings → Privacy & Security.
 
 The following devices were found:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1618,11 +1639,9 @@ Waiting for target-device-1 to connect...
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
-          expect(logger.statusText, equals('''
-Checking for wireless devices...
-'''));
+          expect(logger.statusText, equals(''''''));
           expect(devices, <Device>[attachedIOSDevice1]);
-          expect(deviceManager.iosDiscoverer.devicesCalled, 3);
+          expect(deviceManager.iosDiscoverer.devicesCalled, 1);
           expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
           expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
           expect(deviceManager.iosDiscoverer.xcdevice.waitedForDeviceToConnect, isFalse);
