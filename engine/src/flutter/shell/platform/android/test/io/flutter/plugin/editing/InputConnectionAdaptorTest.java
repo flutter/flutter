@@ -551,7 +551,8 @@ public class InputConnectionAdaptorTest {
   }
 
   @Test
-  public void testSendKeyEvent_shiftKeyUpCancelsSelection() {
+  public void testSendKeyEvent_shiftKeyUpDoesNotCancelSelection() {
+    // Regression test for https://github.com/flutter/flutter/issues/101569.
     int selStart = 5;
     int selEnd = 10;
     ListenableEditingState editable = sampleEditable(selStart, selEnd);
@@ -560,8 +561,8 @@ public class InputConnectionAdaptorTest {
     KeyEvent shiftKeyUp = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SHIFT_LEFT);
     boolean didConsume = adaptor.handleKeyEvent(shiftKeyUp);
 
-    assertTrue(didConsume);
-    assertEquals(selEnd, Selection.getSelectionStart(editable));
+    assertFalse(didConsume);
+    assertEquals(selStart, Selection.getSelectionStart(editable));
     assertEquals(selEnd, Selection.getSelectionEnd(editable));
   }
 

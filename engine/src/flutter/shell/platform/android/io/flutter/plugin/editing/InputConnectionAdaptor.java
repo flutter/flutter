@@ -326,13 +326,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
         return true;
       }
     }
-    if (event.getAction() == KeyEvent.ACTION_UP
-        && (event.getKeyCode() == KeyEvent.KEYCODE_SHIFT_LEFT
-            || event.getKeyCode() == KeyEvent.KEYCODE_SHIFT_RIGHT)) {
-      int selEnd = Selection.getSelectionEnd(mEditable);
-      setSelection(selEnd, selEnd);
-      return true;
-    }
     return false;
   }
 
