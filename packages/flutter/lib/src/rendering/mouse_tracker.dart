@@ -20,11 +20,11 @@ export 'package:flutter/services.dart' show
   MouseCursor,
   SystemMouseCursors;
 
-/// Signature for searching for [MouseTrackerAnnotation]s at the given offset.
+/// Signature for hit testing the render view at the given offset.
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
-typedef MouseDetectorAnnotationFinder = HitTestResult Function(Offset offset);
+typedef MouseTrackerRenderViewHitTest = HitTestResult Function(Offset offset);
 
 // Various states of a connected mouse device used by [MouseTracker].
 class _MouseState {
@@ -161,6 +161,16 @@ class _MouseTrackerUpdateDetails with Diagnosticable {
 /// An instance of [MouseTracker] is owned by the global singleton
 /// [RendererBinding].
 class MouseTracker extends ChangeNotifier {
+  /// Create a mouse tracker.
+  ///
+  /// The `renderViewHitTest` is used to find the render objects on a given
+  /// position in the render view. It is typically provided by the
+  /// [RendererBinding].
+  MouseTracker(MouseTrackerRenderViewHitTest renderViewHitTest)
+    : _renderViewHitTest = renderViewHitTest;
+
+  final MouseTrackerRenderViewHitTest _renderViewHitTest;
+
   final MouseCursorManager _mouseCursorMixin = MouseCursorManager(
     SystemMouseCursors.basic,
   );
@@ -240,14 +250,14 @@ class MouseTracker extends ChangeNotifier {
   //
   // If the device is not connected or not a mouse, an empty map is returned
   // without calling `hitTest`.
-  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state, MouseDetectorAnnotationFinder hitTest) {
+  LinkedHashMap<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
     if (!_mouseStates.containsKey(device)) {
       return LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
     }
 
-    return _hitTestResultToAnnotations(hitTest(globalPosition));
+    return _hitTestResultToAnnotations(_renderViewHitTest(globalPosition));
   }
 
   // A callback that is called on the update of a device.
@@ -279,25 +289,33 @@ class MouseTracker extends ChangeNotifier {
   /// Whether or not at least one mouse is connected and has produced events.
   bool get mouseIsConnected => _mouseStates.isNotEmpty;
 
-  /// Trigger a device update with a new event and its corresponding hit test
-  /// result.
+  /// Perform a device update for one device according to the given new event.
   ///
-  /// The [updateWithEvent] indicates that an event has been observed, and is
-  /// called during the handler of the event. It is typically called by
-  /// [RendererBinding], and should be called with all events received, and let
-  /// [MouseTracker] filter which to react to.
+  /// The [updateWithEvent] is typically called by [RendererBinding] during the
+  /// handler of a pointer event. All pointer events should call this method,
+  /// and let [MouseTracker] filter which to react to.
   ///
-  /// The `getResult` is a function to return the hit test result at the
-  /// position of the event. It should not return a cached hit test
-  /// result, because the cache would not change during a tap sequence.
-  void updateWithEvent(PointerEvent event, ValueGetter<HitTestResult> getResult) {
+  /// The `hitTestResult` serves as an optional optimization, and is the hit
+  /// test result already performed by [RendererBinding] for other gestures. It
+  /// can be null, but when it's not null, it should be identical to the result
+  /// from directly calling `renderViewHitTest` (which means that it should not
+  /// use the cached result for [PointerMoveEvent]).
+  ///
+  /// The [updateWithEvent] is one of the two ways of updating mouse
+  /// states, the other one being [updateAllDevices].
+  void updateWithEvent(PointerEvent event, HitTestResult? hitTestResult) {
     if (event.kind != PointerDeviceKind.mouse) {
       return;
     }
     if (event is PointerSignalEvent) {
       return;
     }
-    final HitTestResult result = event is PointerRemovedEvent ? HitTestResult() : getResult();
+    late final HitTestResult result;
+    if (event is PointerRemovedEvent) {
+      result = HitTestResult();
+    } else {
+      result = hitTestResult ?? _renderViewHitTest(event.position);
+    }
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
     if (!_shouldMarkStateDirty(existingState, event)) {
@@ -338,21 +356,21 @@ class MouseTracker extends ChangeNotifier {
     });
   }
 
-  /// Trigger a device update for all detected devices.
+  /// Perform a device update for all detected devices.
   ///
   /// The [updateAllDevices] is typically called during the post frame phase,
-  /// indicating a frame has passed and all objects have potentially moved. The
-  /// `hitTest` is a function that acquires the hit test result at a given
-  /// position, and must not be empty.
-  ///
-  /// For each connected device, the [updateAllDevices] will make a hit test on
-  /// the device's last seen position, and check if necessary changes need to be
+  /// indicating a frame has passed and all objects have potentially moved. For
+  /// each connected device, the [updateAllDevices] will make a hit test on the
+  /// device's last seen position, and check if necessary changes need to be
   /// made.
-  void updateAllDevices(MouseDetectorAnnotationFinder hitTest) {
+  ///
+  /// The [updateAllDevices] is one of the two ways of updating mouse
+  /// states, the other one being [updateWithEvent].
+  void updateAllDevices() {
     _deviceUpdatePhase(() {
       for (final _MouseState dirtyState in _mouseStates.values) {
         final PointerEvent lastEvent = dirtyState.latestEvent;
-        final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = _findAnnotations(dirtyState, hitTest);
+        final LinkedHashMap<MouseTrackerAnnotation, Matrix4> nextAnnotations = _findAnnotations(dirtyState);
         final LinkedHashMap<MouseTrackerAnnotation, Matrix4> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
 
         _handleDeviceUpdate(_MouseTrackerUpdateDetails.byNewFrame(

@@ -315,18 +315,25 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker();
+    _mouseTracker = tracker ?? MouseTracker(_hitTestForMouseTracker);
+  }
+
+  HitTestResult _hitTestForMouseTracker(Offset offset) {
+    final HitTestResult result = HitTestResult();
+    renderView.hitTest(result, position: offset);
+    result.add(HitTestEntry(this));
+    return result;
   }
 
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
+    final bool hitTestResultWasCached = event is PointerMoveEvent || event is PointerPanZoomUpdateEvent;
     _mouseTracker!.updateWithEvent(
       event,
-      // Enter and exit events should be triggered with or without buttons
-      // pressed. When the button is pressed, normal hit test uses a cached
-      // result, but MouseTracker requires that the hit test is re-executed to
-      // update the hovering events.
-      () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
+      // When the button is pressed, normal hit test uses a cached result, but
+      // MouseTracker requires that the hit test is re-executed to update the
+      // hovering events.
+      hitTestResultWasCached ? null : hitTestResult,
     );
     super.dispatchEvent(event, hitTestResult);
   }
@@ -372,7 +379,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         _debugMouseTrackerUpdateScheduled = false;
         return true;
       }());
-      _mouseTracker!.updateAllDevices(renderView.hitTestMouseTrackers);
+      _mouseTracker!.updateAllDevices();
     });
   }
 
