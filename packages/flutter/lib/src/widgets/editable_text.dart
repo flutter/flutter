@@ -5100,24 +5100,11 @@ class _CodePointBoundary extends TextBoundary {
 
   final String _text;
 
-  // Returns true if the given position falls in the middle of a single code
-  // point in _text.
-  bool _breaksCodePoint(int position) {
+  // Returns true if the given position falls in the center of a surrogate pair.
+  bool _breaksSurrogatePair(int position) {
     assert(position > 0 && position < _text.length && _text.length > 1);
-    // A string containing the two code units that surround the given position.
-    final String surroundingCodeUnits = _text.substring(
-      position - 1,
-      position + 1,
-    );
-
-    // If the surrounding code units are a single code point, then the position
-    // was in the center of that code point.
-    // a[a|b]
-    // [a|b]b
-    // [a|b]c
-    // [a|a]b
-    // a[b|b]
-    return surroundingCodeUnits.runes.length == 1;
+    return _text.codeUnitAt(position) & 0xFC00 == 0xDC00
+        && _text.codeUnitAt(position + 1) & 0xFC00 == 0xD800;
   }
 
   @override
@@ -5132,7 +5119,7 @@ class _CodePointBoundary extends TextBoundary {
       return position;
     }
 
-    return _breaksCodePoint(position) ? position - 1 : position;
+    return _breaksSurrogatePair(position) ? position - 1 : position;
   }
 
   @override
@@ -5147,7 +5134,7 @@ class _CodePointBoundary extends TextBoundary {
       return position;
     }
 
-    return _breaksCodePoint(position + 1) ? position + 2 : position + 1;
+    return _breaksSurrogatePair(position + 1) ? position + 2 : position + 1;
   }
 }
 
