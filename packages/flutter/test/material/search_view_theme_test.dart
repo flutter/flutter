@@ -119,7 +119,7 @@ void main() {
               builder: (BuildContext context, SearchController controller) {
                 return const Icon(Icons.search);
               },
-              suggestionsBuilder: (BuildContext context, SearchController controller) async {
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
                 return <Widget>[];
               },
               isFullScreen: false,
@@ -130,7 +130,7 @@ void main() {
             builder: (BuildContext context, SearchController controller) {
               return const Icon(Icons.search);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) async {
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
               return <Widget>[];
             },
             isFullScreen: false,

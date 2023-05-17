@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -46,7 +47,7 @@ typedef SearchAnchorChildBuilder = Widget Function(BuildContext context, SearchC
 ///
 /// The `controller` callback provided to [SearchAnchor.suggestionsBuilder] can be used
 /// to close the search view and control the editable field on the view.
-typedef SuggestionsBuilder = Future<Iterable<Widget>> Function(BuildContext context, SearchController controller);
+typedef SuggestionsBuilder = FutureOr<Iterable<Widget>> Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to layout the suggestion list.
 ///
@@ -687,10 +688,15 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    widget.suggestionsBuilder(context, _controller)
-        .then((Iterable<Widget> value) {
-      result = value;
-    });
+    final FutureOr<Iterable<Widget>> suggestionsFutureOr = widget.suggestionsBuilder(context, _controller);
+
+    if (suggestionsFutureOr is Iterable<Widget>){
+      result = suggestionsFutureOr;
+    } else {
+      suggestionsFutureOr.then((Iterable<Widget> value) {
+        result = value;
+      });
+    }
 
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
@@ -713,11 +719,11 @@ class _ViewContentState extends State<_ViewContent> {
     return widget.viewBuilder!(suggestions);
   }
 
-  void updateSuggestions() {
-    widget.suggestionsBuilder(context, _controller).then((Iterable<Widget> value) =>
-        setState(() {
-          result = value;
-        }));
+  Future<void> updateSuggestions() async {
+    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
+    setState(() {
+      result = suggestions;
+    });
   }
 
   @override

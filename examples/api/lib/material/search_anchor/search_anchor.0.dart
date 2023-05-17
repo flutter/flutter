@@ -81,7 +81,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
             children: <Widget>[
               SearchAnchor.bar(
                 barHintText: 'Search colors',
-                suggestionsBuilder: (BuildContext context, SearchController controller) async {
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
                   if (controller.text.isEmpty) {
                     if (searchHistory.isNotEmpty) {
                       return getHistoryList(controller);
