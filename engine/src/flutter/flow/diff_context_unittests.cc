@@ -10,7 +10,7 @@ namespace testing {
 TEST_F(DiffContextTest, ClipAlignment) {
   MockLayerTree t1;
   t1.root()->Add(CreateDisplayListLayer(
-      CreateDisplayList(SkRect::MakeLTRB(30, 30, 50, 50))));
+      CreateDisplayList(SkRect::MakeLTRB(30, 30, 50, 50), 1)));
   auto damage = DiffLayerTree(t1, MockLayerTree(), SkIRect::MakeEmpty(), 0, 0);
   EXPECT_EQ(damage.frame_damage, SkIRect::MakeLTRB(30, 30, 50, 50));
   EXPECT_EQ(damage.buffer_damage, SkIRect::MakeLTRB(30, 30, 50, 50));

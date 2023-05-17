@@ -263,9 +263,6 @@ class DisplayList : public SkRefCnt {
   }
 
   bool can_apply_group_opacity() const { return can_apply_group_opacity_; }
-  bool affects_transparent_surface() const {
-    return affects_transparent_surface_;
-  }
   bool isUIThreadSafe() const { return is_ui_thread_safe_; }
 
  private:
@@ -277,7 +274,6 @@ class DisplayList : public SkRefCnt {
               const SkRect& bounds,
               bool can_apply_group_opacity,
               bool is_ui_thread_safe,
-              bool affects_transparent_surface,
               sk_sp<const DlRTree> rtree);
 
   static uint32_t next_unique_id();
@@ -296,8 +292,6 @@ class DisplayList : public SkRefCnt {
 
   const bool can_apply_group_opacity_;
   const bool is_ui_thread_safe_;
-  const bool affects_transparent_surface_;
-
   const sk_sp<const DlRTree> rtree_;
 
   void Dispatch(DlOpReceiver& ctx,
