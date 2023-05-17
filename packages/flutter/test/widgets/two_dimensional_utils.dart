@@ -10,6 +10,23 @@ import 'package:flutter/rendering.dart' show ViewportOffset;
 
 
 // BUILDER DELEGATE ---
+
+final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
+  maxXIndex: 99,
+  maxYIndex: 99,
+  builder: (BuildContext context, ChildVicinity vicinity) {
+    return Container(
+      color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
+        ? Colors.amber[100]
+        : (vicinity.xIndex.isOdd && vicinity.yIndex.isOdd
+        ? Colors.blueAccent[100]
+        : null),
+      height: 200,
+      width: 200,
+      child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
+    );
+  }
+);
 // Creates a simple 2D table of 200x200 squares with a builder delegate.
 Widget simpleBuilderTest({
   Axis mainAxis = Axis.vertical,
@@ -20,8 +37,10 @@ Widget simpleBuilderTest({
   double? cacheExtent,
   DiagonalDragBehavior? diagonalDrag,
   Clip? clipBehavior,
+  String? restorationID,
 }) {
   return MaterialApp(
+    restorationScopeId: restorationID,
     home: Scaffold(
       body: SimpleBuilderTableView(
         mainAxis: mainAxis,
@@ -30,22 +49,7 @@ Widget simpleBuilderTest({
         cacheExtent: cacheExtent,
         diagonalDragBehavior: diagonalDrag ?? DiagonalDragBehavior.none,
         clipBehavior: clipBehavior ?? Clip.hardEdge,
-        delegate: delegate ?? TwoDimensionalChildBuilderDelegate(
-          maxXIndex: 99,
-          maxYIndex: 99,
-          builder: (BuildContext context, ChildVicinity vicinity) {
-            return Container(
-              color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
-                ? Colors.amber[100]
-                : (vicinity.xIndex.isOdd && vicinity.yIndex.isOdd
-                  ? Colors.blueAccent[100]
-                  : null),
-              height: 200,
-              width: 200,
-              child: Center(child: Text('R${vicinity.xIndex}:C${vicinity.yIndex}')),
-            );
-          }
-        ),
+        delegate: delegate ?? builderDelegate,
       ),
     ),
   );

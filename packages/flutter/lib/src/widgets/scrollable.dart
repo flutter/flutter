@@ -2179,8 +2179,8 @@ class _HorizontalInnerDimensionState extends ScrollableState {
         return;
       case DiagonalDragBehavior.weightedContinuous:
         // Re-evaluate locked axis for every update.
-        _evaluateLockedAxis(details.delta);
-        lastDragOffset = details.delta;
+        _evaluateLockedAxis(details.globalPosition);
+        lastDragOffset = details.globalPosition;
       case DiagonalDragBehavior.weightedEvent:
         // Lock axis only once per gesture.
         if (lockedAxis == null && lastDragOffset != null) {
