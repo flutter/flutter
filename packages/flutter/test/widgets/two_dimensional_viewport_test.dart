@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -386,29 +385,32 @@ void main() {
     testWidgets('correctly sets restorationIds', (WidgetTester tester) async {
       late BuildContext capturedContext;
       // with restorationID set
-      await tester.pumpWidget(TwoDimensionalScrollable(
-        restorationId: 'Custom Restoration ID',
-        horizontalDetails: const ScrollableDetails.horizontal(),
-        verticalDetails: const ScrollableDetails.vertical(),
-        viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
-          return SizedBox.square(
-            dimension: 200,
-            child: Builder(
-              builder: (BuildContext context) {
-                capturedContext = context;
-                return Container();
-              },
-            )
-          );
-        },
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        restorationScopeId: 'Test ID',
+        builder: (BuildContext context, Widget? child) => TwoDimensionalScrollable(
+          restorationId: 'Custom Restoration ID',
+          horizontalDetails: const ScrollableDetails.horizontal(),
+          verticalDetails: const ScrollableDetails.vertical(),
+          viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+            return SizedBox.square(
+              dimension: 200,
+              child: Builder(
+                builder: (BuildContext context) {
+                  capturedContext = context;
+                  return Container();
+                },
+              )
+            );
+          },
+        ),
       ));
       await tester.pumpAndSettle();
 
-      // TODO(Piinks): Ask goderbauer why this isn't finding the restoration scope.
-      // expect(
-      //   RestorationScope.of(capturedContext).restorationId,
-      //   'Custom Restoration ID',
-      // );
+      expect(
+        RestorationScope.of(capturedContext).restorationId,
+        'Custom Restoration ID',
+      );
       expect(
         Scrollable.of(capturedContext, axis: Axis.vertical).widget.restorationId,
         'OuterVerticalTwoDimensionalScrollable',
@@ -448,6 +450,31 @@ void main() {
         Scrollable.of(capturedContext, axis: Axis.horizontal).widget.restorationId,
         'InnerHorizontalTwoDimensionalScrollable',
       );
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Restoration works', (WidgetTester tester) async {
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        restorationScopeId: 'Test ID',
+        builder: (BuildContext context, Widget? child) => TwoDimensionalScrollable(
+          restorationId: 'Custom Restoration ID',
+          horizontalDetails: const ScrollableDetails.horizontal(),
+          verticalDetails: const ScrollableDetails.vertical(),
+          viewportBuilder: (BuildContext context, ViewportOffset verticalPosition, ViewportOffset horizontalPosition) {
+            return SimpleBuilderTableViewport(
+              verticalOffset: verticalPosition,
+              verticalAxisDirection: AxisDirection.down,
+              horizontalOffset: horizontalPosition,
+              horizontalAxisDirection: AxisDirection.right,
+              delegate: builderDelegate,
+              mainAxis: Axis.vertical,
+            );
+          },
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      await restoreScrollAndVerify(tester);
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('Inner Scrollables receive the correct details from TwoDimensionalScrollable', (WidgetTester tester) async {
@@ -567,20 +594,276 @@ void main() {
 
     group('DiagonalDragBehavior', () {
       testWidgets('none (default)', (WidgetTester tester) async {
+        // Vertical and horizontal axes are locked.
+        final ScrollController verticalController = ScrollController();
+        final ScrollController horizontalController = ScrollController();
+        await tester.pumpWidget(Directionality(
+          textDirection: TextDirection.ltr,
+          child: simpleBuilderTest(
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+          )
+        ));
+        await tester.pumpAndSettle();
+        final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is TwoDimensionalScrollable);
 
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        await tester.drag(findScrollable, const Offset(0.0, -100.0));
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 80.0);
+        expect(horizontalController.position.pixels, 0.0);
+        await tester.drag(findScrollable, const Offset(-100.0, 0.0));
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 80.0);
+        expect(horizontalController.position.pixels, 80.0);
+        // Drag with and x and y offset, only vertical will accept the gesture
+        // since the x is < kTouchSlop
+        await tester.drag(findScrollable, const Offset(-10.0, -50.0));
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 110.0);
+        expect(horizontalController.position.pixels, 80.0);
+        // Drag with and x and y offset, only horizontal will accept the gesture
+        // since the y is < kTouchSlop
+        await tester.drag(findScrollable, const Offset(-50.0, -10.0));
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 110.0);
+        expect(horizontalController.position.pixels, 110.0);
+        // Drag with and x and y offset, only vertical will accept the gesture
+        //  x is > kTouchSlop, larger offset wins
+        await tester.drag(findScrollable, const Offset(-20.0, -50.0));
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 140.0);
+        expect(horizontalController.position.pixels, 110.0);
+        // Drag with and x and y offset, only horizontal will accept the gesture
+        //  y is > kTouchSlop, larger offset wins
+        await tester.drag(findScrollable, const Offset(-50.0, -20.0));
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 140.0);
+        expect(horizontalController.position.pixels, 140.0);
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('weightedEvent', (WidgetTester tester) async {
+        // For weighted event, the winning axis is locked for the duration of
+        // the gesture.
+        final ScrollController verticalController = ScrollController();
+        final ScrollController horizontalController = ScrollController();
+        await tester.pumpWidget(Directionality(
+          textDirection: TextDirection.ltr,
+          child: simpleBuilderTest(
+            diagonalDrag: DiagonalDragBehavior.weightedEvent,
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+          )
+        ));
+        await tester.pumpAndSettle();
+        final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is TwoDimensionalScrollable);
 
+        // Locks to vertical axis - simple.
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        TestGesture gesture = await tester.startGesture(tester.getCenter(findScrollable));
+        // In this case, the vertical axis clearly wins.
+        Offset secondLocation = tester.getCenter(findScrollable) + const Offset(0.0, -50.0);
+        await gesture.moveTo(secondLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Gesture has not ended yet, move with horizontal diff
+        Offset thirdLocation = secondLocation + const Offset(-30, -15);
+        await gesture.moveTo(thirdLocation);
+        await tester.pumpAndSettle();
+        // Only vertical diff applied
+        expect(verticalController.position.pixels, 65.0);
+        expect(horizontalController.position.pixels, 0.0);
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Lock to vertical axis - scrolls diagonally until certain
+        verticalController.jumpTo(0.0);
+        horizontalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        gesture = await tester.startGesture(tester.getCenter(findScrollable));
+        // In this case, the no one clearly wins, so it moves diagonally.
+        secondLocation = tester.getCenter(findScrollable) + const Offset(-50.0, -50.0);
+        await gesture.moveTo(secondLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 50.0);
+        // Gesture has not ended yet, move clearly indicating vertical
+        thirdLocation = secondLocation + const Offset(-20, -50);
+        await gesture.moveTo(thirdLocation);
+        await tester.pumpAndSettle();
+        // Only vertical diff applied
+        expect(verticalController.position.pixels, 100.0);
+        expect(horizontalController.position.pixels, 50.0);
+        // Gesture has not ended yet, and vertical axis has won for the gesture
+        // continue only vertical scrolling.
+        Offset fourthLocation = thirdLocation + const Offset(-30, -30);
+        await gesture.moveTo(fourthLocation);
+        await tester.pumpAndSettle();
+        // Only vertical diff applied
+        expect(verticalController.position.pixels, 130.0);
+        expect(horizontalController.position.pixels, 50.0);
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Locks to horizontal axis - simple.
+        verticalController.jumpTo(0.0);
+        horizontalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        gesture = await tester.startGesture(tester.getCenter(findScrollable));
+        // In this case, the horizontal axis clearly wins.
+        secondLocation = tester.getCenter(findScrollable) + const Offset(-50.0, 0.0);
+        await gesture.moveTo(secondLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 50.0);
+        // Gesture has not ended yet, move with vertical diff
+        thirdLocation = secondLocation + const Offset(-15, -30);
+        await gesture.moveTo(thirdLocation);
+        await tester.pumpAndSettle();
+        // Only vertical diff applied
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 65.0);
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        // Lock to horizontal axis - scrolls diagonally until certain
+        verticalController.jumpTo(0.0);
+        horizontalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        gesture = await tester.startGesture(tester.getCenter(findScrollable));
+        // In this case, the no one clearly wins, so it moves diagonally.
+        secondLocation = tester.getCenter(findScrollable) + const Offset(-50.0, -50.0);
+        await gesture.moveTo(secondLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 50.0);
+        // Gesture has not ended yet, move clearly indicating horizontal
+        thirdLocation = secondLocation + const Offset(-50, -20);
+        await gesture.moveTo(thirdLocation);
+        await tester.pumpAndSettle();
+        // Only horizontal diff applied
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 100.0);
+        // Gesture has not ended yet, and horizontal axis has won for the gesture
+        // continue only horizontal scrolling.
+        fourthLocation = thirdLocation + const Offset(-30, -30);
+        await gesture.moveTo(fourthLocation);
+        await tester.pumpAndSettle();
+        // Only horizontal diff applied
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 130.0);
+        await gesture.up();
+        await tester.pumpAndSettle();
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('weightedContinuous', (WidgetTester tester) async {
+        // For weighted continuous, the winning axis can change if the axis
+        // differential for the gesture exceeds kTouchSlop. So it can lock, and
+        // remain locked, if the user maintains a generally straight gesture,
+        // otherwise it will unlock and re-evaluate.
+        final ScrollController verticalController = ScrollController();
+        final ScrollController horizontalController = ScrollController();
+        await tester.pumpWidget(Directionality(
+          textDirection: TextDirection.ltr,
+          child: simpleBuilderTest(
+            diagonalDrag: DiagonalDragBehavior.weightedContinuous,
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+          )
+        ));
+        await tester.pumpAndSettle();
+        final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is TwoDimensionalScrollable);
 
+        // Locks to vertical, and then unlocks, resets to horizontal, then
+        // unlocks and scrolls diagonally.
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        final TestGesture gesture = await tester.startGesture(tester.getCenter(findScrollable));
+        // In this case, the vertical axis clearly wins.
+        final Offset secondLocation = tester.getCenter(findScrollable) + const Offset(0.0, -50.0);
+        await gesture.moveTo(secondLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Gesture has not ended yet, move with horizontal diff, but still
+        // dominant vertical
+        final Offset thirdLocation = secondLocation + const Offset(-15, -50);
+        await gesture.moveTo(thirdLocation);
+        await tester.pumpAndSettle();
+        // Only vertical diff applied since kTouchSlop was not exceeded in the
+        // horizontal axis from one drag event to the next.
+        expect(verticalController.position.pixels, 100.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Gesture has not ended yet, move with unlocking horizontal diff
+        final Offset fourthLocation = thirdLocation + const Offset(-50, -15);
+        await gesture.moveTo(fourthLocation);
+        await tester.pumpAndSettle();
+        // Only horizontal diff applied
+        expect(verticalController.position.pixels, 100.0);
+        expect(horizontalController.position.pixels, 50.0);
+        // Gesture has not ended yet, move with unlocking diff that results in
+        // diagonal move since neither wins.
+        final Offset fifthLocation = fourthLocation + const Offset(-50, -50);
+        await gesture.moveTo(fifthLocation);
+        await tester.pumpAndSettle();
+        // Only horizontal diff applied
+        expect(verticalController.position.pixels, 150.0);
+        expect(horizontalController.position.pixels, 100.0);
+        await gesture.up();
+        await tester.pumpAndSettle();
       }, variant: TargetPlatformVariant.all());
 
       testWidgets('free', (WidgetTester tester) async {
+        // For free, anything goes.
+        final ScrollController verticalController = ScrollController();
+        final ScrollController horizontalController = ScrollController();
+        await tester.pumpWidget(Directionality(
+          textDirection: TextDirection.ltr,
+          child: simpleBuilderTest(
+            diagonalDrag: DiagonalDragBehavior.free,
+            verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+            horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+          )
+        ));
+        await tester.pumpAndSettle();
+        final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is TwoDimensionalScrollable);
 
-      }, variant: TargetPlatformVariant.all());
+        // Nothing locks.
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        final TestGesture gesture = await tester.startGesture(tester.getCenter(findScrollable));
+        final Offset secondLocation = tester.getCenter(findScrollable) + const Offset(0.0, -50.0);
+        await gesture.moveTo(secondLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 50.0);
+        expect(horizontalController.position.pixels, 0.0);
+        final Offset thirdLocation = secondLocation + const Offset(-15, -50);
+        await gesture.moveTo(thirdLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 100.0);
+        expect(horizontalController.position.pixels, 15.0);
+        final Offset fourthLocation = thirdLocation + const Offset(-50, -15);
+        await gesture.moveTo(fourthLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 115.0);
+        expect(horizontalController.position.pixels, 65.0);
+        final Offset fifthLocation = fourthLocation + const Offset(-50, -50);
+        await gesture.moveTo(fifthLocation);
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 165.0);
+        expect(horizontalController.position.pixels, 115.0);
+        await gesture.up();
+        await tester.pumpAndSettle();
+      });
     });
   });
 
@@ -965,12 +1248,13 @@ void main() {
         exceptions.add(details.exception);
       };
       // Compose unbounded - vertical axis
-      await tester.pumpWidget(MaterialApp(
-        home: Column(
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget? child) => Column(
           children: <Widget>[
             SimpleBuilderTableView(delegate: delegate)
           ]
-        )
+        ),
       ));
       await tester.pumpAndSettle();
       FlutterError.onError = oldHandler;
@@ -982,12 +1266,13 @@ void main() {
         exceptions.add(details.exception);
       };
       // Compose unbounded - horizontal axis
-      await tester.pumpWidget(MaterialApp(
-        home: Row(
+      await tester.pumpWidget(WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget? child) => Row(
           children: <Widget>[
             SimpleBuilderTableView(delegate: delegate)
           ]
-        )
+        ),
       ));
       await tester.pumpAndSettle();
       FlutterError.onError = oldHandler;
@@ -1096,4 +1381,37 @@ void main() {
 class _NullBuildContext implements BuildContext, TwoDimensionalChildManager {
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+Future<void> restoreScrollAndVerify(WidgetTester tester) async {
+  final Finder findScrollable = find.byElementPredicate((Element e) => e.widget is TwoDimensionalScrollable);
+
+  tester.state<TwoDimensionalScrollableState>(findScrollable).horizontalScrollable.position.jumpTo(100);
+  tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.jumpTo(100);
+  await tester.pump();
+  await tester.restartAndRestore();
+
+  expect(
+    tester.state<TwoDimensionalScrollableState>(findScrollable).horizontalScrollable.position.pixels,
+    100.0,
+  );
+  expect(
+    tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.pixels,
+    100.0,
+  );
+
+  final TestRestorationData data = await tester.getRestorationData();
+  tester.state<TwoDimensionalScrollableState>(findScrollable).horizontalScrollable.position.jumpTo(0);
+  tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.jumpTo(0);
+  await tester.pump();
+  await tester.restoreFrom(data);
+
+  expect(
+    tester.state<TwoDimensionalScrollableState>(findScrollable).horizontalScrollable.position.pixels,
+    100.0,
+  );
+  expect(
+    tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.pixels,
+    100.0,
+  );
 }
