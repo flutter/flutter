@@ -2017,7 +2017,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final Rect offsetBounds = offsetRRect.outerRect;
     final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
     bool paintShadows = true;
     assert(() {
