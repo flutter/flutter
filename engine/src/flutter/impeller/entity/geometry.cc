@@ -657,8 +657,7 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
        &effect_transform](SolidFillVertexShader::PerVertexData old_vtx) {
         TextureFillVertexShader::PerVertexData data;
         data.position = old_vtx.position;
-        auto coverage_coords = (old_vtx.position - texture_coverage.origin) /
-                               texture_coverage.size;
+        auto coverage_coords = old_vtx.position / texture_coverage.size;
         data.texture_coords = effect_transform * coverage_coords;
         vertex_builder.AppendVertex(data);
       });
