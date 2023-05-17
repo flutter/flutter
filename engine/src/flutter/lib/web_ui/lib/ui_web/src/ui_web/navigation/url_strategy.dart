@@ -4,10 +4,46 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'platform_location.dart';
+
+UrlStrategy _realDefaultUrlStrategy = ui.debugEmulateFlutterTesterEnvironment
+      ? TestUrlStrategy.fromEntry(const TestHistoryEntry('default', null, '/'))
+      : const HashUrlStrategy();
+
+UrlStrategy get _defaultUrlStrategy => debugDefaultUrlStrategyOverride ?? _realDefaultUrlStrategy;
+
+/// Overrides the default URL strategy.
+///
+/// Setting this to null allows the real default URL strategy to be used.
+///
+/// This is intended to be used for testing and debugging only.
+@visibleForTesting
+UrlStrategy? debugDefaultUrlStrategyOverride;
+
+/// Whether a custom URL strategy has been set or not.
+//
+// It is valid to set [_customUrlStrategy] to null, so we can't use a null
+// check to determine whether it was set or not. We need an extra boolean.
+bool isCustomUrlStrategySet = false;
+
+/// Whether a custom URL strategy can be set or not.
+///
+/// This is used to prevent setting a custom URL strategy for a second time or
+/// after the app has already started running.
+bool _customUrlStrategyCanBeSet = true;
+
+/// A custom URL strategy set by the app before running.
+UrlStrategy? _customUrlStrategy;
+
+/// Returns the present [UrlStrategy] for handling the browser URL.
+///
+/// Returns null when the browser integration has been manually disabled.
+UrlStrategy? get urlStrategy =>
+    isCustomUrlStrategySet ? _customUrlStrategy : _defaultUrlStrategy;
 
 /// Sets a custom URL strategy instead of the default one.
 ///
@@ -16,7 +52,27 @@ import 'platform_location.dart';
 /// This setter can only be called once. Subsequent calls will throw an error
 /// in debug mode.
 set urlStrategy(UrlStrategy? strategy) {
-  customUrlStrategy = strategy;
+  assert(
+    _customUrlStrategyCanBeSet,
+    'Cannot set URL strategy a second time or after the app has been initialized.',
+  );
+  preventCustomUrlStrategy();
+  isCustomUrlStrategySet = true;
+  _customUrlStrategy = strategy;
+}
+
+/// From this point on, prevents setting a custom URL strategy.
+void preventCustomUrlStrategy() {
+  _customUrlStrategyCanBeSet = false;
+}
+
+/// Resets everything to do with custom URL strategy.
+///
+/// This should only be used in tests to reset things back after each test.
+void debugResetCustomUrlStrategy() {
+  isCustomUrlStrategySet = false;
+  _customUrlStrategyCanBeSet = true;
+  _customUrlStrategy = null;
 }
 
 /// Callback that receives the new state of the browser history entry.
