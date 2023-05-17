@@ -46,7 +46,7 @@ typedef SearchAnchorChildBuilder = Widget Function(BuildContext context, SearchC
 ///
 /// The `controller` callback provided to [SearchAnchor.suggestionsBuilder] can be used
 /// to close the search view and control the editable field on the view.
-typedef SuggestionsBuilder = Iterable<Widget> Function(BuildContext context, SearchController controller);
+typedef SuggestionsBuilder = Future<Iterable<Widget>> Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to layout the suggestion list.
 ///
@@ -661,7 +661,7 @@ class _ViewContentState extends State<_ViewContent> {
   Size? _screenSize;
   late Rect _viewRect;
   late final SearchController _controller;
-  late Iterable<Widget> result;
+  Iterable<Widget> result = <Widget>[];
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -687,7 +687,11 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    result = widget.suggestionsBuilder(context, _controller);
+    widget.suggestionsBuilder(context, _controller)
+        .then((Iterable<Widget> value) {
+      result = value;
+    });
+
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
     if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
@@ -710,9 +714,10 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   void updateSuggestions() {
-    setState(() {
-      result = widget.suggestionsBuilder(context, _controller);
-    });
+    widget.suggestionsBuilder(context, _controller).then((Iterable<Widget> value) =>
+        setState(() {
+          result = value;
+        }));
   }
 
   @override

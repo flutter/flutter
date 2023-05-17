@@ -739,7 +739,7 @@ void main() {
                 builder: (BuildContext context, SearchController controller) {
                   return const Icon(Icons.search);
                 },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                suggestionsBuilder: (BuildContext context, SearchController controller) async {
                   return <Widget>[];
                 },
               ),
@@ -799,7 +799,7 @@ void main() {
                   builder: (BuildContext context, SearchController controller) {
                     return const Icon(Icons.search);
                   },
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  suggestionsBuilder: (BuildContext context, SearchController controller) async {
                     return <Widget>[];
                   },
                 ),
@@ -845,7 +845,7 @@ void main() {
                   builder: (BuildContext context, SearchController controller) {
                     return const Icon(Icons.search);
                   },
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  suggestionsBuilder: (BuildContext context, SearchController controller) async {
                     return <Widget>[];
                   },
                 ),
@@ -882,7 +882,7 @@ void main() {
                 controller.openView();
               },);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -913,7 +913,7 @@ void main() {
                 controller.openView();
               },);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -948,7 +948,7 @@ void main() {
                 controller.openView();
               },);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -981,7 +981,7 @@ void main() {
                 controller.openView();
               },);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -1013,7 +1013,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1034,7 +1034,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1056,7 +1056,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1078,7 +1078,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1102,7 +1102,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1128,7 +1128,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1150,7 +1150,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1177,7 +1177,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1201,7 +1201,7 @@ void main() {
               controller.openView();
             },);
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1229,7 +1229,7 @@ void main() {
                 controller.openView();
               },);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -1254,7 +1254,7 @@ void main() {
             child: SearchAnchor(
               isFullScreen: false,
               builder: builder,
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
+              suggestionsBuilder: (BuildContext context, SearchController controller) async {
                 return <Widget>[];
               },
             ),
@@ -1292,7 +1292,7 @@ void main() {
               child: SearchAnchor(
                 isFullScreen: false,
                 builder: builder,
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                suggestionsBuilder: (BuildContext context, SearchController controller) async {
                   return <Widget>[];
                 },
               ),
@@ -1333,7 +1333,7 @@ void main() {
                 builder: (BuildContext context, SearchController controller) {
                   return const Icon(Icons.search);
                 },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                suggestionsBuilder: (BuildContext context, SearchController controller) async {
                   return <Widget>[
                     ListTile(
                       title: const Text(suggestion),
@@ -1369,7 +1369,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: SearchAnchor.bar(
             isFullScreen: false,
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -1399,7 +1399,7 @@ void main() {
         child: SearchAnchor.bar(
           searchController: controller,
           isFullScreen: false,
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[
               ListTile(
                 title: const Text('item 0'),
@@ -1442,7 +1442,7 @@ void main() {
                 },
               );
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
               return <Widget>[];
             },
           ),
@@ -1481,7 +1481,7 @@ void main() {
                   },
                 );
               },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
+              suggestionsBuilder: (BuildContext context, SearchController controller) async {
                 return <Widget>[];
               },
             ),
@@ -1524,7 +1524,7 @@ void main() {
                   ),
                 );
               },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
+              suggestionsBuilder: (BuildContext context, SearchController controller) async {
                 return <Widget>[];
               },
             ),
@@ -1582,7 +1582,7 @@ void main() {
               ),
             );
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
@@ -1621,7 +1621,7 @@ void main() {
               ),
             );
           },
-          suggestionsBuilder: (BuildContext context, SearchController controller) {
+          suggestionsBuilder: (BuildContext context, SearchController controller) async {
             return <Widget>[];
           },
         ),
