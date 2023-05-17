@@ -403,8 +403,8 @@ void main() {
           ),
           child: FocusScope(
             debugLabel: 'key1',
-            key: key1,
             child: Focus(
+              key: key1,
               focusNode: testNode1,
               child: Container(),
             ),
@@ -413,7 +413,7 @@ void main() {
       );
 
       final Element element = tester.element(find.byKey(key1));
-      final FocusNode scope = Focus.of(element);
+      final FocusNode scope = FocusScope.of(element);
       scope.nextFocus();
 
       await tester.pump();
@@ -887,8 +887,8 @@ void main() {
             ),
             child: FocusScope(
               debugLabel: 'key1',
-              key: key1,
               child: Focus(
+                key: key1,
                 focusNode: testNode1,
                 child: Container(),
               ),
@@ -898,7 +898,7 @@ void main() {
       );
 
       final Element element = tester.element(find.byKey(key1));
-      final FocusNode scope = Focus.of(element);
+      final FocusNode scope = FocusScope.of(element);
       scope.nextFocus();
 
       await tester.pump();
@@ -1296,8 +1296,8 @@ void main() {
             ),
             child: FocusScope(
               debugLabel: 'key1',
-              key: key1,
               child: Focus(
+                key: key1,
                 focusNode: testNode1,
                 child: Container(),
               ),
@@ -1307,7 +1307,7 @@ void main() {
       );
 
       final Element element = tester.element(find.byKey(key1));
-      final FocusNode scope = Focus.of(element);
+      final FocusNode scope = FocusScope.of(element);
       scope.nextFocus();
 
       await tester.pump();
@@ -2475,8 +2475,8 @@ void main() {
           ),
           child: FocusScope(
             debugLabel: 'key1',
-            key: key1,
             child: Focus(
+              key: key1,
               focusNode: testNode1,
               child: Container(),
             ),
@@ -2485,7 +2485,7 @@ void main() {
       );
 
       final Element element = tester.element(find.byKey(key1));
-      final FocusNode scope = Focus.of(element);
+      final FocusNode scope = FocusScope.of(element);
       scope.focusInDirection(TraversalDirection.up);
 
       await tester.pump();
