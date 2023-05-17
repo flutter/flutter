@@ -126,10 +126,9 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
-  auto bounds_origin = GetGeometry()->GetCoverage(Matrix())->origin;
   auto geometry_result = GetGeometry()->GetPositionUVBuffer(
-      Rect(bounds_origin, Size(texture_size)), GetInverseMatrix(), renderer,
-      entity, pass);
+      Rect({0, 0}, Size(texture_size)), GetInverseMatrix(), renderer, entity,
+      pass);
   bool uses_emulated_tile_mode =
       UsesEmulatedTileMode(renderer.GetDeviceCapabilities());
 
