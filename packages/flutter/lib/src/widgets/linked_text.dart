@@ -56,7 +56,7 @@ class LinkedText extends StatelessWidget {
   ///  * [InlineLinkedText.new], which is like this, but for inline text.
   LinkedText({
     super.key,
-    required this.text,
+    required String text,
     this.style,
     Iterable<TextRange>? ranges,
     UriStringCallback? onTap,
@@ -67,6 +67,11 @@ class LinkedText extends StatelessWidget {
                ? TextLinker.urlRangesFinder
                : (String text) => ranges,
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
+         ),
+       ],
+       children = <InlineSpan>[
+         TextSpan(
+           text: text,
          ),
        ];
 
@@ -82,7 +87,7 @@ class LinkedText extends StatelessWidget {
   ///  * [InlineLinkedText.regExp], which is like this, but for inline text.
   LinkedText.regExp({
     super.key,
-    required this.text,
+    required String text,
     required RegExp regExp,
     this.style,
     UriStringCallback? onTap,
@@ -91,6 +96,11 @@ class LinkedText extends StatelessWidget {
          TextLinker(
            rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
+         ),
+       ],
+       children = <InlineSpan>[
+         TextSpan(
+           text: text,
          ),
        ];
 
@@ -111,15 +121,34 @@ class LinkedText extends StatelessWidget {
   ///    the given [RegExp].
   ///  * [InlineLinkedText.textLinkers], which is like this, but for inline
   ///    text.
-  const LinkedText.textLinkers({
+  LinkedText.textLinkers({
     super.key,
-    required this.text,
+    required String text,
     required this.textLinkers,
     this.style,
-  });
+  }) : children = <InlineSpan>[
+         TextSpan(
+           text: text,
+         ),
+       ];
+
+  LinkedText.spans({
+    super.key,
+    required this.children,
+    //required this.textLinkers,
+    this.style,
+    UriStringCallback? onTap,
+  }) : textLinkers = <TextLinker>[
+         TextLinker(
+           rangesFinder: TextLinker.urlRangesFinder,
+           linkBuilder: InlineLinkedText.getDefaultLinkBuilder(onTap),
+         ),
+       ];
+
+  final List<InlineSpan> children;
 
   /// The text in which to highlight URLs and to display.
-  final String text;
+  //final String text;
 
   final List<TextLinker> textLinkers;
 
@@ -128,12 +157,23 @@ class LinkedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
+      text: TextSpan(
+        style: DefaultTextStyle.of(context).style,
+        text: 'Here you go:',
+        //children: linkSpans(TextLinker.urlRangesFinder, children),
+        // TODO(justinmc): Need to handle all children (and none).
+        children: linkSpan(TextLinker.urlRangesFinder, children.first),
+      ),
+    );
+    /*
+    return RichText(
       text: InlineLinkedText.textLinkers(
         style: style ?? DefaultTextStyle.of(context).style,
         text: text,
         textLinkers: textLinkers,
       ),
     );
+    */
   }
 }
 
@@ -290,7 +330,7 @@ class TextLinker {
   }
 }
 
-// TODO(justinmc): Make agnostic to URLs, just "links", which could be GitHub PRs, etc.
+// TODO(justinmc): Make naming agnostic to URLs, just "links", which could be GitHub PRs, etc.
 /// A [TextSpan] that makes parts of the [text] interactive.
 class InlineLinkedText extends TextSpan {
   /// Create an instance of [InlineLinkedText].
@@ -429,4 +469,23 @@ class _TextLink extends StatelessWidget {
       ),
     );
   }
+}
+
+List<InlineSpan> linkSpan(RangesFinder rangesFinder, InlineSpan span) {
+  /*
+  final String flattened = spans.fold<String>('', (String value, InlineSpan span) {
+    return value + span.toString();
+  });
+  print('justin linkSpans flattened to: $flattened');
+  */
+
+  print('justin linkSpan flattened to: ${span.toPlainText()}');
+
+  final Iterable<TextRange> ranges = rangesFinder(span.toPlainText());
+
+  print('justin ranges $ranges');
+
+  return <InlineSpan>[
+    span,
+  ];
 }
