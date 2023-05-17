@@ -334,8 +334,17 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// State for all pointers which are currently down.
   ///
-  /// The state of hovering pointers is not tracked because that would require
-  /// hit-testing on every frame.
+  /// This map caches the hit test result done when the pointer starts tapping (
+  /// [PointerDownEvent] and [PointerPanZoomStartEvent]). This hit test result
+  /// will be used throughout the entire tap sequence; that is, the pointer is
+  /// seen as pointing to the same place even if it has moved away until pointer
+  /// stops tapping ([PointerUpEvent] and [PointerPanZoomEndEvent]). This
+  /// matches the expected gesture interaction with a button, and allows devices
+  /// that don't support hovering to perform as few hit tests as possible.
+  ///
+  /// Hovering, on the other hand, requires hit testing on almost every frame.
+  /// This is handled in [RendererBinding] and [MouseTracker], and will ignore
+  /// the results cached here.
   final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
   /// Dispatch an event to the targets found by a hit test on its position.
@@ -380,7 +389,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       hitTestResult = _hitTests.remove(event.pointer);
-    } else if (event.down || event is PointerPanZoomUpdateEvent) {
+    } else if (event is PointerMoveEvent || event is PointerPanZoomUpdateEvent) {
       // Because events that occur with the pointer down (like
       // [PointerMoveEvent]s) should be dispatched to the same place that their
       // initial PointerDownEvent was, we want to re-use the path we found when
