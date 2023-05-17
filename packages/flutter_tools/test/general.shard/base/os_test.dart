@@ -626,29 +626,7 @@ void main() {
   });
 
   group('unzip on macOS', () {
-    testWithoutContext('falls back to unzip when rsync cannot run', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      fakeProcessManager.excludedExecutables.add('rsync');
-
-      final BufferLogger logger = BufferLogger.test();
-      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
-        processManager: fakeProcessManager,
-      );
-
-      final Directory targetDirectory = fileSystem.currentDirectory;
-      fakeProcessManager.addCommand(FakeCommand(
-        command: <String>['unzip', '-o', '-q', 'foo.zip', '-d', targetDirectory.path],
-      ));
-
-      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory);
-      expect(fakeProcessManager, hasNoRemainingExpectations);
-      expect(logger.traceText, contains('Unable to find rsync'));
-    });
-
-    testWithoutContext('unzip and rsyncs', () {
+    testWithoutContext('unzip and copy to empty folder', () {
       final FileSystem fileSystem = MemoryFileSystem.test();
 
       final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
@@ -676,27 +654,100 @@ void main() {
             tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
           },
         ),
-        FakeCommand(command: <String>[
-          'rsync',
-          '-8',
-          '-av',
-          '--delete',
-          tempDirectory.childDirectory('dirA').path,
-          targetDirectory.path,
-        ]),
-        FakeCommand(command: <String>[
-          'rsync',
-          '-8',
-          '-av',
-          '--delete',
-          tempDirectory.childDirectory('dirB').path,
-          targetDirectory.path,
-        ]),
       ]);
 
       macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(tempDirectory, isNot(exists));
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
+    });
+
+    testWithoutContext('unzip and copy to preexisting folder', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory targetDirectory = fileSystem.currentDirectory;
+      final File origFileA = targetDirectory.childDirectory('dirA').childFile('fileA');
+      origFileA.createSync(recursive: true);
+      origFileA.writeAsStringSync('old');
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').readAsStringSync(), 'old');
+
+      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'unzip',
+            '-o',
+            '-q',
+            'foo.zip',
+            '-d',
+            tempDirectory.path,
+          ],
+          onRun: () {
+            expect(tempDirectory, exists);
+            final File newFileA = tempDirectory.childDirectory('dirA').childFile('fileA');
+            newFileA.createSync(recursive: true);
+            newFileA.writeAsStringSync('new');
+            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+          },
+        ),
+      ]);
+
+      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(tempDirectory, isNot(exists));
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').readAsStringSync(), 'new');
+      expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
+    });
+
+    testWithoutContext('unzip and copy to preexisting folder with type mismatch', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory targetDirectory = fileSystem.currentDirectory;
+      final Directory origFileA = targetDirectory.childDirectory('dirA').childDirectory('fileA');
+      origFileA.createSync(recursive: true);
+      expect(targetDirectory.childDirectory('dirA').childDirectory('fileA').existsSync(), isTrue);
+
+      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'unzip',
+            '-o',
+            '-q',
+            'foo.zip',
+            '-d',
+            tempDirectory.path,
+          ],
+          onRun: () {
+            expect(tempDirectory, exists);
+            tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
+            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+          },
+        ),
+      ]);
+
+      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(tempDirectory, isNot(exists));
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
     });
   });
 
