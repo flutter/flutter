@@ -156,10 +156,9 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   settings.may_insecurely_connect_to_all_domains = true;
   settings.domain_network_policy = "";
 
-  // Whether to enable Impeller.
+  // Whether to enable wide gamut colors.
   NSNumber* nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
-  // TODO(gaaclarke): Make this value `on` by default (pending memory audit).
-  BOOL enableWideGamut = nsEnableWideGamut ? nsEnableWideGamut.boolValue : NO;
+  BOOL enableWideGamut = nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES;
   settings.enable_wide_gamut = enableWideGamut;
 
   // TODO(dnfield): We should reverse the order for all these settings so that command line options
