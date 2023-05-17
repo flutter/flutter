@@ -711,29 +711,46 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   return _engine != nullptr;
 }
 
+- (void)updateDisplayConfig:(NSNotification*)notification {
+  [self updateDisplayConfig];
+}
+
 - (void)updateDisplayConfig {
   if (!_engine) {
     return;
   }
 
-  CVDisplayLinkRef displayLinkRef;
-  CGDirectDisplayID mainDisplayID = CGMainDisplayID();
-  CVDisplayLinkCreateWithCGDisplay(mainDisplayID, &displayLinkRef);
-  CVTime nominal = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(displayLinkRef);
-  if (!(nominal.flags & kCVTimeIsIndefinite)) {
-    double refreshRate = static_cast<double>(nominal.timeScale) / nominal.timeValue;
+  std::vector<FlutterEngineDisplay> displays;
+  for (NSScreen* screen : [NSScreen screens]) {
+    CGDirectDisplayID displayID =
+        static_cast<CGDirectDisplayID>([screen.deviceDescription[@"NSScreenNumber"] integerValue]);
 
     FlutterEngineDisplay display;
     display.struct_size = sizeof(display);
-    display.display_id = mainDisplayID;
-    display.refresh_rate = round(refreshRate);
+    display.display_id = displayID;
+    display.single_display = false;
+    display.width = static_cast<size_t>(screen.frame.size.width);
+    display.height = static_cast<size_t>(screen.frame.size.height);
+    display.device_pixel_ratio = screen.backingScaleFactor;
 
-    std::vector<FlutterEngineDisplay> displays = {display};
-    _embedderAPI.NotifyDisplayUpdate(_engine, kFlutterEngineDisplaysUpdateTypeStartup,
-                                     displays.data(), displays.size());
+    CVDisplayLinkRef displayLinkRef = nil;
+    CVReturn error = CVDisplayLinkCreateWithCGDisplay(displayID, &displayLinkRef);
+
+    if (error == 0) {
+      CVTime nominal = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(displayLinkRef);
+      if (!(nominal.flags & kCVTimeIsIndefinite)) {
+        double refreshRate = static_cast<double>(nominal.timeScale) / nominal.timeValue;
+        display.refresh_rate = round(refreshRate);
+      }
+      CVDisplayLinkRelease(displayLinkRef);
+    } else {
+      display.refresh_rate = 0;
+    }
+
+    displays.push_back(display);
   }
-
-  CVDisplayLinkRelease(displayLinkRef);
+  _embedderAPI.NotifyDisplayUpdate(_engine, kFlutterEngineDisplaysUpdateTypeStartup,
+                                   displays.data(), displays.size());
 }
 
 - (void)onSettingsChanged:(NSNotification*)notification {
@@ -782,7 +799,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   CGRect scaledBounds = [view convertRectToBacking:view.bounds];
   CGSize scaledSize = scaledBounds.size;
   double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
-
+  auto displayId = [view.window.screen.deviceDescription[@"NSScreenNumber"] integerValue];
   const FlutterWindowMetricsEvent windowMetricsEvent = {
       .struct_size = sizeof(windowMetricsEvent),
       .width = static_cast<size_t>(scaledSize.width),
@@ -790,6 +807,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
       .pixel_ratio = pixelRatio,
       .left = static_cast<size_t>(scaledBounds.origin.x),
       .top = static_cast<size_t>(scaledBounds.origin.y),
+      .display_id = static_cast<uint64_t>(displayId),
   };
   _embedderAPI.SendWindowMetricsEvent(_engine, &windowMetricsEvent);
 }
@@ -964,6 +982,14 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
              selector:@selector(applicationWillTerminate:)
                  name:NSApplicationWillTerminateNotification
                object:nil];
+  [center addObserver:self
+             selector:@selector(windowDidChangeScreen:)
+                 name:NSWindowDidChangeScreenNotification
+               object:nil];
+  [center addObserver:self
+             selector:@selector(updateDisplayConfig:)
+                 name:NSApplicationDidChangeScreenParametersNotification
+               object:nil];
 }
 
 - (void)addInternalPlugins {
@@ -985,6 +1011,16 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
 - (void)applicationWillTerminate:(NSNotification*)notification {
   [self shutDownEngine];
+}
+
+- (void)windowDidChangeScreen:(NSNotification*)notification {
+  // Update window metric for all view controllers since the display_id has
+  // changed.
+  NSEnumerator* viewControllerEnumerator = [_viewControllers objectEnumerator];
+  FlutterViewController* nextViewController;
+  while ((nextViewController = [viewControllerEnumerator nextObject])) {
+    [self updateWindowMetricsForViewController:nextViewController];
+  }
 }
 
 - (void)onAccessibilityStatusChanged:(NSNotification*)notification {
