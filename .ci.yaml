@@ -347,6 +347,8 @@ targets:
       firebase_project: master-docs-flutter-dev
       release_ref: refs/heads/master
       release_build: "true"
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_test
     recipe: flutter/flutter
@@ -3925,18 +3927,8 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: tiles_scroll_perf_ios__timeline_summary
 
-  - name: Mac_ios flutter_gallery__transition_perf_e2e_ios
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery__transition_perf_e2e_ios
-
   - name: Mac_build_test flutter_gallery__transition_perf_e2e_ios
     recipe: devicelab/devicelab_drone_build_test
-    bringup: true # New target: https://github.com/flutter/flutter/pull/111164
     presubmit: false
     timeout: 60
     properties:
@@ -4843,8 +4835,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-    dimensions:
-      os: "Linux"
+    drone_dimensions:
+      - os=Linux
 
   - name: Mac flutter_packaging
     recipe: packaging/packaging
@@ -4857,9 +4849,9 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-    dimensions:
-      cpu: "x86"
-      os: "Mac"
+    drone_dimensions:
+      - os=Mac
+      - cpu=x86
 
 
   - name: Mac_arm64 flutter_packaging
@@ -4873,9 +4865,9 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "mac"]
-    dimensions:
-      cpu: "arm64"
-      os: "Mac"
+    drone_dimensions:
+      - os=Mac
+      - cpu=arm64
 
   - name: Windows flutter_packaging
     recipe: packaging/packaging
@@ -4889,8 +4881,8 @@ targets:
       task_name: flutter_packaging
       tags: >
         ["framework", "hostonly", "shard", "windows"]
-    dimensions:
-      os: "Windows"
+    drone_dimensions:
+      - os=Windows
 
 
   - name: Linux docs_deploy_beta
@@ -4913,8 +4905,8 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: master-docs-flutter-dev
-    dimensions:
-      os: "Linux"
+    drone_dimensions:
+      - os=Linux
 
   - name: Linux docs_deploy_stable
     recipe: flutter/flutter
@@ -4936,5 +4928,5 @@ targets:
       validation: docs_deploy
       validation_name: Docs_deploy
       firebase_project: docs-flutter-dev
-    dimensions:
-      os: "Linux"
+    drone_dimensions:
+      - os=Linux
