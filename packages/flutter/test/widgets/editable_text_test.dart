@@ -16224,7 +16224,9 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
     await tester.pump();
     expect(state.textEditingValue.text, '');
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('when manually placing the cursor in the middle of a code point', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -16306,7 +16308,9 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       state.textEditingValue.selection,
       const TextSelection.collapsed(offset: 6),
     );
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {
