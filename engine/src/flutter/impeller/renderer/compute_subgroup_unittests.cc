@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <future>
 #include <numeric>
 
 #include "compute_tessellator.h"
@@ -77,6 +78,9 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
 
     SkPath sk_path;
     if (SkParsePath::FromSVGString(svg_path_data, &sk_path)) {
+      std::promise<bool> promise;
+      auto future = promise.get_future();
+
       auto path = skia_conversions::ToPath(sk_path);
       auto status =
           ComputeTessellator{}
@@ -84,16 +88,15 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
               .Tessellate(
                   path, context, vertex_buffer->AsBufferView(),
                   vertex_buffer_count->AsBufferView(),
-                  [vertex_buffer_count,
-                   &vertex_count](CommandBuffer::Status status) {
+                  [vertex_buffer_count, &vertex_count,
+                   &promise](CommandBuffer::Status status) {
                     vertex_count =
                         reinterpret_cast<SS::VertexBufferCount*>(
                             vertex_buffer_count->AsBufferView().contents)
                             ->count;
+                    promise.set_value(status ==
+                                      CommandBuffer::Status::kCompleted);
                   });
-      if (vertex_count > 0) {
-        ImGui::Text("Vertex count: %zu", vertex_count);
-      }
       switch (status) {
         case ComputeTessellator::Status::kCommandInvalid:
           ImGui::Text("Failed to submit compute job (invalid command)");
@@ -103,6 +106,13 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
           break;
         case ComputeTessellator::Status::kOk:
           break;
+      }
+      if (!future.get()) {
+        ImGui::Text("Failed to submit compute job.");
+        return false;
+      }
+      if (vertex_count > 0) {
+        ImGui::Text("Vertex count: %zu", vertex_count);
       }
     } else {
       ImGui::Text("Failed to parse path data");
