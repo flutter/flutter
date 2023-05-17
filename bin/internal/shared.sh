@@ -140,8 +140,6 @@ function upgrade_flutter () (
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
-    >&2 echo Building flutter tool...
-
     # Prepare packages...
     if [[ "$CI" == "true" || "$BOT" == "true" || "$CONTINUOUS_INTEGRATION" == "true" || "$CHROME_HEADLESS" == "1" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
@@ -151,7 +149,7 @@ function upgrade_flutter () (
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
     pub_upgrade_with_retry
 
-    >&2 echo Pre-compiling Dart snapshot...
+    >&2 echo Building flutter tool...
 
     # Move the old snapshot - we can't just overwrite it as the VM might currently have it
     # memory mapped (e.g. on flutter upgrade). For downloading a new dart sdk the folder is moved,
