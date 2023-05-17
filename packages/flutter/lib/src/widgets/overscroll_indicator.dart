@@ -26,8 +26,8 @@ import 'transitions.dart';
 ///
 /// [GlowingOverscrollIndicator] generates [OverscrollIndicatorNotification]
 /// before showing an overscroll indication. To prevent the indicator from
-/// showing the indication, call [OverscrollIndicatorNotification.disallowGlow]
-/// on the notification.
+/// showing the indication, call
+/// [OverscrollIndicatorNotification.disallowIndicator] on the notification.
 ///
 /// Created automatically by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
