@@ -795,6 +795,9 @@ class TextPainter {
   /// sans-serif font).
   double get preferredLineHeight => (_layoutTemplate ??= _createLayoutTemplate()).height;
 
+  /// Whether to enable the rounding in _applyFloatingPointHack and SkParagraph.
+  static const bool _shouldApplyFloatingPointHack = !bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK');
+
   // Unfortunately, using full precision floating point here causes bad layouts
   // because floating point math isn't associative. If we add and subtract
   // padding, for example, we'll get different values when we estimate sizes and
@@ -802,8 +805,9 @@ class TextPainter {
   // differently. To work around this problem for now, we round fractional pixel
   // values up to the nearest whole pixel value. The right long-term fix is to do
   // layout using fixed precision arithmetic.
-  double _applyFloatingPointHack(double layoutValue) {
-    return layoutValue.ceilToDouble();
+  @pragma('vm:prefer-inline')
+  static double _applyFloatingPointHack(double layoutValue) {
+    return _shouldApplyFloatingPointHack ? layoutValue.ceilToDouble() : layoutValue;
   }
 
   /// The width at which decreasing the width of the text would prevent it from
