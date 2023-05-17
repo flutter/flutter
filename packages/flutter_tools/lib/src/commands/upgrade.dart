@@ -47,6 +47,7 @@ class UpgradeCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Override the upgrade working directory. '
               'This is only intended to enable integration testing of the tool itself.'
+              // Also notably, this will override the FakeFlutterVersion if any is set!
       )
       ..addFlag(
         'verify-only',
@@ -88,7 +89,7 @@ class UpgradeCommand extends FlutterCommand {
 @visibleForTesting
 class UpgradeCommandRunner {
 
-  String? workingDirectory;
+  String? workingDirectory; // set in runCommand() above
 
   Future<FlutterCommandResult> runCommand({
     required bool force,
@@ -209,6 +210,16 @@ class UpgradeCommandRunner {
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
     persistentToolState.setShouldRedisplayWelcomeMessage(true);
+    if (globals.flutterVersion.channel == 'stable') {
+      globals.printStatus(
+        '\n'
+        'As an experienced Flutter developer, you may be interested in moving '
+        'from the "stable" channel to the "beta" channel. The Flutter "beta" '
+        'channel enjoys all the same thorough testing as the "stable" channel, '
+        'but is updated roughly once a month instead of once a quarter.\n'
+        'To change channel, run the "flutter channel beta" command.',
+      );
+    }
   }
 
   Future<bool> hasUncommittedChanges() async {
