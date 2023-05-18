@@ -457,7 +457,6 @@ class ColorScheme with Diagnosticable {
   /// color scheme.
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
-    Color? primaryColorDark,
     Color? accentColor,
     Color? cardColor,
     Color? backgroundColor,
