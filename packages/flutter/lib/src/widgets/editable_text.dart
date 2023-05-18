@@ -5109,7 +5109,7 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    final int validatedPosition = position.clamp(0, _text.length);
+    final int validatedPosition = math.min(math.max(position, 0), _text.length);
     if (validatedPosition == 0) {
       return 0;
     }
@@ -5127,7 +5127,7 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    final int validatedPosition = position.clamp(0, _text.length - 1);
+    final int validatedPosition = math.min(math.max(position, 0), _text.length - 1);
     if (validatedPosition == _text.length - 1) {
       return _text.length;
     }
