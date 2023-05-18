@@ -1936,6 +1936,38 @@ void main() {
     await _testGestureTap(tester, textSpan);
     expect(isTapped, isTrue);
   });
+
+  testWidgetsWithLeakTracking('Tooltip controller should be able to open or close the attached tooltip', (WidgetTester tester) async {
+    final TooltipController controller = TooltipController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          controller: controller,
+          message: tooltipText,
+          triggerMode: TooltipTriggerMode.tap,
+          showDuration: const Duration(seconds: 5),
+          child: const Icon(Icons.refresh)
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(tooltip, findsOneWidget);
+    expect(find.text(tooltipText), findsNothing);
+
+    // Check if show method works fine
+    controller.show(immediately: true);
+    expect(controller.isOpen, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Check if conceal method works fine
+    controller.conceal();
+    expect(controller.isOpen, isFalse);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(

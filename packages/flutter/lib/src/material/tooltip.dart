@@ -96,6 +96,7 @@ class Tooltip extends StatefulWidget {
   /// Only one of [message] and [richMessage] may be non-null.
   const Tooltip({
     super.key,
+    this.controller,
     this.message,
     this.richMessage,
     this.height,
@@ -120,6 +121,10 @@ class Tooltip extends StatefulWidget {
           'If you wish to provide a `textStyle` for a rich tooltip, add the '
           '`textStyle` directly to the `richMessage` InlineSpan.',
         );
+
+  /// An optional controller that allows showing and concealing of the tooltip
+  /// from other widgets.
+  final TooltipController? controller;
 
   /// The text to display in the tooltip.
   ///
@@ -341,6 +346,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const bool _defaultEnableFeedback = true;
   static const TextAlign _defaultTextAlign = TextAlign.start;
 
+  TooltipController? _internalTooltipController;
   late double _height;
   late EdgeInsetsGeometry _padding;
   late EdgeInsetsGeometry _margin;
@@ -365,6 +371,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late bool _forceRemoval;
   late bool _visible;
 
+  TooltipController get _tooltipController => widget.controller ?? _internalTooltipController!;
+
   /// The plain text message for this tooltip.
   ///
   /// This value will either come from [widget.message] or [widget.richMessage].
@@ -373,6 +381,11 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    if (widget.controller == null) {
+      _internalTooltipController = TooltipController();
+    }
+    _tooltipController._attach(this);
+
     _isConcealed = false;
     _forceRemoval = false;
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
@@ -387,6 +400,23 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+  }
+
+  @override
+  void didUpdateWidget(covariant Tooltip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?._detach(this);
+      if (widget.controller != null) {
+        _internalTooltipController?._detach(this);
+        _internalTooltipController = null;
+        widget.controller?._attach(this);
+      } else {
+        assert(_internalTooltipController == null);
+        _internalTooltipController = TooltipController().._attach(this);
+      }
+    }
+    assert(_tooltipController._state == this);
   }
 
   @override
@@ -488,6 +518,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _concealTooltip() {
+    assert(_tooltipController._state == this);
     if (_isConcealed || _forceRemoval) {
       // Already concealed, or it's being removed.
       return;
@@ -659,6 +690,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _tooltipController._detach(this);
+    _internalTooltipController = null;
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
     _removeEntry();
@@ -891,5 +924,60 @@ class _TooltipOverlay extends StatelessWidget {
         child: result,
       ),
     );
+  }
+}
+
+/// A controller to manage visibility of a tooltip.
+///
+/// A [TooltipController] is used to control and interrogate a tooltip after it
+/// has been created, with methods such as [open] and [close],
+/// and state accessors like [isOpen].
+///
+/// See also:
+///
+/// * [Tooltip], a material design tooltip.
+///   [TooltipController].
+class TooltipController {
+  /// The tooltip that this controller controls.
+  ///
+  /// This is set automatically when a [TooltipController] is given to the
+  /// tooltip it controls.
+  TooltipState? _state;
+
+  /// Whether or not the associated tooltip is currently visible.
+  bool get isOpen {
+    assert(_state != null);
+    return !_state!._isConcealed;
+  }
+
+  /// Close the tooltip that this tooltip controller is associated with.
+  ///
+  /// Associating with a tooltip is done by passing a [TooltipController] to a
+  /// [Tooltip].
+  void conceal() {
+    assert(_state != null);
+    _state!._concealTooltip();
+  }
+
+  /// Show the tooltip that this menu controller is associated with.
+  ///
+  /// If `position` is given, then the menu will open at the position given, in
+  /// the coordinate space of the [MenuAnchor] this controller is attached to.
+  ///
+  /// If the `immediately` is set to true will shows the tooltip if it is not already visible.
+  void show({bool immediately = false}) {
+    assert(_state != null);
+    _state!._showTooltip(immediately: immediately);
+  }
+
+  // ignore: use_setters_to_change_properties
+  void _attach(TooltipState state) {
+    _state = state;
+  }
+
+  void _detach(TooltipState state) {
+    if (_state == state) {
+      _state = null;
+    }
   }
 }
