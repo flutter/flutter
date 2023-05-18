@@ -514,6 +514,16 @@ class ListTileConstraint {
     bool? ignoreHorizontalTilePadding,
     ListTilePaddingCorrection Function(Size widgetSize)? paddingCorrection,
   }) {
+    if (
+      <Object?>[maxSize, minimumTileHeight, leadingHorizontalTitleGap,
+        trailingHorizontalTitleGap, ignoreHorizontalTilePadding,
+        paddingCorrection]
+          .where((Object? e) => e != null)
+          .isEmpty
+    ) {
+      return this;
+    }
+
     return ListTileConstraint(
       maxSize: maxSize ?? this.maxSize,
       minimumTileHeight: minimumTileHeight ?? this.minimumTileHeight,
@@ -522,6 +532,25 @@ class ListTileConstraint {
       ignoreHorizontalTilePadding: ignoreHorizontalTilePadding ?? this.ignoreHorizontalTilePadding,
       paddingCorrection: paddingCorrection ?? this.paddingCorrection,
     );
+  }
+
+  @override
+  String toString() {
+    switch (this) {
+      case standard:
+        return 'ListTileConstraint.standard';
+      case icon24:
+        return 'ListTileConstraint.icon24';
+      case switchTile:
+        return 'ListTileConstraint.switchTile';
+      case avatar:
+        return 'ListTileConstraint.avatar';
+      case image:
+        return 'ListTileConstraint.image';
+      case video:
+        return 'ListTileConstraint.video';
+    }
+    return 'ListTileConstraint()';
   }
 }
 
