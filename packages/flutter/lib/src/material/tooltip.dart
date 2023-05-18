@@ -20,7 +20,7 @@ import 'tooltip_visibility.dart';
 typedef TooltipTriggeredCallback = void Function();
 
 // A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
-// to be hit in the hit-testing order will be added to the BoxHitTestResult (i.e.,
+// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
 // child over parent, last sibling over first sibling).
 //
 // The [onEnter] method will be called when a mouse pointer enters this
@@ -436,7 +436,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         if (entryNeedsUpdating) {
           _removeEntry();
         }
-        break;
       case AnimationStatus.completed:
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
@@ -445,7 +444,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           _createNewEntry();
           SemanticsService.tooltip(_tooltipMessage);
         }
-        break;
     }
 
     if (entryNeedsUpdating) {
@@ -477,7 +475,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         } else {
           show();
         }
-        break;
       // If the tooltip is already fading in or fully visible, skip the
       // animation and show the tooltip immediately.
       case AnimationStatus.forward:
@@ -485,7 +482,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       case AnimationStatus.completed:
         // Fade in if needed and schedule to hide.
         show();
-        break;
     }
   }
 
@@ -511,7 +507,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         } else {
           _controller.reverse();
         }
-        break;
     }
   }
 
@@ -536,7 +531,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           ..onLongPress = _handleLongPress
           ..onLongPressUp = _handlePressUp
           ..addPointer(event);
-        break;
       case TooltipTriggerMode.tap:
         final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
           debugOwner: this, supportedDevices: triggerModeDeviceKinds
@@ -545,7 +539,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           ..onTapCancel = _handleTapToDismiss
           ..onTap = _handleTap
           ..addPointer(event);
-        break;
       case TooltipTriggerMode.manual:
         break;
     }
