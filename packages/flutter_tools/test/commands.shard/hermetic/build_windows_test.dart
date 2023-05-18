@@ -86,7 +86,7 @@ void main() {
         '-G',
         generator,
 		'-A',
-		'x64'
+        'x64'
       ],
       onRun: onRun,
     );
