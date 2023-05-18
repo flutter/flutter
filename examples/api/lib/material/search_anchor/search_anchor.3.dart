@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Autocomplete] that shows how to fetch the options
+/// Flutter code sample for [SearchAnchor] that shows how to fetch the suggestions
 /// from a remote API.
 const Duration fakeAPIDuration = Duration(seconds: 1);
 
@@ -46,7 +46,6 @@ class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor > {
   @override
   Widget build(BuildContext context) {
     return SearchAnchor(
-        isFullScreen: false,
         builder: (BuildContext context, SearchController controller) {
           return IconButton(
             icon: const Icon(Icons.search),
