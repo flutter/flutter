@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -61,7 +63,8 @@ class LinkedText extends StatelessWidget {
     Iterable<TextRange>? ranges,
     UriStringCallback? onTap,
     LinkBuilder? linkBuilder,
-  }) : textLinkers = <TextLinker>[
+  }) : onTap = null,
+       textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
                ? TextLinker.urlRangesFinder
@@ -92,7 +95,8 @@ class LinkedText extends StatelessWidget {
     this.style,
     UriStringCallback? onTap,
     LinkBuilder? linkBuilder,
-  }) : textLinkers = <TextLinker>[
+  }) : onTap = null,
+       textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
@@ -126,7 +130,8 @@ class LinkedText extends StatelessWidget {
     required String text,
     required this.textLinkers,
     this.style,
-  }) : children = <InlineSpan>[
+  }) : onTap = null,
+       children = <InlineSpan>[
          TextSpan(
            text: text,
          ),
@@ -137,13 +142,8 @@ class LinkedText extends StatelessWidget {
     required this.children,
     //required this.textLinkers,
     this.style,
-    UriStringCallback? onTap,
-  }) : textLinkers = <TextLinker>[
-         TextLinker(
-           rangesFinder: TextLinker.urlRangesFinder,
-           linkBuilder: InlineLinkedText.getDefaultLinkBuilder(onTap),
-         ),
-       ];
+    this.onTap,
+  }) : textLinkers = <TextLinker>[];
 
   final List<InlineSpan> children;
 
@@ -153,16 +153,18 @@ class LinkedText extends StatelessWidget {
   final List<TextLinker> textLinkers;
 
   final TextStyle? style;
+  final UriStringCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
         style: DefaultTextStyle.of(context).style,
-        text: 'Here you go:',
         //children: linkSpans(TextLinker.urlRangesFinder, children),
         // TODO(justinmc): Need to handle all children (and none).
-        children: linkSpan(TextLinker.urlRangesFinder, children.first),
+        children: <InlineSpan>[
+          linkSpan(TextLinker.urlRangesFinder, children.first, onTap),
+        ],
       ),
     );
     /*
@@ -477,7 +479,28 @@ bool visit(InlineSpan span) {
   return true;
 }
 
-List<InlineSpan> linkSpan(RangesFinder rangesFinder, TextSpan span) {
+List<TextRange> _cleanRanges(Iterable<TextRange> ranges) {
+  final List<TextRange> nextRanges = ranges.toList();
+
+  // Sort by start.
+  nextRanges.sort((TextRange a, TextRange b) {
+    return a.start.compareTo(b.start);
+  });
+
+  // Remove overlapping ranges.
+  int lastEnd = 0;
+  nextRanges.removeWhere((TextRange range) {
+    final bool overlaps = range.start < lastEnd;
+    if (!overlaps) {
+      lastEnd = range.end;
+    }
+    return overlaps;
+  });
+
+  return nextRanges;
+}
+
+InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallback? onTap) {
   /*
   final String flattened = spans.fold<String>('', (String value, InlineSpan span) {
     return value + span.toString();
@@ -485,33 +508,63 @@ List<InlineSpan> linkSpan(RangesFinder rangesFinder, TextSpan span) {
   print('justin linkSpans flattened to: $flattened');
   */
 
-  print('justin linkSpan flattened to: ${span.toPlainText()}');
+  if (span is! TextSpan) {
+    return span;
+  }
+
+  //print('justin linkSpan flattened to: ${span.toPlainText()}');
 
   // Flatten the tree and find all ranges in the flat String. This must be done
   // cumulatively, and not during a traversal, because matches may occur across
   // span boundaries.
-  final Iterable<TextRange> ranges = rangesFinder(span.toPlainText());
+  final List<TextRange> ranges = _cleanRanges(rangesFinder(span.toPlainText()));
 
   print('justin ranges $ranges.');
 
-  final TextSpan nextTree = TextSpan();
-  int index = 0;
-  if (span.text.isNotEmpty) {
-    // TODO(justinmc): Assuming ranges are not ordered, must iterate all of them. Could they be ordered by start?
+  return _linkSpanRecurse(span, ranges, 0, onTap);
+}
+
+InlineSpan _linkSpanRecurse(InlineSpan span, List<TextRange> ranges, int index, UriStringCallback? onTap) {
+  if (span is! TextSpan) {
+    return span;
+  }
+
+  final TextSpan nextTree = TextSpan(
+    children: <InlineSpan>[],
+  );
+  if (span.text?.isNotEmpty ?? false) {
+    final String text = span.text!;
+    final int textEnd = index + text.length;
     for (final TextRange range in ranges) {
-      if (range.start >= index && range.end < span.text.length) {
+      if (range.start >= textEnd) {
+        // Because ranges is ordered, there are no more relevant ranges for this
+        // text.
+        break;
       }
+      if (range.end <= index) {
+        // TODO(justinmc): After you fully use a range, you should remove it somehow.
+        continue;
+      }
+      if (range.start > index) {
+        // Add the unlinked text before the range.
+        nextTree.children!.add(TextSpan(
+          text: text.substring(0, range.end - index),
+        ));
+      }
+      // Add the link itself.
+      final int linkStart = math.max(range.start, index);
+      final int linkEnd = math.min(range.end, textEnd);
+      nextTree.children!.add(InlineLink(
+        onTap: onTap,
+        text: text.substring(linkStart - index, linkEnd - index),
+      ));
     }
   }
-  /*
-  span.visitChildren((InlineSpan span) {
-    if (index == 0) {
-      return true;
+  if (span.children?.isNotEmpty ?? false) {
+    for (final InlineSpan child in span.children!) {
+      nextTree.children!.add(_linkSpanRecurse(child, ranges, index, onTap));
     }
-  });
-  */
+  }
 
-  return <InlineSpan>[
-    span,
-  ];
+  return nextTree;
 }
