@@ -1616,7 +1616,7 @@ abstract class DiagnosticsNode {
           'showSeparator': showSeparator,
         if (level != DiagnosticLevel.info)
           'level': level.name,
-        if (showName == false)
+        if (!showName)
           'showName': showName,
         if (emptyBodyDescription != null)
           'emptyBodyDescription': emptyBodyDescription,

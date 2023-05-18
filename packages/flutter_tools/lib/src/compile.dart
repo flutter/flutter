@@ -793,7 +793,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--platform',
         platformDill!,
       ],
-      if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if (unsafePackageSerialization) '--unsafe-package-serialization',
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
       ...?extraFrontEndOptions,

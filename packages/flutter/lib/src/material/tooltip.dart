@@ -850,30 +850,28 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = IgnorePointer(
-      child: FadeTransition(
-        opacity: animation,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: height),
-          child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyMedium!,
-            child: Container(
-              decoration: decoration,
-              padding: padding,
-              margin: margin,
-              child: Center(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: Text.rich(
-                  richMessage,
-                  style: textStyle,
-                  textAlign: textAlign,
-                ),
+    Widget result = FadeTransition(
+      opacity: animation,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.bodyMedium!,
+          child: Container(
+            decoration: decoration,
+            padding: padding,
+            margin: margin,
+            child: Center(
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: Text.rich(
+                richMessage,
+                style: textStyle,
+                textAlign: textAlign,
               ),
             ),
           ),
         ),
-      )
+      ),
     );
     if (onEnter != null || onExit != null) {
       result = MouseRegion(
