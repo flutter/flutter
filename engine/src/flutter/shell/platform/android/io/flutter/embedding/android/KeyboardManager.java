@@ -13,6 +13,7 @@ import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.editing.InputConnectionAdaptor;
 import io.flutter.plugin.editing.TextInputPlugin;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Processes keyboard events and cooperate with {@link TextInputPlugin}.
@@ -251,5 +252,16 @@ public class KeyboardManager implements InputConnectionAdaptor.KeyboardDelegate 
     if (redispatchedEvents.remove(keyEvent)) {
       Log.w(TAG, "A redispatched key event was consumed before reaching KeyboardManager");
     }
+  }
+
+  /**
+   * Returns an unmodifiable view of the pressed state.
+   *
+   * @return A map whose keys are physical keyboard key IDs and values are the corresponding logical
+   *     keyboard key IDs.
+   */
+  public Map<Long, Long> getPressedState() {
+    KeyEmbedderResponder embedderResponder = (KeyEmbedderResponder) responders[0];
+    return embedderResponder.getPressedState();
   }
 }

@@ -36,6 +36,7 @@ import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+import io.flutter.embedding.engine.systemchannels.KeyboardChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
@@ -1459,6 +1460,7 @@ public class PlatformViewsControllerTest {
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));
+    when(engine.getKeyboardChannel()).thenReturn(mock(KeyboardChannel.class));
     when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
     when(engine.getTextInputChannel()).thenReturn(mock(TextInputChannel.class));
     when(engine.getSettingsChannel()).thenReturn(new SettingsChannel(executor));
