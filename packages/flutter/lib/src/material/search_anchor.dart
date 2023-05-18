@@ -579,11 +579,10 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               viewHeaderTextStyle: viewHeaderTextStyle,
               viewHeaderHintStyle: viewHeaderHintStyle,
               dividerColor: dividerColor,
-              viewConstraints: viewConstraints,
               showFullScreenView: showFullScreenView,
               animation: curvedAnimation,
-              getRect: getRect,
               topPadding: topPadding,
+              viewMaxWidth: _rectTween.end!.width,
               viewRect: viewRect,
               viewDefaults: viewDefaults,
               viewTheme: viewTheme,
@@ -616,11 +615,10 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderTextStyle,
     this.viewHeaderHintStyle,
     this.dividerColor,
-    this.viewConstraints,
     required this.showFullScreenView,
-    required this.getRect,
     required this.topPadding,
     required this.animation,
+    required this.viewMaxWidth,
     required this.viewRect,
     required this.viewDefaults,
     required this.viewTheme,
@@ -641,11 +639,10 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderTextStyle;
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
-  final BoxConstraints? viewConstraints;
   final bool showFullScreenView;
-  final ValueGetter<Rect?> getRect;
   final double topPadding;
   final Animation<double> animation;
+  final double viewMaxWidth;
   final Rect viewRect;
   final SearchViewThemeData viewDefaults;
   final SearchViewThemeData viewTheme;
@@ -690,9 +687,11 @@ class _ViewContentState extends State<_ViewContent> {
     result = widget.suggestionsBuilder(context, _controller);
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
-    if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
+    if (_screenSize != updatedScreenSize) {
       _screenSize = updatedScreenSize;
-      _viewRect = Offset.zero & _screenSize!;
+      if (widget.showFullScreenView) {
+        _viewRect = Offset.zero & _screenSize!;
+      }
     }
   }
 
@@ -782,56 +781,64 @@ class _ViewContentState extends State<_ViewContent> {
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
             elevation: effectiveElevation,
-            child: FadeTransition(
-              opacity: CurvedAnimation(
-                parent: widget.animation,
-                curve: _kViewIconsFadeOnInterval,
-                reverseCurve: _kViewIconsFadeOnInterval.flipped,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: widget.topPadding),
-                    child: SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: SearchBar(
-                        constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
-                        focusNode: _focusNode,
-                        leading: widget.viewLeading ?? defaultLeading,
-                        trailing: widget.viewTrailing ?? defaultTrailing,
-                        hintText: widget.viewHintText,
-                        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                        overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                        elevation: const MaterialStatePropertyAll<double>(0.0),
-                        textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                        hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                        controller: _controller,
-                        onChanged: (_) {
-                          updateSuggestions();
-                        },
-                      ),
-                    ),
+            child: ClipRect(
+              clipBehavior: Clip.antiAlias,
+              child: OverflowBox(
+                alignment: Alignment.topLeft,
+                maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
+                minWidth: 0,
+                child: FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: widget.animation,
+                    curve: _kViewIconsFadeOnInterval,
+                    reverseCurve: _kViewIconsFadeOnInterval.flipped,
                   ),
-                  FadeTransition(
-                    opacity: CurvedAnimation(
-                      parent: widget.animation,
-                      curve: _kViewDividerFadeOnInterval,
-                      reverseCurve: _kViewFadeOnInterval.flipped,
-                    ),
-                    child: viewDivider),
-                  Expanded(
-                    child: FadeTransition(
-                      opacity: CurvedAnimation(
-                        parent: widget.animation,
-                        curve: _kViewListFadeOnInterval,
-                        reverseCurve: _kViewListFadeOnInterval.flipped,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(top: widget.topPadding),
+                        child: SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: SearchBar(
+                            constraints: widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null,
+                            focusNode: _focusNode,
+                            leading: widget.viewLeading ?? defaultLeading,
+                            trailing: widget.viewTrailing ?? defaultTrailing,
+                            hintText: widget.viewHintText,
+                            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                            elevation: const MaterialStatePropertyAll<double>(0.0),
+                            textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                            hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                            controller: _controller,
+                            onChanged: (_) {
+                              updateSuggestions();
+                            },
+                          ),
+                        ),
                       ),
-                      child: viewBuilder(result),
-                    ),
+                      FadeTransition(
+                        opacity: CurvedAnimation(
+                          parent: widget.animation,
+                          curve: _kViewDividerFadeOnInterval,
+                          reverseCurve: _kViewFadeOnInterval.flipped,
+                        ),
+                        child: viewDivider),
+                      Expanded(
+                        child: FadeTransition(
+                          opacity: CurvedAnimation(
+                            parent: widget.animation,
+                            curve: _kViewListFadeOnInterval,
+                            reverseCurve: _kViewListFadeOnInterval.flipped,
+                          ),
+                          child: viewBuilder(result),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
