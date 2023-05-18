@@ -686,24 +686,15 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   @override
-  void didChangeDependencies() {
+  Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    final FutureOr<Iterable<Widget>> suggestionsFutureOr = widget.suggestionsBuilder(context, _controller);
-
-    if (suggestionsFutureOr is Iterable<Widget>){
-      result = suggestionsFutureOr;
-    } else {
-      suggestionsFutureOr.then((Iterable<Widget> value) {
-        result = value;
-      });
-    }
-
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
     if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
       _screenSize = updatedScreenSize;
       _viewRect = Offset.zero & _screenSize!;
     }
+    result = await widget.suggestionsBuilder(context, _controller);
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
