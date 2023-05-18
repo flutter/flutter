@@ -2785,6 +2785,11 @@ void main() {
     });
 
     testWidgets('Padding correction two line, empty, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
@@ -2792,7 +2797,7 @@ void main() {
         trailingConstraint: ListTileConstraint.video,
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.5, 800.0 - 16.0, 16.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, hasIssue99933 ? 17 : 16.5, 800.0 - 16.0, hasIssue99933 ? 27 : 16.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0, 32.0 + 16.0));
 
       await tester.pumpWidget(buildFrame(
@@ -2803,7 +2808,7 @@ void main() {
         trailingConstraint: ListTileConstraint.video,
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.5, 800.0 - 16.0, 16.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, hasIssue99933 ? 17 : 16.5, 800.0 - 16.0, hasIssue99933 ? 27 : 16.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0, 32.0 + 16.0));
 
       await tester.pumpWidget(buildFrame(
@@ -2878,6 +2883,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, empty, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -2887,7 +2897,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0, hasIssue99933 ? 52 : 37.5 + 14.0));
 
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
@@ -2899,7 +2909,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0, hasIssue99933 ? 52 : 37.5 + 14.0));
 
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
@@ -3025,13 +3035,18 @@ void main() {
     });
 
     testWidgets('Padding correction two line, trailing text, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
         trailing: trailingSupportText,
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.5, 800.0 - 16.0 * 2.0 - 56.0, 16.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, hasIssue99933 ? 17 : 16.5, 800.0 - 16.0 * 2.0 - 56.0, hasIssue99933 ? 27 : 16.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0 * 2.0 - 56.0, 32.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 29.0, 800.0 - 16.0, 29.0 + 14.0));
 
@@ -3042,7 +3057,7 @@ void main() {
         trailing: trailingSupportText,
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.5, 800.0 - 16.0, 16.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, hasIssue99933 ? 17 : 16.5, 800.0 - 16.0, hasIssue99933 ? 27 : 16.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 32.0, 800.0 - 16.0, 32.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 29.0, 16.0 + 56.0, 29.0 + 14.0));
 
@@ -3118,6 +3133,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, trailing text, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -3126,7 +3146,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0 * 2.0 - 56.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0 * 2.0 - 56.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2.0 - 56.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 14.0));
 
       await tester.pumpWidget(buildFrame(
@@ -3138,7 +3158,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 14.0));
 
       await tester.pumpWidget(buildFrame(
@@ -3273,6 +3293,11 @@ void main() {
     });
 
     testWidgets('Padding correction two line, icon, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
@@ -3281,7 +3306,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 24.0, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2.0 - 24.0, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 24.0, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 24.0, 800.0 - 16.0, 24.0 + 24.0));
 
@@ -3294,7 +3319,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.5, 800.0 - 16.0 * 2 - 40, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 24.0, 16.0 + 24.0, 24.0 + 24.0));
 
@@ -3382,6 +3407,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, icon, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -3392,7 +3422,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 * 2.0 - 24.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 37.5, 800.0 - 16.0 * 2.0 - 24.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2.0 - 24.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
 
       await tester.pumpWidget(buildFrame(
@@ -3406,7 +3436,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 16.0, 800.0 - 16.0 * 2 - 40, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 37.5, 800.0 - 16.0 * 2 - 40, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 52 : 337.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
 
       await tester.pumpWidget(buildFrame(
@@ -3561,6 +3591,11 @@ void main() {
     });
 
     testWidgets('Padding correction two line, iconButton, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
@@ -3571,7 +3606,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 24.0, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2.0 - 24.0, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 24.0, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
 
@@ -3586,7 +3621,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 8.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.5, 800.0 - 16.0 * 2 - 40, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
 
@@ -3686,6 +3721,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, iconButton, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -3698,7 +3738,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 * 2.0 - 24.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 37.5, 800.0 - 16.0 * 2.0 - 24.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2.0 - 24.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
 
       await tester.pumpWidget(buildFrame(
@@ -3714,7 +3754,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 16.0, 800.0 - 16.0 * 2 - 40, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 37.5, 800.0 - 16.0 * 2 - 40, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 58 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
 
       await tester.pumpWidget(buildFrame(
@@ -3881,6 +3921,11 @@ void main() {
     });
 
     testWidgets('Padding correction two line, avatar, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
@@ -3891,7 +3936,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 40.0, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2.0 - 40.0, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 40.0, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
 
@@ -3906,7 +3951,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 20.5, 800.0 - 16.0 * 2 - 40.0, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 40.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2 - 40.0, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 36.0, 800.0 - 16.0 * 2 - 40.0, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
 
@@ -4006,6 +4051,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, avatar, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -4018,7 +4068,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 * 2.0 - 40.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 37.5, 800.0 - 16.0 * 2.0 - 40.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2.0 - 40.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
 
       await tester.pumpWidget(buildFrame(
@@ -4034,7 +4084,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 16.0, 800.0 - 16.0 * 2 - 40.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 37.5, 800.0 - 16.0 * 2 - 40.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2 - 40.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
 
       await tester.pumpWidget(buildFrame(
@@ -4201,6 +4251,11 @@ void main() {
     });
 
     testWidgets('Padding correction two line, image, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
@@ -4211,7 +4266,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 20.5, 800.0 - 16.0 * 2.0 - 56.0, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2.0 - 56.0, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 36.0, 800.0 - 16.0 * 2.0 - 56.0, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
 
@@ -4226,7 +4281,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 20.5, 800.0 - 16.0 * 2 - 56, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2 - 56, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 36.0, 800.0 - 16.0 * 2 - 56, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
 
@@ -4326,6 +4381,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, image, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -4338,7 +4398,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 56.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 16.0, 800.0 - 16.0 * 2.0 - 56.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 37.5, 800.0 - 16.0 * 2.0 - 56.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2.0 - 56.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 56.0));
 
       await tester.pumpWidget(buildFrame(
@@ -4354,7 +4414,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 56.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.0, 800.0 - 16.0 * 2 - 56, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 37.5, 800.0 - 16.0 * 2 - 56, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, hasIssue99933 ? 38 : 37.5, 800.0 - 16.0 * 2 - 56, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 56.0));
 
       await tester.pumpWidget(buildFrame(
@@ -4521,6 +4581,11 @@ void main() {
     });
 
     testWidgets('Padding correction two line, video, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         overline: overline,
@@ -4531,7 +4596,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 100.0, 20.5, 800.0 - 16.0 - 100.0, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 100.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 - 100.0, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 36.0, 800.0 - 16.0 - 100.0, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
 
@@ -4546,7 +4611,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 100.0, 20.5, 800.0 - 16.0 - 100, 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 100.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 - 100, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 36.0, 800.0 - 16.0 - 100, 36.0 + 16.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
 
@@ -4646,6 +4711,11 @@ void main() {
     });
 
     testWidgets('Padding correction three line, video, Material 2', (WidgetTester tester) async {
+      // TODO(jamesgorman2): https://github.com/flutter/flutter/issues/99933
+      //                A bug in the HTML renderer and/or Chrome 96+ causes a
+      //                discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+
       await tester.pumpWidget(buildFrame(
         useMaterial3: false,
         isThreeLine: true,
@@ -4658,7 +4728,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 16.0, 100.0, 16.0 + 56.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(20.0 + 100.0, 16.0, 800.0 - 20.0 - 100.0, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, 37.5, 800.0 - 20.0 - 100.0, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, hasIssue99933 ? 38 : 37.5, 800.0 - 20.0 - 100.0, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100, 16.0, 800.0, 16.0 + 56.0));
 
       await tester.pumpWidget(buildFrame(
@@ -4674,7 +4744,7 @@ void main() {
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100, 16.0, 800.0, 16.0 + 56.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(20.0 + 100.0, 16.0, 800.0 - 20.0 - 100, 16.0 + 16.0));
-      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, 37.5, 800.0 - 20.0 - 100, 37.5 + 14.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, hasIssue99933 ? 38 : 37.5, 800.0 - 20.0 - 100, hasIssue99933 ? 52 : 37.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 16.0, 100.0, 16.0 + 56.0));
 
       await tester.pumpWidget(buildFrame(
