@@ -96,6 +96,7 @@ void main() {
       logger: logger,
       platform: platform,
       signals: signals,
+      flutterDriverFactory: FailingFakeFlutterDriverFactory(),
     );
     fileSystem.file('lib/main.dart').createSync(recursive: true);
     fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
@@ -115,9 +116,10 @@ void main() {
         'http://localhost:8181',
         '--keep-app-running',
       ]),
-      throwsToolExit(message: 'cannot start app'),
+      throwsToolExit(),
     );
-    expect(logger.statusText, isEmpty);
+    expect(logger.statusText, isNot(contains('Screenshot written to ')));
+    expect(signals.addedHandlers, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -709,5 +711,14 @@ class FakeIosDevice extends Fake implements IOSDevice {
 }
 
 class FakeSignals extends Fake implements Signals {
-  
+  List<SignalHandler> addedHandlers = <SignalHandler>[];
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    addedHandlers.add(handler);
+    return const Object();
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
 }

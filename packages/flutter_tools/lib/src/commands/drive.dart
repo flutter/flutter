@@ -315,10 +315,10 @@ class DriveCommand extends RunCommandBase {
         profileMemory: stringArg('profile-memory'),
       );
 
-      //if (screenshot != null) {
+      if (screenshot != null) {
         // If the test is sent a signal or times out, take a screenshot
         _registerScreenshotCallbacks(device, _fileSystem.directory(screenshot));
-      //}
+      }
 
       final int testResult = await testResultFuture;
 
