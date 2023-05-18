@@ -1527,8 +1527,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         if (existingSelectionStart.offset < existingSelectionEnd.offset) {
           // The selection is normalized, i.e. the start of the selection is before
           // the end.
-          if (shouldSwapEdgesWhenSelectionIsNormalized) {
+          if (shouldSwapEdgesWhenSelectionIsNormalized) {.
             targetPosition = isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
+            // The static edge is moved to the opposite end of the word boundary to
+            // keep the entire origin word in the selection
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
             _setSelectionPosition(isEnd ? localWordBoundary.wordEnd : localWordBoundary.wordStart, isEnd: !isEnd);
           } else {
@@ -1544,6 +1546,8 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
           // the start.
           if (shouldSwapEdgesWhenSelectionNotNormalized) {
             targetPosition = isEnd ? wordBoundary.wordEnd : wordBoundary.wordStart;
+            // The static edge is moved to the opposite end of the word boundary to
+            // keep the entire origin word in the selection
             final ({TextPosition wordStart, TextPosition wordEnd}) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
             _setSelectionPosition(isEnd ? localWordBoundary.wordStart : localWordBoundary.wordEnd, isEnd: !isEnd);
           } else {
