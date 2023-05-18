@@ -2338,6 +2338,7 @@ ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/rend
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/SurfaceTextureWrapper.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/DeferredComponentChannel.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyEventChannel.java + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyboardChannel.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LifecycleChannel.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LocalizationChannel.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/MouseCursorChannel.java + ../../../flutter/LICENSE
@@ -2371,6 +2372,7 @@ ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/Listen
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/SpellCheckPlugin.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextEditingDelta.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/keyboard/KeyboardPlugin.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java + ../../../flutter/LICENSE
@@ -4963,6 +4965,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/render
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/DeferredComponentChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyEventChannel.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/KeyboardChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LifecycleChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/LocalizationChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/MouseCursorChannel.java
@@ -4999,6 +5002,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/Listenab
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/SpellCheckPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextEditingDelta.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/keyboard/KeyboardPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/localization/LocalizationPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/mouse/MouseCursorPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/AccessibilityEventsDelegate.java
