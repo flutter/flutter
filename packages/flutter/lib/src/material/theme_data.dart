@@ -389,11 +389,6 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'This "fix" is now enabled by default. '
-      'This feature was deprecated after v2.5.0-1.0.pre.',
-    )
-    bool? fixTextFieldOutlineLabel,
-    @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
@@ -605,7 +600,6 @@ class ThemeData with Diagnosticable {
     tooltipTheme ??= const TooltipThemeData();
 
     // DEPRECATED (newest deprecations at the bottom)
-    fixTextFieldOutlineLabel ??= true;
     primaryColorBrightness = estimatedPrimaryColorBrightness;
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
@@ -703,7 +697,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor,
@@ -817,11 +810,6 @@ class ThemeData with Diagnosticable {
     required this.tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'This "fix" is now enabled by default. '
-      'This feature was deprecated after v2.5.0-1.0.pre.',
-    )
-    bool? fixTextFieldOutlineLabel,
-    @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
@@ -861,7 +849,6 @@ class ThemeData with Diagnosticable {
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
-       _fixTextFieldOutlineLabel = fixTextFieldOutlineLabel,
        _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
        _selectedRowColor = selectedRowColor,
@@ -870,7 +857,6 @@ class ThemeData with Diagnosticable {
        _bottomAppBarColor = bottomAppBarColor,
        assert(toggleableActiveColor != null),
         // DEPRECATED (newest deprecations at the bottom)
-       assert(fixTextFieldOutlineLabel != null),
        assert(primaryColorBrightness != null),
        assert(errorColor != null),
        assert(backgroundColor != null);
@@ -1537,21 +1523,6 @@ class ThemeData with Diagnosticable {
 
   // DEPRECATED (newest deprecations at the bottom)
 
-  /// An obsolete flag to allow apps to opt-out of a
-  /// [small fix](https://github.com/flutter/flutter/issues/54028) for the Y
-  /// coordinate of the floating label in a [TextField] [OutlineInputBorder].
-  ///
-  /// Setting this flag to true causes the floating label to be more precisely
-  /// vertically centered relative to the border's outline.
-  ///
-  /// The flag is true by default and its use is deprecated.
-  @Deprecated(
-    'This "fix" is now enabled by default. '
-    'This feature was deprecated after v2.5.0-1.0.pre.',
-  )
-  bool get fixTextFieldOutlineLabel => _fixTextFieldOutlineLabel!;
-  final bool? _fixTextFieldOutlineLabel;
-
   /// Obsolete property that was originally used to determine the color
   /// of text and icons placed on top of the primary color (e.g. toolbar text).
   ///
@@ -1725,11 +1696,6 @@ class ThemeData with Diagnosticable {
     TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
-      'This "fix" is now enabled by default. '
-      'This feature was deprecated after v2.5.0-1.0.pre.',
-    )
-    bool? fixTextFieldOutlineLabel,
-    @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
@@ -1860,7 +1826,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel: fixTextFieldOutlineLabel ?? _fixTextFieldOutlineLabel,
       primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
@@ -2056,7 +2021,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel: t < 0.5 ? a.fixTextFieldOutlineLabel : b.fixTextFieldOutlineLabel,
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
@@ -2164,7 +2128,6 @@ class ThemeData with Diagnosticable {
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
         // DEPRECATED (newest deprecations at the bottom)
-        other.fixTextFieldOutlineLabel == fixTextFieldOutlineLabel &&
         other.primaryColorBrightness == primaryColorBrightness &&
         other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.toggleableActiveColor == toggleableActiveColor &&
@@ -2269,7 +2232,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme,
       tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      fixTextFieldOutlineLabel,
       primaryColorBrightness,
       androidOverscrollIndicator,
       toggleableActiveColor,
@@ -2376,7 +2338,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
-    properties.add(DiagnosticsProperty<bool>('fixTextFieldOutlineLabel', fixTextFieldOutlineLabel, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
     properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
