@@ -1906,6 +1906,36 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     }
   });
+
+  testWidgetsWithLeakTracking('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
+    bool isTapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          richMessage: TextSpan(
+            text: tooltipText,
+            recognizer: TapGestureRecognizer()..onTap = () {
+              isTapped = true;
+            }
+          ),
+          showDuration: const Duration(seconds: 5),
+          triggerMode: TooltipTriggerMode.tap,
+          child: const Icon(Icons.refresh)
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    expect(find.text(tooltipText), findsNothing);
+
+    await _testGestureTap(tester, tooltip);
+    final Finder textSpan = find.text(tooltipText);
+    expect(textSpan, findsOneWidget);
+
+    await _testGestureTap(tester, textSpan);
+    expect(isTapped, isTrue);
+  });
 }
 
 Future<void> setWidgetForTooltipMode(
