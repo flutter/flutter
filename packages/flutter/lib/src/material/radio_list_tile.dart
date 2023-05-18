@@ -594,6 +594,7 @@ class RadioListTile<T> extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        titleAlignment: titleAlignment,
       ),
     );
   }

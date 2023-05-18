@@ -18,19 +18,24 @@ void main() {
     Offset radioTopLeft = tester.getTopLeft(find.byType(Radio<example.Groceries>).at(0));
 
     // The radio is centered vertically with the text.
-    expect(radioTopLeft - tileTopLeft, const Offset(16.0, 16.0));
+    expect(radioTopLeft - tileTopLeft, const Offset(8.0, 16.0));
 
     tileTopLeft = tester.getTopLeft(find.byType(RadioListTile<example.Groceries>).at(1));
     radioTopLeft = tester.getTopLeft(find.byType(Radio<example.Groceries>).at(1));
 
+
+    print('tile: ${tester.getSize(find.byType(RadioListTile<example.Groceries>).at(1))}');
+    print('title: ${tester.getSize(find.byType(Text).at(2))}');
+    print('subtitle: ${tester.getSize(find.byType(Text).at(3))}');
+    print('tile: ${tester.getSize(find.byType(Radio<example.Groceries>).at(1))}');
     // The radio is centered vertically with the text.
-    expect(radioTopLeft - tileTopLeft, const Offset(16.0, 30.0));
+    expect(radioTopLeft - tileTopLeft, const Offset(8.0, 30.0));
 
     tileTopLeft = tester.getTopLeft(find.byType(RadioListTile<example.Groceries>).at(2));
     radioTopLeft = tester.getTopLeft(find.byType(Radio<example.Groceries>).at(2));
 
     // The radio is aligned to the top vertically with the text.
-    expect(radioTopLeft - tileTopLeft, const Offset(16.0, 8.0));
+    expect(radioTopLeft - tileTopLeft, const Offset(8.0, 4.0));
   });
 
   testWidgets('Radios can be checked', (WidgetTester tester) async {

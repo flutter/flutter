@@ -55,6 +55,7 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
                 switchValue2 = value!;
               });
             },
+            titleAlignment: ListTileTitleAlignment.threeLine,
             title: const Text('Headline'),
             subtitle: const Text(
                 'Longer supporting text to demonstrate how the text wraps and the switch is centered vertically with the text.'),

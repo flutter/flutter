@@ -56,6 +56,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
                 checkboxValue2 = value!;
               });
             },
+            titleAlignment: ListTileTitleAlignment.threeLine,
             title: const Text('Headline'),
             subtitle: const Text(
                 'Longer supporting text to demonstrate how the text wraps and the checkbox is centered vertically with the text.'),

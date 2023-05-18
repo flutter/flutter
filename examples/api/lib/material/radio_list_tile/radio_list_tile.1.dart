@@ -57,6 +57,7 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
                 _groceryItem = value;
               });
             },
+            titleAlignment: ListTileTitleAlignment.threeLine,
             title: const Text('Tomato'),
             subtitle: const Text(
                 'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.'),
