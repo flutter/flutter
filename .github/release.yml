@@ -1,0 +1,22 @@
+changelog:
+  exclude:
+    authors:
+      - skia-flutter-autoroll
+      - dependabot
+  categories:
+    - title: Impeller
+      labels:
+        - impeller
+    - title: Android
+      labels:
+        - platform-android
+    - title: iOS
+      labels:
+        - platform-ios
+    - title: Web
+      labels:
+        - platform-web
+    - title: Desktop
+      labels:
+        - platform-windows
+        - platform-macos
