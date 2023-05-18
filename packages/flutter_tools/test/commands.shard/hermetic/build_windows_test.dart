@@ -85,7 +85,7 @@ void main() {
         r'build\windows',
         '-G',
         generator,
-		'-A',
+        '-A',
         'x64'
       ],
       onRun: onRun,
