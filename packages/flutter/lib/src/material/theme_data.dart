@@ -6,6 +6,7 @@ import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'action_buttons.dart';
 import 'action_icons_theme.dart';
@@ -1152,9 +1153,9 @@ class ThemeData with Diagnosticable {
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
-  ///     - Common buttons: [ElevatedButton], [FilledButton] (*new*), FilledButton.tonal] (*new*), [OutlinedButton], [TextButton]
+  ///     - Common buttons: [ElevatedButton], [FilledButton] (*new*), [FilledButton.tonal] (*new*), [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
-  ///     - Icon buttons: [IconButton]
+  ///     - Icon buttons: [IconButton], [IconButton.filled] (*new*), [IconButton.filledTonal] (*new*), [IconButton.outlined] (*new*)
   ///     - Segmented buttons: [SegmentedButton] (*new*, replacing [ToggleButtons])
   ///   * Cards: [Card]
   ///   * Checkbox: [Checkbox], [CheckboxListTile]
@@ -1172,10 +1173,11 @@ class ThemeData with Diagnosticable {
   ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio], [RadioListTile]
+  ///   * Search: [SearchBar] (*new*), [SearchAnchor] (*new*),
   ///   * Snack bar: [SnackBar]
   ///   * Slider: [Slider], [RangeSlider]
   ///   * Switch: [Switch], [SwitchListTile]
-  ///   * Tabs: [TabBar]
+  ///   * Tabs: [TabBar], [TabBar.secondary] (*new*)
   ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Time pickers: [showTimePicker], [TimePickerDialog]
   ///   * Top app bar: [AppBar], [SliverAppBar], [SliverAppBar.medium] (*new*), [SliverAppBar.large] (*new*)
