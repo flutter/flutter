@@ -256,6 +256,7 @@ class TextLinker {
   /// Builds an [InlineSpan] to display the text that it's passed.
   final LinkBuilder linkBuilder;
 
+  // TODO(justinmc): Is it possible to enforce this order by TextRange.start, or should I just assume it's unordered?
   /// Returns [TextRange]s that should be built with [linkBuilder].
   final RangesFinder rangesFinder;
 
@@ -471,7 +472,12 @@ class _TextLink extends StatelessWidget {
   }
 }
 
-List<InlineSpan> linkSpan(RangesFinder rangesFinder, InlineSpan span) {
+bool visit(InlineSpan span) {
+  print('justin visiting span ${span.toPlainText()}');
+  return true;
+}
+
+List<InlineSpan> linkSpan(RangesFinder rangesFinder, TextSpan span) {
   /*
   final String flattened = spans.fold<String>('', (String value, InlineSpan span) {
     return value + span.toString();
@@ -481,9 +487,29 @@ List<InlineSpan> linkSpan(RangesFinder rangesFinder, InlineSpan span) {
 
   print('justin linkSpan flattened to: ${span.toPlainText()}');
 
+  // Flatten the tree and find all ranges in the flat String. This must be done
+  // cumulatively, and not during a traversal, because matches may occur across
+  // span boundaries.
   final Iterable<TextRange> ranges = rangesFinder(span.toPlainText());
 
-  print('justin ranges $ranges');
+  print('justin ranges $ranges.');
+
+  final TextSpan nextTree = TextSpan();
+  int index = 0;
+  if (span.text.isNotEmpty) {
+    // TODO(justinmc): Assuming ranges are not ordered, must iterate all of them. Could they be ordered by start?
+    for (final TextRange range in ranges) {
+      if (range.start >= index && range.end < span.text.length) {
+      }
+    }
+  }
+  /*
+  span.visitChildren((InlineSpan span) {
+    if (index == 0) {
+      return true;
+    }
+  });
+  */
 
   return <InlineSpan>[
     span,
