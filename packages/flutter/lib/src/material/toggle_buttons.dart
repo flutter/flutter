@@ -40,12 +40,12 @@ import 'toggle_buttons_theme.dart';
 ///
 /// There is a Material 3 version of this component, [SegmentedButton],
 /// that's preferred for applications that are configured for Material 3
-/// (see [ThemeData.useMaterial3]). The [SegmentedButton] widget's visual
+/// (see [ThemeData.useMaterial3]). The [SegmentedButton] widget's visuals
 /// are a little bit different, see the Material 3 spec at
 /// <https://m3.material.io/components/segmented-buttons/overview> for
 /// more details. The [SegmentedButton] widget's API is also slightly different.
 /// While the [ToggleButtons] widget can have list of widgets, the
-/// [SegmentedButton] widget can have a list of [ButtonSegment]s with
+/// [SegmentedButton] widget has a list of [ButtonSegment]s with
 /// a type value. While the [ToggleButtons] uses a list of boolean values
 /// to determine the selection state of each button, the [SegmentedButton]
 /// uses a set of type values to determine the selection state of each segment.
