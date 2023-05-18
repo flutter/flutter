@@ -525,16 +525,7 @@ import java.util.List;
     if (host.shouldHandleDeeplinking()) {
       Uri data = intent.getData();
       if (data != null) {
-        String fullRoute = data.getPath();
-        if (fullRoute != null && !fullRoute.isEmpty()) {
-          if (data.getQuery() != null && !data.getQuery().isEmpty()) {
-            fullRoute += "?" + data.getQuery();
-          }
-          if (data.getFragment() != null && !data.getFragment().isEmpty()) {
-            fullRoute += "#" + data.getFragment();
-          }
-          return fullRoute;
-        }
+        return data.toString();
       }
     }
     return null;
