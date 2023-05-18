@@ -65,7 +65,7 @@ void main() {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              ListTile(title: const Text('Top'), key: topKey),
+              ListTile(title: const Text('Top'), key: topKey, leading: const Icon(Icons.person)),
               ExpansionTile(
                 key: expandedKey,
                 initiallyExpanded: true,
@@ -76,6 +76,7 @@ void main() {
                   ListTile(
                     key: tileKey,
                     title: const Text('0'),
+                    leading: const Icon(Icons.person),
                   ),
                 ],
               ),
@@ -86,6 +87,7 @@ void main() {
                   ListTile(
                     key: tileKey,
                     title: const Text('0'),
+                    leading: const Icon(Icons.person),
                   ),
                 ],
               ),
@@ -93,7 +95,7 @@ void main() {
                 key: defaultKey,
                 title: Text('Default'),
                 children: <Widget>[
-                  ListTile(title: Text('0')),
+                  ListTile(title: Text('0'), leading: Icon(Icons.person)),
                 ],
               ),
             ],
@@ -107,23 +109,32 @@ void main() {
       of: find.byKey(key),
       matching: find.byType(Container),
     ));
+    DecoratedBox? getDecoratedBox(Key key, {int at = 0}) => tester.widgetList<DecoratedBox>(
+        find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox))
+      ).elementAt(at);
 
-    expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
-    expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
-    expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
+    final double singleLineListTileHeight = getHeight(topKey);
+
+    expect(getHeight(expandedKey) - getHeight(tileKey), singleLineListTileHeight);
+    expect(getHeight(collapsedKey), singleLineListTileHeight);
+    expect(getHeight(defaultKey), singleLineListTileHeight);
 
     // expansionTile should have Clip.antiAlias as clipBehavior
     expect(getContainer(expandedKey).clipBehavior, clipBehavior);
 
-    ShapeDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.red);
-    expect((expandedContainerDecoration.shape as Border).top.color, dividerColor);
-    expect((expandedContainerDecoration.shape as Border).bottom.color, dividerColor);
 
-    ShapeDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    ShapeDecoration expandedDecoratedBoxDecoration = getDecoratedBox(expandedKey, at: 1)!.decoration as ShapeDecoration;
+    expect((expandedDecoratedBoxDecoration.shape as Border).top.color, dividerColor);
+    expect((expandedDecoratedBoxDecoration.shape as Border).bottom.color, dividerColor);
+
+    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
-    expect((collapsedContainerDecoration.shape as Border).top.color, Colors.transparent);
-    expect((collapsedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
+
+    ShapeDecoration collapsedDecoratedBoxDecoration = getDecoratedBox(collapsedKey, at: 1)!.decoration as ShapeDecoration;
+    expect((collapsedDecoratedBoxDecoration.shape as Border).top.color, Colors.transparent);
+    expect((collapsedDecoratedBoxDecoration.shape as Border).bottom.color, Colors.transparent);
 
     await tester.tap(find.text('Expanded'));
     await tester.tap(find.text('Collapsed'));
@@ -133,29 +144,35 @@ void main() {
 
     // Pump to the middle of the animation for expansion.
     await tester.pump(const Duration(milliseconds: 100));
-    final ShapeDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsingContainerDecoration.color, Colors.transparent);
-    expect((collapsingContainerDecoration.shape as Border).top.color, const Color(0x15222222));
-    expect((collapsingContainerDecoration.shape as Border).bottom.color, const Color(0x15222222));
+
+    final ShapeDecoration collapsingDecoratedBoxDecoration = getDecoratedBox(collapsedKey, at: 1)!.decoration as ShapeDecoration;
+    expect((collapsingDecoratedBoxDecoration.shape as Border).top.color, const Color(0x15222222));
+    expect((collapsingDecoratedBoxDecoration.shape as Border).bottom.color, const Color(0x15222222));
 
     // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));
 
-    expect(getHeight(topKey), getHeight(expandedKey) - 2.0);
-    expect(getHeight(topKey), getHeight(collapsedKey) - getHeight(tileKey) - 2.0);
-    expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
+    expect(getHeight(expandedKey), singleLineListTileHeight);
+    expect(getHeight(collapsedKey) - getHeight(tileKey), singleLineListTileHeight);
+    expect(getHeight(defaultKey) - getHeight(tileKey), singleLineListTileHeight);
 
     // Expanded should be collapsed now.
-    expandedContainerDecoration = getContainer(expandedKey).decoration! as ShapeDecoration;
+    expandedContainerDecoration = getContainer(expandedKey).decoration! as BoxDecoration;
     expect(expandedContainerDecoration.color, Colors.transparent);
-    expect((expandedContainerDecoration.shape as Border).top.color, Colors.transparent);
-    expect((expandedContainerDecoration.shape as Border).bottom.color, Colors.transparent);
+
+    expandedDecoratedBoxDecoration = getDecoratedBox(expandedKey, at: 1)!.decoration as ShapeDecoration;
+    expect((expandedDecoratedBoxDecoration.shape as Border).top.color, Colors.transparent);
+    expect((expandedDecoratedBoxDecoration.shape as Border).bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as ShapeDecoration;
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration! as BoxDecoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
-    expect((collapsedContainerDecoration.shape as Border).top.color, dividerColor);
-    expect((collapsedContainerDecoration.shape as Border).bottom.color, dividerColor);
+
+    collapsedDecoratedBoxDecoration = getDecoratedBox(collapsedKey, at: 1)!.decoration as ShapeDecoration;
+    expect((collapsedDecoratedBoxDecoration.shape as Border).top.color, dividerColor);
+    expect((collapsedDecoratedBoxDecoration.shape as Border).bottom.color, dividerColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('ExpansionTile Theme dependencies', (WidgetTester tester) async {
@@ -505,10 +522,10 @@ void main() {
       ),
     ));
 
-    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    BoxDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(expansionTileKey),
       matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    )).decoration! as BoxDecoration;
 
     expect(shapeDecoration.color, collapsedBackgroundColor);
 
@@ -518,12 +535,41 @@ void main() {
     shapeDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(expansionTileKey),
       matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    )).decoration! as BoxDecoration;
 
     expect(shapeDecoration.color, backgroundColor);
   });
 
-  testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
+  testWidgets('ExpansionTile default iconColor, textColor Material 2', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: false);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: const Material(
+        child: ExpansionTile(
+          title: TestText('title'),
+          trailing: TestIcon(),
+          children: <Widget>[
+            SizedBox(height: 100, width: 100),
+          ],
+        ),
+      ),
+    ));
+
+    Color getIconColor() => tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    Color getTextColor() => tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+    expect(getIconColor(), theme.unselectedWidgetColor);
+    expect(getTextColor(), theme.textTheme.titleMedium!.color);
+
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    expect(getIconColor(), theme.colorScheme.primary);
+    expect(getTextColor(), theme.colorScheme.primary);
+  });
+
+  testWidgets('ExpansionTile default iconColor, textColor Material 3', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(MaterialApp(
@@ -548,7 +594,7 @@ void main() {
     await tester.tap(find.text('title'));
     await tester.pumpAndSettle();
 
-    expect(getIconColor(), theme.colorScheme.primary);
+    expect(getIconColor(), theme.colorScheme.onSurfaceVariant);
     expect(getTextColor(), theme.colorScheme.onSurface);
   });
 
@@ -620,20 +666,19 @@ void main() {
       ),
     ));
 
-    Container getContainer(Key key) => tester.firstWidget(find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(Container),
-    ));
+    DecoratedBox? getDecoratedBox(Key key, {int at = 0}) => tester.widgetList<DecoratedBox>(
+        find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox))
+    ).elementAt(at);
 
     // expansionTile should be Collapsed now.
-    ShapeDecoration expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
+    ShapeDecoration expandedContainerDecoration = getDecoratedBox(expansionTileKey, at: 1)!.decoration as ShapeDecoration;
     expect(expandedContainerDecoration.shape, collapsedShape);
 
     await tester.tap(find.text('ExpansionTile'));
     await tester.pumpAndSettle();
 
     // expansionTile should be Expanded now.
-    expandedContainerDecoration = getContainer(expansionTileKey).decoration! as ShapeDecoration;
+    expandedContainerDecoration = getDecoratedBox(expansionTileKey, at: 1)!.decoration as ShapeDecoration;
     expect(expandedContainerDecoration.shape, shape);
   });
 

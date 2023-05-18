@@ -168,7 +168,7 @@ Future<void> main(List<String> args) async {
   IconButtonTemplate('md.comp.filled-tonal-icon-button', 'FilledTonalIconButton', '$materialLib/icon_button.dart', tokens).updateFile();
   IconButtonTemplate('md.comp.outlined-icon-button', 'OutlinedIconButton', '$materialLib/icon_button.dart', tokens).updateFile();
   InputChipTemplate('InputChip', '$materialLib/input_chip.dart', tokens).updateFile();
-  ListTileTemplate('LisTile', '$materialLib/list_tile.dart', tokens).updateFile();
+  ListTileTemplate('ListTile', '$materialLib/list_tile.dart', tokens).updateFile();
   InputDecoratorTemplate('InputDecorator', '$materialLib/input_decorator.dart', tokens).updateFile();
   MenuTemplate('Menu', '$materialLib/menu_anchor.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();

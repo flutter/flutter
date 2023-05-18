@@ -33,7 +33,16 @@ class _${blockName}DefaultsM3 extends ListTileThemeData {
   TextStyle? get titleTextStyle => ${textStyle("md.comp.list.list-item.label-text")};
 
   @override
+  TextStyle? get overlineTextColor => ${componentColor("md.comp.list.list-item.overline")};
+
+  @override
+  TextStyle? get overlineTextStyle => ${textStyle("md.comp.list.list-item.overline")};
+
+  @override
   TextStyle? get subtitleTextStyle => ${textStyle("md.comp.list.list-item.supporting-text")};
+
+  @override
+  TextStyle? get leadingAndTrailingTextColor => ${componentColor("md.comp.list.list-item.trailing-supporting-text")};
 
   @override
   TextStyle? get leadingAndTrailingTextStyle => ${textStyle("md.comp.list.list-item.trailing-supporting-text")};

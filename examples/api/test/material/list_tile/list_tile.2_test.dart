@@ -27,15 +27,15 @@ void main() {
     trailingTopLeft = tester.getTopLeft(find.byType(Icon).at(1));
 
     // The leading and trailing widgets are centered vertically with the text.
-    expect(leadingTopLeft - listTileTopLeft, const Offset(16.0, 30.0));
-    expect(trailingTopLeft - listTileTopLeft, const Offset(752.0, 38.0));
+    expect(leadingTopLeft - listTileTopLeft, const Offset(16.0, 8.0));
+    expect(trailingTopLeft - listTileTopLeft, const Offset(752.0, 8.0));
 
     listTileTopLeft = tester.getTopLeft(find.byType(ListTile).at(2));
     leadingTopLeft = tester.getTopLeft(find.byType(CircleAvatar).at(2));
     trailingTopLeft = tester.getTopLeft(find.byType(Icon).at(2));
 
     // The leading and trailing widgets are aligned to the top vertically with the text.
-    expect(leadingTopLeft - listTileTopLeft, const Offset(16.0, 8.0));
-    expect(trailingTopLeft - listTileTopLeft, const Offset(752.0, 8.0));
+    expect(leadingTopLeft - listTileTopLeft, const Offset(16.0, 12.0));
+    expect(trailingTopLeft - listTileTopLeft, const Offset(752.0, 12.0));
   });
 }

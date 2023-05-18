@@ -351,6 +351,7 @@ void main() {
               data: const ListTileThemeData(
                 selectedColor: selectedColor,
                 textColor: defaultColor,
+                leadingAndTrailingTextColor: defaultColor,
               ),
               child: Builder(
                 builder: (BuildContext context) {

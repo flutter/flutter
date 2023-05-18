@@ -16,9 +16,10 @@ void main() {
     Offset leadingOffset = tester.getTopLeft(find.byType(Checkbox));
     Offset trailingOffset = tester.getTopRight(find.byIcon(Icons.adaptive.more));
 
-    // The default title alignment is threeLine.
-    expect(leadingOffset.dy - titleOffset.dy, 48.0);
-    expect(trailingOffset.dy - titleOffset.dy, 60.0);
+    // The default title alignment is material3, subtitle overflows to force
+    // top align of leading and trailing
+    expect(leadingOffset.dy - titleOffset.dy, 0.0);
+    expect(trailingOffset.dy - titleOffset.dy, 12.0); // icon is padded in the button
 
     await tester.tap(find.byIcon(Icons.adaptive.more));
     await tester.pumpAndSettle();

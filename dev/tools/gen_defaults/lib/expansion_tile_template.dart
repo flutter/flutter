@@ -22,7 +22,7 @@ class _${blockName}DefaultsM3 extends ExpansionTileThemeData {
   Color? get textColor => ${componentColor('md.comp.list.list-item.label-text')};
 
   @override
-  Color? get iconColor => ${componentColor('md.comp.list.list-item.selected.trailing-icon')};
+  Color? get iconColor => ${componentColor('md.comp.list.list-item.list-item.trailing-icon')};
 
   @override
   Color? get collapsedTextColor => ${componentColor('md.comp.list.list-item.label-text')};

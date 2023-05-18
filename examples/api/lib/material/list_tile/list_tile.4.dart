@@ -58,6 +58,10 @@ class _ListTileExampleState extends State<ListTileExample> {
                   child: Text('threeLine'),
                 ),
                 const PopupMenuItem<ListTileTitleAlignment>(
+                  value: ListTileTitleAlignment.material3,
+                  child: Text('material3'),
+                ),
+                const PopupMenuItem<ListTileTitleAlignment>(
                   value: ListTileTitleAlignment.titleHeight,
                   child: Text('titleHeight'),
                 ),

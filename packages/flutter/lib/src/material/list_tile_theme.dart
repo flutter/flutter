@@ -52,7 +52,10 @@ class ListTileThemeData with Diagnosticable {
     this.iconColor,
     this.textColor,
     this.titleTextStyle,
+    this.overlineTextColor,
+    this.overlineTextStyle,
     this.subtitleTextStyle,
+    this.leadingAndTrailingTextColor,
     this.leadingAndTrailingTextStyle,
     this.contentPadding,
     this.tileColor,
@@ -87,8 +90,17 @@ class ListTileThemeData with Diagnosticable {
   /// Overrides the default value of [ListTile.titleTextStyle].
   final TextStyle? titleTextStyle;
 
+  /// Overrides the default value of [ListTile.overlineTextColor].
+  final Color? overlineTextColor;
+
+  /// Overrides the default value of [ListTile.overlineTextStyle].
+  final TextStyle? overlineTextStyle;
+
   /// Overrides the default value of [ListTile.subtitleTextStyle].
   final TextStyle? subtitleTextStyle;
+
+  /// Overrides the default value of [ListTile.leadingAndTrailingTextColor].
+  final Color? leadingAndTrailingTextColor;
 
   /// Overrides the default value of [ListTile.leadingAndTrailingTextStyle].
   final TextStyle? leadingAndTrailingTextStyle;
@@ -133,7 +145,10 @@ class ListTileThemeData with Diagnosticable {
     Color? iconColor,
     Color? textColor,
     TextStyle? titleTextStyle,
+    Color? overlineTextColor,
+    TextStyle? overlineTextStyle,
     TextStyle? subtitleTextStyle,
+    Color? leadingAndTrailingTextColor,
     TextStyle? leadingAndTrailingTextStyle,
     EdgeInsetsGeometry? contentPadding,
     Color? tileColor,
@@ -155,7 +170,10 @@ class ListTileThemeData with Diagnosticable {
       iconColor: iconColor ?? this.iconColor,
       textColor: textColor ?? this.textColor,
       titleTextStyle: titleTextStyle ?? this.titleTextStyle,
+      overlineTextColor: overlineTextColor ?? this.overlineTextColor,
+      overlineTextStyle: overlineTextStyle ?? this.overlineTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? this.subtitleTextStyle,
+      leadingAndTrailingTextColor: leadingAndTrailingTextColor ?? this.leadingAndTrailingTextColor,
       leadingAndTrailingTextStyle: leadingAndTrailingTextStyle ?? this.leadingAndTrailingTextStyle,
       contentPadding: contentPadding ?? this.contentPadding,
       tileColor: tileColor ?? this.tileColor,
@@ -183,7 +201,10 @@ class ListTileThemeData with Diagnosticable {
       iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
       textColor: Color.lerp(a?.textColor, b?.textColor, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
+      overlineTextColor: Color.lerp(a?.overlineTextColor, b?.overlineTextColor, t),
+      overlineTextStyle: TextStyle.lerp(a?.overlineTextStyle, b?.overlineTextStyle, t),
       subtitleTextStyle: TextStyle.lerp(a?.subtitleTextStyle, b?.subtitleTextStyle, t),
+      leadingAndTrailingTextColor: Color.lerp(a?.leadingAndTrailingTextColor, b?.leadingAndTrailingTextColor, t),
       leadingAndTrailingTextStyle: TextStyle.lerp(a?.leadingAndTrailingTextStyle, b?.leadingAndTrailingTextStyle, t),
       contentPadding: EdgeInsetsGeometry.lerp(a?.contentPadding, b?.contentPadding, t),
       tileColor: Color.lerp(a?.tileColor, b?.tileColor, t),
@@ -199,7 +220,7 @@ class ListTileThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll(<Object?>[
     dense,
     shape,
     style,
@@ -207,7 +228,10 @@ class ListTileThemeData with Diagnosticable {
     iconColor,
     textColor,
     titleTextStyle,
+    overlineTextColor,
+    overlineTextStyle,
     subtitleTextStyle,
+    leadingAndTrailingTextColor,
     leadingAndTrailingTextStyle,
     contentPadding,
     tileColor,
@@ -219,7 +243,7 @@ class ListTileThemeData with Diagnosticable {
     mouseCursor,
     visualDensity,
     titleAlignment,
-  );
+  ]);
 
   @override
   bool operator ==(Object other) {
@@ -236,7 +260,10 @@ class ListTileThemeData with Diagnosticable {
       && other.selectedColor == selectedColor
       && other.iconColor == iconColor
       && other.titleTextStyle == titleTextStyle
+      && other.overlineTextColor == overlineTextColor
+      && other.overlineTextStyle == overlineTextStyle
       && other.subtitleTextStyle == subtitleTextStyle
+      && other.leadingAndTrailingTextColor == leadingAndTrailingTextColor
       && other.leadingAndTrailingTextStyle == leadingAndTrailingTextStyle
       && other.textColor == textColor
       && other.contentPadding == contentPadding
@@ -261,7 +288,10 @@ class ListTileThemeData with Diagnosticable {
     properties.add(ColorProperty('iconColor', iconColor, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('overlineTextColor', overlineTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('overlineTextStyle', overlineTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('subtitleTextStyle', subtitleTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('leadingAndTrailingTextColor', leadingAndTrailingTextColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('leadingAndTrailingTextStyle', leadingAndTrailingTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: null));
     properties.add(ColorProperty('tileColor', tileColor, defaultValue: null));
@@ -481,7 +511,10 @@ class ListTileTheme extends InheritedTheme {
     Color? iconColor,
     Color? textColor,
     TextStyle? titleTextStyle,
+    Color? overlineTextColor,
+    TextStyle? overlineTextStyle,
     TextStyle? subtitleTextStyle,
+    Color? leadingAndTrailingTextColor,
     TextStyle? leadingAndTrailingTextStyle,
     EdgeInsetsGeometry? contentPadding,
     Color? tileColor,
@@ -508,7 +541,9 @@ class ListTileTheme extends InheritedTheme {
             iconColor: iconColor ?? parent.iconColor,
             textColor: textColor ?? parent.textColor,
             titleTextStyle: titleTextStyle ?? parent.titleTextStyle,
+            overlineTextColor: overlineTextColor ?? parent.overlineTextColor,
             subtitleTextStyle: subtitleTextStyle ?? parent.subtitleTextStyle,
+            leadingAndTrailingTextColor: leadingAndTrailingTextColor ?? parent.leadingAndTrailingTextColor,
             leadingAndTrailingTextStyle: leadingAndTrailingTextStyle ?? parent.leadingAndTrailingTextStyle,
             contentPadding: contentPadding ?? parent.contentPadding,
             tileColor: tileColor ?? parent.tileColor,

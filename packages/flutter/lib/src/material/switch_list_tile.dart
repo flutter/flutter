@@ -186,11 +186,13 @@ class SwitchListTile extends StatelessWidget {
     this.autofocus = false,
     this.tileColor,
     this.title,
+    this.overline,
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
     this.contentPadding,
     this.secondary,
+    this.secondaryConstraint,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.shape,
@@ -198,11 +200,20 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.enableFeedback,
     this.hoverColor,
+    this.titleAlignment,
   }) : _switchListTileType = _SwitchListTileType.material,
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       assert(!isThreeLine || subtitle != null);
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+           'together when CheckboxListTile.isThreeLine == false',
+       );
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -243,11 +254,13 @@ class SwitchListTile extends StatelessWidget {
     this.applyCupertinoTheme,
     this.tileColor,
     this.title,
+    this.overline,
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
     this.contentPadding,
     this.secondary,
+    this.secondaryConstraint,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.shape,
@@ -255,10 +268,19 @@ class SwitchListTile extends StatelessWidget {
     this.visualDensity,
     this.enableFeedback,
     this.hoverColor,
+    this.titleAlignment,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(!isThreeLine || subtitle != null),
        assert(activeThumbImage != null || onActiveThumbImageError == null),
-       assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+           'together when CheckboxListTile.isThreeLine == false',
+       );
 
   /// Whether this switch is checked.
   ///
@@ -437,6 +459,11 @@ class SwitchListTile extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget? title;
 
+  /// Additional content displayed above the title.
+  ///
+  /// Typically a [Text] widget.
+  final Widget? overline;
+
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
@@ -447,10 +474,22 @@ class SwitchListTile extends StatelessWidget {
   /// Typically an [Icon] widget.
   final Widget? secondary;
 
+  /// Defines how [ListTile.leading] is constrained and aligned to the [ListTile].
+  ///
+  /// The default value is [ListTileConstraint.standard].
+  final ListTileConstraint? secondaryConstraint;
+
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
+  /// If true, then [overline] or [subtitle] must be non-null (since it is expected to give
+  /// the second and third lines of text).
+  ///
+  /// If false, the list tile is treated as having one line if the [overline] or [subtitle] is
+  /// null and treated as having two lines if the subtitle is non-null. It must only have
+  /// one of [overline] or [subtitle].
+  ///
+  /// When using a [Text] widget for [title], [overline] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
@@ -475,6 +514,20 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// Normally, this property is left to its default value, false.
   final bool selected;
+
+  /// Defines how [leading], [trailing] and [title]
+  /// are vertically aligned relative to the [ListTile].
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.material3]
+  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
 
   /// If adaptive, creates the switch with [Switch.adaptive].
   final _SwitchListTileType _switchListTileType;
@@ -565,14 +618,21 @@ class SwitchListTile extends StatelessWidget {
     }
 
     Widget? leading, trailing;
+    ListTileConstraint? leadingConstraint, trailingConstraint;
+
+    const ListTileConstraint switchConstraints = ListTileConstraint.switchTile;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
         leading = control;
+        leadingConstraint = switchConstraints;
         trailing = secondary;
+        trailingConstraint = secondaryConstraint;
       case ListTileControlAffinity.trailing:
       case ListTileControlAffinity.platform:
         leading = secondary;
+        leadingConstraint = secondaryConstraint;
         trailing = control;
+        trailingConstraint = switchConstraints;
     }
 
     final ThemeData theme = Theme.of(context);
@@ -588,8 +648,11 @@ class SwitchListTile extends StatelessWidget {
         selectedColor: effectiveActiveColor,
         leading: leading,
         title: title,
+        overline: overline,
         subtitle: subtitle,
         trailing: trailing,
+        leadingConstraint: leadingConstraint,
+        trailingConstraint: trailingConstraint,
         isThreeLine: isThreeLine,
         dense: dense,
         contentPadding: contentPadding,
@@ -605,6 +668,7 @@ class SwitchListTile extends StatelessWidget {
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
         hoverColor: hoverColor,
+        titleAlignment: titleAlignment,
       ),
     );
   }

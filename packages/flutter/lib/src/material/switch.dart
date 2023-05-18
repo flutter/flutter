@@ -1656,7 +1656,7 @@ class _SwitchConfigM2 with _SwitchConfig {
   double get switchHeightCollapsed => _kSwitchMinSize;
 
   @override
-  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  double get switchWidth => trackWidth - trackHeight + _kSwitchMinSize;
 
   @override
   double get thumbRadiusWithIcon => 10.0;
@@ -1940,7 +1940,7 @@ class _SwitchConfigM3 with _SwitchConfig {
   double get switchHeightCollapsed => _kSwitchMinSize;
 
   @override
-  double get switchWidth => trackWidth - 2 * (trackHeight / 2.0) + _kSwitchMinSize;
+  double get switchWidth => trackWidth - trackHeight + _kSwitchMinSize;
 
   @override
   double get thumbRadiusWithIcon => 24.0 / 2;

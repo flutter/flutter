@@ -138,7 +138,7 @@ void main() {
             value: false,
             onChanged: null,
             title: Text('Title'),
-            contentPadding: EdgeInsets.fromLTRB(10, 18, 4, 2),
+            contentPadding: EdgeInsets.fromLTRB(10, 18, 9, 2),
           ),
         ),
       ),
@@ -151,7 +151,7 @@ void main() {
     final Rect tallerWidget = checkboxRect.height > titleRect.height ? checkboxRect : titleRect;
 
     // Check the offsets of Checkbox and title after padding is applied.
-    expect(paddingRect.right, checkboxRect.right + 4);
+    expect(paddingRect.right, checkboxRect.right + 1.0);
     expect(paddingRect.left, titleRect.left - 10);
 
     // Calculate the remaining height from the default ListTile height.

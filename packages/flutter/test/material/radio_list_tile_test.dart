@@ -621,7 +621,7 @@ void main() {
             value: true,
             title: const Text('Title'),
             onChanged: (_){},
-            contentPadding: const EdgeInsets.fromLTRB(8, 10, 15, 20),
+            contentPadding: const EdgeInsets.fromLTRB(10, 10, 15, 20),
           ),
         ),
       ),
@@ -642,7 +642,7 @@ void main() {
     expect(paddingRect.bottom, tallerRect.bottom + extraHeight / 2 + 20); //bottom padding
 
     // Check for correct left and right padding
-    expect(paddingRect.left, radioRect.left - 8); //left padding
+    expect(paddingRect.left, radioRect.left - 2.0); //left padding
     expect(paddingRect.right, titleRect.right + 15); //right padding
   });
 

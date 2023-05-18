@@ -251,6 +251,18 @@ abstract class EdgeInsetsGeometry {
   ///    based on the `direction` argument.
   EdgeInsets resolve(TextDirection? direction);
 
+  /// Convert this instance into an [EdgeInsetsDirectional], which uses
+  /// relative coordinates (i.e. the 'start' coordinate is the distance
+  /// from the left when text is left-to-right and the distance from
+  /// the right when text is right-to-left).
+  ///
+  /// See also:
+  ///
+  ///  * [EdgeInsets], which flips the determines direction
+  ///    based on the `direction` argument.
+  ///  * [EdgeInsetsDirectional], for which this is a no-op (returns itself).
+  EdgeInsetsDirectional toDirectional(TextDirection? direction);
+
   @override
   String toString() {
     if (_start == 0.0 && _end == 0.0) {
@@ -631,6 +643,17 @@ class EdgeInsets extends EdgeInsetsGeometry {
   @override
   EdgeInsets resolve(TextDirection? direction) => this;
 
+  @override
+  EdgeInsetsDirectional toDirectional(TextDirection? direction) {
+    assert(direction != null);
+    switch (direction!) {
+      case TextDirection.ltr:
+        return EdgeInsetsDirectional.fromSTEB(_left, _top, _right, _bottom);
+      case TextDirection.rtl:
+        return EdgeInsetsDirectional.fromSTEB(_right, _top, _left, _bottom);
+    }
+  }
+
   /// Creates a copy of this EdgeInsets but with the given fields replaced
   /// with the new values.
   EdgeInsets copyWith({
@@ -904,6 +927,9 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
         return EdgeInsets.fromLTRB(start, top, end, bottom);
     }
   }
+
+  @override
+  EdgeInsetsDirectional toDirectional(TextDirection? direction) => this;
 }
 
 class _MixedEdgeInsets extends EdgeInsetsGeometry {
@@ -1005,6 +1031,27 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
         return EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom);
       case TextDirection.ltr:
         return EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom);
+    }
+  }
+
+  @override
+  EdgeInsetsDirectional toDirectional(TextDirection? direction) {
+    assert(direction != null);
+    switch (direction!) {
+      case TextDirection.rtl:
+        return EdgeInsetsDirectional.fromSTEB(
+          _start + _right,
+          _top,
+          _end + _left,
+          _bottom,
+        );
+      case TextDirection.ltr:
+        return EdgeInsetsDirectional.fromSTEB(
+          _start + _left,
+          _top,
+          _end + _right,
+          _bottom,
+        );
     }
   }
 }

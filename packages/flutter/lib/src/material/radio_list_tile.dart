@@ -173,10 +173,12 @@ class RadioListTile<T> extends StatelessWidget {
     this.splashRadius,
     this.materialTapTargetSize,
     this.title,
+    this.overline,
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
     this.secondary,
+    this.secondaryConstraint,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
@@ -188,9 +190,18 @@ class RadioListTile<T> extends StatelessWidget {
     this.focusNode,
     this.onFocusChange,
     this.enableFeedback,
+    this.titleAlignment,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false,
-       assert(!isThreeLine || subtitle != null);
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+           'together when CheckboxListTile.isThreeLine == false',
+       );
 
   /// Creates a combination of a list tile and a platform adaptive radio.
   ///
@@ -212,10 +223,12 @@ class RadioListTile<T> extends StatelessWidget {
     this.splashRadius,
     this.materialTapTargetSize,
     this.title,
+    this.overline,
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
     this.secondary,
+    ListTileConstraint? secondaryConstraint,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.autofocus = false,
@@ -228,8 +241,18 @@ class RadioListTile<T> extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.useCupertinoCheckmarkStyle = false,
+    this.titleAlignment,
   }) : _radioType = _RadioType.adaptive,
-       assert(!isThreeLine || subtitle != null);
+       secondaryConstraint = secondaryConstraint ?? ListTileConstraint.standard,
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+           'together when CheckboxListTile.isThreeLine == false',
+       );
 
   /// The value represented by this radio button.
   final T value;
@@ -357,6 +380,11 @@ class RadioListTile<T> extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget? title;
 
+  /// Additional content displayed above the title.
+  ///
+  /// Typically a [Text] widget.
+  final Widget? overline;
+
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
@@ -367,10 +395,22 @@ class RadioListTile<T> extends StatelessWidget {
   /// Typically an [Icon] widget.
   final Widget? secondary;
 
+  /// Defines how [ListTile.leading] is constrained and aligned to the [ListTile].
+  ///
+  /// The default value is [ListTileConstraint.standard].
+  final ListTileConstraint? secondaryConstraint;
+
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
+  /// If true, then [overline] or [subtitle] must be non-null (since it is expected to give
+  /// the second and third lines of text).
+  ///
+  /// If false, the list tile is treated as having one line if the [overline] or [subtitle] is
+  /// null and treated as having two lines if the subtitle is non-null. It must only have
+  /// one of [overline] or [subtitle].
+  ///
+  /// When using a [Text] widget for [title], [overline] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
@@ -435,6 +475,20 @@ class RadioListTile<T> extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool? enableFeedback;
 
+  /// Defines how [leading], [trailing] and [title]
+  /// are vertically aligned relative to the [ListTile].
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.material3]
+  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
+
   final _RadioType _radioType;
 
   /// Determines wether or not to use the checkbox style for the [CupertinoRadio]
@@ -486,14 +540,19 @@ class RadioListTile<T> extends StatelessWidget {
     }
 
     Widget? leading, trailing;
+    ListTileConstraint? leadingConstraint, trailingConstraint;
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
       case ListTileControlAffinity.platform:
         leading = control;
+        leadingConstraint = ListTileConstraint.icon24;
         trailing = secondary;
+        trailingConstraint = secondaryConstraint;
       case ListTileControlAffinity.trailing:
         leading = secondary;
+        leadingConstraint = secondaryConstraint;
         trailing = control;
+        trailingConstraint = ListTileConstraint.icon24;
     }
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
@@ -508,8 +567,11 @@ class RadioListTile<T> extends StatelessWidget {
         selectedColor: effectiveActiveColor,
         leading: leading,
         title: title,
+        overline: overline,
         subtitle: subtitle,
         trailing: trailing,
+        leadingConstraint: leadingConstraint,
+        trailingConstraint: trailingConstraint,
         isThreeLine: isThreeLine,
         dense: dense,
         enabled: onChanged != null,

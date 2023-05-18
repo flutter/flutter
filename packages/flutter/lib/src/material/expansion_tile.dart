@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'divider.dart';
 import 'expansion_tile_theme.dart';
 import 'icons.dart';
 import 'list_tile.dart';
@@ -227,10 +228,12 @@ class ExpansionTile extends StatefulWidget {
     super.key,
     this.leading,
     required this.title,
+    this.overline,
     this.subtitle,
     this.onExpansionChanged,
     this.children = const <Widget>[],
     this.trailing,
+    this.isThreeLine = false,
     this.initiallyExpanded = false,
     this.maintainState = false,
     this.tilePadding,
@@ -248,10 +251,24 @@ class ExpansionTile extends StatefulWidget {
     this.clipBehavior,
     this.controlAffinity,
     this.controller,
+    this.titleAlignment,
+    this.leadingConstraint,
+    this.trailingConstraint,
+    this.showTopDividerWhenExpanded = true,
+    this.showBottomDividerWhenExpanded = true,
   }) : assert(
-       expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
-       'CrossAxisAlignment.baseline is not supported since the expanded children '
+         expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
+         'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',
+       ),
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+           'together when CheckboxListTile.isThreeLine == false',
        );
 
   /// A widget to display before the title.
@@ -267,10 +284,48 @@ class ExpansionTile extends StatefulWidget {
   /// Typically a [Text] widget.
   final Widget title;
 
+  /// Additional content displayed above the title.
+  ///
+  /// Typically a [Text] widget.
+  final Widget? overline;
+
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
   final Widget? subtitle;
+
+  /// A widget to display after the title.
+  ///
+  /// Depending on the value of [controlAffinity], the [trailing] widget
+  /// may replace the rotating expansion arrow icon.
+  final Widget? trailing;
+
+  /// Whether this list tile is intended to display three lines of text.
+  ///
+  /// If true, then [overline] or [subtitle] must be non-null (since it is expected to give
+  /// the second and third lines of text).
+  ///
+  /// If false, the list tile is treated as having one line if the [overline] or [subtitle] is
+  /// null and treated as having two lines if the subtitle is non-null. It must only have
+  /// one of [overline] or [subtitle].
+  ///
+  /// When using a [Text] widget for [title], [overline] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
+  final bool isThreeLine;
+
+  /// Defines how [leading] is constrained and aligned to the [ListTile].
+  /// This is only used if [leading] is not null and the [leading] widget
+  /// has not been replaced by the rotating expansion arrow icon.
+  ///
+  /// The default value is [ListTileConstraint.standard].
+  final ListTileConstraint? leadingConstraint;
+
+  /// Defines how [trailing] is constrained and aligned to the [ListTile].
+  /// This is only used if [trailing] is not null and the [trailing] widget
+  /// has not been replaced by the rotating expansion arrow icon.
+  ///
+  /// The default value is [ListTileConstraint.standard].
+  final ListTileConstraint? trailingConstraint;
 
   /// Called when the tile expands or collapses.
   ///
@@ -305,12 +360,6 @@ class ExpansionTile extends StatefulWidget {
   /// * [ExpansionTileTheme.of], which returns the nearest [ExpansionTileTheme]'s
   ///   [ExpansionTileThemeData].
   final Color? collapsedBackgroundColor;
-
-  /// A widget to display after the title.
-  ///
-  /// Depending on the value of [controlAffinity], the [trailing] widget
-  /// may replace the rotating expansion arrow icon.
-  final Widget? trailing;
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
@@ -491,6 +540,30 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
+  /// Defines how [leading], [trailing] and [title]
+  /// are vertically aligned relative to the [ListTile].
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.material3]
+  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
+
+  /// Show a [Divider] above the [ExpansionTile] when expanded.
+  ///
+  /// Defaults to true.
+  final bool showTopDividerWhenExpanded;
+
+  /// Show a [Divider] below the [ExpansionTile] when expanded.
+  ///
+  /// Defaults to true.
+  final bool showBottomDividerWhenExpanded;
+
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
 }
@@ -631,39 +704,49 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     }
     return Container(
       clipBehavior: clipBehavior,
-      decoration: ShapeDecoration(
+      padding: EdgeInsets.zero,
+      decoration: BoxDecoration(
         color: _backgroundColor.value ?? expansionTileTheme.backgroundColor ?? Colors.transparent,
-        shape: expansionTileBorder,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Semantics(
-            hint: semanticsHint,
-            onTapHint: onTapHint,
-            child: ListTileTheme.merge(
-              iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
-              textColor: _headerColor.value,
-              child: ListTile(
-                onTap: _handleTap,
-                contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
-                leading: widget.leading ?? _buildLeadingIcon(context),
-                title: widget.title,
-                subtitle: widget.subtitle,
-                trailing: widget.trailing ?? _buildTrailingIcon(context),
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: ShapeDecoration(
+          shape: expansionTileBorder,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Semantics(
+              hint: semanticsHint,
+              onTapHint: onTapHint,
+              child: ListTileTheme.merge(
+                iconColor: _iconColor.value ?? expansionTileTheme.iconColor,
+                textColor: _headerColor.value,
+                child: ListTile(
+                  onTap: _handleTap,
+                  contentPadding: widget.tilePadding ?? expansionTileTheme.tilePadding,
+                  leading: widget.leading ?? _buildLeadingIcon(context),
+                  title: widget.title,
+                  overline: widget.overline,
+                  subtitle: widget.subtitle,
+                  trailing: widget.trailing ?? _buildTrailingIcon(context),
+                  leadingConstraint: widget.leading != null ? widget.leadingConstraint : null,
+                  trailingConstraint: widget.trailing != null ? widget.trailingConstraint : null,
+                  isThreeLine: widget.isThreeLine,
+                ),
               ),
             ),
-          ),
-          ClipRect(
-            child: Align(
-              alignment: widget.expandedAlignment
-                ?? expansionTileTheme.expandedAlignment
-                ?? Alignment.center,
-              heightFactor: _heightFactor.value,
-              child: child,
+            ClipRect(
+              child: Align(
+                alignment: widget.expandedAlignment
+                  ?? expansionTileTheme.expandedAlignment
+                  ?? Alignment.center,
+                heightFactor: _heightFactor.value,
+                child: child,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -685,8 +768,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ..end = widget.shape
         ?? expansionTileTheme.collapsedShape
         ?? Border(
-          top: BorderSide(color: theme.dividerColor),
-          bottom: BorderSide(color: theme.dividerColor),
+          top: widget.showTopDividerWhenExpanded
+              ? Divider.createBorderSide(context)
+              : const BorderSide(color: Colors.transparent),
+          bottom: widget.showBottomDividerWhenExpanded
+              ? Divider.createBorderSide(context)
+              : const BorderSide(color: Colors.transparent),
         );
     _headerColorTween
       ..begin = widget.collapsedTextColor
@@ -772,7 +859,7 @@ class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   Color? get textColor => _colors.onSurface;
 
   @override
-  Color? get iconColor => _colors.primary;
+  Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
   Color? get collapsedTextColor => _colors.onSurface;

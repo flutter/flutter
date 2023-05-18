@@ -53,7 +53,7 @@ class TestTextState extends State<TestText> {
 
 void main() {
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
-    // See https://material.io/go/design-lists
+    // See https://m3.material.io/components/lists
 
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
@@ -171,7 +171,7 @@ void main() {
     await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(hasIssue99933 ? 193 : 192.0);
+    testVerticalGeometry(hasIssue99933 ? 201 : 200.0);
   });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
@@ -210,7 +210,156 @@ void main() {
     testHorizontalGeometry();
   });
 
-  testWidgets('ListTile.divideTiles', (WidgetTester tester) async {
+  testWidgets('ListTile M3 vertical text alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Material(
+        child: Center(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                key: Key('A'),
+                title: Text('title'),
+              ),
+              ListTile(
+                key: Key('B'),
+                title: Text('title'),
+                subtitle: Text('subtitle'),
+              ),
+              ListTile(
+                key: Key('C'),
+                title: Text('title'),
+                overline: Text('overline'),
+              ),
+              ListTile(
+                key: Key('D'),
+                title: Text('title'),
+                subtitle: Text('subtitle'),
+                isThreeLine: true,
+              ),
+              ListTile(
+                key: Key('E'),
+                title: Text('title'),
+                subtitle: Text('subtitle\nmore subtitle'),
+                isThreeLine: true,
+              ),
+              ListTile(
+                key: Key('F'),
+                title: Text('title'),
+                subtitle: Text('subtitle'),
+                overline: Text('overline'),
+                isThreeLine: true,
+              ),
+            ]
+          ),
+        ),
+      ),
+    ));
+
+    double height(String key) => tester.getSize(find.byKey(Key(key))).height;
+    double heightChild(String parent, Type child, int at) {
+      return tester.getSize(find.descendant(
+        of: find.byKey(Key(parent), skipOffstage: false),
+        matching: find.byType(child, skipOffstage: false),
+      ).at(at),
+      ).height;
+    }
+    double verticalOffsetFromParent(String parent, Type child, int at) {
+      final Finder findParent = find.byKey(Key(parent), skipOffstage: false);
+      final double parentTop = tester.getTopLeft(findParent).dy;
+      final double childTop = tester.getTopLeft(
+        find.descendant(
+          of: findParent,
+          matching: find.byType(child, skipOffstage: false),
+        ).at(at),
+      ).dy;
+      return childTop - parentTop;
+    }
+    double parentCenter(String parent) {
+      final Finder findParent = find.byKey(Key(parent), skipOffstage: false);
+      return (tester.getTopLeft(findParent).dy + tester.getBottomLeft(findParent).dy) / 2.0;
+    }
+    double childTop(String parent, Type child, int at) {
+      final Finder findParent = find.byKey(Key(parent), skipOffstage: false);
+      return tester.getTopLeft(find.descendant(of: findParent, matching: find.byType(child, skipOffstage: false)).at(at)).dy;
+    }
+    double childBottom(String parent, Type child, int at) {
+      final Finder findParent = find.byKey(Key(parent), skipOffstage: false);
+      return tester.getBottomLeft(find.descendant(of: findParent, matching: find.byType(child, skipOffstage: false)).at(at)).dy;
+    }
+    double childrenCenter(String parent, Type child, {required int from, required int to}) {
+      return (childTop(parent, child, from) + childBottom(parent, child, to)) / 2.0;
+    }
+
+    expect(height('A'), 56.0);
+    expect(childrenCenter('A', Text, from: 0, to: 0), parentCenter('A'));
+
+    expect(height('B'), 72.0);
+    expect(childrenCenter('B', Text, from: 0, to: 1), parentCenter('B'));
+    expect(childBottom('B', Text, 0), childTop('B', Text, 1));
+
+    expect(height('C'), 72.0);
+    expect(childrenCenter('C', Text, from: 0, to: 1), parentCenter('C'));
+    expect(childBottom('C', Text, 0), childTop('C', Text, 1));
+
+    expect(height('D'), 88.0);
+    expect(verticalOffsetFromParent('D', Text, 0), 12);
+    expect(verticalOffsetFromParent('D', Text, 1), 12 + heightChild('D', Text, 0));
+    expect(childBottom('D', Text, 0), childTop('D', Text, 1));
+
+    expect(height('E'), 88.0);
+    expect(verticalOffsetFromParent('E', Text, 0), 12);
+    expect(verticalOffsetFromParent('E', Text, 1), 12 + heightChild('E', Text, 0));
+    expect(childBottom('E', Text, 0), childTop('E', Text, 1));
+
+    expect(height('F'), 88.0);
+    expect(verticalOffsetFromParent('F', Text, 0), 12);
+    expect(verticalOffsetFromParent('F', Text, 1), 12 + heightChild('F', Text, 0));
+    expect(verticalOffsetFromParent('F', Text, 2), 12 + heightChild('F', Text, 0) + heightChild('F', Text, 1));
+    expect(childBottom('F', Text, 0), childTop('F', Text, 1));
+    expect(childBottom('F', Text, 1), childTop('F', Text, 2));
+  });
+
+  testWidgets('ListTile asserts allowed overline and subtitle states', (WidgetTester tester) async {
+    const Text title = Text('title');
+    const Text overline = Text('overline');
+    const Text subtitle = Text('subtitle');
+
+    expect(
+      () => const ListTile(title: title),
+      isNotNull,
+    );
+    expect(
+      () => const ListTile(title: title, overline: overline),
+      isNotNull,
+    );
+    expect(
+      () => const ListTile(title: title, subtitle: subtitle),
+      isNotNull,
+    );
+    expect(
+      () => ListTile(title: title, overline: overline, subtitle: subtitle),
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () => ListTile(title: title, isThreeLine: true),
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () => const ListTile(title: title, isThreeLine: true, subtitle: subtitle),
+      isNotNull,
+    );
+    expect(
+          () => ListTile(title: title, isThreeLine: true, overline: overline),
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () => const ListTile(title: title, isThreeLine: true, overline: overline, subtitle: subtitle),
+      isNotNull,
+    );
+  });
+
+    testWidgets('ListTile.divideTiles', (WidgetTester tester) async {
     final List<String> titles = <String>[ 'first', 'second', 'third' ];
 
     await tester.pumpWidget(MaterialApp(
@@ -231,6 +380,10 @@ void main() {
     expect(find.text('first'), findsOneWidget);
     expect(find.text('second'), findsOneWidget);
     expect(find.text('third'), findsOneWidget);
+
+    expect(tester.getSize(find.byType(ListTile).at(0)).height, 56.0);
+    expect(tester.getSize(find.byType(ListTile).at(1)).height, 56.0);
+    expect(tester.getSize(find.byType(ListTile).at(2)).height, 56.0);
   });
 
   testWidgets('ListTile.divideTiles with empty list', (WidgetTester tester) async {
@@ -445,8 +598,7 @@ void main() {
   });
 
   testWidgets('ListTile leading and trailing positions', (WidgetTester tester) async {
-    // This test is based on the redlines at
-    // https://material.io/design/components/lists.html#specs
+    // https://m3.material.io/components/lists/specs
 
     // "ONE"-LINE
     await tester.pumpWidget(
@@ -459,11 +611,25 @@ void main() {
                 leading: CircleAvatar(),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                titleAlignment: ListTileTitleAlignment.material3,
+              ),
+              ListTile(
+                leading: CircleAvatar(),
+                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                title: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
               ListTile(
                 leading: CircleAvatar(),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
+                titleAlignment: ListTileTitleAlignment.material3,
+              ),
+              ListTile(
+                leading: CircleAvatar(),
+                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                title: Text('A'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
             ],
           ),
@@ -471,14 +637,28 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-    //                                                                          LEFT                 TOP                   WIDTH  HEIGHT
-
+    //                                                                          LEFT                 TOP            WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,           0.0, 800.0, 328.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         144.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,         152.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0,  328.0       , 800.0,  56.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0,  328.0 +  8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,  328.0 + 16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,           8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,           8.0,  24.0,  24.0));
+
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 328.0        , 800.0, 328.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 328.0 + 144.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, 328.0 + 152.0,  24.0,  24.0));
+
+    expect(tester.getRect(find.byType(ListTile, skipOffstage: false).at(2)),
+                                                            const Rect.fromLTWH(                0.0, 656.0        , 800.0,  56.0));
+    expect(tester.getRect(find.byType(CircleAvatar, skipOffstage: false).at(2)),
+                                                            const Rect.fromLTWH(               16.0, 656.0  +  8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder, skipOffstage: false).at(2)),
+                                                            const Rect.fromLTWH(800.0 - 24.0 - 24.0, 656.0  + 16.0,  24.0,  24.0));
+
+    expect(tester.getRect(find.byType(ListTile, skipOffstage: false).at(3)),
+                                                            const Rect.fromLTWH(                0.0, 712.0        , 800.0,  56.0));
+    expect(tester.getRect(find.byType(CircleAvatar, skipOffstage: false).at(3)),
+                                                            const Rect.fromLTWH(               16.0, 712.0  +  8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder, skipOffstage: false).at(3)),
+                                                            const Rect.fromLTWH(800.0 - 24.0 - 24.0, 712.0  + 16.0,  24.0,  24.0));
 
     // "TWO"-LINE
     await tester.pumpWidget(
@@ -492,12 +672,14 @@ void main() {
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
                 subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
               ListTile(
                 leading: CircleAvatar(),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
                 subtitle: Text('A'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
             ],
           ),
@@ -509,9 +691,10 @@ void main() {
     //                discrepancy in the paragraph height.
     const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     const double height = hasIssue99933 ? 301.0 : 300;
+    const double threeLineHeight = height + 4.0 * 2.0; // padding 8 -> 12
     const double avatarTop = hasIssue99933 ? 130.5 : 130.0;
     const double placeholderTop = hasIssue99933 ? 138.5 : 138.0;
-    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
+    //                                                                          LEFT                 TOP             WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,            0.0, 800.0, height));
     expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,      avatarTop,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop,  24.0,  24.0));
@@ -532,6 +715,7 @@ void main() {
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
                 subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
               ListTile(
                 isThreeLine: true,
@@ -539,19 +723,20 @@ void main() {
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
                 subtitle: Text('A'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
             ],
           ),
         ),
       ),
     );
-    //                                                                          LEFT                 TOP          WIDTH  HEIGHT
-    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, height));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,          8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,          8.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, height      , 800.0,  88.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, height + 8.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0,  24.0,  24.0));
+    //                                                                          LEFT                 TOP                     WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,                    0.0, 800.0, threeLineHeight));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,                   12.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0,                   12.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, threeLineHeight       , 800.0,  88.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, threeLineHeight + 12.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 24.0, threeLineHeight + 12.0,  24.0,  24.0));
 
     // "ONE-LINE" with Small Leading Widget
     await tester.pumpWidget(
@@ -564,11 +749,13 @@ void main() {
                 leading: SizedBox(height: 12.0, width: 24.0, child: Placeholder()),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
               ListTile(
                 leading: SizedBox(height: 12.0, width: 24.0, child: Placeholder()),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
                 title: Text('A'),
+                titleAlignment: ListTileTitleAlignment.threeLine,
               ),
             ],
           ),
@@ -610,8 +797,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,  0.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,  8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 80.0, 24.0, 56.0));
 
     // Two line
     await tester.pumpWidget(
@@ -664,8 +851,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        8.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 88.0 + 8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(16.0,        12.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(16.0, 88.0 + 12.0, 24.0, 56.0));
   });
 
   testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
@@ -695,8 +882,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 24.0,  0.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 24.0 - 24.0, 56.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 24.0,  8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 24.0 - 24.0, 80.0, 24.0, 56.0));
 
     // Two line
     await tester.pumpWidget(
@@ -753,8 +940,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 24.0,        8.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 24.0 - 24.0, 88.0 + 8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 24.0 - 24.0,        12.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 24.0 - 24.0, 88.0 + 12.0, 24.0, 56.0));
   });
 
   testWidgets('ListTile only accepts focus when enabled', (WidgetTester tester) async {
@@ -1836,7 +2023,7 @@ void main() {
     await tester.pumpWidget(buildFrame(selected: true));
     // Wait for text color to animate.
     await tester.pumpAndSettle();
-    // Selected color should be ThemeData.primaryColor by default.
+    // Selected color should be ThemeData.bodyMedium by default.
     expect(textColor(leadingKey), theme.primaryColor);
     expect(textColor(trailingKey), theme.primaryColor);
 
@@ -1947,16 +2134,16 @@ void main() {
     // ListTile default text colors.
     await tester.pumpWidget(buildFrame());
     final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.labelSmall!.color);
+    expect(leading.text.style!.color, theme.colorScheme.onSurfaceVariant);
     final RenderParagraph title = _getTextRenderObject(tester, 'title');
     expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
     final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
     expect(subtitle.text.style!.color, theme.textTheme.bodyMedium!.color);
     final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.labelSmall!.color);
+    expect(trailing.text.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
-  testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ListTile debugFillProperties should be empty', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTile().debugFillProperties(builder);
 
@@ -2221,6 +2408,7 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(buildFrame(useMaterial3: true));
+    await tester.pumpAndSettle(); // wait for theme change
     expect(tester.takeException(), isNull);
   });
 
@@ -2352,20 +2540,28 @@ void main() {
     }
 
     // If [ThemeData.useMaterial3] is true, the default title alignment is
-    // [ListTileTitleAlignment.threeLine], which positions the leading and
-    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
-    // property is false.
+    // [ListTileTitleAlignment.material3], which positions the leading and
+    // trailing widgets top vertically in the tile if the [ListTile.isThreeLine]
+    // property is false but total height is > 88.0.
     await tester.pumpWidget(buildFrame());
     Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
     Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
     Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
 
-    // Leading and trailing widgets are centered vertically in the tile.
-    const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
-    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
-    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+    expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
+    expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
 
-    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.material3));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
+    expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
+
+    // [ListTileTitleAlignment.threeLine] positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
     await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
     tileOffset = tester.getTopLeft(find.byType(ListTile));
     leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
@@ -2373,6 +2569,7 @@ void main() {
 
     // Leading and trailing widgets are centered vertically in the tile,
     // If the [ListTile.isThreeLine] property is false.
+    const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
     expect(leadingOffset.dy - tileOffset.dy, centerPosition);
     expect(trailingOffset.dy - tileOffset.dy, centerPosition);
 
@@ -2427,8 +2624,8 @@ void main() {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const double leadingHeight = 24.0;
-    const double titleHeight = 50.0;
-    const double subtitleHeight = 50.0;
+    const double titleHeight = 30.0;
+    const double subtitleHeight = 30.0;
     const double trailingHeight = 24.0;
     const double minVerticalPadding = 10.0;
     const double tileHeight = minVerticalPadding * 2 + titleHeight + subtitleHeight;
@@ -2453,8 +2650,8 @@ void main() {
     }
 
     // If [ThemeData.useMaterial3] is true, then title alignment should
-    // default to [ListTileTitleAlignment.threeLine].
-    await tester.pumpWidget(buildFrame());
+    // default to [ListTileTitleAlignment.material3].
+    await tester.pumpWidget(buildFrame(isThreeLine: false));
     Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
     Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
     Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
@@ -2478,12 +2675,2125 @@ void main() {
     expect(trailingOffset.dy - tileOffset.dy, topPosition);
   });
 
+  group('ListTilePaddingCorrection', () {
+    const Key tileKey = Key('list');
+    const Key titleKey = Key('title');
+    const Key overlineKey = Key('overline');
+    const Key subtitleKey = Key('subtitle');
+    const Key leadingKey = Key('leading');
+    const Key trailingKey = Key('trailing');
+
+    Widget buildFrame({
+      required bool useMaterial3,
+      Widget? leading,
+      ListTileConstraint? leadingConstraint,
+      Widget? subtitle,
+      Widget? overline,
+      Widget? trailing,
+      ListTileConstraint? trailingConstraint,
+      bool isThreeLine = false,
+      bool isLtr = true,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: useMaterial3),
+        home: Material(
+          child: Directionality(
+            textDirection: isLtr ? TextDirection.ltr : TextDirection.rtl,
+            child: ListView(
+              children: <Widget>[
+                ListTile(
+                  key: tileKey,
+                  leading: leading,
+                  leadingConstraint: leadingConstraint,
+                  title: const Text(key: titleKey, 'title'),
+                  overline: overline,
+                  subtitle: subtitle,
+                  trailing: trailing,
+                  trailingConstraint: trailingConstraint,
+                  isThreeLine: isThreeLine,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    Widget box(Key key, Size size) {
+      return SizedBox(
+        height: size.height,
+        width: size.width,
+        child: Placeholder(key: key),
+      );
+    }
+    const Widget overline = Text(key: overlineKey, 'overline');
+    const Widget subtitle = Text(key: subtitleKey, 'subtitle');
+    const Widget trailingSupportText = Text(key: trailingKey, '100+');
+    final Widget leadingIcon = box(leadingKey, const Size.square(24));
+    final Widget trailingIcon = box(trailingKey, const Size.square(24));
+    final Widget leadingIconButton = box(leadingKey, const Size.square(40));
+    final Widget trailingIconButton = box(trailingKey, const Size.square(40));
+    final Widget leadingImage = box(leadingKey, const Size.square(56));
+    final Widget trailingImage = box(trailingKey, const Size.square(56));
+    final Widget leadingVideo = box(leadingKey, const Size(114, 64));
+    final Widget trailingVideo = box(trailingKey, const Size(114, 64));
+
+    Rect rect(WidgetTester tester, Key key) => tester.getRect(find.byKey(key));
+
+    testWidgets('Padding correction one line, empty, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey),
+          const Rect.fromLTRB(16.0, 20.0, 800.0 - 16.0, 20.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey),
+          const Rect.fromLTRB(16.0, 20.0, 800.0 - 16.0, 20.0 + 16.0));
+    });
+
+    testWidgets('Padding correction one line, empty, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 24.0, 16.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+    });
+
+    testWidgets('Padding correction two line, empty, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.5, 800.0 - 16.0, 16.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0, 32.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.5, 800.0 - 16.0, 16.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0, 32.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+    });
+
+    testWidgets('Padding correction two line, empty, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 14.0, 800.0 - 24.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 38.0, 800.0 - 24.0, 38.0 + 20.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0, 14.0, 800.0 - 16.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0, 38.0, 800.0 - 16.0, 38.0 + 20.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 24.0, 16.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 24.0, 32.0 + 24.0)); //24
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0, 32.0, 800.0 - 16.0, 32.0 + 24.0));
+    });
+
+    testWidgets('Padding correction three line, empty, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 20.5, 800.0 - 16.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 36.0, 800.0 - 16.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 59.5, 800.0 - 16.0, 59.5 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 20.5, 800.0 - 16.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 36.0, 800.0 - 16.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 59.5, 800.0 - 16.0, 59.5 + 14.0));
+    });
+
+    testWidgets('Padding correction three line, empty, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 12.0, 800.0 - 24.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 36.0, 800.0 - 24.0, 36.0 + 20.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0, 12.0, 800.0 - 16.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0, 36.0, 800.0 - 16.0, 36.0 + 20.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 12.0, 800.0 - 24.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 28.0, 800.0 - 24.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 52.0, 800.0 - 24.0, 52.0 + 20.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0, 12.0, 800.0 - 16.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0, 28.0, 800.0 - 16.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0, 52.0, 800.0 - 16.0, 52.0 + 20.0));
+    });
+
+    testWidgets('Padding correction one line, trailing text, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 20.0, 800.0 - 16.0 * 2.0 - 56.0, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 21.0, 800.0 - 16.0, 21.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 20.0, 800.0 - 16.0, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 21.0, 16.0 + 56.0, 21.0 + 14.0));
+    });
+
+    testWidgets('Padding correction one line, trailing text, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0 - 46.0 - 24.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 46.0 - 24.0, 20.0, 800.0 - 24.0, 20.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 20.0, 24.0 + 46.0, 20.0 + 16.0));
+    });
+
+    testWidgets('Padding correction two line, trailing text, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.5, 800.0 - 16.0 * 2.0 - 56.0, 16.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0 * 2.0 - 56.0, 32.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 29.0, 800.0 - 16.0, 29.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.5, 800.0 - 16.0, 16.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 32.0, 800.0 - 16.0, 32.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 29.0, 16.0 + 56.0, 29.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0 * 2.0 - 56.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0 * 2.0 - 56.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 29.0, 800.0 - 16.0, 29.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 29.0, 16.0 + 56.0, 29.0 + 14.0));
+    });
+
+    testWidgets('Padding correction two line, trailing text, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 14.0, 800.0 - 16.0 - 46.0 - 24.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 38.0, 800.0 - 16.0 - 46.0 - 24.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 46.0 - 24.0, 28.0, 800.0 - 24.0, 28.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 14.0, 800.0 - 16.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 38.0, 800.0 - 16.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 28.0, 24.0 + 46.0, 28.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0 - 46.0 - 24.0, 16.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 32.0, 800.0 - 16.0 - 46.0 - 24.0, 32.0 + 24.0)); //24
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 46.0 - 24.0, 28.0, 800.0 - 24.0, 28.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 32.0, 800.0 - 16.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 28.0, 24.0 + 46.0, 28.0 + 16.0));
+    });
+
+    testWidgets('Padding correction three line, trailing text, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 16.0, 800.0 - 16.0 * 2.0 - 56.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 37.5, 800.0 - 16.0 * 2.0 - 56.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.0, 800.0 - 16.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 37.5, 800.0 - 16.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 20.5, 800.0 - 16.0 * 2.0 - 56.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 36.0, 800.0 - 16.0 * 2.0 - 56.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 59.5, 800.0 - 16.0 * 2.0 - 56.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 14.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 20.5, 800.0 - 16.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 36.0, 800.0 - 16.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 59.5, 800.0 - 16.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 14.0));
+    });
+
+    testWidgets('Padding correction three line, trailing text, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 12.0, 800.0 - 16.0 - 46.0 - 24.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 36.0, 800.0 - 16.0 - 46.0 - 24.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 46.0 - 24.0, 12.0, 800.0 - 24.0, 12.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 12.0, 800.0 - 16.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 36.0, 800.0 - 16.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 46.0, 12.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0, 12.0, 800.0 - 16.0 - 46.0 - 24.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0, 28.0, 800.0 - 16.0 - 46.0 - 24.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0, 52.0, 800.0 - 16.0 - 46.0 - 24.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 46.0 - 24.0, 12.0, 800.0 - 24.0, 12.0 + 16.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        trailing: trailingSupportText,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 12.0, 800.0 - 16.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 28.0, 800.0 - 16.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 46.0 + 16.0, 52.0, 800.0 - 16.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 46.0, 12.0 + 16.0));
+    });
+
+    testWidgets('Padding correction one line, icon, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.0, 800.0 - 16.0 * 2.0 - 24.0, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.0, 800.0 - 16.0 * 2 - 40, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+    });
+
+    testWidgets('Padding correction one line, icon, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 24.0, 16.0, 800.0 - 16.0 - 24.0 - 24.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 24.0, 16.0, 800.0 - 24.0, 16.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 24.0 - 16.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 16.0, 800.0 - 16.0 - 24.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 16.0, 24.0 + 24.0, 16.0 + 24.0));
+    });
+
+    testWidgets('Padding correction two line, icon, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 24.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 24.0, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 24.0, 800.0 - 16.0, 24.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.5, 800.0 - 16.0 * 2 - 40, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 24.0, 16.0 + 24.0, 24.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.0, 800.0 - 16.0 * 2.0 - 24.0, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 41.5, 800.0 - 16.0 * 2.0 - 24.0, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 24.0, 800.0 - 16.0, 24.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.0, 800.0 - 16.0 * 2 - 40, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 41.5, 800.0 - 16.0 * 2 - 40, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 24.0, 16.0 + 24.0, 24.0 + 24.0));
+    });
+
+    testWidgets('Padding correction two line, icon, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 24.0, 16.0 + 24.0, 24.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 14.0, 800.0 - 16.0 - 24.0 - 24.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 38.0, 800.0 - 16.0 - 24.0 - 24.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 24.0, 24.0, 800.0 - 24.0, 24.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 24.0, 24.0, 800 - 16.0, 24.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 14.0, 800.0 - 24.0 - 16.0 * 2.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 38.0, 800.0 - 24.0 - 16.0 * 2.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 24.0, 24.0 + 24.0, 24.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 24.0, 16.0 + 24.0, 24.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 16.0, 800.0 - 16.0 - 24.0 - 24.0, 16.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 32.0, 800.0 - 16.0 - 24.0 - 24.0, 32.0 + 24.0)); //24
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 24.0, 24.0, 800.0 - 24.0, 24.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 24.0, 24.0, 800 - 16.0, 24.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 16.0, 800.0 - 24.0 - 16.0 * 2.0, 16.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 32.0, 800.0 - 24.0 - 16.0 * 2.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 24.0, 24.0 + 24.0, 24.0 + 24.0));
+    });
+
+    testWidgets('Padding correction three line, icon, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 * 2.0 - 24.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 37.5, 800.0 - 16.0 * 2.0 - 24.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 16.0, 800.0 - 16.0 * 2 - 40, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 37.5, 800.0 - 16.0 * 2 - 40, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 24.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 24.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 59.5, 800.0 - 16.0 * 2.0 - 24.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 24.0, 16.0, 800.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.5, 800.0 - 16.0 * 2 - 40, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 59.5, 800.0 - 16.0 * 2 - 40, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 24.0, 16.0 + 24.0));
+    });
+
+    testWidgets('Padding correction three line, icon, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 12.0, 16.0 + 24.0, 12.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 12.0, 800.0 - 16.0 - 24.0 - 24.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 - 24.0 - 24.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 24.0, 12.0, 800.0 - 24.0, 12.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 24.0, 12.0, 800 - 16.0, 12.0 + 24.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 12.0, 800.0 - 24.0 - 16.0 * 2.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 36.0, 800.0 - 24.0 - 16.0 * 2.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 24.0, 12.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 12.0, 16.0 + 24.0, 12.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 12.0, 800.0 - 16.0 - 24.0 - 24.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 28.0, 800.0 - 16.0 - 24.0 - 24.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 52.0, 800.0 - 16.0 - 24.0 - 24.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 24.0, 12.0, 800.0 - 24.0, 12.0 + 24.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIcon,
+        trailing: trailingIcon,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 24.0, 12.0, 800 - 16.0, 12.0 + 24.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 12.0, 800.0 - 24.0 - 16.0 * 2.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 28.0, 800.0 - 24.0 - 16.0 * 2.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 52.0, 800.0 - 24.0 - 16.0 * 2.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 24.0, 12.0 + 24.0));
+    });
+
+    testWidgets('Padding correction one line, iconButton, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.0, 800.0 - 16.0 * 2.0 - 24.0, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.0, 800.0 - 16.0 * 2 - 40, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+    });
+
+    testWidgets('Padding correction one line, iconButton, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 24.0, 16.0, 800.0 - 16.0 - 24.0 - 24.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 8.0, 800.0 - 16.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 8.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 16.0, 800.0 - 16.0 - 24.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 40.0, 8.0 + 40.0));
+    });
+
+    testWidgets('Padding correction two line, iconButton, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 24.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 24.0, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 8.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.5, 800.0 - 16.0 * 2 - 40, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.0, 800.0 - 16.0 * 2.0 - 24.0, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 41.5, 800.0 - 16.0 * 2.0 - 24.0, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 8.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.0, 800.0 - 16.0 * 2 - 40, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 41.5, 800.0 - 16.0 * 2 - 40, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
+    });
+
+    testWidgets('Padding correction two line, iconButton, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 14.0, 800.0 - 16.0 - 24.0 - 24.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 38.0, 800.0 - 16.0 - 24.0 - 24.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 8.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 14.0, 800.0 - 24.0 - 16.0 * 2.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 38.0, 800.0 - 24.0 - 16.0 * 2.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 16.0, 8.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 16.0, 800.0 - 16.0 - 24.0 - 24.0, 16.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 32.0, 800.0 - 16.0 - 24.0 - 24.0, 32.0 + 24.0)); //24
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 8.0, 16.0, 800.0 - 8.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 16.0, 800.0 - 24.0 - 16.0 * 2.0, 16.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 32.0, 800.0 - 24.0 - 16.0 * 2.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+    });
+
+    testWidgets('Padding correction three line, iconButton, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 * 2.0 - 24.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 37.5, 800.0 - 16.0 * 2.0 - 24.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 16.0, 800.0 - 16.0 * 2 - 40, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 37.5, 800.0 - 16.0 * 2 - 40, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 24.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 24.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 59.5, 800.0 - 16.0 * 2.0 - 24.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 20.5, 800.0 - 16.0 * 2 - 40, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 59.5, 800.0 - 16.0 * 2 - 40, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
+    });
+
+    testWidgets('Padding correction three line, iconButton, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 4.0, 8.0 + 40.0, 4.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 12.0, 800.0 - 16.0 - 24.0 - 24.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 - 24.0 - 24.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 40.0 - 16.0, 4.0, 800.0 - 16.0, 4.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 8.0 - 40.0, 4.0, 800 - 8.0, 4.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 12.0, 800.0 - 24.0 - 16.0 * 2.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 36.0, 800.0 - 24.0 - 16.0 * 2.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 4.0, 16.0 + 40.0, 4.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(8.0, 4.0, 8.0 + 40.0, 4.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 12.0, 800.0 - 16.0 - 24.0 - 24.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 28.0, 800.0 - 16.0 - 24.0 - 24.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 52.0, 800.0 - 16.0 - 24.0 - 24.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 40.0 - 16.0, 4.0, 800.0 - 16.0, 4.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingIconButton,
+        trailing: trailingIconButton,
+        leadingConstraint: ListTileConstraint.icon24,
+        trailingConstraint: ListTileConstraint.icon24,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 8.0 - 40.0, 4.0, 800 - 8.0, 4.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 12.0, 800.0 - 24.0 - 16.0 * 2.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 28.0, 800.0 - 24.0 - 16.0 * 2.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 24.0 + 16.0, 52.0, 800.0 - 24.0 - 16.0 * 2.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 4.0, 16.0 + 40.0, 4.0 + 40.0));
+    });
+
+    testWidgets('Padding correction one line, avatar, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 40.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.0, 800.0 - 16.0 * 2.0 - 40.0, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 8.0, 800.0 - 16.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 8.0, 800.0 - 16.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 20.0, 800.0 - 16.0 * 2 - 40.0, 20.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 40.0, 8.0 + 40.0));
+    });
+
+    testWidgets('Padding correction one line, avatar, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 40.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 - 24.0 - 40.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 40.0, 8.0, 800.0 - 24.0, 8.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 16.0, 8.0, 800.0 - 16.0, 8.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 16.0, 800.0 - 16.0 - 40.0 - 16.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 8.0, 24.0 + 40.0, 8.0 + 40.0));
+    });
+
+    testWidgets('Padding correction two line, avatar, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 40.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 40.0, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 20.5, 800.0 - 16.0 * 2 - 40.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 36.0, 800.0 - 16.0 * 2 - 40.0, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.0, 800.0 - 16.0 * 2.0 - 40.0, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 41.5, 800.0 - 16.0 * 2.0 - 40.0, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 20.0, 800.0 - 16.0 * 2 - 40.0, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 41.5, 800.0 - 16.0 * 2 - 40.0, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+    });
+
+    testWidgets('Padding correction two line, avatar, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 14.0, 800.0 - 16.0 - 40.0 - 24.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 38.0, 800.0 - 16.0 - 40.0 - 24.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 40.0, 16.0, 800.0 - 24.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 16.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 14.0, 800.0 - 40.0 - 16.0 * 2.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 38.0, 800.0 - 40.0 - 16.0 * 2.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 16.0, 24.0 + 40.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 16.0, 800.0 - 16.0 - 40.0 - 24.0, 16.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 32.0, 800.0 - 16.0 - 40.0 - 24.0, 32.0 + 24.0)); //24
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 40.0, 16.0, 800.0 - 24.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 40.0 - 16.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 16.0, 800.0 - 40.0 - 16.0 * 2.0, 16.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 32.0, 800.0 - 40.0 - 16.0 * 2.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 16.0, 24.0 + 40.0, 16.0 + 40.0));
+    });
+
+    testWidgets('Padding correction three line, avatar, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 16.0, 800.0 - 16.0 * 2.0 - 40.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 37.5, 800.0 - 16.0 * 2.0 - 40.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 16.0, 800.0 - 16.0 * 2 - 40.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 37.5, 800.0 - 16.0 * 2 - 40.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 20.5, 800.0 - 16.0 * 2.0 - 40.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 36.0, 800.0 - 16.0 * 2.0 - 40.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 40.0, 59.5, 800.0 - 16.0 * 2.0 - 40.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 40.0, 16.0, 800.0 - 16.0, 16.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 20.5, 800.0 - 16.0 * 2 - 40.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 36.0, 800.0 - 16.0 * 2 - 40.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 59.5, 800.0 - 16.0 * 2 - 40.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 40.0, 16.0 + 40.0));
+    });
+
+    testWidgets('Padding correction three line, avatar, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 12.0, 16.0 + 40.0, 12.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 12.0, 800.0 - 16.0 - 40.0 - 24.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 36.0, 800.0 - 16.0 - 40.0 - 24.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 40.0, 12.0, 800.0 - 24.0, 12.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 40.0, 12.0, 800 - 16.0, 12.0 + 40.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 12.0, 800.0 - 40.0 - 16.0 * 2.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 36.0, 800.0 - 40.0 - 16.0 * 2.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 40.0, 12.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 12.0, 16.0 + 40.0, 12.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 12.0, 800.0 - 16.0 - 40.0 - 24.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 28.0, 800.0 - 16.0 - 40.0 - 24.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 40.0, 52.0, 800.0 - 16.0 - 40.0 - 24.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 40.0, 12.0, 800.0 - 24.0, 12.0 + 40.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.avatar,
+        trailingConstraint: ListTileConstraint.avatar,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 40.0, 12.0, 800 - 16.0, 12.0 + 40.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 12.0, 800.0 - 40.0 - 16.0 * 2.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 28.0, 800.0 - 40.0 - 16.0 * 2.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 40.0 + 16.0, 52.0, 800.0 - 40.0 - 16.0 * 2.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 40.0, 12.0 + 40.0));
+    });
+
+    testWidgets('Padding correction one line, image, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 28.0, 800.0 - 16.0 * 2.0 - 56.0, 28.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 28.0, 800.0 - 16.0 * 2 - 56, 28.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+    });
+
+    testWidgets('Padding correction one line, image, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 24.0, 800.0 - 16.0 - 24.0 - 56.0, 24.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 56.0, 8.0, 800.0 - 24.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 56.0 - 16.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 24.0, 800.0 - 16.0 - 56.0 - 16.0, 24.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 8.0, 24.0 + 56.0, 8.0 + 56.0));
+    });
+
+    testWidgets('Padding correction two line, image, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 20.5, 800.0 - 16.0 * 2.0 - 56.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 36.0, 800.0 - 16.0 * 2.0 - 56.0, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 20.5, 800.0 - 16.0 * 2 - 56, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 36.0, 800.0 - 16.0 * 2 - 56, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 20.0, 800.0 - 16.0 * 2.0 - 56.0, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 41.5, 800.0 - 16.0 * 2.0 - 56.0, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 20.0, 800.0 - 16.0 * 2 - 56, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 41.5, 800.0 - 16.0 * 2 - 56, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+    });
+
+    testWidgets('Padding correction two line, image, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 14.0, 800.0 - 16.0 - 56.0 - 24.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 38.0, 800.0 - 16.0 - 56.0 - 24.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 56.0, 8.0, 800.0 - 24.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 56.0 - 16.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 14.0, 800.0 - 56.0 - 16.0 * 2.0, 14.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 38.0, 800.0 - 56.0 - 16.0 * 2.0, 38.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 8.0, 24.0 + 56.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 8.0, 16.0 + 56.0, 8.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.0, 800.0 - 16.0 - 56.0 - 24.0, 16.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 32.0, 800.0 - 16.0 - 56.0 - 24.0, 32.0 + 24.0)); //24
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 56.0, 8.0, 800.0 - 24.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 56.0 - 16.0, 8.0, 800.0 - 16.0, 8.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 16.0, 800.0 - 56.0 - 16.0 * 2.0, 16.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 32.0, 800.0 - 56.0 - 16.0 * 2.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 8.0, 24.0 + 56.0, 8.0 + 56.0));
+    });
+
+    testWidgets('Padding correction three line, image, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 16.0, 800.0 - 16.0 * 2.0 - 56.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 37.5, 800.0 - 16.0 * 2.0 - 56.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 16.0, 800.0 - 16.0 * 2 - 56, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 37.5, 800.0 - 16.0 * 2 - 56, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 20.5, 800.0 - 16.0 * 2.0 - 56.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 36.0, 800.0 - 16.0 * 2.0 - 56.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2.0 + 56.0, 59.5, 800.0 - 16.0 * 2.0 - 56.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 16.0 - 56.0, 16.0, 800.0 - 16.0, 16.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 20.5, 800.0 - 16.0 * 2 - 56, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 36.0, 800.0 - 16.0 * 2 - 56, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 59.5, 800.0 - 16.0 * 2 - 56, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(16.0, 16.0, 16.0 + 56.0, 16.0 + 56.0));
+    });
+
+    testWidgets('Padding correction three line, image, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 12.0, 16.0 + 56.0, 12.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 12.0, 800.0 - 16.0 - 56.0 - 24.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 36.0, 800.0 - 16.0 - 56.0 - 24.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 56.0, 12.0, 800.0 - 24.0, 12.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 56.0, 12.0, 800 - 16.0, 12.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 12.0, 800.0 - 56.0 - 16.0 * 2.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 36.0, 800.0 - 56.0 - 16.0 * 2.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 56.0, 12.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(16.0, 12.0, 16.0 + 56.0, 12.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 12.0, 800.0 - 16.0 - 56.0 - 24.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 28.0, 800.0 - 16.0 - 56.0 - 24.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 56.0, 52.0, 800.0 - 16.0 - 56.0 - 24.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 24.0 - 56.0, 12.0, 800.0 - 24.0, 12.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingImage,
+        trailing: trailingImage,
+        leadingConstraint: ListTileConstraint.image,
+        trailingConstraint: ListTileConstraint.image,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800.0 - 16.0 - 56.0, 12.0, 800 - 16.0, 12.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 12.0, 800.0 - 56.0 - 16.0 * 2.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 28.0, 800.0 - 56.0 - 16.0 * 2.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(24.0 + 56.0 + 16.0, 52.0, 800.0 - 56.0 - 16.0 * 2.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(24.0, 12.0, 24.0 + 56.0, 12.0 + 56.0));
+    });
+
+    testWidgets('Padding correction one line, video, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 28.0, 800.0 - 16.0 - 100.0, 28.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 28.0, 800.0 - 16.0 - 100, 28.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
+    });
+
+    testWidgets('Padding correction one line, video, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 32.0, 800.0 - 16.0 - 114.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 32.0, 800.0 - 114.0 - 16.0, 32.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+    });
+
+    testWidgets('Padding correction two line, video, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        overline: overline,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 100.0, 20.5, 800.0 - 16.0 - 100.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 36.0, 800.0 - 16.0 - 100.0, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        overline: overline,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 100.0, 20.5, 800.0 - 16.0 - 100, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 36.0, 800.0 - 16.0 - 100, 36.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 20.0, 800.0 - 16.0 - 100.0, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 + 100.0, 41.5, 800.0 - 16.0 - 100.0, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 72.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100.0, 8.0, 800.0, 8.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 100.0, 20.0, 800.0 - 16.0 - 100, 20.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 + 100.0, 41.5, 800.0 - 16.0 - 100, 41.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 8.0, 100.0, 8.0 + 56.0));
+    });
+
+    testWidgets('Padding correction two line, video, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 114.0, 22.0, 800.0 - 16.0 - 114.0, 22.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 + 114.0, 46.0, 800.0 - 16.0 - 114.0, 46.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 22.0, 800.0 - 114.0 - 16.0, 22.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(114.0 + 16.0, 46.0, 800.0 - 114.0 - 16.0, 46.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        overline: overline,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 + 114.0, 24.0, 800.0 - 16.0 - 114.0, 24.0 + 16.0)); //16
+      expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 + 114.0, 40.0, 800.0 - 16.0 - 114.0, 40.0 + 24.0)); //24
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        overline: overline,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(114.0 + 16.0, 24.0, 800.0 - 114.0 - 16.0, 24.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 40.0, 800.0 - 114.0 - 16.0, 40.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+    });
+
+    testWidgets('Padding correction three line, video, Material 2', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 16.0, 100.0, 16.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(20.0 + 100.0, 16.0, 800.0 - 20.0 - 100.0, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, 37.5, 800.0 - 20.0 - 100.0, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100, 16.0, 800.0, 16.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100, 16.0, 800.0, 16.0 + 56.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(20.0 + 100.0, 16.0, 800.0 - 20.0 - 100, 16.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, 37.5, 800.0 - 20.0 - 100, 37.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 16.0, 100.0, 16.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 16.0, 100.0, 16.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(20.0 + 100.0, 20.5, 800.0 - 20.0 - 100.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(20.0 + 100.0, 36.0, 800.0 - 20.0 - 100.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, 59.5, 800.0 - 20.0 - 100.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 100.0, 16.0, 800.0, 16.0 + 56.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 100.0, 16.0, 800.0, 16.0 + 56.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(20.0 + 100.0, 20.5, 800.0 - 20.0 - 100.0, 20.5 + 10.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(20.0 + 100.0, 36.0, 800.0 - 20.0 - 100.0, 36.0 + 16.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(20.0 + 100.0, 59.5, 800.0 - 20.0 - 100.0, 59.5 + 14.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 16.0, 100.0, 16.0 + 56.0));
+    });
+
+    testWidgets('Padding correction three line, video, Material 3', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 12.0, 800.0 - 16.0 - 114.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(114.0 + 16.0, 36.0, 800.0 - 16.0 - 114.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 12.0, 800.0 - 114.0 - 16.0, 12.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(114.0 + 16.0, 36.0, 800.0 - 114.0 - 16.0, 36.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(114.0 + 16.0, 12.0, 800.0 - 16.0 - 114.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 28.0, 800.0 - 16.0 - 114.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(114.0 + 16.0, 52.0, 800.0 - 16.0 - 114.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isThreeLine: true,
+        isLtr: false,
+        overline: overline,
+        subtitle: subtitle,
+        leading: leadingVideo,
+        trailing: trailingVideo,
+        leadingConstraint: ListTileConstraint.video,
+        trailingConstraint: ListTileConstraint.video,
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 114.0, 12.0, 800.0, 12.0 + 64.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(114.0 + 16.0, 12.0, 800.0 - 114.0 - 16.0, 12.0 + 16.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(114.0 + 16.0, 28.0, 800.0 - 114.0 - 16.0, 28.0 + 24.0));
+      expect(rect(tester, subtitleKey), const Rect.fromLTRB(114.0 + 16.0, 52.0, 800.0 - 114.0 - 16.0, 52.0 + 20.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 12.0, 114.0, 12.0 + 64.0));
+    });
+
+    testWidgets('Padding correction widgets with asymmetric padding', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        // iconButton sized but asymmetric padding
+        leading: box(leadingKey, const Size.square(40.0)),
+        trailing: box(trailingKey, const Size.square(40.0)),
+        leadingConstraint: ListTileConstraint.of(const EdgeInsetsDirectional.fromSTEB(10, 9, 6, 7)),
+        trailingConstraint: ListTileConstraint.of(const EdgeInsetsDirectional.fromSTEB(7, 10, 9, 6)),
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(6.0, 7.0, 46.0, 47.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(56.0, 16.0, 800.0 - 64.0, 16.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800.0 - 55.0, 6.0, 800.0 - 15.0, 46.0));
+
+    });
+
+    testWidgets('Padding correction widgets do not overlap', (WidgetTester tester) async {
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        leading: box(leadingKey, const Size.square(90.0)),
+        trailing: box(trailingKey, const Size.square(90.0)),
+        leadingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+        trailingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 90.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 0.0, 90.0, 90.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(90.0, 37.0, 800.0 - 90.0, 37.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 90.0, 0.0, 800.0, 90.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: false,
+        isLtr: false,
+        leading: box(leadingKey, const Size.square(90.0)),
+        trailing: box(trailingKey, const Size.square(90.0)),
+        leadingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+        trailingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 90.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 90.0, 0.0, 800.0, 90.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(90.0, 37.0, 800.0 - 90.0, 37.0 + 16.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 0.0, 90.0, 90.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        leading: box(leadingKey, const Size.square(90.0)),
+        trailing: box(trailingKey, const Size.square(90.0)),
+        leadingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+        trailingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+      ));
+      await tester.pumpAndSettle(); // wait for theme to change
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 90.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(0.0, 0.0, 90.0, 90.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(90.0, 33.0, 800.0 - 90.0, 33.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(800 - 90.0, 0.0, 800.0, 90.0));
+
+      await tester.pumpWidget(buildFrame(
+        useMaterial3: true,
+        isLtr: false,
+        leading: box(leadingKey, const Size.square(90.0)),
+        trailing: box(trailingKey, const Size.square(90.0)),
+        leadingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+        trailingConstraint: ListTileConstraint.unconstrained
+            .copyWith(paddingCorrection: (Size s) => ListTilePaddingCorrection.of(const EdgeInsetsDirectional.all(50))),
+      ));
+      expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 90.0));
+      expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 90.0, 0.0, 800.0, 90.0));
+      expect(rect(tester, titleKey), const Rect.fromLTRB(90.0, 33.0, 800.0 - 90.0, 33.0 + 24.0));
+      expect(rect(tester, trailingKey), const Rect.fromLTRB(0.0, 0.0, 90.0, 90.0));
+    });
+  });
+
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // Tests that are only relevant for Material 2.
 
     testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
-      // See https://material.io/go/design-lists
+      // See https://m2.material.io/components/lists
 
       final Key leadingKey = GlobalKey();
       final Key trailingKey = GlobalKey();
@@ -2668,7 +4978,7 @@ void main() {
 
     testWidgets('ListTile leading and trailing positions', (WidgetTester tester) async {
       // This test is based on the redlines at
-      // https://material.io/design/components/lists.html#specs
+      // https://m2.material.io/components/lists#specs
 
       // DENSE "ONE"-LINE
       await tester.pumpWidget(
@@ -2831,6 +5141,7 @@ void main() {
       expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(0)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+
       expect(tester.getRect(find.byType(ListTile).at(1)),     const Rect.fromLTWH(                0.0, 180.0,        800.0,  76.0));
       expect(tester.getRect(find.byType(CircleAvatar).at(1)), const Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
       expect(tester.getRect(find.byType(Placeholder).at(1)),  const Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
@@ -3183,8 +5494,10 @@ void main() {
         ),
       );
 
-      expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 56.0));
-      expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
+      expect(tester.getRect(find.byType(ListTile).at(0)), const Rect.fromLTWH(     0.0,                      0.0, 800.0, 72.0));
+      expect(tester.getRect(find.byType(ListTile).at(1)), const Rect.fromLTWH(     0.0,                     72.0, 800.0, 72.0));
+      expect(tester.getRect(find.byType(Placeholder).at(0)), const Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0,  24.0, 56.0));
+      expect(tester.getRect(find.byType(Placeholder).at(1)), const Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0,  24.0, 56.0));
 
       // Dense Three line
       await tester.pumpWidget(

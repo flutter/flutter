@@ -146,6 +146,71 @@ void main() {
       const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
       isNot(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.rtl)),
     );
+    expect(
+      const EdgeInsets.fromLTRB(5, 10, 15, 30).add(const EdgeInsetsDirectional.fromSTEB(10, 15, 20, 25))
+        .resolve(TextDirection.rtl),
+      const EdgeInsets.fromLTRB(25, 25, 25, 55),
+    );
+    expect(
+      const EdgeInsets.fromLTRB(5, 10, 15, 30).add(const EdgeInsetsDirectional.fromSTEB(10, 15, 20, 25))
+        .resolve(TextDirection.ltr),
+      const EdgeInsets.fromLTRB(15, 25, 35, 55),
+    );
+  });
+
+  test('EdgeInsetsGeometry.toDirectional', () {
+    expect(
+      const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0).toDirectional(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0),
+    );
+    expect(
+      const EdgeInsets.fromLTRB(99.0, 98.0, 97.0, 96.0).toDirectional(TextDirection.rtl),
+      const EdgeInsetsDirectional.fromSTEB(97.0, 98.0, 99.0, 96.0),
+    );
+    expect(const EdgeInsets.all(50.0).toDirectional(TextDirection.ltr), const EdgeInsetsDirectional.fromSTEB(50.0, 50.0, 50.0, 50.0));
+    expect(const EdgeInsets.all(50.0).toDirectional(TextDirection.rtl), const EdgeInsetsDirectional.fromSTEB(50.0, 50.0, 50.0, 50.0));
+    expect(
+      const EdgeInsets.only(left: 963.25).toDirectional(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(963.25, 0.0, 0.0, 0.0),
+    );
+    expect(
+      const EdgeInsets.only(top: 963.25).toDirectional(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(0.0, 963.25, 0.0, 0.0),
+    );
+    expect(
+      const EdgeInsets.only(right: 963.25).toDirectional(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 963.25, 0.0),
+    );
+    expect(
+      const EdgeInsets.only(bottom: 963.25).toDirectional(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 963.25),
+    );
+    expect(
+      const EdgeInsets.only(left: 963.25).toDirectional(TextDirection.rtl),
+      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 963.25, 0.0),
+    );
+    expect(
+      const EdgeInsets.only(top: 963.25).toDirectional(TextDirection.rtl),
+      const EdgeInsetsDirectional.fromSTEB(0.0, 963.25, 0.0, 0.0),
+    );
+    expect(
+      const EdgeInsets.only(right: 963.25).toDirectional(TextDirection.rtl),
+      const EdgeInsetsDirectional.fromSTEB(963.25, 0.0, 0.0, 0.0),
+    );
+    expect(
+      const EdgeInsets.only(bottom: 963.25).toDirectional(TextDirection.rtl),
+      const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 963.25),
+    );
+    expect(
+      const EdgeInsets.fromLTRB(5, 10, 15, 30).add(const EdgeInsetsDirectional.fromSTEB(10, 15, 20, 25))
+          .toDirectional(TextDirection.rtl),
+      const EdgeInsetsDirectional.fromSTEB(25, 25, 25, 55),
+    );
+    expect(
+      const EdgeInsets.fromLTRB(5, 10, 15, 30).add(const EdgeInsetsDirectional.fromSTEB(10, 15, 20, 25))
+          .toDirectional(TextDirection.ltr),
+      const EdgeInsetsDirectional.fromSTEB(15, 25, 35, 55),
+    );
   });
 
   test('EdgeInsets equality', () {

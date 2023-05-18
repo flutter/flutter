@@ -169,11 +169,14 @@ void main() {
         ),
       ),
     );
+    DecoratedBox? getDecoratedBox(Key key, {int at = 0}) => tester.widgetList<DecoratedBox>(
+        find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox))
+    ).elementAt(at);
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(tileKey),
       matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    )).decoration! as BoxDecoration;
 
     final Clip tileClipBehavior = tester.firstWidget<Container>(find.descendant(
       of: find.byKey(tileKey),
@@ -184,7 +187,7 @@ void main() {
     expect(tileClipBehavior, clipBehavior);
 
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
-    expect(shapeDecoration.color, collapsedBackgroundColor);
+    expect(boxDecoration.color, collapsedBackgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -208,7 +211,7 @@ void main() {
     // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
     // Check the collapsed ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect((getDecoratedBox(tileKey, at: 1)!.decoration as ShapeDecoration).shape, collapsedShape);
   });
 
   testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
@@ -260,13 +263,16 @@ void main() {
         ),
       ),
     );
+    DecoratedBox? getDecoratedBox(Key key, {int at = 0}) => tester.widgetList<DecoratedBox>(
+        find.descendant(of: find.byKey(key), matching: find.byType(DecoratedBox))
+    ).elementAt(at);
 
-    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(tileKey),
       matching: find.byType(Container),
-    )).decoration! as ShapeDecoration;
+    )).decoration! as BoxDecoration;
     // Check the tile's background color when backgroundColor is applied.
-    expect(shapeDecoration.color, backgroundColor);
+    expect(boxDecoration.color, backgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -290,7 +296,7 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect((getDecoratedBox(tileKey, at: 1)!.decoration as ShapeDecoration).shape, collapsedShape);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

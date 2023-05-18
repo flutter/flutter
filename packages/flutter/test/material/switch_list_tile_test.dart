@@ -245,11 +245,11 @@ void main() {
     await tester.pumpWidget(buildFrame(TextDirection.ltr));
 
     expect(tester.getTopLeft(find.text('L')).dx, 10.0); // contentPadding.start = 10
-    expect(tester.getTopRight(find.byType(Switch)).dx, 780.0); // 800 - contentPadding.end
+    expect(tester.getTopRight(find.byType(Switch)).dx, 784.0); // 800 - contentPadding.end + 4
 
     await tester.pumpWidget(buildFrame(TextDirection.rtl));
 
-    expect(tester.getTopLeft(find.byType(Switch)).dx, 20.0); // contentPadding.end = 20
+    expect(tester.getTopLeft(find.byType(Switch)).dx, 16.0); // contentPadding.end = 20 - 4
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
 

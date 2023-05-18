@@ -182,10 +182,12 @@ class CheckboxListTile extends StatelessWidget {
     this.enabled,
     this.tileColor,
     this.title,
+    this.overline,
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
     this.secondary,
+    this.secondaryConstraint,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.contentPadding,
@@ -195,9 +197,18 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.titleAlignment,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
-       assert(!isThreeLine || subtitle != null);
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+         'together when CheckboxListTile.isThreeLine == false',
+       );
 
   /// Creates a combination of a list tile and a platform adaptive checkbox.
   ///
@@ -226,10 +237,12 @@ class CheckboxListTile extends StatelessWidget {
     this.enabled,
     this.tileColor,
     this.title,
+    this.overline,
     this.subtitle,
     this.isThreeLine = false,
     this.dense,
     this.secondary,
+    this.secondaryConstraint,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
     this.contentPadding,
@@ -239,9 +252,17 @@ class CheckboxListTile extends StatelessWidget {
     this.onFocusChange,
     this.enableFeedback,
     this.checkboxSemanticLabel,
+    this.titleAlignment,
   }) : _checkboxType = _CheckboxType.adaptive,
-       assert(tristate || value != null),
-       assert(!isThreeLine || subtitle != null);
+       assert(
+         !(subtitle == null && isThreeLine),
+         'ListTile.subtitle must be present when CheckboxListTile.isThreeLine == true',
+       ),
+       assert(
+         !(subtitle != null && overline != null && !isThreeLine),
+         'CheckboxListTile.subtitle and CheckboxListTile.overline must not be present '
+         'together when CheckboxListTile.isThreeLine == false',
+       );
 
   /// Whether this checkbox is checked.
   final bool? value;
@@ -374,6 +395,11 @@ class CheckboxListTile extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget? title;
 
+  /// Additional content displayed above the title.
+  ///
+  /// Typically a [Text] widget.
+  final Widget? overline;
+
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
@@ -384,10 +410,22 @@ class CheckboxListTile extends StatelessWidget {
   /// Typically an [Icon] widget.
   final Widget? secondary;
 
+  /// Defines how [ListTile.leading] is constrained and aligned to the [ListTile].
+  ///
+  /// The default value is [ListTileConstraint.standard].
+  final ListTileConstraint? secondaryConstraint;
+
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
+  /// If true, then [overline] or [subtitle] must be non-null (since it is expected to give
+  /// the second and third lines of text).
+  ///
+  /// If false, the list tile is treated as having one line if the [overline] or [subtitle] is
+  /// null and treated as having two lines if the subtitle is non-null. It must only have
+  /// one of [overline] or [subtitle].
+  ///
+  /// When using a [Text] widget for [title], [overline] and [subtitle], you can enforce
+  /// line limits using [Text.maxLines].
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
@@ -457,6 +495,20 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.material.checkbox.semanticLabel}
   final String? checkboxSemanticLabel;
 
+  /// Defines how [leading], [trailing] and [title]
+  /// are vertically aligned relative to the [ListTile].
+  ///
+  /// If this property is null then [ListTileThemeData.titleAlignment]
+  /// is used. If that is also null then [ListTileTitleAlignment.material3]
+  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used.
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final ListTileTitleAlignment? titleAlignment;
+
   final _CheckboxType _checkboxType;
 
   void _handleValueChange() {
@@ -517,14 +569,20 @@ class CheckboxListTile extends StatelessWidget {
     }
 
     Widget? leading, trailing;
+    ListTileConstraint? leadingConstraint, trailingConstraint;
+
     switch (controlAffinity) {
       case ListTileControlAffinity.leading:
         leading = control;
+        leadingConstraint = ListTileConstraint.icon24;
         trailing = secondary;
+        trailingConstraint = secondaryConstraint;
       case ListTileControlAffinity.trailing:
       case ListTileControlAffinity.platform:
         leading = secondary;
+        leadingConstraint = secondaryConstraint;
         trailing = control;
+        trailingConstraint = ListTileConstraint.icon24;
     }
     final ThemeData theme = Theme.of(context);
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
@@ -539,8 +597,11 @@ class CheckboxListTile extends StatelessWidget {
         selectedColor: effectiveActiveColor,
         leading: leading,
         title: title,
+        overline: overline,
         subtitle: subtitle,
         trailing: trailing,
+        leadingConstraint: leadingConstraint,
+        trailingConstraint: trailingConstraint,
         isThreeLine: isThreeLine,
         dense: dense,
         enabled: enabled ?? onChanged != null,
@@ -555,6 +616,7 @@ class CheckboxListTile extends StatelessWidget {
         focusNode: focusNode,
         onFocusChange: onFocusChange,
         enableFeedback: enableFeedback,
+        titleAlignment: titleAlignment,
       ),
     );
   }
