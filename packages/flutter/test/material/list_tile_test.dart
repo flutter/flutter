@@ -2651,7 +2651,7 @@ void main() {
 
     // If [ThemeData.useMaterial3] is true, then title alignment should
     // default to [ListTileTitleAlignment.material3].
-    await tester.pumpWidget(buildFrame(isThreeLine: false));
+    await tester.pumpWidget(buildFrame());
     Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
     Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
     Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));

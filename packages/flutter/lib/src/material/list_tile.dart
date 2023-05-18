@@ -256,7 +256,7 @@ class ListTileConstraint {
     required bool isLeading,
     required ListTileLineCount numberOfLines,
   }) {
-    switch(numberOfLines) {
+    switch (numberOfLines) {
       case ListTileLineCount.oneLine: {
         if (useMaterial3 || isLeading) {
           return isDense ? 48.0 : 56.0;
@@ -344,7 +344,7 @@ class ListTileConstraint {
 
   /// A constraint that can be applied to an [Icon], such as for an [IconButton].
   ///
-  /// Note that using default styles, when [ListTile.isMaterial3] is false
+  /// When [ListTile.isMaterial3] is false, and using default styles,
   /// this will cause the [IconButton]'s splash to clip off the [ListTile].
   static const ListTileConstraint icon24 =
     ListTileConstraint(
@@ -1368,7 +1368,7 @@ class ListTile extends StatelessWidget {
       );
     final EdgeInsetsDirectional effectiveContentPadding = baseContentPadding
         .toDirectional(textDirection)
-        .clamp(EdgeInsets.zero, clamp)
+        .clamp(EdgeInsets.zero, clamp) // ignore_clamp_double_lint
         .toDirectional(textDirection);
     final EdgeInsets resolvedContentPadding = effectiveContentPadding.resolve(textDirection);
 
@@ -1893,7 +1893,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     _parentPadding = value;
     markNeedsLayout();
   }
-  
+
   @override
   bool get sizedByParent => false;
 
@@ -1934,12 +1934,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     double baseDefaultTileHeight() {
       switch (numberOfLines) {
         case ListTileLineCount.oneLine: {
-          // NOTE: this does not follow the M2 spec which should have a base height
+          // This does not follow the M2 spec which should have a base height
           // of 48 for one-line lists with no leading element
           return (isDense ? 48.0 : 56.0);
         }
         case ListTileLineCount.twoLine: {
-          // NOTE: this does not follow the M2 spec which should have a base height
+          // This does not follow the M2 spec which should have a base height
           // of 64 for two-line lists with no leading element
           return (isDense ? 64.0 : 72.0);
         }
@@ -2143,7 +2143,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
           tileHeight > 88.0 || (isDense && tileHeight > 76.0)
       ) {
         // Top align
-        // Note there is an inconsistency in the spec. In the written component
+        // There is an inconsistency in the spec. In the written component
         // it is tileHeight >= 88, but this conflicts with the one and two line
         // video layouts which are centred.
         overlineY = minVerticalPadding;
@@ -2168,7 +2168,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       double? titleBaseline;
       double? overlineBaseline;
       double? subtitleBaseline;
-      switch(numberOfLines) {
+      switch (numberOfLines) {
         case ListTileLineCount.oneLine: break;
         case ListTileLineCount.twoLine: {
           if (leading == null) {
@@ -2301,7 +2301,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
           tileHeight > 88.0 || (isDense && tileHeight > 76.0)
         ) {
           // Top align
-          // Note there is an inconsistency on the spec. In the written component
+          // There is an inconsistency on the spec. In the written component
           // it is tileHeight >= 88, but this conflicts with the one and two line
           // video layouts which are centred.
           leadingY = math.max(_minVerticalPadding - leadingPaddingCorrection.top, 0.0);
@@ -2323,7 +2323,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
         //  - For smaller tiles, trailing should always be centered. Leading can be
         //    centered or closer to the top. It should never be further than 16dp
         //    to the top.
-        // NOTE: baseline offset of trailing supporting text is not supported.
+        // Baseline offset of trailing supporting text is not supported.
         if (tileHeight > 72.0) {
           leadingY = math.max(16.0 - leadingPaddingCorrection.top, 0.0);
           trailingY = math.max(16.0 - trailingPaddingCorrection.top, 0.0);
