@@ -5103,8 +5103,8 @@ class _CodePointBoundary extends TextBoundary {
   // Returns true if the given position falls in the center of a surrogate pair.
   bool _breaksSurrogatePair(int position) {
     assert(position > 0 && position < _text.length && _text.length > 1);
-    return _text.codeUnitAt(position) & 0xFC00 == 0xDC00
-        && _text.codeUnitAt(position + 1) & 0xFC00 == 0xD800;
+    return TextPainter.isHighSurrogate(_text.codeUnitAt(position - 1))
+        && TextPainter.isLowSurrogate(_text.codeUnitAt(position));
   }
 
   @override
