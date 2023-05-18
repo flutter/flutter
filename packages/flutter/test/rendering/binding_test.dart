@@ -22,9 +22,12 @@ void main() {
     RendererBinding.instance.renderView.child = RenderLimitedBox();
     RendererBinding.instance.handleMetricsChanged();
     expect(SchedulerBinding.instance.hasScheduledFrame, true);
+
+    RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
   });
 
   test('debugDumpSemantics prints explanation when semantics are unavailable', () {
+    RendererBinding.instance.addRenderView(RendererBinding.instance.renderView);
     final List<String?> log = <String?>[];
     debugPrint = (String? message, {int? wrapWidth}) {
       log.add(message);
@@ -37,5 +40,6 @@ void main() {
       'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
       'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
     ));
+    RendererBinding.instance.removeRenderView(RendererBinding.instance.renderView);
   });
 }
