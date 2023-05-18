@@ -664,7 +664,7 @@ class ListTileConstraint {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This sample shows [ListTileConstraints] can be used to
+/// This sample shows [ListTileConstraint] can be used to
 /// configure the [leading] and [trailing] widgets to make the list in the
 /// Material 3 spec.
 ///
