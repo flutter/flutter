@@ -6,9 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that contains multiple box children that each fills the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -144,10 +147,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
     switch (constraints.axis) {
       case Axis.horizontal:
         _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
-        break;
       case Axis.vertical:
         _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
-        break;
     }
 
     return;
@@ -162,6 +163,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
 /// A sliver that contains a single box child that fills the remaining space in
 /// the viewport.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
 /// [SliverFillRemaining] will size its [child] to fill the viewport in the
 /// cross axis. The extent of the sliver and its child's size in the main axis

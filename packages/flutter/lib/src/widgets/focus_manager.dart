@@ -90,7 +90,6 @@ KeyEventResult combineKeyEventResults(Iterable<KeyEventResult> results) {
         return KeyEventResult.handled;
       case KeyEventResult.skipRemainingHandlers:
         hasSkipRemainingHandlers = true;
-        break;
       case KeyEventResult.ignored:
         break;
     }
@@ -299,7 +298,9 @@ enum UnfocusDisposition {
 /// [ancestors] and [descendants] accessors.
 ///
 /// [FocusNode]s are [ChangeNotifier]s, so a listener can be registered to
-/// receive a notification when the focus changes. If the [Focus] and
+/// receive a notification when the focus changes. Listeners will also be
+/// notified when [skipTraversal], [canRequestFocus], [descendantsAreFocusable],
+/// and [descendantsAreTraversable] properties are updated. If the [Focus] and
 /// [FocusScope] widgets are being used to manage the nodes, consider
 /// establishing an [InheritedWidget] dependency on them by calling [Focus.of]
 /// or [FocusScope.of] instead. [FocusNode.hasFocus] can also be used to
@@ -885,7 +886,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
           scope = scope.enclosingScope ?? _manager?.rootScope;
         }
         scope._doRequestFocus(findFirstFocus: false);
-        break;
       case UnfocusDisposition.previouslyFocusedChild:
         // Select the most recent focused child from the nearest focusable scope
         // and focus that. If there isn't one, focus the scope itself.
@@ -897,7 +897,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
           scope = scope.enclosingScope ?? _manager?.rootScope;
         }
         scope._doRequestFocus(findFirstFocus: true);
-        break;
     }
     assert(_focusDebug(() => 'Unfocused node:', () => <Object>['primary focus was $this', 'next focus will be ${_manager?._markedForFocus}']));
   }
@@ -1082,7 +1081,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _doRequestFocus(findFirstFocus: true);
   }
 
-  // Note that this is overridden in FocusScopeNode.
+  // This is overridden in FocusScopeNode.
   void _doRequestFocus({required bool findFirstFocus}) {
     if (!canRequestFocus) {
       assert(_focusDebug(() => 'Node NOT requesting focus because canRequestFocus is false: $this'));
@@ -1769,13 +1768,11 @@ class _HighlightModeManager {
       case PointerDeviceKind.invertedStylus:
         _lastInteractionWasTouch = true;
         expectedMode = FocusHighlightMode.touch;
-        break;
       case PointerDeviceKind.mouse:
       case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
         _lastInteractionWasTouch = false;
         expectedMode = FocusHighlightMode.traditional;
-        break;
     }
     if (expectedMode != highlightMode) {
       updateMode();
@@ -1818,11 +1815,9 @@ class _HighlightModeManager {
         case KeyEventResult.handled:
           assert(_focusDebug(() => 'Node $node handled key event $message.'));
           handled = true;
-          break;
         case KeyEventResult.skipRemainingHandlers:
           assert(_focusDebug(() => 'Node $node stopped key event propagation: $message.'));
           handled = false;
-          break;
       }
       // Only KeyEventResult.ignored will continue the for loop. All other
       // options will stop the event propagation.
@@ -1853,13 +1848,10 @@ class _HighlightModeManager {
         } else {
           newMode = FocusHighlightMode.traditional;
         }
-        break;
       case FocusHighlightStrategy.alwaysTouch:
         newMode = FocusHighlightMode.touch;
-        break;
       case FocusHighlightStrategy.alwaysTraditional:
         newMode = FocusHighlightMode.traditional;
-        break;
     }
     // We can't just compare newMode with _highlightMode here, since
     // _highlightMode could be null, so we want to compare with the return value

@@ -298,10 +298,13 @@ Future<ProcessTestResult> runFlutter(
     }
     process.stdin.write('q');
     return -1; // discarded
-  }).catchError((Object error) {
-    // ignore errors here, they will be reported on the next line
-    return -1; // discarded
-  }));
+  }).then(
+    (int i) => i,
+    onError: (Object error) {
+      // ignore errors here, they will be reported on the next line
+      return -1; // discarded
+    },
+  ));
   final int exitCode = await process.exitCode;
   if (streamingLogs) {
     debugPrint('${stamp()} (process terminated with exit code $exitCode)');
@@ -499,7 +502,7 @@ void main() {
         <String>['run', '-dflutter-tester', testScript],
         testDirectory,
         <Transition>[
-          Barrier(RegExp(r'^An Observatory debugger and profiler on Flutter test device is available at: ')),
+          Barrier(RegExp(r'^A Dart VM Service on Flutter test device is available at: ')),
           Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
             return 'r';
           }),
@@ -579,7 +582,7 @@ void main() {
     );
     expect(result.exitCode, 0);
     expect(result.stderr, isEmpty);
-    expect(result.stdout, <Object>[
+    expect(result.stdout, containsAllInOrder(<Object>[
       startsWith('Launching '),
       startsWith('Syncing files to device Flutter test device...'),
       '',
@@ -591,9 +594,7 @@ void main() {
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
       '',
-      contains('Running with sound null safety'),
-      '',
-      startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
+      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Flutter run key commands.',
@@ -603,6 +604,7 @@ void main() {
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
+      'f Dump focus tree to the console.                                               (debugDumpFocusTree)',
       'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
       'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
       'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',
@@ -620,12 +622,10 @@ void main() {
       'c Clear the screen',
       'q Quit (terminate the application on the device).',
       '',
-      contains('Running with sound null safety'),
-      '',
-      startsWith('An Observatory debugger and profiler on Flutter test device is available at: http://'),
+      startsWith('A Dart VM Service on Flutter test device is available at: http://'),
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Application finished.',
-    ]);
+    ]));
   });
 }

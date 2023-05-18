@@ -206,6 +206,7 @@ class DraggableScrollableController extends ChangeNotifier {
     } else {
       _attachedController?.extent._currentSize.removeListener(notifyListeners);
     }
+    _disposeAnimationControllers();
     _attachedController = null;
   }
 
@@ -531,8 +532,8 @@ class _DraggableSheetExtent {
   /// Start an activity that affects the sheet and register a cancel call back
   /// that will be called if another activity starts.
   ///
-  /// Note that `onCanceled` will get called even if the subsequent activity
-  /// started after this one finished so `onCanceled` should be safe to call at
+  /// The `onCanceled` callback will get called even if the subsequent activity
+  /// started after this one finished, so `onCanceled` must be safe to call at
   /// any time.
   void startActivity({required VoidCallback onCanceled}) {
     _cancelActivity?.call();
@@ -781,7 +782,7 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     ScrollPosition? oldPosition,
   ) {
     return _DraggableScrollableSheetScrollPosition(
-      physics: const AlwaysScrollableScrollPhysics().applyTo(physics),
+      physics: physics.applyTo(const AlwaysScrollableScrollPhysics()),
       context: context,
       oldPosition: oldPosition,
       getExtent: () => extent,

@@ -15,6 +15,12 @@ void main() {
     expect(const CheckboxThemeData().hashCode, const CheckboxThemeData().copyWith().hashCode);
   });
 
+  test('CheckboxThemeData lerp special cases', () {
+    expect(CheckboxThemeData.lerp(null, null, 0), const CheckboxThemeData());
+    const CheckboxThemeData data = CheckboxThemeData();
+    expect(identical(CheckboxThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('CheckboxThemeData defaults', () {
     const CheckboxThemeData themeData = CheckboxThemeData();
     expect(themeData.mouseCursor, null);
@@ -136,7 +142,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
@@ -235,7 +241,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
@@ -288,7 +294,7 @@ void main() {
     // Unselected checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: themeDefaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: themeDefaultFillColor));
 
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));

@@ -90,4 +90,25 @@ void main() {
     expect(didStartDrag, isFalse);
     drag.dispose();
   });
+
+  test('allowedButtonsFilter should work the same when null or not specified', () {
+    // Regression test for https://github.com/flutter/flutter/pull/122227
+
+    final ImmediateMultiDragGestureRecognizer recognizer1 = ImmediateMultiDragGestureRecognizer();
+    // ignore: avoid_redundant_argument_values
+    final ImmediateMultiDragGestureRecognizer recognizer2 = ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: null);
+
+    // We want to test _allowedButtonsFilter, which is called in this method.
+    const PointerDownEvent allowedPointer = PointerDownEvent(timeStamp: Duration(days: 10));
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer1.isPointerAllowed(allowedPointer), true);
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer2.isPointerAllowed(allowedPointer), true);
+
+    const PointerDownEvent rejectedPointer = PointerDownEvent(timeStamp: Duration(days: 10), buttons: kMiddleMouseButton);
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer1.isPointerAllowed(rejectedPointer), false);
+    // ignore: invalid_use_of_protected_member
+    expect(recognizer2.isPointerAllowed(rejectedPointer), false);
+  });
 }

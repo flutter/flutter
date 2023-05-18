@@ -941,7 +941,7 @@ class GestureDetector extends StatelessWidget {
   /// force to initiate a force press. The amount of force is at least
   /// [ForcePressGestureRecognizer.startPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressStartCallback? onForcePressStart;
 
@@ -949,7 +949,7 @@ class GestureDetector extends StatelessWidget {
   /// force. The amount of force is at least
   /// [ForcePressGestureRecognizer.peakPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressPeakCallback? onForcePressPeak;
 
@@ -958,13 +958,13 @@ class GestureDetector extends StatelessWidget {
   /// plane of the screen, pressing the screen with varying forces or both
   /// simultaneously.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressUpdateCallback? onForcePressUpdate;
 
-  /// The pointer is no longer in contact with the screen.
+  /// The pointer tracked by [onForcePressStart] is no longer in contact with the screen.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressEndCallback? onForcePressEnd;
 
@@ -1050,7 +1050,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryTapDown = onTertiaryTapDown
             ..onTertiaryTapUp = onTertiaryTapUp
             ..onTertiaryTapCancel = onTertiaryTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1065,7 +1066,8 @@ class GestureDetector extends StatelessWidget {
             ..onDoubleTapDown = onDoubleTapDown
             ..onDoubleTap = onDoubleTap
             ..onDoubleTapCancel = onDoubleTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1116,7 +1118,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryLongPressMoveUpdate = onTertiaryLongPressMoveUpdate
             ..onTertiaryLongPressUp = onTertiaryLongPressUp
             ..onTertiaryLongPressEnd = onTertiaryLongPressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1136,7 +1139,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1156,7 +1160,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1176,7 +1181,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1192,7 +1198,8 @@ class GestureDetector extends StatelessWidget {
             ..dragStartBehavior = dragStartBehavior
             ..gestureSettings = gestureSettings
             ..trackpadScrollCausesScale = trackpadScrollCausesScale
-            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor;
+            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1209,7 +1216,8 @@ class GestureDetector extends StatelessWidget {
             ..onPeak = onForcePressPeak
             ..onUpdate = onForcePressUpdate
             ..onEnd = onForcePressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1232,7 +1240,7 @@ class GestureDetector extends StatelessWidget {
 /// A widget that detects gestures described by the given gesture
 /// factories.
 ///
-/// For common gestures, use a [GestureRecognizer].
+/// For common gestures, use a [GestureDetector].
 /// [RawGestureDetector] is useful primarily when developing your
 /// own gesture recognizers.
 ///

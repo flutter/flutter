@@ -109,13 +109,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   Future<List<BuildInfo>> getBuildInfos() async {
     final List<BuildInfo> buildInfos = <BuildInfo>[];
 
-    if (boolArgDeprecated('debug')) {
+    if (boolArg('debug')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
     }
-    if (boolArgDeprecated('profile')) {
+    if (boolArg('profile')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
     }
-    if (boolArgDeprecated('release')) {
+    if (boolArg('release')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
     }
 
@@ -216,14 +216,14 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   Future<void> validateCommand() async {
     await super.validateCommand();
 
-    if (boolArgDeprecated('universal')) {
+    if (boolArg('universal')) {
       throwToolExit('--universal has been deprecated, only XCFrameworks are supported.');
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument = stringArgDeprecated('output')
+    final String outputArgument = stringArg('output')
         ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
@@ -239,16 +239,16 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     displayNullSafetyMode(buildInfos.first);
     for (final BuildInfo buildInfo in buildInfos) {
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
-      globals.printStatus('Building frameworks for $productBundleIdentifier in ${getNameForBuildMode(buildInfo.mode)} mode...');
-      final String xcodeBuildConfiguration = sentenceCase(getNameForBuildMode(buildInfo.mode));
+      globals.printStatus('Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...');
+      final String xcodeBuildConfiguration = sentenceCase(buildInfo.mode.cliName);
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
       if (modeDirectory.existsSync()) {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArgDeprecated('cocoapods')) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArgDeprecated('force'));
+      if (boolArg('cocoapods')) {
+        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       } else {
         // Copy Flutter.xcframework.
         await _produceFlutterFramework(buildInfo, modeDirectory);
@@ -332,7 +332,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         throwToolExit('Could not find license at ${license.path}');
       }
       final String licenseSource = license.readAsStringSync();
-      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.name}';
+      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.cliName}';
 
       final String podspecContents = '''
 Pod::Spec.new do |s|
@@ -428,7 +428,7 @@ end
             kTargetFile: targetFile,
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
             kIosArchs: defaultIOSArchsForEnvironment(sdkType, globals.artifacts!)
-                .map(getNameForDarwinArch)
+                .map((DarwinArch e) => e.name)
                 .join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
@@ -496,7 +496,7 @@ end
         'SYMROOT=${iPhoneBuildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static') ?? false)
+        if (boolArg('static'))
           'MACH_O_TYPE=staticlib',
       ];
 
@@ -510,7 +510,7 @@ end
       }
 
       // Always build debug for simulator.
-      final String simulatorConfiguration = sentenceCase(getNameForBuildMode(BuildMode.debug));
+      final String simulatorConfiguration = sentenceCase(BuildMode.debug.cliName);
       pluginsBuildCommand = <String>[
         ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
@@ -522,7 +522,7 @@ end
         'SYMROOT=${simulatorBuildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static') ?? false)
+        if (boolArg('static'))
           'MACH_O_TYPE=staticlib',
       ];
 

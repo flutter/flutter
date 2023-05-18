@@ -603,19 +603,773 @@ void main() {
     );
 
     // Start hovering
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse);
     await gesture.moveTo(tester.getCenter(find.byKey(key)));
 
     await tester.pump();
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byKey(key))),
+      paints..rect()..rect(
+        color: Colors.orange[500],
+        rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
+      )
+    );
+  });
+
+  testWidgets('SwitchListTile respects thumbColor in active/enabled states', (WidgetTester tester) async {
+    const Color activeEnabledThumbColor = Color(0xFF000001);
+    const Color activeDisabledThumbColor = Color(0xFF000002);
+    const Color inactiveEnabledThumbColor = Color(0xFF000003);
+    const Color inactiveDisabledThumbColor = Color(0xFF000004);
+
+    Color getThumbColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledThumbColor;
+        }
+        return inactiveDisabledThumbColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledThumbColor;
+      }
+      return inactiveEnabledThumbColor;
+    }
+
+    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+
+    Widget buildSwitchListTile({required bool enabled, required bool selected}) {
+      return wrap(
+        child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                value: selected,
+                thumbColor: thumbColor,
+                onChanged: enabled ? (_) { } : null,
+              );
+            }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+    expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect()..rrect()..rrect()..rrect()
+          ..rrect(color: inactiveDisabledThumbColor),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
       paints
-        ..rect()
-        ..rect(
-            color: Colors.orange[500],
-            rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
-          )
+        ..rrect()..rrect()..rrect()..rrect()
+        ..rrect(color: activeDisabledThumbColor),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()..rrect()..rrect()
+        ..rrect(color: inactiveEnabledThumbColor),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()..rrect()..rrect()
+        ..rrect(color: activeEnabledThumbColor),
+    );
+  });
+
+  testWidgets('SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredThumbColor = Color(0xFF4caf50);
+    const Color pressedThumbColor = Color(0xFFF44336);
+
+    Color getThumbColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return pressedThumbColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredThumbColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
+
+    Widget buildSwitchListTile() {
+      return MaterialApp(
+        theme: ThemeData(),
+        home: wrap(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                value: false,
+                thumbColor: thumbColor,
+                onChanged: (_) { },
+              );
+            }),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()..rrect()..rrect()
+        ..rrect(color: hoveredThumbColor),
+    );
+
+    // On pressed state
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()..rrect()..rrect()
+        ..rrect(color: pressedThumbColor),
+    );
+  });
+
+  testWidgets('SwitchListTile respects trackColor in active/enabled states', (WidgetTester tester) async {
+    const Color activeEnabledTrackColor = Color(0xFF000001);
+    const Color activeDisabledTrackColor = Color(0xFF000002);
+    const Color inactiveEnabledTrackColor = Color(0xFF000003);
+    const Color inactiveDisabledTrackColor = Color(0xFF000004);
+
+    Color getTrackColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledTrackColor;
+        }
+        return inactiveDisabledTrackColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledTrackColor;
+      }
+      return inactiveEnabledTrackColor;
+    }
+
+    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+
+    Widget buildSwitchListTile({required bool enabled, required bool selected}) {
+      return wrap(
+        child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                value: selected,
+                trackColor: trackColor,
+                onChanged: enabled ? (_) { } : null,
+              );
+            }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: false));
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(color: inactiveDisabledTrackColor),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(color: activeDisabledTrackColor),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(color: inactiveEnabledTrackColor),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(color: activeEnabledTrackColor),
+    );
+  });
+
+  testWidgets('SwitchListTile respects trackColor in hovered states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredTrackColor = Color(0xFF4caf50);
+
+    Color getTrackColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredTrackColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> trackColor = MaterialStateColor.resolveWith(getTrackColor);
+
+    Widget buildSwitchListTile() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SwitchListTile(
+              value: false,
+              trackColor: trackColor,
+              onChanged: (_) { },
+            );
+          }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(color: hoveredTrackColor),
+    );
+  });
+
+  testWidgets('SwitchListTile respects thumbIcon - M3', (WidgetTester tester) async {
+    const Icon activeIcon = Icon(Icons.check);
+    const Icon inactiveIcon = Icon(Icons.close);
+
+    MaterialStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
+      return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return activeIcon;
+        }
+        return inactiveIcon;
+      });
+    }
+
+    Widget buildSwitchListTile({required bool enabled, required bool active, Icon? activeIcon, Icon? inactiveIcon}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: wrap(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return SwitchListTile(
+                  thumbIcon: thumbIcon(activeIcon, inactiveIcon),
+                  value: active,
+                  onChanged: enabled ? (_) {} : null,
+                );
+              }),
+        ),
+      );
+    }
+
+    // active icon shows when switch is on.
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, active: true, activeIcon: activeIcon));
+    await tester.pumpAndSettle();
+    final Switch switchWidget0 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget0.thumbIcon?.resolve(<MaterialState>{MaterialState.selected}), activeIcon);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()
+        ..paragraph(offset: const Offset(32.0, 12.0)),
+    );
+
+    // inactive icon shows when switch is off.
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, active: false, inactiveIcon: inactiveIcon));
+    await tester.pumpAndSettle();
+    final Switch switchWidget1 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget1.thumbIcon?.resolve(<MaterialState>{}), inactiveIcon);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()
+        ..rrect()
+        ..paragraph(offset: const Offset(12.0, 12.0)),
+    );
+
+    // active icon doesn't show when switch is off.
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, active: false, activeIcon: activeIcon));
+    await tester.pumpAndSettle();
+    final Switch switchWidget2 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget2.thumbIcon?.resolve(<MaterialState>{MaterialState.selected}), activeIcon);
+    expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect()..rrect()..rrect()
+    );
+
+    // inactive icon doesn't show when switch is on.
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, active: true, inactiveIcon: inactiveIcon));
+    await tester.pumpAndSettle();
+    final Switch switchWidget3 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget3.thumbIcon?.resolve(<MaterialState>{}), inactiveIcon);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()..restore(),
+    );
+
+    // without icon
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, active: false));
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()..rrect()..rrect()..restore(),
+    );
+  });
+
+  testWidgets('SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
+    Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SwitchListTile(
+              materialTapTargetSize: materialTapTargetSize,
+              value: false,
+              onChanged: (_) {},
+            );
+          }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(MaterialTapTargetSize.padded));
+    final Switch switchWidget = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget.materialTapTargetSize, MaterialTapTargetSize.padded);
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 48.0));
+
+    await tester.pumpWidget(buildSwitchListTile(MaterialTapTargetSize.shrinkWrap));
+    final Switch switchWidget1 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget1.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
+  testWidgets('SwitchListTile.adaptive respects applyCupertinoTheme', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    Widget buildSwitchListTile(bool applyCupertinoTheme, TargetPlatform platform) {
+      return MaterialApp(
+        theme: theme.copyWith(platform: platform),
+        home: wrap(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return SwitchListTile.adaptive(
+                  applyCupertinoTheme: applyCupertinoTheme,
+                  value: true,
+                  onChanged: (_) {},
+                );
+              }),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildSwitchListTile(true, platform));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(color: theme.useMaterial3 ? const Color(0xFF6750A4) : const Color(0xFF2196F3)),
+      );
+
+      await tester.pumpWidget(buildSwitchListTile(false, platform));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints..rrect(color: const Color(0xFF34C759)),
+      );
+    }
+  });
+
+  testWidgets('SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
+    Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SwitchListTile(
+              materialTapTargetSize: materialTapTargetSize,
+              value: false,
+              onChanged: (_) {},
+            );
+          }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(MaterialTapTargetSize.padded));
+    final Switch switchWidget = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget.materialTapTargetSize, MaterialTapTargetSize.padded);
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 48.0));
+
+    await tester.pumpWidget(buildSwitchListTile(MaterialTapTargetSize.shrinkWrap));
+    final Switch switchWidget1 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget1.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
+  testWidgets('SwitchListTile passes the value of dragStartBehavior to Switch', (WidgetTester tester) async {
+    Widget buildSwitchListTile(DragStartBehavior dragStartBehavior) {
+      return wrap(
+        child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                dragStartBehavior: dragStartBehavior,
+                value: false,
+                onChanged: (_) {},
+              );
+            }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(DragStartBehavior.start));
+    final Switch switchWidget = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget.dragStartBehavior, DragStartBehavior.start);
+
+    await tester.pumpWidget(buildSwitchListTile(DragStartBehavior.down));
+    final Switch switchWidget1 = tester.widget<Switch>(find.byType(Switch));
+    expect(switchWidget1.dragStartBehavior, DragStartBehavior.down);
+  });
+
+  testWidgets('Switch on SwitchListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test SwitchListTile.adaptive() constructor
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SwitchListTile.adaptive(
+              mouseCursor: SystemMouseCursors.text,
+              value: false,
+              onChanged: (_) {},
+            );
+          }),
+    ));
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Switch)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+    // Test SwitchListTile() constructor
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SwitchListTile(
+              mouseCursor: SystemMouseCursors.forbidden,
+              value: false,
+              onChanged: (_) {},
+            );
+          }),
+    ));
+
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
+
+    // Test default cursor
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return SwitchListTile(
+            value: false,
+            onChanged: (_) {},
+          );
+        }),
+    ));
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return const SwitchListTile(
+              value: false,
+              onChanged: null,
+            );
+          }),
+    ));
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('Switch with splash radius set', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const double splashRadius = 35;
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SwitchListTile(
+              splashRadius: splashRadius,
+              value: false,
+              onChanged: (_) {},
+            );
+          }),
+    ));
+
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..circle(radius: splashRadius),
+    );
+  });
+
+  testWidgets('The overlay color for the thumb of the switch resolves in active/pressed/hovered states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color activeThumbColor = Color(0xFF000000);
+    const Color inactiveThumbColor = Color(0xFF000010);
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const Color hoverOverlayColor = Color(0xFF000003);
+    const Color hoverColor = Color(0xFF000005);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverOverlayColor;
+      }
+      return null;
+    }
+
+    Widget buildSwitch({bool active = false, bool focused = false, bool useOverlay = true}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SwitchListTile(
+            value: active,
+            onChanged: (_) { },
+            thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+              if (states.contains(MaterialState.selected)) {
+                return activeThumbColor;
+              }
+              return inactiveThumbColor;
+            }),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+          ),
+        ),
+      );
+    }
+
+    // test inactive Switch, and overlayColor is set to null.
+    await tester.pumpWidget(buildSwitch(useOverlay: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: inactiveThumbColor.withAlpha(kRadialReactionAlpha),
+        ),
+      reason: 'Default inactive pressed Switch should have overlay color from thumbColor',
+    );
+
+    // test active Switch, and overlayColor is set to null.
+    await tester.pumpWidget(buildSwitch(active: true, useOverlay: false));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: activeThumbColor.withAlpha(kRadialReactionAlpha),
+        ),
+      reason: 'Default active pressed Switch should have overlay color from thumbColor',
+    );
+
+    // test inactive Switch with an overlayColor
+    await tester.pumpWidget(buildSwitch());
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: inactivePressedOverlayColor,
+        ),
+      reason: 'Inactive pressed Switch should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    // test active Switch with an overlayColor
+    await tester.pumpWidget(buildSwitch(active: true));
+    await tester.press(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: activePressedOverlayColor,
+        ),
+      reason: 'Active pressed Switch should have overlay color: $activePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildSwitch(focused: true));
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect()
+        ..circle(
+          color: hoverOverlayColor,
+        ),
+      reason: 'Hovered Switch should use overlay color $hoverOverlayColor over $hoverColor',
+    );
+  });
+
+  testWidgets('SwitchListTile respects trackOutlineColor in active/enabled states', (WidgetTester tester) async {
+    const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
+    const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
+    const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
+    const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
+
+    Color getOutlineColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledTrackOutlineColor;
+        }
+        return inactiveDisabledTrackOutlineColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledTrackOutlineColor;
+      }
+      return inactiveEnabledTrackOutlineColor;
+    }
+
+    final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getOutlineColor);
+
+    Widget buildSwitchListTile({required bool enabled, required bool selected}) {
+      return wrap(
+        child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return SwitchListTile(
+                value: selected,
+                trackOutlineColor: trackOutlineColor,
+                onChanged: enabled ? (_) { } : null,
+              );
+            }),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: inactiveDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: activeDisabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: inactiveEnabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+
+    await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect(style: PaintingStyle.fill)
+        ..rrect(color: activeEnabledTrackOutlineColor, style: PaintingStyle.stroke),
+    );
+  });
+
+  testWidgets('SwitchListTile respects trackOutlineColor in hovered state', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredTrackColor = Color(0xFF4caf50);
+
+    Color getTrackOutlineColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredTrackColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> outlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
+
+    Widget buildSwitchListTile() {
+      return MaterialApp(
+        theme: ThemeData(),
+        home: wrap(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return SwitchListTile(
+                  value: false,
+                  trackOutlineColor: outlineColor,
+                  onChanged: (_) { },
+                );
+              }),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitchListTile());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(Switch)));
+
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints..rrect()..rrect(color: hoveredTrackColor, style: PaintingStyle.stroke)
     );
   });
 }

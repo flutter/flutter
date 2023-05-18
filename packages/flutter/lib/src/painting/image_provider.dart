@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui' show Locale, Size, TextDirection;
 
@@ -846,11 +847,13 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 class ResizeImageKey {
   // Private constructor so nobody from the outside can poison the image cache
   // with this key. It's only accessible to [ResizeImage] internally.
-  const ResizeImageKey._(this._providerCacheKey, this._width, this._height);
+  const ResizeImageKey._(this._providerCacheKey, this._policy, this._width, this._height, this._allowUpscaling);
 
   final Object _providerCacheKey;
+  final ResizeImagePolicy _policy;
   final int? _width;
   final int? _height;
+  final bool _allowUpscaling;
 
   @override
   bool operator ==(Object other) {
@@ -859,12 +862,407 @@ class ResizeImageKey {
     }
     return other is ResizeImageKey
         && other._providerCacheKey == _providerCacheKey
+        && other._policy == _policy
         && other._width == _width
-        && other._height == _height;
+        && other._height == _height
+        && other._allowUpscaling == _allowUpscaling;
   }
 
   @override
-  int get hashCode => Object.hash(_providerCacheKey, _width, _height);
+  int get hashCode => Object.hash(_providerCacheKey, _policy, _width, _height, _allowUpscaling);
+}
+
+/// Configures the behavior for [ResizeImage].
+///
+/// This is used in [ResizeImage.policy] to affect how the [ResizeImage.width]
+/// and [ResizeImage.height] properties are interpreted.
+enum ResizeImagePolicy {
+  /// Sizes the image to the exact width and height specified by
+  /// [ResizeImage.width] and [ResizeImage.height].
+  ///
+  /// If [ResizeImage.width] and [ResizeImage.height] are both non-null, the
+  /// output image will have the specified width and height (with the
+  /// corresponding aspect ratio) regardless of whether it matches the source
+  /// image's intrinsic aspect ratio. This case is similar to [BoxFit.fill].
+  ///
+  /// If only one of `width` and `height` is non-null, then the output image
+  /// will be scaled to the associated width or height, and the other dimension
+  /// will take whatever value is needed to maintain the image's original aspect
+  /// ratio. These cases are simnilar to [BoxFit.fitWidth] and
+  /// [BoxFit.fitHeight], respectively.
+  ///
+  /// If [ResizeImage.allowUpscaling] is false (the default), the width and the
+  /// height of the output image will each be clamped to the intrinsic width and
+  /// height of the image. This may result in a different aspect ratio than the
+  /// aspect ratio specified by the target width and height (e.g. if the height
+  /// gets clamped downwards but the width does not).
+  ///
+  /// ## Examples
+  ///
+  /// The examples below show how [ResizeImagePolicy.exact] works in various
+  /// scenarios. In each example, the source image has a size of 300x200
+  /// (landscape orientation), the red box is a 150x150 square, and the green
+  /// box is a 400x400 square.
+  ///
+  /// <table>
+  /// <tr>
+  /// <td>Scenario</td>
+  /// <td>Output</td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   width: 150,
+  ///   height: 150,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_150x150_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   width: 150,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_150xnull_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   height: 150,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_nullx150_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   width: 400,
+  ///   height: 400,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_400x400_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   width: 400,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_400xnull_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   height: 400,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_nullx400_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   width: 400,
+  ///   height: 400,
+  ///   allowUpscaling: true,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_400x400_true.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   width: 400,
+  ///   allowUpscaling: true,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_400xnull_true.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   height: 400,
+  ///   allowUpscaling: true,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_exact_nullx400_true.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// </table>
+  exact,
+
+  /// Scales the image as necessary to ensure that it fits within the bounding
+  /// box specified by [ResizeImage.width] and [ResizeImage.height] while
+  /// maintaining its aspect ratio.
+  ///
+  /// If [ResizeImage.allowUpscaling] is true, the image will be scaled up or
+  /// down to best fit the bounding box; otherwise it will only ever be scaled
+  /// down.
+  ///
+  /// This is conceptually similar to [BoxFit.contain].
+  ///
+  /// ## Examples
+  ///
+  /// The examples below show how [ResizeImagePolicy.fit] works in various
+  /// scenarios. In each example, the source image has a size of 300x200
+  /// (landscape orientation), the red box is a 150x150 square, and the green
+  /// box is a 400x400 square.
+  ///
+  /// <table>
+  /// <tr>
+  /// <td>Scenario</td>
+  /// <td>Output</td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   width: 150,
+  ///   height: 150,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_150x150_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   width: 150,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_150xnull_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   height: 150,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_nullx150_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   width: 400,
+  ///   height: 400,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_400x400_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   width: 400,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_400xnull_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   height: 400,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_nullx400_false.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   width: 400,
+  ///   height: 400,
+  ///   allowUpscaling: true,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_400x400_true.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   width: 400,
+  ///   allowUpscaling: true,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_400xnull_true.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// <tr>
+  /// <td>
+  ///
+  /// ```dart
+  /// const ResizeImage(
+  ///   AssetImage('dragon_cake.jpg'),
+  ///   policy: ResizeImagePolicy.fit,
+  ///   height: 400,
+  ///   allowUpscaling: true,
+  /// )
+  /// ```
+  ///
+  /// </td>
+  /// <td>
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/painting/resize_image_policy_fit_nullx400_true.png)
+  ///
+  /// </td>
+  /// </tr>
+  /// </table>
+  fit,
 }
 
 /// Instructs Flutter to decode the image at the specified dimensions
@@ -881,10 +1279,13 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// The cached image will be directly decoded and stored at the resolution
   /// defined by `width` and `height`. The image will lose detail and
   /// use less memory if resized to a size smaller than the native size.
+  ///
+  /// At least one of `width` and `height` must be non-null.
   const ResizeImage(
     this.imageProvider, {
     this.width,
     this.height,
+    this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
   }) : assert(width != null || height != null);
 
@@ -892,10 +1293,19 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   final ImageProvider imageProvider;
 
   /// The width the image should decode to and cache.
+  ///
+  /// At least one of this and [height] must be non-null.
   final int? width;
 
   /// The height the image should decode to and cache.
+  ///
+  /// At least one of this and [width] must be non-null.
   final int? height;
+
+  /// The policy that determines how [width] and [height] are interpreted.
+  ///
+  /// Defaults to [ResizeImagePolicy.exact].
+  final ResizeImagePolicy policy;
 
   /// Whether the [width] and [height] parameters should be clamped to the
   /// intrinsic width and height of the image.
@@ -919,6 +1329,10 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
+  @Deprecated(
+    'Implement loadImage for faster image loading. '
+    'This feature was deprecated after v2.13.0-1.0.pre.',
+  )
   ImageStreamCompleter load(ResizeImageKey key, DecoderCallback decode) {
     Future<ui.Codec> decodeResize(Uint8List buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
@@ -936,6 +1350,10 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   @override
+  @Deprecated(
+    'Implement loadImage for image loading. '
+    'This feature was deprecated after v3.7.0-1.4.pre.',
+  )
   ImageStreamCompleter loadBuffer(ResizeImageKey key, DecoderBufferCallback decode) {
     Future<ui.Codec> decodeResize(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
       assert(
@@ -962,17 +1380,56 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
         'getTargetSize.',
       );
       return decode(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
-        int? targetWidth = width;
-        int? targetHeight = height;
-        if (!allowUpscaling) {
-          if (targetWidth != null && targetWidth > intrinsicWidth) {
-            targetWidth = intrinsicWidth;
-          }
-          if (targetHeight != null && targetHeight > intrinsicHeight) {
-            targetHeight = intrinsicHeight;
-          }
+        switch (policy) {
+          case ResizeImagePolicy.exact:
+            int? targetWidth = width;
+            int? targetHeight = height;
+
+            if (!allowUpscaling) {
+              if (targetWidth != null && targetWidth > intrinsicWidth) {
+                targetWidth = intrinsicWidth;
+              }
+              if (targetHeight != null && targetHeight > intrinsicHeight) {
+                targetHeight = intrinsicHeight;
+              }
+            }
+
+            return ui.TargetImageSize(width: targetWidth, height: targetHeight);
+          case ResizeImagePolicy.fit:
+            final double aspectRatio = intrinsicWidth / intrinsicHeight;
+            final int maxWidth = width ?? intrinsicWidth;
+            final int maxHeight = height ?? intrinsicHeight;
+            int targetWidth = intrinsicWidth;
+            int targetHeight = intrinsicHeight;
+
+            if (targetWidth > maxWidth) {
+              targetWidth = maxWidth;
+              targetHeight = targetWidth ~/ aspectRatio;
+            }
+
+            if (targetHeight > maxHeight) {
+              targetHeight = maxHeight;
+              targetWidth = (targetHeight * aspectRatio).floor();
+            }
+
+            if (allowUpscaling) {
+              if (width == null) {
+                assert(height != null);
+                targetHeight = height!;
+                targetWidth = (targetHeight * aspectRatio).floor();
+              } else if (height == null) {
+                targetWidth = width!;
+                targetHeight = targetWidth ~/ aspectRatio;
+              } else {
+                final int derivedMaxWidth = (maxHeight * aspectRatio).floor();
+                final int derivedMaxHeight = maxWidth ~/ aspectRatio;
+                targetWidth = math.min(maxWidth, derivedMaxWidth);
+                targetHeight = math.min(maxHeight, derivedMaxHeight);
+              }
+            }
+
+            return ui.TargetImageSize(width: targetWidth, height: targetHeight);
         }
-        return ui.TargetImageSize(width: targetWidth, height: targetHeight);
       });
     }
 
@@ -993,10 +1450,10 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       if (completer == null) {
         // This future has completed synchronously (completer was never assigned),
         // so we can directly create the synchronous result to return.
-        result = SynchronousFuture<ResizeImageKey>(ResizeImageKey._(key, width, height));
+        result = SynchronousFuture<ResizeImageKey>(ResizeImageKey._(key, policy, width, height, allowUpscaling));
       } else {
         // This future did not synchronously complete.
-        completer.complete(ResizeImageKey._(key, width, height));
+        completer.complete(ResizeImageKey._(key, policy, width, height, allowUpscaling));
       }
     });
     if (result != null) {

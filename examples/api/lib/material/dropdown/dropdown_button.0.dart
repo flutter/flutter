@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [DropdownButton].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [DropdownButton].
 
 const List<String> list = <String>['One', 'Two', 'Three', 'Four'];
 

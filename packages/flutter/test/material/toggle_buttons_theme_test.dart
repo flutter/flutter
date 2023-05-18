@@ -22,6 +22,12 @@ void main() {
     expect(const ToggleButtonsThemeData().hashCode, const ToggleButtonsThemeData().copyWith().hashCode);
   });
 
+  test('ToggleButtonsThemeData lerp special cases', () {
+    expect(ToggleButtonsThemeData.lerp(null, null, 0), null);
+    const ToggleButtonsThemeData data = ToggleButtonsThemeData();
+    expect(identical(ToggleButtonsThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ToggleButtonsThemeData defaults', () {
     const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
     expect(themeData.textStyle, null);

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ListTile].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ListTile].
 
 void main() => runApp(const ListTileApp());
 
@@ -14,7 +14,7 @@ class ListTileApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(useMaterial3: true),
       home: const ListTileExample(),
     );
   }

@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'actions.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -34,7 +34,7 @@ import 'text_editing_intents.dart';
 /// ```dart
 /// @override
 /// Widget build(BuildContext context) {
-///   // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
+///   // If using WidgetsApp or its descendants MaterialApp or CupertinoApp,
 ///   // then DefaultTextEditingShortcuts is already being inserted into the
 ///   // widget tree.
 ///   return const DefaultTextEditingShortcuts(
@@ -89,7 +89,7 @@ import 'text_editing_intents.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
+///     // If using WidgetsApp or its descendants MaterialApp or CupertinoApp,
 ///     // then DefaultTextEditingShortcuts is already being inserted into the
 ///     // widget tree.
 ///     return DefaultTextEditingShortcuts(
@@ -206,6 +206,9 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
+
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, control: true): const ExtendSelectionToNextParagraphBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, control: true): const ExtendSelectionToNextParagraphBoundaryIntent(forward: true, collapseSelection: false),
 
     // Page Up / Down: Move selection by page.
     const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),

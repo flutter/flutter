@@ -125,7 +125,7 @@ void main() {
           // Measure the delta in rotation.
           // Check that it never grows by more than a safe amount.
           //
-          // Note that there may be multiple transitions all active at
+          // There may be multiple transitions all active at
           // the same time. We are concerned only with the closest one.
           final Iterable<RotationTransition> rotationTransitions = tester.widgetList(
             find.byType(RotationTransition),
@@ -1742,11 +1742,9 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
       case TextDirection.rtl:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
-        break;
       case TextDirection.ltr:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
         fabX = startPadding;
-        break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return Offset(fabX, fabY);

@@ -232,7 +232,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         }
         _performanceModeRequestHandle?.dispose();
         _performanceModeRequestHandle = null;
-        break;
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
         if (overlayEntries.isNotEmpty) {
@@ -241,7 +240,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
         _performanceModeRequestHandle ??=
           SchedulerBinding.instance
             .requestPerformanceMode(ui.DartPerformanceMode.latency);
-        break;
       case AnimationStatus.dismissed:
         // We might still be an active route if a subclass is controlling the
         // transition and hits the dismissed status. For example, the iOS
@@ -253,7 +251,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           _performanceModeRequestHandle?.dispose();
           _performanceModeRequestHandle = null;
         }
-        break;
     }
   }
 
@@ -371,7 +368,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
                   _trainHoppingListenerRemover!();
                   _trainHoppingListenerRemover = null;
                 }
-                break;
               case AnimationStatus.forward:
               case AnimationStatus.reverse:
                 break;
@@ -1503,7 +1499,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
-      if (await callback() != true) {
+      // TODO(goderbauer): Tests using the Component Framework in google3 insist on returning
+      //   null for mocked out WillPopCallbacks. Fix that to remove ignore.
+      if (await callback() != true) { // ignore: no_literal_bool_comparisons
         return RoutePopDisposition.doNotPop;
       }
     }
@@ -1959,7 +1957,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
 ///
 /// This is used with [RouteObserver] to make a widget aware of changes to the
 /// [Navigator]'s session history.
-abstract class RouteAware {
+abstract mixin class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.
   void didPopNext() { }

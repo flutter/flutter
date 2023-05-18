@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
@@ -16,7 +17,7 @@ void main() {
 
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -25,7 +26,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
     await tester.pumpWidget(
@@ -57,19 +58,16 @@ void main() {
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(DesktopTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(TextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
         expect(find.byType(DesktopTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
       case TargetPlatform.macOS:
         expect(find.byType(TextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(DesktopTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsOneWidget);
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
@@ -77,14 +75,13 @@ void main() {
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(DesktopTextSelectionToolbar), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgets('Can build children directly as well', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can build children directly as well', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -107,7 +104,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -158,24 +155,20 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(find.byType(TextSelectionToolbarTextButton), findsOneWidget);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
-        break;
       case TargetPlatform.macOS:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('Can build for editable text from raw parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can build for editable text from raw parameters', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -207,20 +200,16 @@ void main() {
       case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(4));
-        break;
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(4));
-        break;
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -228,7 +217,7 @@ void main() {
   );
 
   group('buttonItems', () {
-    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
@@ -291,10 +280,8 @@ void main() {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-          break;
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
-          break;
       }
 
       // With text and selection.
@@ -316,18 +303,16 @@ void main() {
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
-          break;
       }
     },
       variant: TargetPlatformVariant.all(),
       skip: kIsWeb, // [intended]
     );
 
-    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
       const String buttonText = 'Click me';
 
       await tester.pumpWidget(
@@ -365,26 +350,22 @@ void main() {
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-          break;
         case TargetPlatform.iOS:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-          break;
         case TargetPlatform.macOS:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-          break;
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
           expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
           expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-          break;
       }
     },
       variant: TargetPlatformVariant.all(),

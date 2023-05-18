@@ -718,10 +718,8 @@ class ToggleButtons extends StatelessWidget {
           }
           assert(minPaddingSize.width >= 0.0);
           assert(minPaddingSize.height >= 0.0);
-          break;
         case MaterialTapTargetSize.shrinkWrap:
           minPaddingSize = Size.zero;
-          break;
       }
 
       Widget button = _SelectToggleButton(
@@ -894,20 +892,24 @@ class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   @override
   Color? resolve(Set<MaterialState> states) {
     if (selected) {
-      if (states.contains(MaterialState.hovered)) {
-        return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
-      } else if (states.contains(MaterialState.focused)) {
-        return focusColor ?? colorScheme?.primary.withOpacity(0.12);
-      } else if (states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed)) {
         return splashColor ?? colorScheme?.primary.withOpacity(0.16);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusColor ?? colorScheme?.primary.withOpacity(0.12);
+      }
     } else if (unselected) {
+      if (states.contains(MaterialState.pressed)) {
+        return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
+      }
       if (states.contains(MaterialState.hovered)) {
         return hoverColor ?? colorScheme?.onSurface.withOpacity(0.04);
-      } else if (states.contains(MaterialState.focused)) {
+      }
+      if (states.contains(MaterialState.focused)) {
         return focusColor ?? colorScheme?.onSurface.withOpacity(0.12);
-      } else if (states.contains(MaterialState.pressed)) {
-        return splashColor ?? highlightColor ?? colorScheme?.onSurface.withOpacity(0.16);
       }
     }
     return null;
@@ -1188,19 +1190,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       switch (textDirection) {
         case TextDirection.ltr:
           childParentData.offset = Offset(leadingBorderSide.width, borderSide.width);
-          break;
         case TextDirection.rtl:
           childParentData.offset = Offset(trailingBorderSide.width, borderSide.width);
-          break;
       }
     } else {
       switch (verticalDirection) {
         case VerticalDirection.down:
           childParentData.offset = Offset(borderSide.width, leadingBorderSide.width);
-          break;
         case VerticalDirection.up:
           childParentData.offset = Offset(borderSide.width, trailingBorderSide.width);
-          break;
       }
     }
   }
@@ -1354,7 +1352,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.right - rrect.trRadiusX, rrect.bottom);
             context.canvas.drawPath(horizontalPaths, horizontalPaint);
           }
-          break;
         case TextDirection.rtl:
           if (isLastButton) {
             final Path leadingPath = Path();
@@ -1394,7 +1391,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.left - rrect.tlRadiusX, rrect.bottom);
             context.canvas.drawPath(horizontalPaths, horizontalPaint);
           }
-          break;
       }
     } else {
       switch (verticalDirection) {
@@ -1437,7 +1433,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom);
             context.canvas.drawPath(paths, paint);
           }
-          break;
         case VerticalDirection.up:
           if (isLastButton) {
             final Path bottomPath = Path();
@@ -1477,7 +1472,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom - leadingBorderSide.width);
             context.canvas.drawPath(paths, paint);
           }
-          break;
       }
     }
   }

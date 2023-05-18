@@ -227,6 +227,14 @@ void main() {
     expect(_indicatorDecoration(tester)?.color, indicatorColor);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/118618.
+  testWidgets('NavigationRailThemeData lerps correctly with null iconThemes', (WidgetTester tester) async {
+    final NavigationRailThemeData lerp = NavigationRailThemeData.lerp(const NavigationRailThemeData(), const NavigationRailThemeData(), 0.5)!;
+
+    expect(lerp.selectedIconTheme, isNull);
+    expect(lerp.unselectedIconTheme, isNull);
+  });
+
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData().debugFillProperties(builder);

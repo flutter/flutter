@@ -51,7 +51,7 @@ void main() {
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys,
-        unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.bin'])
+        unorderedEquals(<String>['AssetManifest.json', 'AssetManifest.smcbin'])
       );
       const String expectedJsonAssetManifest = '{}';
       const Map<Object, Object> expectedBinAssetManifest = <Object, Object>{};
@@ -60,10 +60,55 @@ void main() {
         expectedJsonAssetManifest,
       );
       expect(
-        const StandardMessageCodec().decodeMessage(ByteData.sublistView(Uint8List.fromList(await bundle.entries['AssetManifest.bin']!.contentsAsBytes()))),
+        const StandardMessageCodec().decodeMessage(ByteData.sublistView(Uint8List.fromList(await bundle.entries['AssetManifest.smcbin']!.contentsAsBytes()))),
         expectedBinAssetManifest
       );
 
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('wildcard directories do not include subdirectories', () async {
+      globals.fs.file('.packages').createSync();
+      globals.fs.file('pubspec.yaml').writeAsStringSync(
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/foo/
+    - assets/bar/lizard.png
+'''
+      );
+
+      final List<String> assets = <String>[
+        'assets/foo/dog.png',
+        'assets/foo/sub/cat.png',
+        'assets/bar/lizard.png',
+        'assets/bar/sheep.png'
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = globals.fs.file(
+          globals.fs.path.joinAll(asset.split('/'))
+        );
+        assetFile.createSync(recursive: true);
+      }
+
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(packagesPath: '.packages');
+
+      expect(bundle.entries.keys, unorderedEquals(<String>[
+        'AssetManifest.json',
+        'AssetManifest.smcbin',
+        'FontManifest.json',
+        'NOTICES.Z',
+        'assets/foo/dog.png',
+        'assets/bar/lizard.png'
+      ]));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -83,7 +128,7 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+        'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       // Simulate modifying the files by updating the filestat time manually.
       globals.fs.file(globals.fs.path.join('assets', 'foo', 'fizz.txt'))
         ..createSync(recursive: true)
@@ -92,7 +137,7 @@ flutter:
       expect(bundle.needsBuild(), true);
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-          'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt',
+          'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt',
           'assets/foo/fizz.txt']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -113,7 +158,7 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+        'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       expect(bundle.needsBuild(), false);
 
       // Delete the wildcard directory and update pubspec file.
@@ -135,7 +180,7 @@ name: example''')
       expect(bundle.needsBuild(), true);
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+        'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -159,7 +204,7 @@ flutter:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+        'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -192,7 +237,7 @@ flutter:
       ).createBundle();
       await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
       expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
+        'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z', 'assets/foo/bar.txt']));
       expect(bundle.deferredComponentsEntries.length, 1);
       expect(bundle.deferredComponentsEntries['component1']!.length, 2);
       expect(bundle.needsBuild(), false);
@@ -223,7 +268,7 @@ flutter:
       await bundle.build(packagesPath: '.packages');
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
         'assets/bar/barbie.txt', 'assets/wild/dash.txt', 'AssetManifest.json',
-        'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+        'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z']));
       expect(bundle.deferredComponentsEntries.isEmpty, true);
       expect(bundle.needsBuild(), false);
     }, overrides: <Type, Generator>{
@@ -257,7 +302,7 @@ flutter:
       ).createBundle();
       await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
-        'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+        'AssetManifest.json', 'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z']));
       expect(bundle.deferredComponentsEntries.length, 1);
       expect(bundle.deferredComponentsEntries['component1']!.length, 2);
       expect(bundle.needsBuild(), false);
@@ -271,7 +316,7 @@ flutter:
       await bundle.build(packagesPath: '.packages', deferredComponentsEnabled: true);
 
       expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo/bar.txt',
-        'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+        'AssetManifest.json', 'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z']));
       expect(bundle.deferredComponentsEntries.length, 1);
       expect(bundle.deferredComponentsEntries['component1']!.length, 3);
     }, overrides: <Type, Generator>{
@@ -618,7 +663,7 @@ flutter:
     await bundle.build(packagesPath: '.packages');
 
       expect(bundle.entries.keys, unorderedEquals(<String>['packages/foo/bar/fizz.txt',
-        'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+        'AssetManifest.json', 'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z']));
     expect(bundle.needsBuild(), false);
 
     // Does not track dependency's wildcard directories.
@@ -754,7 +799,7 @@ flutter:
 
     expect(await bundle.build(packagesPath: '.packages'), 0);
     expect(bundle.entries.keys, unorderedEquals(<String>['assets/foo.txt',
-      'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json', 'NOTICES.Z']));
+      'AssetManifest.json', 'AssetManifest.smcbin', 'FontManifest.json', 'NOTICES.Z']));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),

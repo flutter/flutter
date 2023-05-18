@@ -168,7 +168,7 @@ class ManifestAssetBundle implements AssetBundle {
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const double _defaultResolution = 1.0;
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
-  static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
+  static const String _kAssetManifestBinFilename = 'AssetManifest.smcbin';
 
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension
@@ -907,22 +907,6 @@ class ManifestAssetBundle implements AssetBundle {
         uri,
         packageName: packageName,
         attributedPackage: attributedPackage,
-      );
-    }
-
-    final Iterable<Directory> nonVariantSubDirectories = entities
-      .whereType<Directory>()
-      .where((Directory directory) => !_assetVariantDirectoryRegExp.hasMatch(directory.basename));
-    for (final Directory dir in nonVariantSubDirectories) {
-      final String relativePath = _fileSystem.path.relative(dir.path, from: assetBase);
-      final Uri relativePathsUri = Uri.directory(relativePath, windows: _platform.isWindows);
-
-      _parseAssetsFromFolder(packageConfig,
-        flutterManifest,
-        assetBase,
-        cache,
-        result,
-        relativePathsUri
       );
     }
   }

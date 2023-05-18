@@ -211,10 +211,10 @@ class MediaQueryData {
       devicePixelRatio = view.devicePixelRatio,
       textScaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor,
       platformBrightness = platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
-      padding = EdgeInsets.fromWindowPadding(view.padding, view.devicePixelRatio),
-      viewPadding = EdgeInsets.fromWindowPadding(view.viewPadding, view.devicePixelRatio),
-      viewInsets = EdgeInsets.fromWindowPadding(view.viewInsets, view.devicePixelRatio),
-      systemGestureInsets = EdgeInsets.fromWindowPadding(view.systemGestureInsets, view.devicePixelRatio),
+      padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
+      viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
+      viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio),
       accessibleNavigation = platformData?.accessibleNavigation ?? view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
       invertColors = platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
       disableAnimations = platformData?.disableAnimations ?? view.platformDispatcher.accessibilityFeatures.disableAnimations,
@@ -298,7 +298,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this property
+  ///  * [FlutterView], which provides some additional detail about this property
   ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
@@ -317,7 +317,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [viewInsets] and [viewPadding].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
@@ -341,7 +341,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
@@ -1350,92 +1350,74 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             if (data.size != oldWidget.data.size) {
               return true;
             }
-            break;
           case _MediaQueryAspect.orientation:
             if (data.orientation != oldWidget.data.orientation) {
               return true;
             }
-            break;
           case _MediaQueryAspect.devicePixelRatio:
             if (data.devicePixelRatio != oldWidget.data.devicePixelRatio) {
               return true;
             }
-            break;
           case _MediaQueryAspect.textScaleFactor:
             if (data.textScaleFactor != oldWidget.data.textScaleFactor) {
               return true;
             }
-            break;
           case _MediaQueryAspect.platformBrightness:
             if (data.platformBrightness != oldWidget.data.platformBrightness) {
               return true;
             }
-            break;
           case _MediaQueryAspect.padding:
             if (data.padding != oldWidget.data.padding) {
               return true;
             }
-            break;
           case _MediaQueryAspect.viewInsets:
             if (data.viewInsets != oldWidget.data.viewInsets) {
               return true;
             }
-            break;
           case _MediaQueryAspect.systemGestureInsets:
             if (data.systemGestureInsets != oldWidget.data.systemGestureInsets) {
               return true;
             }
-            break;
           case _MediaQueryAspect.viewPadding:
             if (data.viewPadding != oldWidget.data.viewPadding) {
               return true;
             }
-            break;
           case _MediaQueryAspect.alwaysUse24HourFormat:
             if (data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat) {
               return true;
             }
-            break;
           case _MediaQueryAspect.accessibleNavigation:
             if (data.accessibleNavigation != oldWidget.data.accessibleNavigation) {
               return true;
             }
-            break;
           case _MediaQueryAspect.invertColors:
             if (data.invertColors != oldWidget.data.invertColors) {
               return true;
             }
-            break;
           case _MediaQueryAspect.highContrast:
             if (data.highContrast != oldWidget.data.highContrast) {
               return true;
             }
-            break;
           case _MediaQueryAspect.disableAnimations:
             if (data.disableAnimations != oldWidget.data.disableAnimations) {
               return true;
             }
-            break;
           case _MediaQueryAspect.boldText:
             if (data.boldText != oldWidget.data.boldText) {
               return true;
             }
-            break;
           case _MediaQueryAspect.navigationMode:
             if (data.navigationMode != oldWidget.data.navigationMode) {
               return true;
             }
-            break;
           case _MediaQueryAspect.gestureSettings:
             if (data.gestureSettings != oldWidget.data.gestureSettings) {
               return true;
             }
-            break;
           case _MediaQueryAspect.displayFeatures:
             if (data.displayFeatures != oldWidget.data.displayFeatures) {
               return true;
             }
-            break;
         }
       }
     }

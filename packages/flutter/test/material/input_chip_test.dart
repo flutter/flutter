@@ -13,9 +13,10 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
+  bool useMaterial3 = false,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -26,10 +27,14 @@ Widget wrapForChip({
   );
 }
 
-Widget selectedInputChip({ Color? checkmarkColor }) {
+Widget selectedInputChip({
+  Color? checkmarkColor,
+  bool enabled = false,
+}) {
   return InputChip(
     label: const Text('InputChip'),
     selected: true,
+    isEnabled: enabled,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
   );
@@ -41,9 +46,11 @@ Future<void> pumpCheckmarkChip(
   required Widget chip,
   Color? themeColor,
   Brightness brightness = Brightness.light,
+  bool useMaterial3 = false,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
+      useMaterial3: useMaterial3,
       brightness: brightness,
       child: Builder(
         builder: (BuildContext context) {
@@ -72,6 +79,15 @@ void expectCheckmarkColor(Finder finder, Color color) {
       ..rrect()
       // The second layer that is painted is the check mark.
       ..path(color: color),
+  );
+}
+
+RenderBox getMaterialBox(WidgetTester tester) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: find.byType(InputChip),
+      matching: find.byType(CustomPaint),
+    ),
   );
 }
 
@@ -237,5 +253,29 @@ void main() {
 
     await tester.pumpWidget(wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets('Input chip has correct selected color when enabled - M3 defaults', (WidgetTester tester) async {
+    final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
+    await pumpCheckmarkChip(
+      tester,
+      chip: selectedInputChip(enabled: true),
+      useMaterial3: true,
+    );
+
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..rrect(color: material3ChipDefaults.backgroundColor));
+  });
+
+  testWidgets('Input chip has correct selected color when disabled - M3 defaults', (WidgetTester tester) async {
+    final ChipThemeData material3ChipDefaults = ThemeData(useMaterial3: true).chipTheme;
+    await pumpCheckmarkChip(
+      tester,
+      chip: selectedInputChip(),
+      useMaterial3: true,
+    );
+
+    final RenderBox materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..path(color: material3ChipDefaults.disabledColor));
   });
 }

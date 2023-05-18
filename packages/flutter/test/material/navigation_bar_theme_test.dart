@@ -18,6 +18,12 @@ void main() {
     expect(const NavigationBarThemeData().hashCode, const NavigationBarThemeData().copyWith().hashCode);
   });
 
+  test('NavigationBarThemeData lerp special cases', () {
+    expect(NavigationBarThemeData.lerp(null, null, 0), null);
+    const NavigationBarThemeData data = NavigationBarThemeData();
+    expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);

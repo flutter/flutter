@@ -76,11 +76,9 @@ class RelativeRect {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
 
     return RelativeRect.fromLTRB(left, top, right, bottom);
@@ -165,8 +163,8 @@ class RelativeRect {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RelativeRect? lerp(RelativeRect? a, RelativeRect? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return RelativeRect.fromLTRB(b!.left * t, b.top * t, b.right * t, b.bottom * t);
@@ -566,13 +564,10 @@ class RenderStack extends RenderBox
     switch (fit) {
       case StackFit.loose:
         nonPositionedConstraints = constraints.loosen();
-        break;
       case StackFit.expand:
         nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-        break;
       case StackFit.passthrough:
         nonPositionedConstraints = constraints;
-        break;
     }
 
     RenderBox? child = firstChild;

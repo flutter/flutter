@@ -81,6 +81,8 @@ abstract class FlutterTestDriver {
       // intended only for use in local debugging.
       // ignore: avoid_print
       print('$time$_logPrefix$line');
+    } else {
+      printOnFailure('$time$_logPrefix$line');
     }
   }
 
@@ -194,10 +196,13 @@ abstract class FlutterTestDriver {
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
     await resume().timeout(defaultTimeout)
-        .catchError((Object e) {
-          _debugPrint('Ignoring failure to resume during shutdown');
-          return null;
-        });
+        .then(
+          (Isolate? isolate) => isolate,
+          onError: (Object e) {
+            _debugPrint('Ignoring failure to resume during shutdown');
+            return null;
+          },
+        );
 
     _debugPrint('Sending SIGTERM to $_processPid..');
     io.Process.killPid(_processPid!);
@@ -272,13 +277,13 @@ abstract class FlutterTestDriver {
   ///
   /// Returns a future that completes when the [kind] event is received.
   ///
-  /// Note that this method should be called before the command that triggers
+  /// This method should be called before the command that triggers
   /// the event to subscribe to the event in time, for example:
   ///
-  /// ```
-  ///  var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
-  ///  ...                                             // Code that pauses the app.
-  ///  await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
+  /// ```dart
+  /// var event = subscribeToDebugEvent('Pause', id); // Subscribe to 'pause' events.
+  /// ...                                             // Code that pauses the app.
+  /// await waitForDebugEvent('Pause', id, event);    // Isolate is paused now.
   /// ```
   Future<Event> subscribeToDebugEvent(String kind, String isolateId) {
     _debugPrint('Start listening for $kind events');
@@ -472,13 +477,16 @@ abstract class FlutterTestDriver {
     });
     final Future<T> future = callback().whenComplete(longWarning.cancel);
 
-    return future.catchError((Object error) {
-      if (!timeoutExpired) {
-        timeoutExpired = true;
-        _debugPrint(messages.toString());
-      }
-      throw error; // ignore: only_throw_errors
-    }).whenComplete(() => subscription.cancel());
+    return future.then(
+      (T t) => t,
+      onError: (Object error) {
+        if (!timeoutExpired) {
+          timeoutExpired = true;
+          _debugPrint(messages.toString());
+        }
+        throw error; // ignore: only_throw_errors
+      },
+    ).whenComplete(() => subscription.cancel());
   }
 }
 
@@ -490,6 +498,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   });
 
   String? _currentRunningAppId;
+  String? _currentRunningDeviceId;
+  String? _currentRunningMode;
+
+  String? get currentRunningDeviceId => _currentRunningDeviceId;
+  String? get currentRunningMode => _currentRunningMode;
 
   Future<void> run({
     bool withDebugger = false,
@@ -499,7 +512,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool expressionEvaluation = true,
     bool structuredErrors = false,
     bool singleWidgetReloads = false,
-    bool serveObservatory = true,
+    bool serveObservatory = false,
     String? script,
     List<String>? additionalCommandArgs,
   }) async {
@@ -539,7 +552,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool startPaused = false,
     bool pauseOnExceptions = false,
     bool singleWidgetReloads = false,
-    bool serveObservatory = true,
+    bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
     _attachPort = port;
@@ -605,6 +618,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
         // Set this up now, but we don't wait it yet. We want to make sure we don't
         // miss it while waiting for debugPort below.
+        final Future<Map<String, Object?>> start = _waitFor(event: 'app.start', timeout: appStartTimeout);
         final Future<Map<String, Object?>> started = _waitFor(event: 'app.started', timeout: appStartTimeout);
 
         if (withDebugger) {
@@ -624,9 +638,13 @@ class FlutterRunTestDriver extends FlutterTestDriver {
           _attachPort = attachPort;
         }
 
-        // Now await the started event; if it had already happened the future will
+        // Now await the start/started events; if it had already happened the future will
         // have already completed.
-        _currentRunningAppId = ((await started)['params'] as Map<String, Object?>?)?['appId'] as String?;
+        final Map<String, Object?>? startParams = (await start)['params'] as Map<String, Object?>?;
+        final Map<String, Object?>? startedParams = (await started)['params'] as Map<String, Object?>?;
+        _currentRunningAppId = startedParams?['appId'] as String?;
+        _currentRunningDeviceId = startParams?['deviceId'] as String?;
+        _currentRunningMode = startParams?['mode'] as String?;
         prematureExitGuard.complete();
       } on Exception catch (error, stackTrace) {
         prematureExitGuard.completeError(Exception(error.toString()), stackTrace);
@@ -806,7 +824,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     if (withDebugger) {
       final Map<String, Object?> startedProcessParams =
           (await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout))['params']! as Map<String, Object?>;
-      final String vmServiceHttpString = startedProcessParams['observatoryUri']! as String;
+      final String vmServiceHttpString = startedProcessParams['vmServiceUri']! as String;
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       // Allow us to run code before we start, eg. to set up breakpoints.

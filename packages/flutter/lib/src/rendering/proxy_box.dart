@@ -53,8 +53,10 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 ///
 /// Use this mixin in situations where the proxying behavior
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
-/// impractical (e.g. because you want to mix in other classes as well).
-// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/31543 is fixed
+/// impractical (e.g. because you want to inherit from a different class).
+///
+/// If a class already inherits from [RenderProxyBox] and also uses this mixin,
+/// you can safely delete the use of the mixin.
 @optionalTypeArgs
 mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChildMixin<T> {
   @override
@@ -1095,7 +1097,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 ///
 /// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
 /// than a [double] to control the opacity.
-class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, RenderAnimatedOpacityMixin<RenderBox> {
+class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMixin<RenderBox> {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.
@@ -2015,7 +2017,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final Rect offsetBounds = offsetRRect.outerRect;
     final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
     bool paintShadows = true;
     assert(() {
@@ -2036,14 +2037,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
-      // The drawShadow call doesn't add the region of the shadow to the
-      // picture's bounds, so we draw a hardcoded amount of extra space to
-      // account for the maximum potential area of the shadow.
-      // TODO(jsimmons): remove this when Skia does it for us.
-      canvas.drawRect(
-        offsetBounds.inflate(20.0),
-        _transparentPaint,
-      );
       canvas.drawShadow(
         offsetRRectAsPath,
         shadowColor,
@@ -2766,7 +2759,6 @@ class RenderFittedBox extends RenderProxyBox {
           final BoxConstraints sizeConstraints = constraints.loosen();
           final Size unconstrainedSize = sizeConstraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
           size = constraints.constrain(unconstrainedSize);
-          break;
         case BoxFit.contain:
         case BoxFit.cover:
         case BoxFit.fill:
@@ -2774,7 +2766,6 @@ class RenderFittedBox extends RenderProxyBox {
         case BoxFit.fitWidth:
         case BoxFit.none:
           size = constraints.constrainSizeAndAttemptToPreserveAspectRatio(child!.size);
-          break;
       }
       _clearPaintData();
     } else {
@@ -3572,9 +3563,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
 /// as usual. It just cannot be the target of located events, because its render
 /// object returns false from [hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools). If
-/// [ignoringSemantics] is null, it uses the value of [ignoring].
+/// {@macro flutter.widgets.IgnorePointer.Semantics}
 ///
 /// See also:
 ///
@@ -3583,11 +3572,14 @@ class RenderRepaintBoundary extends RenderProxyBox {
 class RenderIgnorePointer extends RenderProxyBox {
   /// Creates a render object that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   RenderIgnorePointer({
     RenderBox? child,
     bool ignoring = true,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     bool? ignoringSemantics,
   }) : _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics,
@@ -3597,6 +3589,8 @@ class RenderIgnorePointer extends RenderProxyBox {
   ///
   /// Regardless of whether this render object is ignored during hit testing, it
   /// will still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   bool get ignoring => _ignoring;
   bool _ignoring;
   set ignoring(bool value) {
@@ -3604,55 +3598,60 @@ class RenderIgnorePointer extends RenderProxyBox {
       return;
     }
     _ignoring = value;
-    if (_ignoringSemantics == null || !_ignoringSemantics!) {
+    if (ignoringSemantics == null) {
       markNeedsSemanticsUpdate();
     }
   }
 
   /// Whether the semantics of this render object is ignored when compiling the semantics tree.
   ///
-  /// If null, defaults to value of [ignoring].
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   bool? get ignoringSemantics => _ignoringSemantics;
   bool? _ignoringSemantics;
   set ignoringSemantics(bool? value) {
     if (value == _ignoringSemantics) {
       return;
     }
-    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
     _ignoringSemantics = value;
-    if (oldEffectiveValue != _effectiveIgnoringSemantics) {
-      markNeedsSemanticsUpdate();
-    }
+    markNeedsSemanticsUpdate();
   }
-
-  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     return !ignoring && super.hitTest(result, position: position);
   }
 
-  // TODO(ianh): figure out a way to still include labels and flags in
-  // descendants, just make them non-interactive, even when
-  // _effectiveIgnoringSemantics is true
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && !_effectiveIgnoringSemantics) {
-      visitor(child!);
+    if (_ignoringSemantics ?? false) {
+      return;
     }
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    // Do not block user interactions if _ignoringSemantics is false; otherwise,
+    // delegate to _ignoring
+    config.isBlockingUserActions = _ignoring && (_ignoringSemantics ?? true);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
+    properties.add(DiagnosticsProperty<bool>('ignoring', _ignoring));
     properties.add(
       DiagnosticsProperty<bool>(
         'ignoringSemantics',
-        _effectiveIgnoringSemantics,
-        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+        _ignoringSemantics,
+        description: _ignoringSemantics == null ? null : 'implicitly $_ignoringSemantics',
       ),
     );
   }
@@ -3807,6 +3806,8 @@ class RenderOffstage extends RenderProxyBox {
 /// its children from being the target of located events, because its render
 /// object returns true from [hitTest].
 ///
+/// {@macro flutter.widgets.AbsorbPointer.Semantics}
+///
 /// See also:
 ///
 ///  * [RenderIgnorePointer], which has the opposite effect: removing the
@@ -3818,6 +3819,10 @@ class RenderAbsorbPointer extends RenderProxyBox {
   RenderAbsorbPointer({
     RenderBox? child,
     bool absorbing = true,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     bool? ignoringSemantics,
   }) : _absorbing = absorbing,
        _ignoringSemantics = ignoringSemantics,
@@ -3828,6 +3833,8 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// Regardless of whether this render object absorbs pointers during hit
   /// testing, it will still consume space during layout and be visible during
   /// painting.
+  ///
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
   bool get absorbing => _absorbing;
   bool _absorbing;
   set absorbing(bool value) {
@@ -3840,25 +3847,25 @@ class RenderAbsorbPointer extends RenderProxyBox {
     }
   }
 
-  /// Whether the semantics of this render object is ignored when compiling the semantics tree.
+  /// Whether the semantics of this render object is ignored when compiling the
+  /// semantics tree.
   ///
-  /// If null, defaults to value of [absorbing].
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   bool? get ignoringSemantics => _ignoringSemantics;
   bool? _ignoringSemantics;
   set ignoringSemantics(bool? value) {
     if (value == _ignoringSemantics) {
       return;
     }
-    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
     _ignoringSemantics = value;
-    if (oldEffectiveValue != _effectiveIgnoringSemantics) {
-      markNeedsSemanticsUpdate();
-    }
+    markNeedsSemanticsUpdate();
   }
-
-  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
@@ -3869,9 +3876,18 @@ class RenderAbsorbPointer extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && !_effectiveIgnoringSemantics) {
-      visitor(child!);
+    if (_ignoringSemantics ?? false) {
+      return;
     }
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    // Do not block user interactions if _ignoringSemantics is false; otherwise,
+    // delegate to absorbing
+    config.isBlockingUserActions = absorbing && (_ignoringSemantics ?? true);
   }
 
   @override
@@ -3881,8 +3897,8 @@ class RenderAbsorbPointer extends RenderProxyBox {
     properties.add(
       DiagnosticsProperty<bool>(
         'ignoringSemantics',
-        _effectiveIgnoringSemantics,
-        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+        ignoringSemantics,
+        description: ignoringSemantics == null ? null : 'implicitly $ignoringSemantics',
       ),
     );
   }
@@ -4120,10 +4136,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
+    bool blockUserActions = false,
     TextDirection? textDirection,
   })  : _container = container,
         _explicitChildNodes = explicitChildNodes,
         _excludeSemantics = excludeSemantics,
+        _blockUserActions = blockUserActions,
         _textDirection = textDirection,
         _properties = properties,
         super(child) {
@@ -4195,6 +4213,21 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     }
     _excludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether to block user interactions for the semantics subtree.
+  ///
+  /// Setting this true prevents user from activating pointer related
+  /// [SemanticsAction]s, such as [SemanticsAction.tap] or
+  /// [SemanticsAction.longPress].
+  bool get blockUserActions => _blockUserActions;
+  bool _blockUserActions;
+  set blockUserActions(bool value) {
+    if (_blockUserActions == value) {
+      return;
+    }
+    _blockUserActions = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4274,6 +4307,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
+    config.isBlockingUserActions = blockUserActions;
     assert(
       ((_properties.scopesRoute ?? false) && explicitChildNodes) || !(_properties.scopesRoute ?? false),
       'explicitChildNodes must be set to true if scopes route is true',

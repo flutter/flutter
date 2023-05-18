@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Markera alla",
   "tabSemanticsLabel": "Flik $tabIndex av $tabCount",
   "modalBarrierDismissLabel": "Stäng",
-  "searchTextFieldPlaceholderLabel": "Sök"
+  "searchTextFieldPlaceholderLabel": "Sök",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

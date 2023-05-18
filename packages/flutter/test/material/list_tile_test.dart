@@ -1882,10 +1882,10 @@ void main() {
     expect(iconColor(trailingKey), colorScheme.primary);
 
     await tester.pumpWidget(buildFrame(selected: false));
-    expect(iconColor(leadingKey), colorScheme.onSurface);
-    expect(iconColor(titleKey), colorScheme.onSurface);
-    expect(iconColor(subtitleKey), colorScheme.onSurface);
-    expect(iconColor(trailingKey), colorScheme.onSurface);
+    expect(iconColor(leadingKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(titleKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(subtitleKey), colorScheme.onSurfaceVariant);
+    expect(iconColor(trailingKey), colorScheme.onSurfaceVariant);
   });
 
   testWidgets('ListTile font size', (WidgetTester tester) async {
@@ -1998,6 +1998,7 @@ void main() {
       horizontalTitleGap: 4.0,
       minVerticalPadding: 2.0,
       minLeadingWidth: 6.0,
+      titleAlignment: ListTileTitleAlignment.bottom,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -2035,6 +2036,7 @@ void main() {
         'horizontalTitleGap: 4.0',
         'minVerticalPadding: 2.0',
         'minLeadingWidth: 6.0',
+        'titleAlignment: ListTileTitleAlignment.bottom',
       ]),
     );
   });
@@ -2220,6 +2222,260 @@ void main() {
 
     await tester.pumpWidget(buildFrame(useMaterial3: true));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const double leadingHeight = 24.0;
+    const double titleHeight = 50.0;
+    const double trailingHeight = 24.0;
+    const double minVerticalPadding = 10.0;
+    const double tileHeight = minVerticalPadding * 2 + titleHeight;
+
+    Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: titleAlignment,
+              minVerticalPadding: minVerticalPadding,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: leadingHeight),
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: trailingHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // If the tile height is less than 72.0 pixels, the leading widget is placed
+    // 16.0 pixels below the top of the title widget, and the trailing is centered
+    // vertically in the tile.
+    const double titlePosition = 16.0;
+    expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget.
+    const double topPosition = minVerticalPadding;
+    expect(leadingOffset.dy - tileOffset.dy, topPosition);
+    expect(trailingOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    const double bottomPosition = tileHeight - minVerticalPadding - leadingHeight;
+    expect(leadingOffset.dy - tileOffset.dy, bottomPosition);
+    expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
+  });
+
+  testWidgets('titleAlignment position with title and subtitle widgets', (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const double leadingHeight = 24.0;
+    const double titleHeight = 50.0;
+    const double subtitleHeight = 50.0;
+    const double trailingHeight = 24.0;
+    const double minVerticalPadding = 10.0;
+    const double tileHeight = minVerticalPadding * 2 + titleHeight + subtitleHeight;
+
+    Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: titleAlignment,
+              minVerticalPadding: minVerticalPadding,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: leadingHeight),
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: trailingHeight),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, the default title alignment is
+    // [ListTileTitleAlignment.threeLine], which positions the leading and
+    // trailing widgets center vertically in the tile if the [ListTile.isThreeLine]
+    // property is false.
+    await tester.pumpWidget(buildFrame());
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.threeLine] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile,
+    // If the [ListTile.isThreeLine] property is false.
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.titleHeight] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are positioned 16.0 pixels below the
+    // top of the title widget.
+    const double titlePosition = 16.0;
+    expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+    expect(trailingOffset.dy - tileOffset.dy, titlePosition);
+
+    // Test [ListTileTitleAlignment.top] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding below
+    // the top of the title widget.
+    const double topPosition = minVerticalPadding;
+    expect(leadingOffset.dy - tileOffset.dy, topPosition);
+    expect(trailingOffset.dy - tileOffset.dy, topPosition);
+
+    // Test [ListTileTitleAlignment.center] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are centered vertically in the tile.
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Test [ListTileTitleAlignment.bottom] alignment.
+    await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // Leading and trailing widgets are placed minVerticalPadding above
+    // the bottom of the subtitle widget.
+    const double bottomPosition = tileHeight - minVerticalPadding - leadingHeight;
+    expect(leadingOffset.dy - tileOffset.dy, bottomPosition);
+    expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
+  });
+
+  testWidgets("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
+    final Key leadingKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    const double leadingHeight = 24.0;
+    const double titleHeight = 50.0;
+    const double subtitleHeight = 50.0;
+    const double trailingHeight = 24.0;
+    const double minVerticalPadding = 10.0;
+    const double tileHeight = minVerticalPadding * 2 + titleHeight + subtitleHeight;
+
+    Widget buildFrame({ ListTileTitleAlignment? titleAlignment, bool isThreeLine = false }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: ListTile(
+              titleAlignment: titleAlignment,
+              minVerticalPadding: minVerticalPadding,
+              leading: SizedBox(key: leadingKey, width: 24.0, height: leadingHeight),
+              title: const SizedBox(width: 20.0, height: titleHeight),
+              subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+              trailing: SizedBox(key: trailingKey, width: 24.0, height: trailingHeight),
+              isThreeLine: isThreeLine,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If [ThemeData.useMaterial3] is true, then title alignment should
+    // default to [ListTileTitleAlignment.threeLine].
+    await tester.pumpWidget(buildFrame());
+    Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+    Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // By default, leading and trailing widgets are centered vertically
+    // in the tile.
+    const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
+    expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+    expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+    // Set [ListTile.isThreeLine] to true to update the alignment.
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    tileOffset = tester.getTopLeft(find.byType(ListTile));
+    leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+    trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+    // The leading and trailing widgets are placed minVerticalPadding
+    // to the top of the tile widget.
+    const double topPosition = minVerticalPadding;
+    expect(leadingOffset.dy - tileOffset.dy, topPosition);
+    expect(trailingOffset.dy - tileOffset.dy, topPosition);
   });
 
   group('Material 2', () {
@@ -3461,6 +3717,258 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Material), paints..rect(color: defaultColor));
+    });
+
+    testWidgets('titleAlignment position with title widget', (WidgetTester tester) async {
+      final Key leadingKey = GlobalKey();
+      final Key trailingKey = GlobalKey();
+      const double leadingHeight = 24.0;
+      const double titleHeight = 50.0;
+      const double trailingHeight = 24.0;
+      const double minVerticalPadding = 10.0;
+      const double tileHeight = minVerticalPadding * 2 + titleHeight;
+
+      Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: ListTile(
+                titleAlignment: titleAlignment,
+                minVerticalPadding: minVerticalPadding,
+                leading: SizedBox(key: leadingKey, width: 24.0, height: leadingHeight),
+                title: const SizedBox(width: 20.0, height: titleHeight),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: trailingHeight),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // If [ThemeData.useMaterial3] is false, the default title alignment is
+      // [ListTileTitleAlignment.titleHeight], If the tile height is less than
+      // 72.0 pixels, the leading is placed 16.0 pixels below the top of
+      // the title widget and the trailing is centered vertically in the tile.
+      await tester.pumpWidget(buildFrame());
+      Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+      Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are centered vertically in the tile.
+      const double titlePosition = 16.0;
+      const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
+      expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+      expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+      // Test [ListTileTitleAlignment.threeLine] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are centered vertically in the tile,
+      // If the [ListTile.isThreeLine] property is false.
+      expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+      expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+      // Test [ListTileTitleAlignment.titleHeight] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // If the tile height is less than 72.0 pixels, the leading is placed
+      // 16.0 pixels below the top of the tile widget, and the trailing is
+      // centered vertically in the tile.
+      expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+      expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+      // Test [ListTileTitleAlignment.top] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are placed minVerticalPadding below
+      // the top of the title widget.
+      const double topPosition = minVerticalPadding;
+      expect(leadingOffset.dy - tileOffset.dy, topPosition);
+      expect(trailingOffset.dy - tileOffset.dy, topPosition);
+
+      // Test [ListTileTitleAlignment.center] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are vertically centered in the tile.
+      expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+      expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+      // Test [ListTileTitleAlignment.bottom] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are placed minVerticalPadding above
+      // the bottom of the subtitle widget.
+      const double bottomPosition = tileHeight - minVerticalPadding - leadingHeight;
+      expect(leadingOffset.dy - tileOffset.dy, bottomPosition);
+      expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
+    });
+
+    testWidgets('titleAlignment position with title and subtitle widgets', (WidgetTester tester) async {
+      final Key leadingKey = GlobalKey();
+      final Key trailingKey = GlobalKey();
+      const double leadingHeight = 24.0;
+      const double titleHeight = 50.0;
+      const double subtitleHeight = 50.0;
+      const double trailingHeight = 24.0;
+      const double minVerticalPadding = 10.0;
+      const double tileHeight = minVerticalPadding * 2 + titleHeight + subtitleHeight;
+
+      Widget buildFrame({ ListTileTitleAlignment? titleAlignment }) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: ListTile(
+                titleAlignment: titleAlignment,
+                minVerticalPadding: minVerticalPadding,
+                leading: SizedBox(key: leadingKey, width: 24.0, height: leadingHeight),
+                title: const SizedBox(width: 20.0, height: titleHeight),
+                subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: trailingHeight),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // If [ThemeData.useMaterial3] is false, the default title alignment is
+      // [ListTileTitleAlignment.titleHeight], which positions the leading and
+      // trailing widgets 16.0 pixels below the top of the tile widget.
+      await tester.pumpWidget(buildFrame());
+      Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+      Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are positioned 16.0 pixels below the
+      // top of the tile widget.
+      const double titlePosition = 16.0;
+      expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+      expect(trailingOffset.dy - tileOffset.dy, titlePosition);
+
+      // Test [ListTileTitleAlignment.threeLine] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are vertically centered in the tile,
+      // If the [ListTile.isThreeLine] property is false.
+      const double centerPosition = (tileHeight / 2) - (leadingHeight / 2);
+      expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+      expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+      // Test [ListTileTitleAlignment.titleHeight] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.titleHeight));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are positioned 16.0 pixels below the
+      // top of the tile widget.
+      expect(leadingOffset.dy - tileOffset.dy, titlePosition);
+      expect(trailingOffset.dy - tileOffset.dy, titlePosition);
+
+      // Test [ListTileTitleAlignment.top] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.top));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are placed minVerticalPadding below
+      // the top of the tile widget.
+      const double topPosition = minVerticalPadding;
+      expect(leadingOffset.dy - tileOffset.dy, topPosition);
+      expect(trailingOffset.dy - tileOffset.dy, topPosition);
+
+      // Test [ListTileTitleAlignment.center] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.center));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are vertically centered in the tile.
+      expect(leadingOffset.dy - tileOffset.dy, centerPosition);
+      expect(trailingOffset.dy - tileOffset.dy, centerPosition);
+
+      // Test [ListTileTitleAlignment.bottom] alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.bottom));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // Leading and trailing widgets are placed minVerticalPadding above
+      // the bottom of the subtitle widget.
+      const double bottomPosition = tileHeight - minVerticalPadding - leadingHeight;
+      expect(leadingOffset.dy - tileOffset.dy, bottomPosition);
+      expect(trailingOffset.dy - tileOffset.dy, bottomPosition);
+    });
+
+    testWidgets("ListTile.isThreeLine updates ListTileTitleAlignment.threeLine's alignment", (WidgetTester tester) async {
+      final Key leadingKey = GlobalKey();
+      final Key trailingKey = GlobalKey();
+      const double leadingHeight = 24.0;
+      const double titleHeight = 50.0;
+      const double subtitleHeight = 50.0;
+      const double trailingHeight = 24.0;
+      const double minVerticalPadding = 10.0;
+      const double tileHeight = minVerticalPadding * 2 + titleHeight + subtitleHeight;
+
+      Widget buildFrame({ ListTileTitleAlignment? titleAlignment, bool isThreeLine = false }) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Center(
+              child: ListTile(
+                titleAlignment: titleAlignment,
+                minVerticalPadding: minVerticalPadding,
+                leading: SizedBox(key: leadingKey, width: 24.0, height: leadingHeight),
+                title: const SizedBox(width: 20.0, height: titleHeight),
+                subtitle: const SizedBox(width: 20.0, height: subtitleHeight),
+                trailing: SizedBox(key: trailingKey, width: 24.0, height: trailingHeight),
+                isThreeLine: isThreeLine,
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Set title alignment to threeLine.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine));
+      Offset tileOffset = tester.getTopLeft(find.byType(ListTile));
+      Offset leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      Offset trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // If title alignment is threeLine and [ListTile.isThreeLine] is false,
+      // leading and trailing widgets are centered vertically in the tile.
+      const double leadingTrailingPosition = (tileHeight / 2) - (leadingHeight / 2);
+      expect(leadingOffset.dy - tileOffset.dy, leadingTrailingPosition);
+      expect(trailingOffset.dy - tileOffset.dy, leadingTrailingPosition);
+
+      // Set [ListTile.isThreeLine] to true to update the alignment.
+      await tester.pumpWidget(buildFrame(titleAlignment: ListTileTitleAlignment.threeLine, isThreeLine: true));
+      tileOffset = tester.getTopLeft(find.byType(ListTile));
+      leadingOffset = tester.getTopLeft(find.byKey(leadingKey));
+      trailingOffset = tester.getTopRight(find.byKey(trailingKey));
+
+      // The leading and trailing widgets are placed minVerticalPadding
+      // to the top of the tile widget.
+      expect(leadingOffset.dy - tileOffset.dy, minVerticalPadding);
+      expect(trailingOffset.dy - tileOffset.dy, minVerticalPadding);
     });
   });
 }

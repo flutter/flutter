@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -339,7 +340,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     await licenseValidator.runLicenseManager();
-    expect(logger.errorText, contains(exceptionMessage));
+    expect(logger.traceText, contains(exceptionMessage));
     expect(processManager, hasNoRemainingExpectations);
   });
 
@@ -360,6 +361,42 @@ Review licenses that have not been accepted (y/N)?
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
+  });
+
+  testWithoutContext('runLicenseManager errors when sdkmanager exits non-zero', () async {
+    const String sdkManagerPath = '/foo/bar/sdkmanager';
+    sdk.sdkManagerPath = sdkManagerPath;
+    final BufferLogger logger = BufferLogger.test();
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[sdkManagerPath, '--licenses'],
+        exitCode: 1,
+        stderr: 'sdkmanager crash',
+      ),
+    );
+
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: logger,
+      userMessages: UserMessages(),
+      androidStudio: FakeAndroidStudio(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
+
+    await expectLater(
+      licenseValidator.runLicenseManager(),
+      throwsToolExit(
+        message: 'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "exited code 1"',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+    expect(logger.traceText, isEmpty);
+    expect(stdio.writtenToStdout, isEmpty);
+    expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
   testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
@@ -389,7 +426,7 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseMessage.message, UserMessages().androidSdkLicenseOnly(kAndroidHome));
   });
 
-  testWithoutContext('detects minimum required SDK and buildtools', () async {
+  testUsingContext('detects minimum required SDK and buildtools', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'which',
@@ -487,7 +524,7 @@ Review licenses that have not been accepted (y/N)?
     expect(cmdlineMessage.message, errorMessage);
   });
 
-  testWithoutContext('detects minimum required java version', () async {
+  testUsingContext('detects minimum required java version', () async {
     // Test with older version of JDK
     const String javaVersionText = 'openjdk version "1.7.0_212"';
     processManager.addCommand(const FakeCommand(
@@ -516,7 +553,7 @@ Review licenses that have not been accepted (y/N)?
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
@@ -539,7 +576,7 @@ Review licenses that have not been accepted (y/N)?
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();

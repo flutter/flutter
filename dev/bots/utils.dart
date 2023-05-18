@@ -12,7 +12,10 @@ import 'package:meta/meta.dart';
 
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
-final bool hasColor = stdout.supportsAnsiEscapes;
+// If running from LUCI set to False.
+final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
+final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
+
 
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
@@ -119,9 +122,17 @@ void resetErrorStatus() {
   _hideTimer = null;
 }
 
-Never reportErrorsAndExit() {
+Never reportSuccessAndExit(String message) {
   _hideTimer?.cancel();
   _hideTimer = null;
+  print('$clock $message$reset');
+  system.exit(0);
+}
+
+Never reportErrorsAndExit(String message) {
+  _hideTimer?.cancel();
+  _hideTimer = null;
+  print('$clock $message$reset');
   print(redLine);
   print('${red}For your convenience, the error messages reported above are repeated here:$reset');
   final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
@@ -143,7 +154,7 @@ void printProgress(String message) {
   _pendingLogs.clear();
   _hideTimer?.cancel();
   _hideTimer = null;
-  print('$clock $message $reset');
+  print('$clock $message$reset');
   if (hasColor) {
     // This sets up a timer to switch to verbose mode when the tests take too long,
     // so that if a test hangs we can see the logs.

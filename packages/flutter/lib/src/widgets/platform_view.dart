@@ -485,7 +485,7 @@ class _AndroidViewState extends State<AndroidView> {
     _layoutDirection = newLayoutDirection;
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller.dispose();
+      _controller.disposePostFrame();
       _createNewAndroidView();
       return;
     }
@@ -503,6 +503,8 @@ class _AndroidViewState extends State<AndroidView> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 
@@ -562,7 +564,9 @@ class _UiKitViewState extends State<UiKitView> {
   UiKitViewController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
-  late FocusNode _focusNode;
+
+  @visibleForTesting
+  FocusNode? focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
@@ -574,7 +578,7 @@ class _UiKitViewState extends State<UiKitView> {
       return const SizedBox.expand();
     }
     return Focus(
-      focusNode: _focusNode,
+      focusNode: focusNode,
       onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
       child: _UiKitPlatformView(
         controller: _controller!,
@@ -634,6 +638,9 @@ class _UiKitViewState extends State<UiKitView> {
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
+    focusNode?.dispose();
+    focusNode = null;
     super.dispose();
   }
 
@@ -646,7 +653,7 @@ class _UiKitViewState extends State<UiKitView> {
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
       onFocus: () {
-        _focusNode.requestFocus();
+        focusNode?.requestFocus();
       }
     );
     if (!mounted) {
@@ -656,7 +663,7 @@ class _UiKitViewState extends State<UiKitView> {
     widget.onPlatformViewCreated?.call(id);
     setState(() {
       _controller = controller;
-      _focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
+      focusNode = FocusNode(debugLabel: 'UiKitView(id: $id)');
     });
   }
 
@@ -890,7 +897,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.viewType != oldWidget.viewType) {
-      _controller?.dispose();
+      _controller?.disposePostFrame();
       // The _surface has to be recreated as its controller is disposed.
       // Setting _surface to null will trigger its creation in build().
       _surface = null;
@@ -911,9 +918,11 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   }
 
   void _onPlatformViewCreated(int id) {
-    setState(() {
-      _platformViewCreated = true;
-    });
+    if (mounted) {
+      setState(() {
+        _platformViewCreated = true;
+      });
+    }
   }
 
   void _handleFrameworkFocusChanged(bool isFocused) {
@@ -936,6 +945,8 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void dispose() {
     _controller?.dispose();
     _controller = null;
+    _focusNode?.dispose();
+    _focusNode = null;
     super.dispose();
   }
 }
@@ -1086,7 +1097,7 @@ class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
   void initState() {
     super.initState();
     if (!widget.controller.isCreated) {
-      // Schedule a rebuild once creation is complete and the final dislay
+      // Schedule a rebuild once creation is complete and the final display
       // type is known.
       widget.controller.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
     }
@@ -1207,5 +1218,15 @@ class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _PlatformViewPlaceholderBox renderObject) {
     renderObject.onLayout = onLayout;
+  }
+}
+
+extension on PlatformViewController {
+  /// Disposes the controller in a post-frame callback, to allow other widgets to
+  /// remove their listeners before the controller is disposed.
+  void disposePostFrame() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      dispose();
+    });
   }
 }

@@ -1,5 +1,5 @@
 {
-  "version": "v0_152",
+  "version": "v0_162",
 
   "md.comp.date-input.modal.container.color": "surface",
   "md.comp.date-input.modal.container.elevation": "md.sys.elevation.level3",
@@ -12,5 +12,5 @@
   "md.comp.date-input.modal.header.headline.color": "onSurfaceVariant",
   "md.comp.date-input.modal.header.headline.text-style": "headlineLarge",
   "md.comp.date-input.modal.header.supporting-text.color": "onSurfaceVariant",
-  "md.comp.date-input.modal.header.supporting-text.text-style": "labelMedium"
+  "md.comp.date-input.modal.header.supporting-text.text-style": "labelLarge"
 }

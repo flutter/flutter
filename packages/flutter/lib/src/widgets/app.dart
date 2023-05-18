@@ -23,7 +23,7 @@ import 'pages.dart';
 import 'performance_overlay.dart';
 import 'restoration.dart';
 import 'router.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'semantics_debugger.dart';
 import 'shared_app_data.dart';
 import 'shortcuts.dart';
@@ -252,8 +252,6 @@ typedef InitialRouteListFactory = List<Route<dynamic>> Function(String initialRo
 ///    without an explicit style.
 ///  * [MediaQuery], which establishes a subtree in which media queries resolve
 ///    to a [MediaQueryData].
-///  * [MediaQuery.fromWindow], which builds a [MediaQuery] with data derived
-///    from [WidgetsBinding.window].
 ///  * [Localizations], which defines the [Locale] for its `child`.
 ///  * [Title], a widget that describes this app in the operating system.
 ///  * [Navigator], a widget that manages a set of child widgets with a stack
@@ -1174,7 +1172,7 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
-  /// Used by the `showPerformanceOverlay` observatory extension.
+  /// Used by the `showPerformanceOverlay` VM service extension.
   static bool showPerformanceOverlayOverride = false;
 
   /// If true, forces the widget inspector to be visible.
@@ -1184,12 +1182,12 @@ class WidgetsApp extends StatefulWidget {
   /// The inspector allows you to select a location on your device or emulator
   /// and view what widgets and render objects associated with it. An outline of
   /// the selected widget and some summary information is shown on device and
-  /// more detailed information is shown in the IDE or Observatory.
+  /// more detailed information is shown in the IDE or DevTools.
   static bool debugShowWidgetInspectorOverride = false;
 
   /// If false, prevents the debug banner from being visible.
   ///
-  /// Used by the `debugAllowBanner` observatory extension.
+  /// Used by the `debugAllowBanner` VM service extension.
   ///
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
@@ -1364,7 +1362,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       if (widget.routeInformationProvider == null && widget.routeInformationParser != null) {
         _defaultRouteInformationProvider ??= PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
-            location: _initialRouteName,
+            uri: Uri.parse(_initialRouteName),
           ),
         );
       } else {
@@ -1486,7 +1484,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRoute(String route) async {
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
@@ -1498,7 +1496,16 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     if (navigator == null) {
       return false;
     }
-    navigator.pushNamed(route);
+    final Uri uri = routeInformation.uri;
+    navigator.pushNamed(
+      Uri.decodeComponent(
+        Uri(
+          path: uri.path.isEmpty ? '/' : uri.path,
+          queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
+          fragment: uri.fragment.isEmpty ? null : uri.fragment,
+        ).toString(),
+      ),
+    );
     return true;
   }
 
@@ -1623,6 +1630,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         debugLabel: 'Navigator Scope',
         autofocus: true,
         child: Navigator(
+          clipBehavior: Clip.none,
           restorationScopeId: 'nav',
           key: _navigator,
           initialRoute: _initialRouteName,

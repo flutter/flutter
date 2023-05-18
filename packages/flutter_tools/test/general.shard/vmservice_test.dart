@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -59,115 +61,102 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 );
 
 void main() {
-  testWithoutContext('VmService registers reloadSources', () async {
+  testWithoutContext('VM Service registers reloadSources', () async {
     Future<void> reloadSources(String isolateId, { bool? pause, bool? force}) async {}
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      reloadSources,
-      null,
-      null,
-      null,
-      null,
-      null,
-      mockVMService,
+      reloadSources: reloadSources,
+      vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('reloadSources', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kReloadSourcesServiceName, kFlutterToolAlias));
   });
 
-  testWithoutContext('VmService registers flutterMemoryInfo service', () async {
+  testWithoutContext('VM Service registers flutterMemoryInfo service', () async {
     final FakeDevice mockDevice = FakeDevice();
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      mockDevice,
-      null,
-      null,
-      mockVMService,
+      device: mockDevice,
+      vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterMemoryInfo', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
   });
 
-  testWithoutContext('VmService registers flutterGetSkSL service', () async {
+  testWithoutContext('VmService registers flutterGetIOSBuildOptions service', () async {
+    final MockVMService mockVMService = MockVMService();
+    final FlutterProject mockedFlutterProject = MockFlutterProject();
+    await setUpVmService(
+      flutterProject: mockedFlutterProject,
+      vmService: mockVMService,
+    );
+
+    expect(mockVMService.services, containsPair(kFlutterGetIOSBuildOptionsServiceName, kFlutterToolAlias));
+  });
+
+  testWithoutContext('VmService registers flutterGetAndroidBuildVariants service', () async {
+    final MockVMService mockVMService = MockVMService();
+    final FlutterProject mockedFlutterProject = MockFlutterProject();
+    await setUpVmService(
+      flutterProject: mockedFlutterProject,
+      vmService: mockVMService,
+    );
+
+    expect(mockVMService.services, containsPair(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias));
+  });
+
+  testWithoutContext('VM Service registers flutterGetSkSL service', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      null,
-      mockVMService,
+      skSLMethod: () async => 'hello',
+      vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterGetSkSL', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterGetSkSLServiceName, kFlutterToolAlias));
   });
 
-  testWithoutContext('VmService throws tool exit on service registration failure.', () async {
+  testWithoutContext('VM Service throws tool exit on service registration failure.', () async {
     final MockVMService mockVMService = MockVMService()
       ..errorOnRegisterService = true;
 
     await expectLater(() async => setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      null,
-      mockVMService,
+      skSLMethod: () async => 'hello',
+      vmService: mockVMService,
     ), throwsToolExit());
   });
 
-  testWithoutContext('VmService throws tool exit on service registration failure with awaited future.', () async {
+  testWithoutContext('VM Service throws tool exit on service registration failure with awaited future.', () async {
     final MockVMService mockVMService = MockVMService()
       ..errorOnRegisterService = true;
 
     await expectLater(() async => setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      () async => 'hello',
-      (vm_service.Event event) { },
-      mockVMService,
+      skSLMethod: () async => 'hello',
+      printStructuredErrorLogMethod: (vm_service.Event event) { },
+      vmService: mockVMService,
     ), throwsToolExit());
   });
 
-  testWithoutContext('VmService registers flutterPrintStructuredErrorLogMethod', () async {
+  testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      null,
-      (vm_service.Event event) async => 'hello',
-      mockVMService,
+      printStructuredErrorLogMethod: (vm_service.Event event) async => 'hello',
+      vmService: mockVMService,
     );
     expect(mockVMService.listenedStreams, contains(vm_service.EventStreams.kExtension));
   });
 
-  testWithoutContext('VMService returns correct FlutterVersion', () async {
+  testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      mockVMService,
+      vmService: mockVMService,
     );
 
-    expect(mockVMService.services, containsPair('flutterVersion', 'Flutter Tools'));
+    expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
 
-  testUsingContext('VMService prints messages for connection failures', () {
+  testUsingContext('VM Service prints messages for connection failures', () {
     final BufferLogger logger = BufferLogger.test();
     FakeAsync().run((FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
@@ -299,6 +288,68 @@ void main() {
     ]));
   });
 
+  testWithoutContext('VmService forward flutterGetIOSBuildOptions request and response correctly', () async {
+    final MockVMService vmService = MockVMService();
+    final XcodeProjectInfo expectedProjectInfo = XcodeProjectInfo(
+      <String>['target1', 'target2'],
+      <String>['config1', 'config2'],
+      <String>['scheme1', 'scheme2'],
+      MockLogger(),
+    );
+    final FlutterProject mockedFlutterProject = MockFlutterProject(
+      mockedIos: MockIosProject(mockedInfo: expectedProjectInfo),
+    );
+    await setUpVmService(
+      flutterProject: mockedFlutterProject,
+      vmService: vmService
+    );
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetIOSBuildOptionsServiceName]!;
+
+    final Map<String, dynamic> response = await cb(<String, dynamic>{});
+    final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
+    expect(result[kResultType], kResultTypeSuccess);
+    expect(result['targets'], expectedProjectInfo.targets);
+    expect(result['buildConfigurations'], expectedProjectInfo.buildConfigurations);
+    expect(result['schemes'], expectedProjectInfo.schemes);
+  });
+
+  testWithoutContext('VmService forward flutterGetAndroidBuildVariants request and response correctly', () async {
+    final MockVMService vmService = MockVMService();
+    final List<String> expectedOptions = <String>['debug', 'release', 'profile'];
+    final FlutterProject mockedFlutterProject = MockFlutterProject(
+      mockedAndroid: MockAndroidProject(mockedOptions: expectedOptions),
+    );
+    await setUpVmService(
+        flutterProject: mockedFlutterProject,
+        vmService: vmService
+    );
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetAndroidBuildVariantsServiceName]!;
+
+    final Map<String, dynamic> response = await cb(<String, dynamic>{});
+    final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
+    expect(result[kResultType], kResultTypeSuccess);
+    expect(result['variants'], expectedOptions);
+  });
+
+  testWithoutContext('VmService forward flutterGetIOSBuildOptions request and response correctly when no iOS project', () async {
+    final MockVMService vmService = MockVMService();
+    final FlutterProject mockedFlutterProject = MockFlutterProject(
+      mockedIos: MockIosProject(),
+    );
+    await setUpVmService(
+        flutterProject: mockedFlutterProject,
+        vmService: vmService
+    );
+    final vm_service.ServiceCallback cb = vmService.serviceCallBacks[kFlutterGetIOSBuildOptionsServiceName]!;
+
+    final Map<String, dynamic> response = await cb(<String, dynamic>{});
+    final Map<String, dynamic> result = response['result']! as Map<String, dynamic>;
+    expect(result[kResultType], kResultTypeSuccess);
+    expect(result['targets'], isNull);
+    expect(result['buildConfigurations'], isNull);
+    expect(result['schemes'], isNull);
+  });
+
   testWithoutContext('runInView forwards arguments correctly', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -420,6 +471,46 @@ void main() {
     expect(await fakeVmServiceHost.vmService.flutterDebugDumpApp(
       isolateId: '1',
     ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('flutterDebugDumpFocusTree handles missing method', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          errorCode: RPCErrorCodes.kMethodNotFound,
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpFocusTree(
+      isolateId: '1',
+    ), '');
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('flutterDebugDumpFocusTree returns data', () async {
+    final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.debugDumpFocusTree',
+          args: <String, Object>{
+            'isolateId': '1',
+          },
+          jsonResponse: <String, Object> {
+            'data': 'Hello world',
+          },
+        ),
+      ]
+    );
+
+    expect(await fakeVmServiceHost.vmService.flutterDebugDumpFocusTree(
+      isolateId: '1',
+    ), 'Hello world');
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
@@ -846,13 +937,50 @@ void main() {
   });
 }
 
+class MockFlutterProject extends Fake implements FlutterProject {
+  MockFlutterProject({
+    IosProject? mockedIos,
+    AndroidProject? mockedAndroid,
+  }) : ios = mockedIos ?? MockIosProject(),
+       android = mockedAndroid ?? MockAndroidProject();
+
+  @override
+  final IosProject ios;
+
+  @override
+  final AndroidProject android;
+}
+
+class MockIosProject extends Fake implements IosProject {
+  MockIosProject({this.mockedInfo});
+
+  final XcodeProjectInfo? mockedInfo;
+
+  @override
+  Future<XcodeProjectInfo?> projectInfo() async => mockedInfo;
+}
+
+class MockAndroidProject extends Fake implements AndroidProject {
+  MockAndroidProject({this.mockedOptions = const <String>[]});
+
+  final List<String> mockedOptions;
+
+  @override
+  Future<List<String>> getBuildVariants() async => mockedOptions;
+}
+
+class MockLogger extends Fake implements Logger { }
+
 class MockVMService extends Fake implements vm_service.VmService {
   final Map<String, String> services = <String, String>{};
+  final Map<String, vm_service.ServiceCallback> serviceCallBacks = <String, vm_service.ServiceCallback>{};
   final Set<String> listenedStreams = <String>{};
   bool errorOnRegisterService = false;
 
   @override
-  void registerServiceCallback(String service, vm_service.ServiceCallback cb) {}
+  void registerServiceCallback(String service, vm_service.ServiceCallback cb) {
+    serviceCallBacks[service] = cb;
+  }
 
   @override
   Future<vm_service.Success> registerService(String service, String alias) async {
