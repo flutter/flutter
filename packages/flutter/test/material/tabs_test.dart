@@ -473,19 +473,31 @@ void main() {
 
     const double indicatorWeight = 3.0;
 
+
+    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? RRect.fromLTRBAndCorners(
+          64.75,
+          tabBarBox.size.height - indicatorWeight,
+          135.25,
+          tabBarBox.size.height,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        )
+      : RRect.fromLTRBAndCorners(
+          64.5,
+          tabBarBox.size.height - indicatorWeight,
+          135.5,
+          tabBarBox.size.height,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        );
+
     expect(
       tabBarBox,
       paints
         ..rrect(
           color: theme.colorScheme.primary,
-          rrect: RRect.fromLTRBAndCorners(
-            64.5,
-            tabBarBox.size.height - indicatorWeight,
-            135.5,
-            tabBarBox.size.height,
-            topLeft: const Radius.circular(3.0),
-            topRight: const Radius.circular(3.0),
-          ),
+          rrect: rrect,
     ));
   });
 

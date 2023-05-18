@@ -5701,7 +5701,7 @@ void main() {
         const double width = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
           ? 100 / 0.75
           : 133.0;
-        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, width, 16.0)));
+        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
         return true;
       }),
     );

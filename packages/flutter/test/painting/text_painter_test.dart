@@ -1462,6 +1462,17 @@ void main() {
 
     painter.dispose();
   });
+
+  test('TextPainter line breaking does not round to integers', () {
+     const double fontSize = 1.25;
+     final TextPainter painter = TextPainter(
+       textDirection: TextDirection.ltr,
+       text: const TextSpan(text: 'text', style: TextStyle(fontSize: fontSize)),
+     )..layout(maxWidth: 4 * fontSize);
+
+     expect(painter.computeLineMetrics().length, 1);
+     expect(painter.computeLineMetrics()[0].width, 4 * fontSize);
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {

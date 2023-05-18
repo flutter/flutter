@@ -465,7 +465,6 @@ void main() {
       ),
     );
 
-
     final double textWidth = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
       ? width
       : (width / 1.5).floorToDouble() * 1.5;
@@ -475,12 +474,7 @@ void main() {
     // as the font size, with 10 dps bottom margin.
     expect(
       tester.getRect(find.byType(Text)),
-      Rect.fromLTRB(
-        0,
-        height - titleFontSize - 10,
-        textWidth,
-        height,
-      ),
+      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - 10, textWidth, height), epsilon: 0.0001),
     );
   });
 
@@ -550,12 +544,7 @@ void main() {
     // as the font size, with 40 dps bottom margin to maintain its bottom position.
     expect(
       tester.getRect(title),
-      Rect.fromLTRB(
-        0,
-        height - titleFontSize - bottomMargin,
-        textWidth,
-        height,
-      ),
+      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - bottomMargin, textWidth, height), epsilon: 0.0001),
     );
   });
 

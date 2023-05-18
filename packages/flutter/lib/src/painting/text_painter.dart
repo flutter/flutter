@@ -806,9 +806,7 @@ class TextPainter {
   // values up to the nearest whole pixel value. The right long-term fix is to do
   // layout using fixed precision arithmetic.
   @pragma('vm:prefer-inline')
-  static double _applyFloatingPointHack(double layoutValue) {
-    return _shouldApplyFloatingPointHack ? layoutValue.ceilToDouble() : layoutValue;
-  }
+  static double _applyFloatingPointHack(double layoutValue) => _shouldApplyFloatingPointHack ? layoutValue.ceilToDouble() : layoutValue;
 
   /// The width at which decreasing the width of the text would prevent it from
   /// painting itself completely within its bounds.

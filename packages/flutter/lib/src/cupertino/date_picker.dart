@@ -1977,7 +1977,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   int? lastSelectedMinute;
   int? lastSelectedSecond;
 
-  final TextPainter textPainter = TextPainter();
+  final TextPainter textPainter = TextPainter(maxLines: 1);
   final List<String> numbers = List<String>.generate(10, (int i) => '${9 - i}');
   late double numberLabelWidth;
   late double numberLabelHeight;
