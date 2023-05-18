@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/tests/controls_page.dart';
 import 'src/tests/headings_page.dart';
@@ -16,14 +15,12 @@ import 'src/tests/popup_page.dart';
 import 'src/tests/text_field_page.dart';
 
 void main() {
-  timeDilation = 0.05; // remove animations.
-  enableFlutterDriverExtension(handler: dataHandler);
   runApp(const TestApp());
 }
 
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
-Future<String> dataHandler(String? message) async {
+Future<String> invokeSemanticsMethod(String? message) async {
   if (message != null && message.contains('getSemanticsNode')) {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;

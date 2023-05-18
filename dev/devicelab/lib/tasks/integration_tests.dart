@@ -74,9 +74,9 @@ TaskFunction createHybridAndroidViewsIntegrationTest() {
 }
 
 TaskFunction createAndroidSemanticsIntegrationTest() {
-  return DriverTest(
+  return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
-    'lib/main.dart',
+    'integration_test/main_test.dart',
   ).call;
 }
 
