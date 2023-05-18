@@ -1527,7 +1527,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         if (existingSelectionStart.offset < existingSelectionEnd.offset) {
           // The selection is normalized, i.e. the start of the selection is before
           // the end.
-          if (shouldSwapEdgesWhenSelectionIsNormalized) {.
+          if (shouldSwapEdgesWhenSelectionIsNormalized) {
             targetPosition = isEnd ? wordBoundary.wordStart : wordBoundary.wordEnd;
             // The static edge is moved to the opposite end of the word boundary to
             // keep the entire origin word in the selection
