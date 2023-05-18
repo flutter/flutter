@@ -1518,195 +1518,63 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     TextPosition? targetPosition;
     if (wordBoundary != null) {
       if (existingSelectionStart != null && existingSelectionEnd != null) {
-        if (isEnd) {
-          // Moving the end edge. This means the start edge remains static until
-          // reaching a condition where a swap is needed.
-          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            // The start of the selection is before the end.
-            if (position.offset < existingSelectionStart.offset) {
-              // The new position is before the start of the selection. So to keep
-              // the origin word in bounds, the start should move to the end of the
-              // origin word.
-              targetPosition = wordBoundary.$1;
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            } else {
-              // Keep the selection at the same word boundary regardless of affinity.
-              targetPosition = position.offset == existingSelectionStart.offset ? existingSelectionEnd : wordBoundary.$2;
-            }
+        final TextPosition edgeToKeepInPlace = isEnd ? existingSelectionStart : existingSelectionEnd;
+        final TextPosition otherEdge = isEnd ? existingSelectionEnd : existingSelectionStart;
+        final bool shouldSwapEdgesWhenWordBoundaryNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
+        final bool shouldSwapEdgesWhenWordBoundaryNotNormalized = isEnd ? position.offset > existingSelectionStart.offset : position.offset < existingSelectionEnd.offset;
+        if (existingSelectionStart.offset < existingSelectionEnd.offset) {
+          // The start of the selection is before the end.
+          if (shouldSwapEdgesWhenWordBoundaryNormalized) {
+            targetPosition = isEnd ? wordBoundary.$1 : wordBoundary.$2;
+            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            _setSelectionPosition(isEnd ? localWordBoundary.$2 : localWordBoundary.$1, isEnd: !isEnd);
           } else {
-            // The end of the selection is before the start.
-            if (position.offset > existingSelectionStart.offset) {
-              // The new position is after the start of the selection. So to keep
-              // the origin word in bounds, the start should move to the beginning
-              // of the origin word.
-              targetPosition = wordBoundary.$2;
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            } else {
-              // Keep the selection at the same word boundary regardless of affinity.
-              targetPosition = position.offset == existingSelectionStart.offset ? existingSelectionEnd : wordBoundary.$1;
-            }
+            // Keep the selection at the same word boundary regardless of affinity.
+            targetPosition = position.offset == edgeToKeepInPlace.offset ? otherEdge : isEnd ? wordBoundary.$2 : wordBoundary.$1;
           }
         } else {
-          // Moving the start edge. This means the end edge remains static until
-          // reaching a condition where a swap is needed.
-          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            // The start of the selection is before the end.
-            if (position.offset > existingSelectionEnd.offset) {
-              // The new position is after the end of the selection. So to keep the
-              // origin word in bounds, the end should move the to beginning of
-              // the origin word.
-              targetPosition = wordBoundary.$2;
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            } else {
-              // Keep the selection at the same word boundary regardless of affinity.
-              targetPosition = position.offset == existingSelectionEnd.offset ? existingSelectionStart : wordBoundary.$1;
-            }
+          // The end of the selection is before the start.
+          if (shouldSwapEdgesWhenWordBoundaryNotNormalized) {
+            targetPosition = isEnd ? wordBoundary.$2 : wordBoundary.$1;
+            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            _setSelectionPosition(isEnd ? localWordBoundary.$1 : localWordBoundary.$2, isEnd: !isEnd);
           } else {
-            // The end of the selection is before the start.
-            if (position.offset < existingSelectionEnd.offset) {
-              // The new position is before the selection end. So to keep the origin
-              // word in bounds, the end edge should be moved to the end of the origin word.
-              targetPosition = wordBoundary.$1;
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            } else {
-              // Keep the selection at the same word boundary regardless of affinity.
-              targetPosition = position.offset == existingSelectionEnd.offset ? existingSelectionStart : wordBoundary.$2;
-            }
-          }
-        }
-      } else if (existingSelectionStart != null) {
-        if (isEnd) {
-          if (position.offset < existingSelectionStart.offset) {
-            targetPosition = wordBoundary.$1;
-          } else {
-            targetPosition = wordBoundary.$2;
-          }
-        } else {
-          // Move edge to closest word boundary.
-          final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
-          final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
-          targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
-        }
-      } else if (existingSelectionEnd != null) {
-        if (isEnd) {
-          // Move edge to closest word boundary.
-          final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
-          final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
-          targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
-        } else {
-          if (position.offset < existingSelectionEnd.offset) {
-            targetPosition = wordBoundary.$1;
-          } else {
-            targetPosition = wordBoundary.$2;
+            // Keep the selection at the same word boundary regardless of affinity.
+            targetPosition = position.offset == edgeToKeepInPlace.offset ? otherEdge : isEnd ? wordBoundary.$1 : wordBoundary.$2;
           }
         }
       } else {
-        // Move edge to closest word boundary.
-        final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
-        final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
-        targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
+        final TextPosition? nonNullEdge = existingSelectionStart ?? existingSelectionEnd;
+        if (nonNullEdge != null && (nonNullEdge == existingSelectionStart && isEnd || nonNullEdge == existingSelectionEnd && !isEnd)) {
+          if (position.offset < nonNullEdge.offset) {
+            targetPosition = wordBoundary.$1;
+          } else {
+            targetPosition = wordBoundary.$2;
+          }
+        } else {
+          // Move edge to closest word boundary.
+          final int differenceA = (position.offset - wordBoundary.$1.offset).abs();
+          final int differenceB = (position.offset - wordBoundary.$2.offset).abs();
+          targetPosition = differenceA < differenceB ? wordBoundary.$1 : wordBoundary.$2;
+        }
       }
     } else {
       // The localPosition is not contained within the current rect. The adjustedPosition
       // will either be at the end or beginning of the current rect.
       if (existingSelectionStart != null && existingSelectionEnd != null) {
-        if (isEnd) {
-          // Moving the end edge.
-          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            // The start of the selection is before the end.
-            if (position.offset < existingSelectionStart.offset) {
-              // The new position is before the start of the selection. To keep
-              // the origin word in bounds, the start edge should be moved the end
-              // of the origin word.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            }
+        final TextPosition edgeToKeepInPlace = isEnd ? existingSelectionStart : existingSelectionEnd;
+        final bool shouldSwapEdgesWhenWordBoundaryNormalized = isEnd ? position.offset < existingSelectionStart.offset : position.offset > existingSelectionEnd.offset;
+        final bool shouldSwapEdgesWhenWordBoundaryNotNormalized = isEnd ? position.offset > existingSelectionStart.offset : position.offset < existingSelectionEnd.offset;
 
-            if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
-              // This case applies when the origin word is at the beginning of
-              // the origin selectable, and the adjustedPosition is at the beginning
-              // of the rect, to keep the origin word in bounds, the start edge should
-              // move to the end the origin word.
-              //
-              // This is only done when the current selectable contains the origin word,
-              // if it does not then we are okay with the selection being collapsed
-              // as a result of the adjustedPosition.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            }
-          } else {
-            // The end of the selection is before the start.
-            if (position.offset > existingSelectionStart.offset) {
-              // The new position is after the start of the selection. To keep
-              // the origin word in bounds, the start edge should be moved the
-              // beginning of the origin word.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            }
-
-            if (position.offset == existingSelectionStart.offset && _selectableContainsOriginWord!) {
-              // This case applies when the origin word is at the end of
-              // the origin selectable, and the adjustedPosition is at the end
-              // of the rect, to keep the origin word in bounds, the start edge should
-              // move to the beginning the origin word.
-              //
-              // This is only done when the current selectable contains the origin word,
-              // if it does not then we are okay with the selection being collapsed
-              // as a result of the adjustedPosition.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionStart);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            }
+        if (existingSelectionStart.offset < existingSelectionEnd.offset) {
+          if (shouldSwapEdgesWhenWordBoundaryNormalized || position.offset == edgeToKeepInPlace.offset && _selectableContainsOriginWord!) {
+            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            _setSelectionPosition(isEnd ? localWordBoundary.$2 : localWordBoundary.$1, isEnd: !isEnd);
           }
         } else {
-          // Moving the start edge.
-          if (existingSelectionStart.offset < existingSelectionEnd.offset) {
-            // The start of the selection is before the end.
-            if (position.offset > existingSelectionEnd.offset) {
-              // The new position is after the end of the selection. To keep
-              // the origin word in bounds, the end edge should be moved the
-              // beginning of the origin word.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            }
-
-            if (position.offset == existingSelectionEnd.offset && _selectableContainsOriginWord!) {
-              // This case applies when the origin word is at the end of
-              // the origin selectable, and the adjustedPosition is at the end
-              // of the rect, to keep the origin word in bounds, the end edge should
-              // move to the beginning the origin word.
-              //
-              // This is only done when the current selectable contains the origin word,
-              // if it does not then we are okay with the selection being collapsed
-              // as a result of the adjustedPosition.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              _setSelectionPosition(localWordBoundary.$1, isEnd: !isEnd);
-            }
-          } else {
-            // The end of the selection is before the start.
-            if (position.offset < existingSelectionEnd.offset) {
-              // The new position is before the end of the selection. To keep
-              // the origin word in bounds, the end edge should be moved the
-              // end of the origin word.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            }
-
-            if (position.offset == existingSelectionEnd.offset && _selectableContainsOriginWord!) {
-              // This case applies when the origin word is at the beginning of
-              // the origin selectable, and the adjustedPosition is at the beginning
-              // of the rect, to keep the origin word in bounds, the end edge should
-              // move to the end the origin word.
-              //
-              // This is only done when the current selectable contains the origin word,
-              // if it does not then we are okay with the selection being collapsed
-              // as a result of the adjustedPosition.
-              final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(existingSelectionEnd);
-              _setSelectionPosition(localWordBoundary.$2, isEnd: !isEnd);
-            }
+          if (shouldSwapEdgesWhenWordBoundaryNotNormalized || position.offset == edgeToKeepInPlace.offset && _selectableContainsOriginWord!) {
+            final (TextPosition start, TextPosition end) localWordBoundary = _getWordBoundaryAtPosition(edgeToKeepInPlace);
+            _setSelectionPosition(isEnd ? localWordBoundary.$1 : localWordBoundary.$2, isEnd: !isEnd);
           }
         }
       }
