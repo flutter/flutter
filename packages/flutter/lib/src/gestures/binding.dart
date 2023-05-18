@@ -372,25 +372,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     _handlePointerEventImmediately(event);
   }
 
-  /// Returns true if the [HitTestResult] given to [dispatchEvent] is a cached
-  /// one.
-  ///
-  /// Tapping (and pan zooming) uses the same hit test result throughout the
-  /// tap sequence, but hovering needs fresh hit tests every frame.
-  @protected
-  bool useCachedHitTestResult(PointerEvent event) {
-    // Technically, PointerUpEvent, PointerCancelEvent, and PointerPanZoomEndEvent
-    // uses the cached result as well. But these events occur on the same position
-    // as their last PointerMoveEvent/PointerPanZoomUpdateEvent.
-    return event is PointerMoveEvent || event is PointerPanZoomUpdateEvent;
-  }
-
   void _handlePointerEventImmediately(PointerEvent event) {
     HitTestResult? hitTestResult;
-    if (useCachedHitTestResult(event)) {
-      hitTestResult = _hitTests[event.pointer];
-    } else if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
-      assert(!_hitTests.containsKey(event.pointer), 'A ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly occurrs when a HitTestResult is associated with the pointer.');
+    if (event is PointerDownEvent || event is PointerSignalEvent || event is PointerHoverEvent || event is PointerPanZoomStartEvent) {
+      assert(!_hitTests.containsKey(event.pointer), 'Pointer of ${event.toString(minLevel: DiagnosticLevel.debug)} unexpectedly has a HitTestResult associated with it.');
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
       if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
@@ -404,6 +389,13 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
       hitTestResult = _hitTests.remove(event.pointer);
+    } else if (event.down || event is PointerPanZoomUpdateEvent) {
+      // Because events that occur with the pointer down (like
+      // [PointerMoveEvent]s) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
     }
     assert(() {
       if (debugPrintMouseHoverEvents && event is PointerHoverEvent) {

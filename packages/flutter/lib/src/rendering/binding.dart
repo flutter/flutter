@@ -326,10 +326,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     _mouseTracker!.updateWithEvent(
       event,
-      // When the button is pressed, normal hit test uses a cached result, but
-      // MouseTracker requires that the hit test is re-executed to update the
-      // hovering events.
-      useCachedHitTestResult(event) ? null : hitTestResult,
+      // When the button is pressed, normal hit test uses a cached
+      // result, but MouseTracker requires that the hit test is re-executed to
+      // update the hovering events.
+      event is PointerMoveEvent ? null : hitTestResult,
     );
     super.dispatchEvent(event, hitTestResult);
   }
