@@ -1375,12 +1375,21 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
 /// This is useful when you want to apply a custom cross-axis extent constraint
 /// to a sliver child, as slivers typically consume the full cross axis extent.
 ///
+/// This widget also sets its parent data's [SliverPhysicalParentData.crossAxisFlex]
+/// to 0, so that it informs [SliverCrossAxisGroup] that it should not flex
+/// in the cross axis direction.
+///
 /// {@tool dartpad}
 /// In this sample the [SliverConstrainedCrossAxis] sizes its child so that the
 /// cross axis extent takes up less space than the actual viewport.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/sliver_constrained_cross_axis.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+///  * [SliverCrossAxisGroup], the widget which makes use of 0 flex factor set by
+///    this widget.
 class SliverConstrainedCrossAxis extends StatelessWidget {
   /// Creates a sliver that constrains the cross axis extent of its sliver child.
   ///
@@ -1436,7 +1445,7 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => Widget;
+  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
 }
 
 class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
@@ -1459,5 +1468,109 @@ class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
     renderObject.maxExtent = maxExtent;
+  }
+}
+
+/// Set a flex factor for allocating space in the cross axis direction.
+///
+/// This is a [ParentDataWidget] to be used in [SliverCrossAxisGroup].
+/// After all slivers with null or zero flex (e.g. [SliverConstrainedCrossAxis])
+/// are laid out (which should determine their own [SliverGeometry.crossAxisExtent]),
+/// the remaining space is laid out among the slivers with nonzero flex
+/// proportionally to their flex value.
+class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerParentData> {
+  /// Creates an object that assigns a [flex] value to the child sliver.
+  ///
+  /// The provided [flex] value must be greater than 0.
+  const SliverCrossAxisExpanded({
+    super.key,
+    required this.flex,
+    required Widget sliver,
+  }): assert(flex > 0 && flex < double.infinity),
+      super(child: sliver);
+
+  /// Flex value for allocating cross axis extent left after laying out the children with
+  /// constrained cross axis. The children with flex values will have the remaining extent
+  /// allocated proportionally to their flex value. This must an integer between
+  /// 0 and infinity, exclusive.
+  final int flex;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is SliverPhysicalContainerParentData);
+    assert(renderObject.parent is RenderSliverCrossAxisGroup);
+    final SliverPhysicalParentData parentData = renderObject.parentData! as SliverPhysicalParentData;
+    bool needsLayout = false;
+
+    if (parentData.crossAxisFlex != flex) {
+      parentData.crossAxisFlex = flex;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
+      final AbstractNode? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
+        targetParent.markNeedsLayout();
+      }
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
+}
+
+
+/// A sliver that places multiple sliver children in a linear array along
+/// the cross axis.
+///
+/// ## Layout algorithm
+///
+/// _This section describes how the framework causes [RenderSliverCrossAxisGroup]
+/// to position its children._
+///
+/// Layout for a [RenderSliverCrossAxisGroup] has four steps:
+///
+/// 1. Layout each child with a null or zero flex factor with cross axis constraint
+///    being whatever cross axis space is remaining after laying out any previous
+///    sliver. Slivers with null or zero flex factor should determine their own
+///    [SliverGeometry.crossAxisExtent]. For example, the [SliverConstrainedCrossAxis]
+///    widget uses either [SliverConstrainedCrossAxis.maxExtent] or
+///    [SliverConstraints.crossAxisExtent], deciding between whichever is smaller.
+/// 2. Divide up the remaining cross axis space among the children with non-zero flex
+///    factors according to their flex factor. For example, a child with a flex
+///    factor of 2.0 will receive twice the amount of cross axis space as a child
+///    with a flex factor 1.0.
+/// 3. Layout each of the remaining children with the cross axis constraint
+///    allocated in the previous step.
+/// 4. Set the geometry to that of whichever child has the longest
+///    [SliverGeometry.scrollExtent] with the [SliverGeometry.crossAxisExtent] adjusted
+///    to [SliverConstraints.crossAxisExtent].
+///
+/// {@tool dartpad}
+/// In this sample the [SliverCrossAxisGroup] sizes its three [children] so that
+/// the first normal [SliverList] has a flex factor of 1, the second [SliverConstrainedCrossAxis]
+/// has a flex factor of 0 and a maximum cross axis extent of 200.0, and the third
+/// [SliverCrossAxisExpanded] has a flex factor of 2.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_cross_axis_group.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [SliverCrossAxisExpanded], which is the [ParentDataWidget] for setting a flex
+///    value to a widget.
+///  * [SliverConstrainedCrossAxis], which is a [RenderObjectWidget] for setting
+///    an extent to constrain the widget to.
+class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
+  /// Creates a sliver that places sliver children in a linear array along
+  /// the cross axis.
+  const SliverCrossAxisGroup({
+    super.key,
+    required List<Widget> slivers,
+  }): super(children: slivers);
+
+  @override
+  RenderSliverCrossAxisGroup createRenderObject(BuildContext context) {
+    return RenderSliverCrossAxisGroup();
   }
 }

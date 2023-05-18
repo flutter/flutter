@@ -133,6 +133,10 @@ abstract final class SystemChannels {
   ///  * `System.requestAppExit`: The application has requested that it be
   ///    terminated. See [ServicesBinding.exitApplication].
   ///
+  ///  * `System.initializationComplete`: Indicate to the engine the
+  ///    initialization of a binding that may, among other tasks, register a
+  ///    handler for application exit attempts.
+  ///
   /// Calls to methods that are not implemented on the shell side are ignored
   /// (so it is safe to call methods when the relevant plugin might be missing).
   static const MethodChannel platform = OptionalMethodChannel(
@@ -487,5 +491,23 @@ abstract final class SystemChannels {
   static const MethodChannel contextMenu = OptionalMethodChannel(
     'flutter/contextmenu',
     JSONMethodCodec(),
+  );
+
+  /// A [MethodChannel] for retrieving keyboard pressed keys from the engine.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `getKeyboardState`: Obtains keyboard pressed keys from the engine.
+  ///    The keyboard state is sent as a `Map<int, int>?` where each entry
+  ///    represents a pressed keyboard key. The entry key is the physical
+  ///    key ID and the entry value is the logical key ID.
+  ///
+  /// See also:
+  ///
+  ///  * [HardwareKeyboard.syncKeyboardState], which uses this channel to synchronize
+  ///    the `HardwareKeyboard` pressed state.
+  static const MethodChannel keyboard = OptionalMethodChannel(
+    'flutter/keyboard',
   );
 }

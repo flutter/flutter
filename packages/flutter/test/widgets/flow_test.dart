@@ -172,7 +172,7 @@ void main() {
     final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    for(final Clip clip in Clip.values) {
+    for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
         Flow(
           delegate: OpacityFlowDelegate(opacity),
@@ -201,7 +201,7 @@ void main() {
     final RenderFlow renderObject = tester.renderObject(find.byType(Flow));
     expect(renderObject.clipBehavior, equals(Clip.hardEdge));
 
-    for(final Clip clip in Clip.values) {
+    for (final Clip clip in Clip.values) {
       await tester.pumpWidget(
         Flow.unwrapped(
           delegate: OpacityFlowDelegate(opacity),

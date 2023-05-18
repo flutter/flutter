@@ -25,6 +25,7 @@ void main() {
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--target-platform=android-arm64',
     ], workingDirectory: workingDirectory);
@@ -61,6 +62,7 @@ void main() {
       flutterBin,
       'build',
       'ios',
+      '--verbose',
       '--analyze-size',
       '--code-size-directory=${codeSizeDir.path}',
       '--no-codesign',
@@ -99,6 +101,7 @@ void main() {
     final ProcessResult configResult = await processManager.run(<String>[
       flutterBin,
       'config',
+      '--verbose',
       '--enable-macos-desktop',
     ], workingDirectory: workingDirectory);
 
@@ -144,6 +147,7 @@ void main() {
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--target-platform=android-arm64',
       '--debug',
@@ -159,14 +163,24 @@ void main() {
 
   testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
-    final ProcessResult result = await processManager.run(<String>[
+    final List<String> command = <String>[
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--target-platform=android-arm64',
       '--split-debug-info=infos',
-    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+    ];
+    final String workingDirectory =
+        fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+    final ProcessResult result =
+        await processManager.run(command, workingDirectory: workingDirectory);
+
+    printOnFailure('workingDirectory: $workingDirectory');
+    printOnFailure('command:\n${command.join(" ")}');
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
 
     expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));
 
@@ -177,15 +191,30 @@ void main() {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_size_test.');
 
-    final ProcessResult result = await processManager.run(<String>[
+    final List<String> command = <String>[
       flutterBin,
       'build',
       'apk',
+      '--verbose',
       '--analyze-size',
       '--code-size-directory=${tempDir.path}',
       '--target-platform=android-arm64',
       '--release',
-    ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
+    ];
+    final String workingDirectory = fileSystem.path.join(
+      getFlutterRoot(),
+      'examples',
+      'hello_world',
+    );
+    final ProcessResult result = await processManager.run(
+      command,
+      workingDirectory: workingDirectory,
+    );
+
+    printOnFailure('workingDirectory: $workingDirectory');
+    printOnFailure('command:\n${command.join(" ")}');
+    printOnFailure('stdout:\n${result.stdout}');
+    printOnFailure('stderr:\n${result.stderr}');
 
     expect(result.exitCode, 0);
     expect(tempDir.existsSync(), true);

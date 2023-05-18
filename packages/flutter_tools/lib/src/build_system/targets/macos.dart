@@ -191,7 +191,7 @@ class DebugMacOSFramework extends Target {
       ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments =
-        darwinArchs.expand((DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
+        darwinArchs.expand((DarwinArch arch) => <String>['-arch', arch.name]);
 
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
@@ -277,10 +277,10 @@ class CompileMacOSFramework extends Target {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('snapshot.${darwinArch.name}.json');
         final File precompilerTraceFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('trace.${darwinArch.name}.json');
         extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -288,7 +288,7 @@ class CompileMacOSFramework extends Target {
       pending.add(snapshotter.build(
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
-        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
         platform: TargetPlatform.darwin,
         darwinArch: darwinArch,
         splitDebugInfo: splitDebugInfo,
@@ -419,11 +419,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       targetPlatform: TargetPlatform.darwin,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

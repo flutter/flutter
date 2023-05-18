@@ -545,7 +545,51 @@ enum TargetPlatform {
   android_arm,
   android_arm64,
   android_x64,
-  android_x86,
+  android_x86;
+
+  String get fuchsiaArchForTargetPlatform {
+    switch (this) {
+      case TargetPlatform.fuchsia_arm64:
+        return 'arm64';
+      case TargetPlatform.fuchsia_x64:
+        return 'x64';
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.darwin:
+      case TargetPlatform.ios:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_x64:
+        throw UnsupportedError('Unexpected Fuchsia platform $this');
+    }
+  }
+
+  String get simpleName {
+    switch (this) {
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.darwin:
+      case TargetPlatform.windows_x64:
+        return 'x64';
+      case TargetPlatform.linux_arm64:
+        return 'arm64';
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.ios:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+        throw UnsupportedError('Unexpected target platform $this');
+    }
+  }
 }
 
 /// iOS and macOS target device architecture.
@@ -554,7 +598,21 @@ enum TargetPlatform {
 enum DarwinArch {
   armv7, // Deprecated. Used to display 32-bit unsupported devices.
   arm64,
-  x86_64,
+  x86_64;
+
+  /// Returns the Dart SDK's name for the specified target architecture.
+  ///
+  /// When building for Darwin platforms, the tool invokes architecture-specific
+  /// variants of `gen_snapshot`, one for each target architecture. The output
+  /// instructions are then built into architecture-specific binaries, which are
+  /// merged into a universal binary using the `lipo` tool.
+  String get dartName {
+    return switch (this) {
+      DarwinArch.armv7 => 'armv7',
+      DarwinArch.arm64 => 'arm64',
+      DarwinArch.x86_64 => 'x64'
+    };
+  }
 }
 
 // TODO(zanderso): replace all android TargetPlatform usage with AndroidArch.
@@ -562,7 +620,25 @@ enum AndroidArch {
   armeabi_v7a,
   arm64_v8a,
   x86,
-  x86_64,
+  x86_64;
+
+  String get archName {
+    return switch (this) {
+      AndroidArch.armeabi_v7a => 'armeabi-v7a',
+      AndroidArch.arm64_v8a => 'arm64-v8a',
+      AndroidArch.x86_64 => 'x86_64',
+      AndroidArch.x86 => 'x86'
+    };
+  }
+
+  String get platformName {
+    return switch (this) {
+      AndroidArch.armeabi_v7a => 'android-arm',
+      AndroidArch.arm64_v8a => 'android-arm64',
+      AndroidArch.x86_64 => 'android-x64',
+      AndroidArch.x86 => 'android-x86'
+    };
+  }
 }
 
 /// The default set of iOS device architectures to build for.
@@ -607,42 +683,6 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   ];
 }
 
-// Returns the Dart SDK's name for the specified target architecture.
-//
-// When building for Darwin platforms, the tool invokes architecture-specific
-// variants of `gen_snapshot`, one for each target architecture. The output
-// instructions are then built into architecture-specific binaries, which are
-// merged into a universal binary using the `lipo` tool.
-String getDartNameForDarwinArch(DarwinArch arch) {
-  switch (arch) {
-    case DarwinArch.armv7:
-      return 'armv7';
-    case DarwinArch.arm64:
-      return 'arm64';
-    case DarwinArch.x86_64:
-      return 'x64';
-  }
-}
-
-// Returns Apple's name for the specified target architecture.
-//
-// When invoking Apple tools such as `xcodebuild` or `lipo`, the tool often
-// passes one or more target architectures as parameters. The names returned by
-// this function reflect Apple's name for the specified architecture.
-//
-// For consistency with developer expectations, Flutter outputs also use these
-// architecture names in its build products for Darwin target platforms.
-String getNameForDarwinArch(DarwinArch arch) {
-  switch (arch) {
-    case DarwinArch.armv7:
-      return 'armv7';
-    case DarwinArch.arm64:
-      return 'arm64';
-    case DarwinArch.x86_64:
-      return 'x86_64';
-  }
-}
-
 DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
@@ -680,12 +720,12 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
       return 'android-x86';
     case TargetPlatform.ios:
       if (darwinArch != null) {
-        return 'ios-${getNameForDarwinArch(darwinArch)}';
+        return 'ios-${darwinArch.name}';
       }
       return 'ios';
     case TargetPlatform.darwin:
       if (darwinArch != null) {
-        return 'darwin-${getNameForDarwinArch(darwinArch)}';
+        return 'darwin-${darwinArch.name}';
       }
       return 'darwin';
     case TargetPlatform.linux_x64:
@@ -755,54 +795,6 @@ AndroidArch getAndroidArchForName(String platform) {
       return AndroidArch.x86;
   }
   throw Exception('Unsupported Android arch name "$platform"');
-}
-
-String getNameForAndroidArch(AndroidArch arch) {
-  switch (arch) {
-    case AndroidArch.armeabi_v7a:
-      return 'armeabi-v7a';
-    case AndroidArch.arm64_v8a:
-      return 'arm64-v8a';
-    case AndroidArch.x86_64:
-      return 'x86_64';
-    case AndroidArch.x86:
-      return 'x86';
-  }
-}
-
-String getPlatformNameForAndroidArch(AndroidArch arch) {
-  switch (arch) {
-    case AndroidArch.armeabi_v7a:
-      return 'android-arm';
-    case AndroidArch.arm64_v8a:
-      return 'android-arm64';
-    case AndroidArch.x86_64:
-      return 'android-x64';
-    case AndroidArch.x86:
-      return 'android-x86';
-  }
-}
-
-String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
-  switch (targetPlatform) {
-    case TargetPlatform.fuchsia_arm64:
-      return 'arm64';
-    case TargetPlatform.fuchsia_x64:
-      return 'x64';
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-    case TargetPlatform.darwin:
-    case TargetPlatform.ios:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-    case TargetPlatform.windows_x64:
-      throw UnsupportedError('Unexpected Fuchsia platform $targetPlatform');
-  }
 }
 
 HostPlatform getCurrentHostPlatform() {
@@ -876,7 +868,7 @@ String getWebBuildDirectory([bool isWasm = false]) {
 String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
   final String arch = (targetPlatform == null) ?
       _getCurrentHostPlatformArchName() :
-      getNameForTargetPlatformArch(targetPlatform);
+      targetPlatform.simpleName;
   final String subDirs = 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
@@ -1033,44 +1025,7 @@ enum NullSafetyMode {
 
 String _getCurrentHostPlatformArchName() {
   final HostPlatform hostPlatform = getCurrentHostPlatform();
-  return getNameForHostPlatformArch(hostPlatform);
-}
-
-String getNameForTargetPlatformArch(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.darwin:
-    case TargetPlatform.windows_x64:
-      return 'x64';
-    case TargetPlatform.linux_arm64:
-      return 'arm64';
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.ios:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
-      throw UnsupportedError('Unexpected target platform $platform');
-  }
-}
-
-String getNameForHostPlatformArch(HostPlatform platform) {
-  switch (platform) {
-    case HostPlatform.darwin_x64:
-      return 'x64';
-    case HostPlatform.darwin_arm64:
-      return 'arm64';
-    case HostPlatform.linux_x64:
-      return 'x64';
-    case HostPlatform.linux_arm64:
-      return 'arm64';
-    case HostPlatform.windows_x64:
-      return 'x64';
-  }
+  return hostPlatform.platformName;
 }
 
 String? _uncapitalize(String? s) {
