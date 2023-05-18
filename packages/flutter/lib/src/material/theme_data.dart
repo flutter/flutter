@@ -6,7 +6,6 @@ import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import 'action_buttons.dart';
 import 'action_icons_theme.dart';
