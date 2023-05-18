@@ -21,6 +21,8 @@ const String _noAttachedCheckForWirelessMessage = 'No devices found yet. Checkin
 const String _noDevicesFoundMessage = 'No devices found.';
 const String _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 const String _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
+String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
+    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
 
 String _chooseDeviceOptionMessage(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
 String _foundMultipleSpecifiedDevicesMessage(String deviceId) =>
@@ -598,7 +600,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         disabledDevices.add(device);
         if (printWarning) {
           _logger.printStatus(
-              userMessages.flutterSpecifiedDeviceDevModeDisabled(device.name)
+              flutterSpecifiedDeviceDevModeDisabled(device.name)
           );
         }
       }
