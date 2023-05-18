@@ -1,4 +1,4 @@
-Signature: 68d93cec446bd80677dbd8bc2b343967
+Signature: 8062816ee1dcccd6f6b75fe432b67722
 
 ====================================================================================================
 LIBRARY: etc1
@@ -6978,14 +6978,11 @@ ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp + ../../.
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCore.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLCore.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLExpression.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLExpression.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLModifiers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLType.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/sksl/dsl/DSLVar.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLStructDefinition.h + ../../../third_party/skia/LICENSE
@@ -7123,14 +7120,11 @@ FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLSPIRVtoHLSL.h
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLVMCodeGenerator.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLCore.cpp
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLCore.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLExpression.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLModifiers.h
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.cpp
 FILE: ../../../third_party/skia/src/sksl/dsl/DSLType.h
-FILE: ../../../third_party/skia/src/sksl/dsl/DSLVar.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLFunctionPrototype.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLPrefixExpression.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLStructDefinition.h
