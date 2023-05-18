@@ -324,7 +324,7 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragHandleHover(bool hovering) {
     if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
       setState(() {
-        if(hovering){
+        if (hovering){
           dragHandleMaterialState.add(MaterialState.hovered);
         }
         else{
@@ -360,7 +360,7 @@ class _BottomSheetState extends State<BottomSheet> {
       // Only add [GestureDetector] to the drag handle when the rest of the
       // bottom sheet is not draggable. If the whole bottom sheet is draggable,
       // no need to add it.
-      if(!widget.enableDrag) {
+      if (!widget.enableDrag) {
         dragHandle = GestureDetector(
           onVerticalDragStart: _handleDragStart,
           onVerticalDragUpdate: _handleDragUpdate,

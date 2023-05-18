@@ -328,7 +328,7 @@ class AOTSnapshotter {
         }
       }
     } else {
-      assert(stripAfterBuild == false);
+      assert(!stripAfterBuild);
     }
 
     return 0;

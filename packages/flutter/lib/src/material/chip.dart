@@ -875,7 +875,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     setMaterialState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
-      value: widget.selected == true ? 1.0 : 0.0,
+      value: widget.selected ? 1.0 : 0.0,
       vsync: this,
     );
     selectionFade = CurvedAnimation(
@@ -884,7 +884,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     );
     avatarDrawerController = AnimationController(
       duration: _kDrawerDuration,
-      value: hasAvatar || widget.selected == true ? 1.0 : 0.0,
+      value: hasAvatar || widget.selected ? 1.0 : 0.0,
       vsync: this,
     );
     deleteDrawerController = AnimationController(
@@ -1042,7 +1042,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     }
     if (oldWidget.avatar != widget.avatar || oldWidget.selected != widget.selected) {
       setState(() {
-        if (hasAvatar || widget.selected == true) {
+        if (hasAvatar || widget.selected) {
           avatarDrawerController.forward();
         } else {
           avatarDrawerController.reverse();
@@ -1052,7 +1052,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     if (oldWidget.selected != widget.selected) {
       setState(() {
         setMaterialState(MaterialState.selected, widget.selected);
-        if (widget.selected == true) {
+        if (widget.selected) {
           selectController.forward();
         } else {
           selectController.reverse();
@@ -1342,7 +1342,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   }
 }
 
-class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_ChipSlot> {
+class _ChipRenderWidget extends SlottedMultiChildRenderObjectWidget<_ChipSlot, RenderBox> {
   const _ChipRenderWidget({
     required this.theme,
     this.value,
@@ -1393,7 +1393,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_ChipSlot> createRenderObject(BuildContext context) {
+  SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> createRenderObject(BuildContext context) {
     return _RenderChip(
       theme: theme,
       textDirection: Directionality.of(context),
@@ -1478,7 +1478,7 @@ class _ChipRenderTheme {
   );
 }
 
-class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {
+class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot, RenderBox> {
   _RenderChip({
     required _ChipRenderTheme theme,
     required TextDirection textDirection,
@@ -1979,7 +1979,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       _paintSelectionOverlay(context, offset);
     }
 
-    if (theme.showAvatar == false && avatarDrawerAnimation.isDismissed) {
+    if (!theme.showAvatar && avatarDrawerAnimation.isDismissed) {
       return;
     }
     final Color disabledColor = _disabledColor;

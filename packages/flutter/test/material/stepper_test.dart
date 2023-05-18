@@ -931,7 +931,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
   testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
     const ScrollPhysics physics = NeverScrollableScrollPhysics();
 
-    for(final StepperType type in StepperType.values) {
+    for (final StepperType type in StepperType.values) {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(

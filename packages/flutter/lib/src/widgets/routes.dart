@@ -1499,7 +1499,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final WillPopCallback callback in List<WillPopCallback>.of(_willPopCallbacks)) {
-      if (await callback() != true) {
+      // TODO(goderbauer): Tests using the Component Framework in google3 insist on returning
+      //   null for mocked out WillPopCallbacks. Fix that to remove ignore.
+      if (await callback() != true) { // ignore: no_literal_bool_comparisons
         return RoutePopDisposition.doNotPop;
       }
     }

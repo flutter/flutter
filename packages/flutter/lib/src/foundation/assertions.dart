@@ -1009,7 +1009,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       isInDebugMode = true;
       return true;
     }());
-    final bool reportError = isInDebugMode || details.silent != true; // could be null
+    final bool reportError = isInDebugMode || !details.silent;
     if (!reportError && !forceReport) {
       return;
     }

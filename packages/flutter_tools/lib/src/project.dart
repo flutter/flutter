@@ -515,7 +515,7 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   File get appManifestFile {
-    if(isUsingGradle) {
+    if (isUsingGradle) {
       return hostAppGradleRoot
         .childDirectory('app')
         .childDirectory('src')
@@ -568,7 +568,13 @@ class AndroidProject extends FlutterProjectPlatform {
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = globals.java?.version?.number;
+    final String? javaVersion = globals.androidSdk?.getJavaVersion(
+      androidStudio: globals.androidStudio,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      platform: globals.platform,
+      processUtils: globals.processUtils,
+    );
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
