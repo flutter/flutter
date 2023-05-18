@@ -160,13 +160,17 @@ void main() {
   testWithoutContext('IOSDevice.startApp twice in a row where ios-deploy fails the first time', () async {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
+    final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       attachDebuggerCommand(
         stdout: 'PROCESS_EXITED',
       ),
-      attachDebuggerCommand(),
+      attachDebuggerCommand(
+        stdout: '(lldb)     run\nsuccess\nThe Dart VM service is listening on http://127.0.0.1:456',
+        completer: completer,
+      ),
     ]);
-    final IOSDeviceWithFakeLogReader device = setUpIOSDevice(
+    final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
       fileSystem: fileSystem,
       logger: logger,
@@ -178,9 +182,7 @@ void main() {
       applicationPackage: fileSystem.currentDirectory,
     );
 
-    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
     device.portForwarder = const NoOpDevicePortForwarder();
-    device.deviceLogReader = deviceLogReader;
 
     final LaunchResult launchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
@@ -190,16 +192,6 @@ void main() {
 
     expect(launchResult.started, false);
     expect(launchResult.hasVmService, false);
-    expect(deviceLogReader.disposed, isTrue);
-
-    final FakeDeviceLogReader secondDeviceLogReader = FakeDeviceLogReader();
-    device.deviceLogReader = secondDeviceLogReader;
-
-    // Start writing messages to the log reader.
-    Timer.run(() {
-      secondDeviceLogReader.addLine('Foo');
-      secondDeviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-    });
 
     final LaunchResult secondLaunchResult = await device.startApp(iosApp,
       prebuiltApplication: true,
@@ -207,7 +199,7 @@ void main() {
       platformArgs: <String, dynamic>{},
       discoveryTimeout: Duration.zero,
     );
-
+    completer.complete();
     expect(secondLaunchResult.started, true);
     expect(secondLaunchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
@@ -611,42 +603,7 @@ void main() {
   });
 }
 
-class IOSDeviceWithFakeLogReader extends IOSDevice {
-  IOSDeviceWithFakeLogReader(
-    super.id, {
-    required super.fileSystem,
-    required super.name,
-    required super.cpuArchitecture,
-    required super.connectionInterface,
-    required super.isConnected,
-    super.sdkVersion,
-    required super.platform,
-    required super.iosDeploy,
-    required super.iMobileDevice,
-    required super.iProxy,
-    required super.logger
-  });
-
-  /// If not null, set the device logger to this when the [getLogReader]
-  /// method is called.
-  FakeDeviceLogReader? deviceLogReader;
-
-  @override
-  DeviceLogReader getLogReader({
-    covariant IOSApp? app,
-    bool includePastLogs = false,
-  }) {
-    if (deviceLogReader != null) {
-      setLogReader(app!, deviceLogReader!);
-    }
-    return super.getLogReader(
-      app: app,
-      includePastLogs: includePastLogs,
-    );
-  }
-}
-
-IOSDeviceWithFakeLogReader setUpIOSDevice({
+IOSDevice setUpIOSDevice({
   String sdkVersion = '13.0.1',
   FileSystem? fileSystem,
   Logger? logger,
@@ -668,7 +625,7 @@ IOSDeviceWithFakeLogReader setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
   logger ??= BufferLogger.test();
-  return IOSDeviceWithFakeLogReader('123',
+  return IOSDevice('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),

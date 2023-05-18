@@ -147,6 +147,33 @@ void main () {
         expect(logger.traceText, contains('* thread #1'));
       });
 
+      testWithoutContext('debugger attached and stop failed', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nprocess signal SIGSTOP\r\n\r\nerror: Failed to send signal 17: failed to send signal 17',
+            stdin: IOSink(stdin.sink),
+          ),
+        ]);
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final List<String> receivedLogLines = <String>[];
+        final Stream<String> logLines = iosDeployDebugger.logLines
+          ..listen(receivedLogLines.add);
+
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'success',
+        ]));
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await logLines.drain();
+
+        expect(logger.traceText, contains('ios-deploy exited with code 0'));
+      });
+
       testWithoutContext('handle processing logging after process exit', () async {
         final StreamController<List<int>> stdin = StreamController<List<int>>();
         // Make sure we don't hit a race where logging processed after the process exits
