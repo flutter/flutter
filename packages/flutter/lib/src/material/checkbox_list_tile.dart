@@ -495,12 +495,12 @@ class CheckboxListTile extends StatelessWidget {
   /// {@macro flutter.material.checkbox.semanticLabel}
   final String? checkboxSemanticLabel;
 
-  /// Defines how [leading], [trailing] and [title]
+  /// Defines how the underlying [ListTile.leading] and [ListTile.trailing]
   /// are vertically aligned relative to the [ListTile].
   ///
   /// If this property is null then [ListTileThemeData.titleAlignment]
   /// is used. If that is also null then [ListTileTitleAlignment.material3]
-  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used if [ThemeData.useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
   /// is used.
   ///
   /// See also:

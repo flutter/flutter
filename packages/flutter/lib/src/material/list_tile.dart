@@ -344,7 +344,7 @@ class ListTileConstraint {
 
   /// A constraint that can be applied to an [Icon], such as for an [IconButton].
   ///
-  /// When [ListTile.isMaterial3] is false, and using default styles,
+  /// When [ThemeData.useMaterial3] is false, and using default styles,
   /// this will cause the [IconButton]'s splash to clip off the [ListTile].
   static const ListTileConstraint icon24 =
     ListTileConstraint(
@@ -401,12 +401,12 @@ class ListTileConstraint {
 
   /// Constraints for a standard Material 2 or 3 video.
   ///
-  /// When [ListTile.useMaterial3] is true, this limits the leading or
+  /// When [ThemeData.useMaterial3] is true, this limits the leading or
   /// trailing element size to 56h x 100w when dense, otherwise 64h x 114w.
   /// The tile height to is forced to 72 when dense, otherwise to 88. The
   /// leading horizontal title gap is 16.
   ///
-  /// When [ListTile.useMaterial3] is false, this limits the leading or
+  /// When [ThemeData.useMaterial3] is false, this limits the leading or
   /// trailing element size to 48h x 86w when dense, otherwise 56h x 100w.
   /// The tile height to is forced to 64 when dense, otherwise to 72. If
   /// [ListTile.isThreeLine] is also true, the leading horizontal title gap
@@ -452,8 +452,9 @@ class ListTileConstraint {
   /// Constraints for an element with symmetric padding, such as an
   /// [IconButton].
   ///
-  /// Uses the same values as [ListTileConstraint.standard]
-  /// except it applies [ListTilePaddingCorrections.center].
+  /// Uses the same values as [ListTileConstraint.standard] except it
+  /// determines the padding at runtime by comparing the [correctedSize]
+  /// to the actual widget size.
   static ListTileConstraint center(Size correctedSize) {
     return ListTileConstraint(
       maxSize: _defaultSize,
@@ -634,7 +635,7 @@ class ListTileConstraint {
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This sample shows [ListTileLeadingTrailingConstraints] can be used to
+/// This sample shows [ListTileConstraints] can be used to
 /// configure the [leading] and [trailing] widgets to make the list in the
 /// Material 3 spec.
 ///
@@ -1158,12 +1159,12 @@ class ListTile extends StatelessWidget {
   /// that is also null, then a default value of 40 is used.
   final double? minLeadingWidth;
 
-  /// Defines how [ListTile.leading], [ListTile.trailing] and [ListTile.title]
+  /// Defines how [ListTile.leading] and [ListTile.trailing]
   /// are vertically aligned relative to the [ListTile].
   ///
   /// If this property is null then [ListTileThemeData.titleAlignment]
   /// is used. If that is also null then [ListTileTitleAlignment.material3]
-  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used if [ThemeData.useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
   /// is used.
   ///
   /// See also:

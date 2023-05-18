@@ -21,7 +21,7 @@ const Duration _kExpand = Duration(milliseconds: 200);
 /// Enables control over a single [ExpansionTile]'s expanded/collapsed state.
 ///
 /// It can be useful to expand or collapse an [ExpansionTile]
-/// programatically, for example to reconfigure an existing expansion
+/// programmatically, for example to reconfigure an existing expansion
 /// tile based on a system event. To do so, create an [ExpansionTile]
 /// with an [ExpansionTileController] that's owned by a stateful widget
 /// or look up the tile's automatically created [ExpansionTileController]
@@ -540,12 +540,12 @@ class ExpansionTile extends StatefulWidget {
   /// than supplying a controller.
   final ExpansionTileController? controller;
 
-  /// Defines how [leading], [trailing] and [title]
+  /// Defines how the underlying [leading] and [trailing]
   /// are vertically aligned relative to the [ListTile].
   ///
   /// If this property is null then [ListTileThemeData.titleAlignment]
   /// is used. If that is also null then [ListTileTitleAlignment.material3]
-  /// is used if [useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
+  /// is used if [ThemeData.useMaterial3] is true, otherwise [ListTileTitleAlignment.titleHeight]
   /// is used.
   ///
   /// See also:
