@@ -336,11 +336,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///
   /// This map caches the hit test result done when the pointer goes down
   /// ([PointerDownEvent] and [PointerPanZoomStartEvent]). This hit test result
-  /// will be used throughout the entire tap; that is, the pointer is seen as
-  /// pointing to the same place even if it has moved away until pointer goes up
-  /// ([PointerUpEvent] and [PointerPanZoomEndEvent]). This matches the expected
-  /// gesture interaction with a button, and allows devices that don't support
-  /// hovering to perform as few hit tests as possible.
+  /// will be used throughout the entire pointer interaction; that is, the
+  /// pointer is seen as pointing to the same place even if it has moved away
+  /// until pointer goes up ([PointerUpEvent] and [PointerPanZoomEndEvent]).
+  /// This matches the expected gesture interaction with a button, and allows
+  /// devices that don't support hovering to perform as few hit tests as
+  /// possible.
   ///
   /// On the other hand, hovering requires hit testing on almost every frame.
   /// This is handled in [RendererBinding] and [MouseTracker], and will ignore
