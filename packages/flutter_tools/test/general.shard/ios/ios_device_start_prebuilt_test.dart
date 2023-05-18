@@ -67,6 +67,7 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 // The command used to actually launch the app and attach the debugger with args in debug.
 FakeCommand attachDebuggerCommand({
   IOSink? stdin,
+  String stdout = '(lldb)     run\nsuccess',
   Completer<void>? completer,
   bool isWirelessDevice = false,
 }) {
@@ -94,7 +95,7 @@ FakeCommand attachDebuggerCommand({
       'PATH': '/usr/bin:null',
       'DYLD_LIBRARY_PATH': '/path/to/libraries',
     },
-    stdout: '(lldb)     run\nsuccess',
+    stdout: stdout,
     stdin: stdin,
   );
 }
@@ -153,6 +154,62 @@ void main() {
 
     expect(launchResult.started, true);
     expect(launchResult.hasVmService, true);
+    expect(await device.stopApp(iosApp), false);
+  });
+
+  testWithoutContext('IOSDevice.startApp twice in a row where ios-deploy fails the first time', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      attachDebuggerCommand(
+        stdout: 'PROCESS_EXITED',
+      ),
+      attachDebuggerCommand(),
+    ]);
+    final IOSDeviceWithFakeLogReader device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+
+    final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+    device.portForwarder = const NoOpDevicePortForwarder();
+    device.deviceLogReader = deviceLogReader;
+
+    final LaunchResult launchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+    );
+
+    expect(launchResult.started, false);
+    expect(launchResult.hasVmService, false);
+    expect(deviceLogReader.disposed, isTrue);
+
+    final FakeDeviceLogReader secondDeviceLogReader = FakeDeviceLogReader();
+    device.deviceLogReader = secondDeviceLogReader;
+
+    // Start writing messages to the log reader.
+    Timer.run(() {
+      secondDeviceLogReader.addLine('Foo');
+      secondDeviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
+    });
+
+    final LaunchResult secondLaunchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+      discoveryTimeout: Duration.zero,
+    );
+
+    expect(secondLaunchResult.started, true);
+    expect(secondLaunchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
   });
 
@@ -554,7 +611,42 @@ void main() {
   });
 }
 
-IOSDevice setUpIOSDevice({
+class IOSDeviceWithFakeLogReader extends IOSDevice {
+  IOSDeviceWithFakeLogReader(
+    super.id, {
+    required super.fileSystem,
+    required super.name,
+    required super.cpuArchitecture,
+    required super.connectionInterface,
+    required super.isConnected,
+    super.sdkVersion,
+    required super.platform,
+    required super.iosDeploy,
+    required super.iMobileDevice,
+    required super.iProxy,
+    required super.logger
+  });
+
+  /// If not null, set the device logger to this when the [getLogReader]
+  /// method is called.
+  FakeDeviceLogReader? deviceLogReader;
+
+  @override
+  DeviceLogReader getLogReader({
+    covariant IOSApp? app,
+    bool includePastLogs = false,
+  }) {
+    if (deviceLogReader != null) {
+      setLogReader(app!, deviceLogReader!);
+    }
+    return super.getLogReader(
+      app: app,
+      includePastLogs: includePastLogs,
+    );
+  }
+}
+
+IOSDeviceWithFakeLogReader setUpIOSDevice({
   String sdkVersion = '13.0.1',
   FileSystem? fileSystem,
   Logger? logger,
@@ -576,7 +668,7 @@ IOSDevice setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
   logger ??= BufferLogger.test();
-  return IOSDevice('123',
+  return IOSDeviceWithFakeLogReader('123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
