@@ -5109,35 +5109,42 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    final int validatedPosition = position.clamp(0, _text.length); // ignore_clamp_double_lint
-    if (validatedPosition == 0) {
+    if (position < 0) {
+      return null;
+    }
+    if (position == 0) {
       return 0;
     }
-    if (validatedPosition == _text.length) {
+    if (position >= _text.length) {
       return _text.length;
     }
     if (_text.length <= 1) {
-      return validatedPosition;
+      return position;
     }
 
-    return _breaksSurrogatePair(validatedPosition)
-        ? validatedPosition - 1
-        : validatedPosition;
+    return _breaksSurrogatePair(position)
+        ? position - 1
+        : position;
   }
 
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    final int validatedPosition = position.clamp(0, _text.length - 1); // ignore_clamp_double_lint
-    if (validatedPosition == _text.length - 1) {
+    if (position >= _text.length) {
+      return null;
+    }
+    if (position < 0) {
+      return 0;
+    }
+    if (position == _text.length - 1) {
       return _text.length;
     }
     if (_text.length <= 1) {
-      return validatedPosition;
+      return position;
     }
 
-    return _breaksSurrogatePair(validatedPosition + 1)
-        ? validatedPosition + 2
-        : validatedPosition + 1;
+    return _breaksSurrogatePair(position + 1)
+        ? position + 2
+        : position + 1;
   }
 }
 
