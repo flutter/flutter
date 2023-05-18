@@ -29,6 +29,12 @@ class _${blockName}DefaultsM3 extends ExpansionTileThemeData {
 
   @override
   Color? get collapsedIconColor => ${componentColor('md.comp.list.list-item.trailing-icon')};
+  
+  @override
+  bool? get showTopDividerWhenExpanded => true;
+  
+  @override
+  bool? get showBottomDividerWhenExpanded => true;
 }
 ''';
 }

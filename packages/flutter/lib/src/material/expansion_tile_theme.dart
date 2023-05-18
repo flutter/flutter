@@ -52,6 +52,8 @@ class ExpansionTileThemeData with Diagnosticable {
     this.shape,
     this.collapsedShape,
     this.clipBehavior,
+    this.showTopDividerWhenExpanded,
+    this.showBottomDividerWhenExpanded,
   });
 
   /// Overrides the default value of [ExpansionTile.backgroundColor].
@@ -90,6 +92,12 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Overrides the default value of [ExpansionTile.clipBehavior].
   final Clip? clipBehavior;
 
+  /// Overrides the default value of [ExpansionTile.showTopDividerWhenExpanded].
+  final bool? showTopDividerWhenExpanded;
+
+  /// Overrides the default value of [ExpansionTile.showBottomDividerWhenExpanded].
+  final bool? showBottomDividerWhenExpanded;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ExpansionTileThemeData copyWith({
@@ -105,6 +113,8 @@ class ExpansionTileThemeData with Diagnosticable {
     ShapeBorder? shape,
     ShapeBorder? collapsedShape,
     Clip? clipBehavior,
+    bool? showTopDividerWhenExpanded,
+    bool? showBottomDividerWhenExpanded,
   }) {
     return ExpansionTileThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -119,8 +129,12 @@ class ExpansionTileThemeData with Diagnosticable {
       shape: shape ?? this.shape,
       collapsedShape: collapsedShape ?? this.collapsedShape,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      showTopDividerWhenExpanded: showTopDividerWhenExpanded ?? this.showTopDividerWhenExpanded,
+      showBottomDividerWhenExpanded: showBottomDividerWhenExpanded ?? this.showBottomDividerWhenExpanded,
     );
   }
+
+  static bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 
   /// Linearly interpolate between ExpansionTileThemeData objects.
   static ExpansionTileThemeData? lerp(ExpansionTileThemeData? a, ExpansionTileThemeData? b, double t) {
@@ -139,6 +153,8 @@ class ExpansionTileThemeData with Diagnosticable {
       collapsedTextColor: Color.lerp(a?.collapsedTextColor, b?.collapsedTextColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       collapsedShape: ShapeBorder.lerp(a?.collapsedShape, b?.collapsedShape, t),
+      showTopDividerWhenExpanded: _lerpBool(a?.showTopDividerWhenExpanded, b?.showTopDividerWhenExpanded, t),
+      showBottomDividerWhenExpanded: _lerpBool(a?.showBottomDividerWhenExpanded, b?.showBottomDividerWhenExpanded, t),
     );
   }
 
@@ -157,6 +173,8 @@ class ExpansionTileThemeData with Diagnosticable {
       shape,
       collapsedShape,
       clipBehavior,
+      showTopDividerWhenExpanded,
+      showBottomDividerWhenExpanded,
     );
   }
 
@@ -180,7 +198,9 @@ class ExpansionTileThemeData with Diagnosticable {
       && other.collapsedTextColor == collapsedTextColor
       && other.shape == shape
       && other.collapsedShape == collapsedShape
-      && other.clipBehavior == clipBehavior;
+      && other.clipBehavior == clipBehavior
+      && other.showTopDividerWhenExpanded == showTopDividerWhenExpanded
+      && other.showBottomDividerWhenExpanded == showBottomDividerWhenExpanded;
   }
 
   @override
@@ -198,6 +218,8 @@ class ExpansionTileThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('collapsedShape', collapsedShape, defaultValue: null));
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showTopDividerWhenExpanded', showTopDividerWhenExpanded, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('showBottomDividerWhenExpanded', showBottomDividerWhenExpanded, defaultValue: null));
   }
 }
 

@@ -254,8 +254,8 @@ class ExpansionTile extends StatefulWidget {
     this.titleAlignment,
     this.leadingConstraint,
     this.trailingConstraint,
-    this.showTopDividerWhenExpanded = true,
-    this.showBottomDividerWhenExpanded = true,
+    this.showTopDividerWhenExpanded,
+    this.showBottomDividerWhenExpanded,
   }) : assert(
          expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
          'CrossAxisAlignment.baseline is not supported since the expanded children '
@@ -556,13 +556,15 @@ class ExpansionTile extends StatefulWidget {
 
   /// Show a [Divider] above the [ExpansionTile] when expanded.
   ///
-  /// Defaults to true.
-  final bool showTopDividerWhenExpanded;
+  /// If this property is null, the [ExpansionTileThemeData.showTopDividerWhenExpanded]
+  /// is used. If that is also null, true is used
+  final bool? showTopDividerWhenExpanded;
 
   /// Show a [Divider] below the [ExpansionTile] when expanded.
   ///
-  /// Defaults to true.
-  final bool showBottomDividerWhenExpanded;
+  /// If this property is null, the [ExpansionTileThemeData.showBottomDividerWhenExpanded]
+  /// is used. If that is also null, true is used
+  final bool? showBottomDividerWhenExpanded;
 
   @override
   State<ExpansionTile> createState() => _ExpansionTileState();
@@ -680,9 +682,9 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   Widget _buildChildren(BuildContext context, Widget? child) {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
-    final ShapeBorder expansionTileBorder = _border.value ?? const Border(
-            top: BorderSide(color: Colors.transparent),
-            bottom: BorderSide(color: Colors.transparent),
+    final ShapeBorder expansionTileBorder = _border.value ?? Border(
+            top: Divider.createBorderSide(context, color: Colors.transparent),
+            bottom: Divider.createBorderSide(context, color: Colors.transparent),
           );
     final Clip clipBehavior = widget.clipBehavior ?? expansionTileTheme.clipBehavior ?? Clip.none;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -758,22 +760,27 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ExpansionTileThemeData defaults = theme.useMaterial3
       ? _ExpansionTileDefaultsM3(context)
       : _ExpansionTileDefaultsM2(context);
+    final bool showTopDividerWhenExpanded = widget.showTopDividerWhenExpanded
+      ?? expansionTileTheme.showTopDividerWhenExpanded
+      ?? defaults.showTopDividerWhenExpanded!;
+    final bool showBottomDividerWhenExpanded = widget.showBottomDividerWhenExpanded
+      ?? expansionTileTheme.showBottomDividerWhenExpanded
+      ?? defaults.showBottomDividerWhenExpanded!;
+    final BorderSide transparentBorder = Divider.createBorderSide(context, color: Colors.transparent);
+    final BorderSide coloredBorder = Divider.createBorderSide(context);
+
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
-        ?? const Border(
-          top: BorderSide(color: Colors.transparent),
-          bottom: BorderSide(color: Colors.transparent),
+        ?? Border(
+          top: transparentBorder,
+          bottom: transparentBorder,
         )
       ..end = widget.shape
         ?? expansionTileTheme.collapsedShape
         ?? Border(
-          top: widget.showTopDividerWhenExpanded
-              ? Divider.createBorderSide(context)
-              : const BorderSide(color: Colors.transparent),
-          bottom: widget.showBottomDividerWhenExpanded
-              ? Divider.createBorderSide(context)
-              : const BorderSide(color: Colors.transparent),
+          top: showTopDividerWhenExpanded ? coloredBorder : transparentBorder,
+          bottom: showBottomDividerWhenExpanded ? coloredBorder : transparentBorder,
         );
     _headerColorTween
       ..begin = widget.collapsedTextColor
@@ -837,6 +844,12 @@ class _ExpansionTileDefaultsM2 extends ExpansionTileThemeData {
 
   @override
   Color? get collapsedIconColor => _theme.unselectedWidgetColor;
+
+  @override
+  bool? get showTopDividerWhenExpanded => true;
+
+  @override
+  bool? get showBottomDividerWhenExpanded => true;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - ExpansionTile
@@ -866,6 +879,12 @@ class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
 
   @override
   Color? get collapsedIconColor => _colors.onSurfaceVariant;
+
+  @override
+  bool? get showTopDividerWhenExpanded => true;
+
+  @override
+  bool? get showBottomDividerWhenExpanded => true;
 }
 
 // END GENERATED TOKEN PROPERTIES - ExpansionTile

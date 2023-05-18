@@ -1116,7 +1116,7 @@ class _ExpansionTilesState extends State<ExpansionTiles> {
         ExpansionTile(
           title: headline,
           subtitle: supportingText,
-          showTopDividerWhenExpanded: !Theme.of(context).useMaterial3,
+          showTopDividerWhenExpanded: true, //!Theme.of(context).useMaterial3,
           controlAffinity: leadingControlAffinity
               ? ListTileControlAffinity.leading
               : ListTileControlAffinity.trailing,

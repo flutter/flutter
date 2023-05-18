@@ -67,6 +67,8 @@ void main() {
     expect(theme.shape, null);
     expect(theme.collapsedShape, null);
     expect(theme.clipBehavior, null);
+    expect(theme.showTopDividerWhenExpanded, null);
+    expect(theme.showBottomDividerWhenExpanded, null);
   });
 
   testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
@@ -96,6 +98,8 @@ void main() {
       shape: Border(),
       collapsedShape: Border(),
       clipBehavior: Clip.antiAlias,
+      showTopDividerWhenExpanded: true,
+      showBottomDividerWhenExpanded: false,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -116,6 +120,8 @@ void main() {
       'shape: Border.all(BorderSide(width: 0.0, style: none))',
       'collapsedShape: Border.all(BorderSide(width: 0.0, style: none))',
       'clipBehavior: Clip.antiAlias',
+      'showTopDividerWhenExpanded: true',
+      'showBottomDividerWhenExpanded: false',
     ]);
   });
 
