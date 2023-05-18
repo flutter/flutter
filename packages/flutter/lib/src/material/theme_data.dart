@@ -1148,7 +1148,7 @@ class ThemeData with Diagnosticable {
   ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
-  /// \* *new* means the new widgets/methods since the last stable release.
+  /// \* *new* means the new widgets/methods created since the last stable release.
   ///   * Badges: [Badge]
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
