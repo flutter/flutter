@@ -2822,8 +2822,9 @@ enum _RouteLifecycle {
   removing, // we are waiting for subsequent routes to be done animating, then will switch to dispose
   // routes that are completely removed from the navigator and overlay.
   dispose, // we will dispose the route momentarily
-  disposing, // The entry is waiting for its subtree to disposed first. It should
-             // be in stored in the _entryWaitingForSubTreeDisposal
+  disposing, // The entry is waiting for its widget subtree to be disposed
+             // first. It is stored in _entryWaitingForSubTreeDisposal while
+             // awaiting that.
   disposed, // we have disposed the route
 }
 
@@ -3050,12 +3051,23 @@ class _RouteEntry extends RouteTransitionRecord {
     currentState = _RouteLifecycle.dispose;
   }
 
+  /// Disposes this route entry and its [route] immediately.
+  ///
+  /// This method does not wait for the widget subtree of the [route] to unmount
+  /// before disposing.
   void forcedDispose() {
     assert(currentState.index < _RouteLifecycle.disposed.index);
     currentState = _RouteLifecycle.disposed;
     route.dispose();
   }
 
+  /// Disposes this route entry and its [route].
+  ///
+  /// This method waits for the widget subtree of the [route] to unmount before
+  /// disposing. If subtree is already unmounted, this method calls
+  /// [forcedDispose] immediately.
+  ///
+  /// Use [forcedDispose] if the [route] need to be disposed immediately.
   void dispose() {
     assert(currentState.index < _RouteLifecycle.disposing.index);
     currentState = _RouteLifecycle.disposing;
