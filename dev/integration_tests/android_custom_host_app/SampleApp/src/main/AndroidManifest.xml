@@ -7,6 +7,7 @@ found in the LICENSE file. -->
     package="io.flutter.add2app">
 
     <application android:allowBackup="false"
+        android:name="${applicationName}"
         tools:ignore="GoogleAppIndexingWarning,MissingApplicationIcon">
         <activity android:name=".MainActivity" />
     </application>

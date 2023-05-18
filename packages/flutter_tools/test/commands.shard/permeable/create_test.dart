@@ -2937,14 +2937,16 @@ void main() {
     final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
 
     // Each build file should contain namespace.
-    expect(moduleBuildGradleFileContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
-    expect(moduleAppBuildGradleFileContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
-    expect(moduleFlutterBuildGradleFileContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
+    expect(moduleAppBuildGradleFileContent.contains(expectedNameSpace), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
 
     // The namespaces should be conditionalized for AGP <4.2.
-    expect(moduleBuildGradleFileContent.contains('if (project.android.hasProperty("namespace")) {'), true);
-    expect(moduleAppBuildGradleFileContent.contains('if (project.android.hasProperty("namespace")) {'), true);
-    expect(moduleFlutterBuildGradleFileContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+    const String expectedConditional = 'if (project.android.hasProperty("namespace")) {';
+    expect(moduleBuildGradleFileContent.contains(expectedConditional), true);
+    expect(moduleAppBuildGradleFileContent.contains(expectedConditional), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedConditional), true);
 
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
