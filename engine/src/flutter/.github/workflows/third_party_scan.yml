@@ -13,6 +13,13 @@ jobs:
     name: Vulnerability scanning
     runs-on: ubuntu-20.04
     if: ${{ github.repository == 'flutter/engine' }}
+    permissions:
+      # Needed to upload the SARIF results to code-scanning dashboard.
+      security-events: write
+      actions: read
+      contents: read
+      # Needed to access OIDC token.
+      id-token: write
     steps:
       - name: "Checkout code"
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
