@@ -537,7 +537,7 @@ void main() {
 
     final double textWidth = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
       ? collapsedWidth
-      : (collapsedWidth / 1.5).floorToDouble() * 1.5;
+      : (collapsedWidth / 3).floorToDouble() * 3;
     // The title is scaled and transformed to be 3 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 3 times smaller than the full width. The height of the text is the same

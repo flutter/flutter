@@ -1472,7 +1472,7 @@ void main() {
 
      expect(painter.computeLineMetrics().length, 1);
      expect(painter.computeLineMetrics()[0].width, 4 * fontSize);
-  });
+  }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
 }
 
 class MockCanvas extends Fake implements Canvas {
