@@ -384,7 +384,7 @@ void main() {
     Error? error;
     try {
       nav.currentState!.pushNamed<Object>('/second');
-    } on Error catch(e) {
+    } on Error catch (e) {
       error = e;
     }
     expect(error, isNull);

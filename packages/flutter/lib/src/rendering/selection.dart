@@ -58,7 +58,7 @@ enum SelectionResult {
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
-/// and is typically not use directly.
+/// and is typically not used directly.
 ///
 /// {@template flutter.rendering.SelectionHandler}
 /// This class returns a [SelectionGeometry] as its [value], and is responsible
