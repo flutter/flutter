@@ -19,23 +19,23 @@ import 'tooltip_visibility.dart';
 /// Signature for when a tooltip is triggered.
 typedef TooltipTriggeredCallback = void Function();
 
-// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
-// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
-// child over parent, last sibling over first sibling).
-//
-// The [onEnter] method will be called when a mouse pointer enters this
-// [MouseRegion], and there is no other [_ExclusiveMouseRegion]s obstructing
-// this [_ExclusiveMouseRegion] from receiving the events. This includes the
-// case where the mouse cursor stays within the paint bounds of an outer
-// [_ExclusiveMouseRegion], but moves outside of the bounds of the inner
-// [_ExclusiveMouseRegion] that was initially blocking the outer widget.
-//
-// Likewise, [onExit] is called when the a mouse pointer moves out of the paint
-// bounds of this widget, or moves into another [_ExclusiveMouseRegion] that
-// overlaps this widget in hit-testing order.
-//
-// This widget doesn't affect [MouseRegion]s that aren't [_ExclusiveMouseRegion]s,
-// or other [HitTestTarget]s in the tree.
+/// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
+/// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
+/// child over parent, last sibling over first sibling).
+///
+/// The [onEnter] method will be called when a mouse pointer enters this
+/// [MouseRegion], and there is no other [_ExclusiveMouseRegion]s obstructing
+/// this [_ExclusiveMouseRegion] from receiving the events. This includes the
+/// case where the mouse cursor stays within the paint bounds of an outer
+/// [_ExclusiveMouseRegion], but moves outside of the bounds of the inner
+/// [_ExclusiveMouseRegion] that was initially blocking the outer widget.
+///
+/// Likewise, [onExit] is called when the a mouse pointer moves out of the paint
+/// bounds of this widget, or moves into another [_ExclusiveMouseRegion] that
+/// overlaps this widget in hit-testing order.
+///
+/// This widget doesn't affect [MouseRegion]s that aren't [_ExclusiveMouseRegion]s,
+/// or other [HitTestTarget]s in the tree.
 class _ExclusiveMouseRegion extends MouseRegion {
   const _ExclusiveMouseRegion({
     super.onEnter,
@@ -611,7 +611,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   // # Current Hovering Behavior:
-  // 1. Hovered tooltips don't show more than one at once, for each mouse
+  // 1. Hovered tooltips don't show more than one at a time, for each mouse
   //    device. For example, a chip with a delete icon typically shouldn't show
   //    both the delete icon tooltip and the chip tooltip at the same time.
   // 2. Hovered tooltips are dismissed when:
@@ -620,8 +620,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   //    (even these tooltips are still hovered),
   //    iii. The last hovering device leaves the tooltip.
   void _handleMouseEnter(PointerEnterEvent event) {
-    // The callback is also used in an OverlayEntry there's a chance that this
-    // widget is already unmounted.
+    // The callback is also used in an OverlayEntry, so there's a chance that
+    // this widget is already unmounted.
     if (!mounted) {
       return;
     }
