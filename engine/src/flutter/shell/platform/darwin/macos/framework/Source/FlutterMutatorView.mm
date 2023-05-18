@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
-#include "flutter/fml/logging.h"
 
 #include <QuartzCore/QuartzCore.h>
+
 #include <vector>
+
+#include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 @interface FlutterMutatorView () {
   /// Each of these views clips to a CGPathRef. These views, if present,
@@ -83,6 +86,28 @@ FlutterRect ToFlutterRect(const CGRect& rect) {
       .bottom = rect.origin.y + rect.size.height,
 
   };
+}
+
+using MutationVector = std::vector<FlutterPlatformViewMutation>;
+
+/// Returns a vector of FlutterPlatformViewMutation object pointers associated with a platform view.
+/// The transforms sent from the engine include a transform from logical to physical coordinates.
+/// Since Cocoa deals only in logical points, this function prepends a scale transform that scales
+/// back from physical to logical coordinates to compensate.
+MutationVector MutationsForPlatformView(const FlutterPlatformView* view, float scale) {
+  MutationVector mutations;
+  mutations.reserve(view->mutations_count + 1);
+  mutations.push_back({
+      .type = kFlutterPlatformViewMutationTypeTransformation,
+      .transformation{
+          .scaleX = 1.0 / scale,
+          .scaleY = 1.0 / scale,
+      },
+  });
+  for (size_t i = 0; i < view->mutations_count; ++i) {
+    mutations.push_back(*view->mutations[i]);
+  }
+  return mutations;
 }
 
 /// Returns whether the point is inside ellipse with given radius (centered at 0, 0).
@@ -219,27 +244,29 @@ CGPathRef PathFromRoundedRect(const FlutterRoundedRect& roundedRect) {
   return YES;
 }
 
+/// Returns the scale factor to translate logical pixels to physical pixels for this view.
+- (CGFloat)contentsScale {
+  return self.superview != nil ? self.superview.layer.contentsScale : 1.0;
+}
+
 /// Whenever possible view will be clipped using layer bounds.
 /// If clipping to path is needed, CAShapeLayer(s) will be used as mask.
 /// Clipping to round rect only clips to path if round corners are intersected.
 - (void)applyFlutterLayer:(const FlutterLayer*)layer {
-  CGFloat scale = self.superview != nil ? self.superview.layer.contentsScale : 1.0;
-
-  // Initial transform to compensate for scale factor. This is needed because all
-  // cocoa coordinates are logical but Flutter will send the physical to logical
-  // transform in mutations.
-  CATransform3D transform = CATransform3DMakeScale(1.0 / scale, 1.0 / scale, 1);
+  CGFloat scale = [self contentsScale];
+  auto mutations = MutationsForPlatformView(layer->platform_view, scale);
 
   // Platform view transform after applying all transformation mutations.
-  CATransform3D finalTransform = transform;
-  for (size_t i = 0; i < layer->platform_view->mutations_count; ++i) {
-    auto mutation = layer->platform_view->mutations[i];
-    if (mutation->type == kFlutterPlatformViewMutationTypeTransformation) {
-      finalTransform =
-          CATransform3DConcat(ToCATransform3D(mutation->transformation), finalTransform);
+  CATransform3D finalTransform = CATransform3DIdentity;
+  for (auto mutation : mutations) {
+    if (mutation.type == kFlutterPlatformViewMutationTypeTransformation) {
+      CATransform3D mutationTransform = ToCATransform3D(mutation.transformation);
+      finalTransform = CATransform3DConcat(mutationTransform, finalTransform);
     }
   }
 
+  // Compute the untransformed bounding rect for the platform view in logical pixels.
+  // FlutterLayer.size is in physical pixels but Cocoa uses logical points.
   CGRect untransformedBoundingRect =
       CGRectMake(0, 0, layer->size.width / scale, layer->size.height / scale);
 
@@ -257,22 +284,23 @@ CGPathRef PathFromRoundedRect(const FlutterRoundedRect& roundedRect) {
   // Gathered pairs of rounded rect in local coordinates + appropriate transform.
   std::vector<std::pair<FlutterRoundedRect, CGAffineTransform>> roundedRects;
 
-  for (size_t i = 0; i < layer->platform_view->mutations_count; ++i) {
-    auto mutation = layer->platform_view->mutations[i];
-    if (mutation->type == kFlutterPlatformViewMutationTypeTransformation) {
-      transform = CATransform3DConcat(ToCATransform3D(mutation->transformation), transform);
-    } else if (mutation->type == kFlutterPlatformViewMutationTypeClipRect) {
-      CGRect rect = CGRectApplyAffineTransform(FromFlutterRect(mutation->clip_rect),
+  // Create the initial transform.
+  CATransform3D transform = CATransform3DIdentity;
+  for (auto mutation : mutations) {
+    if (mutation.type == kFlutterPlatformViewMutationTypeTransformation) {
+      transform = CATransform3DConcat(ToCATransform3D(mutation.transformation), transform);
+    } else if (mutation.type == kFlutterPlatformViewMutationTypeClipRect) {
+      CGRect rect = CGRectApplyAffineTransform(FromFlutterRect(mutation.clip_rect),
                                                CATransform3DGetAffineTransform(transform));
       masterClip = CGRectIntersection(rect, masterClip);
-    } else if (mutation->type == kFlutterPlatformViewMutationTypeClipRoundedRect) {
+    } else if (mutation.type == kFlutterPlatformViewMutationTypeClipRoundedRect) {
       CGAffineTransform affineTransform = CATransform3DGetAffineTransform(transform);
-      roundedRects.push_back(std::make_pair(mutation->clip_rounded_rect, affineTransform));
-      CGRect rect = CGRectApplyAffineTransform(FromFlutterRect(mutation->clip_rounded_rect.rect),
+      roundedRects.push_back(std::make_pair(mutation.clip_rounded_rect, affineTransform));
+      CGRect rect = CGRectApplyAffineTransform(FromFlutterRect(mutation.clip_rounded_rect.rect),
                                                affineTransform);
       masterClip = CGRectIntersection(rect, masterClip);
-    } else if (mutation->type == kFlutterPlatformViewMutationTypeOpacity) {
-      self.layer.opacity *= mutation->opacity;
+    } else if (mutation.type == kFlutterPlatformViewMutationTypeOpacity) {
+      self.layer.opacity *= mutation.opacity;
     }
   }
 
