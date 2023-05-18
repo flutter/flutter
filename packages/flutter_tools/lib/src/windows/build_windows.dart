@@ -166,7 +166,7 @@ Future<void> _runCmakeGeneration({
         buildDir.path,
         '-G',
         generator,
-	// Flutter for Windows doesn't include ARM binaries, so this pins the generator to x64.
+        // Flutter for Windows doesn't include ARM binaries, so this pins the generator to x64.
         '-A',
         'x64',
       ],
