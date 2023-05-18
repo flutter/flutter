@@ -763,7 +763,7 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 12, extentOffset: 4));
 
       await gesture.up();
-    });
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
