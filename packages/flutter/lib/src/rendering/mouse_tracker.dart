@@ -310,7 +310,7 @@ class MouseTracker extends ChangeNotifier {
     if (event is PointerSignalEvent) {
       return;
     }
-    late final HitTestResult result;
+    final HitTestResult result;
     if (event is PointerRemovedEvent) {
       result = HitTestResult();
     } else {
