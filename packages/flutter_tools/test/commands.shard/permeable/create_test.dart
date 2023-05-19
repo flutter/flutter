@@ -2936,11 +2936,12 @@ void main() {
     final String moduleAppBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath)).readAsString();
     final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
 
-    // Each build file should contain namespace.
+    // Each build file should contain the expected namespace.
     const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
     expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
-    expect(moduleAppBuildGradleFileContent.contains('$expectedNameSpace.host'), true);
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
+    const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
+    expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
 
     // The namespaces should be conditionalized for AGP <4.2.
     const String expectedConditional = 'if (project.android.hasProperty("namespace")) {';
