@@ -12079,6 +12079,69 @@
       }
     }
   },
+  "flutter/impeller/entity/points.comp.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/points.comp.vkspv",
+      "has_uniform_computation": true,
+      "type": "Compute",
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 35,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              null
+            ],
+            "longest_path_cycles": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.046875,
+              0.0,
+              0.046875,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.453125,
+              0.21875,
+              0.453125,
+              0.1875,
+              5.0,
+              0.0
+            ]
+          },
+          "shared_storage_used": 0,
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 16,
+          "work_registers_used": 17
+        }
+      }
+    }
+  },
   "flutter/impeller/entity/porter_duff_blend.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",

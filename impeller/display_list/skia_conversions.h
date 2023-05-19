@@ -26,6 +26,8 @@ std::optional<Rect> ToRect(const SkRect* rect);
 
 std::vector<Rect> ToRects(const SkRect tex[], int count);
 
+std::vector<Point> ToPoints(const SkPoint points[], int count);
+
 Point ToPoint(const SkPoint& point);
 
 Color ToColor(const SkColor& color);
