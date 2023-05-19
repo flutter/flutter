@@ -523,6 +523,7 @@ class IOSDevice extends Device {
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');
         _logger.printError('');
+        await dispose();
         return LaunchResult.failed();
       }
 
@@ -546,6 +547,7 @@ class IOSDevice extends Device {
             "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
           );
         } else {
+          iosDeployDebugger?.checkForSymbolsFiles(_fileSystem);
           iosDeployDebugger?.pauseDumpBacktraceResume();
         }
       });
@@ -556,6 +558,7 @@ class IOSDevice extends Device {
         final Uri? serviceURL = await vmServiceDiscovery?.uri;
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
+          await dispose();
           return LaunchResult.failed();
         }
 
@@ -586,12 +589,14 @@ class IOSDevice extends Device {
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
+        await dispose();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
+      await dispose();
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
@@ -606,7 +611,7 @@ class IOSDevice extends Device {
     // If the debugger is not attached, killing the ios-deploy process won't stop the app.
     final IOSDeployDebugger? deployDebugger = iosDeployDebugger;
     if (deployDebugger != null && deployDebugger.debuggerAttached) {
-      return deployDebugger.exit() == true;
+      return deployDebugger.exit();
     }
     return false;
   }

@@ -5,7 +5,6 @@
 @TestOn('!chrome')
 library;
 
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -427,7 +426,7 @@ void main() {
             tester.view.devicePixelRatio = 1;
             await mediaQueryBoilerplate(tester, materialType: materialType);
 
-            width = min(timePickerPortraitSize.width + padding.horizontal, 560); // width is limited to 560
+            width = timePickerPortraitSize.width + padding.horizontal;
             height = timePickerPortraitSize.height + padding.vertical;
             expect(
               tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
@@ -446,7 +445,7 @@ void main() {
               materialType: materialType,
             );
 
-            width =  min(timePickerLandscapeSize.width + padding.horizontal, 560); // width is limited to 560
+            width =  timePickerLandscapeSize.width + padding.horizontal;
             height = timePickerLandscapeSize.height + padding.vertical;
             expect(
               tester.getSize(find.byWidget(getMaterialFromDialog(tester))),
@@ -750,10 +749,10 @@ void main() {
             expect(tester.getBottomLeft(find.text(okString)).dx, 616);
             expect(tester.getBottomRight(find.text(cancelString)).dx, 582);
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(144, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(298.0, 143.0)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 610);
-            expect(tester.getBottomRight(find.text(cancelString)).dx, 572);
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(292.0, 143.0)));
+            expect(tester.getBottomLeft(find.text(okString)).dx, 616);
+            expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
         }
 
         await tester.tap(find.text(okString));
@@ -771,11 +770,11 @@ void main() {
             expect(tester.getBottomRight(find.text(okString)).dx, 184);
             expect(tester.getBottomLeft(find.text(cancelString)).dx, 218);
           case MaterialType.material3:
-            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(502, 129)));
-            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(656, 143)));
-            expect(tester.getBottomLeft(find.text(okString)).dx, 162);
-            expect(tester.getBottomRight(find.text(okString)).dx, 190);
-            expect(tester.getBottomLeft(find.text(cancelString)).dx, 228);
+            expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(508, 129)));
+            expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 143)));
+            expect(tester.getBottomLeft(find.text(okString)).dx, 156);
+            expect(tester.getBottomRight(find.text(okString)).dx, 184);
+            expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
         }
 
         await tester.tap(find.text(okString));

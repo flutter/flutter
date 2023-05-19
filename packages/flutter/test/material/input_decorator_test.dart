@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -156,7 +157,7 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 }
 
 void main() {
-  for(final bool useMaterial3 in  <bool>[true, false]){
+  for (final bool useMaterial3 in  <bool>[true, false]){
   testWidgets('InputDecorator input/label text layout', (WidgetTester tester) async {
     // The label appears above the input text
     await tester.pumpWidget(
@@ -379,7 +380,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    if(!useMaterial3) {
+    if (!useMaterial3) {
       expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
       expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
@@ -722,7 +723,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    if(!useMaterial3) {
+    if (!useMaterial3) {
       expect(tester.getTopLeft(find.byKey(key)).dy, tester.getTopLeft(find.text('hint')).dy);
       expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
@@ -1764,6 +1765,40 @@ void main() {
     );
 
     expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
+  });
+
+  testWidgets('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(
+              labelText: 'label',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(TextField));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
@@ -6213,34 +6248,6 @@ void main() {
 
     // Verify that the styles were passed along
     expect(getLabelStyle(tester).color, labelStyle.color);
-  });
-
-  testWidgets("InputDecorator's floating label origin no longer depends on ThemeData.fixTextFieldOutlineLabel", (WidgetTester tester) async {
-    Widget buildFrame(bool fixTextFieldOutlineLabel) {
-      return buildInputDecorator(
-        useMaterial3: useMaterial3,
-        isEmpty: true,
-        theme: ThemeData.light().copyWith(
-          fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
-        ),
-        decoration: const InputDecoration(
-          labelText: 'label',
-          enabledBorder: OutlineInputBorder(),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(false));
-    await tester.pumpAndSettle();
-
-    // floatingLabelHeight = 12 (font size 16dps * 0.75 = 12)
-    // labelY = -floatingLabelHeight/2 + borderWidth/2
-    expect(tester.getTopLeft(find.text('label')).dy, -5.5);
-
-    await tester.pumpWidget(buildFrame(true));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, -5.5);
   });
 
   testWidgets('hint style overflow works', (WidgetTester tester) async {

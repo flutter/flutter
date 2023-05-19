@@ -304,7 +304,7 @@ class BoxConstraints extends Constraints {
   ///  * The size must satisfy these constraints.
   ///  * The aspect ratio of the returned size matches the aspect ratio of the
   ///    given size.
-  ///  * The returned size as big as possible while still being equal to or
+  ///  * The returned size is as big as possible while still being equal to or
   ///    smaller than the given size.
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
     if (isTight) {
@@ -1486,10 +1486,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// ### Text
   ///
-  /// Text is the canonical example of a width-in-height-out algorithm. The
-  /// `height` argument is therefore ignored.
+  /// English text is the canonical example of a width-in-height-out algorithm.
+  /// The `height` argument is therefore ignored.
   ///
-  /// Consider the string "Hello World" The _maximum_ intrinsic width (as
+  /// Consider the string "Hello World". The _maximum_ intrinsic width (as
   /// returned from [computeMaxIntrinsicWidth]) would be the width of the string
   /// with no line breaks.
   ///
@@ -1498,12 +1498,12 @@ abstract class RenderBox extends RenderObject {
   /// might still not overflow. For example, maybe the rendering would put a
   /// line-break half-way through the words, as in "Hel⁞lo⁞Wor⁞ld". However,
   /// this wouldn't be a _correct_ rendering, and [computeMinIntrinsicWidth] is
-  /// supposed to render the minimum width that the box could be without failing
-  /// to _correctly_ paint the contents within itself.
+  /// defined as returning the minimum width that the box could be without
+  /// failing to _correctly_ paint the contents within itself.
   ///
-  /// The minimum intrinsic _height_ for a given width smaller than the minimum
-  /// intrinsic width could therefore be greater than the minimum intrinsic
-  /// height for the minimum intrinsic width.
+  /// The minimum intrinsic _height_ for a given width _smaller_ than the
+  /// minimum intrinsic width could therefore be greater than the minimum
+  /// intrinsic height for the minimum intrinsic width.
   ///
   /// ### Viewports (e.g. scrolling lists)
   ///
