@@ -26,6 +26,11 @@ String camelCase(String str) {
   return str;
 }
 
+/// Convert `fooBar` to `foo-bar`.
+String kebabCase(String str) {
+  return snakeCase(str, '-');
+}
+
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
