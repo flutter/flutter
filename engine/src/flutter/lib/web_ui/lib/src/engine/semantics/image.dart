@@ -73,6 +73,7 @@ class ImageRoleManager extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     _cleanUpAuxiliaryElement();
     _cleanupElement();
   }

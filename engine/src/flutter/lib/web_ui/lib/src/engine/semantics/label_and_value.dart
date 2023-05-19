@@ -102,6 +102,7 @@ class LabelAndValue extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     _cleanUpDom();
   }
 }

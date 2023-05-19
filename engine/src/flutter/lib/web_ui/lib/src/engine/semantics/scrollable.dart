@@ -224,6 +224,7 @@ class Scrollable extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     final DomCSSStyleDeclaration style = semanticsObject.element.style;
     assert(_gestureModeListener != null);
     style.removeProperty('overflowY');
