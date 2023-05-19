@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
@@ -479,7 +478,7 @@ class TwoDimensionalViewportParentData extends ParentData {
       'paintOffset=$paintOffset; '
       '${_paintExtent == null
         ? 'not visible '
-        : '${!isVisible ? 'not ' : ''}visible - paintExtent=$_paintExtent'}';
+        : '${!isVisible ? 'NOT ' : ''}visible - paintExtent=$_paintExtent'}';
   }
 }
 
@@ -851,8 +850,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
     for (final RenderBox child in _children.values) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
-      if (childParentData.isVisible) {
-        final bool isHit = result.addWithPaintOffset(
+      if (!childParentData.isVisible) {
+        // Can't hit a child that is not visible.
+        continue;
+      }
+      final Rect childRect = childParentData.paintOffset! & child.size;
+      if (childRect.contains(position)) {
+        result.addWithPaintOffset(
           offset: childParentData.paintOffset,
           position: position,
           hitTest: (BoxHitTestResult result, Offset transformed) {
@@ -860,9 +864,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
             return child.hitTest(result, position: transformed);
           },
         );
-        if (isHit) {
-          return true;
-        }
+        return true;
       }
     }
     return false;
@@ -965,9 +967,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     assert(_debugCheckContentDimensions());
     _didResize = false;
     _needsDelegateRebuild = false;
-    assert(_debugOrphans?.isEmpty ?? true);
     invokeLayoutCallback<BoxConstraints>((BoxConstraints _) {
       _childManager._endLayout();
+      assert(_debugOrphans?.isEmpty ?? true);
     });
   }
 
@@ -1026,7 +1028,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     assert(vicinity != ChildVicinity.invalid);
     // It is possible and valid for a vicinity to be skipped.
     // For example, a table can have merged cells, spanning multiple
-    // indices, but only represented by one RenderBox.
+    // indices, but only represented by one RenderBox and ChildVicinity.
     if (_children.containsKey(vicinity)) {
       final RenderBox child = _children[vicinity]!;
       assert(parentDataOf(child).vicinity == vicinity);
@@ -1046,7 +1048,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
 
   bool _debugCheckContentDimensions() {
     const  String hint = 'Subclasses should call applyContentDimensions on the '
-      'verticalOffset and horizontalOffset to set the min and max scroll offset.';
+      'verticalOffset and horizontalOffset to set the min and max scroll offset. '
+      'If the contents exceed one or both sides of the viewportDimension, '
+      'ensure the viewportDimension height or width is subtracted in that axis '
+      'for the correct extent.';
     assert(() {
       if (!(verticalOffset as ScrollPosition).hasContentDimensions) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1164,22 +1169,60 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     if (childSize == Size.zero || childSize.height == 0.0 || childSize.width == 0.0) {
       return Size.zero;
     }
-    // Horizontal
-    double lowerBound = 0;
-    double upperBound = viewportDimension.width;
-    final double width = clampDouble(
-      clampDouble(childSize.width + layoutOffset.dx.abs(), lowerBound, upperBound),
-      0,
-      childSize.width,
-    );
-    // Vertical
-    lowerBound = 0;
-    upperBound = viewportDimension.height;
-    final double height = clampDouble(
-      clampDouble(childSize.height + layoutOffset.dy.abs(), lowerBound, upperBound),
-      0,
-      childSize.height,
-    );
+    // Horizontal extent
+    final double width;
+    if (layoutOffset.dx < 0.0) {
+      // The child is positioned beyond the leading edge of the viewport.
+      if (layoutOffset.dx + childSize.width <= 0.0) {
+        // The child does not extend into the viewable area, it is not visible.
+        return Size.zero;
+      }
+      // If the child is positioned starting at -50, then the paint extent is
+      // the width + (-50).
+      width = layoutOffset.dx + childSize.width;
+    } else if (layoutOffset.dx >= viewportDimension.width) {
+      // The child is positioned after the trailing edge of the viewport, also
+      // not visible.
+      return Size.zero;
+    } else {
+      // The child is positioned within the viewport bounds, but may extend
+      // beyond it.
+      assert(layoutOffset.dx >= 0 && layoutOffset.dx < viewportDimension.width);
+      if (layoutOffset.dx + childSize.width > viewportDimension.width) {
+        width = viewportDimension.width - layoutOffset.dx;
+      } else {
+        assert(layoutOffset.dx + childSize.width <= viewportDimension.width);
+        width = childSize.width;
+      }
+    }
+
+    // Vertical extent
+    final double height;
+    if (layoutOffset.dy < 0.0) {
+      // The child is positioned beyond the leading edge of the viewport.
+      if (layoutOffset.dy + childSize.height <= 0.0) {
+        // The child does not extend into the viewable area, it is not visible.
+        return Size.zero;
+      }
+      // If the child is positioned starting at -50, then the paint extent is
+      // the width + (-50).
+      height = layoutOffset.dy + childSize.height;
+    } else if (layoutOffset.dy >= viewportDimension.height) {
+      // The child is positioned after the trailing edge of the viewport, also
+      // not visible.
+      return Size.zero;
+    } else {
+      // The child is positioned within the viewport bounds, but may extend
+      // beyond it.
+      assert(layoutOffset.dy >= 0 && layoutOffset.dy < viewportDimension.height);
+      if (layoutOffset.dy + childSize.height > viewportDimension.height) {
+        height = viewportDimension.height - layoutOffset.dy;
+      } else {
+        assert(layoutOffset.dy + childSize.height <= viewportDimension.height);
+        height = childSize.height;
+      }
+    }
+
     return Size(width, height);
   }
 
@@ -1211,7 +1254,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       case AxisDirection.left:
         throw Exception('This should not happen');
     }
-    switch(horizontalAxisDirection){
+    switch(horizontalAxisDirection) {
       case AxisDirection.right:
         xOffset = layoutOffset.dx;
       case AxisDirection.left:
@@ -1382,7 +1425,11 @@ abstract class TwoDimensionalChildManager {
 class ChildVicinity implements Comparable<ChildVicinity> {
   /// Creates a reference to a child in a two dimensional plane, with the
   /// [xIndex] and [yIndex] being relative to other children in the viewport.
-  const ChildVicinity({required this.xIndex, required this.yIndex});
+  const ChildVicinity({
+    required this.xIndex,
+    required this.yIndex,
+  }) : assert(xIndex >= -1),
+       assert(yIndex >= -1);
 
   /// Represents an unassigned child position. The given child may be in the
   /// process of moving from one position to another.

@@ -313,10 +313,7 @@ void main() {
           diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
           dragStartBehavior: DragStartBehavior.down,
           delegate: TwoDimensionalChildBuilderDelegate(
-            builder: (BuildContext context, ChildVicinity vicinity) {
-              capturedContext = context;
-              return Text(vicinity.toString());
-            },
+            builder: _testChildBuilder,
           ),
         ),
       ));
