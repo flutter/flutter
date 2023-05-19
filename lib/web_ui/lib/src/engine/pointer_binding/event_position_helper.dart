@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
+import 'package:ui/src/engine/embedder.dart';
+import 'package:ui/src/engine/text_editing/text_editing.dart';
+import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui show Offset;
 
 import '../dom.dart';
@@ -24,48 +29,50 @@ ui.Offset computeEventOffsetToTarget(DomMouseEvent event, DomElement actualTarge
     return _computeOffsetForTalkbackEvent(event, actualTarget);
   }
 
+  // On one of our text-editing nodes
+  final bool isInput = flutterViewEmbedder.textEditingHostNode.contains(event.target! as DomNode);
+  if (isInput) {
+    final EditableTextGeometry? inputGeometry = textEditing.strategy.geometry;
+    if (inputGeometry != null) {
+      return _computeOffsetForInputs(event, inputGeometry);
+    }
+  }
+
+  // On another DOM Element (normally a platform view)
   final bool isTargetOutsideOfShadowDOM = event.target != actualTarget;
   if (isTargetOutsideOfShadowDOM) {
-    return _computeOffsetRelativeToActualTarget(event, actualTarget);
+    final DomRect origin = actualTarget.getBoundingClientRect();
+    // event.clientX/Y and origin.x/y are relative **to the viewport**.
+    // (This doesn't work with 3D translations of the parent element.)
+    // TODO(dit): Make this understand 3D transforms, https://github.com/flutter/flutter/issues/117091
+    return ui.Offset(event.clientX - origin.x, event.clientY - origin.y);
   }
+
   // Return the offsetX/Y in the normal case.
   // (This works with 3D translations of the parent element.)
   return ui.Offset(event.offsetX, event.offsetY);
 }
 
-/// Computes the event offset when hovering over any nodes that don't exist in
-/// the shadowDOM such as platform views or text editing nodes.
+/// Computes the offsets for input nodes, which live outside of the shadowDOM.
+/// Since inputs can be transformed (scaled, translated, etc), we can't rely on
+/// `_computeOffsetRelativeToActualTarget` to calculate accurate coordinates, as
+/// it only handles the case where inputs are translated, but will have issues
+/// for scaled inputs (see: https://github.com/flutter/flutter/issues/125948).
 ///
-/// This still uses offsetX/Y, but adds the offset from the top/left corner of the
-/// platform view to the Flutter View (`actualTarget`).
-///
-///  ×--FlutterView(actualTarget)--------------+
-///  |\                                        |
-///  | x1,y1                                   |
-///  |                                         |
-///  |                                         |
-///  |     ×-PlatformView(target)---------+    |
-///  |     |\                             |    |
-///  |     | x2,y2                        |    |
-///  |     |                              |    |
-///  |     |      × (event)               |    |
-///  |     |       \                      |    |
-///  |     |        offsetX, offsetY      |    |
-///  |     |  (Relative to PlatformView)  |    |
-///  |     +------------------------------+    |
-///  +-----------------------------------------+
-///
-/// Offset between PlatformView and FlutterView (xP, yP) = (x2 - x1, y2 - y1)
-///
-/// Event offset relative to FlutterView = (offsetX + xP, offsetY + yP)
-// TODO(dit): Make this understand 3D transforms, https://github.com/flutter/flutter/issues/117091
-ui.Offset _computeOffsetRelativeToActualTarget(DomMouseEvent event, DomElement actualTarget) {
-  final DomElement target = event.target! as DomElement;
-  final DomRect targetRect = target.getBoundingClientRect();
-  final DomRect actualTargetRect = actualTarget.getBoundingClientRect();
-  final double offsetTop = targetRect.y - actualTargetRect.y;
-  final double offsetLeft = targetRect.x - actualTargetRect.x;
-  return ui.Offset(event.offsetX + offsetLeft, event.offsetY + offsetTop);
+/// We compute the offsets here by using the text input geometry data that is
+/// sent from the framework, which includes information on how to transform the
+/// underlying input element. We transform the `event.offset` points we receive
+/// using the values from the input's transform matrix.
+ui.Offset _computeOffsetForInputs(DomMouseEvent event, EditableTextGeometry inputGeometry) {
+  final DomElement targetElement = event.target! as DomHTMLElement;
+  final DomHTMLElement domElement = textEditing.strategy.activeDomElement;
+  assert(targetElement == domElement, 'The targeted input element must be the active input element');
+  final Float32List transformValues = inputGeometry.globalTransform;
+  assert(transformValues.length == 16);
+  final Matrix4 transform = Matrix4.fromFloat32List(transformValues);
+  final Vector3 transformedPoint = transform.perspectiveTransform(x: event.offsetX, y: event.offsetY, z: 0);
+
+  return ui.Offset(transformedPoint.x, transformedPoint.y);
 }
 
 /// Computes the event offset when TalkBack is firing the event.
