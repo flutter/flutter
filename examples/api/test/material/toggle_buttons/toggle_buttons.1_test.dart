@@ -74,7 +74,7 @@ void main() {
     final ThemeData theme = ThemeData(useMaterial3: true);
     Finder findButton(String text) {
       return find.descendant(
-        of: find.byType(SegmentedButton<example.Sizes>),
+        of: find.byType(SegmentedButton<example.ShirtSize>),
         matching: find.widgetWithText(TextButton, text),
       );
     }

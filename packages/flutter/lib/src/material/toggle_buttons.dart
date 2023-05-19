@@ -53,6 +53,13 @@ import 'toggle_buttons_theme.dart';
 /// used to customize the entire segmented button and the individual segments.
 ///
 /// {@tool dartpad}
+/// This sample shows how to migrate [ToggleButtons] that allows multiple
+/// or no selection to [SegmentedButton] that allows multiple or no selection.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
 /// This example showcase [ToggleButtons] in various configurations.
 ///
 /// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.0.dart **
