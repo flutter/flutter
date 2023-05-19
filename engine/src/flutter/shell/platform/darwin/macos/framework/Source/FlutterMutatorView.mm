@@ -365,6 +365,30 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
   return self.superview != nil ? self.superview.layer.contentsScale : 1.0;
 }
 
+/// Updates the nested stack of clip views that host the platform view.
+- (void)updatePathClipViewsWithPaths:(NSArray*)paths {
+  // Remove path clip views depending on the number of paths.
+  while (_pathClipViews.count > paths.count) {
+    NSView* view = _pathClipViews.lastObject;
+    [view removeFromSuperview];
+    [_pathClipViews removeLastObject];
+  }
+  // Otherwise, add path clip views to the end.
+  for (size_t i = _pathClipViews.count; i < paths.count; ++i) {
+    NSView* superView = _pathClipViews.count == 0 ? self : _pathClipViews.lastObject;
+    FlutterPathClipView* pathClipView = [[FlutterPathClipView alloc] initWithFrame:self.bounds];
+    [_pathClipViews addObject:pathClipView];
+    [superView addSubview:pathClipView];
+  }
+  // Update bounds and apply clip paths.
+  for (size_t i = 0; i < _pathClipViews.count; ++i) {
+    FlutterPathClipView* pathClipView = _pathClipViews[i];
+    pathClipView.frame = self.bounds;
+    [pathClipView maskToPath:(__bridge CGPathRef)[paths objectAtIndex:i]
+                  withOrigin:self.frame.origin];
+  }
+}
+
 /// Whenever possible view will be clipped using layer bounds.
 /// If clipping to path is needed, CAShapeLayer(s) will be used as mask.
 /// Clipping to round rect only clips to path if round corners are intersected.
@@ -397,30 +421,7 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
 
   /// Paths in global logical coordinates that need to be clipped to.
   NSMutableArray* paths = RoundedRectClipsFromMutations(masterClip, mutations);
-
-  // Add / remove path clip views depending on the number of paths.
-  while (_pathClipViews.count > paths.count) {
-    NSView* view = _pathClipViews.lastObject;
-    [view removeFromSuperview];
-    [_pathClipViews removeLastObject];
-  }
-
-  NSView* lastView = self;
-
-  for (size_t i = 0; i < paths.count; ++i) {
-    FlutterPathClipView* pathClipView = nil;
-    if (i < _pathClipViews.count) {
-      pathClipView = _pathClipViews[i];
-    } else {
-      pathClipView = [[FlutterPathClipView alloc] initWithFrame:self.bounds];
-      [_pathClipViews addObject:pathClipView];
-      [lastView addSubview:pathClipView];
-    }
-    pathClipView.frame = self.bounds;
-    [pathClipView maskToPath:(__bridge CGPathRef)[paths objectAtIndex:i]
-                  withOrigin:finalBoundingRect.origin];
-    lastView = pathClipView;
-  }
+  [self updatePathClipViewsWithPaths:paths];
 
   // Used to apply sublayer transform.
   if (_platformViewContainer == nil) {
@@ -428,6 +429,7 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
     _platformViewContainer.wantsLayer = YES;
   }
 
+  NSView* lastView = _pathClipViews.count == 0 ? self : _pathClipViews.lastObject;
   [lastView addSubview:_platformViewContainer];
   _platformViewContainer.frame = self.bounds;
 
