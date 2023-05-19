@@ -42,7 +42,7 @@ void main() {
     late Directory tempDir;
     late Config testConfig;
     late FileSystem fs;
-    const String flutterRoot = '../..';
+    const String flutterRoot = '/path/to/flutter';
 
     setUp(() {
       Cache.flutterRoot = flutterRoot;
@@ -80,7 +80,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(fs: fs, flutterRoot: flutterRoot),
+      FlutterVersion: () => FakeFlutterVersion(),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -104,7 +104,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(fs: fs, flutterRoot: flutterRoot),
+      FlutterVersion: () => FakeFlutterVersion(),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -121,7 +121,7 @@ void main() {
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(fs: fs, flutterRoot: flutterRoot),
+      FlutterVersion: () => FakeFlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -144,7 +144,7 @@ void main() {
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(fs: fs, flutterRoot: flutterRoot),
+      FlutterVersion: () => FakeFlutterVersion(),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
