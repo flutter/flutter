@@ -114,10 +114,8 @@ class ABTest {
         switch (aligns[column]) {
           case FieldJustification.LEFT:
             value = value.padRight(len);
-            break;
           case FieldJustification.RIGHT:
             value = value.padLeft(len);
-            break;
           case FieldJustification.CENTER:
             value = value.padLeft((len + value.length) ~/2);
             value = value.padRight(len);

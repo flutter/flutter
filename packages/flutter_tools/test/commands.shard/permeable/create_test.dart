@@ -2939,7 +2939,7 @@ void main() {
     // Each build file should contain namespace.
     const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
     expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
-    expect(moduleAppBuildGradleFileContent.contains(expectedNameSpace), true);
+    expect(moduleAppBuildGradleFileContent.contains('$expectedNameSpace.host'), true);
     expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
 
     // The namespaces should be conditionalized for AGP <4.2.
