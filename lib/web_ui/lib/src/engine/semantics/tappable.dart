@@ -66,6 +66,7 @@ class Tappable extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     _stopListening();
     semanticsObject.setAriaRole('button', false);
   }

@@ -450,6 +450,7 @@ class TextField extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     _positionInputElementTimer?.cancel();
     _positionInputElementTimer = null;
     // on iOS, the `blur` event listener callback will remove the element.

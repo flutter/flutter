@@ -43,6 +43,7 @@ class Focusable extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     _focusManager.stopManaging();
   }
 }

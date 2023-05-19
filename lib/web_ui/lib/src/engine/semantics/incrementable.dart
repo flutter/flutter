@@ -140,6 +140,7 @@ class Incrementable extends RoleManager {
   @override
   void dispose() {
     assert(_gestureModeListener != null);
+    super.dispose();
     _focusManager.stopManaging();
     semanticsObject.owner.removeGestureModeListener(_gestureModeListener);
     _gestureModeListener = null;

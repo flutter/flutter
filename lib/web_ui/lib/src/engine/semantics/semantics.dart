@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../../engine.dart'  show registerHotRestartListener;
@@ -365,15 +366,35 @@ enum Role {
 
   /// Adds the "dialog" ARIA role to the node.
   ///
-  /// This corresponds to a semantics node that has both `scopesRoute` and
-  /// `namesRoute` bits set. While in Flutter a named route is not necessarily a
-  /// dialog, this is the closest analog on the web.
+  /// This corresponds to a semantics node that has `scopesRoute` bit set. While
+  /// in Flutter a named route is not necessarily a dialog, this is the closest
+  /// analog on the web.
   ///
-  /// Why is `scopesRoute` alone not sufficient? Because Flutter can create
-  /// routes that are not logically dialogs and there's nothing interesting to
-  /// announce to the user. For example, a modal barrier has `scopesRoute` set
-  /// but marking it as a dialog would be wrong.
+  /// There are 3 possible situations:
+  ///
+  /// * The node also has the `namesRoute` bit set. This means that the node's
+  ///   `label` describes the dialog, which can be expressed by adding the
+  ///   `aria-label` attribute.
+  /// * A descendant node has the `namesRoute` bit set. This means that the
+  ///   child's content describes the dialog. The child may simply be labelled,
+  ///   or it may be a subtree of nodes that describe the dialog together. The
+  ///   nearest HTML equivalent is `aria-describedby`. The child acquires the
+  ///   [routeName] role, which manages the relevant ARIA attributes.
+  /// * There is no `namesRoute` bit anywhere in the sub-tree rooted at the
+  ///   current node. In this case it's likely not a dialog at all, and the node
+  ///   should not get a label or the "dialog" role. It's just a group of
+  ///   children. For example, a modal barrier has `scopesRoute` set but marking
+  ///   it as a dialog would be wrong.
   dialog,
+
+  /// Provides a description for an ancestor dialog.
+  ///
+  /// This role is assigned to nodes that have `namesRoute` set but not
+  /// `scopesRoute`. When both flags are set the node only gets the dialog
+  /// role (see [dialog]).
+  ///
+  /// If the ancestor dialog is missing, this role does nothing useful.
+  routeName,
 }
 
 /// A function that creates a [RoleManager] for a [SemanticsObject].
@@ -390,6 +411,7 @@ final Map<Role, RoleManagerFactory> _roleFactories = <Role, RoleManagerFactory>{
   Role.image: (SemanticsObject object) => ImageRoleManager(object),
   Role.liveRegion: (SemanticsObject object) => LiveRegion(object),
   Role.dialog: (SemanticsObject object) => Dialog(object),
+  Role.routeName: (SemanticsObject object) => RouteName(object),
 };
 
 /// Provides the functionality associated with the role of the given
@@ -416,6 +438,10 @@ abstract class RoleManager {
   /// minimum DOM updates.
   void update();
 
+  /// Whether this role manager was disposed of.
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+
   /// Called when [semanticsObject] is removed, or when it changes its role such
   /// that this role is no longer relevant.
   ///
@@ -423,7 +449,10 @@ abstract class RoleManager {
   /// DOM. In particular, this method is the appropriate place to call
   /// [EngineSemanticsOwner.removeGestureModeListener] if this role reponds to
   /// gesture mode changes.
-  void dispose();
+  @mustCallSuper
+  void dispose() {
+    _isDisposed = true;
+  }
 }
 
 /// Instantiation of a framework-side semantics node in the DOM.
@@ -827,6 +856,15 @@ class SemanticsObject {
   DomElement? _childContainerElement;
 
   /// The parent of this semantics object.
+  ///
+  /// This value is not final until the tree is finalized. It is not safe to
+  /// rely on this value in the middle of a semantics tree update. It is safe to
+  /// use this value in post-update callback (see [SemanticsUpdatePhase] and
+  /// [EngineSemanticsOwner.addOneTimePostUpdateCallback]).
+  SemanticsObject? get parent {
+    assert(owner.phase == SemanticsUpdatePhase.postUpdate);
+    return _parent;
+  }
   SemanticsObject? _parent;
 
   /// Whether this node currently has a given [SemanticsFlag].
@@ -881,14 +919,15 @@ class SemanticsObject {
       !hasAction(ui.SemanticsAction.tap) &&
       !hasFlag(ui.SemanticsFlag.isButton);
 
-  /// Whether this node should be treated as an ARIA dialog.
+  /// Whether this node defines a scope for a route.
   ///
   /// See also [Role.dialog].
-  bool get isDialog {
-    final bool scopesRoute = hasFlag(ui.SemanticsFlag.scopesRoute);
-    final bool namesRoute = hasFlag(ui.SemanticsFlag.namesRoute);
-    return scopesRoute && namesRoute;
-  }
+  bool get scopesRoute => hasFlag(ui.SemanticsFlag.scopesRoute);
+
+  /// Whether this node describes a route.
+  ///
+  /// See also [Role.dialog].
+  bool get namesRoute => hasFlag(ui.SemanticsFlag.namesRoute);
 
   /// Whether this object carry enabled/disabled state (and if so whether it is
   /// enabled).
@@ -1276,7 +1315,20 @@ class SemanticsObject {
   /// spec:
   ///
   /// > A map literal is ordered: iterating over the keys and/or values of the maps always happens in the order the keys appeared in the source code.
-  final Map<Role, RoleManager?> _roleManagers = <Role, RoleManager?>{};
+  final Map<Role, RoleManager> _roleManagers = <Role, RoleManager>{};
+
+  /// The mapping of roles to role managers.
+  ///
+  /// This getter is only meant for testing.
+  Map<Role, RoleManager> get debugRoleManagers => _roleManagers;
+
+  /// Returns if this node has the given [role].
+  bool hasRole(Role role) => _roleManagers.containsKey(role);
+
+  /// Returns the role manager for the given [role] attached to this node.
+  ///
+  /// If [hasRole] is false for the given [role], throws an error.
+  R getRole<R extends RoleManager>(Role role) => _roleManagers[role]! as R;
 
   /// Returns the role manager for the given [role].
   ///
@@ -1287,10 +1339,11 @@ class SemanticsObject {
   /// the lifecycles of [RoleManager] objects.
   void _updateRoles() {
     // Some role managers manage labels themselves for various role-specific reasons.
-    final bool managesOwnLabel = isTextField || isDialog || isVisualOnly;
+    final bool managesOwnLabel = isTextField || scopesRoute || isVisualOnly;
     _updateRole(Role.labelAndValue, (hasLabel || hasValue || hasTooltip) && !managesOwnLabel);
 
-    _updateRole(Role.dialog, isDialog);
+    _updateRole(Role.dialog, scopesRoute);
+    _updateRole(Role.routeName, namesRoute && !scopesRoute);
     _updateRole(Role.textField, isTextField);
 
     // The generic `Focusable` role manager can be used for everything except
@@ -1500,6 +1553,30 @@ enum GestureMode {
   browserGestures,
 }
 
+/// The current phase of the semantic update.
+enum SemanticsUpdatePhase {
+  /// No update is in progress.
+  ///
+  /// When the semantics owner receives an update, it enters the [updating]
+  /// phase from the idle phase.
+  idle,
+
+  /// Updating individual [SemanticsObject] nodes by calling
+  /// [RoleManager.update] and fixing parent-child relationships.
+  ///
+  /// After this phase is done, the owner enters the [postUpdate] phase.
+  updating,
+
+  /// Post-update callbacks are being called.
+  ///
+  /// At this point all nodes have been updated, the parent child hierarchy has
+  /// been established, the DOM tree is in sync with the semantics tree, and
+  /// [RoleManager.dispose] has been called on removed nodes.
+  ///
+  /// After this phase is done, the owner switches back to [idle].
+  postUpdate,
+}
+
 /// The top-level service that manages everything semantics-related.
 class EngineSemanticsOwner {
   EngineSemanticsOwner._() {
@@ -1527,6 +1604,10 @@ class EngineSemanticsOwner {
     _instance!.semanticsEnabled = false;
     _instance = null;
   }
+
+  /// The current update phase of this semantics owner.
+  SemanticsUpdatePhase get phase => _phase;
+  SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
 
@@ -1604,11 +1685,16 @@ class EngineSemanticsOwner {
     _detachments = <SemanticsObject>[];
     _attachments = <int, SemanticsObject>{};
 
-    if (_oneTimePostUpdateCallbacks.isNotEmpty) {
-      for (final ui.VoidCallback callback in _oneTimePostUpdateCallbacks) {
-        callback();
+    _phase = SemanticsUpdatePhase.postUpdate;
+    try {
+      if (_oneTimePostUpdateCallbacks.isNotEmpty) {
+        for (final ui.VoidCallback callback in _oneTimePostUpdateCallbacks) {
+          callback();
+        }
+        _oneTimePostUpdateCallbacks = <ui.VoidCallback>[];
       }
-      _oneTimePostUpdateCallbacks = <ui.VoidCallback>[];
+    } finally {
+      _phase = SemanticsUpdatePhase.idle;
     }
   }
 
@@ -1876,6 +1962,7 @@ class EngineSemanticsOwner {
       }
     }
 
+    _phase = SemanticsUpdatePhase.updating;
     final SemanticsUpdate update = uiUpdate as SemanticsUpdate;
 
     // First, update each object's information about itself. This information is

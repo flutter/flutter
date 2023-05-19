@@ -84,6 +84,7 @@ class Checkable extends RoleManager {
 
   @override
   void dispose() {
+    super.dispose();
     switch (_kind) {
       case _CheckableKind.checkbox:
         semanticsObject.setAriaRole('checkbox', false);
