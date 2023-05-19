@@ -57,6 +57,10 @@ class Geometry {
 
   static std::unique_ptr<Geometry> MakeRect(Rect rect);
 
+  static std::unique_ptr<Geometry> MakePointField(std::vector<Point> points,
+                                                  Scalar radius,
+                                                  bool round);
+
   virtual GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                            const Entity& entity,
                                            RenderPass& pass) = 0;
@@ -258,6 +262,45 @@ class RectGeometry : public Geometry {
   Rect rect_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RectGeometry);
+};
+
+class PointFieldGeometry : public Geometry {
+ public:
+  PointFieldGeometry(std::vector<Point> points, Scalar radius, bool round);
+
+  ~PointFieldGeometry();
+
+  static size_t ComputeCircleDivisions(Scalar scaled_radius, bool round);
+
+ private:
+  // |Geometry|
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) override;
+
+  // |Geometry|
+  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
+                                     Matrix effect_transform,
+                                     const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) override;
+
+  // |Geometry|
+  GeometryVertexType GetVertexType() const override;
+
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  GeometryResult GetPositionBufferCPU(const ContentContext& renderer,
+                                      const Entity& entity,
+                                      RenderPass& pass,
+                                      Scalar radius);
+
+  std::vector<Point> points_;
+  Scalar radius_;
+  bool round_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(PointFieldGeometry);
 };
 
 }  // namespace impeller

@@ -211,6 +211,10 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
                                     id<MTLComputeCommandEncoder> encoder,
                                     const ISize& grid_size,
                                     const ISize& thread_group_size) const {
+  if (grid_size.width == 0 || grid_size.height == 0) {
+    return true;
+  }
+
   ComputePassBindingsCache pass_bindings(encoder);
 
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
@@ -246,19 +250,28 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
     // TODO(dnfield): use feature detection to support non-uniform threadgroup
     // sizes.
     // https://github.com/flutter/flutter/issues/110619
-
-    // For now, check that the sizes are uniform.
-    FML_DCHECK(grid_size == thread_group_size);
     auto width = grid_size.width;
     auto height = grid_size.height;
-    while (width * height >
-           static_cast<int64_t>(
-               pass_bindings.GetPipeline().maxTotalThreadsPerThreadgroup)) {
-      width = std::max(1LL, width / 2);
-      height = std::max(1LL, height / 2);
+
+    auto maxTotalThreadsPerThreadgroup = static_cast<int64_t>(
+        pass_bindings.GetPipeline().maxTotalThreadsPerThreadgroup);
+
+    // Special case for linear processing.
+    if (height == 1) {
+      int64_t threadGroups =
+          std::max(width / maxTotalThreadsPerThreadgroup, 1LL);
+      [encoder dispatchThreadgroups:MTLSizeMake(threadGroups, 1, 1)
+              threadsPerThreadgroup:MTLSizeMake(maxTotalThreadsPerThreadgroup,
+                                                1, 1)];
+    } else {
+      while (width * height > maxTotalThreadsPerThreadgroup) {
+        width = std::max(1LL, width / 2);
+        height = std::max(1LL, height / 2);
+      }
+
+      auto size = MTLSizeMake(width, height, 1);
+      [encoder dispatchThreadgroups:size threadsPerThreadgroup:size];
     }
-    auto size = MTLSizeMake(width, height, 1);
-    [encoder dispatchThreadgroups:size threadsPerThreadgroup:size];
   }
 
   return true;
