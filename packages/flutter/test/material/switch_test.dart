@@ -3370,6 +3370,35 @@ void main() {
         ..rrect(color: const Color(0xffffffff)),
     );
   });
+
+  testWidgets('Switch.onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
+    bool focused = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: Switch(
+            value: true,
+            focusNode: focusNode,
+            onFocusChange: (bool value) {
+              focused = value;
+            },
+            onChanged:(bool newValue) {},
+          ),
+        ),
+      ),
+    ));
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focused, isTrue);
+    expect(focusNode.hasFocus, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focused, isFalse);
+    expect(focusNode.hasFocus, isFalse);
+  });
 }
 
 class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
