@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
@@ -145,6 +146,28 @@ void main () {
         expect(logger.traceText, contains('PROCESS_STOPPED'));
         expect(logger.traceText, contains('thread backtrace all'));
         expect(logger.traceText, contains('* thread #1'));
+      });
+
+      testWithoutContext('debugger attached and stop failed', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nprocess signal SIGSTOP\r\n\r\nerror: Failed to send signal 17: failed to send signal 17',
+            stdin: IOSink(stdin.sink),
+          ),
+        ]);
+        final IOSDeployDebuggerWaitForExit iosDeployDebugger = IOSDeployDebuggerWaitForExit.test(
+          processManager: processManager,
+          logger: logger,
+        );
+
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'success',
+        ]));
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await iosDeployDebugger.exitCompleter.future;
       });
 
       testWithoutContext('handle processing logging after process exit', () async {
@@ -590,4 +613,38 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
     artifacts: artifacts ?? Artifacts.test(),
     cache: cache,
   );
+}
+
+class IOSDeployDebuggerWaitForExit extends IOSDeployDebugger {
+  IOSDeployDebuggerWaitForExit({
+    required super.logger,
+    required super.processUtils,
+    required super.launchCommand,
+    required super.iosDeployEnv
+  });
+
+  /// Create a [IOSDeployDebugger] for testing.
+  ///
+  /// Sets the command to "ios-deploy" and environment to an empty map.
+  factory IOSDeployDebuggerWaitForExit.test({
+    required ProcessManager processManager,
+    Logger? logger,
+  }) {
+    final Logger debugLogger = logger ?? BufferLogger.test();
+    return IOSDeployDebuggerWaitForExit(
+      logger: debugLogger,
+      processUtils: ProcessUtils(logger: debugLogger, processManager: processManager),
+      launchCommand: <String>['ios-deploy'],
+      iosDeployEnv: <String, String>{},
+    );
+  }
+
+  final Completer<void> exitCompleter = Completer<void>();
+
+  @override
+  bool exit() {
+    final bool status = super.exit();
+    exitCompleter.complete();
+    return status;
+  }
 }

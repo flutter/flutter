@@ -523,6 +523,7 @@ class IOSDevice extends Device {
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');
         _logger.printError('');
+        await dispose();
         return LaunchResult.failed();
       }
 
@@ -557,6 +558,7 @@ class IOSDevice extends Device {
         final Uri? serviceURL = await vmServiceDiscovery?.uri;
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
+          await dispose();
           return LaunchResult.failed();
         }
 
@@ -587,12 +589,14 @@ class IOSDevice extends Device {
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
+        await dispose();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
+      await dispose();
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
