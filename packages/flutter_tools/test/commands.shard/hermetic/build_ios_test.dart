@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
@@ -632,6 +634,50 @@ void main() {
         setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
         setUpRsyncCommand(),
       ]),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    });
+
+    testUsingContext('Delete xcresult bundle before each xcodebuild command.', () async {
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      createMinimalMockProjectFiles();
+
+      await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
+
+      expect(testLogger.statusText, contains('Xcode build done.'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        // Intentionally fail the first xcodebuild command with concurrent run failure message.
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          stdout: '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
+          onRun: () {
+            fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).createSync();
+          }
+        ),
+        // The second xcodebuild is triggered due to above concurrent run failure message.
+        setUpFakeXcodeBuildHandler(
+          onRun: () {
+            // If the file is not cleaned, throw an error, test failure.
+            if (fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).existsSync()) {
+              throwToolExit('xcresult bundle file existed.', exitCode: 2);
+            }
+            fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).createSync();
+          }
+        ),
+        setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
+        setUpRsyncCommand(),
+      ],
+      ),
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
