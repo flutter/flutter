@@ -255,10 +255,6 @@ TaskFunction createWebCompileTest() {
   return const WebCompileTest().run;
 }
 
-TaskFunction createComplexLayoutCompileTest() {
-  return CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
-}
-
 TaskFunction createFlutterViewStartupTest() {
   return StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
@@ -638,6 +634,19 @@ TaskFunction createAnimatedBlurBackropFilterPerfTest({
     'animated_blur_backdrop_filter_perf',
     enableImpeller: enableImpeller,
     testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createDrawPointsPerfTest({
+  bool? enableImpeller,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_points_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/draw_points_perf_test.dart',
     saveTraceFile: true,
   ).run;
 }

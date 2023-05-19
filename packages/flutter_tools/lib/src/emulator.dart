@@ -56,8 +56,8 @@ class EmulatorManager {
         emulator.id.toLowerCase() == searchText ||
         emulator.name.toLowerCase() == searchText;
     bool startsWithEmulatorId(Emulator emulator) =>
-        emulator.id.toLowerCase().startsWith(searchText) == true ||
-        emulator.name.toLowerCase().startsWith(searchText) == true;
+        emulator.id.toLowerCase().startsWith(searchText) ||
+        emulator.name.toLowerCase().startsWith(searchText);
 
     Emulator? exactMatch;
     for (final Emulator emulator in emulators) {

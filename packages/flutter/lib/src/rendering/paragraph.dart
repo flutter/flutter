@@ -494,19 +494,17 @@ class RenderParagraph extends RenderBox
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
+        case ui.PlaceholderAlignment.belowBaseline:
           assert(
             RenderObject.debugCheckingIntrinsics,
             'Intrinsics are not available for PlaceholderAlignment.baseline, '
             'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
           );
           return false;
-        }
         case ui.PlaceholderAlignment.top:
         case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
+        case ui.PlaceholderAlignment.bottom:
           continue;
-        }
       }
     }
     return true;
@@ -1526,7 +1524,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {
     final Matrix4 transform = paragraph.getTransformTo(null);
     if (transform.invert() == 0.0) {
-      switch(movement) {
+      switch (movement) {
         case SelectionExtendDirection.previousLine:
         case SelectionExtendDirection.backward:
           return SelectionResult.previous;
@@ -1539,7 +1537,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(!baselineInParagraphCoordinates.isNaN);
     final TextPosition newPosition;
     final SelectionResult result;
-    switch(movement) {
+    switch (movement) {
       case SelectionExtendDirection.previousLine:
       case SelectionExtendDirection.nextLine:
         assert(_textSelectionEnd != null && _textSelectionStart != null);

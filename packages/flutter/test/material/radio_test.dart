@@ -1029,7 +1029,7 @@ void main() {
             color: const Color(0xffffffff),
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           )
-        ..circle(color: theme.useMaterial3 ? theme.colorScheme.primary.withOpacity(0.08) : Colors.black12)
+        ..circle(color: theme.useMaterial3 ? theme.colorScheme.primary.withOpacity(0.08) : theme.hoverColor)
         ..circle(color: hoveredFillColor),
     );
   });
@@ -1437,5 +1437,70 @@ void main() {
 
       expect(find.byType(CupertinoRadio<int>), findsNothing);
     }
+  });
+
+  testWidgets('Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final bool material3 = theme.useMaterial3;
+
+    Finder findRadio() {
+      return find.byWidgetPredicate((Widget widget) => widget is Radio<bool>);
+    }
+
+    MaterialInkController? getRadioMaterial(WidgetTester tester) {
+      return Material.of(tester.element(findRadio()));
+    }
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: Radio<bool>(
+          focusNode: focusNode,
+          value: true,
+          groupValue: true,
+          onChanged: (_) { },
+        ),
+      ),
+    ));
+
+    // Hover
+    final Offset center = tester.getCenter(find.byType(Radio<bool>));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    expect(getRadioMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.primary.withOpacity(0.08) : theme.hoverColor)
+        ..circle(color: material3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+    );
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+
+    expect(getRadioMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.onSurface.withOpacity(0.12) : theme.colorScheme.secondary.withAlpha(kRadialReactionAlpha))
+        ..circle(color: material3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+    );
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getRadioMaterial(tester),
+      paints
+        ..circle(color: material3 ? theme.colorScheme.primary.withOpacity(0.12) : theme.focusColor)
+        ..circle(color: material3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+    );
   });
 }

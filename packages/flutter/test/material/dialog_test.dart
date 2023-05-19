@@ -2206,7 +2206,7 @@ void main() {
           return const AlertDialog(title: Text('Title'));
         },
       );
-    } catch(exception) {
+    } catch (exception) {
       error = exception;
     }
 
