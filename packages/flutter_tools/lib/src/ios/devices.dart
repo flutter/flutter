@@ -276,7 +276,6 @@ class IOSDevice extends Device {
       _fileSystem = fileSystem,
       _logger = logger,
       _platform = platform,
-      _devModeEnabled = devModeEnabled,
         super(
           category: Category.mobile,
           platformType: PlatformType.ios,
@@ -295,7 +294,6 @@ class IOSDevice extends Device {
   final Platform _platform;
   final IMobileDevice _iMobileDevice;
   final IProxy _iproxy;
-  final bool _devModeEnabled;
 
   /// May be 0 if version cannot be parsed.
   int get majorSdkVersion {

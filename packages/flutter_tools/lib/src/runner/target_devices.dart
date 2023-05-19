@@ -21,8 +21,6 @@ const String _noAttachedCheckForWirelessMessage = 'No devices found yet. Checkin
 const String _noDevicesFoundMessage = 'No devices found.';
 const String _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 const String _wirelesslyConnectedDevicesMessage = 'Wirelessly connected devices:';
-String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
-    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
 
 String _chooseDeviceOptionMessage(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
 String _foundMultipleSpecifiedDevicesMessage(String deviceId) =>
@@ -31,6 +29,8 @@ String _foundSpecifiedDevicesMessage(int count, String deviceId) =>
     'Found $count devices with name or id matching $deviceId:';
 String _noMatchingDeviceMessage(String deviceId) => 'No supported devices found with name or id '
     "matching '$deviceId'.";
+String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
+    "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
 
 /// This class handles functionality of finding and selecting target devices.
 ///
