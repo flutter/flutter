@@ -1263,7 +1263,7 @@ target-device (mobile) • xxx • ios • iOS 16 (unsupported)
         });
 
         testUsingContext('when only matching device is dev mode disabled', () async {
-          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device', devModeEnabled: false, isConnected: true)];
+          deviceManager.iosDiscoverer.deviceList = <Device>[FakeIOSDevice(deviceName: 'target-device', devModeEnabled: false)];
 
           final List<Device>? devices = await targetDevices.findAllTargetDevices();
 
