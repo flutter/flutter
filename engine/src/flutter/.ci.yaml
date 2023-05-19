@@ -110,7 +110,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_virtual_device", "version": "31"},
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       upload_packages: "true"
       clobber: "true"
@@ -428,7 +428,7 @@ targets:
       config_name: mac_host_engine
       dependencies: >-
         [
-          {"dependency": "goldctl", "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"}
+          {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       $flutter/osx_sdk : >-
         { "sdk_version": "14e222b" }
