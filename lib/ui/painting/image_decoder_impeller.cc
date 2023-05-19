@@ -417,7 +417,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                                      bitmap_result.value()]() {
 // TODO(jonahwilliams): remove ifdef once blit from buffer to texture is
 // implemented on other platforms.
-#ifdef FML_OS_IOS
+#if (FML_OS_IOS && !TARGET_IPHONE_SIMULATOR)
           result(UploadTextureToPrivate(context, bitmap_result.device_buffer,
                                         bitmap_result.image_info));
 #else
