@@ -461,6 +461,8 @@ class IOSSimulator extends Device {
       );
     }
 
+    final Future<Uri?>? futureDeviceUri = vmServiceDiscovery?.uri;
+
     // Launch the updated application in the simulator.
     try {
       // Use the built application's Info.plist to get the bundle identifier,
@@ -489,7 +491,8 @@ class IOSSimulator extends Device {
     globals.printTrace('Waiting for VM Service port to be available...');
 
     try {
-      final Uri? deviceUri = await vmServiceDiscovery?.uri;
+
+      final Uri? deviceUri = await futureDeviceUri;
       if (deviceUri != null) {
         return LaunchResult.succeeded(vmServiceUri: deviceUri);
       }
