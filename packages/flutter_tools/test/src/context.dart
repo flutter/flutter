@@ -393,7 +393,7 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 class FakeSignals implements Signals {
   @override
   Object addHandler(ProcessSignal signal, SignalHandler handler) {
-    return Object();
+    return const Object();
   }
 
   @override
