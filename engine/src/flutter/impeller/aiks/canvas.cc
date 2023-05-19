@@ -383,6 +383,25 @@ void Canvas::RestoreClip() {
   GetCurrentPass().AddEntity(entity);
 }
 
+void Canvas::DrawPoints(std::vector<Point> points,
+                        Scalar radius,
+                        const Paint& paint,
+                        PointStyle point_style) {
+  if (radius <= 0) {
+    return;
+  }
+
+  Entity entity;
+  entity.SetTransformation(GetCurrentTransformation());
+  entity.SetStencilDepth(GetStencilDepth());
+  entity.SetBlendMode(paint.blend_mode);
+  entity.SetContents(paint.WithFilters(paint.CreateContentsForGeometry(
+      Geometry::MakePointField(std::move(points), radius,
+                               /*round=*/point_style == PointStyle::kRound))));
+
+  GetCurrentPass().AddEntity(entity);
+}
+
 void Canvas::DrawPicture(Picture picture) {
   if (!picture.pass) {
     return;

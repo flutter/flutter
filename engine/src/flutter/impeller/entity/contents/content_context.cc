@@ -11,6 +11,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/tessellator/tessellator.h"
@@ -295,6 +296,13 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<YUVToRGBFilterPipeline>(*context_);
   porter_duff_blend_pipelines_[{}] =
       CreateDefaultPipeline<PorterDuffBlendPipeline>(*context_);
+
+  if (context_->GetCapabilities()->SupportsCompute()) {
+    auto pipeline_desc =
+        PointsComputeShaderPipeline::MakeDefaultPipelineDescriptor(*context_);
+    point_field_compute_pipelines_ =
+        context_->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  }
 
   if (solid_fill_pipelines_[{}]->GetDescriptor().has_value()) {
     auto clip_pipeline_descriptor =

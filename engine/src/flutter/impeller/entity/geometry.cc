@@ -7,10 +7,12 @@
 #include "impeller/core/device_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/points.comp.h"
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/tessellator/tessellator.h"
 
@@ -64,6 +66,14 @@ std::unique_ptr<Geometry> Geometry::MakeFillPath(const Path& path) {
   return std::make_unique<FillPathGeometry>(path);
 }
 
+// static
+std::unique_ptr<Geometry> Geometry::MakePointField(std::vector<Point> points,
+                                                   Scalar radius,
+                                                   bool round) {
+  return std::make_unique<PointFieldGeometry>(std::move(points), radius, round);
+}
+
+// static
 std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
                                                    Scalar stroke_width,
                                                    Scalar miter_limit,
@@ -794,6 +804,212 @@ GeometryVertexType RectGeometry::GetVertexType() const {
 
 std::optional<Rect> RectGeometry::GetCoverage(const Matrix& transform) const {
   return rect_.TransformBounds(transform);
+}
+
+/////// PointFieldGeometry Geometry ///////
+
+PointFieldGeometry::PointFieldGeometry(std::vector<Point> points,
+                                       Scalar radius,
+                                       bool round)
+    : points_(std::move(points)), radius_(radius), round_(round) {}
+
+PointFieldGeometry::~PointFieldGeometry() = default;
+
+GeometryResult PointFieldGeometry::GetPositionBuffer(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
+  if (radius_ < 0.0) {
+    return {};
+  }
+  auto determinant = entity.GetTransformation().GetDeterminant();
+  if (determinant == 0) {
+    return {};
+  }
+
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar radius = std::max(radius_, min_size);
+
+  if (!renderer.GetDeviceCapabilities().SupportsCompute()) {
+    return GetPositionBufferCPU(renderer, entity, pass, radius);
+  }
+
+  auto vertices_per_geom = ComputeCircleDivisions(
+      entity.GetTransformation().GetMaxBasisLength() * radius, round_);
+  auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
+  auto total = points_per_circle * points_.size();
+  auto& host_buffer = pass.GetTransientsBuffer();
+
+  using PS = PointsComputeShader;
+
+  auto points_data = host_buffer.Emplace(
+      points_.data(), points_.size() * sizeof(Point), alignof(Point));
+
+  DeviceBufferDescriptor buffer_desc;
+  buffer_desc.size = total * sizeof(Point);
+  buffer_desc.storage_mode = StorageMode::kDevicePrivate;
+
+  auto buffer =
+      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
+
+  ComputeCommand cmd;
+  cmd.label = "Points Geometry";
+  cmd.pipeline = renderer.GetPointComputePipeline();
+
+  PS::FrameInfo frame_info;
+  frame_info.count = points_.size();
+  frame_info.radius = radius;
+  frame_info.radian_start = round_ ? 0.0f : kPiOver4;
+  frame_info.radian_step = k2Pi / vertices_per_geom;
+  frame_info.points_per_circle = points_per_circle;
+  frame_info.divisions_per_circle = vertices_per_geom;
+
+  PS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+  PS::BindGeometryData(
+      cmd, {.buffer = buffer, .range = Range{0, total * sizeof(Point)}});
+  PS::BindPointData(cmd, points_data);
+
+  {
+    auto cmd_buffer = renderer.GetContext()->CreateCommandBuffer();
+    auto pass = cmd_buffer->CreateComputePass();
+    pass->SetGridSize(ISize(total, 1));
+    pass->SetThreadGroupSize(ISize(total, 1));
+
+    if (!pass->AddCommand(std::move(cmd)) || !pass->EncodeCommands() ||
+        !cmd_buffer->SubmitCommands()) {
+      return {};
+    }
+  }
+
+  return {
+      .type = PrimitiveType::kTriangle,
+      .vertex_buffer = {.vertex_buffer = {.buffer = buffer,
+                                          .range =
+                                              Range{0, total * sizeof(Point)}},
+                        .vertex_count = total,
+                        .index_type = IndexType::kNone},
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
+      .prevent_overdraw = false,
+  };
+}
+
+GeometryResult PointFieldGeometry::GetPositionBufferCPU(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    Scalar radius) {
+  auto vertices_per_geom = ComputeCircleDivisions(
+      entity.GetTransformation().GetMaxBasisLength() * radius, round_);
+  auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
+  auto total = points_per_circle * points_.size();
+  auto& host_buffer = pass.GetTransientsBuffer();
+  auto radian_start = round_ ? 0.0f : 0.785398f;
+  auto radian_step = k2Pi / vertices_per_geom;
+
+  VertexBufferBuilder<SolidFillVertexShader::PerVertexData> vtx_builder;
+  vtx_builder.Reserve(total);
+
+  /// Precompute all relative points and angles for a fixed geometry size.
+  auto elapsed_angle = radian_start;
+  std::vector<Point> angle_table(vertices_per_geom);
+  for (auto i = 0u; i < vertices_per_geom; i++) {
+    angle_table[i] = Point(cos(elapsed_angle), sin(elapsed_angle)) * radius;
+    elapsed_angle += radian_step;
+  }
+
+  for (auto i = 0u; i < points_.size(); i++) {
+    auto center = points_[i];
+
+    auto origin = center + angle_table[0];
+    vtx_builder.AppendVertex({origin});
+
+    auto pt1 = center + angle_table[1];
+    vtx_builder.AppendVertex({pt1});
+
+    auto pt2 = center + angle_table[2];
+    vtx_builder.AppendVertex({pt2});
+
+    for (auto j = 0u; j < vertices_per_geom - 3; j++) {
+      vtx_builder.AppendVertex({origin});
+      vtx_builder.AppendVertex({pt2});
+
+      pt2 = center + angle_table[j + 3];
+      vtx_builder.AppendVertex({pt2});
+    }
+  }
+
+  return {
+      .type = PrimitiveType::kTriangle,
+      .vertex_buffer = vtx_builder.CreateVertexBuffer(host_buffer),
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
+      .prevent_overdraw = false,
+  };
+}
+
+GeometryResult PointFieldGeometry::GetPositionUVBuffer(
+    Rect texture_coverage,
+    Matrix effect_transform,
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) {
+  FML_UNREACHABLE();
+}
+
+/// @brief Compute the number of vertices to divide each circle into.
+///
+/// @return the number of vertices.
+size_t PointFieldGeometry::ComputeCircleDivisions(Scalar scaled_radius,
+                                                  bool round) {
+  if (!round) {
+    return 4;
+  }
+
+  // Note: these values are approximated based on the values returned from
+  // the decomposition of 4 cubics performed by Path::CreatePolyline.
+  if (scaled_radius < 1.0) {
+    return 4;
+  }
+  if (scaled_radius < 2.0) {
+    return 8;
+  }
+  if (scaled_radius < 12.0) {
+    return 24;
+  }
+  if (scaled_radius < 22.0) {
+    return 34;
+  }
+  return std::min(scaled_radius, 140.0f);
+}
+
+// |Geometry|
+GeometryVertexType PointFieldGeometry::GetVertexType() const {
+  return GeometryVertexType::kPosition;
+}
+
+// |Geometry|
+std::optional<Rect> PointFieldGeometry::GetCoverage(
+    const Matrix& transform) const {
+  if (points_.size() > 0) {
+    // Doesn't use MakePointBounds as this isn't resilient to points that
+    // all lie along the same axis.
+    auto first = points_.begin();
+    auto last = points_.end();
+    auto left = first->x;
+    auto top = first->y;
+    auto right = first->x;
+    auto bottom = first->y;
+    for (auto it = first + 1; it < last; ++it) {
+      left = std::min(left, it->x);
+      top = std::min(top, it->y);
+      right = std::max(right, it->x);
+      bottom = std::max(bottom, it->y);
+    }
+    return Rect::MakeLTRB(left - radius_, top - radius_, right + radius_,
+                          bottom + radius_);
+  }
+  return std::nullopt;
 }
 
 }  // namespace impeller

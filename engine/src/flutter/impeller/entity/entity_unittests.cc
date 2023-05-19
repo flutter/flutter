@@ -2616,5 +2616,23 @@ TEST_P(EntityTest, TessellateConvex) {
   }
 }
 
+TEST_P(EntityTest, PointFieldGeometryDivisions) {
+  // Square always gives 4 divisions.
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(24.0, false), 4u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(2.0, false), 4u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(200.0, false), 4u);
+
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(0.5, true), 4u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(1.5, true), 8u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(5.5, true), 24u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(12.5, true), 34u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(22.3, true), 22u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(40.5, true), 40u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(100.0, true), 100u);
+  // Caps at 140.
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(1000.0, true), 140u);
+  ASSERT_EQ(PointFieldGeometry::ComputeCircleDivisions(20000.0, true), 140u);
+}
+
 }  // namespace testing
 }  // namespace impeller

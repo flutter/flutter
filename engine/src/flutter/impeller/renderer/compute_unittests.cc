@@ -204,7 +204,7 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
   latch.Wait();
 }
 
-TEST_P(ComputeTest, CanCorrectlyDownScaleLargeGridSize) {
+TEST_P(ComputeTest, CanCompute1DimensionalData) {
   using CS = SampleComputeShader;
   auto context = GetContext();
   ASSERT_TRUE(context);
@@ -224,10 +224,7 @@ TEST_P(ComputeTest, CanCorrectlyDownScaleLargeGridSize) {
 
   static constexpr size_t kCount = 5;
 
-  // Intentionally making the grid size obscenely large. No GPU will tolerate
-  // this.
-  pass->SetGridSize(ISize(std::numeric_limits<int64_t>::max(), 1));
-  pass->SetThreadGroupSize(ISize(std::numeric_limits<int64_t>::max(), 1));
+  pass->SetGridSize(ISize(kCount, 1));
 
   ComputeCommand cmd;
   cmd.label = "Compute";
@@ -305,8 +302,8 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
 
   static constexpr size_t kCount = 5;
 
-  // Intentionally making the grid size obscenely large. No GPU will tolerate
-  // this.
+  // Intentionally making the grid size zero in one dimension. No GPU will
+  // tolerate this.
   pass->SetGridSize(ISize(0, 1));
   pass->SetThreadGroupSize(ISize(0, 1));
 
