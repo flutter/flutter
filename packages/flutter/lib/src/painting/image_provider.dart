@@ -448,7 +448,7 @@ abstract class ImageProvider<T extends Object> {
             exception: exception,
             stack: stack,
           ));
-          completer.complete(null);
+          completer.complete();
         }
       },
     );

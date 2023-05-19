@@ -368,7 +368,7 @@ void main() {
       await FakeAsync().run((FakeAsync time) {
         unawaited(FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((bool r) {
           expect(r, isFalse);
-          completer.complete(null);
+          completer.complete();
         }));
         time.elapse(const Duration(seconds: 1));
         time.flushMicrotasks();

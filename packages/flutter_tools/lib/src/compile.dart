@@ -114,7 +114,7 @@ class StdoutHandler {
         }
       }
       if (message.length <= messageBoundaryKey.length) {
-        compilerOutput?.complete(null);
+        compilerOutput?.complete();
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
@@ -809,7 +809,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
           if (_stdoutHandler.compilerOutput?.isCompleted == false) {
-            _stdoutHandler.compilerOutput?.complete(null);
+            _stdoutHandler.compilerOutput?.complete();
             throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });

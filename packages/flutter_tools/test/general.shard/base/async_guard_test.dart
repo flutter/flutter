@@ -176,12 +176,12 @@ void main() {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }));
       time.elapse(const Duration(seconds: 1));
@@ -214,12 +214,12 @@ void main() {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }));
       time.elapse(const Duration(seconds: 1));
@@ -252,12 +252,12 @@ void main() {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }));
       time.elapse(const Duration(seconds: 1));
@@ -292,12 +292,12 @@ void main() {
           caughtByHandler = true;
         }
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }, (Object e, StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
-          completer.complete(null);
+          completer.complete();
         }
       }));
       time.elapse(const Duration(seconds: 1));
