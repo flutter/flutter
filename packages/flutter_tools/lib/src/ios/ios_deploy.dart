@@ -348,6 +348,8 @@ class IOSDeployDebugger {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
+
+        // TODO(@vashworth): Revert after https://github.com/flutter/flutter/issues/121231 is resolved.
         if (line.isNotEmpty) {
           _logger.printTrace('[ios-deploy] $line');
         }
