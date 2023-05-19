@@ -147,8 +147,10 @@ public final class BasicMessageChannel<T> {
       @NonNull BinaryMessenger messenger, @NonNull String channel, int newSize) {
     Charset charset = Charset.forName("UTF-8");
     String messageString = String.format(Locale.US, "resize\r%s\r%d", channel, newSize);
-    ByteBuffer message = ByteBuffer.wrap(messageString.getBytes(charset));
-    messenger.send(CHANNEL_BUFFERS_CHANNEL, message);
+    final byte[] bytes = messageString.getBytes(charset);
+    ByteBuffer packet = ByteBuffer.allocateDirect(bytes.length);
+    packet.put(bytes);
+    messenger.send(BasicMessageChannel.CHANNEL_BUFFERS_CHANNEL, packet);
   }
 
   /** A handler of incoming messages. */
