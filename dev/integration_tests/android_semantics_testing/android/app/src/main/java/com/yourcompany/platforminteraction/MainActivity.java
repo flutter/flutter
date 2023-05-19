@@ -132,7 +132,7 @@ public class MainActivity extends FlutterActivity {
     }
   }
 
-  // // These indices need to be in sync with android_semantics_testing/lib/src/constants.dart
+  // These indices need to be in sync with android_semantics_testing/lib/src/constants.dart
   static final int kFocusIndex = 1 << 0;
   static final int kClearFocusIndex = 1 << 1;
   static final int kSelectIndex = 1 << 2;

@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:android_semantics_testing/android_semantics_testing.dart';
 import 'package:android_semantics_testing/main.dart' as app;
 import 'package:android_semantics_testing/test_constants.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -17,16 +22,45 @@ const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSe
   AndroidSemanticsAction.clearAccessibilityFocus,
 ];
 
-void main() {
+const MethodChannel kSemanticsChannel = MethodChannel('semantics');
+
+Future<void> setClipboard(String message) async {
+  final Completer<void> completer = Completer<void>();
+  Future<void> completeSetClipboard([Object? _]) async {
+    await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
+      'message': message,
+    });
+    completer.complete();
+  }
+  if (SchedulerBinding.instance.hasScheduledFrame) {
+    SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
+  } else {
+    completeSetClipboard();
+  }
+  await completer.future;
+}
+
+Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
+  final int id = tester.getSemantics(finder).id;
+  final Completer<String> completer = Completer<String>();
+  Future<void> completeSemantics([Object? _]) async {
+    final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
+      'id': id,
+    });
+    completer.complete(json.encode(result));
+  }
+  if (SchedulerBinding.instance.hasScheduledFrame) {
+    SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
+  } else {
+    completeSemantics();
+  }
+  return AndroidSemanticsNode.deserialize(await completer.future);
+}
+
+Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('AccessibilityBridge', () {
-    Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
-      final int id = tester.getSemantics(finder).id;
-      final String data = await app.invokeSemanticsMethod('getSemanticsNode#$id');
-      return AndroidSemanticsNode.deserialize(data);
-    }
-
     group('TextField', () {
       Future<void> prepareTextField(WidgetTester tester) async {
         app.main();
@@ -41,7 +75,7 @@ void main() {
         // Ideally this should test the case where there is nothing on the
         // clipboard as well, but there is no reliable way to clear the
         // clipboard on Android devices.
-        await app.invokeSemanticsMethod('setClipboard#Hello World');
+        await setClipboard('Hello World');
         await tester.pumpAndSettle();
       }
 
