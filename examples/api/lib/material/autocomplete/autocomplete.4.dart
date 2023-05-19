@@ -30,7 +30,7 @@ class AutocompleteExampleApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text('Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.'),
-              SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
               const _AsyncAutocomplete(),
             ],
           ),
