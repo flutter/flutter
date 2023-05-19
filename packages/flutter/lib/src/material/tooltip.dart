@@ -930,7 +930,7 @@ class _TooltipOverlay extends StatelessWidget {
 /// A controller to manage visibility of a tooltip.
 ///
 /// A [TooltipController] is used to control and interrogate a tooltip after it
-/// has been created, with methods such as [open] and [close],
+/// has been created, with methods such as [show] and [conceal],
 /// and state accessors like [isOpen].
 ///
 /// See also:
@@ -944,7 +944,7 @@ class TooltipController {
   /// tooltip it controls.
   TooltipState? _state;
 
-  /// Whether or not the associated tooltip is currently visible.
+  /// Whether or not the associated tooltip is currently open.
   bool get isOpen {
     assert(_state != null);
     return !_state!._isConcealed;
@@ -961,10 +961,7 @@ class TooltipController {
 
   /// Show the tooltip that this menu controller is associated with.
   ///
-  /// If `position` is given, then the menu will open at the position given, in
-  /// the coordinate space of the [MenuAnchor] this controller is attached to.
-  ///
-  /// If the `immediately` is set to true will shows the tooltip if it is not already visible.
+  /// If `immediately` is set to true, the tooltip will be shown if it is not already visible.
   void show({bool immediately = false}) {
     assert(_state != null);
     _state!._showTooltip(immediately: immediately);
