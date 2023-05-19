@@ -1255,7 +1255,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       case AxisDirection.left:
         throw Exception('This should not happen');
     }
-    switch(horizontalAxisDirection) {
+    switch (horizontalAxisDirection) {
       case AxisDirection.right:
         xOffset = layoutOffset.dx;
       case AxisDirection.left:
