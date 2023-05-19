@@ -101,7 +101,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto radius = Radius{blur_sigma_}.radius;
+  // Limit the kernel size to 1000x1000 pixels, like Skia does.
+  auto radius = std::min(Radius{blur_sigma_}.radius, 500.0f);
 
   // Input 0 snapshot.
 
