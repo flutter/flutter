@@ -441,6 +441,88 @@ void _testEngineSemanticsOwner() {
     mockSemanticsEnabler.shouldEnableSemanticsReturnValue = true;
     expect(semantics().receiveGlobalEvent(pointerEvent), isTrue);
   });
+
+  test('semantics owner update phases', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    expect(
+      reason: 'Should start in idle phase',
+      semantics().phase,
+      SemanticsUpdatePhase.idle,
+    );
+
+    void pumpSemantics({ required String label }) {
+      final SemanticsTester tester = SemanticsTester(semantics());
+      tester.updateNode(
+        id: 0,
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(id: 1, label: label),
+        ],
+      );
+      tester.apply();
+    }
+
+    SemanticsUpdatePhase? capturedPostUpdateCallbackPhase;
+    semantics().addOneTimePostUpdateCallback(() {
+      capturedPostUpdateCallbackPhase = semantics().phase;
+    });
+
+    pumpSemantics(label: 'Hello');
+
+    final SemanticsObject semanticsObject = semantics().debugSemanticsTree![1]!;
+
+    expect(
+      reason: 'Should be in postUpdate phase while calling post-update callbacks',
+      capturedPostUpdateCallbackPhase,
+      SemanticsUpdatePhase.postUpdate,
+    );
+    expect(
+      reason: 'After the update is done, should go back to idle',
+      semantics().phase,
+      SemanticsUpdatePhase.idle,
+    );
+
+    // Rudely replace the role manager with a mock, and trigger an update.
+    final MockRoleManager mockRoleManager = MockRoleManager(Role.labelAndValue, semanticsObject);
+    semanticsObject.debugRoleManagers[Role.labelAndValue] = mockRoleManager;
+
+    pumpSemantics(label: 'World');
+
+    expect(
+      reason: 'While updating must be in SemanticsUpdatePhase.updating phase',
+      mockRoleManager.log,
+      <MockRoleManagerLogEntry>[
+        (method: 'update', phase: SemanticsUpdatePhase.updating),
+      ],
+    );
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+typedef MockRoleManagerLogEntry = ({
+  String method,
+  SemanticsUpdatePhase phase,
+});
+
+class MockRoleManager extends RoleManager {
+  MockRoleManager(super.role, super.semanticsObject);
+
+  final List<MockRoleManagerLogEntry> log = <MockRoleManagerLogEntry>[];
+
+  void _log(String method) {
+    log.add((
+      method: method,
+      phase: semanticsObject.owner.phase,
+    ));
+  }
+
+  @override
+  void update() {
+    _log('update');
+  }
 }
 
 class MockSemanticsEnabler implements SemanticsEnabler {
@@ -2365,8 +2447,8 @@ void _testDialog() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="dialog" aria-label="this is a dialog label" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
-''');
+      <sem role="dialog" aria-label="this is a dialog label" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
+    ''');
 
     expect(
       semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
@@ -2404,18 +2486,153 @@ void _testDialog() {
     expect(
       warnings,
       <String>[
-        'Semantic node 0 was assigned dialog role, but is missing a label. A dialog should contain a label so that a screen reader can communicate to the user that a dialog appeared and a user action is requested.',
+        'Semantic node 0 had both scopesRoute and namesRoute set, indicating a self-labelled dialog, but it is missing the label. A dialog should be labelled either by setting namesRoute on itself and providing a label, or by containing a child node with namesRoute that can describe it with its content.',
       ],
     );
 
     // But still sets the dialog role.
     expectSemanticsTree('''
-<sem role="dialog" aria-label="" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
-''');
+      <sem role="dialog" aria-label="" style="$rootSemanticStyle"><sem-c><sem></sem></sem-c></sem>
+    ''');
 
     expect(
       semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
       isA<Dialog>(),
+    );
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('dialog can be described by a descendant', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    void pumpSemantics({ required String label }) {
+      final SemanticsTester tester = SemanticsTester(semantics());
+      tester.updateNode(
+        id: 0,
+        scopesRoute: true,
+        transform: Matrix4.identity().toFloat64(),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 1,
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(
+                id: 2,
+                namesRoute: true,
+                label: label,
+              ),
+            ],
+          ),
+        ],
+      );
+      tester.apply();
+
+      expectSemanticsTree('''
+        <sem aria-describedby="flt-semantic-node-2" style="$rootSemanticStyle">
+          <sem-c>
+            <sem>
+              <sem-c>
+                <sem aria-label="$label"></sem>
+              </sem-c>
+            </sem>
+          </sem-c>
+        </sem>
+      ''');
+    }
+
+    pumpSemantics(label: 'Dialog label');
+
+    expect(
+      semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
+      isA<Dialog>(),
+    );
+    expect(
+      semantics().debugSemanticsTree![2]!.debugRoleManagerFor(Role.routeName),
+      isA<RouteName>(),
+    );
+
+    pumpSemantics(label: 'Updated dialog label');
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('scopesRoute alone sets the dialog role with no label', () {
+    final List<String> warnings = <String>[];
+    printWarning = warnings.add;
+
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(semantics());
+    tester.updateNode(
+      id: 0,
+      scopesRoute: true,
+      transform: Matrix4.identity().toFloat64(),
+    );
+    tester.apply();
+
+    expectSemanticsTree('''
+      <sem style="$rootSemanticStyle"></sem>
+    ''');
+
+    expect(
+      semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
+      isA<Dialog>(),
+    );
+    expect(
+      semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.routeName),
+      isNull,
+    );
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('namesRoute alone has no effect', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(semantics());
+    tester.updateNode(
+      id: 0,
+      transform: Matrix4.identity().toFloat64(),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              namesRoute: true,
+              label: 'Hello',
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree('''
+      <sem style="$rootSemanticStyle">
+        <sem-c>
+          <sem>
+            <sem-c>
+              <sem aria-label="Hello"></sem>
+            </sem-c>
+          </sem>
+        </sem-c>
+      </sem>
+    ''');
+
+    expect(
+      semantics().debugSemanticsTree![0]!.debugRoleManagerFor(Role.dialog),
+      isNull,
+    );
+    expect(
+      semantics().debugSemanticsTree![2]!.debugRoleManagerFor(Role.routeName),
+      isA<RouteName>(),
     );
 
     semantics().semanticsEnabled = false;

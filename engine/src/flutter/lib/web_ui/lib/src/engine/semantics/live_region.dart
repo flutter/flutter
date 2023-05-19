@@ -31,8 +31,4 @@ class LiveRegion extends RoleManager {
       }
     }
   }
-
-  @override
-  void dispose() {
-  }
 }
