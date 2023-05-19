@@ -1081,11 +1081,11 @@ class BitmapCanvas extends EngineCanvas {
     final double dpr = ui.window.devicePixelRatio;
     final double width = ui.window.physicalSize.width * dpr;
     final double height = ui.window.physicalSize.height * dpr;
-    final Vector3 topLeft = inverted.perspectiveTransform(Vector3(0, 0, 0));
-    final Vector3 topRight = inverted.perspectiveTransform(Vector3(width, 0, 0));
+    final Vector3 topLeft = inverted.perspectiveTransform(x: 0, y: 0, z: 0);
+    final Vector3 topRight = inverted.perspectiveTransform(x: width, y: 0, z: 0);
     final Vector3 bottomRight =
-        inverted.perspectiveTransform(Vector3(width, height, 0));
-    final Vector3 bottomLeft = inverted.perspectiveTransform(Vector3(0, height, 0));
+        inverted.perspectiveTransform(x: width, y: height, z: 0);
+    final Vector3 bottomLeft = inverted.perspectiveTransform(x: 0, y: height, z: 0);
     return ui.Rect.fromLTRB(
       math.min(topLeft.x,
           math.min(topRight.x, math.min(bottomRight.x, bottomLeft.x))),

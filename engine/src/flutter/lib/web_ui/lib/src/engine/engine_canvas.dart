@@ -134,8 +134,6 @@ class SaveClipEntry {
 /// Provides save stack tracking functionality to implementations of
 /// [EngineCanvas].
 mixin SaveStackTracking on EngineCanvas {
-  static final Vector3 _unitZ = Vector3(0.0, 0.0, 1.0);
-
   final List<SaveStackEntry> _saveStack = <SaveStackEntry>[];
 
   /// The stack that maintains clipping operations used when text is painted
@@ -206,7 +204,7 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.rotate()`.
   @override
   void rotate(double radians) {
-    _currentTransform.rotate(_unitZ, radians);
+    _currentTransform.rotate(kUnitZ, radians);
   }
 
   /// Skews the [currentTransform] matrix.
@@ -288,8 +286,6 @@ class _SaveElementStackEntry {
 /// Provides save stack tracking functionality to implementations of
 /// [EngineCanvas].
 mixin SaveElementStackTracking on EngineCanvas {
-  static final Vector3 _unitZ = Vector3(0.0, 0.0, 1.0);
-
   final List<_SaveElementStackEntry> _saveStack = <_SaveElementStackEntry>[];
 
   /// The element at the top of the element stack, or [rootElement] if the stack
@@ -373,7 +369,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.rotate()`.
   @override
   void rotate(double radians) {
-    _currentTransform.rotate(_unitZ, radians);
+    _currentTransform.rotate(kUnitZ, radians);
   }
 
   /// Skews the [currentTransform] matrix.
