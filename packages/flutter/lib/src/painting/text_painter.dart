@@ -991,6 +991,11 @@ class TextPainter {
     canvas.drawParagraph(_paragraph!, offset);
   }
 
+  // Returns true if value falls in the valid range of the UTF16 encoding.
+  static bool _isUTF16(int value) {
+    return value >= 0x0 && value <= 0xFFFFF;
+  }
+
   /// Returns true iff the given value is a valid UTF-16 high (first) surrogate.
   /// The value must be a UTF-16 code unit, meaning it must be in the range
   /// 0x0000-0xFFFF.
@@ -1000,6 +1005,7 @@ class TextPainter {
   ///   * [isLowSurrogate], which checks the same thing for low (second)
   /// surrogates.
   static bool isHighSurrogate(int value) {
+    assert(_isUTF16(value));
     return value & 0xFC00 == 0xD800;
   }
 
@@ -1012,6 +1018,7 @@ class TextPainter {
   ///   * [isHighSurrogate], which checks the same thing for high (first)
   /// surrogates.
   static bool isLowSurrogate(int value) {
+    assert(_isUTF16(value));
     return value & 0xFC00 == 0xDC00;
   }
 
