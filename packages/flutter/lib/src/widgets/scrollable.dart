@@ -1877,7 +1877,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
       if (oldWidget.verticalDetails.controller == null) {
         // The old controller was null, meaning the fallback cannot be null.
         // Dispose of the fallback.
-        assert(_verticalFallbackController !=  null);
+        assert(_verticalFallbackController != null);
         assert(widget.verticalDetails.controller != null);
         _verticalFallbackController!.dispose();
         _verticalFallbackController = null;

@@ -278,7 +278,7 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
     final List<Element> children = _vicinityToChild.values.toList()..sort(_compareChildren);
     return <DiagnosticsNode>[
       for (final Element child in children)
-       child.toDiagnosticsNode(name: child.slot.toString())
+        child.toDiagnosticsNode(name: child.slot.toString())
     ];
   }
 
@@ -478,7 +478,7 @@ class TwoDimensionalViewportParentData extends ParentData {
       'paintOffset=$paintOffset; '
       '${_paintExtent == null
         ? 'not visible '
-        : '${!isVisible ? 'NOT ' : ''}visible - paintExtent=$_paintExtent'}';
+        : '${!isVisible ? 'not ' : ''}visible - paintExtent=$_paintExtent'}';
   }
 }
 
@@ -498,7 +498,8 @@ class TwoDimensionalViewportParentData extends ParentData {
 abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderAbstractViewport {
   /// Initializes fields for subclasses.
   ///
-  /// The [cacheExtent], if null, defaults to [RenderAbstractViewport.defaultCacheExtent].
+  /// The [cacheExtent], if null, defaults to
+  /// [RenderAbstractViewport.defaultCacheExtent].
   RenderTwoDimensionalViewport({
     required ViewportOffset horizontalOffset,
     required AxisDirection horizontalAxisDirection,

@@ -52,7 +52,6 @@ void main() {
         ),
       ));
 
-
       FlutterError.onError = oldHandler;
       expect(exceptions.length, 3);
       for (final Object exception in exceptions) {

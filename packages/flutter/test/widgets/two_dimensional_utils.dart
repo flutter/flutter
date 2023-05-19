@@ -191,7 +191,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     this.forgetToLayoutChild = false,
   }) : super(delegate: delegate);
 
-  // These are to test conditions that need to be met by subclasses in
+  // These are to test conditions to validate subclass implementations after
   // layoutChildSequence
   final bool applyDimensions;
   final bool useParentSize;
