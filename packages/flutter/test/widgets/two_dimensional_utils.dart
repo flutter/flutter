@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ViewportOffset;
@@ -12,8 +13,8 @@ import 'package:flutter/rendering.dart' show ViewportOffset;
 // BUILDER DELEGATE ---
 
 final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
-  maxXIndex: 99,
-  maxYIndex: 99,
+  maxXIndex: 5,
+  maxYIndex: 5,
   builder: (BuildContext context, ChildVicinity vicinity) {
     return Container(
       color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
@@ -27,6 +28,7 @@ final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBu
     );
   }
 );
+
 // Creates a simple 2D table of 200x200 squares with a builder delegate.
 Widget simpleBuilderTest({
   Axis mainAxis = Axis.vertical,
@@ -38,6 +40,11 @@ Widget simpleBuilderTest({
   DiagonalDragBehavior? diagonalDrag,
   Clip? clipBehavior,
   String? restorationID,
+  bool useCacheExtent = false,
+  bool applyDimensions = true,
+  bool useParentSize = true,
+  bool forgetToLayoutChild = false,
+  bool setLayoutOffset = true,
 }) {
   return MaterialApp(
     restorationScopeId: restorationID,
@@ -47,9 +54,14 @@ Widget simpleBuilderTest({
         verticalDetails: verticalDetails ?? const ScrollableDetails.vertical(),
         horizontalDetails: horizontalDetails ?? const ScrollableDetails.horizontal(),
         cacheExtent: cacheExtent,
+        useCacheExtent: useCacheExtent,
         diagonalDragBehavior: diagonalDrag ?? DiagonalDragBehavior.none,
         clipBehavior: clipBehavior ?? Clip.hardEdge,
         delegate: delegate ?? builderDelegate,
+        applyDimensions: applyDimensions,
+        useParentSize: useParentSize,
+        forgetToLayoutChild: forgetToLayoutChild,
+        setLayoutOffset: setLayoutOffset,
       ),
     ),
   );
@@ -68,7 +80,19 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     super.dragStartBehavior = DragStartBehavior.start,
     super.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     super.clipBehavior = Clip.hardEdge,
+    this.useCacheExtent = false,
+    this.applyDimensions = true,
+    this.useParentSize = true,
+    this.forgetToLayoutChild = false,
+    this.setLayoutOffset = true,
   }) : super(delegate: delegate);
+
+  // Piped through for testing in RenderTwoDimensionalViewport
+  final bool useCacheExtent;
+  final bool applyDimensions;
+  final bool useParentSize;
+  final bool forgetToLayoutChild;
+  final bool setLayoutOffset;
 
   @override
   Widget buildViewport(BuildContext context, ViewportOffset verticalOffset, ViewportOffset horizontalOffset) {
@@ -81,6 +105,11 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
       delegate: delegate as TwoDimensionalChildBuilderDelegate,
       cacheExtent: cacheExtent,
       clipBehavior: clipBehavior,
+      useCacheExtent: useCacheExtent,
+      applyDimensions: applyDimensions,
+      useParentSize: useParentSize,
+      forgetToLayoutChild: forgetToLayoutChild,
+      setLayoutOffset: setLayoutOffset,
     );
   }
 }
@@ -96,7 +125,19 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
     required super.mainAxis,
     super.cacheExtent,
     super.clipBehavior = Clip.hardEdge,
+    this.useCacheExtent = false,
+    this.applyDimensions = true,
+    this.useParentSize = true,
+    this.forgetToLayoutChild = false,
+    this.setLayoutOffset = true,
   }) : super(delegate: delegate);
+
+  // Piped through for testing in RenderTwoDimensionalViewport
+  final bool useCacheExtent;
+  final bool applyDimensions;
+  final bool useParentSize;
+  final bool forgetToLayoutChild;
+  final bool setLayoutOffset;
 
   @override
   RenderTwoDimensionalViewport createRenderObject(BuildContext context) {
@@ -110,6 +151,11 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
       childManager: context as TwoDimensionalChildManager,
       cacheExtent: cacheExtent,
       clipBehavior: clipBehavior,
+      useCacheExtent: useCacheExtent,
+      applyDimensions: applyDimensions,
+      useParentSize: useParentSize,
+      forgetToLayoutChild: forgetToLayoutChild,
+      setLayoutOffset: setLayoutOffset,
     );
   }
 
@@ -141,11 +187,19 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     this.applyDimensions = true,
     this.useParentSize = true,
     this.setLayoutOffset = true,
+    this.useCacheExtent = false,
+    this.forgetToLayoutChild = false,
   }) : super(delegate: delegate);
 
-  final bool applyDimensions; // Testing error message
-  final bool useParentSize; // Testing error message
-  final bool setLayoutOffset; // Testing error message
+  // These are to test conditions that need to be met by subclasses in
+  // layoutChildSequence
+  final bool applyDimensions;
+  final bool useParentSize;
+  final bool setLayoutOffset;
+  final bool useCacheExtent;
+  final bool forgetToLayoutChild;
+
+  RenderBox? testGetChildFor(ChildVicinity vicinity) => getChildFor(vicinity);
 
   @override
   void layoutChildSequence() {
@@ -153,21 +207,24 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     // Every child is 200x200 square
     final double horizontalPixels = horizontalOffset.pixels;
     final double verticalPixels = verticalOffset.pixels;
+    final double viewportWidth = viewportDimension.width + (useCacheExtent ? cacheExtent : 0.0);
+    final double viewportHeight = viewportDimension.height + (useCacheExtent ? cacheExtent : 0.0);
     final TwoDimensionalChildBuilderDelegate builderDelegate = delegate as TwoDimensionalChildBuilderDelegate;
-    final int rowCount;
-    final int columnCount;
-    rowCount = builderDelegate.maxYIndex ?? 99;
-    columnCount = builderDelegate.maxXIndex ?? 99;
+
+    final int maxRowIndex;
+    final int maxColumnIndex;
+    maxRowIndex = builderDelegate.maxYIndex ?? 5;
+    maxColumnIndex = builderDelegate.maxXIndex ?? 5;
 
     final int leadingColumn = math.max((horizontalPixels / 200).floor(), 0);
     final int leadingRow = math.max((verticalPixels / 200).floor(), 0);
     final int trailingColumn = math.min(
-      ((horizontalPixels + viewportDimension.width) / 200).ceil(),
-      columnCount,
+      ((horizontalPixels + viewportWidth) / 200).ceil(),
+      maxColumnIndex,
     );
     final int trailingRow = math.min(
-      ((verticalPixels + viewportDimension.height) / 200).ceil(),
-      rowCount,
+      ((verticalPixels + viewportHeight) / 200).ceil(),
+      maxRowIndex,
     );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
@@ -176,10 +233,12 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
       for (int row = leadingRow; row <= trailingRow; row++) {
         final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
-        child.layout(
-          constraints.tighten(width: 200.0, height: 200.0),
-          parentUsesSize: useParentSize,
-        );
+        if (!forgetToLayoutChild) {
+          child.layout(
+            constraints.tighten(width: 200.0, height: 200.0),
+            parentUsesSize: useParentSize,
+          );
+        }
 
         if (setLayoutOffset) {
           parentDataOf(child).layoutOffset = Offset(xLayoutOffset, yLayoutOffset);
@@ -189,8 +248,16 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
       xLayoutOffset += 200;
     }
     if (applyDimensions) {
-      verticalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.height);
-      horizontalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.width);
+      final double verticalExtent = 200 * (maxRowIndex + 1);
+      verticalOffset.applyContentDimensions(
+        0.0,
+        clampDouble(verticalExtent - viewportDimension.height, 0.0, double.infinity),
+      );
+      final double horizontalExtent = 200 * (maxColumnIndex + 1);
+      horizontalOffset.applyContentDimensions(
+        0.0,
+        clampDouble(horizontalExtent - viewportDimension.width, 0.0, double.infinity),
+      );
     }
   }
 }
