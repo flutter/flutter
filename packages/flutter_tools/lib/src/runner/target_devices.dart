@@ -220,21 +220,6 @@ class TargetDevices {
     return null;
   }
 
-  Future<void> _printUnsupportedDevices() async {
-    // Get connected devices from cache, including unsupported ones.
-    final List<Device> unsupportedDevices = await _deviceManager.getAllDevices(
-        filter: DeviceDiscoveryFilter(
-          deviceConnectionInterface: deviceConnectionInterface,
-        )
-    );
-
-    if (unsupportedDevices.isNotEmpty) {
-      _logger.printStatus('');
-      _logger.printStatus('The following devices were found:');
-      await Device.printDevices(unsupportedDevices, _logger);
-    }
-  }
-
   /// Determine which device to use when multiple found.
   ///
   /// If user has not specified a device id/name, attempt to prioritize
@@ -503,15 +488,21 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       // If there are multiple matches, continue on to wait for all attached
       // and wireless devices to load so the user can select between all
       // connected matches.
-      List<Device> specifiedDevices = await _getDeviceById(
+      final List<Device> specifiedDevices = await _getDeviceById(
         includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         includeDisconnected: true,
       );
 
-      specifiedDevices = await _removeDevDisabledIOSDevices(specifiedDevices);
-
       if (specifiedDevices.length == 1) {
         Device? matchedDevice = specifiedDevices.first;
+        // If the only matching device does not have Developer Mode enabled,
+        // print a warning
+        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled) {
+          _logger.printStatus(
+              flutterSpecifiedDeviceDevModeDisabled(matchedDevice.name)
+          );
+          return null;
+        }
 
         if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
           matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
@@ -520,14 +511,22 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         if (matchedDevice != null && matchedDevice.isConnected) {
           return <Device>[matchedDevice];
         }
+
+      } else {
+        for (final Device device in specifiedDevices) {
+          // Print warning for every matching device that does not have Developer Mode enabled.
+          if (device is IOSDevice && !device.devModeEnabled) {
+            _logger.printStatus(
+                flutterSpecifiedDeviceDevModeDisabled(device.name)
+            );
+          }
+        }
       }
     }
 
-    List<Device> attachedDevices = await _getAttachedDevices(
+    final List<Device> attachedDevices = await _getAttachedDevices(
       supportFilter: _defaultSupportFilter(includeDevicesUnsupportedByProject),
     );
-
-    attachedDevices = await _removeDevDisabledIOSDevices(attachedDevices, printWarning: false);
 
     // _getRefreshedWirelessDevices must be run after _getAttachedDevices is
     // finished to prevent non-iOS discoverers from running simultaneously.
@@ -587,27 +586,6 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     _logger.printStatus(_checkingForWirelessDevicesMessage);
     final List<Device> wirelessDevices = await futureWirelessDevices;
     return devices + wirelessDevices;
-  }
-
-  Future<List<Device>> _removeDevDisabledIOSDevices(
-      List<Device> devices,
-      {bool printWarning = true}
-      ) async {
-    final List<Device> disabledDevices = <Device>[];
-
-    for (final Device device in devices) {
-      if (device is IOSDevice && !device.devModeEnabled) {
-        disabledDevices.add(device);
-        if (printWarning) {
-          _logger.printStatus(
-              flutterSpecifiedDeviceDevModeDisabled(device.name)
-          );
-        }
-      }
-    }
-
-    devices.removeWhere((Device element) => disabledDevices.contains(element));
-    return devices;
   }
 
   /// Determine which device to use when one or more are found.
