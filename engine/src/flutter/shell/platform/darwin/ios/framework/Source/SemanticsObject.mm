@@ -460,6 +460,10 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return attributedString;
 }
 
+- (void)showOnScreen {
+  [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kShowOnScreen);
+}
+
 #pragma mark - UIAccessibility overrides
 
 - (BOOL)isAccessibilityElement {
@@ -561,12 +565,30 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return nil;
 }
 
-// Overrides apple private method to fix https://github.com/flutter/flutter/issues/113377.
-// For overlapping UIAccessibilityElements (e.g. a stack) in IOS, the focus goes to the smallest
-// object before IOS 16, but to the top-left object in IOS 16.
-// Overrides this method to focus the first eligiable semantics object in hit test order.
+// iOS uses this method to determine the hittest results when users touch
+// explore in VoiceOver.
+//
+// For overlapping UIAccessibilityElements (e.g. a stack) in IOS, the focus
+// goes to the smallest object before IOS 16, but to the top-left object in
+// IOS 16. Overrides this method to focus the first eligiable semantics
+// object in hit test order.
 - (id)_accessibilityHitTest:(CGPoint)point withEvent:(UIEvent*)event {
   return [self search:point];
+}
+
+// iOS calls this method when this item is swipe-to-focusd in VoiceOver.
+- (BOOL)accessibilityScrollToVisible {
+  [self showOnScreen];
+  return YES;
+}
+
+// iOS calls this method when this item is swipe-to-focusd in VoiceOver.
+- (BOOL)accessibilityScrollToVisibleWithChild:(id)child {
+  if ([child isKindOfClass:[SemanticsObject class]]) {
+    [child showOnScreen];
+    return YES;
+  }
+  return NO;
 }
 
 - (NSAttributedString*)accessibilityAttributedLabel {
@@ -750,7 +772,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   [self bridge]->AccessibilityObjectDidBecomeFocused([self uid]);
   if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden) ||
       [self node].HasFlag(flutter::SemanticsFlags::kIsHeader)) {
-    [self bridge]->DispatchSemanticsAction([self uid], flutter::SemanticsAction::kShowOnScreen);
+    [self showOnScreen];
   }
   if ([self node].HasAction(flutter::SemanticsAction::kDidGainAccessibilityFocus)) {
     [self bridge]->DispatchSemanticsAction([self uid],
