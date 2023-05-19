@@ -172,6 +172,13 @@ void CanRenderTiledTexture(AiksTest* aiks_test, Entity::TileMode tile_mode) {
     canvas.DrawRect({0, 0, 600, 600}, paint);
   }
 
+  // Should not change the image.
+  PathBuilder path_builder;
+  path_builder.AddCircle({150, 150}, 150);
+  path_builder.AddRoundedRect(Rect::MakeLTRB(300, 300, 600, 600), 10);
+  paint.style = Paint::Style::kFill;
+  canvas.DrawPath(path_builder.TakePath(), paint);
+
   ASSERT_TRUE(aiks_test->OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 }  // namespace
