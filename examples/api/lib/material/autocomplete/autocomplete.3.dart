@@ -59,7 +59,6 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete > {
 
     // If another search happened after this one, throw away these options.
     if (_currentQuery != query) {
-      _currentQuery = null;
       return null;
     }
     _currentQuery = null;
