@@ -3787,7 +3787,7 @@ void main() {
       ));
       expect(rect(tester, tileKey), const Rect.fromLTRB(0.0, 0.0, 800.0, 88.0));
       expect(rect(tester, leadingKey), const Rect.fromLTRB(800 - 8.0 - 40.0, 8.0, 800.0 - 8.0, 8.0 + 40.0));
-      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 31 : 20.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 21 : 20.5 + 10.0));
+      expect(rect(tester, overlineKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 21 : 20.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 31 : 20.5 + 10.0));
       expect(rect(tester, titleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, 36.0, 800.0 - 16.0 * 2 - 40, 36.0 + 16.0));
       expect(rect(tester, subtitleKey), const Rect.fromLTRB(16.0 * 2 + 24.0, hasIssue99933 ? 60 : 59.5, 800.0 - 16.0 * 2 - 40, hasIssue99933 ? 74 : 59.5 + 14.0));
       expect(rect(tester, trailingKey), const Rect.fromLTRB(8.0, 8.0, 8.0 + 40.0, 8.0 + 40.0));
