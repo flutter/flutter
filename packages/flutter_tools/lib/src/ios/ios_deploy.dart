@@ -314,6 +314,7 @@ class IOSDeployDebugger {
 
   // Send signal to stop (pause) the app. Used before a backtrace dump.
   static const String _signalStop = 'process signal SIGSTOP';
+  static const String _signalStopError = 'Failed to send signal 17';
 
   static const String _processResume = 'process continue';
   static const String _processInterrupt = 'process interrupt';
@@ -401,11 +402,23 @@ class IOSDeployDebugger {
           }
           return;
         }
-        if (line == _signalStop) {
+
+        // (lldb) process signal SIGSTOP
+        // or
+        // process signal SIGSTOP
+        if (line.contains(_signalStop)) {
           // The app is about to be stopped. Only show in verbose mode.
           _logger.printTrace(line);
           return;
         }
+
+        // error: Failed to send signal 17: failed to send signal 17
+        if (line.contains(_signalStopError)) {
+          // The stop signal failed, force exit.
+          exit();
+          return;
+        }
+
         if (line == _backTraceAll) {
           // The app is stopped and the backtrace for all threads will be printed.
           _logger.printTrace(line);
