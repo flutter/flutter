@@ -5109,7 +5109,7 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getLeadingTextBoundaryAt(int position) {
-    if (position < 0) {
+    if (_text.isEmpty || position < 0) {
       return null;
     }
     if (position == 0) {
@@ -5129,7 +5129,7 @@ class _CodePointBoundary extends TextBoundary {
 
   @override
   int? getTrailingTextBoundaryAt(int position) {
-    if (position >= _text.length) {
+    if (_text.isEmpty || position >= _text.length) {
       return null;
     }
     if (position < 0) {
