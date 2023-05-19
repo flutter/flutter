@@ -101,6 +101,10 @@ void main() {
       allowedBaseUrls: <String>['http://test.zip'],
     );
 
+    // entitlements file cached from before the tool had a denylist
+    final File staleEntitlementsFile = fileSystem.file('out/path/to/entitlements.txt')..createSync(recursive: true);
+
+    expect(staleEntitlementsFile, exists);
     await artifactUpdater.downloadZipArchive(
       'test message',
       Uri.parse('http://test.zip'),
@@ -110,6 +114,7 @@ void main() {
     expect(desiredArtifact, exists);
     expect(entitlementsFile, isNot(exists));
     expect(nestedWithoutEntitlementsFile, isNot(exists));
+    expect(staleEntitlementsFile, isNot(exists));
   });
 
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
