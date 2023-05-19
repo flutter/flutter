@@ -207,8 +207,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
       VS::PerVertexData data;
       data.position = points[i];
       auto coverage_coords =
-          ((points[i] - texture_coverage.origin) / texture_coverage.size) /
-          texture_coverage.size;
+          (points[i] - texture_coverage.origin) / texture_coverage.size;
       data.texture_coords = effect_transform * coverage_coords;
       vertex_builder.AppendVertex(data);
     }
@@ -238,8 +237,7 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
           Point vtx = {vertices[i], vertices[i + 1]};
           data.position = vtx;
           auto coverage_coords =
-              ((vtx - texture_coverage.origin) / texture_coverage.size) /
-              texture_coverage.size;
+              (vtx - texture_coverage.origin) / texture_coverage.size;
           data.texture_coords = effect_transform * coverage_coords;
           vertex_builder.AppendVertex(data);
         }
