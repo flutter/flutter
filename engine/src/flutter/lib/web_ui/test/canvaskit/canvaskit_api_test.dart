@@ -754,8 +754,8 @@ void _matrix4x4CompositionTests() {
       paint(canvas, (ui.Canvas canvas) {
         final Matrix4 matrix = Matrix4.identity();
         matrix.setEntry(3, 2, 0.001);
-        matrix.rotate(Vector3(1, 0, 0), rotateAroundX);
-        matrix.rotate(Vector3(0, 1, 0), rotateAroundY);
+        matrix.rotate(kUnitX, rotateAroundX);
+        matrix.rotate(kUnitY, rotateAroundY);
         canvas.transform(matrix.toFloat64());
       });
     }, width, height);

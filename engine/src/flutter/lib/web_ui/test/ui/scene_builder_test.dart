@@ -48,7 +48,7 @@ Future<void> testMain() async {
       // matrix for the device pixel ratio, so just push the identity matrix.
       sceneBuilder.pushTransform(transform.toFloat64());
       transform.translate(150, 150);
-      transform.rotate(Vector3(0, 0, 1), math.pi / 3);
+      transform.rotate(kUnitZ, math.pi / 3);
       sceneBuilder.pushTransform(transform.toFloat64());
       sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
         canvas.drawRRect(
