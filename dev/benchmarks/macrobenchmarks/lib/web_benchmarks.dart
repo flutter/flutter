@@ -4,10 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert' show json;
-import 'dart:js_interop';
+import 'dart:html' as html;
 import 'dart:math' as math;
-
-import 'package:web/web.dart' as web;
 
 import 'src/web/bench_build_image.dart';
 import 'src/web/bench_build_material_checkbox.dart';
@@ -97,7 +95,7 @@ Future<void> main() async {
   }
 
   await _runBenchmark(nextBenchmark);
-  web.window.location.reload();
+  html.window.location.reload();
 }
 
 Future<void> _runBenchmark(String benchmarkName) async {
@@ -152,20 +150,8 @@ Future<void> _runBenchmark(String benchmarkName) async {
   );
 }
 
-extension WebHTMLElementExtension on web.HTMLElement {
-  void appendHtml(String html) {
-    final web.HTMLDivElement div = web.document.createElement('div'.toJS) as
-        web.HTMLDivElement;
-    div.innerHTML = html.toJS;
-    final web.DocumentFragment fragment = web.document.createDocumentFragment();
-    fragment.append(div);
-    web.document.adoptNode(fragment);
-    append(fragment);
-  }
-}
-
 void _fallbackToManual(String error) {
-  web.document.body!.appendHtml('''
+  html.document.body!.appendHtml('''
     <div id="manual-panel">
       <h3>$error</h3>
 
@@ -180,29 +166,28 @@ void _fallbackToManual(String error) {
         }
       </ul>
     </div>
-  ''');
+  ''', validator: html.NodeValidatorBuilder()..allowHtml5()..allowInlineStyles());
 
   for (final String benchmarkName in benchmarks.keys) {
-    final web.Element button = web.document.querySelector('#$benchmarkName'.toJS)!;
-    button.addEventListener('click'.toJS, (JSObject _) {
-      final web.Element? manualPanel =
-          web.document.querySelector('#manual-panel'.toJS);
+    final html.Element button = html.document.querySelector('#$benchmarkName')!;
+    button.addEventListener('click', (_) {
+      final html.Element? manualPanel = html.document.querySelector('#manual-panel');
       manualPanel?.remove();
       _runBenchmark(benchmarkName);
-    }.toJS);
+    });
   }
 }
 
 /// Visualizes results on the Web page for manual inspection.
 void _printResultsToScreen(Profile profile) {
-  web.document.body!.remove();
-  web.document.body = web.document.createElement('body'.toJS) as web.HTMLBodyElement;
-  web.document.body!.appendHtml('<h2>${profile.name}</h2>');
+  html.document.body!.remove();
+  html.document.body = html.BodyElement();
+  html.document.body!.appendHtml('<h2>${profile.name}</h2>');
 
   profile.scoreData.forEach((String scoreKey, Timeseries timeseries) {
-    web.document.body!.appendHtml('<h2>$scoreKey</h2>');
-    web.document.body!.appendHtml('<pre>${timeseries.computeStats()}</pre>');
-    web.document.body!.append(TimeseriesVisualization(timeseries).render());
+    html.document.body!.appendHtml('<h2>$scoreKey</h2>');
+    html.document.body!.appendHtml('<pre>${timeseries.computeStats()}</pre>');
+    html.document.body!.append(TimeseriesVisualization(timeseries).render());
   });
 }
 
@@ -210,15 +195,15 @@ void _printResultsToScreen(Profile profile) {
 class TimeseriesVisualization {
   TimeseriesVisualization(this._timeseries) {
     _stats = _timeseries.computeStats();
-    _canvas = web.document.createElement('canvas'.toJS) as web.HTMLCanvasElement;
-    _screenWidth = web.window.screen.width.toDart.toInt();
-    _canvas.width = _screenWidth.toJS;
-    _canvas.height = (_kCanvasHeight * web.window.devicePixelRatio.toDart).round().toJS;
+    _canvas = html.CanvasElement();
+    _screenWidth = html.window.screen!.width!;
+    _canvas.width = _screenWidth;
+    _canvas.height = (_kCanvasHeight * html.window.devicePixelRatio).round();
     _canvas.style
-      ..setProperty('width'.toJS, '100%'.toJS)
-      ..setProperty('height'.toJS,  '${_kCanvasHeight}px'.toJS)
-      ..setProperty('outline'.toJS, '1px solid green'.toJS);
-    _ctx = _canvas.getContext('2d'.toJS)! as web.CanvasRenderingContext2D;
+      ..width = '100%'
+      ..height = '${_kCanvasHeight}px'
+      ..outline = '1px solid green';
+    _ctx = _canvas.context2D;
 
     // The amount of vertical space available on the chart. Because some
     // outliers can be huge they can dwarf all the useful values. So we
@@ -233,8 +218,8 @@ class TimeseriesVisualization {
 
   final Timeseries _timeseries;
   late TimeseriesStats _stats;
-  late web.HTMLCanvasElement _canvas;
-  late web.CanvasRenderingContext2D _ctx;
+  late html.CanvasElement _canvas;
+  late html.CanvasRenderingContext2D _ctx;
   late int _screenWidth;
 
   // Used to normalize benchmark values to chart height.
@@ -250,15 +235,15 @@ class TimeseriesVisualization {
   /// A utility for drawing lines.
   void drawLine(num x1, num y1, num x2, num y2) {
     _ctx.beginPath();
-    _ctx.moveTo(x1.toJS, y1.toJS);
-    _ctx.lineTo(x2.toJS, y2.toJS);
+    _ctx.moveTo(x1, y1);
+    _ctx.lineTo(x2, y2);
     _ctx.stroke();
   }
 
   /// Renders the timeseries into a `<canvas>` and returns the canvas element.
-  web.HTMLCanvasElement render() {
-    _ctx.translate(0.toJS, (_kCanvasHeight * web.window.devicePixelRatio.toDart).toJS);
-    _ctx.scale(1.toJS, (-web.window.devicePixelRatio.toDart).toJS);
+  html.CanvasElement render() {
+    _ctx.translate(0, _kCanvasHeight * html.window.devicePixelRatio);
+    _ctx.scale(1, -html.window.devicePixelRatio);
 
     final double barWidth = _screenWidth / _stats.samples.length;
     double xOffset = 0;
@@ -267,42 +252,40 @@ class TimeseriesVisualization {
 
       if (sample.isWarmUpValue) {
         // Put gray background behind warm-up samples.
-        _ctx.fillStyle = 'rgba(200,200,200,1)'.toJS;
-        _ctx.fillRect(xOffset.toJS, 0.toJS, barWidth.toJS,
-            _normalized(_maxValueChartRange).toJS);
+        _ctx.fillStyle = 'rgba(200,200,200,1)';
+        _ctx.fillRect(xOffset, 0, barWidth, _normalized(_maxValueChartRange));
       }
 
       if (sample.magnitude > _maxValueChartRange) {
         // The sample value is so big it doesn't fit on the chart. Paint it purple.
-        _ctx.fillStyle = 'rgba(100,50,100,0.8)'.toJS;
+        _ctx.fillStyle = 'rgba(100,50,100,0.8)';
       } else if (sample.isOutlier) {
         // The sample is an outlier, color it light red.
-        _ctx.fillStyle = 'rgba(255,50,50,0.6)'.toJS;
+        _ctx.fillStyle = 'rgba(255,50,50,0.6)';
       } else {
         // A non-outlier sample, color it light blue.
-        _ctx.fillStyle = 'rgba(50,50,255,0.6)'.toJS;
+        _ctx.fillStyle = 'rgba(50,50,255,0.6)';
       }
 
-      _ctx.fillRect(xOffset.toJS, 0.toJS, (barWidth - 1).toJS,
-          _normalized(sample.magnitude).toJS);
+      _ctx.fillRect(xOffset, 0, barWidth - 1, _normalized(sample.magnitude));
       xOffset += barWidth;
     }
 
     // Draw a horizontal solid line corresponding to the average.
-    _ctx.lineWidth = 1.toJS;
+    _ctx.lineWidth = 1;
     drawLine(0, _normalized(_stats.average), _screenWidth, _normalized(_stats.average));
 
     // Draw a horizontal dashed line corresponding to the outlier cut off.
-    _ctx.setLineDash(<JSAny?>[5.toJS, 5.toJS].toJS);
+    _ctx.setLineDash(<num>[5, 5]);
     drawLine(0, _normalized(_stats.outlierCutOff), _screenWidth, _normalized(_stats.outlierCutOff));
 
     // Draw a light red band that shows the noise (1 stddev in each direction).
-    _ctx.fillStyle = 'rgba(255,50,50,0.3)'.toJS;
+    _ctx.fillStyle = 'rgba(255,50,50,0.3)';
     _ctx.fillRect(
-      0.toJS,
-      _normalized(_stats.average * (1 - _stats.noise)).toJS,
-      _screenWidth.toJS,
-      _normalized(2 * _stats.average * _stats.noise).toJS,
+      0,
+      _normalized(_stats.average * (1 - _stats.noise)),
+      _screenWidth,
+      _normalized(2 * _stats.average * _stats.noise),
     );
 
     return _canvas;
@@ -330,7 +313,7 @@ class LocalBenchmarkServerClient {
   /// Returns [kManualFallback] if local server is not available (uses 404 as a
   /// signal).
   Future<String> requestNextBenchmark() async {
-    final web.XMLHttpRequest request = await _requestXhr(
+    final html.HttpRequest request = await _requestXhr(
       '/next-benchmark',
       method: 'POST',
       mimeType: 'application/json',
@@ -340,13 +323,13 @@ class LocalBenchmarkServerClient {
     // 404 is expected in the following cases:
     // - The benchmark is ran using plain `flutter run`, which does not provide "next-benchmark" handler.
     // - We ran all benchmarks and the benchmark is telling us there are no more benchmarks to run.
-    if (request.status.toDart != 200) {
+    if (request.status == 404) {
       isInManualMode = true;
       return kManualFallback;
     }
 
     isInManualMode = false;
-    return request.responseText.toDart;
+    return request.responseText!;
   }
 
   void _checkNotManualMode() {
@@ -362,7 +345,7 @@ class LocalBenchmarkServerClient {
   /// DevTools Protocol.
   Future<void> startPerformanceTracing(String benchmarkName) async {
     _checkNotManualMode();
-    await _requestXhr(
+    await html.HttpRequest.request(
       '/start-performance-tracing?label=$benchmarkName',
       method: 'POST',
       mimeType: 'application/json',
@@ -372,7 +355,7 @@ class LocalBenchmarkServerClient {
   /// Stops the performance tracing session started by [startPerformanceTracing].
   Future<void> stopPerformanceTracing() async {
     _checkNotManualMode();
-    await _requestXhr(
+    await html.HttpRequest.request(
       '/stop-performance-tracing',
       method: 'POST',
       mimeType: 'application/json',
@@ -383,13 +366,13 @@ class LocalBenchmarkServerClient {
   /// server.
   Future<void> sendProfileData(Profile profile) async {
     _checkNotManualMode();
-    final web.XMLHttpRequest request = await _requestXhr(
+    final html.HttpRequest request = await html.HttpRequest.request(
       '/profile-data',
       method: 'POST',
       mimeType: 'application/json',
       sendData: json.encode(profile.toJson()),
     );
-    if (request.status.toDart != 200) {
+    if (request.status != 200) {
       throw Exception(
         'Failed to report profile data to benchmark server. '
         'The server responded with status code ${request.status}.'
@@ -402,7 +385,7 @@ class LocalBenchmarkServerClient {
   /// The server will halt the devicelab task and log the error.
   Future<void> reportError(dynamic error, StackTrace stackTrace) async {
     _checkNotManualMode();
-    await _requestXhr(
+    await html.HttpRequest.request(
       '/on-error',
       method: 'POST',
       mimeType: 'application/json',
@@ -416,7 +399,7 @@ class LocalBenchmarkServerClient {
   /// Reports a message about the demo to the benchmark server.
   Future<void> printToConsole(String report) async {
     _checkNotManualMode();
-    await _requestXhr(
+    await html.HttpRequest.request(
       '/print-to-console',
       method: 'POST',
       mimeType: 'text/plain',
@@ -426,7 +409,7 @@ class LocalBenchmarkServerClient {
 
   /// This is the same as calling [html.HttpRequest.request] but it doesn't
   /// crash on 404, which we use to detect `flutter run`.
-  Future<web.XMLHttpRequest> _requestXhr(
+  Future<html.HttpRequest> _requestXhr(
     String url, {
     String? method,
     bool? withCredentials,
@@ -435,40 +418,38 @@ class LocalBenchmarkServerClient {
     Map<String, String>? requestHeaders,
     dynamic sendData,
   }) {
-    final Completer<web.XMLHttpRequest> completer = Completer<web.XMLHttpRequest>();
-    final web.XMLHttpRequest xhr = web.XMLHttpRequest();
+    final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();
+    final html.HttpRequest xhr = html.HttpRequest();
 
     method ??= 'GET';
-    xhr.open(method.toJS, url.toJS, true.toJS);
+    xhr.open(method, url, async: true);
 
     if (withCredentials != null) {
-      xhr.withCredentials = withCredentials.toJS;
+      xhr.withCredentials = withCredentials;
     }
 
     if (responseType != null) {
-      xhr.responseType = responseType.toJS;
+      xhr.responseType = responseType;
     }
 
     if (mimeType != null) {
-      xhr.overrideMimeType(mimeType.toJS);
+      xhr.overrideMimeType(mimeType);
     }
 
     if (requestHeaders != null) {
       requestHeaders.forEach((String header, String value) {
-        xhr.setRequestHeader(header.toJS, value.toJS);
+        xhr.setRequestHeader(header, value);
       });
     }
 
-    xhr.addEventListener('load'.toJS, (web.ProgressEvent e) {
+    xhr.onLoad.listen((html.ProgressEvent e) {
       completer.complete(xhr);
-    }.toJS);
+    });
 
-    xhr.addEventListener('error'.toJS, (JSObject error) {
-        return completer.completeError(error);
-    }.toJS);
+    xhr.onError.listen(completer.completeError);
 
     if (sendData != null) {
-      xhr.send((sendData as Object?).jsify());
+      xhr.send(sendData);
     } else {
       xhr.send();
     }
