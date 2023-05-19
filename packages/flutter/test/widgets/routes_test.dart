@@ -401,7 +401,7 @@ void main() {
       ],
     );
     await tester.pumpWidget(Container());
-    expect(results, equals(<String>['A: dispose', 'b: dispose']));
+    expect(results, equals(<String>['b: dispose', 'A: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });

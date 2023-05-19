@@ -84,6 +84,9 @@ abstract class OverlayRoute<T> extends Route<T> {
 
   @override
   void dispose() {
+    for (final OverlayEntry entry in _overlayEntries) {
+      entry.dispose();
+    }
     _overlayEntries.clear();
     super.dispose();
   }
@@ -704,7 +707,9 @@ mixin LocalHistoryRoute<T> on Route<T> {
         // elements during finalizeTree. The state is locked at this moment, and
         // we can only notify state has changed in the next frame.
         SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-          changedInternalState();
+          if (isActive) {
+            changedInternalState();
+          }
         });
       } else {
         changedInternalState();
