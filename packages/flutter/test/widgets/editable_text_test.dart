@@ -16311,6 +16311,64 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   },
     skip: kIsWeb, // [intended]
   );
+
+  testWidgets('when inserting a malformed string', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍�');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '👨‍👩‍�');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    // The dangling high surrogate is treated as a single rune.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 7),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '👨‍👩‍');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {
