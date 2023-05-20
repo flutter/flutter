@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 enum ColorFilterType {
@@ -19,7 +20,7 @@ enum ColorFilterType {
 ///
 /// Instances of this class are used with [Paint.colorFilter] on [Paint]
 /// objects.
-class EngineColorFilter implements ui.ColorFilter {
+class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
   /// Creates a color filter that applies the blend mode given as the second
   /// argument. The source color is the one given as the first argument, and the
   /// destination color is the one from the layer being composited.
@@ -116,4 +117,8 @@ class EngineColorFilter implements ui.ColorFilter {
   final ui.BlendMode? blendMode;
   final List<double>? matrix;
   final ColorFilterType type;
+
+  /// Color filters don't affect the image bounds
+  @override
+  ui.Rect filterBounds(ui.Rect inputBounds) => inputBounds;
 }

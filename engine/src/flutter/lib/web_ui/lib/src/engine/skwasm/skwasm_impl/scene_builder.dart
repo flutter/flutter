@@ -92,7 +92,7 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     ui.BackdropFilterEngineLayer? oldLayer
   }) => pushLayer<BackdropFilterLayer>(
       BackdropFilterLayer(),
-      BackdropFilterOperation()
+      BackdropFilterOperation(filter, blendMode),
     );
 
   @override
@@ -133,7 +133,7 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     ui.ColorFilterEngineLayer? oldLayer
   }) => pushLayer<ColorFilterLayer>(
       ColorFilterLayer(),
-      ColorFilterOperation(),
+      ColorFilterOperation(filter),
     );
 
   @override
@@ -143,7 +143,7 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer? oldLayer
   }) => pushLayer<ImageFilterLayer>(
       ImageFilterLayer(),
-      ImageFilterOperation(),
+      ImageFilterOperation(filter, offset),
     );
 
   @override

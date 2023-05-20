@@ -180,6 +180,79 @@ Future<void> testMain() async {
       await renderer.renderScene(sceneBuilder.build());
       await matchGoldenFile('scene_builder_shader_mask.png', region: region);
     }, skip: isFirefox && isHtml); // https://github.com/flutter/flutter/issues/86623
+
+    test('backdrop filter layer', () async {
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        // Create a red and blue checkerboard pattern
+        final ui.Paint redPaint = ui.Paint()..color = const ui.Color(0xFFFF0000);
+        final ui.Paint bluePaint = ui.Paint()..color = const ui.Color(0xFF0000FF);
+        for (double y = 0; y < 300; y += 10) {
+          for (double x = 0; x < 300; x += 10) {
+            final ui.Paint paint = ((x + y) % 20 == 0) ? redPaint : bluePaint;
+            canvas.drawRect(ui.Rect.fromLTWH(x, y, 10, 10), paint);
+          }
+        }
+      }));
+
+      sceneBuilder.pushBackdropFilter(ui.ImageFilter.blur(
+        sigmaX: 3.0,
+        sigmaY: 3.0,
+      ));
+
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawCircle(
+          const ui.Offset(150, 150),
+          50,
+          ui.Paint()..color = const ui.Color(0xFF00FF00)
+        );
+      }));
+
+      await renderer.renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_backdrop_filter.png', region: region);
+    });
+
+    test('image filter layer', () async {
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+      sceneBuilder.pushImageFilter(ui.ImageFilter.blur(
+        sigmaX: 5.0,
+        sigmaY: 5.0,
+      ));
+
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawCircle(
+          const ui.Offset(150, 150),
+          50,
+          ui.Paint()..color = const ui.Color(0xFF00FF00)
+        );
+      }));
+
+      await renderer.renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_image_filter.png', region: region);
+    });
+
+    test('color filter layer', () async {
+      final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();
+      const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
+        0.393, 0.769, 0.189, 0, 0,
+        0.349, 0.686, 0.168, 0, 0,
+        0.272, 0.534, 0.131, 0, 0,
+        0,     0,     0,     1, 0,
+      ]);
+      sceneBuilder.pushColorFilter(sepia);
+
+      sceneBuilder.addPicture(ui.Offset.zero, drawPicture((ui.Canvas canvas) {
+        canvas.drawCircle(
+          const ui.Offset(150, 150),
+          50,
+          ui.Paint()..color = const ui.Color(0xFF00FF00)
+        );
+      }));
+
+      await renderer.renderScene(sceneBuilder.build());
+      await matchGoldenFile('scene_builder_color_filter.png', region: region);
+    });
   });
 }
 

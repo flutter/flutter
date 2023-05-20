@@ -9,7 +9,7 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmCanvas implements ui.Canvas {
+class SkwasmCanvas implements SceneCanvas {
   factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) =>
       SkwasmCanvas.fromHandle(withStackScope((StackScope s) =>
           pictureRecorderBeginRecording(
@@ -32,10 +32,23 @@ class SkwasmCanvas implements ui.Canvas {
     paint as SkwasmPaint;
     if (bounds != null) {
       withStackScope((StackScope s) {
-        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paint.handle);
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paint.handle, nullptr);
       });
     } else {
-      canvasSaveLayer(_handle, nullptr, paint.handle);
+      canvasSaveLayer(_handle, nullptr, paint.handle, nullptr);
+    }
+  }
+
+  @override
+  void saveLayerWithFilter(ui.Rect? bounds, ui.Paint paint, ui.ImageFilter imageFilter) {
+    final SkwasmImageFilter nativeFilter = SkwasmImageFilter.fromUiFilter(imageFilter);
+    paint as SkwasmPaint;
+    if (bounds != null) {
+      withStackScope((StackScope s) {
+        canvasSaveLayer(_handle, s.convertRectToNative(bounds), paint.handle, nativeFilter.handle);
+      });
+    } else {
+      canvasSaveLayer(_handle, nullptr, paint.handle, nativeFilter.handle);
     }
   }
 

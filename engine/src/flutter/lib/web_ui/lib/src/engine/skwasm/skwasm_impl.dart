@@ -10,6 +10,7 @@ library skwasm_impl;
 import 'dart:ffi';
 
 export 'skwasm_impl/canvas.dart';
+export 'skwasm_impl/filters.dart';
 export 'skwasm_impl/font_collection.dart';
 export 'skwasm_impl/image.dart';
 export 'skwasm_impl/layers.dart';
@@ -19,6 +20,7 @@ export 'skwasm_impl/path.dart';
 export 'skwasm_impl/path_metrics.dart';
 export 'skwasm_impl/picture.dart';
 export 'skwasm_impl/raw/raw_canvas.dart';
+export 'skwasm_impl/raw/raw_filters.dart';
 export 'skwasm_impl/raw/raw_fonts.dart';
 export 'skwasm_impl/raw/raw_geometry.dart';
 export 'skwasm_impl/raw/raw_image.dart';
