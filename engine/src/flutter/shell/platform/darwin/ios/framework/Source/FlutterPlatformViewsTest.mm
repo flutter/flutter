@@ -2945,7 +2945,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   // SKSurface is required if the root FlutterView is present.
   const SkImageInfo image_info = SkImageInfo::MakeN32Premul(1000, 1000);
-  sk_sp<SkSurface> mock_sk_surface = SkSurface::MakeRaster(image_info);
+  sk_sp<SkSurface> mock_sk_surface = SkSurfaces::Raster(image_info);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
       std::move(mock_sk_surface), framebuffer_info,

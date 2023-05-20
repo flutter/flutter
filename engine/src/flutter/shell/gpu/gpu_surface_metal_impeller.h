@@ -13,6 +13,7 @@
 #include "flutter/impeller/aiks/aiks_context.h"
 #include "flutter/impeller/renderer/renderer.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
+#include "third_party/skia/include/gpu/mtl/GrMtlTypes.h"
 
 namespace flutter {
 
