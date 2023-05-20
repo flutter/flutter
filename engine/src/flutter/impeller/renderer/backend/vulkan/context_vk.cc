@@ -278,7 +278,10 @@ void ContextVK::Setup(Settings settings) {
     VALIDATION_LOG << "Could not create logical device.";
     return;
   }
-  vk::UniqueDevice device = std::move(device_result.value);
+  device_ = std::move(device_result.value);
+  // This makes sure that the device is deleted at the proper time if there is
+  // an error.
+  fml::ScopedCleanupClosure device_resetter([this]() { device_.reset(); });
 
   if (!caps->SetDevice(physical_device.value())) {
     VALIDATION_LOG << "Capabilities could not be updated.";
@@ -292,7 +295,7 @@ void ContextVK::Setup(Settings settings) {
       weak_from_this(),                  //
       application_info.apiVersion,       //
       physical_device.value(),           //
-      device.get(),                      //
+      device_.get(),                     //
       instance.value.get(),              //
       dispatcher.vkGetInstanceProcAddr,  //
       dispatcher.vkGetDeviceProcAddr     //
@@ -307,8 +310,7 @@ void ContextVK::Setup(Settings settings) {
   /// Setup the pipeline library.
   ///
   auto pipeline_library = std::shared_ptr<PipelineLibraryVK>(
-      new PipelineLibraryVK(weak_from_this(),                     //
-                            device.get(),                         //
+      new PipelineLibraryVK(shared_from_this(),                   //
                             caps,                                 //
                             std::move(settings.cache_directory),  //
                             settings.worker_task_runner           //
@@ -320,10 +322,10 @@ void ContextVK::Setup(Settings settings) {
   }
 
   auto sampler_library =
-      std::shared_ptr<SamplerLibraryVK>(new SamplerLibraryVK(device.get()));
+      std::shared_ptr<SamplerLibraryVK>(new SamplerLibraryVK(device_.get()));
 
   auto shader_library = std::shared_ptr<ShaderLibraryVK>(
-      new ShaderLibraryVK(device.get(),                    //
+      new ShaderLibraryVK(weak_from_this(),                //
                           settings.shader_libraries_data)  //
   );
 
@@ -336,7 +338,7 @@ void ContextVK::Setup(Settings settings) {
   /// Create the fence waiter.
   ///
   auto fence_waiter =
-      std::shared_ptr<FenceWaiterVK>(new FenceWaiterVK(device.get()));
+      std::shared_ptr<FenceWaiterVK>(new FenceWaiterVK(device_.get()));
   if (!fence_waiter->IsValid()) {
     VALIDATION_LOG << "Could not create fence waiter.";
     return;
@@ -345,7 +347,7 @@ void ContextVK::Setup(Settings settings) {
   //----------------------------------------------------------------------------
   /// Fetch the queues.
   ///
-  QueuesVK queues(device.get(),            //
+  QueuesVK queues(device_.get(),           //
                   graphics_queue.value(),  //
                   compute_queue.value(),   //
                   transfer_queue.value()   //
@@ -365,7 +367,7 @@ void ContextVK::Setup(Settings settings) {
   instance_ = std::move(instance.value);
   debug_report_ = std::move(debug_report);
   physical_device_ = physical_device.value();
-  device_ = std::move(device);
+  device_resetter.Release();
   allocator_ = std::move(allocator);
   shader_library_ = std::move(shader_library);
   sampler_library_ = std::move(sampler_library);
