@@ -1,4 +1,4 @@
-Signature: f74128df186dc0ce1b3811a70fc86f8d
+Signature: ae18e7fd021e39531143478049e2057a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -389,6 +389,7 @@ FILE: ../../../third_party/skia/relnotes/skgraphics_methods.md
 FILE: ../../../third_party/skia/relnotes/skimage_graphite.md
 FILE: ../../../third_party/skia/relnotes/skimage_methods.md
 FILE: ../../../third_party/skia/relnotes/skimage_subset.md
+FILE: ../../../third_party/skia/relnotes/skimagefilters_image.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_magnifier.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_picture.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_shader.md
