@@ -693,7 +693,7 @@ class _ViewContentState extends State<_ViewContent> {
         _viewRect = Offset.zero & _screenSize!;
       }
     }
-    updateSuggestions();
+    unawaited(updateSuggestions());
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -711,9 +711,11 @@ class _ViewContentState extends State<_ViewContent> {
 
   Future<void> updateSuggestions() async {
     final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
-    setState(() {
-      result = suggestions;
-    });
+    if (mounted) {
+      setState(() {
+        result = suggestions;
+      });
+    }
   }
 
   @override
