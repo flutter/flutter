@@ -109,9 +109,10 @@ AndroidShellHolder::AndroidShellHolder(
       [&jni_facade, &weak_platform_view](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            jni_facade,              // JNI interop
+            shell,                                  // delegate
+            shell.GetTaskRunners(),                 // task runners
+            shell.GetConcurrentWorkerTaskRunner(),  // worker task runner
+            jni_facade,                             // JNI interop
             shell.GetSettings()
                 .enable_software_rendering,   // use software rendering
             shell.GetSettings().msaa_samples  // msaa sample count
