@@ -963,7 +963,7 @@ class NavigationRailDestination {
   /// The amount of space to inset the destination item.
   final EdgeInsetsGeometry? padding;
 
-  /// Indicates the this destination is inaccessible.
+  /// Indicates that this destination is inaccessible.
   final bool disabled;
 }
 
