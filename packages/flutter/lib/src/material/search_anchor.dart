@@ -686,7 +686,7 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   @override
-  Future<void> didChangeDependencies() async {
+  void didChangeDependencies() {
     super.didChangeDependencies();
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
@@ -694,7 +694,7 @@ class _ViewContentState extends State<_ViewContent> {
       _screenSize = updatedScreenSize;
       _viewRect = Offset.zero & _screenSize!;
     }
-    result = await widget.suggestionsBuilder(context, _controller);
+    updateSuggestions();
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [SearchAnchor] that shows how to fetch the suggestions
 /// from a remote API.
+
 const Duration fakeAPIDuration = Duration(seconds: 1);
 
 void main() => runApp(const SearchAnchorAsyncExampleApp());

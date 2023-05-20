@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [SearchAnchor] that demonstrates fetching the
 /// suggestions asynchronously and debouncing the network calls.
+
 const Duration fakeAPIDuration = Duration(seconds: 1);
 const Duration debounceDuration = Duration(milliseconds: 500);
 
