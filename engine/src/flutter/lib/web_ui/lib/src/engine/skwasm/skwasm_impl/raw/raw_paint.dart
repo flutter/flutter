@@ -66,3 +66,12 @@ external double paintGetMiterLimit(PaintHandle paint);
 
 @Native<Void Function(PaintHandle, ShaderHandle)>(symbol: 'paint_setShader', isLeaf: true)
 external void paintSetShader(PaintHandle handle, ShaderHandle shader);
+
+@Native<Void Function(PaintHandle, ImageFilterHandle)>(symbol: 'paint_setImageFilter', isLeaf: true)
+external void paintSetImageFilter(PaintHandle handle, ImageFilterHandle filter);
+
+@Native<Void Function(PaintHandle, ColorFilterHandle)>(symbol: 'paint_setColorFilter', isLeaf: true)
+external void paintSetColorFilter(PaintHandle handle, ColorFilterHandle filter);
+
+@Native<Void Function(PaintHandle, MaskFilterHandle)>(symbol: 'paint_setMaskFilter', isLeaf: true)
+external void paintSetMaskFilter(PaintHandle handle, MaskFilterHandle filter);

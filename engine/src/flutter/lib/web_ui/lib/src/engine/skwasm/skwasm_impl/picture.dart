@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPicture implements ui.Picture {
+class SkwasmPicture implements ScenePicture {
   SkwasmPicture.fromHandle(this._handle);
   final PictureHandle _handle;
 
@@ -31,6 +32,7 @@ class SkwasmPicture implements ui.Picture {
   ui.Image toImageSync(int width, int height) =>
     SkwasmImage(imageCreateFromPicture(handle, width, height));
 
+  @override
   ui.Rect get cullRect {
     return withStackScope((StackScope s) {
       final RawRect rect = s.allocFloatArray(4);

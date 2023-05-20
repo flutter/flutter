@@ -4,6 +4,9 @@
 
 #include "export.h"
 #include "helpers.h"
+#include "third_party/skia/include/core/SkColorFilter.h"
+#include "third_party/skia/include/core/SkImageFilter.h"
+#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkShader.h"
 
@@ -89,5 +92,29 @@ SKWASM_EXPORT void paint_setShader(SkPaint* paint, SkShader* shader) {
     return;
   }
   shader->ref();
-  return paint->setShader(sk_sp<SkShader>(shader));
+  paint->setShader(sk_sp<SkShader>(shader));
+}
+
+SKWASM_EXPORT void paint_setImageFilter(SkPaint* paint, SkImageFilter* filter) {
+  if (filter == nullptr) {
+    paint->setImageFilter(nullptr);
+  }
+  filter->ref();
+  paint->setImageFilter(sk_sp<SkImageFilter>(filter));
+}
+
+SKWASM_EXPORT void paint_setColorFilter(SkPaint* paint, SkColorFilter* filter) {
+  if (filter == nullptr) {
+    paint->setColorFilter(nullptr);
+  }
+  filter->ref();
+  paint->setColorFilter(sk_sp<SkColorFilter>(filter));
+}
+
+SKWASM_EXPORT void paint_setMaskFilter(SkPaint* paint, SkMaskFilter* filter) {
+  if (filter == nullptr) {
+    paint->setMaskFilter(nullptr);
+  }
+  filter->ref();
+  paint->setMaskFilter(sk_sp<SkMaskFilter>(filter));
 }

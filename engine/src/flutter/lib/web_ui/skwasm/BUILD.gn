@@ -10,6 +10,7 @@ wasm_lib("skwasm") {
     "contour_measure.cpp",
     "data.cpp",
     "export.h",
+    "filters.cpp",
     "fonts.cpp",
     "helpers.h",
     "image.cpp",
