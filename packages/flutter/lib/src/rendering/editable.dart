@@ -2257,7 +2257,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(constraints, ChildLayoutHelper.dryLayoutChild));
+    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final double width = forceLine ? constraints.maxWidth : constraints
         .constrainWidth(_textPainter.size.width + _caretMargin);
@@ -2267,7 +2267,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineWidgets(constraints.loosen(), ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineWidgets(constraints.maxWidth, ChildLayoutHelper.layoutChild);
     _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _computeTextMetricsIfNeeded();
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);

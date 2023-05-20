@@ -4,8 +4,10 @@
 
 import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
-import 'package:flutter/painting.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
 import 'framework.dart';
 
 // Examples can assume:
@@ -84,6 +86,29 @@ class WidgetSpan extends PlaceholderSpan {
           identical(alignment, ui.PlaceholderAlignment.baseline)
         ),
       );
+
+  /// Helper function for extracting [WidgetSpan]s in preorder, from the given
+  /// [InlineSpan] as a list of widgets.
+  ///
+  /// The extracted widgets will be annotated with necessary semantics
+  /// information. This function is used by [EditableText] and [RichText] so
+  /// calling it directly is rarely necessary.
+  static List<Widget> extractFromInlineSpan(InlineSpan span, double textScaleFactor) {
+    final List<Widget> widgets = <Widget>[];
+    int index = 0;
+    span.visitChildren((InlineSpan span) {
+      if (span is WidgetSpan) {
+        widgets.add(
+          Semantics(
+            tagForChildren: PlaceholderSpanIndexSemanticsTag(index++),
+            child: _AutoScaleInlineWidget(span: span, textScaleFactor: textScaleFactor),
+          ),
+        );
+      }
+      return true;
+    });
+    return widgets;
+  }
 
   /// The widget to embed inline within text.
   final Widget child;
@@ -210,5 +235,147 @@ class WidgetSpan extends PlaceholderSpan {
     // WidgetSpans are always valid as asserts prevent invalid WidgetSpans
     // from being constructed.
     return true;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Widget>('widget', child));
+  }
+}
+
+class _AutoScaleInlineWidget extends SingleChildRenderObjectWidget {
+  _AutoScaleInlineWidget({ required this.span, required this.textScaleFactor }) : super(child: span.child);
+
+  final WidgetSpan span;
+  final double textScaleFactor;
+
+  @override
+  _RenderScaledInlineWidget createRenderObject(BuildContext context) {
+    return _RenderScaledInlineWidget(span.alignment, span.baseline, textScaleFactor);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderScaledInlineWidget renderObject) {
+    renderObject
+      ..alignment = span.alignment
+      ..baseline = span.baseline
+      ..scale = textScaleFactor;
+  }
+}
+
+class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  _RenderScaledInlineWidget(this._alignment, this._baseline, this._scale);
+
+  double get scale => _scale;
+  double _scale;
+  set scale(double value) {
+    if (value == _scale) {
+      return;
+    }
+    assert(value > 0);
+    assert(value.isFinite);
+    _scale = value;
+    markNeedsLayout();
+  }
+
+  ui.PlaceholderAlignment get alignment => _alignment;
+  ui.PlaceholderAlignment _alignment;
+  set alignment(ui.PlaceholderAlignment value) {
+    if (_alignment == value) {
+      return;
+    }
+    _alignment = value;
+    markNeedsLayout();
+  }
+
+  TextBaseline? get baseline => _baseline;
+  TextBaseline? _baseline;
+  set baseline(TextBaseline? value) {
+    if (value == _baseline) {
+      return;
+    }
+    _baseline = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return (child?.computeMaxIntrinsicHeight(width / scale) ?? 0.0) * scale;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return (child?.computeMaxIntrinsicWidth(height / scale) ?? 0.0) * scale;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return (child?.computeMinIntrinsicHeight(width / scale) ?? 0.0) * scale;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return (child?.computeMinIntrinsicWidth(height / scale) ?? 0.0) * scale;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return switch (child?.getDistanceToActualBaseline(baseline)) {
+      null => super.computeDistanceToActualBaseline(baseline),
+      final double childBaseline => scale * childBaseline,
+    };
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(!constraints.hasBoundedHeight);
+    final Size unscaledSize = child?.computeDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
+    return unscaledSize * scale;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return;
+    }
+    assert(!constraints.hasBoundedHeight);
+    // Only constrain the width to the maximum width of the paragraph.
+    // Leave height unconstrained, which will overflow if expanded past.
+    child.layout(BoxConstraints(maxWidth: constraints.maxWidth / scale), parentUsesSize: true);
+    size = child.size * scale;
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.scale(scale, scale);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return;
+    }
+    context.pushTransform(
+      needsCompositing,
+      offset,
+      Matrix4.diagonal3Values(scale, scale, 1.0),
+      (PaintingContext context, Offset offset) => context.paintChild(child, offset),
+    );
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return false;
+    }
+    return result.addWithPaintTransform(
+      transform: Matrix4.diagonal3Values(scale, scale, 1.0),
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformedOffset) => child.hitTest(result, position: transformedOffset),
+    );
   }
 }

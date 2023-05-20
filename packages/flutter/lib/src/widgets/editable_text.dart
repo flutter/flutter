@@ -4760,7 +4760,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : super(children: RichText.extractWidgetSpans(inlineSpan, textScaleFactor));
+  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaleFactor));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;

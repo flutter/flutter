@@ -124,7 +124,14 @@ class PlaceholderDimensions {
 
   @override
   String toString() {
-    return 'PlaceholderDimensions($size, $baseline)';
+    return switch (alignment) {
+      ui.PlaceholderAlignment.top ||
+      ui.PlaceholderAlignment.bottom ||
+      ui.PlaceholderAlignment.middle ||
+      ui.PlaceholderAlignment.aboveBaseline ||
+      ui.PlaceholderAlignment.belowBaseline => 'PlaceholderDimensions($size, $alignment)',
+      ui.PlaceholderAlignment.baseline      => 'PlaceholderDimensions($size, $alignment($baselineOffset from top))',
+    };
   }
 }
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior, PlaceholderAlignment;
+import 'dart:ui' as ui show Image, ImageFilter, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -15,7 +15,6 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
-import 'media_query.dart';
 import 'visibility.dart';
 import 'widget_span.dart';
 
@@ -5624,107 +5623,6 @@ class Flow extends MultiChildRenderObjectWidget {
   }
 }
 
-class _AutoScaleInlineWidget extends SingleChildRenderObjectWidget {
-  _AutoScaleInlineWidget({ required this.span, required this.textScaleFactor }) : super(child: span.child);
-
-  final WidgetSpan span;
-  final double textScaleFactor;
-
-  @override
-  _RenderScaledInlineWidget createRenderObject(BuildContext context) {
-    return _RenderScaledInlineWidget(span.alignment, span.baseline, textScaleFactor);
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderScaledInlineWidget renderObject) {
-    renderObject
-      ..alignment = span.alignment
-      ..baseline = span.baseline
-      ..scale = textScaleFactor;
-  }
-}
-
-class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  _RenderScaledInlineWidget(this._alignment, this._baseline, this._scale);
-
-  double get scale => _scale;
-  double _scale = 1.0;
-  set scale(double value) {
-    if (value == _scale) {
-      return;
-    }
-    assert(value > 0);
-    assert(value.isFinite);
-    _scale = value;
-    markNeedsLayout();
-  }
-
-  ui.PlaceholderAlignment get alignment => _alignment;
-  ui.PlaceholderAlignment _alignment;
-  set alignment(ui.PlaceholderAlignment value) {
-    if (_alignment == value) {
-      return;
-    }
-    _alignment = value;
-    markNeedsLayout();
-  }
-
-  TextBaseline? get baseline => _baseline;
-  TextBaseline? _baseline;
-  set baseline(TextBaseline? value) {
-    if (value == _baseline) {
-      return;
-    }
-    _baseline = value;
-    markNeedsLayout();
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    final Size unscaledSize = child?.computeDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
-    return unscaledSize * scale;
-  }
-
-  @override
-  void performLayout() {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return;
-    }
-    // Only constrain the width to the maximum width of the paragraph.
-    // Leave height unconstrained, which will overflow if expanded past.
-    child.layout(BoxConstraints(maxWidth: constraints.maxWidth / scale), parentUsesSize: true);
-    size = child.size * scale;
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return;
-    }
-    context.pushTransform(
-      needsCompositing,
-      offset,
-      Matrix4.diagonal3Values(scale, scale, 1.0),
-      (PaintingContext context, Offset offset) => context.paintChild(child, offset),
-    );
-  }
-
-  @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return false;
-    }
-    return result.addWithPaintTransform(
-      transform: Matrix4.diagonal3Values(scale, scale, 1.0),
-      position: position,
-      hitTest: (BoxHitTestResult result, Offset transformedOffset) => child.hitTest(result, position: transformedOffset),
-    );
-  }
-}
-
 /// A paragraph of rich text.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=rykDVh-QFfw}
@@ -5834,26 +5732,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       super(children: extractWidgetSpans(text, textScaleFactor));
-
-  // Traverses the InlineSpan tree and depth-first collects the list of
-  // child widgets that are created in WidgetSpans.
-  static List<Widget> extractWidgetSpans(InlineSpan span, double textScaleFactor) {
-    final List<Widget> widgets = <Widget>[];
-    int index = 0;
-    span.visitChildren((InlineSpan span) {
-      if (span is WidgetSpan) {
-        widgets.add(
-          Semantics(
-            tagForChildren: PlaceholderSpanIndexSemanticsTag(index += 1),
-            child: _AutoScaleInlineWidget(span: span, textScaleFactor: textScaleFactor),
-          ),
-        );
-      }
-      return true;
-    });
-    return widgets;
-  }
+       super(children: WidgetSpan.extractFromInlineSpan(text, textScaleFactor));
 
   /// The text to display in this widget.
   final InlineSpan text;

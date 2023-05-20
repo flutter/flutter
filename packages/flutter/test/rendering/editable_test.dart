@@ -1554,6 +1554,7 @@ void main() {
         selectionColor: Colors.black,
         textDirection: TextDirection.ltr,
         cursorColor: Colors.red,
+        cursorWidth: 0.0,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1572,11 +1573,10 @@ void main() {
         children: renderBoxes,
       );
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
-      editable.hasFocus = true;
-      final double maxIntrinsicWidth = editable.computeMaxIntrinsicWidth(fixedHeight);
-      pumpFrame();
-
-      expect(maxIntrinsicWidth, 278);
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
     });
 
     test('hits correct WidgetSpan when not scrolled', () {

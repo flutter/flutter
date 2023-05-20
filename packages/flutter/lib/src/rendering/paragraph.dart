@@ -13,24 +13,12 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
-import 'editable.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
 import 'selection.dart';
-import 'sliver_multi_box_adaptor.dart' show KeepAliveParentDataMixin;
 
 const String _kEllipsis = '\u2026';
-
-/// Parent data for use with [RenderParagraph] and [RenderEditable].
-class TextParentData extends ContainerBoxParentData<RenderBox> with KeepAliveParentDataMixin {
-  @override
-  bool get keptAlive => _keptAlive;
-  bool _keptAlive = false;
-
-  @override
-  String toString() => 'offset=$offset${keptAlive ? ", (ellipsized away)" : ""}';
-}
 
 /// Used by the [RenderParagraph] to map its rendering children to their
 /// corresponding semantics nodes.
@@ -56,6 +44,15 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 
   @override
   int get hashCode => Object.hash(PlaceholderSpanIndexSemanticsTag, index);
+}
+
+/// Parent data for use with [RenderParagraph] and [RenderEditable].
+class TextParentData extends ContainerBoxParentData<RenderBox> {
+  bool get keptAlive => _keptAlive;
+  bool _keptAlive = false;
+
+  @override
+  String toString() => 'offset=$offset${keptAlive ? ", (ellipsized away)" : ""}';
 }
 
 mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
@@ -99,7 +96,7 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
   }
 
   @protected
-  List<PlaceholderDimensions> layoutInlineWidgets(BoxConstraints constraints, ChildLayouter layoutChild) {
+  List<PlaceholderDimensions> layoutInlineWidgets(double maxWidth, ChildLayouter layoutChild) {
     if (childCount == 0) {
       return <PlaceholderDimensions>[];
     }
@@ -108,7 +105,7 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
     int childIndex = 0;
     while (child != null) {
       final PlaceholderSpan span = _placeholderSpans[childIndex];
-      final Size childSize = layoutChild(child, constraints);
+      final Size childSize = layoutChild(child, BoxConstraints(maxWidth: maxWidth));
       final double? baselineOffset = switch (span.alignment) {
           ui.PlaceholderAlignment.baseline => child.getDistanceToBaseline(span.baseline!),
           ui.PlaceholderAlignment.aboveBaseline
@@ -132,14 +129,14 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
   @protected
   void positionInlineChildren(List<ui.TextBox> boxes) {
     RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null && childIndex < boxes.length) {
+    for (final ui.TextBox box in boxes) {
+      if (child == null) {
+        return;
+      }
       final TextParentData textParentData = child.parentData! as TextParentData;
-      final ui.TextBox box = boxes[childIndex];
       textParentData._keptAlive = false;
       textParentData.offset = Offset(box.left, box.top);
       child = childAfter(child);
-      childIndex += 1;
     }
     while (child != null) {
       final TextParentData textParentData = child.parentData! as TextParentData;
@@ -158,8 +155,9 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
     while (child != null) {
       final TextParentData childParentData = child.parentData! as TextParentData;
       if (childParentData.keptAlive) {
-        context.paintChild(child, childParentData.offset + offset);
+        return;
       }
+      context.paintChild(child, childParentData.offset + offset);
       child = childAfter(child);
     }
   }
@@ -541,7 +539,10 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _computeChildrenWidthWithMinIntrinsics(height);
+    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(
+      double.infinity,
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+    ));
     _layoutText(); // layout with infinite width.
     return _textPainter.minIntrinsicWidth;
   }
@@ -551,7 +552,12 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _computeChildrenWidthWithMaxIntrinsics(height);
+    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(
+      double.infinity,
+      // Height and baseline is irrelevant as all text will be laid
+      // out in a single line. Therefore, using 0.0 as a dummy for the height.
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+    ));
     _layoutText(); // layout with infinite width.
     return _textPainter.maxIntrinsicWidth;
   }
@@ -560,7 +566,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _computeChildrenHeightWithMinIntrinsics(width);
+    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(width, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
@@ -611,62 +617,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
     }
     return true;
-  }
-
-  void _computeChildrenWidthWithMaxIntrinsics(double height) {
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
-    int childIndex = 0;
-    while (child != null) {
-      // Height and baseline is irrelevant as all text will be laid
-      // out in a single line. Therefore, using 0.0 as a dummy for the height.
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions);
-  }
-
-  void _computeChildrenWidthWithMinIntrinsics(double height) {
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
-    int childIndex = 0;
-    while (child != null) {
-      // Height and baseline is irrelevant; only looking for the widest word or
-      // placeholder. Therefore, using 0.0 as a dummy for height.
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions);
-  }
-
-  void _computeChildrenHeightWithMinIntrinsics(double width) {
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
-    int childIndex = 0;
-    // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scaled up when it paints.
-    width = width / textScaleFactor;
-    while (child != null) {
-      final Size size = child.getDryLayout(BoxConstraints(maxWidth: width));
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: size,
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   @override
@@ -728,7 +678,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(constraints, ChildLayoutHelper.dryLayoutChild));
+    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     return constraints.constrain(_textPainter.size);
   }
@@ -736,7 +686,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineWidgets(constraints.loosen(), ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineWidgets(constraints.maxWidth, ChildLayoutHelper.layoutChild);
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
@@ -748,7 +698,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     final Size textSize = _textPainter.size;
     final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
-    //print('>>>>>>> $this set placeholder dimens $_placeholderDimensions, size => ${textSize} ($constraints) => $size');
 
     final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
