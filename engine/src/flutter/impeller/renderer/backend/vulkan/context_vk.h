@@ -113,6 +113,9 @@ class ContextVK final : public Context,
   // |DeviceHolder|
   const vk::Device& GetDevice() const override;
 
+  const std::shared_ptr<fml::ConcurrentTaskRunner>
+  GetConcurrentWorkerTaskRunner() const;
+
   [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface);
 
   std::unique_ptr<Surface> AcquireNextSurface();
@@ -141,6 +144,7 @@ class ContextVK final : public Context,
   std::shared_ptr<const Capabilities> device_capabilities_;
   std::shared_ptr<FenceWaiterVK> fence_waiter_;
   std::string device_name_;
+  std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner_;
   const uint64_t hash_;
 
   bool is_valid_ = false;
