@@ -702,16 +702,6 @@ class TextPainter {
   List<TextBox>? get inlinePlaceholderBoxes => _inlinePlaceholderBoxes;
   List<TextBox>? _inlinePlaceholderBoxes;
 
-  /// An ordered list of scales for each placeholder in the paragraph.
-  ///
-  /// The scale is used as a multiplier on the height, width and baselineOffset of
-  /// the placeholder. Scale is primarily used to handle accessibility scaling.
-  ///
-  /// Each scale corresponds to a [PlaceholderSpan] in the order they were defined
-  /// in the [InlineSpan] tree.
-  List<double>? get inlinePlaceholderScales => _inlinePlaceholderScales;
-  List<double>? _inlinePlaceholderScales;
-
   /// Sets the dimensions of each placeholder in [text].
   ///
   /// The number of [PlaceholderDimensions] provided should be the same as the
@@ -890,7 +880,6 @@ class TextPainter {
     }
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
     text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
-    _inlinePlaceholderScales = builder.placeholderScales;
     assert(() {
       _debugMarkNeedsLayoutCallStack = null;
       return true;

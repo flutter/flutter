@@ -4760,20 +4760,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : super(children: _extractChildren(inlineSpan));
-
-  // Traverses the InlineSpan tree and depth-first collects the list of
-  // child widgets that are created in WidgetSpans.
-  static List<Widget> _extractChildren(InlineSpan span) {
-    final List<Widget> result = <Widget>[];
-    span.visitChildren((InlineSpan span) {
-      if (span is WidgetSpan) {
-        result.add(span.child);
-      }
-      return true;
-    });
-    return result;
-  }
+  }) : super(children: RichText.extractWidgetSpans(inlineSpan, textScaleFactor));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;

@@ -110,7 +110,6 @@ class WidgetSpan extends PlaceholderSpan {
       currentDimensions.size.width,
       currentDimensions.size.height,
       alignment,
-      scale: textScaleFactor,
       baseline: currentDimensions.baseline,
       baselineOffset: currentDimensions.baselineOffset,
     );
