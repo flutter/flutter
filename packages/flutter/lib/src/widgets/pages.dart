@@ -81,12 +81,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
-  }) : assert(pageBuilder != null),
-       assert(transitionsBuilder != null),
-       assert(opaque != null),
-       assert(barrierDismissible != null),
-       assert(maintainState != null),
-       assert(fullscreenDialog != null);
+  });
 
   /// {@template flutter.widgets.pageRouteBuilder.pageBuilder}
   /// Used build the route's primary contents.

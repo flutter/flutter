@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -185,7 +187,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get hasTerminal => _hasTerminal;
   set hasTerminal(bool value) {
-    assert(value != null);
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
@@ -196,7 +197,6 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get supportsAnsiEscapes => _supportsAnsiEscapes;
   set supportsAnsiEscapes(bool value) {
-    assert(value != null);
     _supportsAnsiEscapes = value;
   }
   bool _supportsAnsiEscapes = true;
@@ -297,8 +297,18 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
-    return _underlyingValues[key] as String?;
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    return _underlyingValues[key] as T?;
+  }
+
+  @override
+  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+    if (value == null) {
+      _underlyingValues.remove(key);
+      return true;
+    }
+    setProperty(key, value);
+    return true;
   }
 }
 
@@ -415,6 +425,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
+    this.isFlutterWebWasmEnabled = false,
   });
 
   @override
@@ -443,6 +454,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
+
+  @override
+  final bool isFlutterWebWasmEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -575,6 +589,7 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
+
   @override
   late bool platformToolsAvailable;
 
@@ -583,4 +598,47 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion? latestVersion;
+}
+
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  @override
+  String get javaPath => 'java';
+}
+
+class FakeJava extends Fake implements Java {
+  FakeJava({
+    this.javaHome = '/android-studio/jbr',
+    String binary = '/android-studio/jbr/bin/java',
+    JavaVersion? version,
+    bool canRun = true,
+  }): binaryPath = binary,
+      version = version ?? JavaVersion(
+       longText: 'openjdk 19.0.2 2023-01-17',
+       number: '19.0.2',
+      ),
+      _environment = <String, String>{
+        if (javaHome != null) 'JAVA_HOME': javaHome,
+        'PATH': '/android-studio/jbr/bin',
+      },
+      _canRun = canRun;
+
+  @override
+  String? javaHome;
+
+  @override
+  String binaryPath;
+
+  final Map<String, String> _environment;
+  final bool _canRun;
+
+  @override
+  Map<String, String> get environment => _environment;
+
+  @override
+  JavaVersion? version;
+
+  @override
+  bool canRun() {
+    return _canRun;
+  }
 }

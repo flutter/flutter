@@ -9,9 +9,7 @@ import 'package:process/process.dart';
 
 @immutable
 class RunningProcessInfo {
-  const RunningProcessInfo(this.pid, this.commandLine, this.creationDate)
-      : assert(pid != null),
-        assert(commandLine != null);
+  const RunningProcessInfo(this.pid, this.commandLine, this.creationDate);
 
   final int pid;
   final String commandLine;
@@ -94,10 +92,6 @@ Future<Set<RunningProcessInfo>> windowsRunningProcesses(
 ///      2904 3/11/2019 11:01:54 AM "C:\Program Files\Android\Android Studio\jre\bin\java.exe" -Xmx1536M -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\win1\.gradle\wrapper\dists\gradle-4.10.2-all\9fahxiiecdb76a5g3aw9oi8rv\gradle-4.10.2\lib\gradle-launcher-4.10.2.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
 @visibleForTesting
 Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
-  if (output == null) {
-    return;
-  }
-
   const int processIdHeaderSize = 'ProcessId'.length;
   const int creationDateHeaderStart = processIdHeaderSize + 1;
   late int creationDateHeaderEnd;
@@ -187,9 +181,6 @@ Iterable<RunningProcessInfo> processPsOutput(
   String output,
   String? processName,
 ) sync* {
-  if (output == null) {
-    return;
-  }
   bool inTableBody = false;
   for (String line in output.split('\n')) {
     if (line.trim().startsWith('STARTED')) {

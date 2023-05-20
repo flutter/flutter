@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('IconButtonThemeData lerp special cases', () {
+    expect(IconButtonThemeData.lerp(null, null, 0), null);
+    const IconButtonThemeData data = IconButtonThemeData();
+    expect(identical(IconButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no IconButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(

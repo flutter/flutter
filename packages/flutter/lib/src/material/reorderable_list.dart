@@ -5,13 +5,11 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
 import 'icons.dart';
 import 'material.dart';
-import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A list whose items the user can interactively reorder by dragging.
@@ -36,17 +34,28 @@ import 'theme.dart';
 ///
 /// All list items must have a key.
 ///
-/// This example demonstrates using the [proxyDecorator] callback to customize
-/// the appearance of a list item while it's being dragged.
-/// {@tool dartpad}
+/// This example demonstrates using the [ReorderableListView.proxyDecorator] callback
+/// to customize the appearance of a list item while it's being dragged.
 ///
-/// While a drag is underway, the widget returned by the [proxyDecorator]
-/// serves as a "proxy" (a substitute) for the item in the list. The proxy is
-/// created with the original list item as its child. The [proxyDecorator]
-/// in this example is similar to the default one except that it changes the
+/// {@tool dartpad}
+/// While a drag is underway, the widget returned by the [ReorderableListView.proxyDecorator]
+/// callback serves as a "proxy" (a substitute) for the item in the list. The proxy is
+/// created with the original list item as its child. The [ReorderableListView.proxyDecorator]
+/// callback in this example is similar to the default one except that it changes the
 /// proxy item's background color.
 ///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.1.dart **
+/// {@end-tool}
+///
+/// This example demonstrates using the [ReorderableListView.proxyDecorator] callback to
+/// customize the appearance of a [Card] while it's being dragged.
+///
+/// {@tool dartpad}
+/// The default [proxyDecorator] wraps the dragged item in a [Material] widget and animates
+/// its elevation. This example demonstrates how to use the [ReorderableListView.proxyDecorator]
+/// callback to update the dragged card elevation without inserted a new [Material] widget.
+///
+/// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.2.dart **
 /// {@end-tool}
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
@@ -85,10 +94,8 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(scrollDirection != null),
-       assert(onReorder != null),
-       assert(children != null),
-       assert(
+    this.autoScrollerVelocityScalar,
+  }) : assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        ),
@@ -96,7 +103,6 @@ class ReorderableListView extends StatefulWidget {
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
        ),
-       assert(buildDefaultDragHandles != null),
        itemBuilder = ((BuildContext context, int index) => children[index]),
        itemCount = children.length;
 
@@ -154,14 +160,12 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(scrollDirection != null),
-       assert(itemCount >= 0),
-       assert(onReorder != null),
+    this.autoScrollerVelocityScalar,
+  }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
-       ),
-       assert(buildDefaultDragHandles != null);
+       );
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -268,69 +272,14 @@ class ReorderableListView extends StatefulWidget {
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
 
+  /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  final double? autoScrollerVelocityScalar;
+
   @override
   State<ReorderableListView> createState() => _ReorderableListViewState();
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
-  Widget _wrapWithSemantics(Widget child, int index) {
-    void reorder(int startIndex, int endIndex) {
-      if (startIndex != endIndex) {
-        widget.onReorder(startIndex, endIndex);
-      }
-    }
-
-    // First, determine which semantics actions apply.
-    final Map<CustomSemanticsAction, VoidCallback> semanticsActions = <CustomSemanticsAction, VoidCallback>{};
-
-    // Create the appropriate semantics actions.
-    void moveToStart() => reorder(index, 0);
-    void moveToEnd() => reorder(index, widget.itemCount);
-    void moveBefore() => reorder(index, index - 1);
-    // To move after, we go to index+2 because we are moving it to the space
-    // before index+2, which is after the space at index+1.
-    void moveAfter() => reorder(index, index + 2);
-
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-
-    // If the item can move to before its current position in the list.
-    if (index > 0) {
-      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToStart)] = moveToStart;
-      String reorderItemBefore = localizations.reorderItemUp;
-      if (widget.scrollDirection == Axis.horizontal) {
-        reorderItemBefore = Directionality.of(context) == TextDirection.ltr
-            ? localizations.reorderItemLeft
-            : localizations.reorderItemRight;
-      }
-      semanticsActions[CustomSemanticsAction(label: reorderItemBefore)] = moveBefore;
-    }
-
-    // If the item can move to after its current position in the list.
-    if (index < widget.itemCount - 1) {
-      String reorderItemAfter = localizations.reorderItemDown;
-      if (widget.scrollDirection == Axis.horizontal) {
-        reorderItemAfter = Directionality.of(context) == TextDirection.ltr
-            ? localizations.reorderItemRight
-            : localizations.reorderItemLeft;
-      }
-      semanticsActions[CustomSemanticsAction(label: reorderItemAfter)] = moveAfter;
-      semanticsActions[CustomSemanticsAction(label: localizations.reorderItemToEnd)] = moveToEnd;
-    }
-
-    // We pass toWrap with a GlobalKey into the item so that when it
-    // gets dragged, the accessibility framework can preserve the selected
-    // state of the dragging item.
-    //
-    // We also apply the relevant custom accessibility actions for moving the item
-    // up, down, to the start, and to the end of the list.
-    return MergeSemantics(
-      child: Semantics(
-        customSemanticsActions: semanticsActions,
-        child: child,
-      ),
-    );
-  }
-
   Widget _itemBuilder(BuildContext context, int index) {
     final Widget item = widget.itemBuilder(context, index);
     assert(() {
@@ -342,9 +291,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
       return true;
     }());
 
-    // TODO(goderbauer): The semantics stuff should probably happen inside
-    //   _ReorderableItem so the widget versions can have them as well.
-    final Widget itemWithSemantics = _wrapWithSemantics(item, index);
     final Key itemGlobalKey = _ReorderableListViewChildGlobalKey(item.key!, this);
 
     if (widget.buildDefaultDragHandles) {
@@ -357,7 +303,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
               return Stack(
                 key: itemGlobalKey,
                 children: <Widget>[
-                  itemWithSemantics,
+                  item,
                   Positioned.directional(
                     textDirection: Directionality.of(context),
                     start: 0,
@@ -377,7 +323,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
               return Stack(
                 key: itemGlobalKey,
                 children: <Widget>[
-                  itemWithSemantics,
+                  item,
                   Positioned.directional(
                     textDirection: Directionality.of(context),
                     top: 0,
@@ -401,14 +347,14 @@ class _ReorderableListViewState extends State<ReorderableListView> {
           return ReorderableDelayedDragStartListener(
             key: itemGlobalKey,
             index: index,
-            child: itemWithSemantics,
+            child: item,
           );
       }
     }
 
     return KeyedSubtree(
       key: itemGlobalKey,
-      child: itemWithSemantics,
+      child: item,
     );
   }
 
@@ -455,7 +401,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             listPadding = EdgeInsets.fromLTRB(widget.header != null ? 0 : padding.left, padding.top, widget.footer != null ? 0 : padding.right, padding.bottom);
             footerPadding = EdgeInsets.fromLTRB(0, padding.top, padding.right, padding.bottom);
           }
-          break;
         case Axis.vertical:
           if (widget.reverse) {
             headerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
@@ -466,7 +411,6 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             listPadding = EdgeInsets.fromLTRB(padding.left, widget.header != null ? 0 : padding.top, padding.right, widget.footer != null ? 0 : padding.bottom);
             footerPadding = EdgeInsets.fromLTRB(padding.left, 0, padding.right, padding.bottom);
           }
-         break;
       }
     }
 
@@ -500,6 +444,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
+            autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
           ),
         ),
         if (widget.footer != null)

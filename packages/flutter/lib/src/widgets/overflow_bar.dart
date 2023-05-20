@@ -59,7 +59,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   /// [overflowDirection], and [clipBehavior] parameters must not be
   /// null. The [children] argument must not be null and must not contain
   /// any null objects.
-  OverflowBar({
+  const OverflowBar({
     super.key,
     this.spacing = 0.0,
     this.alignment,
@@ -69,11 +69,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.clipBehavior = Clip.none,
     super.children,
-  }) : assert(spacing != null),
-       assert(overflowSpacing != null),
-       assert(overflowAlignment != null),
-       assert(overflowDirection != null),
-       assert(clipBehavior != null);
+  });
 
   /// The width of the gap between [children] for the default
   /// horizontal layout.
@@ -257,12 +253,7 @@ class _RenderOverflowBar extends RenderBox
     VerticalDirection overflowDirection = VerticalDirection.down,
     required TextDirection textDirection,
     Clip clipBehavior = Clip.none,
-  }) : assert(spacing != null),
-       assert(overflowSpacing != null),
-       assert(overflowAlignment != null),
-       assert(textDirection != null),
-       assert(clipBehavior != null),
-       _spacing = spacing,
+  }) : _spacing = spacing,
        _alignment = alignment,
        _overflowSpacing = overflowSpacing,
        _overflowAlignment = overflowAlignment,
@@ -275,7 +266,6 @@ class _RenderOverflowBar extends RenderBox
   double get spacing => _spacing;
   double _spacing;
   set spacing (double value) {
-    assert(value != null);
     if (_spacing == value) {
       return;
     }
@@ -296,7 +286,6 @@ class _RenderOverflowBar extends RenderBox
   double get overflowSpacing => _overflowSpacing;
   double _overflowSpacing;
   set overflowSpacing (double value) {
-    assert(value != null);
     if (_overflowSpacing == value) {
       return;
     }
@@ -307,7 +296,6 @@ class _RenderOverflowBar extends RenderBox
   OverflowBarAlignment get overflowAlignment => _overflowAlignment;
   OverflowBarAlignment _overflowAlignment;
   set overflowAlignment (OverflowBarAlignment value) {
-    assert(value != null);
     if (_overflowAlignment == value) {
       return;
     }
@@ -318,7 +306,6 @@ class _RenderOverflowBar extends RenderBox
   VerticalDirection get overflowDirection => _overflowDirection;
   VerticalDirection _overflowDirection;
   set overflowDirection (VerticalDirection value) {
-    assert(value != null);
     if (_overflowDirection == value) {
       return;
     }
@@ -339,7 +326,6 @@ class _RenderOverflowBar extends RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value == _clipBehavior) {
       return;
     }
@@ -511,15 +497,11 @@ class _RenderOverflowBar extends RenderBox
         switch (overflowAlignment) {
           case OverflowBarAlignment.start:
             x = rtl ? constraints.maxWidth - child.size.width : 0;
-            break;
           case OverflowBarAlignment.center:
             x = (constraints.maxWidth - child.size.width) / 2;
-            break;
           case OverflowBarAlignment.end:
             x = rtl ? 0 : constraints.maxWidth - child.size.width;
-            break;
         }
-        assert(x != null);
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
         child = nextChild();
@@ -537,29 +519,22 @@ class _RenderOverflowBar extends RenderBox
       switch (alignment) {
         case null:
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.start:
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.center:
           final double halfRemainingWidth = (size.width - actualWidth) / 2;
           x = rtl ? size.width - halfRemainingWidth - firstChildWidth : halfRemainingWidth;
-          break;
         case MainAxisAlignment.end:
           x = rtl ? actualWidth - firstChildWidth : size.width - actualWidth;
-          break;
         case MainAxisAlignment.spaceBetween:
           layoutSpacing = (size.width - childrenWidth) / (childCount - 1);
           x = rtl ? size.width - firstChildWidth : 0;
-          break;
         case MainAxisAlignment.spaceAround:
           layoutSpacing = childCount > 0 ? (size.width - childrenWidth) / childCount : 0;
           x = rtl ? size.width - layoutSpacing / 2 - firstChildWidth : layoutSpacing / 2;
-          break;
         case MainAxisAlignment.spaceEvenly:
           layoutSpacing = (size.width - childrenWidth) / (childCount + 1);
           x = rtl ? size.width - layoutSpacing - firstChildWidth : layoutSpacing;
-          break;
       }
 
       while (child != null) {

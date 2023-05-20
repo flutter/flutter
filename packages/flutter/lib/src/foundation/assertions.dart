@@ -54,9 +54,7 @@ class PartialStackFrame {
     required this.package,
     required this.className,
     required this.method,
-  }) : assert(className != null),
-       assert(method != null),
-       assert(package != null);
+  });
 
   /// An `<asynchronous suspension>` line in a stack trace.
   static const PartialStackFrame asynchronousSuspension = PartialStackFrame(
@@ -128,8 +126,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   const RepetitiveStackFrameFilter({
     required this.frames,
     required this.replacement,
-  }) : assert(frames != null),
-       assert(replacement != null);
+  });
 
   /// The shape of this repetitive stack pattern.
   final List<PartialStackFrame> frames;
@@ -140,7 +137,7 @@ class RepetitiveStackFrameFilter extends StackFilter {
   /// The string to replace the frames with.
   ///
   /// If the same replacement string is used multiple times in a row, the
-  /// [FlutterError.defaultStackFilter] will simply update a counter after this
+  /// [FlutterError.defaultStackFilter] will insert a repeat count after this
   /// line rather than repeating it.
   final String replacement;
 
@@ -177,8 +174,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
     String message, {
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(message != null),
-       super(
+  }) : super(
          null,
          <Object>[message],
          showName: false,
@@ -217,8 +213,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
     List<Object> messageParts, {
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
     DiagnosticLevel level = DiagnosticLevel.info,
-  }) : assert(messageParts != null),
-       super(
+  }) : super(
          null,
          messageParts,
          showName: false,
@@ -228,6 +223,13 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
          level: level,
        );
 
+  @override
+  String toString({
+    TextTreeConfiguration? parentConfiguration,
+    DiagnosticLevel minLevel = DiagnosticLevel.info,
+  }) {
+    return valueToString(parentConfiguration: parentConfiguration);
+  }
 
   @override
   List<Object> get value => super.value!;
@@ -406,7 +408,7 @@ class FlutterErrorDetails with Diagnosticable {
     this.stackFilter,
     this.informationCollector,
     this.silent = false,
-  }) : assert(exception != null);
+  });
 
   /// Creates a copy of the error details but with the given fields replaced
   /// with new values.
@@ -672,9 +674,7 @@ class FlutterErrorDetails with Diagnosticable {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
     final Diagnosticable? diagnosticable = _exceptionToDiagnosticable();
-    if (exception is NullThrownError) {
-      properties.add(ErrorDescription('The null value was $verb.'));
-    } else if (exception is num) {
+    if (exception is num) {
       properties.add(ErrorDescription('The number $exception was $verb.'));
     } else {
       final DiagnosticsNode errorName;
@@ -724,7 +724,7 @@ class FlutterErrorDetails with Diagnosticable {
             'provide substantially more information in this error message to help you determine '
             'and fix the underlying cause.\n'
             'In either case, please report this assertion by filing a bug on GitHub:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ));
         }
       }
@@ -857,7 +857,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         ),
       ]),
     );
@@ -883,7 +883,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           '\nThis error should still help you solve your problem, '
           'however please also report this malformed error in the '
           'framework by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
         ));
         throw FlutterError.fromParts(message);
       }
@@ -1003,15 +1003,13 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   ///
   /// The default behavior for the [onError] handler is to call this function.
   static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
-    assert(details != null);
-    assert(details.exception != null);
     bool isInDebugMode = false;
     assert(() {
       // In debug mode, we ignore the "silent" flag.
       isInDebugMode = true;
       return true;
     }());
-    final bool reportError = isInDebugMode || details.silent != true; // could be null
+    final bool reportError = isInDebugMode || !details.silent;
     if (!reportError && !forceReport) {
       return;
     }
@@ -1184,8 +1182,6 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// ```
   /// {@end-tool}
   static void reportError(FlutterErrorDetails details) {
-    assert(details != null);
-    assert(details.exception != null);
     onError?.call(details);
   }
 }

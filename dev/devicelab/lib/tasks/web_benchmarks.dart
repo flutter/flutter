@@ -25,11 +25,13 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
   return inDirectory(macrobenchmarksDirectory, () async {
+    await flutter('clean');
     await evalFlutter('build', options: <String>[
       'web',
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       '--web-renderer=${useCanvasKit ? 'canvaskit' : 'html'}',
       '--profile',
+      '--no-web-resources-cdn',
       '-t',
       'lib/web_benchmarks.dart',
     ]);
@@ -161,11 +163,11 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
 
         final String namespace = '$benchmarkName.$backend';
         final List<String> scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
-        if (scoreKeys == null || scoreKeys.isEmpty) {
+        if (scoreKeys.isEmpty) {
           throw 'No score keys in benchmark "$benchmarkName"';
         }
         for (final String scoreKey in scoreKeys) {
-          if (scoreKey == null || scoreKey.isEmpty) {
+          if (scoreKey.isEmpty) {
             throw 'Score key is empty in benchmark "$benchmarkName". '
                 'Received [${scoreKeys.join(', ')}]';
           }

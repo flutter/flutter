@@ -5,8 +5,10 @@
 import 'template.dart';
 
 class ActionChipTemplate extends TokenTemplate {
-
-  const ActionChipTemplate(super.blockName, super.fileName, super.tokens);
+  const ActionChipTemplate(super.blockName, super.fileName, super.tokens, {
+    super.colorSchemePrefix = '_colors.',
+    super.textThemePrefix = '_textTheme.'
+  });
 
   static const String tokenGroup = 'md.comp.assist-chip';
   static const String variant = '.flat';
@@ -14,7 +16,7 @@ class ActionChipTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends ChipThemeData {
-  const _${blockName}DefaultsM3(this.context, this.isEnabled)
+  _${blockName}DefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
         shape: ${shape("$tokenGroup.container")},
@@ -23,6 +25,8 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
 
   final BuildContext context;
   final bool isEnabled;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   TextStyle? get labelStyle => ${textStyle("$tokenGroup.label-text")};
@@ -72,7 +76,7 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 ''';

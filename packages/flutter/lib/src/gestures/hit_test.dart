@@ -15,11 +15,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'events.dart' show PointerEvent;
 
 /// An object that can hit-test pointers.
-abstract class HitTestable {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  HitTestable._();
-
+abstract interface class HitTestable {
   /// Check whether the given position hits this object.
   ///
   /// If this given position hits this object, consider adding a [HitTestEntry]
@@ -28,21 +24,13 @@ abstract class HitTestable {
 }
 
 /// An object that can dispatch events.
-abstract class HitTestDispatcher {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  HitTestDispatcher._();
-
+abstract interface class HitTestDispatcher {
   /// Override this method to dispatch events.
   void dispatchEvent(PointerEvent event, HitTestResult result);
 }
 
 /// An object that can handle events.
-abstract class HitTestTarget {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  HitTestTarget._();
-
+abstract interface class HitTestTarget {
   /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry<HitTestTarget> entry);
 }
@@ -215,7 +203,6 @@ class HitTestResult {
   ///    around this function for hit testing on [RenderBox]s.
   @protected
   void pushTransform(Matrix4 transform) {
-    assert(transform != null);
     assert(
       _debugVectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
       _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
@@ -255,7 +242,6 @@ class HitTestResult {
   ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushOffset(Offset offset) {
-    assert(offset != null);
     _localTransforms.add(_OffsetTransformPart(offset));
   }
 

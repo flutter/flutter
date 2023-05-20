@@ -128,5 +128,16 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "ເມນູແຖບເມນູ"
+  "menuBarMenuLabel": "ເມນູແຖບເມນູ",
+  "currentDateLabel": "ມື້ນີ້",
+  "scrimLabel": "Scrim",
+  "bottomSheetLabel": "ຊີດລຸ່ມສຸດ",
+  "scrimOnTapHint": "ປິດ $modalRouteContentName",
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

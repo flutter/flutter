@@ -545,10 +545,8 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
-          break;
         case null:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
-          break;
       }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       box.paint(context, Offset.zero);
@@ -963,6 +961,17 @@ void main() {
     expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
     expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
   });
+
+  test('RenderProxyBox behavior can be mixed in along with another base class', () {
+    final RenderFancyProxyBox fancyProxyBox = RenderFancyProxyBox(fancy: 6);
+    // Box has behavior from its base class:
+    expect(fancyProxyBox.fancyMethod(), 36);
+    // Box has behavior from RenderProxyBox:
+    expect(
+      fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
+      const Size(0, 8),
+    );
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1060,6 +1069,21 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 }
 
 class TestOffsetLayerA extends OffsetLayer {}
+
+class RenderFancyBox extends RenderBox {
+  RenderFancyBox({required this.fancy}) : super();
+
+  late int fancy;
+
+  int fancyMethod() {
+    return fancy * fancy;
+  }
+}
+
+class RenderFancyProxyBox extends RenderFancyBox
+    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+  RenderFancyProxyBox({required super.fancy});
+}
 
 void expectAssertionError() {
   final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;

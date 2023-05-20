@@ -128,5 +128,16 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "મેનૂ બાર મેનૂ"
+  "menuBarMenuLabel": "મેનૂ બાર મેનૂ",
+  "currentDateLabel": "આજે",
+  "scrimLabel": "સ્ક્રિમ",
+  "bottomSheetLabel": "બોટમ શીટ",
+  "scrimOnTapHint": "$modalRouteContentNameને બંધ કરો",
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

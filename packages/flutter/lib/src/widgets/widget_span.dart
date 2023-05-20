@@ -77,8 +77,7 @@ class WidgetSpan extends PlaceholderSpan {
     super.alignment,
     super.baseline,
     super.style,
-  }) : assert(child != null),
-       assert(
+  }) : assert(
          baseline != null || !(
           identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
           identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
@@ -122,9 +121,10 @@ class WidgetSpan extends PlaceholderSpan {
 
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
-  bool visitChildren(InlineSpanVisitor visitor) {
-    return visitor(this);
-  }
+  bool visitChildren(InlineSpanVisitor visitor) => visitor(this);
+
+  @override
+  bool visitDirectChildren(InlineSpanVisitor visitor) => true;
 
   @override
   InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
@@ -137,8 +137,10 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   int? codeUnitAtVisitor(int index, Accumulator offset) {
+    final int localOffset = index - offset.value;
+    assert(localOffset >= 0);
     offset.increment(1);
-    return PlaceholderSpan.placeholderCodeUnit;
+    return localOffset == 0 ? PlaceholderSpan.placeholderCodeUnit : null;
   }
 
   @override

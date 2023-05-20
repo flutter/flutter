@@ -112,7 +112,7 @@ void main() {
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
-    await runner.run(<String>['build', 'web', '--no-pub', '--dart-define=foo=a', '--dart2js-optimization=O3']);
+    await runner.run(<String>['build', 'web', '--no-pub', '--no-web-resources-cdn', '--dart-define=foo=a', '--dart2js-optimization=O3']);
 
     final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
 
@@ -137,7 +137,7 @@ void main() {
         'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
-        'TreeShakeIcons': 'false',
+        'TreeShakeIcons': 'true',
       });
     }),
   });
@@ -164,6 +164,7 @@ void main() {
       'build',
       'web',
       '--no-pub',
+      '--no-web-resources-cdn',
       '--output=$newBuildDir'
     ]);
 
@@ -183,11 +184,12 @@ void main() {
         'ServiceWorkerStrategy': 'offline-first',
         'Dart2jsDumpInfo': 'false',
         'Dart2jsNoFrequencyBasedMinification': 'false',
+        'Dart2jsOptimization': 'O4',
         'BuildMode': 'release',
         'DartDefines': 'RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'false',
-        'TreeShakeIcons': 'false',
+        'TreeShakeIcons': 'true',
       });
     }),
   });
@@ -243,6 +245,38 @@ void main() {
         .getBuildInfo(forcedBuildMode: BuildMode.debug);
     expect(buildInfo.buildNumber, '42');
     expect(buildInfo.buildName, '1.2.3');
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+  });
+
+  testUsingContext('Defaults to gstatic CanvasKit artifacts', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    setupFileSystemForEndToEndTest(fileSystem);
+    await runner.run(<String>['build', 'web', '--no-pub', '--web-resources-cdn']);
+    final BuildInfo buildInfo =
+        await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+    expect(buildInfo.dartDefines, contains(startsWith('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/')));
+  }, overrides: <Type, Generator>{
+    Platform: () => fakePlatform,
+    FileSystem: () => fileSystem,
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+    ProcessManager: () => FakeProcessManager.any(),
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+  });
+
+  testUsingContext('Does not override custom CanvasKit URL', () async {
+    final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    setupFileSystemForEndToEndTest(fileSystem);
+    await runner.run(<String>['build', 'web', '--no-pub', '--web-resources-cdn', '--dart-define=FLUTTER_WEB_CANVASKIT_URL=abcdefg']);
+    final BuildInfo buildInfo =
+        await buildCommand.webCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+    expect(buildInfo.dartDefines, contains('FLUTTER_WEB_CANVASKIT_URL=abcdefg'));
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

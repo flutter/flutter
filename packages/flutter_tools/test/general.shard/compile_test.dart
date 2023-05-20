@@ -105,13 +105,11 @@ void main() {
   testWithoutContext('buildModeOptions removes matching profile define in profile mode', () {
     expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=true']), <String>[
       '-Ddart.vm.product=false',
-      '--compact-async'
     ]);
   });
 
   testWithoutContext('buildModeOptions removes both matching profile and release define in profile mode', () {
     expect(buildModeOptions(BuildMode.profile, <String>['dart.vm.profile=false', 'dart.vm.product=true']), <String>[
-      '--compact-async'
     ]);
   });
 }

@@ -17,7 +17,6 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:111:19: (top-level declaration) (unnecessary_nullable_for_final_variable_declarations)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:5: (top-level declaration) (prefer_const_declarations)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:112:21: (top-level declaration) (invalid_assignment)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (argument_type_not_assignable)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:136:21: (top-level declaration) (read_potentially_unassigned_final)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:147:12: (self-contained program) (unused_import)',
@@ -29,14 +28,14 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:161:7: (top-level declaration) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:165: Found "```" in code but it did not match RegExp: pattern=^ */// *```dart\$ flags= so something is wrong. Line was: "/// ```"',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:9:12: (statement) (invalid_assignment)',
-  'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:17:4: Empty ```dart block in snippet code.',
+  'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:18:4: Empty ```dart block in snippet code.',
 ];
 
 const List<String> expectedUiErrors = <String>[
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:15:7: (top-level declaration) (prefer_typing_uninitialized_variables)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:15:7: (top-level declaration) (missing_const_final_var_or_type)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:17:20: (top-level declaration) (prefer_final_fields)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:17:20: (top-level declaration) (unused_field)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (prefer_typing_uninitialized_variables)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (missing_const_final_var_or_type)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (prefer_final_fields)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (unused_field)',
 ];
 
 final RegExp errorPrefixRE = RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');
@@ -72,7 +71,7 @@ void main() {
     final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
-      'Found 19 snippet code errors.',
+      'Found 18 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
@@ -96,7 +95,7 @@ void main() {
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,
-      'Found 23 snippet code errors.',
+      'Found 22 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);

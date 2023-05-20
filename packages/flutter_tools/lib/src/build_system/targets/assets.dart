@@ -14,6 +14,7 @@ import '../build_system.dart';
 import '../depfile.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
+import 'scene_importer.dart';
 import 'shader_compiler.dart';
 
 /// A helper function to copy an asset bundle into an [environment]'s output
@@ -84,6 +85,12 @@ Future<Depfile> copyAssets(
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
   );
+  final SceneImporter sceneImporter = SceneImporter(
+    processManager: environment.processManager,
+    logger: environment.logger,
+    fileSystem: environment.fileSystem,
+    artifacts: environment.artifacts,
+  );
 
   final Map<String, DevFSContent> assetEntries = <String, DevFSContent>{
     ...assetBundle.entries,
@@ -122,7 +129,6 @@ Future<Depfile> copyAssets(
                 outputPath: file.path,
                 relativePath: entry.key,
               );
-              break;
             case AssetKind.shader:
               doCopy = !await shaderCompiler.compileShader(
                 input: content.file as File,
@@ -130,7 +136,11 @@ Future<Depfile> copyAssets(
                 target: shaderTarget,
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
-              break;
+            case AssetKind.model:
+              doCopy = !await sceneImporter.importScene(
+                input: content.file as File,
+                outputPath: file.path,
+              );
           }
           if (doCopy) {
             await (content.file as File).copy(file.path);
@@ -168,7 +178,7 @@ Future<Depfile> copyAssets(
               // If deferred components are disabled, then copy assets to regular location.
               final File file = environment.defines[kDeferredComponents] == 'true'
                 ? environment.fileSystem.file(
-                    environment.fileSystem.path.join(componentOutputDir.path, buildMode.name, 'deferred_assets', 'flutter_assets', entry.key))
+                    environment.fileSystem.path.join(componentOutputDir.path, buildMode.cliName, 'deferred_assets', 'flutter_assets', entry.key))
                 : environment.fileSystem.file(
                     environment.fileSystem.path.join(outputDirectory.path, entry.key));
               outputs.add(file);
@@ -313,11 +323,7 @@ class CopyAssets extends Target {
       targetPlatform: TargetPlatform.android,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

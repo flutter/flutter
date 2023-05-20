@@ -630,6 +630,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _entry?.remove();
     }
     _isConcealed = false;
+    _entry?.dispose();
     _entry = null;
     if (_mouseIsConnected) {
       Tooltip._revealLastTooltip();
@@ -778,9 +779,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
-  }) : assert(target != null),
-       assert(verticalOffset != null),
-       assert(preferBelow != null);
+  });
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -851,30 +850,28 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = IgnorePointer(
-      child: FadeTransition(
-        opacity: animation,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: height),
-          child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyMedium!,
-            child: Container(
-              decoration: decoration,
-              padding: padding,
-              margin: margin,
-              child: Center(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: Text.rich(
-                  richMessage,
-                  style: textStyle,
-                  textAlign: textAlign,
-                ),
+    Widget result = FadeTransition(
+      opacity: animation,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.bodyMedium!,
+          child: Container(
+            decoration: decoration,
+            padding: padding,
+            margin: margin,
+            child: Center(
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: Text.rich(
+                richMessage,
+                style: textStyle,
+                textAlign: textAlign,
               ),
             ),
           ),
         ),
-      )
+      ),
     );
     if (onEnter != null || onExit != null) {
       result = MouseRegion(
@@ -884,7 +881,7 @@ class _TooltipOverlay extends StatelessWidget {
       );
     }
     return Positioned.fill(
-      bottom: MediaQuery.maybeOf(context)?.viewInsets.bottom ?? 0.0,
+      bottom: MediaQuery.maybeViewInsetsOf(context)?.bottom ?? 0.0,
       child: CustomSingleChildLayout(
         delegate: _TooltipPositionDelegate(
           target: target,

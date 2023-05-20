@@ -531,6 +531,47 @@ void main() {
     expect(point1.dy, greaterThan(point2.dy));
   });
 
+  testWidgets('NestedScrollViews respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/113753
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(
+                  floating: true,
+                  title: Text('AA'),
+                ),
+              ];
+            },
+            body: Container(),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('AA'), findsOneWidget);
+    final Offset point1 = tester.getCenter(find.text('AA'));
+
+    await tester.dragFrom(point1, const Offset(0.0, -200.0));
+    await tester.pump();
+
+    final Offset point2 = tester.getCenter(find.text(
+      'AA',
+      skipOffstage: false,
+    ));
+    expect(point1, point2);
+  });
+
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
     debugDisableShadows = false;
     const List<String> tabs = <String>['Hello', 'World'];
@@ -1006,6 +1047,54 @@ void main() {
       expect(globalKey.currentState!.outerController.offset, appBarHeight);
       // the inner scroll controller should have scrolled equivalent to the
       // difference between the applied scrollExtent and the outer extent.
+      expect(
+        globalKey.currentState!.innerController.offset,
+        scrollExtent - appBarHeight,
+      );
+    });
+
+    testWidgets('Inertia-cancel event does not modify either position.', (WidgetTester tester) async {
+      final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+      await tester.pumpWidget(buildTest(
+        key: globalKey,
+        expanded: false,
+      ));
+
+      double appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      expect(appBarHeight, 104.0);
+      final double scrollExtent = appBarHeight + 50.0;
+      expect(globalKey.currentState!.outerController.offset, 0.0);
+      expect(globalKey.currentState!.innerController.offset, 0.0);
+
+      // The scroll gesture should occur in the inner body, so the whole
+      // scroll view is scrolled.
+      final TestGesture gesture = await tester.startGesture(Offset(
+        0.0,
+        appBarHeight + 1.0,
+      ));
+      await gesture.moveBy(Offset(0.0, -scrollExtent));
+      await tester.pump();
+
+      appBarHeight = tester.renderObject<RenderBox>(find.byType(AppBar)).size.height;
+      // This is not an expanded AppBar.
+      expect(appBarHeight, 104.0);
+      // The outer scroll controller should show an offset of the applied
+      // scrollExtent.
+      expect(globalKey.currentState!.outerController.offset, appBarHeight);
+      // the inner scroll controller should have scrolled equivalent to the
+      // difference between the applied scrollExtent and the outer extent.
+      expect(
+        globalKey.currentState!.innerController.offset,
+        scrollExtent - appBarHeight,
+      );
+
+      final TestPointer testPointer = TestPointer(3, ui.PointerDeviceKind.trackpad);
+      await tester.sendEventToBinding(testPointer.addPointer(
+        location: Offset(0.0, appBarHeight + 1.0)
+      ));
+      await tester.sendEventToBinding(testPointer.scrollInertiaCancel());
+      // ensure no change.
+      expect(globalKey.currentState!.outerController.offset, appBarHeight);
       expect(
         globalKey.currentState!.innerController.offset,
         scrollExtent - appBarHeight,
@@ -2631,8 +2720,8 @@ void main() {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: SliverAppBar.medium(
-                  title: const Text('AppBar Title'),
+                sliver: const SliverAppBar.medium(
+                  title: Text('AppBar Title'),
                 ),
               ),
             ];
@@ -2658,11 +2747,11 @@ void main() {
     ));
 
     // There are two widgets for the title.
-    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitle = find.text('AppBar Title').first;
     final Finder expandedTitleClip = find.ancestor(
       of: expandedTitle,
       matching: find.byType(ClipRect),
-    );
+    ).first;
 
     // Default, fully expanded app bar.
     expect(nestedScrollView.currentState?.outerController.offset, 0);
@@ -2741,11 +2830,11 @@ void main() {
     ));
 
     // There are two widgets for the title.
-    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitle = find.text('AppBar Title').first;
     final Finder expandedTitleClip = find.ancestor(
       of: expandedTitle,
       matching: find.byType(ClipRect),
-    );
+    ).first;
 
     // Default, fully expanded app bar.
     expect(nestedScrollView.currentState?.outerController.offset, 0);
@@ -2781,6 +2870,43 @@ void main() {
     expect(find.byType(SliverAppBar), findsOneWidget);
     expect(appBarHeight(tester), expandedAppBarHeight);
     expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
+  });
+
+  testWidgets('NestedScrollView does not crash when inner scrollable changes while scrolling', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126454.
+    Widget buildApp({required bool nested}) {
+      final Widget innerScrollable = ListView(
+        children: const <Widget>[SizedBox(height: 1000)],
+      );
+      return MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  title: const Text('Books'),
+                  pinned: true,
+                  expandedHeight: 150.0,
+                  forceElevated: innerBoxIsScrolled,
+                ),
+              ];
+            },
+            body: nested ? Container(child: innerScrollable) : innerScrollable,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(nested: false));
+
+    // Start a scroll.
+    final TestGesture scrollDrag = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await tester.pump();
+    await scrollDrag.moveBy(const Offset(0, 50));
+    await tester.pump();
+
+    // Restructuring inner scrollable while scroll is in progress shouldn't crash.
+    await tester.pumpWidget(buildApp(nested: true));
   });
 }
 

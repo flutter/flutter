@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math' as math show pi;
 

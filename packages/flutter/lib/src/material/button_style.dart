@@ -492,9 +492,8 @@ class ButtonStyle with Diagnosticable {
 
   /// Linearly interpolate between two [ButtonStyle]s.
   static ButtonStyle? lerp(ButtonStyle? a, ButtonStyle? b, double t) {
-    assert (t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     return ButtonStyle(
       textStyle: MaterialStateProperty.lerp<TextStyle?>(a?.textStyle, b?.textStyle, t, TextStyle.lerp),

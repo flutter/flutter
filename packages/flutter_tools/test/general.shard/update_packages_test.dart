@@ -17,7 +17,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: '>=2.2.2 <3.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -51,7 +51,7 @@ description: A dummy pubspec with no dependencies
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 ''';
 
 const String kInvalidGitPubspec = '''
@@ -60,7 +60,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -91,6 +91,27 @@ void main() {
     flutter = flutterSdk.childDirectory('packages').childDirectory('flutter')
       ..createSync(recursive: true);
     flutter.childFile('pubspec.yaml').writeAsStringSync(kFlutterPubspecYaml);
+  });
+
+  testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
+    expect(
+      kManuallyPinnedDependencies.values,
+      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
+      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
+    );
+    expect(
+      kManuallyPinnedDependencies.keys,
+      unorderedEquals(const <String>[
+        'flutter_gallery_assets',
+        'flutter_template_images',
+        'video_player',
+        'material_color_utilities',
+        'url_launcher_android',
+        'archive',
+        'path_provider_android',
+        'flutter_plugin_android_lifecycle',
+      ]),
+    );
   });
 
   testWithoutContext(

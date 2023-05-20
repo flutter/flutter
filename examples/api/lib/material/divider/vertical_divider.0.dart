@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [VerticalDivider].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [VerticalDivider].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const VerticalDividerExampleApp());
+
+class VerticalDividerExampleApp extends StatelessWidget {
+  const VerticalDividerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {

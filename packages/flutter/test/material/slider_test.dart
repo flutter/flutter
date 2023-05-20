@@ -1855,6 +1855,20 @@ void main() {
       paints..circle(color: theme.colorScheme.primary.withOpacity(0.08)),
     );
 
+    // Slider still shows correct hovered color after pressing/dragging
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0.0, 100.0));
+    await tester.pumpAndSettle();
+    await gesture.moveTo(tester.getCenter(find.byType(Slider)));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.08)),
+    );
+
     // Slider does not have an overlay when disabled and hovered.
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle();
@@ -2949,6 +2963,51 @@ void main() {
     );
   });
 
+  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/118955
+    double sliderValue = 0.0;
+    Widget buildFrame(ThemeMode themeMode) {
+      return MaterialApp(
+        themeMode: themeMode,
+        theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
+        darkTheme: ThemeData(brightness: Brightness.dark, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: SizedBox(
+                height: 10.0,
+                width: 10.0,
+                child: Slider(
+                  value: sliderValue,
+                  label: 'label',
+                  onChanged: (double value) => sliderValue = value,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(ThemeMode.light));
+
+    // _RenderSlider is the last render object in the tree.
+    final RenderObject renderObject = tester.allRenderObjects.last;
+    expect(renderObject.debugNeedsLayout, false);
+
+    await tester.pumpWidget(buildFrame(ThemeMode.dark));
+    await tester.pump(
+      const Duration(milliseconds: 100), // to let the theme animate
+      EnginePhase.build,
+    );
+
+    expect(renderObject.debugNeedsLayout, true);
+
+    // Pump the rest of the frames to complete the test.
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -3437,6 +3496,61 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+    // Test covering crashing found in Google internal issue b/192329942.
+    double value = 0.0;
+    final ValueNotifier<bool> shouldShowSliderListenable =
+        ValueNotifier<bool>(true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: shouldShowSliderListenable,
+                    builder: (BuildContext context, bool shouldShowSlider, _) {
+                      return shouldShowSlider
+                          ? Slider(
+                              value: value,
+                              onChanged: (double newValue) {
+                                setState(() {
+                                  value = newValue;
+                                });
+                              },
+                            )
+                          : const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester
+        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
+
+    // Intentionally not calling `await tester.pumpAndSettle()` to allow drag
+    // event performed on `Slider` before it is about to get unmounted.
+    shouldShowSliderListenable.value = false;
+
+    await tester.drag(find.byType(Slider), const Offset(1.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(value, equals(0.0));
+
+    // This is supposed to trigger animation on `Slider` if it is mounted.
+    await gesture.up();
+
+    expect(tester.takeException(), null);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
@@ -3601,6 +3715,211 @@ void main() {
         Material.of(tester.element(find.byType(Slider))),
         paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
       );
+    });
+  });
+
+  group('Slider.allowedInteraction', () {
+    testWidgets('SliderInteraction.tapOnly', (WidgetTester tester) async {
+      double value = 1.0;
+      final Key sliderKey = UniqueKey();
+      // (slider's left padding (overlayRadius), windowHeight / 2)
+      const Offset startOfTheSliderTrack = Offset(24, 300);
+      const Offset centerOfTheSlideTrack = Offset(400, 300);
+
+      Widget buildWidget() => MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext _, StateSetter setState) {
+              return Slider(
+                value: value,
+                key: sliderKey,
+                allowedInteraction: SliderInteraction.tapOnly,
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              );
+            }),
+          ),
+        ),
+      );
+
+      // allow tap only
+      await tester.pumpWidget(buildWidget());
+
+      // test tap
+      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
+      await tester.pump();
+      // changes from 1.0 -> 0.5
+      expect(value, 0.5);
+
+      // test slide
+      await gesture.moveTo(startOfTheSliderTrack);
+      await tester.pump();
+      // has no effect, remains 0.5
+      expect(value, 0.5);
+    });
+
+    testWidgets('SliderInteraction.tapAndSlide', (WidgetTester tester) async {
+      double value = 1.0;
+      final Key sliderKey = UniqueKey();
+      // (slider's left padding (overlayRadius), windowHeight / 2)
+      const Offset startOfTheSliderTrack = Offset(24, 300);
+      const Offset centerOfTheSlideTrack = Offset(400, 300);
+      const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+
+      Widget buildWidget() => MaterialApp(
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext _, StateSetter setState) {
+              return Slider(
+                value: value,
+                key: sliderKey,
+                // allowedInteraction: SliderInteraction.tapAndSlide, // default
+                onChanged: (double newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              );
+            }),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(buildWidget());
+
+      // Test tap.
+      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
+      await tester.pump();
+      // changes from 1.0 -> 0.5
+      expect(value, 0.5);
+
+      // test slide
+      await gesture.moveTo(startOfTheSliderTrack);
+      await tester.pump();
+      // changes from 0.5 -> 0.0
+      expect(value, 0.0);
+      await gesture.moveTo(endOfTheSliderTrack);
+      await tester.pump();
+      // changes from 0.0 -> 1.0
+      expect(value, 1.0);
+    });
+
+    testWidgets('SliderInteraction.slideOnly', (WidgetTester tester) async {
+      double value = 1.0;
+      final Key sliderKey = UniqueKey();
+      // (slider's left padding (overlayRadius), windowHeight / 2)
+      const Offset startOfTheSliderTrack = Offset(24, 300);
+      const Offset centerOfTheSlideTrack = Offset(400, 300);
+      const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+
+      Widget buildApp() {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext _, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  key: sliderKey,
+                  allowedInteraction: SliderInteraction.slideOnly,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+
+      // test tap
+      final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
+      await tester.pump();
+      // has no effect as tap is disabled, remains 1.0
+      expect(value, 1.0);
+
+      // test slide
+      await gesture.moveTo(startOfTheSliderTrack);
+      await tester.pump();
+      // changes from 1.0 -> 0.5
+      expect(value, 0.5);
+      await gesture.moveTo(endOfTheSliderTrack);
+      await tester.pump();
+      // changes from 0.0 -> 1.0
+      expect(value, 1.0);
+    });
+
+    testWidgets('SliderInteraction.slideThumb', (WidgetTester tester) async {
+      double value = 1.0;
+      final Key sliderKey = UniqueKey();
+      // (slider's left padding (overlayRadius), windowHeight / 2)
+      const Offset startOfTheSliderTrack = Offset(24, 300);
+      const Offset centerOfTheSliderTrack = Offset(400, 300);
+      const Offset endOfTheSliderTrack = Offset(800 - 24, 300);
+
+      Widget buildApp() {
+        return MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(builder: (BuildContext _, StateSetter setState) {
+                return Slider(
+                  value: value,
+                  key: sliderKey,
+                  allowedInteraction: SliderInteraction.slideThumb,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+
+      // test tap
+      final TestGesture gesture = await tester.startGesture(centerOfTheSliderTrack);
+      await tester.pump();
+      // has no effect, remains 1.0
+      expect(value, 1.0);
+
+      // test slide
+      await gesture.moveTo(startOfTheSliderTrack);
+      await tester.pump();
+      // has no effect, remains 1.0
+      expect(value, 1.0);
+
+      // test slide thumb
+      await gesture.up();
+      await gesture.down(endOfTheSliderTrack); // where the thumb is
+      await tester.pump();
+      // has no effect, remains 1.0
+      expect(value, 1.0);
+      await gesture.moveTo(centerOfTheSliderTrack);
+      await tester.pump();
+      // changes from 1.0 -> 0.5
+      expect(value, 0.5);
+
+      // test tap inside overlay but not on thumb, then slide
+      await gesture.up();
+      // default overlay radius is 12, so 10 is inside the overlay
+      await gesture.down(centerOfTheSliderTrack.translate(-10, 0));
+      await tester.pump();
+      // has no effect, remains 1.0
+      expect(value, 0.5);
+      await gesture.moveTo(endOfTheSliderTrack.translate(-10, 0));
+      await tester.pump();
+      // changes from 0.5 -> 1.0
+      expect(value, 1.0);
     });
   });
 }

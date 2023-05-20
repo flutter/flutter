@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -44,6 +45,39 @@ void main() {
 
     expect(value, isFalse);
     await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+  });
+
+  testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+    bool value = true;
+    Widget buildApp({bool enabled = true}) {
+      return CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return CupertinoSwitch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
     expect(value, isTrue);
   });
 
@@ -764,6 +798,66 @@ void main() {
     );
   });
 
+  testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoTheme(
+        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: Column(
+                    children: <Widget>[
+                      CupertinoSwitch(
+                        key: switchKey,
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: true,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                      CupertinoSwitch(
+                        value: value,
+                        dragStartBehavior: DragStartBehavior.down,
+                        applyTheme: false,
+                        onChanged: (bool newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.off.themed.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(Column),
+      matchesGoldenFile('switch.tap.on.themed.png'),
+    );
+  });
+
   testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
     const bool value = false;
     // Disabled CupertinoSwitch does not update cursor on Web.
@@ -818,5 +912,116 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  testWidgets('CupertinoSwitch is focusable and has correct focus color', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    bool value = true;
+    const Color focusColor = Color(0xffff0000);
+
+    Widget buildApp({bool enabled = true}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                onChanged: enabled ? (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                } : null,
+                focusColor: focusColor,
+                focusNode: focusNode,
+                autofocus: true,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0xff34c759))
+        ..rrect(color: focusColor)
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+
+    // Check the false value.
+    value = false;
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0x28787880))
+        ..rrect(color: focusColor)
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+
+    // Check what happens when disabled.
+    value = false;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+    expect(
+      find.byType(CupertinoSwitch),
+      paints
+        ..rrect(color: const Color(0x28787880))
+        ..clipRRect()
+        ..rrect(color: const Color(0x26000000))
+        ..rrect(color: const Color(0x0f000000))
+        ..rrect(color: const Color(0x0a000000))
+        ..rrect(color: const Color(0xffffffff)),
+    );
+  });
+
+  testWidgets('CupertinoSwitch.onFocusChange callback', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoSwitch');
+    bool focused = false;
+    await tester.pumpWidget(
+      Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: CupertinoSwitch(
+            value: true,
+            focusNode: focusNode,
+            onFocusChange: (bool value) {
+              focused = value;
+            },
+            onChanged:(bool newValue) {},
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focused, isTrue);
+    expect(focusNode.hasFocus, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focused, isFalse);
+    expect(focusNode.hasFocus, isFalse);
   });
 }

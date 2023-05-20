@@ -48,7 +48,7 @@ class CmakeCustomCommandMigration extends ProjectMigrator {
 
     for (final RegExpMatch match in matches) {
       final String? addCustomCommandOriginal = match.group(1);
-      if (addCustomCommandOriginal != null && addCustomCommandOriginal.contains('VERBATIM') == false) {
+      if (addCustomCommandOriginal != null && !addCustomCommandOriginal.contains('VERBATIM')) {
         final String addCustomCommandReplacement = '$addCustomCommandOriginal\n  VERBATIM';
         newProjectContents = newProjectContents.replaceAll(addCustomCommandOriginal, addCustomCommandReplacement);
       }

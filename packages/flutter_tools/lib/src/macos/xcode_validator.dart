@@ -26,7 +26,7 @@ class XcodeValidator extends DoctorValidator {
     final String? xcodeSelectPath = _xcode.xcodeSelectPath;
 
     if (_xcode.isInstalled) {
-      xcodeStatus = ValidationType.installed;
+      xcodeStatus = ValidationType.success;
       if (xcodeSelectPath != null) {
         messages.add(ValidationMessage(_userMessages.xcodeLocation(xcodeSelectPath)));
       }

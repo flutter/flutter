@@ -303,4 +303,14 @@ void main() {
   ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(trackVisibility: nowShowing);
   scrollbarTheme.copyWith(trackVisibility: nowShowing);
   scrollbarTheme.trackVisibility;
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOf(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    decorationClipBehavior: Clip.none,
+  );
+  final Clip clip = details.decorationClipBehavior;
 }

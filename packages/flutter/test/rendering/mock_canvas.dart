@@ -318,7 +318,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style });
+  void arc({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap });
 
   /// Indicates that a paragraph is expected next.
   ///
@@ -498,7 +498,7 @@ class _PathMatcher extends Matcher {
 }
 
 class _MismatchedCall {
-  const _MismatchedCall(this.message, this.callIntroduction, this.call) : assert(call != null);
+  const _MismatchedCall(this.message, this.callIntroduction, this.call);
   final String message;
   final String callIntroduction;
   final RecordedInvocation call;
@@ -769,8 +769,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void arc({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style }) {
-    _predicates.add(_ArcPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  void arc({ Rect? rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) {
+    _predicates.add(_ArcPaintPredicate(rect: rect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap));
   }
 
   @override
@@ -891,6 +891,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     this.strokeWidth,
     this.hasMaskFilter,
     this.style,
+    this.strokeCap,
   });
 
   final Symbol symbol;
@@ -901,6 +902,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   final double? strokeWidth;
   final bool? hasMaskFilter;
   final PaintingStyle? style;
+  final StrokeCap? strokeCap;
 
   String get methodName => _symbolName(symbol);
 
@@ -934,6 +936,9 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     }
     if (style != null && paintArgument.style != style) {
       throw 'It called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
+    }
+    if (strokeCap != null && paintArgument.strokeCap != strokeCap) {
+      throw 'It called $methodName with a paint whose strokeCap, ${paintArgument.strokeCap}, was not exactly the expected strokeCap ($strokeCap).';
     }
   }
 
@@ -1268,9 +1273,28 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
 }
 
 class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
-  _ArcPaintPredicate({ Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style }) : super(
-    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style,
+  _ArcPaintPredicate({ this.rect, Color? color, double? strokeWidth, bool? hasMaskFilter, PaintingStyle? style, StrokeCap? strokeCap }) : super(
+    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style, strokeCap: strokeCap,
   );
+
+  final Rect? rect;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final Rect rectArgument = arguments[0] as Rect;
+    if (rect != null && rectArgument != rect) {
+      throw 'It called $methodName with a paint whose rect, $rectArgument, was not exactly the expected rect ($rect).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (rect != null) {
+      description.add('rect $rect');
+    }
+  }
 }
 
 class _ShadowPredicate extends _PaintPredicate {

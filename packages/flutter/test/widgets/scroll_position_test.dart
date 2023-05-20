@@ -34,7 +34,7 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
     Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromView(tester.view),
         child: Navigator(
           key: navigatorKey,
           onGenerateRoute: (RouteSettings settings) {

@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [InputDecorator].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [InputDecorator].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const PrefixIconExampleApp());
+
+class PrefixIconExampleApp extends StatelessWidget {
+  const PrefixIconExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'Input Decorator Sample',
       home: Scaffold(body: InputDecoratorExample()),
     );
   }

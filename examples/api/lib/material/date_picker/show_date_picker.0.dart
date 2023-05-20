@@ -2,48 +2,43 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [showDatePicker].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [showDatePicker].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DatePickerApp());
 
-  static const String _title = 'Flutter Code Sample';
+class DatePickerApp extends StatelessWidget {
+  const DatePickerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       restorationScopeId: 'app',
-      title: _title,
-      home: MyStatefulWidget(restorationId: 'main'),
+      home: const DatePickerExample(restorationId: 'main'),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key, this.restorationId});
+class DatePickerExample extends StatefulWidget {
+  const DatePickerExample({super.key, this.restorationId});
 
   final String? restorationId;
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DatePickerExample> createState() => _DatePickerExampleState();
 }
 
 /// RestorationProperty objects can be used because of RestorationMixin.
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
-    with RestorationMixin {
+class _DatePickerExampleState extends State<DatePickerExample> with RestorationMixin {
   // In this example, the restoration ID for the mixin is passed in through
   // the [StatefulWidget]'s constructor.
   @override
   String? get restorationId => widget.restorationId;
 
-  final RestorableDateTime _selectedDate =
-      RestorableDateTime(DateTime(2021, 7, 25));
-  late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture =
-      RestorableRouteFuture<DateTime?>(
+  final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
+  late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(
     onComplete: _selectDate,
     onPresent: (NavigatorState navigator, Object? arguments) {
       return navigator.restorablePush(
@@ -53,6 +48,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
     },
   );
 
+  @pragma('vm:entry-point')
   static Route<DateTime> _datePickerRoute(
     BuildContext context,
     Object? arguments,
@@ -74,8 +70,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_selectedDate, 'selected_date');
-    registerForRestoration(
-        _restorableDatePickerRouteFuture, 'date_picker_route_future');
+    registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
   }
 
   void _selectDate(DateTime? newSelectedDate) {
@@ -83,8 +78,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       setState(() {
         _selectedDate.value = newSelectedDate;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
+          content:
+              Text('Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
         ));
       });
     }

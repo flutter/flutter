@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [MenuAnchor].
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+/// Flutter code sample for [MenuAnchor].
 
 void main() => runApp(const ContextMenuApp());
 
@@ -101,16 +101,18 @@ class _MyContextMenuState extends State<MyContextMenu> {
               child: Text(MenuEntry.about.label),
               onPressed: () => _activate(MenuEntry.about),
             ),
-            if (_showingMessage) MenuItemButton(
-              onPressed: () => _activate(MenuEntry.hideMessage),
-              shortcut: MenuEntry.hideMessage.shortcut,
-              child: Text(MenuEntry.hideMessage.label),
-            ),
-            if (!_showingMessage) MenuItemButton(
-              onPressed: () => _activate(MenuEntry.showMessage),
-              shortcut: MenuEntry.showMessage.shortcut,
-              child: Text(MenuEntry.showMessage.label),
-            ),
+            if (_showingMessage)
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.hideMessage),
+                shortcut: MenuEntry.hideMessage.shortcut,
+                child: Text(MenuEntry.hideMessage.label),
+              ),
+            if (!_showingMessage)
+              MenuItemButton(
+                onPressed: () => _activate(MenuEntry.showMessage),
+                shortcut: MenuEntry.showMessage.shortcut,
+                child: Text(MenuEntry.showMessage.label),
+              ),
             SubmenuButton(
               menuChildren: <Widget>[
                 MenuItemButton(
@@ -169,22 +171,17 @@ class _MyContextMenuState extends State<MyContextMenu> {
           applicationName: 'MenuBar Sample',
           applicationVersion: '1.0.0',
         );
-        break;
       case MenuEntry.showMessage:
       case MenuEntry.hideMessage:
         showingMessage = !showingMessage;
-        break;
       case MenuEntry.colorMenu:
         break;
       case MenuEntry.colorRed:
         backgroundColor = Colors.red;
-        break;
       case MenuEntry.colorGreen:
         backgroundColor = Colors.green;
-        break;
       case MenuEntry.colorBlue:
         backgroundColor = Colors.blue;
-        break;
     }
   }
 

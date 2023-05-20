@@ -230,23 +230,23 @@ void main() {
           addRepaintBoundaries: false,
           addSemanticIndexes: false,
           cacheExtent: 0.0,
-          children: <Widget>[
+          children: const <Widget>[
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
               ),
             ),
-            const AutomaticKeepAlive(
+            AutomaticKeepAlive(
               child: SizedBox(
                 key: GlobalObjectKey<_LeafState>(2),
                 height: 400.0,
               ),
             ),
-            const AutomaticKeepAlive(
+            AutomaticKeepAlive(
               child: SizedBox(
                 key: GlobalObjectKey<_LeafState>(3),
                 height: 400.0,
@@ -314,11 +314,11 @@ void main() {
           addRepaintBoundaries: false,
           addSemanticIndexes: false,
           cacheExtent: 0.0,
-          children: <Widget>[
+          children: const <Widget>[
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 ]),
@@ -327,7 +327,7 @@ void main() {
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 ]),
@@ -336,7 +336,7 @@ void main() {
             AutomaticKeepAlive(
               child: SizedBox(
                 height: 400.0,
-                child: Stack(children: const <Widget>[
+                child: Stack(children: <Widget>[
                   Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                   Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 ]),
@@ -370,11 +370,11 @@ void main() {
         addRepaintBoundaries: false,
         addSemanticIndexes: false,
         cacheExtent: 0.0,
-        children: <Widget>[
+        children: const <Widget>[
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
               ]),
             ),
@@ -382,7 +382,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
               ]),
@@ -391,7 +391,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(0), child: Placeholder()),
@@ -434,11 +434,11 @@ void main() {
         addRepaintBoundaries: false,
         addSemanticIndexes: false,
         cacheExtent: 0.0,
-        children: <Widget>[
+        children: const <Widget>[
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(1), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(2), child: Placeholder()),
               ]),
@@ -453,7 +453,7 @@ void main() {
           AutomaticKeepAlive(
             child: SizedBox(
               height: 400.0,
-              child: Stack(children: const <Widget>[
+              child: Stack(children: <Widget>[
                 Leaf(key: GlobalObjectKey<_LeafState>(3), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(4), child: Placeholder()),
                 Leaf(key: GlobalObjectKey<_LeafState>(5), child: Placeholder()),
@@ -557,6 +557,26 @@ void main() {
 
     expect(alternate.children.length, 1);
   });
+
+  testWidgets('Keep alive Listenable has its listener removed once called', (WidgetTester tester) async {
+    final LeakCheckerHandle handle = LeakCheckerHandle();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView.builder(
+        itemCount: 1,
+        itemBuilder: (BuildContext context, int index) {
+          return const KeepAliveListenableLeakChecker(key: GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0));
+        },
+      ),
+    ));
+    final _KeepAliveListenableLeakCheckerState state = const GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0).currentState!;
+
+    expect(handle.hasListeners, false);
+    state.dispatch(handle);
+    expect(handle.hasListeners, true);
+    handle.notifyListeners();
+    expect(handle.hasListeners, false);
+  });
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
@@ -632,4 +652,27 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
 
   @override
   void performLayout() { }
+}
+
+class LeakCheckerHandle with ChangeNotifier {
+  @override
+  bool get hasListeners => super.hasListeners;
+}
+
+class KeepAliveListenableLeakChecker extends StatefulWidget {
+  const KeepAliveListenableLeakChecker({super.key});
+
+  @override
+  State<KeepAliveListenableLeakChecker> createState() => _KeepAliveListenableLeakCheckerState();
+}
+
+class _KeepAliveListenableLeakCheckerState extends State<KeepAliveListenableLeakChecker> {
+  void dispatch(Listenable handle) {
+    KeepAliveNotification(handle).dispatch(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
 }

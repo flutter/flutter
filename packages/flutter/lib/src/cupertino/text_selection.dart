@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -92,7 +92,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
@@ -184,11 +184,10 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   }
 }
 
+// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
+// deleted, when users should migrate back to cupertinoTextSelectionControls.
+// See https://github.com/flutter/flutter/pull/124262
 /// Text selection handle controls that follow iOS design conventions.
-@Deprecated(
-  'Use `cupertinoTextSelectionControls` instead. '
-  'This feature was deprecated after v3.3.0-0.5.pre.',
-)
 final TextSelectionControls cupertinoTextSelectionHandleControls =
     CupertinoTextSelectionHandleControls();
 
@@ -210,7 +209,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ValueNotifier<ClipboardStatus>? clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;
@@ -260,14 +259,14 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     }
 
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
     // The toolbar should appear below the TextField when there is not enough
     // space above the TextField to show it, assuming there's always enough
     // space at the bottom in this case.
     final double anchorX = clampDouble(widget.selectionMidpoint.dx + widget.globalEditableRegion.left,
-      _kArrowScreenPadding + mediaQuery.padding.left,
-      mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
+      _kArrowScreenPadding + mediaQueryPadding.left,
+      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
     );
 
     final double topAmountInEditableRegion = widget.endpoints.first.point.dy - widget.textLineHeight;
@@ -289,7 +288,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
     final List<Widget> items = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
     final Widget onePhysicalPixelVerticalDivider =
-        SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+        SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
 
     void addToolbarButton(
       String text,

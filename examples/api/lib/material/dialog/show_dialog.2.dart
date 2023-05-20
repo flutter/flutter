@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [showDialog].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [showDialog].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShowDialogExampleApp());
+
+class ShowDialogExampleApp extends StatelessWidget {
+  const ShowDialogExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,18 +38,19 @@ class DialogExample extends StatelessWidget {
     );
   }
 
-  static Route<Object?> _dialogBuilder(
-      BuildContext context, Object? arguments) {
+  @pragma('vm:entry-point')
+  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return DialogRoute<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Basic dialog title'),
           content: const Text(
-              'A dialog is a type of modal window that\n'
-              'appears in front of app content to\n'
-              'provide critical information, or prompt\n'
-              'for a decision to be made.'),
+            'A dialog is a type of modal window that\n'
+            'appears in front of app content to\n'
+            'provide critical information, or prompt\n'
+            'for a decision to be made.',
+          ),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(

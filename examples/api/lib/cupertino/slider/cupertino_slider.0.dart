@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoSlider].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoSlider].
 
 void main() => runApp(const CupertinoSliderApp());
 
@@ -28,7 +28,7 @@ class CupertinoSliderExample extends StatefulWidget {
 }
 
 class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
-  double _currentSliderValue =  0.0;
+  double _currentSliderValue = 0.0;
   String? _sliderStatus;
 
   @override
@@ -75,8 +75,8 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
             Text(
               _sliderStatus ?? '',
               style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                fontSize: 12,
-              ),
+                    fontSize: 12,
+                  ),
             ),
           ],
         ),

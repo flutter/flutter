@@ -21,6 +21,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.platform,
     required super.processManager,
     required super.artifacts,
+    required super.suppressAnalytics,
   }) : super(
         repoPackages: repoPackages,
         repoRoots: repoRoots,
@@ -63,6 +64,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       processManager: processManager,
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
+      suppressAnalytics: suppressAnalytics,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
@@ -113,9 +115,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       for (final AnalysisError error in sortedErrors) {
         logger.printStatus(error.toString());
-        if (error.code != null) {
-          logger.printTrace('error code: ${error.code}');
-        }
+        logger.printTrace('error code: ${error.code}');
       }
 
       dumpErrors(sortedErrors.map<String>((AnalysisError error) => error.toLegacyString()));

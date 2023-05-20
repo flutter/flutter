@@ -401,7 +401,7 @@ void main() {
       ],
     );
     await tester.pumpWidget(Container());
-    expect(results, equals(<String>['A: dispose', 'b: dispose']));
+    expect(results, equals(<String>['b: dispose', 'A: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
@@ -2153,6 +2153,7 @@ class WidgetWithNoLocalHistoryState extends State<WidgetWithNoLocalHistory> {
 class _RestorableDialogTestWidget extends StatelessWidget {
   const _RestorableDialogTestWidget();
 
+  @pragma('vm:entry-point')
   static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (

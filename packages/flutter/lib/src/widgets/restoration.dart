@@ -60,7 +60,7 @@ class RestorationScope extends StatefulWidget {
     super.key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// Returns the [RestorationBucket] inserted into the widget tree by the
   /// closest ancestor [RestorationScope] of `context`.
@@ -106,15 +106,26 @@ class RestorationScope extends StatefulWidget {
     final RestorationBucket? bucket = maybeOf(context);
     assert(() {
       if (bucket == null) {
-        throw FlutterError(
-          'RestorationScope.of() was called with a context that does not contain a '
-          'RestorationScope widget.\n'
-          'No RestorationScope widget ancestor could be found starting from the '
-          'context that was passed to RestorationScope.of(). This can happen '
-          'because you are using a widget that looks for a RestorationScope '
-          'ancestor, but no such ancestor exists.\n'
-          'The context used was:\n'
-          '  $context',
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'RestorationScope.of() was called with a context that does not '
+            'contain a RestorationScope widget. '
+          ),
+          ErrorDescription(
+            'No RestorationScope widget ancestor could be found starting from '
+            'the context that was passed to RestorationScope.of(). This can '
+            'happen because you are using a widget that looks for a '
+            'RestorationScope ancestor, but no such ancestor exists.\n'
+            'The context used was:\n'
+            '  $context'
+          ),
+          ErrorHint(
+            'State restoration must be enabled for a RestorationScope to exist. '
+            'This can be done by passing a restorationScopeId to MaterialApp, '
+            'CupertinoApp, or WidgetsApp at the root of the widget tree or by '
+            'wrapping the widget tree in a RootRestorationScope.'
+          ),
+        ],
         );
       }
       return true;
@@ -194,7 +205,7 @@ class UnmanagedRestorationScope extends InheritedWidget {
     super.key,
     this.bucket,
     required super.child,
-  }) : assert(child != null);
+  });
 
   /// The [RestorationBucket] that this widget will insert into the widget tree.
   ///
@@ -268,7 +279,7 @@ class RootRestorationScope extends StatefulWidget {
     super.key,
     required this.restorationId,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -529,8 +540,6 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   RestorationMixin? _owner;
   void _register(String restorationId, RestorationMixin owner) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    assert(restorationId != null);
-    assert(owner != null);
     _restorationId = restorationId;
     _owner = owner;
   }
@@ -768,8 +777,6 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// unless it has been unregistered with [unregisterFromRestoration].
   @protected
   void registerForRestoration(RestorableProperty<Object?> property, String restorationId) {
-    assert(property != null);
-    assert(restorationId != null);
     assert(property._restorationId == null || (_debugDoingRestore && property._restorationId == restorationId),
            'Property is already registered under ${property._restorationId}.',
     );
@@ -822,7 +829,6 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
   /// restoration data by calling this method.
   @protected
   void unregisterFromRestoration(RestorableProperty<Object?> property) {
-    assert(property != null);
     assert(property._owner == this);
     _bucket?.remove<Object?>(property._restorationId!);
     _unregister(property);
@@ -949,10 +955,8 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
       return didReplace;
     }
     assert(restorationId != null);
-    assert(parent != null);
     if (restorePending || _bucket == null) {
       final RestorationBucket newBucket = parent.claimChild(restorationId!, debugOwner: this);
-      assert(newBucket != null);
       final bool didReplace = _setNewBucketIfNecessary(newBucket: newBucket, restorePending: restorePending);
       assert(_bucket == newBucket);
       return didReplace;

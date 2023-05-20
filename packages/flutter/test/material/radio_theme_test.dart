@@ -15,6 +15,12 @@ void main() {
     expect(const RadioThemeData().hashCode, const RadioThemeData().copyWith().hashCode);
   });
 
+  test('RadioThemeData lerp special cases', () {
+    expect(RadioThemeData.lerp(null, null, 0), const RadioThemeData());
+    const RadioThemeData data = RadioThemeData();
+    expect(identical(RadioThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('RadioThemeData defaults', () {
     const RadioThemeData themeData = RadioThemeData();
     expect(themeData.mouseCursor, null);

@@ -72,15 +72,15 @@ void main() {
   test('light, dark and fallback constructors support useMaterial3', () {
     final ThemeData lightTheme = ThemeData.light(useMaterial3: true);
     expect(lightTheme.useMaterial3, true);
-    expect(lightTheme.typography, Typography.material2021());
+    expect(lightTheme.typography, Typography.material2021(colorScheme: lightTheme.colorScheme));
 
     final ThemeData darkTheme = ThemeData.dark(useMaterial3: true);
     expect(darkTheme.useMaterial3, true);
-    expect(darkTheme.typography, Typography.material2021());
+    expect(darkTheme.typography, Typography.material2021(colorScheme: darkTheme.colorScheme));
 
     final ThemeData fallbackTheme = ThemeData.light(useMaterial3: true);
     expect(fallbackTheme.useMaterial3, true);
-    expect(fallbackTheme.typography, Typography.material2021());
+    expect(fallbackTheme.typography, Typography.material2021(colorScheme: fallbackTheme.colorScheme));
   });
 
   testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
@@ -90,25 +90,23 @@ void main() {
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(themeData.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
-        break;
     }
   }, variant: TargetPlatformVariant.all());
 
   test('Can control fontFamily default', () {
     final ThemeData themeData = ThemeData(
-      fontFamily: 'Ahem',
+      fontFamily: 'FlutterTest',
       textTheme: const TextTheme(
         titleLarge: TextStyle(fontFamily: 'Roboto'),
       ),
     );
 
-    expect(themeData.textTheme.bodyLarge!.fontFamily, equals('Ahem'));
-    expect(themeData.primaryTextTheme.displaySmall!.fontFamily, equals('Ahem'));
+    expect(themeData.textTheme.bodyLarge!.fontFamily, equals('FlutterTest'));
+    expect(themeData.primaryTextTheme.displaySmall!.fontFamily, equals('FlutterTest'));
 
     // Shouldn't override the specified style's family
     expect(themeData.textTheme.titleLarge!.fontFamily, equals('Roboto'));
@@ -186,8 +184,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -238,8 +234,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.surface);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -287,8 +281,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -337,8 +329,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.primary);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.dark);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -387,8 +377,6 @@ void main() {
     expect(theme.primaryColor, theme.colorScheme.surface);
     expect(theme.primaryColorBrightness, Brightness.dark);
     expect(theme.canvasColor, theme.colorScheme.background);
-    expect(theme.accentColor, theme.colorScheme.secondary);
-    expect(theme.accentColorBrightness, Brightness.light);
     expect(theme.scaffoldBackgroundColor, theme.colorScheme.background);
     expect(theme.bottomAppBarColor, theme.colorScheme.surface);
     expect(theme.cardColor, theme.colorScheme.surface);
@@ -406,7 +394,6 @@ void main() {
 
     expect(theme.brightness, equals(Brightness.light));
     expect(theme.primaryColor, equals(lightColors.primary));
-    expect(theme.accentColor, equals(lightColors.secondary));
     expect(theme.cardColor, equals(lightColors.surface));
     expect(theme.backgroundColor, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
@@ -423,7 +410,6 @@ void main() {
     expect(theme.brightness, equals(Brightness.dark));
     // in dark theme's the color used for main components is surface instead of primary
     expect(theme.primaryColor, equals(darkColors.surface));
-    expect(theme.accentColor, equals(darkColors.secondary));
     expect(theme.cardColor, equals(darkColors.surface));
     expect(theme.backgroundColor, equals(darkColors.background));
     expect(theme.canvasColor, equals(darkColors.background));
@@ -446,7 +432,6 @@ void main() {
         } else {
           expect(theme.splashFactory, equals(InkSparkle.splashFactory));
         }
-        break;
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -476,11 +461,23 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.standard));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.compact));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('VisualDensity.getDensityForPlatform returns adaptive values', (WidgetTester tester) async {
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!), equals(VisualDensity.standard));
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!), equals(VisualDensity.compact));
     }
   }, variant: TargetPlatformVariant.all());
 
@@ -491,10 +488,23 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         expect(themeData.visualDensity, equals(VisualDensity.standard));
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        expect(themeData.visualDensity, equals(VisualDensity.compact));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android ? TargetPlatform.linux : TargetPlatform.android);
+    switch (debugDefaultTargetPlatformOverride!) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(themeData.visualDensity, equals(VisualDensity.standard));
+      case TargetPlatform.android:
         expect(themeData.visualDensity, equals(VisualDensity.compact));
     }
   }, variant: TargetPlatformVariant.all());
@@ -611,7 +621,7 @@ void main() {
         textStyle: TextStyle(fontSize: 100),
       );
 
-      // Both ThemeDatas include both extensions
+      // Both ThemeData arguments include both extensions.
       ThemeData lerped = ThemeData.lerp(
         ThemeData(
           extensions: const <ThemeExtension<dynamic>>[
@@ -769,6 +779,7 @@ void main() {
       textTheme: ThemeData.dark().textTheme,
       typography: Typography.material2018(),
       // COMPONENT THEMES
+      actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.black),
@@ -781,9 +792,11 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: chipTheme,
       dataTableTheme: const DataTableThemeData(),
+      datePickerTheme: const DatePickerThemeData(),
       dialogTheme: const DialogTheme(backgroundColor: Colors.black),
       dividerTheme: const DividerThemeData(color: Colors.black),
       drawerTheme: const DrawerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(foregroundColor: Colors.green)),
@@ -800,6 +813,8 @@ void main() {
       popupMenuTheme: const PopupMenuThemeData(color: Colors.black),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: sliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.black),
@@ -811,12 +826,6 @@ void main() {
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: Colors.black,
-      accentColorBrightness: Brightness.dark,
-      accentTextTheme: ThemeData.dark().textTheme,
-      accentIconTheme: ThemeData.dark().iconTheme,
-      buttonColor: Colors.black,
-      fixTextFieldOutlineLabel: false,
       primaryColorBrightness: Brightness.dark,
       androidOverscrollIndicator: AndroidOverscrollIndicator.glow,
       toggleableActiveColor: Colors.black,
@@ -889,6 +898,7 @@ void main() {
       typography: Typography.material2018(platform: TargetPlatform.iOS),
 
       // COMPONENT THEMES
+      actionIconTheme: const ActionIconThemeData(),
       appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
       badgeTheme: const BadgeThemeData(backgroundColor: Colors.black),
       bannerTheme: const MaterialBannerThemeData(backgroundColor: Colors.white),
@@ -901,9 +911,11 @@ void main() {
       checkboxTheme: const CheckboxThemeData(),
       chipTheme: otherChipTheme,
       dataTableTheme: const DataTableThemeData(),
+      datePickerTheme: const DatePickerThemeData(backgroundColor: Colors.amber),
       dialogTheme: const DialogTheme(backgroundColor: Colors.white),
       dividerTheme: const DividerThemeData(color: Colors.white),
       drawerTheme: const DrawerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
       elevatedButtonTheme: const ElevatedButtonThemeData(),
       expansionTileTheme: const ExpansionTileThemeData(backgroundColor: Colors.black),
       filledButtonTheme: const FilledButtonThemeData(),
@@ -920,6 +932,8 @@ void main() {
       popupMenuTheme: const PopupMenuThemeData(color: Colors.white),
       progressIndicatorTheme: const ProgressIndicatorThemeData(),
       radioTheme: const RadioThemeData(),
+      searchBarTheme: const SearchBarThemeData(),
+      searchViewTheme: const SearchViewThemeData(),
       segmentedButtonTheme: const SegmentedButtonThemeData(),
       sliderTheme: otherSliderTheme,
       snackBarTheme: const SnackBarThemeData(backgroundColor: Colors.white),
@@ -932,12 +946,6 @@ void main() {
       tooltipTheme: const TooltipThemeData(height: 100),
 
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: Colors.white,
-      accentColorBrightness: Brightness.light,
-      accentIconTheme: ThemeData.light().iconTheme,
-      accentTextTheme: ThemeData.light().textTheme,
-      buttonColor: Colors.white,
-      fixTextFieldOutlineLabel: true,
       primaryColorBrightness: Brightness.light,
       androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
       toggleableActiveColor: Colors.white,
@@ -995,6 +1003,7 @@ void main() {
       typography: otherTheme.typography,
 
       // COMPONENT THEMES
+      actionIconTheme: otherTheme.actionIconTheme,
       appBarTheme: otherTheme.appBarTheme,
       badgeTheme: otherTheme.badgeTheme,
       bannerTheme: otherTheme.bannerTheme,
@@ -1008,6 +1017,7 @@ void main() {
       chipTheme: otherTheme.chipTheme,
       dataTableTheme: otherTheme.dataTableTheme,
       dialogTheme: otherTheme.dialogTheme,
+      datePickerTheme: otherTheme.datePickerTheme,
       dividerTheme: otherTheme.dividerTheme,
       drawerTheme: otherTheme.drawerTheme,
       elevatedButtonTheme: otherTheme.elevatedButtonTheme,
@@ -1026,6 +1036,8 @@ void main() {
       popupMenuTheme: otherTheme.popupMenuTheme,
       progressIndicatorTheme: otherTheme.progressIndicatorTheme,
       radioTheme: otherTheme.radioTheme,
+      searchBarTheme: otherTheme.searchBarTheme,
+      searchViewTheme: otherTheme.searchViewTheme,
       sliderTheme: otherTheme.sliderTheme,
       snackBarTheme: otherTheme.snackBarTheme,
       switchTheme: otherTheme.switchTheme,
@@ -1037,12 +1049,6 @@ void main() {
       tooltipTheme: otherTheme.tooltipTheme,
 
       // DEPRECATED (newest deprecations at the bottom)
-      accentColor: otherTheme.accentColor,
-      accentColorBrightness: otherTheme.accentColorBrightness,
-      accentIconTheme: otherTheme.accentIconTheme,
-      accentTextTheme: otherTheme.accentTextTheme,
-      buttonColor: otherTheme.buttonColor,
-      fixTextFieldOutlineLabel: otherTheme.fixTextFieldOutlineLabel,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       androidOverscrollIndicator: otherTheme.androidOverscrollIndicator,
       toggleableActiveColor: otherTheme.toggleableActiveColor,
@@ -1099,6 +1105,7 @@ void main() {
     expect(themeDataCopy.typography, equals(otherTheme.typography));
 
     // COMPONENT THEMES
+    expect(themeDataCopy.actionIconTheme, equals(otherTheme.actionIconTheme));
     expect(themeDataCopy.appBarTheme, equals(otherTheme.appBarTheme));
     expect(themeDataCopy.badgeTheme, equals(otherTheme.badgeTheme));
     expect(themeDataCopy.bannerTheme, equals(otherTheme.bannerTheme));
@@ -1111,6 +1118,7 @@ void main() {
     expect(themeDataCopy.checkboxTheme, equals(otherTheme.checkboxTheme));
     expect(themeDataCopy.chipTheme, equals(otherTheme.chipTheme));
     expect(themeDataCopy.dataTableTheme, equals(otherTheme.dataTableTheme));
+    expect(themeDataCopy.datePickerTheme, equals(otherTheme.datePickerTheme));
     expect(themeDataCopy.dialogTheme, equals(otherTheme.dialogTheme));
     expect(themeDataCopy.dividerTheme, equals(otherTheme.dividerTheme));
     expect(themeDataCopy.drawerTheme, equals(otherTheme.drawerTheme));
@@ -1129,6 +1137,8 @@ void main() {
     expect(themeDataCopy.popupMenuTheme, equals(otherTheme.popupMenuTheme));
     expect(themeDataCopy.progressIndicatorTheme, equals(otherTheme.progressIndicatorTheme));
     expect(themeDataCopy.radioTheme, equals(otherTheme.radioTheme));
+    expect(themeDataCopy.searchBarTheme, equals(otherTheme.searchBarTheme));
+    expect(themeDataCopy.searchViewTheme, equals(otherTheme.searchViewTheme));
     expect(themeDataCopy.sliderTheme, equals(otherTheme.sliderTheme));
     expect(themeDataCopy.snackBarTheme, equals(otherTheme.snackBarTheme));
     expect(themeDataCopy.switchTheme, equals(otherTheme.switchTheme));
@@ -1143,12 +1153,6 @@ void main() {
     expect(themeDataCopy.tooltipTheme, equals(otherTheme.tooltipTheme));
 
     // DEPRECATED (newest deprecations at the bottom)
-    expect(themeDataCopy.accentColor, equals(otherTheme.accentColor));
-    expect(themeDataCopy.accentColorBrightness, equals(otherTheme.accentColorBrightness));
-    expect(themeDataCopy.accentIconTheme, equals(otherTheme.accentIconTheme));
-    expect(themeDataCopy.accentTextTheme, equals(otherTheme.accentTextTheme));
-    expect(themeDataCopy.buttonColor, equals(otherTheme.buttonColor));
-    expect(themeDataCopy.fixTextFieldOutlineLabel, equals(otherTheme.fixTextFieldOutlineLabel));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.androidOverscrollIndicator, equals(otherTheme.androidOverscrollIndicator));
     expect(themeDataCopy.toggleableActiveColor, equals(otherTheme.toggleableActiveColor));
@@ -1186,7 +1190,6 @@ void main() {
     expect(theme.brightness, equals(Brightness.dark));
     expect(theme.colorScheme.brightness, equals(Brightness.dark));
     expect(theme.primaryColor, equals(lightColors.primary));
-    expect(theme.accentColor, equals(lightColors.secondary));
     expect(theme.cardColor, equals(lightColors.surface));
     expect(theme.backgroundColor, equals(lightColors.background));
     expect(theme.canvasColor, equals(lightColors.background));
@@ -1238,6 +1241,7 @@ void main() {
       'iconTheme',
       'primaryIconTheme',
       // COMPONENT THEMES
+      'actionIconTheme',
       'appBarTheme',
       'badgeTheme',
       'bannerTheme',
@@ -1250,9 +1254,11 @@ void main() {
       'checkboxTheme',
       'chipTheme',
       'dataTableTheme',
+      'datePickerTheme',
       'dialogTheme',
       'dividerTheme',
       'drawerTheme',
+      'dropdownMenuTheme',
       'elevatedButtonTheme',
       'expansionTileTheme',
       'filledButtonTheme',
@@ -1269,6 +1275,8 @@ void main() {
       'popupMenuTheme',
       'progressIndicatorTheme',
       'radioTheme',
+      'searchBarTheme',
+      'searchViewTheme',
       'segmentedButtonTheme',
       'sliderTheme',
       'snackBarTheme',
@@ -1280,12 +1288,6 @@ void main() {
       'toggleButtonsTheme',
       'tooltipTheme',
       // DEPRECATED (newest deprecations at the bottom)
-      'accentColor',
-      'accentColorBrightness',
-      'accentTextTheme',
-      'accentIconTheme',
-      'buttonColor',
-      'fixTextFieldOutlineLabel',
       'primaryColorBrightness',
       'androidOverscrollIndicator',
       'toggleableActiveColor',

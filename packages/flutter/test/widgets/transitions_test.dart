@@ -562,4 +562,149 @@ void main() {
       expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
     });
   });
+
+  group('Builders', () {
+    testWidgets('AnimatedBuilder rebuilds when changed', (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+      final ChangeNotifier notifier = ChangeNotifier();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedBuilder(
+            animation: notifier,
+            builder: (BuildContext context, Widget? child) {
+              return RedrawCounter(key: redrawKey, child: child);
+            },
+          ),
+        ),
+      );
+
+      expect(redrawKey.currentState!.redraws, equals(1));
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(1));
+      notifier.notifyListeners();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+
+      // Pump a few more times to make sure that we don't rebuild unnecessarily.
+      await tester.pump();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+    });
+
+    testWidgets("AnimatedBuilder doesn't rebuild the child", (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+      final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
+      final ChangeNotifier notifier = ChangeNotifier();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedBuilder(
+            animation: notifier,
+            builder: (BuildContext context, Widget? child) {
+              return RedrawCounter(key: redrawKey, child: child);
+            },
+            child: RedrawCounter(key: redrawKeyChild),
+          ),
+        ),
+      );
+
+      expect(redrawKey.currentState!.redraws, equals(1));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(1));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+      notifier.notifyListeners();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+
+      // Pump a few more times to make sure that we don't rebuild unnecessarily.
+      await tester.pump();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+    });
+
+    testWidgets('ListenableBuilder rebuilds when changed', (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+      final ChangeNotifier notifier = ChangeNotifier();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListenableBuilder(
+            listenable: notifier,
+            builder: (BuildContext context, Widget? child) {
+              return RedrawCounter(key: redrawKey, child: child);
+            },
+          ),
+        ),
+      );
+
+      expect(redrawKey.currentState!.redraws, equals(1));
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(1));
+      notifier.notifyListeners();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+
+      // Pump a few more times to make sure that we don't rebuild unnecessarily.
+      await tester.pump();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+    });
+
+    testWidgets("ListenableBuilder doesn't rebuild the child", (WidgetTester tester) async {
+      final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
+      final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
+      final ChangeNotifier notifier = ChangeNotifier();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListenableBuilder(
+            listenable: notifier,
+            builder: (BuildContext context, Widget? child) {
+              return RedrawCounter(key: redrawKey, child: child);
+            },
+            child: RedrawCounter(key: redrawKeyChild),
+          ),
+        ),
+      );
+
+      expect(redrawKey.currentState!.redraws, equals(1));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(1));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+      notifier.notifyListeners();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+
+      // Pump a few more times to make sure that we don't rebuild unnecessarily.
+      await tester.pump();
+      await tester.pump();
+      expect(redrawKey.currentState!.redraws, equals(2));
+      expect(redrawKeyChild.currentState!.redraws, equals(1));
+    });
+  });
+}
+
+class RedrawCounter extends StatefulWidget {
+  const RedrawCounter({ super.key, this.child });
+
+  final Widget? child;
+
+  @override
+  State<RedrawCounter> createState() => RedrawCounterState();
+}
+
+class RedrawCounterState extends State<RedrawCounter> {
+  int redraws = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    redraws += 1;
+    return SizedBox(child: widget.child);
+  }
 }

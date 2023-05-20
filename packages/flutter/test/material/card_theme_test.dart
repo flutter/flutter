@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +14,12 @@ void main() {
   test('CardTheme copyWith, ==, hashCode basics', () {
     expect(const CardTheme(), const CardTheme().copyWith());
     expect(const CardTheme().hashCode, const CardTheme().copyWith().hashCode);
+  });
+
+  test('CardTheme lerp special cases', () {
+    expect(CardTheme.lerp(null, null, 0), const CardTheme());
+    const CardTheme theme = CardTheme();
+    expect(identical(CardTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
