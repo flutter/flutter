@@ -67,7 +67,7 @@ class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
       const SkISize& size)
       : sysmem_token_request_(std::move(sysmem_token_request)),
         buffer_import_token_(std::move(buffer_import_token)),
-        surface_(SkSurface::MakeNull(size.width(), size.height())) {
+        surface_(SkSurfaces::Null(size.width(), size.height())) {
     zx_status_t acquire_status = zx::event::create(0, &acquire_fence_);
     if (acquire_status != ZX_OK) {
       FML_LOG(ERROR)

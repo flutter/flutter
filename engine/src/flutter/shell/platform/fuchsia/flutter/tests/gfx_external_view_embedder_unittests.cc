@@ -60,7 +60,7 @@ class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
                                       const SkISize& size,
                                       uint32_t buffer_id)
       : session_(session),
-        surface_(SkSurface::MakeNull(size.width(), size.height())),
+        surface_(SkSurfaces::Null(size.width(), size.height())),
         buffer_id_(buffer_id) {
     FML_CHECK(session_);
     FML_CHECK(buffer_id_ != 0);

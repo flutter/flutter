@@ -746,7 +746,7 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
       kN32_SkColorType,             // color type
       SkColorSpace::MakeSRGB(),     // color space
       &surface_properties,          // surface properties
-      static_cast<SkSurface::RenderTargetReleaseProc>(
+      static_cast<SkSurfaces::RenderTargetReleaseProc>(
           framebuffer->destruction_callback),  // release proc
       framebuffer->user_data                   // release context
   );
