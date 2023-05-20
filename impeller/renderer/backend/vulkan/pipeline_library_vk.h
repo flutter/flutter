@@ -43,8 +43,7 @@ class PipelineLibraryVK final
   bool is_valid_ = false;
 
   PipelineLibraryVK(
-      const std::weak_ptr<DeviceHolder>& device_holder,
-      const vk::Device& device,
+      const std::shared_ptr<DeviceHolder>& device_holder,
       std::shared_ptr<const Capabilities> caps,
       fml::UniqueFD cache_directory,
       std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner);

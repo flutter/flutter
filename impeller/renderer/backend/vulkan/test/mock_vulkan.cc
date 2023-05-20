@@ -8,6 +8,12 @@ namespace impeller {
 namespace testing {
 
 namespace {
+
+struct MockDevice {
+  MockDevice() : called_functions_(new std::vector<std::string>()) {}
+  std::shared_ptr<std::vector<std::string>> called_functions_;
+};
+
 void noop() {}
 
 VkResult vkEnumerateInstanceExtensionProperties(
@@ -97,7 +103,7 @@ VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,
                         const VkDeviceCreateInfo* pCreateInfo,
                         const VkAllocationCallbacks* pAllocator,
                         VkDevice* pDevice) {
-  *pDevice = reinterpret_cast<VkDevice>(0xcafebabe);
+  *pDevice = reinterpret_cast<VkDevice>(new MockDevice());
   return VK_SUCCESS;
 }
 
@@ -125,6 +131,8 @@ VkResult vkCreatePipelineCache(VkDevice device,
                                const VkPipelineCacheCreateInfo* pCreateInfo,
                                const VkAllocationCallbacks* pAllocator,
                                VkPipelineCache* pPipelineCache) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkCreatePipelineCache");
   *pPipelineCache = reinterpret_cast<VkPipelineCache>(0xb000dead);
   return VK_SUCCESS;
 }
@@ -212,6 +220,81 @@ VkResult vkBindBufferMemory(VkDevice device,
   return VK_SUCCESS;
 }
 
+VkResult vkCreateRenderPass(VkDevice device,
+                            const VkRenderPassCreateInfo* pCreateInfo,
+                            const VkAllocationCallbacks* pAllocator,
+                            VkRenderPass* pRenderPass) {
+  *pRenderPass = reinterpret_cast<VkRenderPass>(0x12341234);
+  return VK_SUCCESS;
+}
+
+VkResult vkCreateDescriptorSetLayout(
+    VkDevice device,
+    const VkDescriptorSetLayoutCreateInfo* pCreateInfo,
+    const VkAllocationCallbacks* pAllocator,
+    VkDescriptorSetLayout* pSetLayout) {
+  *pSetLayout = reinterpret_cast<VkDescriptorSetLayout>(0x77777777);
+  return VK_SUCCESS;
+}
+
+VkResult vkCreatePipelineLayout(VkDevice device,
+                                const VkPipelineLayoutCreateInfo* pCreateInfo,
+                                const VkAllocationCallbacks* pAllocator,
+                                VkPipelineLayout* pPipelineLayout) {
+  *pPipelineLayout = reinterpret_cast<VkPipelineLayout>(0x88888888);
+  return VK_SUCCESS;
+}
+
+VkResult vkCreateGraphicsPipelines(
+    VkDevice device,
+    VkPipelineCache pipelineCache,
+    uint32_t createInfoCount,
+    const VkGraphicsPipelineCreateInfo* pCreateInfos,
+    const VkAllocationCallbacks* pAllocator,
+    VkPipeline* pPipelines) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkCreateGraphicsPipelines");
+  *pPipelines = reinterpret_cast<VkPipeline>(0x99999999);
+  return VK_SUCCESS;
+}
+
+void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkDestroyDevice");
+  delete reinterpret_cast<MockDevice*>(device);
+}
+
+void vkDestroyPipeline(VkDevice device,
+                       VkPipeline pipeline,
+                       const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkDestroyPipeline");
+}
+
+VkResult vkCreateShaderModule(VkDevice device,
+                              const VkShaderModuleCreateInfo* pCreateInfo,
+                              const VkAllocationCallbacks* pAllocator,
+                              VkShaderModule* pShaderModule) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkCreateShaderModule");
+  *pShaderModule = reinterpret_cast<VkShaderModule>(0x11111111);
+  return VK_SUCCESS;
+}
+
+void vkDestroyShaderModule(VkDevice device,
+                           VkShaderModule shaderModule,
+                           const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkDestroyShaderModule");
+}
+
+void vkDestroyPipelineCache(VkDevice device,
+                            VkPipelineCache pipelineCache,
+                            const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkDestroyPipelineCache");
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -264,6 +347,24 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkGetBufferMemoryRequirements2KHR;
   } else if (strcmp("vkBindBufferMemory", pName) == 0) {
     return (PFN_vkVoidFunction)vkBindBufferMemory;
+  } else if (strcmp("vkCreateRenderPass", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateRenderPass;
+  } else if (strcmp("vkCreateDescriptorSetLayout", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateDescriptorSetLayout;
+  } else if (strcmp("vkCreatePipelineLayout", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreatePipelineLayout;
+  } else if (strcmp("vkCreateGraphicsPipelines", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateGraphicsPipelines;
+  } else if (strcmp("vkDestroyDevice", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyDevice;
+  } else if (strcmp("vkDestroyPipeline", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyPipeline;
+  } else if (strcmp("vkCreateShaderModule", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateShaderModule;
+  } else if (strcmp("vkDestroyShaderModule", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyShaderModule;
+  } else if (strcmp("vkDestroyPipelineCache", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyPipelineCache;
   }
   return noop;
 }
@@ -277,6 +378,12 @@ std::shared_ptr<ContextVK> CreateMockVulkanContext(void) {
       std::make_shared<fml::ConcurrentTaskRunner>(message_loop);
   settings.proc_address_callback = GetMockVulkanProcAddress;
   return ContextVK::Create(std::move(settings));
+}
+
+std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
+    VkDevice device) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  return mock_device->called_functions_;
 }
 
 }  // namespace testing

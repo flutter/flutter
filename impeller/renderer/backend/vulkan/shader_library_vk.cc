@@ -53,9 +53,9 @@ static std::string VKShaderNameToShaderKeyName(const std::string& name,
 }
 
 ShaderLibraryVK::ShaderLibraryVK(
-    const vk::Device& device,
+    std::weak_ptr<DeviceHolder> device_holder,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data)
-    : device_(device) {
+    : device_holder_(device_holder) {
   TRACE_EVENT0("impeller", "CreateShaderLibrary");
   bool success = true;
   auto iterator = [&](auto type,         //
@@ -145,7 +145,13 @@ bool ShaderLibraryVK::RegisterFunction(
       reinterpret_cast<const uint32_t*>(code->GetMapping()));
   shader_module_info.setCodeSize(code->GetSize());
 
-  auto module = device_.createShaderModuleUnique(shader_module_info);
+  auto device_holder = device_holder_.lock();
+  if (!device_holder) {
+    return false;
+  }
+  FML_DCHECK(device_holder->GetDevice());
+  auto module =
+      device_holder->GetDevice().createShaderModuleUnique(shader_module_info);
 
   if (module.result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create shader module: "
@@ -156,11 +162,13 @@ bool ShaderLibraryVK::RegisterFunction(
   const auto key_name = VKShaderNameToShaderKeyName(name, stage);
 
   vk::UniqueShaderModule shader_module = std::move(module.value);
-  ContextVK::SetDebugName(device_, *shader_module, "Shader " + name);
+  ContextVK::SetDebugName(device_holder->GetDevice(), *shader_module,
+                          "Shader " + name);
 
   WriterLock lock(functions_mutex_);
   functions_[ShaderKey{key_name, stage}] = std::shared_ptr<ShaderFunctionVK>(
-      new ShaderFunctionVK(library_id_,              //
+      new ShaderFunctionVK(device_holder_,
+                           library_id_,              //
                            key_name,                 //
                            stage,                    //
                            std::move(shader_module)  //
