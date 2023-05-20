@@ -561,9 +561,7 @@ class _SnackBarState extends State<SnackBar> {
         : theme.copyWith(
             colorScheme: ColorScheme(
               primary: colorScheme.onPrimary,
-              primaryVariant: colorScheme.onPrimary,
               secondary: buttonColor,
-              secondaryVariant: colorScheme.onSecondary,
               surface: colorScheme.onSurface,
               background: defaults.backgroundColor!,
               error: colorScheme.onError,
