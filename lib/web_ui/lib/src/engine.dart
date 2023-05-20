@@ -131,6 +131,7 @@ export 'engine/raw_keyboard.dart';
 export 'engine/renderer.dart';
 export 'engine/rrect_renderer.dart';
 export 'engine/safe_browser_api.dart';
+export 'engine/scene_painting.dart';
 export 'engine/semantics/accessibility.dart';
 export 'engine/semantics/checkable.dart';
 export 'engine/semantics/dialog.dart';

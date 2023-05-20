@@ -24,19 +24,10 @@ class SkwasmRenderer implements Renderer {
     return SkwasmPath.combine(op, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 
-  @override
-  ui.ImageFilter composeImageFilters({required ui.ImageFilter outer, required ui.ImageFilter inner}) {
-    throw UnimplementedError('composeImageFilters not yet implemented');
-  }
 
   @override
   ui.Path copyPath(ui.Path src) {
     return SkwasmPath.from(src as SkwasmPath);
-  }
-
-  @override
-  ui.ImageFilter createBlurImageFilter({double sigmaX = 0.0, double sigmaY = 0.0, ui.TileMode tileMode = ui.TileMode.clamp}) {
-    throw UnimplementedError('createBlurImageFilter not yet implemented');
   }
 
   @override
@@ -65,14 +56,51 @@ class SkwasmRenderer implements Renderer {
     );
 
   @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) {
-    throw UnimplementedError('createDilateImageFilter not yet implemented');
-  }
+  ui.ImageFilter createBlurImageFilter({
+    double sigmaX = 0.0,
+    double sigmaY = 0.0,
+    ui.TileMode tileMode = ui.TileMode.clamp
+  }) => SkwasmImageFilter.blur(
+    sigmaX: sigmaX,
+    sigmaY: sigmaY,
+    tileMode: tileMode
+  );
 
   @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) {
-    throw UnimplementedError('createErodeImageFilter not yet implemented');
-  }
+  ui.ImageFilter createDilateImageFilter({
+    double radiusX = 0.0,
+    double radiusY = 0.0
+  }) => SkwasmImageFilter.dilate(
+    radiusX: radiusX,
+    radiusY: radiusY,
+  );
+
+  @override
+  ui.ImageFilter createErodeImageFilter({
+    double radiusX = 0.0,
+    double radiusY = 0.0
+  }) => SkwasmImageFilter.erode(
+    radiusX: radiusX,
+    radiusY: radiusY,
+  );
+
+  @override
+  ui.ImageFilter composeImageFilters({
+    required ui.ImageFilter outer,
+    required ui.ImageFilter inner
+  }) => SkwasmImageFilter.compose(
+    SkwasmImageFilter.fromUiFilter(outer),
+    SkwasmImageFilter.fromUiFilter(inner),
+  );
+
+  @override
+  ui.ImageFilter createMatrixImageFilter(
+    Float64List matrix4, {
+    ui.FilterQuality filterQuality = ui.FilterQuality.low
+  }) => SkwasmImageFilter.matrix(
+    matrix4,
+    filterQuality: filterQuality
+  );
 
   @override
   ui.ImageShader createImageShader(
@@ -106,10 +134,6 @@ class SkwasmRenderer implements Renderer {
     matrix4: matrix4,
   );
 
-  @override
-  ui.ImageFilter createMatrixImageFilter(Float64List matrix4, {ui.FilterQuality filterQuality = ui.FilterQuality.low}) {
-    throw UnimplementedError('createMatrixImageFilter not yet implemented');
-  }
 
   @override
   ui.Paint createPaint() => SkwasmPaint();

@@ -4,6 +4,7 @@
 
 import 'dart:ffi';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -20,6 +21,22 @@ class SkwasmPaint implements ui.Paint {
   ui.BlendMode _cachedBlendMode = ui.BlendMode.srcOver;
 
   SkwasmShader? _shader;
+  ui.ImageFilter? _imageFilter;
+
+  EngineColorFilter? _colorFilter;
+
+  ui.MaskFilter? _maskFilter;
+
+  bool _invertColors = false;
+
+  static final SkwasmColorFilter _invertColorFilter = SkwasmColorFilter.fromEngineColorFilter(
+    const EngineColorFilter.matrix(<double>[
+      -1.0, 0, 0, 1.0, 0, // row
+      0, -1.0, 0, 1.0, 0, // row
+      0, 0, -1.0, 1.0, 0, // row
+      1.0, 1.0, 1.0, 1.0, 0
+    ])
+  );
 
   @override
   ui.BlendMode get blendMode {
@@ -91,16 +108,72 @@ class SkwasmPaint implements ui.Paint {
   @override
   ui.FilterQuality filterQuality = ui.FilterQuality.none;
 
-  // Unimplemented stuff below
   @override
-  ui.ColorFilter? colorFilter;
+  ui.ImageFilter? get imageFilter => _imageFilter;
 
   @override
-  ui.ImageFilter? imageFilter;
+  set imageFilter(ui.ImageFilter? filter) {
+    _imageFilter = filter;
+
+    final SkwasmImageFilter? nativeImageFilter = filter != null
+      ? SkwasmImageFilter.fromUiFilter(filter)
+      : null;
+    paintSetImageFilter(handle, nativeImageFilter != null ? nativeImageFilter.handle : nullptr);
+  }
 
   @override
-  bool invertColors = false;
+  ui.ColorFilter? get colorFilter => _colorFilter;
+
+  void _setEffectiveColorFilter() {
+    final SkwasmColorFilter? nativeFilter = _colorFilter != null
+      ? SkwasmColorFilter.fromEngineColorFilter(_colorFilter!) : null;
+    if (_invertColors) {
+      if (nativeFilter != null) {
+        final SkwasmColorFilter composedFilter = SkwasmColorFilter.composed(_invertColorFilter, nativeFilter);
+        nativeFilter.dispose();
+        paintSetColorFilter(handle, composedFilter.handle);
+        composedFilter.dispose();
+      } else {
+        paintSetColorFilter(handle, _invertColorFilter.handle);
+      }
+    } else if (nativeFilter != null) {
+      paintSetColorFilter(handle, nativeFilter.handle);
+      nativeFilter.dispose();
+    } else {
+      paintSetColorFilter(handle, nullptr);
+    }
+  }
 
   @override
-  ui.MaskFilter? maskFilter;
+  set colorFilter(ui.ColorFilter? filter) {
+    _colorFilter = filter as EngineColorFilter?;
+    _setEffectiveColorFilter();
+  }
+
+  @override
+  ui.MaskFilter? get maskFilter => _maskFilter;
+
+  @override
+  set maskFilter(ui.MaskFilter? filter) {
+    _maskFilter = filter;
+    if (filter == null) {
+      paintSetMaskFilter(handle, nullptr);
+    } else {
+      final SkwasmMaskFilter nativeFilter = SkwasmMaskFilter.fromUiMaskFilter(filter);
+      paintSetMaskFilter(handle, nativeFilter.handle);
+      nativeFilter.dispose();
+    }
+  }
+
+  @override
+  bool get invertColors => _invertColors;
+
+  @override
+  set invertColors(bool invertColors) {
+    if (_invertColors == invertColors) {
+      return;
+    }
+    _invertColors = invertColors;
+    _setEffectiveColorFilter();
+  }
 }

@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+import 'package:ui/src/engine/scene_painting.dart';
 import 'package:ui/src/engine/vector_math.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -12,19 +12,22 @@ class BackdropFilterLayer
   with PictureLayer
   implements ui.BackdropFilterEngineLayer {}
 class BackdropFilterOperation implements LayerOperation {
-  BackdropFilterOperation();
+  BackdropFilterOperation(this.filter, this.mode);
+
+  final ui.ImageFilter filter;
+  final ui.BlendMode mode;
 
   @override
   ui.Rect cullRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
-    // TODO(jacksongardner): Implement backdrop filter
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
+    canvas.saveLayerWithFilter(contentRect, ui.Paint()..blendMode = mode, filter);
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
-    // TODO(jacksongardner): Implement backdrop filter
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
+    canvas.restore();
   }
 }
 
@@ -41,7 +44,7 @@ class ClipPathOperation implements LayerOperation {
   ui.Rect cullRect(ui.Rect contentRect) => contentRect.intersect(path.getBounds());
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.save();
     canvas.clipPath(path, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -50,7 +53,7 @@ class ClipPathOperation implements LayerOperation {
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -71,7 +74,7 @@ class ClipRectOperation implements LayerOperation {
   ui.Rect cullRect(ui.Rect contentRect) => contentRect.intersect(rect);
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.save();
     canvas.clipRect(rect, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -80,7 +83,7 @@ class ClipRectOperation implements LayerOperation {
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -101,7 +104,7 @@ class ClipRRectOperation implements LayerOperation {
   ui.Rect cullRect(ui.Rect contentRect) => contentRect.intersect(rrect.outerRect);
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.save();
     canvas.clipRRect(rrect, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
@@ -110,7 +113,7 @@ class ClipRRectOperation implements LayerOperation {
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
       canvas.restore();
     }
@@ -122,19 +125,21 @@ class ColorFilterLayer
   with PictureLayer
   implements ui.ColorFilterEngineLayer {}
 class ColorFilterOperation implements LayerOperation {
-  ColorFilterOperation();
+  ColorFilterOperation(this.filter);
+
+  final ui.ColorFilter filter;
 
   @override
   ui.Rect cullRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
-    // TODO(jacksongardner): Implement color filter
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
+    canvas.saveLayer(contentRect, ui.Paint()..colorFilter = filter);
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
-    // TODO(jacksongardner): Implement color filter
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
+    canvas.restore();
   }
 }
 
@@ -142,17 +147,31 @@ class ImageFilterLayer
   with PictureLayer
   implements ui.ImageFilterEngineLayer {}
 class ImageFilterOperation implements LayerOperation {
+  ImageFilterOperation(this.filter, this.offset);
+
+  final ui.ImageFilter filter;
+  final ui.Offset offset;
+
   @override
   ui.Rect cullRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
-    // TODO(jacksongardner): Implement image filter
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
+    if (offset != ui.Offset.zero) {
+      canvas.save();
+      canvas.translate(offset.dx, offset.dy);
+    }
+    final ui.Rect adjustedContentRect =
+      (filter as SceneImageFilter).filterBounds(contentRect);
+    canvas.saveLayer(adjustedContentRect, ui.Paint()..imageFilter = filter);
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
-    // TODO(jacksongardner): Implement image filter
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
+    if (offset != ui.Offset.zero) {
+      canvas.restore();
+    }
+    canvas.restore();
   }
 }
 
@@ -169,13 +188,13 @@ class OffsetOperation implements LayerOperation {
   ui.Rect cullRect(ui.Rect contentRect) => contentRect.shift(ui.Offset(dx, dy));
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect cullRect) {
+  void pre(SceneCanvas canvas, ui.Rect cullRect) {
     canvas.save();
     canvas.translate(dx, dy);
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.restore();
   }
 }
@@ -193,7 +212,7 @@ class OpacityOperation implements LayerOperation {
   ui.Rect cullRect(ui.Rect contentRect) => contentRect.shift(offset);
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect cullRect) {
+  void pre(SceneCanvas canvas, ui.Rect cullRect) {
     if (offset != ui.Offset.zero) {
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
@@ -205,7 +224,7 @@ class OpacityOperation implements LayerOperation {
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.restore();
     if (offset != ui.Offset.zero) {
       canvas.restore();
@@ -226,13 +245,13 @@ class TransformOperation implements LayerOperation {
     Matrix4.fromFloat32List(toMatrix32(transform)).transformRect(contentRect);
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect cullRect) {
+  void pre(SceneCanvas canvas, ui.Rect cullRect) {
     canvas.save();
     canvas.transform(transform);
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.restore();
   }
 }
@@ -251,7 +270,7 @@ class ShaderMaskOperation implements LayerOperation {
   ui.Rect cullRect(ui.Rect contentRect) => contentRect;
 
   @override
-  void pre(ui.Canvas canvas, ui.Rect contentRect) {
+  void pre(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.saveLayer(
       contentRect,
       ui.Paint(),
@@ -259,7 +278,7 @@ class ShaderMaskOperation implements LayerOperation {
   }
 
   @override
-  void post(ui.Canvas canvas, ui.Rect contentRect) {
+  void post(SceneCanvas canvas, ui.Rect contentRect) {
     canvas.save();
     canvas.translate(maskRect.left, maskRect.top);
     canvas.drawRect(
@@ -287,8 +306,8 @@ abstract class LayerOperation {
   const LayerOperation();
 
   ui.Rect cullRect(ui.Rect contentRect);
-  void pre(ui.Canvas canvas, ui.Rect contentRect);
-  void post(ui.Canvas canvas, ui.Rect contentRect);
+  void pre(SceneCanvas canvas, ui.Rect contentRect);
+  void post(SceneCanvas canvas, ui.Rect contentRect);
 }
 
 class PictureDrawCommand {
@@ -327,7 +346,7 @@ class LayerBuilder {
     final ui.Rect drawnRect = contentRect ?? ui.Rect.zero;
     final ui.Rect rect = operation?.cullRect(drawnRect) ?? drawnRect;
     final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, rect);
+    final SceneCanvas canvas = ui.Canvas(recorder, rect) as SceneCanvas;
 
     operation?.pre(canvas, rect);
     for (final PictureDrawCommand command in drawCommands) {
@@ -353,7 +372,7 @@ class LayerBuilder {
     bool willChangeHint = false
   }) {
     drawCommands.add(PictureDrawCommand(offset, picture));
-    final ui.Rect cullRect = (picture as SkwasmPicture).cullRect;
+    final ui.Rect cullRect = (picture as ScenePicture).cullRect;
     final ui.Rect shiftedRect = cullRect.shift(offset);
     contentRect = contentRect?.expandToInclude(shiftedRect) ?? shiftedRect;
   }
