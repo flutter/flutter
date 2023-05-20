@@ -20,8 +20,7 @@ class PipelineCacheVK {
   // at the time of executing `PipelineCacheVK` because of how `ContextVK` does
   // initialization.
   explicit PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
-                           std::weak_ptr<DeviceHolder> device_holder,
-                           const vk::Device& device,
+                           std::shared_ptr<DeviceHolder> device_holder,
                            fml::UniqueFD cache_directory);
 
   ~PipelineCacheVK();

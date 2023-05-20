@@ -53,13 +53,12 @@ static std::unique_ptr<fml::Mapping> OpenCacheFile(
 }
 
 PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
-                                 std::weak_ptr<DeviceHolder> device_holder,
-                                 const vk::Device& device,
+                                 std::shared_ptr<DeviceHolder> device_holder,
                                  fml::UniqueFD cache_directory)
     : caps_(std::move(caps)),
       device_holder_(device_holder),
       cache_directory_(std::move(cache_directory)) {
-  if (!caps_ || !device) {
+  if (!caps_ || !device_holder->GetDevice()) {
     return;
   }
 
@@ -81,7 +80,8 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
     cache_info.pInitialData = existing_cache_data->GetMapping();
   }
 
-  auto [result, existing_cache] = device.createPipelineCacheUnique(cache_info);
+  auto [result, existing_cache] =
+      device_holder->GetDevice().createPipelineCacheUnique(cache_info);
 
   if (result == vk::Result::eSuccess) {
     cache_ = std::move(existing_cache);
@@ -93,7 +93,8 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
                   << vk::to_string(result) << ". Starting with a fresh cache.";
     cache_info.pInitialData = nullptr;
     cache_info.initialDataSize = 0u;
-    auto [result2, new_cache] = device.createPipelineCacheUnique(cache_info);
+    auto [result2, new_cache] =
+        device_holder->GetDevice().createPipelineCacheUnique(cache_info);
     if (result2 == vk::Result::eSuccess) {
       cache_ = std::move(new_cache);
     } else {
@@ -105,7 +106,14 @@ PipelineCacheVK::PipelineCacheVK(std::shared_ptr<const Capabilities> caps,
   is_valid_ = !!cache_;
 }
 
-PipelineCacheVK::~PipelineCacheVK() = default;
+PipelineCacheVK::~PipelineCacheVK() {
+  std::shared_ptr<DeviceHolder> device_holder = device_holder_.lock();
+  if (device_holder) {
+    cache_.reset();
+  } else {
+    cache_.release();
+  }
+}
 
 bool PipelineCacheVK::IsValid() const {
   return is_valid_;

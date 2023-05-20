@@ -4,12 +4,18 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 namespace impeller {
 namespace testing {
 
+std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
+    VkDevice device);
+
 std::shared_ptr<ContextVK> CreateMockVulkanContext(void);
 
-}
+}  // namespace testing
 }  // namespace impeller
