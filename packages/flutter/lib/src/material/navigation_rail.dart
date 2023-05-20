@@ -580,12 +580,16 @@ class _RailDestination extends StatelessWidget {
       '[NavigationRail.indicatorColor] does not have an effect when [NavigationRail.useIndicator] is false',
     );
 
-    final bool material3 = Theme.of(context).useMaterial3;
+    final ThemeData theme = Theme.of(context);
+
+    final bool material3 = theme.useMaterial3;
     final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
     Offset indicatorOffset;
 
     final Widget themedIcon = IconTheme(
-      data: iconTheme,
+      data: disabled
+        ? iconTheme.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        : iconTheme,
       child: icon,
     );
     final Widget styledLabel = DefaultTextStyle(
@@ -771,12 +775,7 @@ class _RailDestination extends StatelessWidget {
               hoverColor: colors.primary.withOpacity(0.04),
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
-              child: disabled
-                ? Opacity(
-                    opacity: 0.25,
-                    child: content,
-                  )
-                : content,
+              child: content,
             ),
           ),
           Semantics(
