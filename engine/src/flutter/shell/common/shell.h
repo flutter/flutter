@@ -402,6 +402,9 @@ class Shell final : public PlatformView::Delegate,
 
   const std::weak_ptr<VsyncWaiter> GetVsyncWaiter() const;
 
+  const std::shared_ptr<fml::ConcurrentTaskRunner>
+  GetConcurrentWorkerTaskRunner() const;
+
  private:
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,

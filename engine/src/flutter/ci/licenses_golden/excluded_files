@@ -228,6 +228,7 @@
 ../../../flutter/shell/platform/android/.gitignore
 ../../../flutter/shell/platform/android/android_context_gl_impeller_unittests.cc
 ../../../flutter/shell/platform/android/android_context_gl_unittests.cc
+../../../flutter/shell/platform/android/android_context_vulkan_impeller_unittests.cc
 ../../../flutter/shell/platform/android/android_shell_holder_unittests.cc
 ../../../flutter/shell/platform/android/apk_asset_provider_unittests.cc
 ../../../flutter/shell/platform/android/external_view_embedder/external_view_embedder_unittests.cc

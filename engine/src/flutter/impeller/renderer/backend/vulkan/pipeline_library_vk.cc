@@ -28,6 +28,7 @@ PipelineLibraryVK::PipelineLibraryVK(
                                                    device_holder,
                                                    std::move(cache_directory))),
       worker_task_runner_(std::move(worker_task_runner)) {
+  FML_DCHECK(worker_task_runner_);
   if (!pso_cache_->IsValid() || !worker_task_runner_) {
     return;
   }

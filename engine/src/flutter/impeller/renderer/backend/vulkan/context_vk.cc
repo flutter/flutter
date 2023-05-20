@@ -120,6 +120,13 @@ void ContextVK::Setup(Settings settings) {
     return;
   }
 
+  if (!settings.worker_task_runner) {
+    VALIDATION_LOG
+        << "Cannot set up a Vulkan context without a worker task runner.";
+    return;
+  }
+  worker_task_runner_ = settings.worker_task_runner;
+
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
 
@@ -313,7 +320,7 @@ void ContextVK::Setup(Settings settings) {
       new PipelineLibraryVK(shared_from_this(),                   //
                             caps,                                 //
                             std::move(settings.cache_directory),  //
-                            settings.worker_task_runner           //
+                            worker_task_runner_                   //
                             ));
 
   if (!pipeline_library->IsValid()) {
@@ -427,6 +434,11 @@ vk::Instance ContextVK::GetInstance() const {
 
 const vk::Device& ContextVK::GetDevice() const {
   return device_.get();
+}
+
+const std::shared_ptr<fml::ConcurrentTaskRunner>
+ContextVK::GetConcurrentWorkerTaskRunner() const {
+  return worker_task_runner_;
 }
 
 std::unique_ptr<Surface> ContextVK::AcquireNextSurface() {
