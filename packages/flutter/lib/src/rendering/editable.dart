@@ -3015,7 +3015,7 @@ class _CaretPainter extends RenderEditablePainter {
     }
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
+      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCursorRadius),
       floatingCursorPaint..color = floatingCursorColor,
     );
   }
