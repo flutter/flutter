@@ -1331,10 +1331,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// [Directionality] or an explicit [textDirection] should be provided.
   final String? tooltip;
 
-  /// The level of the widget (when it's defined as a header) within
-  /// the structural hierarchy of the screen. A value of 1 indicates the highest
-  /// level of structural hierarchy. A value of 2 indicates the next level,
-  /// and so on.
+  /// The heading level in the DOM document structure.
+  ///
+  /// This is only applied to web semantics and is ignored on other platforms.
+  ///
+  /// Screen readers will use this value to determine which part of the page
+  /// structure this heading represents. A level 1 heading, indicated
+  /// with aria-level="1", usually indicates the main heading of a page,
+  /// a level 2 heading, defined with aria-level="2" the first subsection,
+  /// a level 3 is a subsection of that, and so on.
   ///
   /// This should only be set when [header] is set.
   final int? headingLevel;
@@ -4471,7 +4476,10 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isHeader, value);
   }
 
-  /// Indicates the owning [RenderObject]'s hierarchy level.
+  /// Indicates the heading level in the document structure. Only applied
+  /// if the owning [RenderObject] is a header (this is given by [isHeader]).
+  ///
+  /// This is only used for web semantics, and is ignored on other platforms.
   int? get headingLevel => _headingLevel;
   int? _headingLevel;
 
