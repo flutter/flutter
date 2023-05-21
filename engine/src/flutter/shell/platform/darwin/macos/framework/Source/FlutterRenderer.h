@@ -36,16 +36,6 @@
 - (FlutterRendererConfig)createRendererConfig;
 
 /**
- * Called by the engine when the given view's buffers should be swapped.
- */
-- (BOOL)present:(FlutterViewId)viewId texture:(nonnull const FlutterMetalTexture*)texture;
-
-/**
- * Creates a Metal texture for the given view with the given size.
- */
-- (FlutterMetalTexture)createTextureForView:(FlutterViewId)viewId size:(CGSize)size;
-
-/**
  * Populates the texture registry with the provided metalTexture.
  */
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID
