@@ -500,7 +500,6 @@ class ThemeData with Diagnosticable {
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
       primarySwatch: primarySwatch,
-      primaryColorDark: primaryColorDark,
       accentColor: isDark ? Colors.tealAccent[200]! : primarySwatch[500]!,
       cardColor: cardColor,
       backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
@@ -1148,14 +1147,15 @@ class ThemeData with Diagnosticable {
   ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
-  ///   * Badges: [Badge] (*new*)
+  /// \* *new* means the new widgets/methods created since the last stable release.
+  ///   * Badges: [Badge]
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
-  ///     - Common buttons: [ElevatedButton], [FilledButton] (*new*), FilledButton.tonal] (*new*), [OutlinedButton], [TextButton]
+  ///     - Common buttons: [ElevatedButton], [FilledButton], [FilledButton.tonal], [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
-  ///     - Icon buttons: [IconButton]
-  ///     - Segmented buttons: [SegmentedButton] (*new*, replacing [ToggleButtons])
+  ///     - Icon buttons: [IconButton], [IconButton.filled] (*new*), [IconButton.filledTonal] (*new*), [IconButton.outlined] (*new*)
+  ///     - Segmented buttons: [SegmentedButton] (replacing [ToggleButtons])
   ///   * Cards: [Card]
   ///   * Checkbox: [Checkbox], [CheckboxListTile]
   ///   * Chips:
@@ -1163,22 +1163,23 @@ class ThemeData with Diagnosticable {
   ///     - [FilterChip], [ChoiceChip] (used for single selection filter chips),
   ///     - [InputChip]
   ///   * Date pickers: [showDatePicker], [showDateRangePicker], [DatePickerDialog], [DateRangePickerDialog], [InputDatePickerFormField]
-  ///   * Dialogs: [AlertDialog], [Dialog.fullscreen] (*new*)
+  ///   * Dialogs: [AlertDialog], [Dialog.fullscreen]
   ///   * Divider: [Divider], [VerticalDivider]
   ///   * Lists: [ListTile]
-  ///   * Menus: [MenuAnchor] (*new*), [DropdownMenu] (*new*), [MenuBar] (*new*)
-  ///   * Navigation bar: [NavigationBar] (*new*, replacing [BottomNavigationBar])
-  ///   * Navigation drawer: [NavigationDrawer] (*new*, replacing [Drawer])
+  ///   * Menus: [MenuAnchor], [DropdownMenu], [MenuBar]
+  ///   * Navigation bar: [NavigationBar] (replacing [BottomNavigationBar])
+  ///   * Navigation drawer: [NavigationDrawer] (replacing [Drawer])
   ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio], [RadioListTile]
+  ///   * Search: [SearchBar] (*new*), [SearchAnchor] (*new*),
   ///   * Snack bar: [SnackBar]
   ///   * Slider: [Slider], [RangeSlider]
   ///   * Switch: [Switch], [SwitchListTile]
-  ///   * Tabs: [TabBar]
+  ///   * Tabs: [TabBar], [TabBar.secondary] (*new*)
   ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Time pickers: [showTimePicker], [TimePickerDialog]
-  ///   * Top app bar: [AppBar], [SliverAppBar], [SliverAppBar.medium] (*new*), [SliverAppBar.large] (*new*)
+  ///   * Top app bar: [AppBar], [SliverAppBar], [SliverAppBar.medium], [SliverAppBar.large]
   ///
   /// In addition, this flag enables features introduced in Android 12.
   ///   * Stretch overscroll: [MaterialScrollBehavior]

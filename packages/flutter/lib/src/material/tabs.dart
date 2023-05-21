@@ -1893,6 +1893,10 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
     }
 
+    if (!_controllerIsValid) {
+      return false;
+    }
+
     _scrollUnderwayCount += 1;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
       final bool pageChanged = (_pageController.page! - _controller!.index).abs() > 1.0;
