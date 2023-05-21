@@ -676,9 +676,13 @@ typedef struct {
   FlutterMetalCommandQueueHandle present_command_queue;
   /// The callback that gets invoked when the engine requests the embedder for a
   /// texture to render to.
+  ///
+  /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterMetalTextureCallback get_next_drawable_callback;
   /// The callback presented to the embedder to present a fully populated metal
   /// texture to the user.
+  ///
+  /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterMetalPresentCallback present_drawable_callback;
   /// When the embedder specifies that a texture has a frame available, the
   /// engine will call this method (on an internal engine managed thread) so

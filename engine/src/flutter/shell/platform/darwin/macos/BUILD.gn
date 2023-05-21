@@ -179,7 +179,6 @@ executable("flutter_desktop_darwin_unittests") {
     "framework/Source/FlutterMutatorViewTest.mm",
     "framework/Source/FlutterPlatformNodeDelegateMacTest.mm",
     "framework/Source/FlutterPlatformViewControllerTest.mm",
-    "framework/Source/FlutterRendererTest.mm",
     "framework/Source/FlutterSurfaceManagerTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextInputSemanticsObjectTest.mm",
