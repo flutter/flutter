@@ -12,23 +12,15 @@
 
 #pragma mark - Static callbacks that require the engine.
 
-static FlutterMetalTexture OnGetNextDrawableForDefaultView(FlutterEngine* engine,
-                                                           const FlutterFrameInfo* frameInfo) {
-  // TODO(dkwingsmt): This callback only supports single-view, therefore it only
-  // operates on the default view. To support multi-view, we need a new callback
-  // that also receives a view ID, or pass the ID via FlutterFrameInfo.
-  FlutterViewId viewId = kFlutterDefaultViewId;
-  CGSize size = CGSizeMake(frameInfo->size.width, frameInfo->size.height);
-  return [engine.renderer createTextureForView:viewId size:size];
+static FlutterMetalTexture OnGetNextDrawable(FlutterEngine* engine,
+                                             const FlutterFrameInfo* frameInfo) {
+  NSCAssert(NO, @"The renderer config should not be used to get the next drawable.");
+  return FlutterMetalTexture{};
 }
 
-static bool OnPresentDrawableOfDefaultView(FlutterEngine* engine,
-                                           const FlutterMetalTexture* texture) {
-  // TODO(dkwingsmt): This callback only supports single-view, therefore it only
-  // operates on the default view. To support multi-view, we need a new callback
-  // that also receives a view ID.
-  FlutterViewId viewId = kFlutterDefaultViewId;
-  return [engine.renderer present:viewId texture:texture];
+static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* texture) {
+  NSCAssert(NO, @"The renderer config should not be used to present drawable.");
+  return false;
 }
 
 static bool OnAcquireExternalTexture(FlutterEngine* engine,
@@ -43,15 +35,12 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 #pragma mark - FlutterRenderer implementation
 
 @implementation FlutterRenderer {
-  FlutterViewEngineProvider* _viewProvider;
-
   FlutterDarwinContextMetalSkia* _darwinMetalContext;
 }
 
 - (instancetype)initWithFlutterEngine:(nonnull FlutterEngine*)flutterEngine {
   self = [super initWithDelegate:self engine:flutterEngine];
   if (self) {
-    _viewProvider = [[FlutterViewEngineProvider alloc] initWithEngine:flutterEngine];
     _device = MTLCreateSystemDefaultDevice();
     if (!_device) {
       NSLog(@"Could not acquire Metal device.");
@@ -77,9 +66,9 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
       .metal.device = (__bridge FlutterMetalDeviceHandle)_device,
       .metal.present_command_queue = (__bridge FlutterMetalCommandQueueHandle)_commandQueue,
       .metal.get_next_drawable_callback =
-          reinterpret_cast<FlutterMetalTextureCallback>(OnGetNextDrawableForDefaultView),
+          reinterpret_cast<FlutterMetalTextureCallback>(OnGetNextDrawable),
       .metal.present_drawable_callback =
-          reinterpret_cast<FlutterMetalPresentCallback>(OnPresentDrawableOfDefaultView),
+          reinterpret_cast<FlutterMetalPresentCallback>(OnPresentDrawable),
       .metal.external_texture_frame_callback =
           reinterpret_cast<FlutterMetalTextureFrameCallback>(OnAcquireExternalTexture),
   };
@@ -88,38 +77,13 @@ static bool OnAcquireExternalTexture(FlutterEngine* engine,
 
 #pragma mark - Embedder callback implementations.
 
-- (FlutterMetalTexture)createTextureForView:(FlutterViewId)viewId size:(CGSize)size {
-  FlutterView* view = [_viewProvider viewForId:viewId];
-  NSAssert(view != nil, @"Can't create texture on a non-existent view 0x%llx.", viewId);
-  if (view == nil) {
-    // FlutterMetalTexture has texture `null`, therefore is discarded.
-    return FlutterMetalTexture{};
-  }
-  return [view.surfaceManager surfaceForSize:size].asFlutterMetalTexture;
-}
-
-- (BOOL)present:(FlutterViewId)viewId texture:(const FlutterMetalTexture*)texture {
-  FlutterView* view = [_viewProvider viewForId:viewId];
-  if (view == nil) {
-    return NO;
-  }
-  FlutterSurface* surface = [FlutterSurface fromFlutterMetalTexture:texture];
-  if (surface == nil) {
-    return NO;
-  }
-  FlutterSurfacePresentInfo* info = [[FlutterSurfacePresentInfo alloc] init];
-  info.surface = surface;
-  [view.surfaceManager present:@[ info ] notify:nil];
-  return YES;
-}
-
-#pragma mark - FlutterTextureRegistrar methods.
-
 - (BOOL)populateTextureWithIdentifier:(int64_t)textureID
                          metalTexture:(FlutterMetalExternalTexture*)textureOut {
   FlutterExternalTexture* texture = [self getTextureWithID:textureID];
   return [texture populateTexture:textureOut];
 }
+
+#pragma mark - FlutterTextureRegistrar methods.
 
 - (FlutterExternalTexture*)onRegisterTexture:(id<FlutterTexture>)texture {
   return [[FlutterExternalTexture alloc] initWithFlutterTexture:texture
