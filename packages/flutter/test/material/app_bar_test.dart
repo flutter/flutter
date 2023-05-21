@@ -3946,6 +3946,33 @@ void main() {
     );
   });
 
+  testWidgets('Only local entries that imply app bar dismissal will introduce an back button', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: key,
+          appBar: AppBar(),
+        ),
+      ),
+    );
+    expect(find.byType(BackButton), findsNothing);
+
+    // Push one entry that doesn't imply app bar dismissal.
+    ModalRoute.of(key.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(onRemove: () {}, impliesAppBarDismissal: false),
+    );
+    await tester.pump();
+    expect(find.byType(BackButton), findsNothing);
+
+    // Push one entry that implies app bar dismissal.
+    ModalRoute.of(key.currentContext!)!.addLocalHistoryEntry(
+      LocalHistoryEntry(onRemove: () {}),
+    );
+    await tester.pump();
+    expect(find.byType(BackButton), findsOneWidget);
+  });
+
   testWidgets('AppBar.preferredHeightFor', (WidgetTester tester) async {
     late double preferredHeight;
     late Size preferredSize;

@@ -168,7 +168,7 @@ class ManifestAssetBundle implements AssetBundle {
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const double _defaultResolution = 1.0;
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
-  static const String _kAssetManifestBinFilename = 'AssetManifest.bin';
+  static const String _kAssetManifestBinFilename = 'AssetManifest.smcbin';
 
   static const String _kNoticeFile = 'NOTICES';
   // Comically, this can't be name with the more common .gz file extension

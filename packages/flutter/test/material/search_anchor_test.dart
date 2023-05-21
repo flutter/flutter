@@ -1639,6 +1639,46 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.arrow_back), findsOneWidget);
   });
+
+  testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/126590.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(5, (int index) {
+                final String item = 'item $index';
+                return ListTile(
+                  leading: const Icon(Icons.history),
+                  title: Text(item),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {},
+                );
+              });
+            }),
+        ),
+      ),
+    ));
+
+    // Open search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // Pop search view route
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
+    // No exception.
+  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

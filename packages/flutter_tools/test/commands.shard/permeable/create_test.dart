@@ -1254,7 +1254,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1300;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1335,7 +1335,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1300;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('ios', 'Runner.xcworkspace', 'xcshareddata'));
     expectExists(workspaceSharedData.childFile('WorkspaceSettings.xcsettings').path);
@@ -1579,7 +1579,7 @@ void main() {
     final File xcodeProjectFile = globals.fs.file(globals.fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('path = "flutter_project.app";'));
-    expect(xcodeProject, contains('LastUpgradeCheck = 1300;'));
+    expect(xcodeProject, contains('LastUpgradeCheck = 1430;'));
 
     // Xcode workspace shared data
     final Directory workspaceSharedData = globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace', 'xcshareddata'));
@@ -2846,6 +2846,77 @@ void main() {
     expect(buildContent.contains('compileSdkVersion flutter.compileSdkVersion'), true);
     expect(buildContent.contains('ndkVersion flutter.ndkVersion'), true);
     expect(buildContent.contains('targetSdkVersion flutter.targetSdkVersion'), true);
+  });
+
+  testUsingContext('Android Java plugin contains namespace', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'java',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    // The namespace should be conditionalized for AGP <4.2.
+    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+  });
+
+  testUsingContext('Android FFI plugin contains namespace', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin_ffi',
+      '--org', 'com.bar.foo',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    // The namespace should be conditionalized for AGP <4.2.
+    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
+  });
+
+  testUsingContext('Android Kotlin plugin contains namespace', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub',
+      '-t', 'plugin',
+      '--org', 'com.bar.foo',
+      '-a', 'kotlin',
+      '--platforms=android',
+      projectDir.path]);
+
+    final File buildGradleFile = globals.fs.file('${projectDir.path}/android/build.gradle');
+
+    expect(buildGradleFile.existsSync(), true);
+
+    final String buildGradleContent = await buildGradleFile.readAsString();
+
+    expect(buildGradleContent.contains("namespace 'com.bar.foo.flutter_project'"), true);
+    // The namespace should be conditionalized for AGP <4.2.
+    expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
 
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
