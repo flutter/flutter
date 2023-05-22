@@ -984,19 +984,9 @@ class RawScrollbar extends StatefulWidget {
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.padding,
-    @Deprecated(
-      'Use thumbVisibility instead. '
-      'This feature was deprecated after v2.9.0-1.0.pre.',
-    )
-    this.isAlwaysShown,
   }) : assert(
-         thumbVisibility == null || isAlwaysShown == null,
-         'Scrollbar thumb appearance should only be controlled with thumbVisibility, '
-         'isAlwaysShown is deprecated.'
-       ),
-       assert(
-         !((thumbVisibility == false || isAlwaysShown == false) && (trackVisibility ?? false)),
-         'A scrollbar track cannot be drawn without a scrollbar thumb.'
+         !(thumbVisibility == false && (trackVisibility ?? false)),
+         'A scrollbar track cannot be drawn without a scrollbar thumb.',
        ),
        assert(minThumbLength >= 0),
        assert(minOverscrollLength == null || minOverscrollLength <= minThumbLength),
@@ -1149,99 +1139,11 @@ class RawScrollbar extends StatefulWidget {
   ///     scroll view associated with the parent [PrimaryScrollController].
   ///   * [PrimaryScrollController], which associates a [ScrollController] with
   ///     a subtree.
-  ///
-  /// Replaces deprecated [isAlwaysShown].
   /// {@endtemplate}
   ///
   /// Subclass [Scrollbar] can hide and show the scrollbar thumb in response to
   /// [MaterialState]s by using [ScrollbarThemeData.thumbVisibility].
   final bool? thumbVisibility;
-
-  /// {@template flutter.widgets.Scrollbar.isAlwaysShown}
-  /// Indicates that the scrollbar thumb should be visible, even when a scroll
-  /// is not underway.
-  ///
-  /// When false, the scrollbar will be shown during scrolling
-  /// and will fade out otherwise.
-  ///
-  /// When true, the scrollbar will always be visible and never fade out. This
-  /// requires that the Scrollbar can access the [ScrollController] of the
-  /// associated Scrollable widget. This can either be the provided [controller],
-  /// or the [PrimaryScrollController] of the current context.
-  ///
-  ///   * When providing a controller, the same ScrollController must also be
-  ///     provided to the associated Scrollable widget.
-  ///   * The [PrimaryScrollController] is used by default for a [ScrollView]
-  ///     that has not been provided a [ScrollController] and that has a
-  ///     [ScrollView.scrollDirection] of [Axis.vertical]. This automatic
-  ///     behavior does not apply to those with Axis.horizontal. To explicitly
-  ///     use the PrimaryScrollController, set [ScrollView.primary] to true.
-  ///
-  /// Defaults to false when null.
-  ///
-  /// {@tool snippet}
-  ///
-  /// ```dart
-  /// // (e.g. in a stateful widget)
-  ///
-  /// final ScrollController controllerOne = ScrollController();
-  /// final ScrollController controllerTwo = ScrollController();
-  ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  /// return Column(
-  ///   children: <Widget>[
-  ///     SizedBox(
-  ///        height: 200,
-  ///        child: Scrollbar(
-  ///          thumbVisibility: true,
-  ///          controller: controllerOne,
-  ///          child: ListView.builder(
-  ///            controller: controllerOne,
-  ///            itemCount: 120,
-  ///            itemBuilder: (BuildContext context, int index) {
-  ///              return Text('item $index');
-  ///            },
-  ///          ),
-  ///        ),
-  ///      ),
-  ///      SizedBox(
-  ///        height: 200,
-  ///        child: CupertinoScrollbar(
-  ///          thumbVisibility: true,
-  ///          controller: controllerTwo,
-  ///          child: SingleChildScrollView(
-  ///            controller: controllerTwo,
-  ///            child: const SizedBox(
-  ///              height: 2000,
-  ///              width: 500,
-  ///              child: Placeholder(),
-  ///            ),
-  ///          ),
-  ///        ),
-  ///      ),
-  ///    ],
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///   * [RawScrollbarState.showScrollbar], an overridable getter which uses
-  ///     this value to override the default behavior.
-  ///   * [ScrollView.primary], which indicates whether the ScrollView is the primary
-  ///     scroll view associated with the parent [PrimaryScrollController].
-  ///   * [PrimaryScrollController], which associates a [ScrollController] with
-  ///     a subtree.
-  ///
-  /// This is deprecated, [thumbVisibility] should be used instead.
-  /// {@endtemplate}
-  @Deprecated(
-    'Use thumbVisibility instead. '
-    'This feature was deprecated after v2.9.0-1.0.pre.',
-  )
-  final bool? isAlwaysShown;
 
   /// The [OutlinedBorder] of the scrollbar's thumb.
   ///
@@ -1453,14 +1355,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   /// Subclasses can override this getter to make its value depend on an inherited
   /// theme.
   ///
-  /// Defaults to false when [RawScrollbar.isAlwaysShown] or
-  /// [RawScrollbar.thumbVisibility] is null.
-  ///
-  /// See also:
-  ///
-  ///   * [RawScrollbar.isAlwaysShown], which overrides the default behavior.
+  /// Defaults to false when [RawScrollbar.thumbVisibility] is null.
   @protected
-  bool get showScrollbar => widget.isAlwaysShown ?? widget.thumbVisibility ?? false;
+  bool get showScrollbar => widget.thumbVisibility ?? false;
 
   bool get _showTrack => showScrollbar && (widget.trackVisibility ?? false);
 
@@ -1546,9 +1443,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       : 'provided ScrollController';
 
     String when = '';
-    if (widget.isAlwaysShown ?? false) {
-      when = 'Scrollbar.isAlwaysShown is true';
-    } else if (widget.thumbVisibility ?? false) {
+    if (widget.thumbVisibility ?? false) {
       when = 'Scrollbar.thumbVisibility is true';
     } else if (enableGestures) {
       when = 'the scrollbar is interactive';
@@ -1658,9 +1553,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isAlwaysShown != oldWidget.isAlwaysShown
-        || widget.thumbVisibility != oldWidget.thumbVisibility) {
-      if ((widget.isAlwaysShown ?? false) || (widget.thumbVisibility ?? false)) {
+    if (widget.thumbVisibility != oldWidget.thumbVisibility) {
+      if (widget.thumbVisibility ?? false) {
         assert(_debugScheduleCheckHasValidScrollPosition());
         _fadeoutTimer?.cancel();
         _fadeoutAnimationController.animateTo(1.0);

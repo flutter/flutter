@@ -3801,7 +3801,7 @@ void main() {
                 title: const Text('AppBar'),
               ),
               body: Scrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: controller,
                 child: ListView(
                   controller: controller,
