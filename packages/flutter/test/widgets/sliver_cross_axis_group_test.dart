@@ -511,6 +511,56 @@ void main() {
     expect(first.localToGlobal(Offset.zero), Offset.zero);
     expect(second.localToGlobal(Offset.zero), const Offset(VIEWPORT_WIDTH / 2, 0));
   });
+
+  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        SliverPersistentHeader(
+          delegate: TestDelegate(),
+          pinned: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(600));
+    controller.jumpTo(570);
+    await tester.pumpAndSettle();
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-30.0));
+  });
+
+  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        SliverPersistentHeader(
+          delegate: TestDelegate(),
+          floating: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(600));
+    print('should repaint');
+    controller.jumpTo(600);
+    await tester.pumpAndSettle();
+    print('should repaint');
+    controller.jumpTo(570);
+    await tester.pumpAndSettle();
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-30.0));
+  });
 }
 
 Widget _buildSliverList({
@@ -550,6 +600,7 @@ Widget _buildSliverCrossAxisGroup({
   double viewportWidth = VIEWPORT_WIDTH,
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
+  List<Widget> otherSlivers = const <Widget>[],
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -562,9 +613,33 @@ Widget _buildSliverCrossAxisGroup({
           scrollDirection: scrollDirection,
           reverse: reverse,
           controller: controller,
-          slivers: <Widget>[SliverCrossAxisGroup(slivers: slivers)],
+          slivers: <Widget>[SliverCrossAxisGroup(slivers: slivers), ...otherSlivers],
         ),
       ),
     ),
   );
+}
+
+class TestDelegate extends SliverPersistentHeaderDelegate {
+  TestDelegate({this.stretchConfiguration, this.showOnScreenConfiguration});
+
+  @override
+  double get maxExtent => 60.0;
+
+  @override
+  double get minExtent => 60.0;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(height: maxExtent);
+  }
+
+  @override
+  bool shouldRebuild(TestDelegate oldDelegate) => false;
+
+  @override
+  final OverScrollHeaderStretchConfiguration? stretchConfiguration;
+  @override
+  final PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration;
 }

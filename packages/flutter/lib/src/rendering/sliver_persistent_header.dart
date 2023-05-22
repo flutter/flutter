@@ -309,6 +309,8 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
           offset += Offset(childMainAxisPosition(child!), 0.0);
       }
       context.paintChild(child!, offset);
+      print(offset);
+      print(paintBounds);
     }
   }
 
