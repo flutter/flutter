@@ -31,7 +31,7 @@ class ImageDecoder {
 
   virtual ~ImageDecoder();
 
-  using ImageResult = std::function<void(sk_sp<DlImage>)>;
+  using ImageResult = std::function<void(sk_sp<DlImage>, std::string)>;
 
   // Takes an image descriptor and returns a handle to a texture resident on the
   // GPU. All image decompression and resizes are done on a worker thread

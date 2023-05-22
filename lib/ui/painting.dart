@@ -2125,9 +2125,12 @@ base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {
   @override
   Future<FrameInfo> getNextFrame() async {
     final Completer<FrameInfo> completer = Completer<FrameInfo>.sync();
-    final String? error = _getNextFrame((_Image? image, int durationMilliseconds) {
+    final String? error = _getNextFrame((_Image? image, int durationMilliseconds, String decodeError) {
       if (image == null) {
-        completer.completeError(Exception('Codec failed to produce an image, possibly due to invalid image data.'));
+        if (decodeError.isEmpty) {
+          decodeError = 'Codec failed to produce an image, possibly due to invalid image data.';
+        }
+        completer.completeError(Exception(decodeError));
       } else {
         completer.complete(FrameInfo._(
           image: Image._(image, image.width, image.height),
@@ -2143,7 +2146,7 @@ base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {
 
   /// Returns an error message on failure, null on success.
   @Native<Handle Function(Pointer<Void>, Handle)>(symbol: 'Codec::getNextFrame')
-  external String? _getNextFrame(void Function(_Image?, int) callback);
+  external String? _getNextFrame(void Function(_Image?, int, String) callback);
 
   @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'Codec::dispose')
