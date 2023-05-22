@@ -2024,7 +2024,6 @@ void main() {
           return const Text('BottomSheet');
         },
       );
-debugPrint(retrievedRouteSettings.toString());
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
