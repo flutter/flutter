@@ -131,7 +131,7 @@ Future<String> _evalApkAnalyzer(
        printStdout: printStdout,
        workingDirectory: workingDirectory,
        environment: <String, String>{
-         'JAVA_HOME': javaHome,
+         Java.javaHomeEnvironmentVariable: javaHome,
        },
      );
    }
@@ -462,7 +462,7 @@ Future<ProcessResult> _resultOfGradleTask({
     gradle,
     args,
     workingDirectory: workingDirectory,
-    environment: <String, String>{ 'JAVA_HOME': javaHome },
+    environment: <String, String>{ Java.javaHomeEnvironmentVariable: javaHome },
   );
 }
 
