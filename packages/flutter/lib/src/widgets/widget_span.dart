@@ -265,7 +265,7 @@ class _WidgetSpanParentData extends ParentDataWidget<TextParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => InlineWidgetContainerDefaults;
+  Type get debugTypicalAncestorWidgetClass => RenderInlineWidgetContainerDefaults;
 }
 
 // A RenderObjectWidget that automatically applies text scaling on inline

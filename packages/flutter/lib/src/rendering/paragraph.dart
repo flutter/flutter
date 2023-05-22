@@ -87,7 +87,7 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
 ///
 ///  * [WidgetSpan.extractFromInlineSpan], a helper function for extracting
 ///    [WidgetSpan]s from an [InlineSpan] tree.
-mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
+mixin RenderInlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData) {
@@ -119,8 +119,8 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
   /// Computes the layout for every inline widget children using the given
   /// `layoutChild` function and the `maxWidth` constraint.
   ///
-  /// Returns a list of [PlaceholderDimensions] for each child managed by the
-  /// [ContainerRenderObjectMixin] mixin.
+  /// Returns a list of [PlaceholderDimensions], representing the layout results
+  /// for each child managed by the [ContainerRenderObjectMixin] mixin.
   ///
   /// Since this method does not impose a maximum height constraint on the
   /// inline widget children, some children may become taller than this
@@ -231,7 +231,7 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
 }
 
 /// A render object that displays a paragraph of text.
-class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, InlineWidgetContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
+class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineWidgetContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
