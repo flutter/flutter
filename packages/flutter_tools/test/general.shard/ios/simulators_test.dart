@@ -464,10 +464,10 @@ void main() {
       await launchDeviceUnifiedLogging(device, null);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
-      overrides: <Type, Generator>{
-        ProcessManager: () => fakeProcessManager,
-        FileSystem: () => fileSystem,
-      });
+    overrides: <Type, Generator>{
+      ProcessManager: () => fakeProcessManager,
+      FileSystem: () => fileSystem,
+    });
   });
 
   group('log reader', () {
@@ -1103,6 +1103,96 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text'''
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => xcode,
+    });
+
+    group('processes', () {
+      late FakeProcessManager fakeProcessManager;
+      Xcode xcode;
+      late SimControl simControl;
+      const String deviceId = 'smart-phone';
+      const String appId = 'flutterApp';
+
+      setUp(() {
+        fakeProcessManager = FakeProcessManager.empty();
+        xcode = Xcode.test(processManager: FakeProcessManager.any());
+        simControl = SimControl(
+          logger: BufferLogger.test(),
+          processManager: fakeProcessManager,
+          xcode: xcode,
+        );
+      });
+
+      testUsingContext('execute in specific order', () async {
+        final IOSSimulator device = IOSSimulator(
+          deviceId,
+          name: 'iPhone SE',
+          simulatorCategory: 'iOS 11.2',
+          simControl: simControl,
+        );
+        testPlistParser.setProperty('CFBundleIdentifier', appId);
+
+        // install first
+        fakeProcessManager.addCommand(const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'install',
+            deviceId,
+            '/',
+          ],
+        ));
+
+        // spawn second
+        const String expectedPredicate = 'eventType = logEvent AND processImagePath ENDSWITH "name" AND '
+            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+            'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
+            'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
+            'NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        fakeProcessManager.addCommand(const FakeCommand(command: <String>[
+          'xcrun',
+          'simctl',
+          'spawn',
+          deviceId,
+          'log',
+          'stream',
+          '--style',
+          'json',
+          '--predicate',
+          expectedPredicate,
+        ]));
+
+        // launch third
+        fakeProcessManager.addCommand(const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'simctl',
+            'launch',
+            deviceId,
+            appId,
+            '--enable-dart-profiling',
+            '--enable-checked-mode',
+          '--verify-entry-points',
+          ],
+        ));
+
+        final Directory mockDir = globals.fs.currentDirectory;
+        final IOSApp package = PrebuiltIOSApp(
+          projectBundleId: appId,
+          bundleName: 'name',
+          uncompressedBundle: mockDir,
+          applicationPackage: mockDir,
+        );
+        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
+        final DebuggingOptions mockOptions = DebuggingOptions.enabled(mockInfo);
+        await device.startApp(package, debuggingOptions: mockOptions);
+
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        PlistParser: () => testPlistParser,
+        ProcessManager: () => fakeProcessManager,
+        FileSystem: () => fileSystem,
+      });
     });
   });
 

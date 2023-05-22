@@ -450,9 +450,9 @@ class IOSSimulator extends Device {
       platformArgs,
     );
 
-    final DeviceLogReader deviceLogReader = getLogReader(app: package);
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
+      final DeviceLogReader deviceLogReader = getLogReader(app: package);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         deviceLogReader,
         ipv6: ipv6,
@@ -460,14 +460,14 @@ class IOSSimulator extends Device {
         devicePort: debuggingOptions.deviceVmServicePort,
         logger: globals.logger,
       );
-    }
 
-    // When the ProtocolDiscovery above is created, it starts listening to the
-    // `deviceLogReader`. On listen, the `deviceLogReader` launches a command
-    // to get the device logs.
-    // Wait for that command to finish starting before launching the app.
-    if (deviceLogReader is _IOSSimulatorLogReader) {
-      await deviceLogReader.deviceLogStarted.future;
+      // When the ProtocolDiscovery above is created, it starts listening to the
+      // `deviceLogReader`. On listen, the `deviceLogReader` launches a command
+      // to get the device logs.
+      // Wait for that command to finish starting before launching the app.
+      if (deviceLogReader is _IOSSimulatorLogReader) {
+        await deviceLogReader.deviceLogStarted.future;
+      }
     }
 
     // Launch the updated application in the simulator.
