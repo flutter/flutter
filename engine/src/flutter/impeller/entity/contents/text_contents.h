@@ -40,6 +40,8 @@ class TextContents final : public Contents {
 
   void SetOffset(Vector2 offset);
 
+  std::optional<Rect> GetTextFrameBounds() const;
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
