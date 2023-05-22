@@ -2004,8 +2004,6 @@ void main() {
     testWidgets('Verify that modalBarrierDismissLabel is used if provided',
         (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-      const RouteSettings routeSettings =
-          RouteSettings(name: 'route_name', arguments: 'route_argument');
       const String customLabel = 'custom label';
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -2017,7 +2015,6 @@ void main() {
       showModalBottomSheet<void>(
         barrierLabel: 'custom label',
         context: scaffoldKey.currentContext!,
-        routeSettings: routeSettings,
         builder: (BuildContext context) {
           return const Text('BottomSheet');
         },
@@ -2033,8 +2030,6 @@ void main() {
     testWidgets('Verify that modalBarrierDismissLabel from context is used if barrierLabel is not provided',
         (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-      const RouteSettings routeSettings =
-          RouteSettings(name: 'route_name', arguments: 'route_argument');
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           key: scaffoldKey,
@@ -2044,7 +2039,6 @@ void main() {
 
       showModalBottomSheet<void>(
         context: scaffoldKey.currentContext!,
-        routeSettings: routeSettings,
         builder: (BuildContext context) {
           return const Text('BottomSheet');
         },
