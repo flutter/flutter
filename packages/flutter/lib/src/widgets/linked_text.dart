@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
+
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -159,7 +161,7 @@ class LinkedText extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
+        style: style,
         //children: linkSpans(TextLinker.urlRangesFinder, children),
         // TODO(justinmc): Need to handle all children (and none).
         children: <InlineSpan>[
@@ -414,64 +416,32 @@ class InlineLinkedText extends TextSpan {
 }
 
 /// An inline text link.
-class InlineLink extends WidgetSpan {
+class InlineLink extends TextSpan {
   /// Create an instance of [InlineLink].
   InlineLink({
     required String text,
-    // TODO(justinmc): Include these super parameters?
-    /*
-    super.alignment,
-    super.baseline,
-    super.style,
-    */
+    super.locale,
+    // TODO(justinmc): I probably need to identify this as a link in semantics somehow?
+    super.semanticsLabel,
     TextStyle style = const TextStyle(
       // TODO(justinmc): Correct color per-platform. Get it from Theme in
       // Material somehow?
+      // And decide underline or no per-platform.
       color: Color(0xff0000ff),
+      decoration: TextDecoration.underline,
     ),
     UriStringCallback? onTap,
   }) : super(
-    child: _TextLink(
-      uriString: text,
-      onTap: onTap,
-      style: style,
-    ),
+    style: style,
+    mouseCursor: SystemMouseCursors.click,
+    text: text,
+    recognizer: (TapGestureRecognizer()..onTap = () {
+      if (onTap == null) {
+        return;
+      }
+      return onTap(text);
+    }),
   );
-}
-
-/// A text link widget that can be displayed inline with [WidgetSpan].
-class _TextLink extends StatelessWidget {
-  const _TextLink({
-    required this.uriString,
-    this.onTap,
-    this.style,
-  });
-
-  final UriStringCallback? onTap;
-  final String uriString;
-  final TextStyle? style;
-
-  void _onTap() {
-    if (onTap == null) {
-      return;
-    }
-    return onTap!(uriString);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO(justinmc): Semantics.
-    return GestureDetector(
-      onTap: _onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Text(
-          uriString,
-          style: style,
-        ),
-      ),
-    );
-  }
 }
 
 bool visit(InlineSpan span) {
@@ -530,6 +500,7 @@ InlineSpan _linkSpanRecurse(InlineSpan span, List<TextRange> ranges, int index, 
   }
 
   final TextSpan nextTree = TextSpan(
+    style: span.style,
     children: <InlineSpan>[],
   );
   if (span.text?.isNotEmpty ?? false) {
