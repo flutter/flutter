@@ -10,6 +10,7 @@
 #include "impeller/entity/points.comp.h"
 #include "impeller/entity/position_color.vert.h"
 #include "impeller/entity/texture_fill.vert.h"
+#include "impeller/entity/uv.comp.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/command_buffer.h"
@@ -47,6 +48,31 @@ std::pair<std::vector<Point>, std::vector<uint16_t>> TessellateConvex(
     }
   }
   return std::make_pair(output, indices);
+}
+
+/// Compute UV geometry for a VBB that contains only position geometry.
+///
+/// texture_origin should be set to 0, 0 for stroke and stroke based geometry,
+/// like the point field.
+static VertexBufferBuilder<TextureFillVertexShader::PerVertexData>
+ComputeUVGeometryCPU(
+    VertexBufferBuilder<SolidFillVertexShader::PerVertexData>& input,
+    Point texture_origin,
+    Size texture_coverage,
+    Matrix effect_transform) {
+  VertexBufferBuilder<TextureFillVertexShader::PerVertexData> vertex_builder;
+  vertex_builder.Reserve(input.GetVertexCount());
+  input.IterateVertices(
+      [&vertex_builder, &texture_coverage, &effect_transform,
+       &texture_origin](SolidFillVertexShader::PerVertexData old_vtx) {
+        TextureFillVertexShader::PerVertexData data;
+        data.position = old_vtx.position;
+        auto coverage_coords =
+            (old_vtx.position - texture_origin) / texture_coverage;
+        data.texture_coords = effect_transform * coverage_coords;
+        vertex_builder.AppendVertex(data);
+      });
+  return vertex_builder;
 }
 
 Geometry::Geometry() = default;
@@ -658,17 +684,8 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
       path_, stroke_width, miter_limit_ * stroke_width_ * 0.5,
       GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
       entity.GetTransformation().GetMaxBasisLength());
-
-  VertexBufferBuilder<TextureFillVertexShader::PerVertexData> vertex_builder;
-  stroke_builder.IterateVertices(
-      [&vertex_builder, &texture_coverage,
-       &effect_transform](SolidFillVertexShader::PerVertexData old_vtx) {
-        TextureFillVertexShader::PerVertexData data;
-        data.position = old_vtx.position;
-        auto coverage_coords = old_vtx.position / texture_coverage.size;
-        data.texture_coords = effect_transform * coverage_coords;
-        vertex_builder.AppendVertex(data);
-      });
+  auto vertex_builder = ComputeUVGeometryCPU(
+      stroke_builder, {0, 0}, texture_coverage.size, effect_transform);
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
@@ -817,91 +834,71 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
-  if (radius_ < 0.0) {
+  if (renderer.GetDeviceCapabilities().SupportsCompute()) {
+    return GetPositionBufferGPU(renderer, entity, pass);
+  }
+  auto vtx_builder = GetPositionBufferCPU(renderer, entity, pass);
+  if (!vtx_builder.has_value()) {
     return {};
   }
-  auto determinant = entity.GetTransformation().GetDeterminant();
-  if (determinant == 0) {
-    return {};
-  }
 
-  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
-  Scalar radius = std::max(radius_, min_size);
-
-  if (!renderer.GetDeviceCapabilities().SupportsCompute()) {
-    return GetPositionBufferCPU(renderer, entity, pass, radius);
-  }
-
-  auto vertices_per_geom = ComputeCircleDivisions(
-      entity.GetTransformation().GetMaxBasisLength() * radius, round_);
-  auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
-  auto total = points_per_circle * points_.size();
   auto& host_buffer = pass.GetTransientsBuffer();
-
-  using PS = PointsComputeShader;
-
-  auto points_data = host_buffer.Emplace(
-      points_.data(), points_.size() * sizeof(Point), alignof(Point));
-
-  DeviceBufferDescriptor buffer_desc;
-  buffer_desc.size = total * sizeof(Point);
-  buffer_desc.storage_mode = StorageMode::kDevicePrivate;
-
-  auto buffer =
-      renderer.GetContext()->GetResourceAllocator()->CreateBuffer(buffer_desc);
-
-  ComputeCommand cmd;
-  cmd.label = "Points Geometry";
-  cmd.pipeline = renderer.GetPointComputePipeline();
-
-  PS::FrameInfo frame_info;
-  frame_info.count = points_.size();
-  frame_info.radius = radius;
-  frame_info.radian_start = round_ ? 0.0f : kPiOver4;
-  frame_info.radian_step = k2Pi / vertices_per_geom;
-  frame_info.points_per_circle = points_per_circle;
-  frame_info.divisions_per_circle = vertices_per_geom;
-
-  PS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
-  PS::BindGeometryData(
-      cmd, {.buffer = buffer, .range = Range{0, total * sizeof(Point)}});
-  PS::BindPointData(cmd, points_data);
-
-  {
-    auto cmd_buffer = renderer.GetContext()->CreateCommandBuffer();
-    auto pass = cmd_buffer->CreateComputePass();
-    pass->SetGridSize(ISize(total, 1));
-    pass->SetThreadGroupSize(ISize(total, 1));
-
-    if (!pass->AddCommand(std::move(cmd)) || !pass->EncodeCommands() ||
-        !cmd_buffer->SubmitCommands()) {
-      return {};
-    }
-  }
-
   return {
       .type = PrimitiveType::kTriangle,
-      .vertex_buffer = {.vertex_buffer = {.buffer = buffer,
-                                          .range =
-                                              Range{0, total * sizeof(Point)}},
-                        .vertex_count = total,
-                        .index_type = IndexType::kNone},
+      .vertex_buffer = vtx_builder->CreateVertexBuffer(host_buffer),
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation(),
       .prevent_overdraw = false,
   };
 }
 
-GeometryResult PointFieldGeometry::GetPositionBufferCPU(
+GeometryResult PointFieldGeometry::GetPositionUVBuffer(
+    Rect texture_coverage,
+    Matrix effect_transform,
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass,
-    Scalar radius) {
+    RenderPass& pass) {
+  if (renderer.GetDeviceCapabilities().SupportsCompute()) {
+    return GetPositionBufferGPU(renderer, entity, pass, texture_coverage,
+                                effect_transform);
+  }
+
+  auto vtx_builder = GetPositionBufferCPU(renderer, entity, pass);
+  if (!vtx_builder.has_value()) {
+    return {};
+  }
+  auto uv_vtx_builder = ComputeUVGeometryCPU(
+      vtx_builder.value(), {0, 0}, texture_coverage.size, effect_transform);
+
+  auto& host_buffer = pass.GetTransientsBuffer();
+  return {
+      .type = PrimitiveType::kTriangle,
+      .vertex_buffer = uv_vtx_builder.CreateVertexBuffer(host_buffer),
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
+      .prevent_overdraw = false,
+  };
+}
+
+std::optional<VertexBufferBuilder<SolidFillVertexShader::PerVertexData>>
+PointFieldGeometry::GetPositionBufferCPU(const ContentContext& renderer,
+                                         const Entity& entity,
+                                         RenderPass& pass) {
+  if (radius_ < 0.0) {
+    return std::nullopt;
+  }
+  auto determinant = entity.GetTransformation().GetDeterminant();
+  if (determinant == 0) {
+    return std::nullopt;
+  }
+
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar radius = std::max(radius_, min_size);
+
   auto vertices_per_geom = ComputeCircleDivisions(
       entity.GetTransformation().GetMaxBasisLength() * radius, round_);
   auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
   auto total = points_per_circle * points_.size();
-  auto& host_buffer = pass.GetTransientsBuffer();
   auto radian_start = round_ ? 0.0f : 0.785398f;
   auto radian_step = k2Pi / vertices_per_geom;
 
@@ -936,23 +933,123 @@ GeometryResult PointFieldGeometry::GetPositionBufferCPU(
       vtx_builder.AppendVertex({pt2});
     }
   }
+  return vtx_builder;
+}
+
+GeometryResult PointFieldGeometry::GetPositionBufferGPU(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    std::optional<Rect> texture_coverage,
+    std::optional<Matrix> effect_transform) {
+  FML_DCHECK(renderer.GetDeviceCapabilities().SupportsCompute());
+  if (radius_ < 0.0) {
+    return {};
+  }
+  auto determinant = entity.GetTransformation().GetDeterminant();
+  if (determinant == 0) {
+    return {};
+  }
+
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar radius = std::max(radius_, min_size);
+
+  auto vertices_per_geom = ComputeCircleDivisions(
+      entity.GetTransformation().GetMaxBasisLength() * radius, round_);
+
+  auto points_per_circle = 3 + (vertices_per_geom - 3) * 3;
+  auto total = points_per_circle * points_.size();
+
+  auto cmd_buffer = renderer.GetContext()->CreateCommandBuffer();
+  auto compute_pass = cmd_buffer->CreateComputePass();
+  auto& host_buffer = compute_pass->GetTransientsBuffer();
+
+  auto points_data =
+      host_buffer.Emplace(points_.data(), points_.size() * sizeof(Point),
+                          DefaultUniformAlignment());
+
+  DeviceBufferDescriptor buffer_desc;
+  buffer_desc.size = total * sizeof(Point);
+  buffer_desc.storage_mode = StorageMode::kDevicePrivate;
+
+  auto geometry_buffer = renderer.GetContext()
+                             ->GetResourceAllocator()
+                             ->CreateBuffer(buffer_desc)
+                             ->AsBufferView();
+
+  BufferView output;
+  {
+    using PS = PointsComputeShader;
+    ComputeCommand cmd;
+    cmd.label = "Points Geometry";
+    cmd.pipeline = renderer.GetPointComputePipeline();
+
+    PS::FrameInfo frame_info;
+    frame_info.count = points_.size();
+    frame_info.radius = radius;
+    frame_info.radian_start = round_ ? 0.0f : kPiOver4;
+    frame_info.radian_step = k2Pi / vertices_per_geom;
+    frame_info.points_per_circle = points_per_circle;
+    frame_info.divisions_per_circle = vertices_per_geom;
+
+    PS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+    PS::BindGeometryData(cmd, geometry_buffer);
+    PS::BindPointData(cmd, points_data);
+
+    if (!compute_pass->AddCommand(std::move(cmd))) {
+      return {};
+    }
+    output = geometry_buffer;
+  }
+
+  if (texture_coverage.has_value() && effect_transform.has_value()) {
+    DeviceBufferDescriptor buffer_desc;
+    buffer_desc.size = total * sizeof(Vector4);
+    buffer_desc.storage_mode = StorageMode::kDevicePrivate;
+
+    auto geometry_uv_buffer = renderer.GetContext()
+                                  ->GetResourceAllocator()
+                                  ->CreateBuffer(buffer_desc)
+                                  ->AsBufferView();
+
+    using UV = UvComputeShader;
+
+    ComputeCommand cmd;
+    cmd.label = "UV Geometry";
+    cmd.pipeline = renderer.GetUvComputePipeline();
+
+    UV::FrameInfo frame_info;
+    frame_info.count = total;
+    frame_info.effect_transform = effect_transform.value();
+    frame_info.texture_origin = {0, 0};
+    frame_info.texture_size = Vector2(texture_coverage.value().size);
+
+    UV::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
+    UV::BindGeometryData(cmd, geometry_buffer);
+    UV::BindGeometryUVData(cmd, geometry_uv_buffer);
+
+    if (!compute_pass->AddCommand(std::move(cmd))) {
+      return {};
+    }
+    output = geometry_uv_buffer;
+  }
+
+  compute_pass->SetGridSize(ISize(total, 1));
+  compute_pass->SetThreadGroupSize(ISize(total, 1));
+
+  if (!compute_pass->EncodeCommands() || !cmd_buffer->SubmitCommands()) {
+    return {};
+  }
 
   return {
       .type = PrimitiveType::kTriangle,
-      .vertex_buffer = vtx_builder.CreateVertexBuffer(host_buffer),
+      .vertex_buffer = {.vertex_buffer = output,
+                        .vertex_count = total,
+                        .index_type = IndexType::kNone},
       .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
                    entity.GetTransformation(),
       .prevent_overdraw = false,
   };
-}
-
-GeometryResult PointFieldGeometry::GetPositionUVBuffer(
-    Rect texture_coverage,
-    Matrix effect_transform,
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) {
-  FML_UNREACHABLE();
 }
 
 /// @brief Compute the number of vertices to divide each circle into.

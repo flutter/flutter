@@ -291,10 +291,17 @@ class PointFieldGeometry : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
-  GeometryResult GetPositionBufferCPU(const ContentContext& renderer,
-                                      const Entity& entity,
-                                      RenderPass& pass,
-                                      Scalar radius);
+  GeometryResult GetPositionBufferGPU(
+      const ContentContext& renderer,
+      const Entity& entity,
+      RenderPass& pass,
+      std::optional<Rect> texture_coverage = std::nullopt,
+      std::optional<Matrix> effect_transform = std::nullopt);
+
+  std::optional<VertexBufferBuilder<SolidFillVertexShader::PerVertexData>>
+  GetPositionBufferCPU(const ContentContext& renderer,
+                       const Entity& entity,
+                       RenderPass& pass);
 
   std::vector<Point> points_;
   Scalar radius_;
