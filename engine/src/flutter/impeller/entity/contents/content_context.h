@@ -53,6 +53,7 @@
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/tiled_texture_fill.vert.h"
+#include "impeller/entity/uv.comp.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.vert.h"
@@ -278,6 +279,7 @@ using FramebufferBlendSoftLightPipeline =
 
 /// Geometry Pipelines
 using PointsComputeShaderPipeline = ComputePipelineBuilder<PointsComputeShader>;
+using UvComputeShaderPipeline = ComputePipelineBuilder<UvComputeShader>;
 
 /// Pipeline state configuration.
 ///
@@ -670,6 +672,12 @@ class ContentContext {
     return point_field_compute_pipelines_;
   }
 
+  std::shared_ptr<Pipeline<ComputePipelineDescriptor>> GetUvComputePipeline()
+      const {
+    FML_DCHECK(GetDeviceCapabilities().SupportsCompute());
+    return uv_compute_pipelines_;
+  }
+
   std::shared_ptr<Context> GetContext() const;
 
   std::shared_ptr<GlyphAtlasContext> GetGlyphAtlasContext(
@@ -794,6 +802,8 @@ class ContentContext {
       framebuffer_blend_softlight_pipelines_;
   mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>
       point_field_compute_pipelines_;
+  mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>
+      uv_compute_pipelines_;
 
   template <class TypedPipeline>
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
