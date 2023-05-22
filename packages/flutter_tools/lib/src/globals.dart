@@ -9,6 +9,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'artifacts.dart';
 import 'base/bot_detector.dart';
 import 'base/config.dart';
@@ -308,3 +309,9 @@ final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening
 // The official tool no longer allows non-null safe builds. This can be
 // overridden in other clients.
 NonNullSafeBuilds get nonNullSafeBuilds => context.get<NonNullSafeBuilds>() ?? NonNullSafeBuilds.notAllowed;
+
+/// Contains information about the JRE/JDK to use for Java-dependent operations.
+///
+/// A value of [null] indicates that no installation of java could be found on
+/// the host machine.
+Java? get java => context.get<Java>();
