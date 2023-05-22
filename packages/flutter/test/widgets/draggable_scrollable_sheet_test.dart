@@ -20,7 +20,9 @@ void main() {
     Key? containerKey,
     Key? stackKey,
     NotificationListenerCallback<ScrollNotification>? onScrollNotification,
+    NotificationListenerCallback<DraggableScrollableNotification>? onDraggableScrollableNotification,
     bool ignoreController = false,
+    bool shouldCloseOnMinExtent = true,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -42,19 +44,23 @@ void main() {
                 snap: snap,
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
+                shouldCloseOnMinExtent: shouldCloseOnMinExtent,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
-                    child: ColoredBox(
-                      key: containerKey,
-                      color: const Color(0xFFABCDEF),
-                      child: ListView.builder(
-                        controller: ignoreController ? null : scrollController,
-                        itemExtent: itemExtent,
-                        itemCount: itemCount,
-                        itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                    child: NotificationListener<DraggableScrollableNotification>(
+                      onNotification: onDraggableScrollableNotification,
+                      child:ColoredBox(
+                        key: containerKey,
+                        color: const Color(0xFFABCDEF),
+                        child: ListView.builder(
+                          controller: ignoreController ? null : scrollController,
+                          itemExtent: itemExtent,
+                          itemCount: itemCount,
+                          itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                        ),
                       ),
-                    ),
+                    )
                   );
                 },
               ),
@@ -862,6 +868,22 @@ void main() {
       UserScrollNotification,
     ];
     expect(notificationTypes, types);
+  });
+
+  testWidgets('Emits DraggableScrollableNotification with shouldCloseOnMinExtent set to non-default value', (WidgetTester tester) async {
+    DraggableScrollableNotification? receivedNotification;
+    await tester.pumpWidget(boilerplateWidget(
+      null,
+      shouldCloseOnMinExtent: false,
+      onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+        receivedNotification = notification;
+        return false;
+      },
+    ));
+
+    await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+    await tester.pumpAndSettle();
+    expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
   });
 
   testWidgets('Do not crash when remove the tree during animation.', (WidgetTester tester) async {
