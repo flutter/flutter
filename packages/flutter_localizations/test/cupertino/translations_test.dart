@@ -138,6 +138,19 @@ void main() {
     expect(localizations.timerPickerMinute(10), '10');
   });
 
+  testWidgets('Spot check Pashto', (WidgetTester tester) async {
+    const Locale locale = Locale('ps');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationZh>());
+    expect(localizations.alertDialogLabel, 'Alert');
+    expect(localizations.datePickerHourSemanticsLabel(1), '1 o'clock');
+    expect(localizations.datePickerHourSemanticsLabel(12), '12 o'clock');
+    expect(localizations.pasteButtonLabel, 'Paste');
+    expect(localizations.datePickerDateOrder, DatePickerDateOrder.ymd);
+    expect(localizations.selectAllButtonLabel, 'Select all');
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/53036.
   testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
     final File nbCupertinoArbFile = File(
