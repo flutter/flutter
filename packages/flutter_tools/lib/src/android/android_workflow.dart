@@ -75,74 +75,51 @@ class AndroidWorkflow implements Workflow {
 /// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
+    required Java? java,
     required AndroidSdk? androidSdk,
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
-    required ProcessManager processManager,
     required UserMessages userMessages,
-  }) : _androidSdk = androidSdk,
-       _androidStudio = androidStudio,
-       _fileSystem = fileSystem,
+  }) : _java = java,
+       _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
-       _processManager = processManager,
        _userMessages = userMessages,
        super('Android toolchain - develop for Android devices');
 
+  final Java? _java;
   final AndroidSdk? _androidSdk;
-  final AndroidStudio? _androidStudio;
-  final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
-  final ProcessManager _processManager;
   final UserMessages _userMessages;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
   String? _task;
 
-  /// Finds the semantic version anywhere in a text.
-  static final RegExp _javaVersionPattern = RegExp(r'(\d+)(\.(\d+)(\.(\d+))?)?');
-
-  /// `java -version` response is not only a number, but also includes other
-  /// information eg. `openjdk version "1.7.0_212"`.
-  /// This method extracts only the semantic version from that response.
-  static String? _extractJavaVersion(String? text) {
-    if (text == null || text.isEmpty) {
-      return null;
-    }
-    final Match? match = _javaVersionPattern.firstMatch(text);
-    if (match == null) {
-      return null;
-    }
-    return text.substring(match.start, match.end);
-  }
-
   /// Returns false if we cannot determine the Java version or if the version
   /// is older that the minimum allowed version of 1.8.
-  Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
+  Future<bool> _checkJavaVersion(List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
-      if (!_processManager.canRun(javaBinary)) {
-        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(javaBinary)));
+      if (_java?.binaryPath == null) {
+        messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
+        return false;
+      }
+      messages.add(ValidationMessage(_userMessages.androidJdkLocation(_java!.binaryPath)));
+      if (!_java!.canRun()) {
+        messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java!.binaryPath)));
         return false;
       }
       String? javaVersionText;
+      String? javaVersionNumber;
       try {
-        // TODO(andrewkolos): Use Java class to find version instead of using duplicate
-        // code. See https://github.com/flutter/flutter/issues/124252.
-        _logger.printTrace('java -version');
-        final ProcessResult result = await _processManager.run(<String>[javaBinary, '-version']);
-        if (result.exitCode == 0) {
-          final List<String> versionLines = (result.stderr as String).split('\n');
-          javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        }
+        javaVersionText = _java!.version?.longText;
+        javaVersionNumber = _java!.version?.number;
       } on Exception catch (error) {
         _logger.printTrace(error.toString());
       }
-      final Version? javaVersion = Version.parse(_extractJavaVersion(javaVersionText));
+      final Version? javaVersion = Version.parse(javaVersionNumber);
       if (javaVersionText == null || javaVersionText.isEmpty || javaVersion == null) {
         // Could not determine the java version.
         messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
@@ -234,22 +211,9 @@ class AndroidValidator extends DoctorValidator {
     }
 
     _task = 'Finding Java binary';
-    // Now check for the JDK.
-    final String? javaBinary = Java.find(
-      logger: _logger,
-      androidStudio: _androidStudio,
-      fileSystem: _fileSystem,
-      platform: _platform,
-      processManager: _processManager,
-    )?.binaryPath;
-    if (javaBinary == null) {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingJdk));
-      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
-    }
-    messages.add(ValidationMessage(_userMessages.androidJdkLocation(javaBinary)));
 
     // Check JDK version.
-    if (!await _checkJavaVersion(javaBinary, messages)) {
+    if (!await _checkJavaVersion(messages)) {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 

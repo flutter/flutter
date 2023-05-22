@@ -11,11 +11,11 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import 'android_studio.dart';
 
-const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
 const String _kJavaExecutable = 'java';
 
 /// Represents an installation of Java.
 class Java {
+
   Java({
     required this.javaHome,
     required this.binaryPath,
@@ -31,6 +31,15 @@ class Java {
       _processManager = processManager,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
+  /// Within the Java ecosystem, this environment variable is typically set
+  /// the install location of a Java Runtime Environment (JRE) or Java
+  /// Development Kit (JDK).
+  ///
+  /// Tools that depend on Java and need to find it will often check this
+  /// variable. If you are looking to set `JAVA_HOME` when stating a process,
+  /// consider using the [environment] instance property instead.
+  static String javaHomeEnvironmentVariable = 'JAVA_HOME';
+
   /// Finds the Java runtime environment that should be used for all java-dependent
   /// operations across the tool.
   ///
@@ -41,13 +50,6 @@ class Java {
   /// 3. the java binary found on PATH.
   ///
   /// Returns null if no java binary could be found.
-  // TODO(andrewkolos): To prevent confusion when debugging Android-related
-  // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
-  // this logic should be consistently followed by any Java-dependent operation
-  // across the  the tool (building Android apps, interacting with the Android SDK, etc.).
-  // Currently, this consistency is fragile since the logic used for building
-  // Android apps exists independently of this method.
-  // See https://github.com/flutter/flutter/issues/124252.
   static Java? find({
     required AndroidStudio? androidStudio,
     required Logger logger,
@@ -120,7 +122,7 @@ class Java {
   /// processes, such as Gradle or Android SDK tools (avdmanager, sdkmanager, etc.)
   Map<String, String> get environment {
     return <String, String>{
-      if (javaHome != null) _javaHomeEnvironmentVariable: javaHome!,
+      if (javaHome != null) javaHomeEnvironmentVariable: javaHome!,
       'PATH': _fileSystem.path.dirname(binaryPath) +
                         _os.pathVarSeparator +
                         _platform.environment['PATH']!,
@@ -156,7 +158,7 @@ String? _findJavaHome({
     return androidStudioJavaPath;
   }
 
-  final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+  final String? javaHomeEnv = platform.environment[Java.javaHomeEnvironmentVariable];
   if (javaHomeEnv != null) {
     return javaHomeEnv;
   }

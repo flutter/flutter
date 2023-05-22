@@ -78,7 +78,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           logger: logger,
           fileSystem: fs,
           platform: FakePlatform(environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           }),
           processManager: processManager,
         )!;

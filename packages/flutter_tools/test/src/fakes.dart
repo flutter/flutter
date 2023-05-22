@@ -627,7 +627,7 @@ class FakeJava extends Fake implements Java {
        number: '19.0.2',
       ),
       _environment = <String, String>{
-        if (javaHome != null) 'JAVA_HOME': javaHome,
+        if (javaHome != null) Java.javaHomeEnvironmentVariable: javaHome,
         'PATH': '/android-studio/jbr/bin',
       },
       _canRun = canRun;

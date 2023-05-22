@@ -83,7 +83,7 @@ Future<void> main() async {
           await exec(gradlewExecutable,
             <String>['clean'],
             environment: <String, String>{
-              'JAVA_HOME': javaHome,
+              Java.javaHomeEnvironmentVariable: javaHome,
             },
           );
         });
@@ -104,7 +104,7 @@ Future<void> main() async {
         await exec(gradlewExecutable,
           <String>['app:assembleDemoDebug'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           },
         );
       });
@@ -147,7 +147,7 @@ Future<void> main() async {
             'app:assembleDemoDebug',
           ],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           },
         );
       });
@@ -182,7 +182,7 @@ Future<void> main() async {
         await exec(gradlewExecutable,
           <String>['app:assembleDemoStaging'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           },
         );
       });
@@ -219,7 +219,7 @@ Future<void> main() async {
         await exec(gradlewExecutable,
           <String>['app:assembleDemoRelease'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           },
         );
       });
@@ -257,7 +257,7 @@ Future<void> main() async {
         await exec(gradlewExecutable,
           <String>['app:assembleDemoProd'],
           environment: <String, String>{
-            'JAVA_HOME': javaHome,
+            Java.javaHomeEnvironmentVariable: javaHome,
           },
         );
       });
