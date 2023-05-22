@@ -11,7 +11,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import 'android_studio.dart';
 
-const String _kJavaExecutable = 'java';
+const String _javaExecutable = 'java';
 
 /// Represents an installation of Java.
 class Java {
@@ -177,7 +177,7 @@ String? _findJavaBinary({
   }
 
   // Fallback to PATH based lookup.
-  return operatingSystemUtils.which(_kJavaExecutable)?.path;
+  return operatingSystemUtils.which(_javaExecutable)?.path;
 }
 
 // Returns a user visible String that says the tool failed to parse
