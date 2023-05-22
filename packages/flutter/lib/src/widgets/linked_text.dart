@@ -491,21 +491,26 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
 
   print('justin ranges $ranges.');
 
-  return _linkSpanRecurse(span, ranges, 0, onTap);
+  final (InlineSpan nextSpan, _) = _linkSpanRecurse(span, ranges, 0, onTap);
+  return nextSpan;
 }
 
-InlineSpan _linkSpanRecurse(InlineSpan span, List<TextRange> ranges, int index, UriStringCallback? onTap) {
+// index is the index of the start of `span` in the overall tree.
+(InlineSpan, List<TextRange>) _linkSpanRecurse(InlineSpan span, List<TextRange> ranges, int index, UriStringCallback? onTap) {
+  print('\n\njustin _linkSpanRecurse with index $index, ranges $ranges.');
   if (span is! TextSpan) {
-    return span;
+    // TODO(justinmc): Should actually remove span from ranges here.
+    return (span, ranges);
   }
 
   final TextSpan nextTree = TextSpan(
     style: span.style,
     children: <InlineSpan>[],
   );
+  List<TextRange> nextRanges = <TextRange>[...ranges];
+  int lastLinkEnd = index;
   if (span.text?.isNotEmpty ?? false) {
-    final String text = span.text!;
-    final int textEnd = index + text.length;
+    final int textEnd = index + span.text!.length;
     for (final TextRange range in ranges) {
       if (range.start >= textEnd) {
         // Because ranges is ordered, there are no more relevant ranges for this
@@ -513,29 +518,64 @@ InlineSpan _linkSpanRecurse(InlineSpan span, List<TextRange> ranges, int index, 
         break;
       }
       if (range.end <= index) {
-        // TODO(justinmc): After you fully use a range, you should remove it somehow.
+        // This range ends before this span and is therefore irrelevant to it.
+        // It should have been removed from ranges.
+        assert(false, 'Invalid ranges.');
+        nextRanges.removeAt(0);
         continue;
       }
       if (range.start > index) {
         // Add the unlinked text before the range.
         nextTree.children!.add(TextSpan(
-          text: text.substring(0, range.end - index),
+          text: span.text!.substring(
+            lastLinkEnd - index,
+            range.start - index,
+          ),
         ));
+        print('justin added to tree (plain text): |${nextTree.children!.last.toPlainText()}|');
       }
       // Add the link itself.
       final int linkStart = math.max(range.start, index);
-      final int linkEnd = math.min(range.end, textEnd);
+      lastLinkEnd = math.min(range.end, textEnd);
       nextTree.children!.add(InlineLink(
         onTap: onTap,
-        text: text.substring(linkStart - index, linkEnd - index),
+        text: span.text!.substring(linkStart - index, lastLinkEnd - index),
       ));
+      print('justin added to tree (link): |${nextTree.children!.last.toPlainText()}|');
+      if (range.end > textEnd) {
+        // If we only partially used this range, keep it in nextRanges, and stop
+        // iterating.
+        // TODO(justinmc): This assumes there aren't overlapping ranges.
+        break;
+      }
+      nextRanges.removeAt(0);
     }
-  }
-  if (span.children?.isNotEmpty ?? false) {
-    for (final InlineSpan child in span.children!) {
-      nextTree.children!.add(_linkSpanRecurse(child, ranges, index, onTap));
+
+    // Add any extra text after any ranges.
+    final String remainingText = span.text!.substring(lastLinkEnd - index);
+    if (remainingText.isNotEmpty) {
+      nextTree.children!.add(TextSpan(
+        text: remainingText,
+      ));
+      print('justin added to tree (plain text at end of ranges): |${nextTree.children!.last.toPlainText()}|');
     }
   }
 
-  return nextTree;
+  int nextIndex = index + (span.text?.length ?? 0);
+  if (span.children?.isNotEmpty ?? false) {
+    for (final InlineSpan child in span.children!) {
+      final (InlineSpan childSpan, List<TextRange> childRanges) = _linkSpanRecurse(
+        child,
+        nextRanges,
+        nextIndex,
+        onTap,
+      );
+      nextTree.children!.add(childSpan);
+      print('justin added to tree (child): |${nextTree.children!.last.toPlainText()}|');
+      nextRanges = childRanges;
+      nextIndex += child.toPlainText().length; // TODO(justinmc): Performance?
+    }
+  }
+
+  return (nextTree, nextRanges);
 }
