@@ -15,6 +15,23 @@ void main() {
   late String flutterBin;
   late Directory exampleAppDir;
 
+  ProcessResult runSync(List<String> cmd, [int expectedCode = 0]) {
+    final ProcessResult result = processManager.runSync(
+      cmd,
+      workingDirectory: tempDir.path,
+    );
+
+    if (result.exitCode != expectedCode) {
+      fail(
+        'Sub-process "${cmd.join(' ')}" exited with unexpected code ${result.exitCode}\n\n'
+         'stdout:\n${result.stdout}\n\n'
+         'stderr:\n${result.stderr}',
+      );
+    }
+
+    return result;
+  }
+
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_build_test.');
     flutterBin = fileSystem.path.join(
@@ -24,14 +41,17 @@ void main() {
     );
     exampleAppDir = tempDir.childDirectory('bbb').childDirectory('example');
 
-    processManager.runSync(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'create',
-      '--template=plugin',
-      '--platforms=android',
-      'bbb',
-    ], workingDirectory: tempDir.path);
+    runSync(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'create',
+        '--template=plugin',
+        '--platforms=android',
+        'bbb',
+        '-v',
+      ],
+    );
   });
 
   tearDown(() async {
@@ -48,14 +68,16 @@ void main() {
       // Ensure file is gone prior to configOnly running.
       await gradleFile.delete();
 
-      final ProcessResult result = processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'apk',
-        '--target-platform=android-arm',
-        '--config-only',
-      ], workingDirectory: exampleAppDir.path);
+      final ProcessResult result = runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'build',
+          'apk',
+          '--target-platform=android-arm',
+          '--config-only',
+        ],
+      );
 
       expect(gradleFile, exists);
       expect(result.stdout, contains(RegExp(r'Config complete')));
@@ -63,3 +85,5 @@ void main() {
     },
   );
 }
+
+
