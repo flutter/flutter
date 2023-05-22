@@ -766,6 +766,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         // This handles going forward (fling up) and inner list is scrolled past
         // zero. We want to grab the extra pixels immediately to shrink.
         extra = _outerPosition!.maxScrollExtent - _outerPosition!.pixels;
+        if (extra.abs() < precisionErrorTolerance) {
+          extra = 0.0;
+        }
         assert(extra >= 0.0);
         minRange = pixels;
         maxRange = pixels + extra;
