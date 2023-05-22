@@ -349,9 +349,9 @@ class IOSDeployDebugger {
           .transform<String>(const LineSplitter())
           .listen((String line) {
 
-        // TODO(@vashworth): Revert after https://github.com/flutter/flutter/issues/121231 is resolved.
+        // TODO(vashworth): Revert after https://github.com/flutter/flutter/issues/121231 is resolved.
         if (line.isNotEmpty) {
-          _logger.printTrace('[ios-deploy] $line');
+          _logger.printTrace(line);
         }
 
         _monitorIOSDeployFailure(line, _logger);
@@ -484,7 +484,7 @@ class IOSDeployDebugger {
           .transform<String>(const LineSplitter())
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
-        _logger.printTrace('[ios-deploy] error: $line');
+        _logger.printTrace('error: $line');
       });
       unawaited(_iosDeployProcess!.exitCode.then((int status) async {
         _logger.printTrace('ios-deploy exited with code $exitCode');
