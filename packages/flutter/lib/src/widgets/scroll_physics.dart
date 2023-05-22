@@ -878,7 +878,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
       // Hit top edge.
       return value - position.minScrollExtent;
     }
-    if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) {
+    if (position.pixels < position.maxScrollExtent && value - position.maxScrollExtent > precisionErrorTolerance) {
       // Hit bottom edge.
       return value - position.maxScrollExtent;
     }
