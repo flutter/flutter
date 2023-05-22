@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -207,6 +208,35 @@ All SDK package licenses accepted.
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
     expect(result, LicensesAccepted.all);
+  });
+
+  testWithoutContext('licensesAccepted sets environment for finding java', () async {
+    final Java java = FakeJava();
+    sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[sdk.sdkManagerPath!, '--licenses'],
+        stdout: 'All SDK package licenses accepted.',
+        environment: <String, String>{
+          'JAVA_HOME': java.javaHome!,
+          'PATH': fileSystem.path.join(java.javaHome!, 'bin'),
+        }
+      )
+    );
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      java: java,
+      androidSdk: sdk,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: BufferLogger.test(),
+      userMessages: UserMessages(),
+      androidStudio: FakeAndroidStudio(),
+    );
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
+
+    expect(licenseStatus, LicensesAccepted.all);
   });
 
   testWithoutContext('licensesAccepted works for some licenses accepted', () async {
