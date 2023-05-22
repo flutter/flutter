@@ -1679,6 +1679,43 @@ void main() {
 
     // No exception.
   });
+
+  testWidgets('Docked search should position itself correctly based on closest navigator', (WidgetTester tester) async {
+    const double rootSpacing = 100.0;
+
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget? child) {
+        return Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(rootSpacing),
+            child: child,
+          ),
+        );
+      },
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                controller.openView();
+              },
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
+  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
