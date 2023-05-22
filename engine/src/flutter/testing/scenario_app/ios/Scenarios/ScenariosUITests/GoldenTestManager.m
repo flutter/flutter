@@ -47,6 +47,9 @@ NSDictionary* launchArgsMap;
         @"--bogus-font-text" : @"bogus_font_text",
         @"--spawn-engine-works" : @"spawn_engine_works",
         @"--platform-view-cliprect-after-moved" : @"platform_view_cliprect_after_moved",
+        @"--two-platform-view-clip-rect" : @"two_platform_view_clip_rect",
+        @"--two-platform-view-clip-rrect" : @"two_platform_view_clip_rrect",
+        @"--two-platform-view-clip-path" : @"two_platform_view_clip_path",
       };
     });
     _identifier = launchArgsMap[launchArg];
