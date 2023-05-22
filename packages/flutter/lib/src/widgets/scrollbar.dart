@@ -1687,6 +1687,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
     _thumbDragging = true;
     final ScrollPosition position = _cachedController!.position;
+    position.didStartScroll();
     position.isScrollingNotifier.value = true;
   }
 
@@ -1721,6 +1722,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _thumbDragging = false;
     final ScrollPosition position = _cachedController!.position;
     position.isScrollingNotifier.value = false;
+    position.didEndScroll();
 
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
