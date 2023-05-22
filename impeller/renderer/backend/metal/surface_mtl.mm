@@ -179,6 +179,7 @@ bool SurfaceMTL::Present() const {
     }
   }
 
+#if ((FML_OS_MACOSX && !FML_OS_IOS) || FML_OS_IOS_SIMULATOR)
   // If a transaction is present, `presentDrawable` will present too early. And
   // so we wait on an empty command buffer to get scheduled instead, which
   // forces us to also wait for all of the previous command buffers in the queue
@@ -187,6 +188,8 @@ bool SurfaceMTL::Present() const {
       ContextMTL::Cast(context.get())->CreateMTLCommandBuffer();
   [command_buffer commit];
   [command_buffer waitUntilScheduled];
+#endif  // ((FML_OS_MACOSX && !FML_OS_IOS) || FML_OS_IOS_SIMULATOR)
+
   [drawable_ present];
 
   return true;
