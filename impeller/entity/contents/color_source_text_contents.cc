@@ -36,15 +36,14 @@ void ColorSourceTextContents::SetTextPosition(Point position) {
 bool ColorSourceTextContents::Render(const ContentContext& renderer,
                                      const Entity& entity,
                                      RenderPass& pass) const {
-  auto coverage = text_contents_->GetCoverage(entity);
-  if (!coverage.has_value()) {
+  auto text_bounds = text_contents_->GetTextFrameBounds();
+  if (!text_bounds.has_value()) {
     return true;
   }
-  auto transform = entity.GetTransformation();
 
   text_contents_->SetColor(Color::Black());
   color_source_contents_->SetGeometry(
-      Geometry::MakeRect(Rect::MakeSize(coverage->size)));
+      Geometry::MakeRect(Rect::MakeSize(text_bounds->size)));
 
   // offset the color source so it behaves as if it were drawn in the original
   // position.
@@ -53,10 +52,9 @@ bool ColorSourceTextContents::Render(const ContentContext& renderer,
   color_source_contents_->SetEffectTransform(effect_transform);
 
   auto new_texture = renderer.MakeSubpass(
-      "Text Color Blending", ISize::Ceil(coverage.value().size),
+      "Text Color Blending", ISize::Ceil(text_bounds.value().size),
       [&](const ContentContext& context, RenderPass& pass) {
         Entity sub_entity;
-        sub_entity.SetTransformation(transform);
         sub_entity.SetContents(text_contents_);
         sub_entity.SetBlendMode(BlendMode::kSource);
         if (!sub_entity.Render(context, pass)) {
@@ -71,9 +69,7 @@ bool ColorSourceTextContents::Render(const ContentContext& renderer,
     return false;
   }
 
-  auto dest_rect = Rect::MakeSize(new_texture->GetSize())
-                       .TransformBounds(transform.Invert())
-                       .Shift(position_);
+  auto dest_rect = Rect::MakeSize(new_texture->GetSize()).Shift(position_);
 
   auto texture_contents = TextureContents::MakeRect(dest_rect);
   texture_contents->SetTexture(new_texture);
