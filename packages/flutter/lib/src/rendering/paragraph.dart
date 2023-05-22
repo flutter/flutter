@@ -60,7 +60,7 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
   /// The [WidgetSpan] associated with this inline widget.
   ///
   /// This field is usually set by a [ParentDataWidget], and is typically not
-  /// null when [performLayout] is called.
+  /// null when `performLayout` is called.
   PlaceholderSpan? span;
 
   @override

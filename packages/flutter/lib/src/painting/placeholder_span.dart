@@ -21,7 +21,7 @@ import 'text_style.dart';
 /// of the placeholder.
 ///
 /// Flutter widgets such as [TextField], [Text] and [RichText] do not recognize
-/// [PlaceholderSpan] subclasses other than [WidgetSapn]. **Consider
+/// [PlaceholderSpan] subclasses other than [WidgetSpan]. **Consider
 /// implementing the [WidgetSpan] interface instead of the [Placeholder]
 /// interface.**
 ///
