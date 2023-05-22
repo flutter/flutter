@@ -2000,40 +2000,8 @@ void main() {
 
   });
 
-    // ignore: always_declare_return_types
   group('showModalBottomSheet modalBarrierDismissLabel', () {
-    testWidgets('Verify that modalBarrierDismissLabel is used if provided', (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-      const RouteSettings routeSettings = RouteSettings(name: 'route_name', arguments: 'route_argument');
-      const String customLabel = 'custom label';
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          key: scaffoldKey,
-          body: const Center(child: Text('body')),
-        ),
-      ));
-
-      late RouteSettings retrievedRouteSettings;
-
-      showModalBottomSheet<void>(
-        barrierLabel: customLabel,
-        context: scaffoldKey.currentContext!,
-        routeSettings: routeSettings,
-        builder: (BuildContext context) {
-          retrievedRouteSettings = ModalRoute.of(context)!.settings;
-          return const Text('BottomSheet');
-        },
-      );
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-
-      expect(retrievedRouteSettings, routeSettings);
-      });
-  });
-
-  group('showModalBottomSheet modalBarrierDismissLabel', () {
-    testWidgets('Verify that barrierLabel is used if provided',
+    testWidgets('Verify that modalBarrierDismissLabel is used if provided',
         (WidgetTester tester) async {
       final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
       const RouteSettings routeSettings =
