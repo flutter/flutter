@@ -36,8 +36,8 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     if (!cached_image_->image()) {
       return tonic::ToDart("Decoded image has been disposed");
     }
-    tonic::DartInvoke(callback_handle,
-                      {tonic::ToDart(cached_image_), tonic::ToDart(0)});
+    tonic::DartInvoke(callback_handle, {tonic::ToDart(cached_image_),
+                                        tonic::ToDart(0), tonic::ToDart("")});
     return Dart_Null();
   }
 
@@ -69,7 +69,8 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
       new fml::RefPtr<SingleFrameCodec>(this);
 
   decoder->Decode(
-      descriptor_, target_width_, target_height_, [raw_codec_ref](auto image) {
+      descriptor_, target_width_, target_height_,
+      [raw_codec_ref](auto image, auto decode_error) {
         std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
         fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));
 
@@ -97,9 +98,9 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
 
         // Invoke any callbacks that were provided before the frame was decoded.
         for (const DartPersistentValue& callback : codec->pending_callbacks_) {
-          tonic::DartInvoke(
-              callback.value(),
-              {tonic::ToDart(codec->cached_image_), tonic::ToDart(0)});
+          tonic::DartInvoke(callback.value(),
+                            {tonic::ToDart(codec->cached_image_),
+                             tonic::ToDart(0), tonic::ToDart(decode_error)});
         }
         codec->pending_callbacks_.clear();
       });
