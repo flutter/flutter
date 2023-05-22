@@ -16334,11 +16334,15 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     );
 
     await tester.tap(find.byType(EditableText));
-    await tester.enterText(find.byType(EditableText), '👨‍👩‍�');
+    // This malformed string is the result of removing the final code unit from
+    // the extended grapheme cluster "👨‍👩‍👦", so that the final
+    // surrogate pair (the "👦" emoji or "\uD83D\uDC66"), only has its high
+    // surrogate.
+    await tester.enterText(find.byType(EditableText), '👨‍👩‍\uD83D');
     await tester.pump();
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-    expect(state.textEditingValue.text, '👨‍👩‍�');
+    expect(state.textEditingValue.text, '👨‍👩‍\uD83D');
     expect(
       state.textEditingValue.selection,
       const TextSelection.collapsed(offset: 7),
@@ -16365,6 +16369,126 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
     expect(
       state.textEditingValue.selection,
       const TextSelection.collapsed(offset: 6),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('when inserting a malformed string that is a sequence of dangling high surrogates', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    // This string is the high surrogate from the emoji "👦" ("\uD83D\uDC66"),
+    // repeated.
+    await tester.enterText(find.byType(EditableText), '\uD83D\uD83D\uD83D\uD83D\uD83D\uD83D');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '\uD83D\uD83D\uD83D\uD83D\uD83D\uD83D');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    // Each dangling high surrogate is treated as a single character.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '\uD83D\uD83D\uD83D\uD83D\uD83D');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('when inserting a malformed string that is a sequence of dangling low surrogates', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(),
+          focusNode: focusNode,
+          obscureText: true,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            cut: true,
+            paste: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    // This string is the low surrogate from the emoji "👦" ("\uD83D\uDC66"),
+    // repeated.
+    await tester.enterText(find.byType(EditableText), '\uDC66\uDC66\uDC66\uDC66\uDC66\uDC66');
+    await tester.pump();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textEditingValue.text, '\uDC66\uDC66\uDC66\uDC66\uDC66\uDC66');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    // Each dangling high surrogate is treated as a single character.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 6),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+    await tester.pump();
+    expect(state.textEditingValue.text, '\uDC66\uDC66\uDC66\uDC66\uDC66');
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 5),
     );
   },
     skip: kIsWeb, // [intended]
