@@ -15,25 +15,20 @@ class ScrollNotificationObserverApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      // For demonstration purposes, this sample excludes
-      // the Scaffold as it has its own ScrollNotificationObserver.
-      home: Material(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'ScrollNotificationObserver Sample',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ),
-            const Expanded(
-              child: ScrollNotificationObserver(
-                child: ScrollNotificationObserverExample(),
-              ),
-            ),
-          ],
+      // The Scaffold widget contains a [ScrollNotificationObserver].
+      // This is used by [AppBar] for its scrolled under behavior.
+      //
+      // We can use [ScrollNotificationObserver.maybeOf] to get the
+      // state of this [ScrollNotificationObserver] from descendants
+      // of the Scaffold widget.
+      //
+      // If you're not using a [Scaffold] widget, use the [ScrollNotificationObserver]
+      // directly to notify its descendants of scroll notifications.
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('ScrollNotificationObserver Sample'),
         ),
+        body: const ScrollNotificationObserverExample(),
       ),
     );
   }
@@ -56,8 +51,9 @@ class _ScrollNotificationObserverExampleState extends State<ScrollNotificationOb
     super.didChangeDependencies();
     // Remove any previous listener.
     _scrollNotificationObserver?.removeListener(_handleScrollNotification);
-    // Add a new listener.
+    // Get the ScrollNotificationObserverState from the Scaffold widget.
     _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
+    // Add a new listener.
     _scrollNotificationObserver?.addListener(_handleScrollNotification);
   }
 
