@@ -247,6 +247,9 @@ class _TextLinkerSingle {
   }
 }
 
+// TODO(justinmc): This isn't ideal for linking arbitrary text to arbitrary urls.
+// That's probably ok; the best way to do that is just with a TextSpan tree, in
+// which case you don't need to linkify it.
 // TODO(justinmc): Think about which links need to go here vs. on InlineTextLinker.
 /// Specifies a way to find and style parts of a String.
 class TextLinker {
@@ -408,7 +411,7 @@ class InlineLinkedText extends TextSpan {
   static LinkBuilder getDefaultLinkBuilder([UriStringCallback? onTap]) {
     return (String linkText) {
       return InlineLink(
-        onTap: onTap,
+        onTap: () => onTap?.call(linkText),
         text: linkText,
       );
     };
@@ -430,23 +433,21 @@ class InlineLink extends TextSpan {
       color: Color(0xff0000ff),
       decoration: TextDecoration.underline,
     ),
-    UriStringCallback? onTap,
+    VoidCallback? onTap,
   }) : super(
     style: style,
     mouseCursor: SystemMouseCursors.click,
     text: text,
-    recognizer: (TapGestureRecognizer()..onTap = () {
-      if (onTap == null) {
-        return;
-      }
-      return onTap(text);
-    }),
+    recognizer: onTap == null ? null : (TapGestureRecognizer()..onTap = onTap),
   );
 }
 
-bool visit(InlineSpan span) {
-  print('justin visiting span ${span.toPlainText()}');
-  return true;
+Iterable<(TextRange, String)> _getRanges(RangesFinder rangesFinder, String text) {
+  final Iterable<TextRange> ranges = _cleanRanges(rangesFinder(text));
+
+  return ranges.map((TextRange range) {
+    return (range, text.substring(range.start, range.end));
+  });
 }
 
 List<TextRange> _cleanRanges(Iterable<TextRange> ranges) {
@@ -487,7 +488,8 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
   // Flatten the tree and find all ranges in the flat String. This must be done
   // cumulatively, and not during a traversal, because matches may occur across
   // span boundaries.
-  final List<TextRange> ranges = _cleanRanges(rangesFinder(span.toPlainText()));
+  final String spanText = span.toPlainText();
+  final Iterable<(TextRange, String)> ranges = _getRanges(rangesFinder, spanText);
 
   print('justin ranges $ranges.');
 
@@ -496,7 +498,7 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
 }
 
 // index is the index of the start of `span` in the overall tree.
-(InlineSpan, List<TextRange>) _linkSpanRecurse(InlineSpan span, List<TextRange> ranges, int index, UriStringCallback? onTap) {
+(InlineSpan, Iterable<(TextRange, String)>) _linkSpanRecurse(InlineSpan span, Iterable<(TextRange, String)> ranges, int index, UriStringCallback? onTap) {
   print('\n\njustin _linkSpanRecurse with index $index, ranges $ranges.');
   if (span is! TextSpan) {
     // TODO(justinmc): Should actually remove span from ranges here.
@@ -507,11 +509,11 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
     style: span.style,
     children: <InlineSpan>[],
   );
-  List<TextRange> nextRanges = <TextRange>[...ranges];
+  List<(TextRange, String)> nextRanges = <(TextRange, String)>[...ranges];
   int lastLinkEnd = index;
   if (span.text?.isNotEmpty ?? false) {
     final int textEnd = index + span.text!.length;
-    for (final TextRange range in ranges) {
+    for (final (TextRange range, String rangeText) in ranges) {
       if (range.start >= textEnd) {
         // Because ranges is ordered, there are no more relevant ranges for this
         // text.
@@ -537,15 +539,17 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
       // Add the link itself.
       final int linkStart = math.max(range.start, index);
       lastLinkEnd = math.min(range.end, textEnd);
+      // TODO(justinmc): So partially styled links work by separately linking
+      // two different TextSpans. Is that ok for things like Semantics?
       nextTree.children!.add(InlineLink(
-        onTap: onTap,
+        onTap: () => onTap?.call(rangeText),
         text: span.text!.substring(linkStart - index, lastLinkEnd - index),
       ));
       print('justin added to tree (link): |${nextTree.children!.last.toPlainText()}|');
       if (range.end > textEnd) {
-        // If we only partially used this range, keep it in nextRanges, and stop
-        // iterating.
-        // TODO(justinmc): This assumes there aren't overlapping ranges.
+        // If we only partially used this range, keep it in nextRanges. Since
+        // overlapping ranges have been removed, this must be the last relevant
+        // range for this span.
         break;
       }
       nextRanges.removeAt(0);
@@ -564,7 +568,7 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
   int nextIndex = index + (span.text?.length ?? 0);
   if (span.children?.isNotEmpty ?? false) {
     for (final InlineSpan child in span.children!) {
-      final (InlineSpan childSpan, List<TextRange> childRanges) = _linkSpanRecurse(
+      final (InlineSpan childSpan, Iterable<(TextRange, String)> childRanges) = _linkSpanRecurse(
         child,
         nextRanges,
         nextIndex,
@@ -572,7 +576,7 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
       );
       nextTree.children!.add(childSpan);
       print('justin added to tree (child): |${nextTree.children!.last.toPlainText()}|');
-      nextRanges = childRanges;
+      nextRanges = childRanges.toList();
       nextIndex += child.toPlainText().length; // TODO(justinmc): Performance?
     }
   }
