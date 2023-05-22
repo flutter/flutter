@@ -450,10 +450,11 @@ class IOSSimulator extends Device {
       platformArgs,
     );
 
+    final DeviceLogReader deviceLogReader = getLogReader(app: package);
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(app: package),
+        deviceLogReader,
         ipv6: ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -461,7 +462,13 @@ class IOSSimulator extends Device {
       );
     }
 
-    final Future<Uri?>? futureDeviceUri = vmServiceDiscovery?.uri;
+    // When the ProtocolDiscovery above is created, it starts listening to the
+    // `deviceLogReader`. On listen, the `deviceLogReader` launches a command
+    // to get the device logs.
+    // Wait for that command to finish starting before launching the app.
+    if (deviceLogReader is _IOSSimulatorLogReader) {
+      await deviceLogReader.deviceLogStarted.future;
+    }
 
     // Launch the updated application in the simulator.
     try {
@@ -491,8 +498,7 @@ class IOSSimulator extends Device {
     globals.printTrace('Waiting for VM Service port to be available...');
 
     try {
-
-      final Uri? deviceUri = await futureDeviceUri;
+      final Uri? deviceUri = await vmServiceDiscovery?.uri;
       if (deviceUri != null) {
         return LaunchResult.succeeded(vmServiceUri: deviceUri);
       }
@@ -703,6 +709,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   @override
   String get name => device.name;
 
+  Completer<void> deviceLogStarted = Completer<void>();
+
   Future<void> _start() async {
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
@@ -724,6 +732,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       _systemProcess?.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSystemLine);
       _systemProcess?.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_onSystemLine);
     }
+
+    deviceLogStarted.complete();
 
     // We don't want to wait for the process or its callback. Best effort
     // cleanup in the callback.
@@ -875,6 +885,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   void _stop() {
     _deviceProcess?.kill();
     _systemProcess?.kill();
+    deviceLogStarted = Completer<void>();
   }
 
   @override

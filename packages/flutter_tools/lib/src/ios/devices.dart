@@ -507,7 +507,6 @@ class IOSDevice extends Device {
         );
       }
 
-      final Future<Uri?>? futureDeviceUri = vmServiceDiscovery?.uri;
       if (iosDeployDebugger == null) {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
@@ -557,7 +556,7 @@ class IOSDevice extends Device {
       Uri? localUri;
       if (isWirelesslyConnected) {
         // Wait for Dart VM Service to start up.
-        final Uri? serviceURL = await futureDeviceUri;
+        final Uri? serviceURL = await vmServiceDiscovery?.uri;
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
           await dispose();
@@ -586,7 +585,7 @@ class IOSDevice extends Device {
 
         mDNSLookupTimer.cancel();
       } else {
-        localUri = await futureDeviceUri;
+        localUri = await vmServiceDiscovery?.uri;
       }
       timer.cancel();
       if (localUri == null) {
