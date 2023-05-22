@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -691,7 +692,11 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerTopRight = tester.getTopRight(divider);
       expect(subHeaderTextTopLeft.dx, dividerTopRight.dx + 24.0);
-      expect(subHeaderTextTopLeft.dy, dialogTopLeft.dy + 16.0);
+      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+      // A bug in the HTML renderer and/or Chrome 96+ causes a
+      // discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+      expect(subHeaderTextTopLeft.dy,  dialogTopLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);
@@ -705,7 +710,7 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dividerTopRight.dx);
-      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
+      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
 
       // Test month navigation icons position.
       final Finder previousMonthButton = find.widgetWithIcon(IconButton, Icons.chevron_left);
@@ -765,7 +770,11 @@ void main() {
       final Offset headerTextTextTopLeft = tester.getTopLeft(headerText);
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(headerTextTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0);
+      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+      // A bug in the HTML renderer and/or Chrome 96+ causes a
+      // discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+      expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0 - (hasIssue99933 ? 1.0 : 0.0));
 
       // Test switch button position.
       final Finder switchButtonM3 = find.widgetWithIcon(IconButton, Icons.edit_outlined);
@@ -785,7 +794,7 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerBottomLeft = tester.getBottomLeft(divider);
       expect(subHeaderTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0);
+      expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);
@@ -808,16 +817,16 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dialogTopLeft.dx);
-      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
+      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
 
       // Test action buttons position.
       final Offset dialogBottomRight = tester.getBottomRight(find.byType(AnimatedContainer));
       final Offset okButtonTopRight = tester.getTopRight(find.widgetWithText(TextButton, 'OK'));
       final Offset cancelButtonTopRight = tester.getTopRight(find.widgetWithText(TextButton, 'Cancel'));
       final Offset calendarPageViewBottomRight = tester.getBottomRight(calendarPageView);
+      final Offset okButtonTopLeft = tester.getTopLeft(find.widgetWithText(TextButton, 'OK'));
       expect(okButtonTopRight.dx, dialogBottomRight.dx - 8);
       expect(okButtonTopRight.dy, calendarPageViewBottomRight.dy + 2);
-      final Offset okButtonTopLeft = tester.getTopLeft(find.widgetWithText(TextButton, 'OK'));
       expect(cancelButtonTopRight.dx, okButtonTopLeft.dx - 8);
     });
 
