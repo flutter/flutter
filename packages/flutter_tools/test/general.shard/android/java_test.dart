@@ -106,8 +106,8 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           processManager: processManager,
         )!;
 
-        expect(java.binaryPath, os.which('java')!.path);
         expect(java.javaHome, isNull);
+        expect(java.binaryPath, os.which('java')!.path);
       });
 
       testWithoutContext('returns null if no java could be found', () {

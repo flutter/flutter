@@ -2182,7 +2182,7 @@ class _FailingImageProvider extends ImageProvider<int> {
     this.failOnLoad = false,
     required this.throws,
     required this.image,
-  }) : assert(failOnLoad == true || failOnObtainKey == true);
+  }) : assert(failOnLoad || failOnObtainKey);
 
   final bool failOnObtainKey;
   final bool failOnLoad;

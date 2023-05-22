@@ -1172,7 +1172,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
-      && buildMode.isPrecompiled == true
+      && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
 
     final String? bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)

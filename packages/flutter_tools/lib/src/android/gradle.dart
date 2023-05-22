@@ -977,6 +977,22 @@ File findBundleFile(FlutterProject project, BuildInfo buildInfo, Logger logger, 
     fileCandidates.add(getBundleDirectory(project)
         .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
         .childFile('app-${buildInfo.uncapitalizedFlavor}-${buildInfo.modeName}.aab'));
+
+    // The Android Gradle plugin uses kebab-case and lowercases the first character of the flavor name
+    // when multiple flavor dimensions are used:
+    // e.g.
+    // flavorDimensions "dimension1","dimension2"
+    // productFlavors {
+    //   foo {
+    //     dimension "dimension1"
+    //   }
+    //   bar {
+    //     dimension "dimension2"
+    //   }
+    // }
+    fileCandidates.add(getBundleDirectory(project)
+        .childDirectory('${buildInfo.uncapitalizedFlavor}${camelCase('_${buildInfo.modeName}')}')
+        .childFile('app-${kebabCase(buildInfo.uncapitalizedFlavor!)}-${buildInfo.modeName}.aab'));
   }
   for (final File bundleFile in fileCandidates) {
     if (bundleFile.existsSync()) {

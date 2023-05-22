@@ -303,7 +303,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       return;
     }
     _OverlayEntryLocation? candidate = reversed ? children.last : children.first;
-    while(candidate != null) {
+    while (candidate != null) {
       final RenderBox? renderBox = candidate._overlayChildRenderBox;
       candidate = reversed ? candidate.previous : candidate.next;
       if (renderBox != null) {
@@ -912,7 +912,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
       final Iterator<RenderBox>? iterator = childParentData.paintOrderIterator;
       if (iterator != null) {
-        while(iterator.moveNext()) {
+        while (iterator.moveNext()) {
           iterator.current.attach(owner);
         }
       }

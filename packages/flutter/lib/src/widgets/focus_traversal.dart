@@ -35,13 +35,15 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
   return target;
 }
 
-void _focusAndEnsureVisible(
-  FocusNode node, {
-  ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-}) {
-  node.requestFocus();
-  Scrollable.ensureVisible(node.context!, alignment: 1.0, alignmentPolicy: alignmentPolicy);
-}
+/// Signature for the callback that's called when a traversal policy
+/// requests focus.
+typedef TraversalRequestFocusCallback = void Function(
+    FocusNode node, {
+    ScrollPositionAlignmentPolicy? alignmentPolicy,
+    double? alignment,
+    Duration? duration,
+    Curve? curve,
+});
 
 // A class to temporarily hold information about FocusTraversalGroups when
 // sorting their contents.
@@ -150,7 +152,39 @@ enum TraversalEdgeBehavior {
 abstract class FocusTraversalPolicy with Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const FocusTraversalPolicy();
+  ///
+  /// {@template flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
+  /// The `requestFocusCallback` can be used to override the default behavior
+  /// of the focus requests. If `requestFocusCallback`
+  /// is null, it defaults to [FocusTraversalPolicy.defaultTraversalRequestFocusCallback].
+  /// {@endtemplate}
+  const FocusTraversalPolicy({
+    TraversalRequestFocusCallback? requestFocusCallback
+  }) : requestFocusCallback = requestFocusCallback ?? defaultTraversalRequestFocusCallback;
+
+  /// The callback used to move the focus from one focus node to another when
+  /// traversing them using a keyboard. By default it requests focus on the next
+  /// node and ensures the node is visible if it's in a scrollable.
+  final TraversalRequestFocusCallback requestFocusCallback;
+
+  /// The default value for [requestFocusCallback].
+  /// Requests focus from `node` and ensures the node is visible
+  /// by calling [Scrollable.ensureVisible].
+  static void defaultTraversalRequestFocusCallback(
+    FocusNode node, {
+    ScrollPositionAlignmentPolicy? alignmentPolicy,
+    double? alignment,
+    Duration? duration,
+    Curve? curve,
+  }) {
+    node.requestFocus();
+    Scrollable.ensureVisible(
+      node.context!, alignment: alignment ?? 1.0,
+      alignmentPolicy: alignmentPolicy ?? ScrollPositionAlignmentPolicy.explicit,
+      duration: duration ?? Duration.zero,
+      curve: curve ?? Curves.ease,
+    );
+  }
 
   /// Returns the node that should receive focus if focus is traversing
   /// forwards, and there is no current focus.
@@ -423,7 +457,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     if (focusedChild == null) {
       final FocusNode? firstFocus = forward ? findFirstFocus(currentNode) : findLastFocus(currentNode);
       if (firstFocus != null) {
-        _focusAndEnsureVisible(
+        requestFocusCallback(
           firstFocus,
           alignmentPolicy: forward ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
         );
@@ -442,7 +476,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
           focusedChild!.unfocus();
           return false;
         case TraversalEdgeBehavior.closedLoop:
-          _focusAndEnsureVisible(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
+          requestFocusCallback(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
           return true;
       }
     }
@@ -452,7 +486,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
           focusedChild!.unfocus();
           return false;
         case TraversalEdgeBehavior.closedLoop:
-          _focusAndEnsureVisible(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
+          requestFocusCallback(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);
           return true;
       }
     }
@@ -461,7 +495,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     FocusNode? previousNode;
     for (final FocusNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
-        _focusAndEnsureVisible(
+        requestFocusCallback(
           node,
           alignmentPolicy: forward ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd : ScrollPositionAlignmentPolicy.keepVisibleAtStart,
         );
@@ -771,7 +805,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           case TraversalDirection.down:
             alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
         }
-        _focusAndEnsureVisible(
+        requestFocusCallback(
           lastNode,
           alignmentPolicy: alignmentPolicy,
         );
@@ -850,13 +884,13 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       switch (direction) {
         case TraversalDirection.up:
         case TraversalDirection.left:
-          _focusAndEnsureVisible(
+          requestFocusCallback(
             firstFocus,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
         case TraversalDirection.right:
         case TraversalDirection.down:
-          _focusAndEnsureVisible(
+          requestFocusCallback(
             firstFocus,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
@@ -927,13 +961,13 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
       switch (direction) {
         case TraversalDirection.up:
         case TraversalDirection.left:
-          _focusAndEnsureVisible(
+          requestFocusCallback(
             found,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
           );
         case TraversalDirection.down:
         case TraversalDirection.right:
-          _focusAndEnsureVisible(
+          requestFocusCallback(
             found,
             alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
           );
@@ -962,6 +996,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
 class WidgetOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  /// Constructs a traversal policy that orders widgets for keyboard traversal
+  /// based on the widget hierarchy order.
+  ///
+  /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
+  WidgetOrderTraversalPolicy({super.requestFocusCallback});
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) => descendants;
 }
@@ -1129,6 +1168,11 @@ class _ReadingOrderDirectionalGroupData with Diagnosticable {
 ///  * [OrderedTraversalPolicy], a policy that describes the order
 ///    explicitly using [FocusTraversalOrder] widgets.
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
+  /// Constructs a traversal policy that orders the widgets in "reading order".
+  ///
+  /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
+  ReadingOrderTraversalPolicy({super.requestFocusCallback});
+
   // Collects the given candidates into groups by directionality. The candidates
   // have already been sorted as if they all had the directionality of the
   // nearest Directionality ancestor.
@@ -1418,7 +1462,7 @@ class OrderedTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusT
   /// based on an explicit order.
   ///
   /// If [secondary] is null, it will default to [ReadingOrderTraversalPolicy].
-  OrderedTraversalPolicy({this.secondary});
+  OrderedTraversalPolicy({this.secondary, super.requestFocusCallback});
 
   /// This is the policy that is used when a node doesn't have an order
   /// assigned, or when multiple nodes have orders which are identical.
@@ -1770,8 +1814,16 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 class RequestFocusIntent extends Intent {
   /// Creates an intent used with [RequestFocusAction].
   ///
-  /// The argument must not be null.
-  const RequestFocusIntent(this.focusNode);
+  /// The [focusNode] argument must not be null.
+  /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
+  const RequestFocusIntent(this.focusNode, {
+    TraversalRequestFocusCallback? requestFocusCallback
+  }) : requestFocusCallback = requestFocusCallback ?? FocusTraversalPolicy.defaultTraversalRequestFocusCallback;
+
+  /// The callback used to move the focus to the node [focusNode].
+  /// By default it requests focus on the node and ensures the node is visible
+  /// if it's in a scrollable.
+  final TraversalRequestFocusCallback requestFocusCallback;
 
   /// The [FocusNode] that is to be focused.
   final FocusNode focusNode;
@@ -1802,9 +1854,10 @@ class RequestFocusIntent extends Intent {
 ///
 /// See [FocusTraversalPolicy] for more information about focus traversal.
 class RequestFocusAction extends Action<RequestFocusIntent> {
+
   @override
   void invoke(RequestFocusIntent intent) {
-    _focusAndEnsureVisible(intent.focusNode);
+    intent.requestFocusCallback(intent.focusNode);
   }
 }
 
