@@ -1348,11 +1348,11 @@ void main() {
     // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
     expect(
       () => painter.paint(MockCanvas(), Offset.zero),
-      throwsA(isA<UnimplementedError>().having(
-        (UnimplementedError error) => error.message,
+      isNot(throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
         'message',
-        contains('drawParagraph'),
-      )),
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      ))),
     );
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
