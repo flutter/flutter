@@ -24,8 +24,7 @@ baz=qux
 
   group('Version', () {
     testWithoutContext('can parse and compare', () {
-      expect(Version.unknown.toString(), equals('unknown'));
-      expect(Version(null, null, null).toString(), equals('0'));
+      expect(Version(0, null, null).toString(), equals('0'));
       expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
       final Version v1 = Version.parse('1')!;
@@ -33,7 +32,7 @@ baz=qux
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
-      expect(v1, greaterThan(Version.unknown));
+      expect(v1, greaterThan(Version(0, 0, 0)));
 
       final Version v2 = Version.parse('1.2')!;
       expect(v2.major, equals(1));
@@ -119,6 +118,17 @@ baz=qux
       expect(snakeCase('AbC'), equals('ab_c'));
       expect(snakeCase('ABc'), equals('a_bc'));
       expect(snakeCase('ABC'), equals('a_b_c'));
+    });
+
+    testWithoutContext('kebabCase', () async {
+      expect(kebabCase('abc'), equals('abc'));
+      expect(kebabCase('abC'), equals('ab-c'));
+      expect(kebabCase('aBc'), equals('a-bc'));
+      expect(kebabCase('aBC'), equals('a-b-c'));
+      expect(kebabCase('Abc'), equals('abc'));
+      expect(kebabCase('AbC'), equals('ab-c'));
+      expect(kebabCase('ABc'), equals('a-bc'));
+      expect(kebabCase('ABC'), equals('a-b-c'));
     });
 
     testWithoutContext('sentenceCase', () async {

@@ -1450,7 +1450,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     try {
       await Future.wait(serveObservatoryRequests);
-    } on vm_service.RPCError catch(e) {
+    } on vm_service.RPCError catch (e) {
       globals.printWarning('Unable to enable Observatory: $e');
     }
   }

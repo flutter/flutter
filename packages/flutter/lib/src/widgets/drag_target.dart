@@ -885,6 +885,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _leaveAllEntered();
     _activeTarget = null;
     _entry!.remove();
+    _entry!.dispose();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
     onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);

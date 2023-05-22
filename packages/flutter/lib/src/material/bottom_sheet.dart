@@ -210,14 +210,13 @@ class BottomSheet extends StatefulWidget {
 
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
-  /// Typically a bottom sheet will cover the entire width of its
-  /// parent. Consider limiting the width by setting smaller constraints
-  /// for large screens.
-  ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null then the bottom sheet's size will be constrained
-  /// by its parent (usually a [Scaffold]).
+  /// is null and [ThemeData.useMaterial3] is true, then the bottom sheet
+  /// will have a max width of 640dp. If [ThemeData.useMaterial3] is false, then
+  /// the bottom sheet's size will be constrained by its parent
+  /// (usually a [Scaffold]). In this case, consider limiting the width by
+  /// setting smaller constraints for large screens.
   ///
   /// If constraints are specified (either in this property or in the
   /// theme), the bottom sheet will be aligned to the bottom-center of
@@ -325,7 +324,7 @@ class _BottomSheetState extends State<BottomSheet> {
   void _handleDragHandleHover(bool hovering) {
     if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
       setState(() {
-        if(hovering){
+        if (hovering){
           dragHandleMaterialState.add(MaterialState.hovered);
         }
         else{
@@ -361,7 +360,7 @@ class _BottomSheetState extends State<BottomSheet> {
       // Only add [GestureDetector] to the drag handle when the rest of the
       // bottom sheet is not draggable. If the whole bottom sheet is draggable,
       // no need to add it.
-      if(!widget.enableDrag) {
+      if (!widget.enableDrag) {
         dragHandle = GestureDetector(
           onVerticalDragStart: _handleDragStart,
           onVerticalDragUpdate: _handleDragUpdate,
@@ -880,14 +879,13 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
-  /// Typically a bottom sheet will cover the entire width of its
-  /// parent. Consider limiting the width by setting smaller constraints
-  /// for large screens.
-  ///
   /// If null, the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
-  /// is null, the bottom sheet's size will be constrained
-  /// by its parent (usually a [Scaffold]).
+  /// is null and [ThemeData.useMaterial3] is true, then the bottom sheet
+  /// will have a max width of 640dp. If [ThemeData.useMaterial3] is false, then
+  /// the bottom sheet's size will be constrained by its parent
+  /// (usually a [Scaffold]). In this case, consider limiting the width by
+  /// setting smaller constraints for large screens.
   ///
   /// If constraints are specified (either in this property or in the
   /// theme), the bottom sheet will be aligned to the bottom-center of
@@ -1331,6 +1329,9 @@ class _BottomSheetDefaultsM3 extends BottomSheetThemeData {
 
   @override
   Size? get dragHandleSize => const Size(32, 4);
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 640.0);
 }
 
 // END GENERATED TOKEN PROPERTIES - BottomSheet

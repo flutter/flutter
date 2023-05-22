@@ -228,7 +228,7 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
@@ -404,11 +404,11 @@ void main() {
 
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterNoSupportedDevices),
+          containsIgnoringWhitespace('No supported devices connected.'),
         );
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(userMessages.flutterFoundButUnsupportedDevices),
+          containsIgnoringWhitespace('The following devices were found, but are not supported by this project:'),
         );
         expect(
           testLogger.statusText,
@@ -831,7 +831,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with only iOS network device', () async {
+      testUsingContext('with only iOS wireless device', () async {
         final List<Device> devices = <Device>[
           FakeIOSDevice(
             connectionInterface: DeviceConnectionInterface.wireless,
@@ -875,7 +875,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('with both iOS usb and network devices', () async {
+      testUsingContext('with both iOS usb and wireless devices', () async {
         final List<Device> devices = <Device>[
           FakeIOSDevice(
             connectionInterface: DeviceConnectionInterface.wireless,
@@ -1278,10 +1278,10 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
     String? userIdentifier,
   }) async {
-    if (startAppSuccess == false) {
+    if (!startAppSuccess) {
       return LaunchResult.failed();
     }
-    if (startAppSuccess == true) {
+    if (startAppSuccess) {
       return LaunchResult.succeeded();
     }
     final String dartFlags = debuggingOptions.dartFlags;

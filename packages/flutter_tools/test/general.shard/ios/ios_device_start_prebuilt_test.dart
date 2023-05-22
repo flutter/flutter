@@ -67,8 +67,9 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 // The command used to actually launch the app and attach the debugger with args in debug.
 FakeCommand attachDebuggerCommand({
   IOSink? stdin,
+  String stdout = '(lldb)     run\nsuccess',
   Completer<void>? completer,
-  bool isNetworkDevice = false,
+  bool isWirelessDevice = false,
 }) {
   return FakeCommand(
     command: <String>[
@@ -82,9 +83,9 @@ FakeCommand attachDebuggerCommand({
       '--bundle',
       '/',
       '--debug',
-      if (!isNetworkDevice) '--no-wifi',
+      if (!isWirelessDevice) '--no-wifi',
       '--args',
-      if (isNetworkDevice)
+      if (isWirelessDevice)
         '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
       else
         '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
@@ -94,7 +95,7 @@ FakeCommand attachDebuggerCommand({
       'PATH': '/usr/bin:null',
       'DYLD_LIBRARY_PATH': '/path/to/libraries',
     },
-    stdout: '(lldb)     run\nsuccess',
+    stdout: stdout,
     stdin: stdin,
   );
 }
@@ -153,6 +154,54 @@ void main() {
 
     expect(launchResult.started, true);
     expect(launchResult.hasVmService, true);
+    expect(await device.stopApp(iosApp), false);
+  });
+
+  testWithoutContext('IOSDevice.startApp twice in a row where ios-deploy fails the first time', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Completer<void> completer = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      attachDebuggerCommand(
+        stdout: 'PROCESS_EXITED',
+      ),
+      attachDebuggerCommand(
+        stdout: '(lldb)     run\nsuccess\nThe Dart VM service is listening on http://127.0.0.1:456',
+        completer: completer,
+      ),
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+
+    device.portForwarder = const NoOpDevicePortForwarder();
+
+    final LaunchResult launchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+    );
+
+    expect(launchResult.started, false);
+    expect(launchResult.hasVmService, false);
+
+    final LaunchResult secondLaunchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      platformArgs: <String, dynamic>{},
+      discoveryTimeout: Duration.zero,
+    );
+    completer.complete();
+    expect(secondLaunchResult.started, true);
+    expect(secondLaunchResult.hasVmService, true);
     expect(await device.stopApp(iosApp), false);
   });
 
@@ -244,7 +293,7 @@ void main() {
     final CompleterIOSink stdin = CompleterIOSink();
     final Completer<void> completer = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      attachDebuggerCommand(stdin: stdin, completer: completer, isNetworkDevice: true),
+      attachDebuggerCommand(stdin: stdin, completer: completer, isWirelessDevice: true),
     ]);
     final IOSDevice device = setUpIOSDevice(
       processManager: processManager,
@@ -620,7 +669,7 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     bool usesIpv6 = false,
     int? hostVmservicePort,
     required int deviceVmservicePort,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
   }) async {
     return Uri.tryParse('http://0.0.0.0:1234');

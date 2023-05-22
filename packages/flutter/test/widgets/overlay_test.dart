@@ -1102,7 +1102,7 @@ void main() {
       bool visited = false;
       renderObject.visitChildren((RenderObject child) {
         visited = true;
-        switch(clip) {
+        switch (clip) {
           case Clip.none:
             expect(renderObject.describeApproximatePaintClip(child), null);
           case Clip.hardEdge:

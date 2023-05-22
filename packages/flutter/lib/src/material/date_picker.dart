@@ -71,6 +71,22 @@ const double _inputFormLandscapeHeight = 108.0;
 /// or [DatePickerEntryMode.input] (a text input field) mode.
 /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
 ///
+/// {@template flutter.material.date_picker.switchToInputEntryModeIcon}
+/// An optional [switchToInputEntryModeIcon] argument can be used to
+/// display a custom Icon in the corner of the dialog
+/// when [DatePickerEntryMode] is [DatePickerEntryMode.calendar]. Clicking on
+/// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.input].
+/// If null, `Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit)` is used.
+/// {@endtemplate}
+///
+/// {@template flutter.material.date_picker.switchToCalendarEntryModeIcon}
+/// An optional [switchToCalendarEntryModeIcon] argument can be used to
+/// display a custom Icon in the corner of the dialog
+/// when [DatePickerEntryMode] is [DatePickerEntryMode.input]. Clicking on
+/// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.calendar].
+/// If null, `Icon(Icons.calendar_today)` is used.
+/// {@endtemplate}
+///
 /// An optional [selectableDayPredicate] function can be passed in to only allow
 /// certain days for selection. If provided, only the days that
 /// [selectableDayPredicate] returns true for will be selectable. For example,
@@ -164,7 +180,9 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
-  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange
+  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
+  final Icon? switchToInputEntryModeIcon,
+  final Icon? switchToCalendarEntryModeIcon,
 }) async {
   initialDate = DateUtils.dateOnly(initialDate);
   firstDate = DateUtils.dateOnly(firstDate);
@@ -204,6 +222,8 @@ Future<DateTime?> showDatePicker({
     fieldLabelText: fieldLabelText,
     keyboardType: keyboardType,
     onDatePickerModeChange: onDatePickerModeChange,
+    switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+    switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
   );
 
   if (textDirection != null) {
@@ -261,7 +281,9 @@ class DatePickerDialog extends StatefulWidget {
     this.fieldLabelText,
     this.keyboardType,
     this.restorationId,
-    this.onDatePickerModeChange
+    this.onDatePickerModeChange,
+    this.switchToInputEntryModeIcon,
+    this.switchToCalendarEntryModeIcon,
   }) : initialDate = DateUtils.dateOnly(initialDate),
        firstDate = DateUtils.dateOnly(firstDate),
        lastDate = DateUtils.dateOnly(lastDate),
@@ -369,6 +391,12 @@ class DatePickerDialog extends StatefulWidget {
   /// user's preferred entry mode and uses it to initialize the
   /// `initialEntryMode` parameter the next time the date picker is shown.
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange;
+
+  /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
+  final Icon? switchToInputEntryModeIcon;
+
+  /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
+  final Icon? switchToCalendarEntryModeIcon;
 
   @override
   State<DatePickerDialog> createState() => _DatePickerDialogState();
@@ -576,7 +604,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       case DatePickerEntryMode.calendar:
         picker = calendarDatePicker();
         entryModeButton = IconButton(
-          icon:  Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
+          icon: widget.switchToInputEntryModeIcon ?? Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
           color: headerForegroundColor,
           tooltip: localizations.inputDateModeButtonLabel,
           onPressed: _handleEntryModeToggle,
@@ -589,7 +617,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       case DatePickerEntryMode.input:
         picker = inputDatePicker();
         entryModeButton = IconButton(
-          icon: const Icon(Icons.calendar_today),
+          icon: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
           color: headerForegroundColor,
           tooltip: localizations.calendarModeButtonLabel,
           onPressed: _handleEntryModeToggle,
@@ -906,6 +934,10 @@ class _DatePickerHeader extends StatelessWidget {
 /// grid) or [DatePickerEntryMode.input] (two text input fields) mode.
 /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
 ///
+/// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
+///
+/// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
+///
 /// The following optional string parameters allow you to override the default
 /// text used for various parts of the dialog:
 ///
@@ -997,6 +1029,8 @@ Future<DateTimeRange?> showDateRangePicker({
   TransitionBuilder? builder,
   Offset? anchorPoint,
   TextInputType keyboardType = TextInputType.datetime,
+  final Icon? switchToInputEntryModeIcon,
+  final Icon? switchToCalendarEntryModeIcon,
 }) async {
   assert(
     initialDateRange == null || !initialDateRange.start.isAfter(initialDateRange.end),
@@ -1046,6 +1080,8 @@ Future<DateTimeRange?> showDateRangePicker({
     fieldStartLabelText: fieldStartLabelText,
     fieldEndLabelText: fieldEndLabelText,
     keyboardType: keyboardType,
+    switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+    switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
   );
 
   if (textDirection != null) {
@@ -1134,6 +1170,8 @@ class DateRangePickerDialog extends StatefulWidget {
     this.fieldEndLabelText,
     this.keyboardType = TextInputType.datetime,
     this.restorationId,
+    this.switchToInputEntryModeIcon,
+    this.switchToCalendarEntryModeIcon,
   });
 
   /// The date range that the date range picker starts with when it opens.
@@ -1255,6 +1293,12 @@ class DateRangePickerDialog extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
+
+  /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
+  final Icon? switchToInputEntryModeIcon;
+
+  /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
+  final Icon? switchToCalendarEntryModeIcon;
 
   @override
   State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
@@ -1378,7 +1422,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           onCancel: _handleCancel,
           entryModeButton: showEntryModeButton
             ? IconButton(
-                icon: Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
+                icon: widget.switchToInputEntryModeIcon ?? Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.inputDateModeButtonLabel,
                 onPressed: _handleEntryModeToggle,
@@ -1444,7 +1488,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           onCancel: _handleCancel,
           entryModeButton: showEntryModeButton
             ? IconButton(
-                icon: const Icon(Icons.calendar_today),
+                icon: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
                 padding: EdgeInsets.zero,
                 tooltip: localizations.calendarModeButtonLabel,
                 onPressed: _handleEntryModeToggle,

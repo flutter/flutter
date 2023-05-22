@@ -118,6 +118,14 @@ void main() {
     expect(localizations.lastPageTooltip, 'Ikhasi lokugcina');
   });
 
+  testWidgets('translations spot check expansionTileExpandedHint', (WidgetTester tester) async {
+    const Locale locale = Locale.fromSubtags(languageCode: 'en');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations.expansionTileExpandedHint, 'double tap to collapse');
+  });
+
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.selectedRowCountTitle(0), 'No items selected');
