@@ -39,6 +39,7 @@ MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator)
 static void InvokeNextFrameCallback(
     const fml::RefPtr<CanvasImage>& image,
     int duration,
+    const std::string& decode_error,
     std::unique_ptr<DartPersistentValue> callback,
     size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
@@ -49,7 +50,8 @@ static void InvokeNextFrameCallback(
   }
   tonic::DartState::Scope scope(dart_state);
   tonic::DartInvoke(callback->value(),
-                    {tonic::ToDart(image), tonic::ToDart(duration)});
+                    {tonic::ToDart(image), tonic::ToDart(duration),
+                     tonic::ToDart(decode_error)});
 }
 
 // Copied the source bitmap to the destination. If this cannot occur due to
@@ -85,7 +87,8 @@ static bool CopyToBitmap(SkBitmap* dst,
   return true;
 }
 
-sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
+std::pair<sk_sp<DlImage>, std::string>
+MultiFrameCodec::State::GetNextFrameImage(
     fml::WeakPtr<GrDirectContext> resourceContext,
     const std::shared_ptr<const fml::SyncSwitch>& gpu_disable_sync_switch,
     const std::shared_ptr<impeller::Context>& impeller_context,
@@ -97,9 +100,12 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
     info = updated;
   }
   if (!bitmap.tryAllocPixels(info)) {
-    FML_LOG(ERROR) << "Failed to allocate memory for bitmap of size "
-                   << info.computeMinByteSize() << "B";
-    return nullptr;
+    std::ostringstream ostr;
+    ostr << "Failed to allocate memory for bitmap of size "
+         << info.computeMinByteSize() << "B";
+    std::string decode_error = ostr.str();
+    FML_LOG(ERROR) << decode_error;
+    return std::make_pair(nullptr, decode_error);
   }
 
   ImageGenerator::FrameInfo frameInfo =
@@ -133,8 +139,11 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
   // are already set in accordance with the previous frame's disposal policy.
   if (!generator_->GetPixels(info, bitmap.getPixels(), bitmap.rowBytes(),
                              nextFrameIndex_, requiredFrameIndex)) {
-    FML_LOG(ERROR) << "Could not getPixels for frame " << nextFrameIndex_;
-    return nullptr;
+    std::ostringstream ostr;
+    ostr << "Could not getPixels for frame " << nextFrameIndex_;
+    std::string decode_error = ostr.str();
+    FML_LOG(ERROR) << decode_error;
+    return std::make_pair(nullptr, decode_error);
   }
 
   // Hold onto this if we need it to decode future frames.
@@ -177,7 +186,8 @@ sk_sp<DlImage> MultiFrameCodec::State::GetNextFrameImage(
             }
           }));
 
-  return DlImageGPU::Make({skImage, std::move(unref_queue)});
+  return std::make_pair(DlImageGPU::Make({skImage, std::move(unref_queue)}),
+                        std::string());
 }
 
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
@@ -190,7 +200,9 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
     const std::shared_ptr<impeller::Context>& impeller_context) {
   fml::RefPtr<CanvasImage> image = nullptr;
   int duration = 0;
-  sk_sp<DlImage> dlImage =
+  sk_sp<DlImage> dlImage;
+  std::string decode_error;
+  std::tie(dlImage, decode_error) =
       GetNextFrameImage(std::move(resourceContext), gpu_disable_sync_switch,
                         impeller_context, std::move(unref_queue));
   if (dlImage) {
@@ -204,11 +216,12 @@ void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
 
   // The static leak checker gets confused by the use of fml::MakeCopyable.
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  ui_task_runner->PostTask(fml::MakeCopyable([callback = std::move(callback),
-                                              image = std::move(image),
-                                              duration, trace_id]() mutable {
-    InvokeNextFrameCallback(image, duration, std::move(callback), trace_id);
-  }));
+  ui_task_runner->PostTask(fml::MakeCopyable(
+      [callback = std::move(callback), image = std::move(image),
+       decode_error = std::move(decode_error), duration, trace_id]() mutable {
+        InvokeNextFrameCallback(image, duration, decode_error,
+                                std::move(callback), trace_id);
+      }));
 }
 
 Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
@@ -224,12 +237,14 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   const auto& task_runners = dart_state->GetTaskRunners();
 
   if (state_->frameCount_ == 0) {
-    FML_LOG(ERROR) << "Could not provide any frame.";
+    std::string decode_error("Could not provide any frame.");
+    FML_LOG(ERROR) << decode_error;
     task_runners.GetUITaskRunner()->PostTask(fml::MakeCopyable(
-        [trace_id,
+        [trace_id, decode_error = std::move(decode_error),
          callback = std::make_unique<DartPersistentValue>(
              tonic::DartState::Current(), callback_handle)]() mutable {
-          InvokeNextFrameCallback(nullptr, 0, std::move(callback), trace_id);
+          InvokeNextFrameCallback(nullptr, 0, decode_error, std::move(callback),
+                                  trace_id);
         }));
     return Dart_Null();
   }

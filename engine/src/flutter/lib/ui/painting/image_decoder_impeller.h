@@ -41,6 +41,7 @@ struct DecompressResult {
   std::shared_ptr<impeller::DeviceBuffer> device_buffer;
   std::shared_ptr<SkBitmap> sk_bitmap;
   SkImageInfo image_info;
+  std::string decode_error;
 };
 
 class ImageDecoderImpeller final : public ImageDecoder {
@@ -59,7 +60,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
               uint32_t target_height,
               const ImageResult& result) override;
 
-  static std::optional<DecompressResult> DecompressTexture(
+  static DecompressResult DecompressTexture(
       ImageDescriptor* descriptor,
       SkISize target_size,
       impeller::ISize max_texture_size,
@@ -72,7 +73,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
   /// @param buffer     A host buffer containing the image to be uploaded.
   /// @param image_info Format information about the particular image.
   /// @return           A DlImage.
-  static sk_sp<DlImage> UploadTextureToPrivate(
+  static std::pair<sk_sp<DlImage>, std::string> UploadTextureToPrivate(
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
       const SkImageInfo& image_info);
@@ -83,7 +84,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
   /// @param create_mips Whether mipmaps should be generated for the given
   /// image.
   /// @return            A DlImage.
-  static sk_sp<DlImage> UploadTextureToShared(
+  static std::pair<sk_sp<DlImage>, std::string> UploadTextureToShared(
       const std::shared_ptr<impeller::Context>& context,
       std::shared_ptr<SkBitmap> bitmap,
       bool create_mips = true);

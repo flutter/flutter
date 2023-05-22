@@ -248,12 +248,12 @@ void createPath() {
 external void _validatePath(Path path);
 
 @pragma('vm:entry-point')
-void frameCallback(Object? image, int durationMilliseconds) {
-  validateFrameCallback(image, durationMilliseconds);
+void frameCallback(Object? image, int durationMilliseconds, String decodeError) {
+  validateFrameCallback(image, durationMilliseconds, decodeError);
 }
 
 @pragma('vm:external-name', 'ValidateFrameCallback')
-external void validateFrameCallback(Object? image, int durationMilliseconds);
+external void validateFrameCallback(Object? image, int durationMilliseconds, String decodeError);
 
 @pragma('vm:entry-point')
 void platformMessagePortResponseTest() async {

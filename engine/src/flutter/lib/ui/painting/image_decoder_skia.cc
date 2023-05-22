@@ -254,7 +254,7 @@ void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
               // terminate without a base trace. Add one explicitly.
               TRACE_EVENT0("flutter", "ImageDecodeCallback");
               flow.End();
-              callback(DlImageGPU::Make(std::move(image)));
+              callback(DlImageGPU::Make(std::move(image)), {});
               raw_descriptor->Release();
             }));
       };
