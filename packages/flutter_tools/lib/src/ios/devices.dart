@@ -506,7 +506,6 @@ class IOSDevice extends Device {
           logger: _logger,
         );
       }
-
       if (iosDeployDebugger == null) {
         installationResult = await _iosDeploy.launchApp(
           deviceId: id,
