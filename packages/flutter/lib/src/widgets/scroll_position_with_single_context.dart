@@ -209,6 +209,17 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
+  void dragTo(double value) {
+    if (pixels != value) {
+      final double oldPixels = pixels;
+      forcePixels(value);
+      didStartScroll();
+      didUpdateScrollPositionBy(pixels - oldPixels);
+      didEndScroll();
+    }
+  }
+
+  @override
   void pointerScroll(double delta) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in

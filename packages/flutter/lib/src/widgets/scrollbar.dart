@@ -1626,7 +1626,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
           // platforms, and only then if the physics allow it.
           break;
       }
-      position.jumpTo(newPosition);
+      if (_thumbDragging) {
+        position.dragTo(newPosition);
+      } else {
+        position.jumpTo(newPosition);
+      }
     }
   }
 
@@ -1682,6 +1686,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _lastDragUpdateOffset = localPosition;
     _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
     _thumbDragging = true;
+    final ScrollPosition position = _cachedController!.position;
+    position.isScrollingNotifier.value = true;
   }
 
   /// Handler called when a currently active long press gesture moves.
@@ -1704,6 +1710,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     _updateScrollPosition(localPosition);
     _lastDragUpdateOffset = localPosition;
+    position.isScrollingNotifier.value = true;
   }
 
   /// Handler called when a long press has ended.
@@ -1712,6 +1719,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
     assert(_debugCheckHasValidScrollPosition());
     _thumbDragging = false;
+    final ScrollPosition position = _cachedController!.position;
+    position.isScrollingNotifier.value = false;
+
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;
