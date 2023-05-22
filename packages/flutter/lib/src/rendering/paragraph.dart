@@ -46,28 +46,48 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
   int get hashCode => Object.hash(PlaceholderSpanIndexSemanticsTag, index);
 }
 
-/// Parent data for use with [RenderParagraph] and [RenderEditable].
-class TextParentData extends ContainerBoxParentData<RenderBox> {
-  bool get keptAlive => _keptAlive;
-  bool _keptAlive = false;
+/// Parent data used by [RenderParagraph] and [RenderEditable] to annotate
+/// inline widgets with.
+class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox> {
+  /// The offset at which to paint the child in the parent's coordinate system.
+  ///
+  /// A `null` value indicates this inline widget is not laid out. For instance,
+  /// when the inline widget has never been laid out, or the inline widget is
+  /// ellipsized away.
+  Offset? get offset => _offset;
+  Offset? _offset;
+
+  /// The [WidgetSpan] associated with this inline widget.
+  ///
+  /// This field is usually set by a [ParentDataWidget], and is typically not
+  /// null when [performLayout] is called.
+  PlaceholderSpan? span;
 
   @override
-  String toString() => 'offset=$offset${keptAlive ? ", (ellipsized away)" : ""}';
-}
-
-mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
-  late List<PlaceholderSpan> _placeholderSpans;
-  @protected
-  void updateInlineWidgets(InlineSpan span) {
-    _placeholderSpans = <PlaceholderSpan>[];
-    span.visitChildren((InlineSpan span) {
-      if (span is PlaceholderSpan) {
-        _placeholderSpans.add(span);
-      }
-      return true;
-    });
+  void detach() {
+    span = null;
+    _offset = null;
+    super.detach();
   }
 
+  @override
+  String toString() =>'widget: $span, ${offset == null ? "not laid out" : "offset: $offset"}';
+}
+
+/// A mixin that provides useful default behaviors for text [RenderBox]es
+/// ([RenderParagraph] and [RenderEditable] for example) with inline widget
+/// children managed by the [ContainerRenderObjectMixin] mixin.
+///
+/// This mixin assumes every child managed by the [ContainerRenderObjectMixin]
+/// mixin corresponds to a [WidgetSpan], and they are organized in logical
+/// order of the text (the order each [WidgetSpan] is encountered when the user
+/// reads the text).
+///
+/// See also:
+///
+///  * [WidgetSpan.extractFromInlineSpan], a helper function for extracting
+///    [WidgetSpan]s from an [InlineSpan] tree.
+mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData) {
@@ -75,103 +95,129 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
     }
   }
 
-  @protected
-  bool debugCanComputeDryLayoutForInlineWidgets() {
-    // Dry layout cannot be calculated without a full layout for
-    // alignments that require the baseline (baseline, aboveBaseline,
-    // belowBaseline).
-    for (final PlaceholderSpan span in _placeholderSpans) {
-      switch (span.alignment) {
-        case ui.PlaceholderAlignment.baseline:
-        case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline:
-          return false;
-        case ui.PlaceholderAlignment.top:
-        case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom:
-          continue;
-      }
-    }
-    return true;
+  static PlaceholderDimensions _layoutChild(RenderBox child, double maxWidth, ChildLayouter layoutChild) {
+    final TextParentData parentData = child.parentData! as TextParentData;
+    final PlaceholderSpan? span = parentData.span;
+    assert(span != null);
+    return span == null
+      ? PlaceholderDimensions.empty
+      : PlaceholderDimensions(
+          size: layoutChild(child, BoxConstraints(maxWidth: maxWidth)),
+          alignment: span.alignment,
+          baseline: span.baseline,
+          baselineOffset: switch (span.alignment) {
+            ui.PlaceholderAlignment.aboveBaseline ||
+            ui.PlaceholderAlignment.belowBaseline ||
+            ui.PlaceholderAlignment.bottom ||
+            ui.PlaceholderAlignment.middle ||
+            ui.PlaceholderAlignment.top      => null,
+            ui.PlaceholderAlignment.baseline => child.getDistanceToBaseline(span.baseline!),
+          },
+        );
   }
 
+  /// Computes the layout for every inline widget children using the given
+  /// `layoutChild` function and the `maxWidth` constraint.
+  ///
+  /// Returns a list of [PlaceholderDimensions] for each child managed by the
+  /// [ContainerRenderObjectMixin] mixin.
+  ///
+  /// Since this method does not impose a maximum height constraint on the
+  /// inline widget children, some children may become taller than this
+  /// [RenderBox].
+  ///
+  /// See also:
+  ///
+  ///  * [TextPainter.setPlaceholderDimensions], the method that usually takes
+  ///    the layout results from this method as the input.
   @protected
   List<PlaceholderDimensions> layoutInlineWidgets(double maxWidth, ChildLayouter layoutChild) {
-    if (childCount == 0) {
-      return <PlaceholderDimensions>[];
-    }
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
-    int childIndex = 0;
-    while (child != null) {
-      final PlaceholderSpan span = _placeholderSpans[childIndex];
-      final Size childSize = layoutChild(child, BoxConstraints(maxWidth: maxWidth));
-      final double? baselineOffset = switch (span.alignment) {
-          ui.PlaceholderAlignment.baseline => child.getDistanceToBaseline(span.baseline!),
-          ui.PlaceholderAlignment.aboveBaseline
-          || ui.PlaceholderAlignment.belowBaseline
-          || ui.PlaceholderAlignment.bottom
-          || ui.PlaceholderAlignment.middle
-          || ui.PlaceholderAlignment.top   => null,
-        };
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: childSize,
-        alignment: span.alignment,
-        baseline: span.baseline,
-        baselineOffset: baselineOffset,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    return placeholderDimensions;
+    return <PlaceholderDimensions>[
+      for (RenderBox? child = firstChild; child != null; child = childAfter(child))
+        _layoutChild(child, maxWidth, layoutChild),
+    ];
   }
 
+  /// Positions each inline widget according to the coordinates provided in the
+  /// `boxes` list.
+  ///
+  /// The `boxes` list must be in logical order, which is the order each child
+  /// is encountered when the user reads the text. Usually the length of the
+  /// list equals [childCount], but it can be less than that, when some children
+  /// are ommitted due to ellipsing. It never exceeds [childCount].
+  ///
+  /// See also:
+  ///
+  ///  * [TextPainter.inlinePlaceholderBoxes], the method that can be used to
+  ///    get the input `boxes`.
   @protected
   void positionInlineChildren(List<ui.TextBox> boxes) {
     RenderBox? child = firstChild;
     for (final ui.TextBox box in boxes) {
       if (child == null) {
+        assert(false, 'The length of boxes (${boxes.length}) should be greater than childCount ($childCount)');
         return;
       }
       final TextParentData textParentData = child.parentData! as TextParentData;
-      textParentData._keptAlive = false;
-      textParentData.offset = Offset(box.left, box.top);
+      textParentData._offset = Offset(box.left, box.top);
       child = childAfter(child);
     }
     while (child != null) {
       final TextParentData textParentData = child.parentData! as TextParentData;
-      textParentData._keptAlive = true;
+      textParentData._offset = null;
       child = childAfter(child);
     }
   }
 
+  /// Applies the transform that would be applied when painting the given child
+  /// to the given matrix.
+  ///
+  /// Render children whose [TextParentData.offset] is null zeros out the
+  /// `transform` to indicate they're invisible thus should not be painted.
+  @protected
+  void defaultApplyPaintTransform(RenderBox child, Matrix4 transform) {
+    final TextParentData childParentData = child.parentData! as TextParentData;
+    final Offset? offset = childParentData.offset;
+    if (offset == null) {
+      transform.setZero();
+    } else {
+      transform.translate(offset.dx, offset.dy);
+    }
+  }
+
+  /// Paints each inline widget child.
+  ///
+  /// Render children whose [TextParentData.offset] is null will be skipped by
+  /// this method.
   @protected
   void paintInlineWidgets(PaintingContext context, Offset offset) {
-    // childIndex might be out of index of placeholder boxes. This can happen
-    // if engine truncates children due to ellipsis. Sadly, we would not know
-    // it until we finish layout, and RenderObject is in immutable state at
-    // this point.
     RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData childParentData = child.parentData! as TextParentData;
-      if (childParentData.keptAlive) {
+      final Offset? childOffset = childParentData.offset;
+      if (childOffset == null) {
         return;
       }
-      context.paintChild(child, childParentData.offset + offset);
+      context.paintChild(child, childOffset + offset);
       child = childAfter(child);
     }
   }
 
+  /// Performs a hit test on each inline widget child.
+  ///
+  /// Render children whose [TextParentData.offset] is null will be skipped by
+  /// this method.
   @protected
   bool hitTestInlineWidgets(BoxHitTestResult result, Offset position) {
     RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData childParentData = child.parentData! as TextParentData;
-      if (childParentData.keptAlive) {
+      final Offset? childOffset = childParentData.offset;
+      if (childOffset == null) {
         return false;
       }
       final bool isHit = result.addWithPaintOffset(
-        offset: childParentData.offset,
+        offset: childOffset,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) => child!.hitTest(result, position: transformed),
       );
@@ -185,7 +231,7 @@ mixin InlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<Ren
 }
 
 /// A render object that displays a paragraph of text.
-class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>, InlineWidgetContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
+class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, InlineWidgetContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -225,7 +271,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
          textHeightBehavior: textHeightBehavior,
        ) {
     addAll(children);
-    updateInlineWidgets(text);
     this.registrar = registrar;
   }
 
@@ -249,8 +294,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       case RenderComparison.paint:
         _textPainter.text = value;
         _cachedAttributedLabels = null;
+        _canComputeIntrinsicsCached = null;
         _cachedCombinedSemanticsInfos = null;
-        updateInlineWidgets(value);
         markNeedsPaint();
         markNeedsSemanticsUpdate();
       case RenderComparison.layout:
@@ -258,7 +303,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
         _overflowShader = null;
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
-        updateInlineWidgets(value);
+        _canComputeIntrinsicsCached = null;
         markNeedsLayout();
         _removeSelectionRegistrarSubscription();
         _disposeSelectableFragments();
@@ -595,28 +640,36 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
+  /// Whether all inline widget children of this [RenderBox] support dry layout
+  /// calculation.
+  bool _canComputeDryLayoutForInlineWidgets() {
+    // Dry layout cannot be calculated without a full layout for
+    // alignments that require the baseline (baseline, aboveBaseline,
+    // belowBaseline).
+    return text.visitChildren((InlineSpan span) {
+      return (span is! PlaceholderSpan) || switch (span.alignment) {
+        ui.PlaceholderAlignment.baseline ||
+        ui.PlaceholderAlignment.aboveBaseline ||
+        ui.PlaceholderAlignment.belowBaseline => false,
+        ui.PlaceholderAlignment.top ||
+        ui.PlaceholderAlignment.middle ||
+        ui.PlaceholderAlignment.bottom => true,
+      };
+    });
+  }
+
+  bool? _canComputeIntrinsicsCached;
   // Intrinsics cannot be calculated without a full layout for
   // alignments that require the baseline (baseline, aboveBaseline,
   // belowBaseline).
   bool _canComputeIntrinsics() {
-    for (final PlaceholderSpan span in _placeholderSpans) {
-      switch (span.alignment) {
-        case ui.PlaceholderAlignment.baseline:
-        case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline:
-          assert(
-            RenderObject.debugCheckingIntrinsics,
-            'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
-          );
-          return false;
-        case ui.PlaceholderAlignment.top:
-        case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom:
-          continue;
-      }
-    }
-    return true;
+    final bool returnValue = _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
+    assert(
+        returnValue || RenderObject.debugCheckingIntrinsics,
+        'Intrinsics are not available for PlaceholderAlignment.baseline, '
+        'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline.',
+      );
+    return returnValue;
   }
 
   @override
@@ -672,7 +725,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (!debugCanComputeDryLayoutForInlineWidgets()) {
+    if (!_canComputeIntrinsics()) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
       ));
@@ -754,6 +807,11 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       _needsClipping = false;
       _overflowShader = null;
     }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    defaultApplyPaintTransform(child, transform);
   }
 
   @override
@@ -1058,9 +1116,8 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
-          assert(!parentData.keptAlive || parentData.offset == Offset.zero);
           // parentData.scale may be null if the render object is truncated.
-          if (!parentData.keptAlive) {
+          if (parentData.offset != null) {
             newChildren.add(childNode);
           }
           childIndex += 1;

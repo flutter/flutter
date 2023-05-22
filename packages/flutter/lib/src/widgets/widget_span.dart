@@ -96,15 +96,23 @@ class WidgetSpan extends PlaceholderSpan {
   static List<Widget> extractFromInlineSpan(InlineSpan span, double textScaleFactor) {
     final List<Widget> widgets = <Widget>[];
     int index = 0;
+    // This assumes an InlineSpan tree's logical order is equivalent to preorder.
     span.visitChildren((InlineSpan span) {
       if (span is WidgetSpan) {
         widgets.add(
-          Semantics(
-            tagForChildren: PlaceholderSpanIndexSemanticsTag(index++),
-            child: _AutoScaleInlineWidget(span: span, textScaleFactor: textScaleFactor),
+          _WidgetSpanParentData(
+            span: span,
+            child: Semantics(
+              tagForChildren: PlaceholderSpanIndexSemanticsTag(index++),
+              child: _AutoScaleInlineWidget(span: span, textScaleFactor: textScaleFactor, child: span.child),
+            ),
           ),
         );
       }
+      assert(
+        span is WidgetSpan || span is! PlaceholderSpan,
+        '$span is a PlaceholderSpan but not a WidgetSpan subclass. This is currently not supported.',
+      );
       return true;
     });
     return widgets;
@@ -244,8 +252,29 @@ class WidgetSpan extends PlaceholderSpan {
   }
 }
 
+// A ParentDataWidget that sets TextParentData.span.
+class _WidgetSpanParentData extends ParentDataWidget<TextParentData> {
+  const _WidgetSpanParentData({ required this.span, required super.child });
+
+  final WidgetSpan span;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    final TextParentData parentData = renderObject.parentData! as TextParentData;
+    parentData.span = span;
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => InlineWidgetContainerDefaults;
+}
+
+// A RenderObjectWidget that automatically applies text scaling on inline
+// widgets.
+//
+// TODO(LongCatIsLooong): this shouldn't happen automatically, at least there
+// should be a way to opt out: https://github.com/flutter/flutter/issues/126962
 class _AutoScaleInlineWidget extends SingleChildRenderObjectWidget {
-  _AutoScaleInlineWidget({ required this.span, required this.textScaleFactor }) : super(child: span.child);
+  const _AutoScaleInlineWidget({ required this.span, required this.textScaleFactor, required super.child });
 
   final WidgetSpan span;
   final double textScaleFactor;

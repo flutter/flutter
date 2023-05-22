@@ -14,6 +14,25 @@ import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
+void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
+  int index = 0;
+  RenderBox? previousBox;
+  span.visitChildren((InlineSpan span) {
+    if (span is! WidgetSpan) {
+      return true;
+    }
+
+    final RenderBox box = inlineRenderBoxes[index];
+    box.parentData = TextParentData()
+                      ..span = span
+                      ..previousSibling = previousBox;
+    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
+    index += 1;
+    previousBox = box;
+    return true;
+  });
+}
+
 // A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
 // for a given TextSelection.
 // This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
@@ -504,6 +523,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: renderBoxes,
     );
+    _applyParentData(renderBoxes, text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -544,6 +564,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: renderBoxes,
     );
+    _applyParentData(renderBoxes, text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -591,6 +612,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: renderBoxes,
     );
+    _applyParentData(renderBoxes, text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -630,6 +652,7 @@ void main() {
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
+    _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
     final SemanticsNode result = SemanticsNode();
     final SemanticsNode truncatedChild = SemanticsNode();
@@ -730,6 +753,7 @@ void main() {
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
+    _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph);
 
     final SemanticsNode node = SemanticsNode();
@@ -816,6 +840,7 @@ void main() {
         registrar: registrar,
         children: renderBoxes,
       );
+      _applyParentData(renderBoxes, paragraph.text);
       layout(paragraph);
       // The widget span will register to the selection container without going
       // through the render paragraph.
