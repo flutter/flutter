@@ -20,19 +20,20 @@ final ArgParser argParser = ArgParser()
 final List<Replacer> uiPatterns = <Replacer>[
   AllReplacer(RegExp(r'library\s+ui;'), 'library dart.ui;'),
   AllReplacer(RegExp(r'part\s+of\s+ui;'), 'part of dart.ui;'),
+
+  // import 'src/engine.dart' as engine;
   AllReplacer(RegExp(r'''
 import\s*'src/engine.dart'\s*as\s+engine;
 '''), r'''
 import 'dart:_engine' as engine;
 '''),
-  AllReplacer(RegExp(
-    r'''
-export\s*'src/engine.dart'
+
+  // import 'ui_web/src/ui_web.dart' as ui_web;
+  AllReplacer(RegExp(r'''
+import\s*'ui_web/src/ui_web.dart'\s*as\s+ui_web;
+'''), r'''
+import 'dart:ui_web' as ui_web;
 '''),
-    r'''
-export 'dart:_engine'
-''',
-  ),
 ];
 
 List<Replacer> generateApiFilePatterns(String libraryName, bool isPublic, List<String> extraImports) {

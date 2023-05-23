@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
@@ -653,7 +654,7 @@ void _testForImageCodecs({required bool useBrowserImageDecoder}) {
     //  * https://github.com/flutter/flutter/issues/86809
     //  * https://github.com/flutter/flutter/issues/91881
     test('the same image can be rendered on difference surfaces', () async {
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );

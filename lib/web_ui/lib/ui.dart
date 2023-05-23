@@ -14,6 +14,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'src/engine.dart' as engine;
+import 'ui_web/src/ui_web.dart' as ui_web;
 
 part 'annotations.dart';
 part 'canvas.dart';
