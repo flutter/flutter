@@ -78,7 +78,7 @@ CommandPoolVK::CommandPoolVK(const ContextVK* context)
     return;
   }
 
-  device_holder_ = context->weak_from_this();
+  device_holder_ = context->GetDeviceHolder();
   graphics_pool_ = std::move(pool.value);
   is_valid_ = true;
 }
