@@ -78,7 +78,7 @@ void main() {
     projectDir = tempDir.childDirectory('flutter_project');
     fakeFlutterVersion = FakeFlutterVersion(
       frameworkRevision: frameworkRevision,
-      channel: frameworkChannel,
+      branch: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
     mockStdio = FakeStdio();
@@ -1269,8 +1269,8 @@ void main() {
     expectExists(versionPath);
     final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
-    expect(version, contains('revision: 12345678'));
-    expect(version, contains('channel: omega'));
+    expect(version, contains('revision: "12345678"'));
+    expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
     final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
@@ -1349,8 +1349,8 @@ void main() {
     expectExists(versionPath);
     final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
-    expect(version, contains('revision: 12345678'));
-    expect(version, contains('channel: omega'));
+    expect(version, contains('revision: "12345678"'));
+    expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
     final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
