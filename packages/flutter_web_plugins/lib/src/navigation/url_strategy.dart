@@ -9,6 +9,7 @@ import 'utils.dart';
 export 'dart:ui_web'
     show
         BrowserPlatformLocation,
+        EventListener,
         HashUrlStrategy,
         PlatformLocation,
         UrlStrategy,
