@@ -10,6 +10,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/status.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 
@@ -114,6 +115,16 @@ class FrameTimingsRecorder {
   FrameTiming GetRecordedTime() const;
 
  private:
+  FML_FRIEND_TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync);
+  FML_FRIEND_TEST(FrameTimingsRecorderTest,
+                  ThrowWhenRecordRasterBeforeBuildEnd);
+
+  [[nodiscard]] fml::Status RecordVsyncImpl(fml::TimePoint vsync_start,
+                                            fml::TimePoint vsync_target);
+  [[nodiscard]] fml::Status RecordBuildStartImpl(fml::TimePoint build_start);
+  [[nodiscard]] fml::Status RecordBuildEndImpl(fml::TimePoint build_end);
+  [[nodiscard]] fml::Status RecordRasterStartImpl(fml::TimePoint raster_start);
+
   static std::atomic<uint64_t> frame_number_gen_;
 
   mutable std::mutex state_mutex_;

@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <thread>
 #include "flutter/flow/frame_timings.h"
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
-
-#include <thread>
 
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
@@ -16,7 +15,8 @@
 #include "gtest/gtest.h"
 
 namespace flutter {
-namespace testing {
+
+using testing::MockRasterCache;
 
 TEST(FrameTimingsRecorderTest, RecordVsync) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
@@ -130,9 +130,9 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordBuildBeforeVsync) {
   auto recorder = std::make_unique<FrameTimingsRecorder>();
 
   const auto build_start = fml::TimePoint::Now();
-  EXPECT_EXIT(recorder->RecordBuildStart(build_start),
-              ::testing::KilledBySignal(SIGABRT),
-              "Check failed: state_ == State::kVsync.");
+  fml::Status status = recorder->RecordBuildStartImpl(build_start);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(status.message(), "Check failed: state_ == State::kVsync.");
 }
 
 TEST(FrameTimingsRecorderTest, ThrowWhenRecordRasterBeforeBuildEnd) {
@@ -143,9 +143,9 @@ TEST(FrameTimingsRecorderTest, ThrowWhenRecordRasterBeforeBuildEnd) {
   recorder->RecordVsync(st, en);
 
   const auto raster_start = fml::TimePoint::Now();
-  EXPECT_EXIT(recorder->RecordRasterStart(raster_start),
-              ::testing::KilledBySignal(SIGABRT),
-              "Check failed: state_ == State::kBuildEnd.");
+  fml::Status status = recorder->RecordRasterStartImpl(raster_start);
+  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(status.message(), "Check failed: state_ == State::kBuildEnd.");
 }
 
 #endif
@@ -297,5 +297,4 @@ TEST(FrameTimingsRecorderTest, FrameNumberTraceArgIsValid) {
   ASSERT_EQ(actual_arg, expected_arg);
 }
 
-}  // namespace testing
 }  // namespace flutter
