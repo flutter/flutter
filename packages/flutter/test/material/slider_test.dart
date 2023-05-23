@@ -3427,6 +3427,78 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
+  testWidgets('Value indicator disappears after some time when the slider is '
+      'clicked, not dragged, on desktop', (WidgetTester tester) async {
+    double currentValue = 0.5;
+    final FocusNode focusNode = FocusNode();
+
+    Widget buildApp({bool enabled = true}) {
+      return MaterialApp(
+        theme: ThemeData(
+          sliderTheme: const SliderThemeData(
+            showValueIndicator: ShowValueIndicator.always,
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return Slider(
+                value: currentValue,
+                focusNode: focusNode,
+                divisions: 5,
+                label: currentValue.toStringAsFixed(1),
+                onChanged: enabled
+                    ? (double newValue) {
+                  setState(() {
+                    currentValue = newValue;
+                  });
+                }
+                    : null,
+              );
+            }),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+
+    // Slider does not show value indicator without focus.
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, false);
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+    );
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+
+    // Tap somewhere to bring value indicator.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.down(tapLocation);
+    await gesture.up();
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..path(color: const Color(0xff000000))..paragraph(),
+    );
+
+
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    expect(
+      valueIndicatorBox,
+      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+    );
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
     final FocusNode focusNode = FocusNode();
