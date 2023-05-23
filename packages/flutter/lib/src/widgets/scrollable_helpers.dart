@@ -160,11 +160,8 @@ class EdgeDraggingAutoScroller {
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
-    double? velocityScalar,
-  }): velocityScalar = velocityScalar ?? _kDefaultAutoScrollVelocityScalar;
-
-  // An eyeballed value for a smooth scrolling experience.
-  static const double _kDefaultAutoScrollVelocityScalar = 7;
+    required this.velocityScalar,
+  });
 
   /// The [Scrollable] this auto scroller is scrolling.
   final ScrollableState scrollable;
