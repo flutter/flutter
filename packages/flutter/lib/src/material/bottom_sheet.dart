@@ -1152,6 +1152,9 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
+/// The 'barrierLabel' parameter can be used to set a custom barrierlabel.
+/// Will default to modalBarrierDismissLabel of context if not set.
+///
 /// {@tool dartpad}
 /// This example demonstrates how to use [showModalBottomSheet] to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
@@ -1184,6 +1187,7 @@ Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   Color? backgroundColor,
+  String? barrierLabel,
   double? elevation,
   ShapeBorder? shape,
   Clip? clipBehavior,
@@ -1208,7 +1212,7 @@ Future<T?> showModalBottomSheet<T>({
     builder: builder,
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     isScrollControlled: isScrollControlled,
-    barrierLabel: localizations.scrimLabel,
+    barrierLabel: barrierLabel ?? localizations.scrimLabel,
     barrierOnTapHint: localizations.scrimOnTapHint(localizations.bottomSheetLabel),
     backgroundColor: backgroundColor,
     elevation: elevation,
