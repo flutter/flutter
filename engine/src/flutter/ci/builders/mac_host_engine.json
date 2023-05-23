@@ -51,7 +51,7 @@
                         "--variant",
                         "host_debug",
                         "--type",
-                        "dart",
+                        "dart,engine",
                         "--engine-capture-core-dump"
                     ],
                     "script": "flutter/testing/run_tests.py"

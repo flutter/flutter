@@ -38,4 +38,7 @@
   TypeName() = delete;                               \
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)
 
+#define FML_FRIEND_TEST(test_case_name, test_name) \
+  friend class test_case_name##_##test_name##_Test
+
 #endif  // FLUTTER_FML_MACROS_H_
