@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <signal.h>
+
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/log_settings.h"
 #include "flutter/fml/logging.h"
@@ -18,6 +20,41 @@
 
 namespace fml {
 namespace testing {
+
+#ifndef OS_FUCHSIA
+class MakeSureFmlLogDoesNotSegfaultWhenStaticallyCalled {
+ public:
+  MakeSureFmlLogDoesNotSegfaultWhenStaticallyCalled() {
+    SegfaultCatcher catcher;
+    // If this line causes a segfault, FML is using a method of logging that is
+    // not safe from static initialization on your platform.
+    FML_LOG(INFO)
+        << "This log exists to verify that static logging from FML works.";
+  }
+
+ private:
+  struct SegfaultCatcher {
+    typedef void (*sighandler_t)(int);
+
+    SegfaultCatcher() {
+      handler = ::signal(SIGSEGV, SegfaultHandler);
+      FML_CHECK(handler != SIG_ERR);
+    }
+
+    ~SegfaultCatcher() { FML_CHECK(::signal(SIGSEGV, handler) != SIG_ERR); }
+
+    static void SegfaultHandler(int signal) {
+      fprintf(stderr,
+              "FML failed to handle logging from static initialization.\n");
+      exit(signal);
+    }
+
+    sighandler_t handler;
+  };
+};
+
+static MakeSureFmlLogDoesNotSegfaultWhenStaticallyCalled fml_log_static_check_;
+#endif  // !defined(OS_FUCHSIA)
 
 int UnreachableScopeWithoutReturnDoesNotMakeCompilerMad() {
   KillProcess();
