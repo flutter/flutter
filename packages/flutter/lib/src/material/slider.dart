@@ -1820,7 +1820,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double get currentValue {
-    return clampDouble(value , 0.0, 1.0);
+    return clampDouble(value, 0.0, 1.0);
   }
 
   double increaseValue() {
