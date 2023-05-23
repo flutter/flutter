@@ -356,6 +356,7 @@
 ../../../flutter/sky/packages/sky_engine/README.md
 ../../../flutter/sky/packages/sky_engine/lib/_embedder.yaml
 ../../../flutter/sky/packages/sky_engine/pubspec.yaml
+../../../flutter/sky/tools/create_embedder_framework.py
 ../../../flutter/sky/tools/create_full_ios_framework.py
 ../../../flutter/sky/tools/create_ios_framework.py
 ../../../flutter/sky/tools/create_macos_framework.py
