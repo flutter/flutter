@@ -4,6 +4,7 @@
 
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
+import 'package:io/io.dart' show copyPathSync;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -444,25 +445,31 @@ class _MacOSUtils extends _PosixUtils {
         throwOnError: true,
         verboseExceptions: true,
       );
+
       for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
-        final FileSystemEntityType fileType = targetDirectory.fileSystem.typeSync(
-          targetDirectory.fileSystem.path.join(targetDirectory.path, unzippedFile.basename),
+        final FileSystemEntityType fileType = unzippedFile.fileSystem.typeSync(
+          unzippedFile.path,
           followLinks: false,
         );
-        final FileSystemEntity fileToReplace;
+
+        // Delete existing version in the target directory.
+        // Then copy from the temporary directory to target directory.
         if (fileType == FileSystemEntityType.directory) {
-          fileToReplace = targetDirectory.childDirectory(unzippedFile.basename);
+          final Directory destinationDirectory = targetDirectory.childDirectory(unzippedFile.basename);
+          ErrorHandlingFileSystem.deleteIfExists(destinationDirectory, recursive: true);
+          copyPathSync(unzippedFile.path, destinationDirectory.path);
         } else if (fileType == FileSystemEntityType.link) {
-          fileToReplace = targetDirectory.childLink(unzippedFile.basename);
+          final Link tempLink = unzippedFile as Link;
+          final Link destinationLink = targetDirectory.childLink(unzippedFile.basename);
+          ErrorHandlingFileSystem.deleteIfExists(destinationLink, recursive: true);
+          destinationLink.createSync(tempLink.targetSync(), recursive: true);
         } else {
-          fileToReplace = targetDirectory.childFile(unzippedFile.basename);
+          final File tempFile = unzippedFile as File;
+          final File destinationFile = targetDirectory.childFile(unzippedFile.basename);
+          ErrorHandlingFileSystem.deleteIfExists(destinationFile, recursive: true);
+          tempFile.copySync(destinationFile.path);
         }
-        // Delete existing version before moving.
-        ErrorHandlingFileSystem.deleteIfExists(fileToReplace, recursive: true);
-        unzippedFile.renameSync(fileToReplace.path);
       }
-    } on FileSystemException catch (e) {
-      _logger.printTrace('${e.message}: ${e.osError}');
     } finally {
       tempDirectory.deleteSync(recursive: true);
     }
