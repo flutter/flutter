@@ -352,12 +352,15 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
                                      shell_test_external_view_embedder,  //
                                      rendering_backend                   //
     ](Shell& shell) {
-      return ShellTestPlatformView::Create(shell,                             //
-                                           shell.GetTaskRunners(),            //
-                                           vsync_clock,                       //
-                                           create_vsync_waiter,               //
-                                           rendering_backend,                 //
-                                           shell_test_external_view_embedder  //
+      return ShellTestPlatformView::Create(
+          shell,                                  //
+          shell.GetTaskRunners(),                 //
+          vsync_clock,                            //
+          create_vsync_waiter,                    //
+          rendering_backend,                      //
+          shell_test_external_view_embedder,      //
+          shell.GetConcurrentWorkerTaskRunner(),  //
+          shell.GetIsGpuDisabledSyncSwitch()      //
       );
     };
   }

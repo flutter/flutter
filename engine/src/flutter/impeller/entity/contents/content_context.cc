@@ -375,11 +375,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     return nullptr;
   }
 
-  if (!sub_renderpass->EncodeCommands()) {
-    return nullptr;
-  }
-
-  if (!sub_command_buffer->SubmitCommands()) {
+  if (!sub_command_buffer->SubmitCommandsAsync(std::move(sub_renderpass))) {
     return nullptr;
   }
 

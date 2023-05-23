@@ -18,9 +18,12 @@ IOSContext::IOSContext(MsaaSampleCount msaa_samples) : msaa_samples_(msaa_sample
 
 IOSContext::~IOSContext() = default;
 
-std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI api,
-                                               IOSRenderingBackend backend,
-                                               MsaaSampleCount msaa_samples) {
+std::unique_ptr<IOSContext> IOSContext::Create(
+    IOSRenderingAPI api,
+    IOSRenderingBackend backend,
+    MsaaSampleCount msaa_samples,
+    std::shared_ptr<fml::ConcurrentTaskRunner> task_runner,
+    std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch) {
   switch (api) {
     case IOSRenderingAPI::kSoftware:
       return std::make_unique<IOSContextSoftware>();
@@ -30,7 +33,8 @@ std::unique_ptr<IOSContext> IOSContext::Create(IOSRenderingAPI api,
         case IOSRenderingBackend::kSkia:
           return std::make_unique<IOSContextMetalSkia>(msaa_samples);
         case IOSRenderingBackend::kImpeller:
-          return std::make_unique<IOSContextMetalImpeller>();
+          return std::make_unique<IOSContextMetalImpeller>(std::move(task_runner),
+                                                           std::move(is_gpu_disabled_sync_switch));
       }
 #endif  // SHELL_ENABLE_METAL
     default:

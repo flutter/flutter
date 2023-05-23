@@ -17,12 +17,16 @@ class DarwinContextMetal;
 class ShellTestPlatformViewMetal final : public ShellTestPlatformView,
                                          public GPUSurfaceMetalDelegate {
  public:
-  ShellTestPlatformViewMetal(PlatformView::Delegate& delegate,
-                             const TaskRunners& task_runners,
-                             std::shared_ptr<ShellTestVsyncClock> vsync_clock,
-                             CreateVsyncWaiter create_vsync_waiter,
-                             std::shared_ptr<ShellTestExternalViewEmbedder>
-                                 shell_test_external_view_embedder);
+  ShellTestPlatformViewMetal(
+      PlatformView::Delegate& delegate,
+      const TaskRunners& task_runners,
+      std::shared_ptr<ShellTestVsyncClock> vsync_clock,
+      CreateVsyncWaiter create_vsync_waiter,
+      std::shared_ptr<ShellTestExternalViewEmbedder>
+          shell_test_external_view_embedder,
+      const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
+      const std::shared_ptr<const fml::SyncSwitch>&
+          is_gpu_disabled_sync_switch);
 
   // |ShellTestPlatformView|
   virtual ~ShellTestPlatformViewMetal() override;

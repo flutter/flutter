@@ -55,7 +55,8 @@ class CommandBuffer {
 
   //----------------------------------------------------------------------------
   /// @brief      Schedule the command encoded by render passes within this
-  ///             command buffer on the GPU.
+  ///             command buffer on the GPU. The encoding of these commnands is
+  ///             performed immediately on the calling thread.
   ///
   ///             A command buffer may only be committed once.
   ///
@@ -64,6 +65,17 @@ class CommandBuffer {
   [[nodiscard]] bool SubmitCommands(const CompletionCallback& callback);
 
   [[nodiscard]] bool SubmitCommands();
+
+  //----------------------------------------------------------------------------
+  /// @brief      Schedule the command encoded by render passes within this
+  ///             command buffer on the GPU. The enqueing of this buffer is
+  ///             performed immediately but encoding is pushed to a worker
+  ///             thread if possible.
+  ///
+  ///             A command buffer may only be committed once.
+  ///
+  [[nodiscard]] virtual bool SubmitCommandsAsync(
+      std::shared_ptr<RenderPass> render_pass);
 
   //----------------------------------------------------------------------------
   /// @brief      Force execution of pending GPU commands.
