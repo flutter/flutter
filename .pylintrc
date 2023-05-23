@@ -38,6 +38,7 @@ docstring-quote = double
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
 disable=
+    duplicate-code,
     exec-used,
     fixme,
     missing-class-docstring,
