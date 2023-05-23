@@ -74,7 +74,9 @@ flutter::FakeDelegate fake_delegate;
       /*delegate=*/fake_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   weak_factory = std::make_unique<fml::WeakPtrFactory<flutter::PlatformView>>(platform_view.get());
 }
 
@@ -105,7 +107,9 @@ flutter::FakeDelegate fake_delegate;
       /*delegate=*/fake_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
 
   XCTAssertEqual(msaa_4x_platform_view->GetIosContext()->GetMsaaSampleCount(),
                  MsaaSampleCount::kFour);

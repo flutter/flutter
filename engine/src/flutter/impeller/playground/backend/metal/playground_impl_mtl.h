@@ -6,7 +6,9 @@
 
 #include <memory>
 
+#include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/synchronization/sync_switch.h"
 #include "impeller/playground/playground_impl.h"
 
 namespace impeller {
@@ -27,6 +29,8 @@ class PlaygroundImplMTL final : public PlaygroundImpl {
   // To ensure that ObjC stuff doesn't leak into C++ TUs.
   std::unique_ptr<Data> data_;
   std::shared_ptr<Context> context_;
+  std::shared_ptr<fml::ConcurrentMessageLoop> concurrent_loop_;
+  std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch_;
 
   // |PlaygroundImpl|
   std::shared_ptr<Context> GetContext() const override;
