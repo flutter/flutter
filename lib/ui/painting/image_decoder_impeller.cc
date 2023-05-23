@@ -452,7 +452,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
           // texture is implemented on other platforms.
           sk_sp<DlImage> image;
           std::string decode_error;
-#if (FML_OS_IOS && !TARGET_IPHONE_SIMULATOR)
+#ifdef FML_OS_IOS
           std::tie(image, decode_error) = UploadTextureToPrivate(
               context, bitmap_result.device_buffer, bitmap_result.image_info);
 #else
