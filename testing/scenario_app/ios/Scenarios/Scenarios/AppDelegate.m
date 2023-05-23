@@ -69,10 +69,7 @@
     @"--spawn-engine-works" : @"spawn_engine_works",
     @"--pointer-events" : @"pointer_events",
     @"--platform-view-scrolling-under-widget" : @"platform_view_scrolling_under_widget",
-    @"--platform-view-cliprect-after-moved" : @"platform_view_cliprect_after_moved",
-    @"--two-platform-view-clip-rect" : @"two_platform_view_clip_rect",
-    @"--two-platform-view-clip-rrect" : @"two_platform_view_clip_rrect",
-    @"--two-platform-view-clip-path" : @"two_platform_view_clip_path",
+    @"--platform-view-cliprect-after-moved" : @"platform_view_cliprect_after_moved"
   };
   __block NSString* flutterViewControllerTestName = nil;
   [launchArgsMap
