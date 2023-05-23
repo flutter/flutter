@@ -749,6 +749,39 @@ void main() {
       expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
       expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
     });
+
+    testWithoutContext('unzip and copy causes crash on FileSystemException', () {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'unzip',
+            '-o',
+            '-q',
+            'foo.zip',
+            '-d',
+            tempDirectory.path,
+          ],
+          onRun: () {
+            throw const FileSystemException();
+          },
+        ),
+      ]);
+
+      expect(
+        () => macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory),
+        throwsFileSystemException(),
+      );
+    });
   });
 
   group('display an install message when unzip cannot be run', () {

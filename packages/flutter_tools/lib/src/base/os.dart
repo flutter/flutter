@@ -444,6 +444,7 @@ class _MacOSUtils extends _PosixUtils {
         throwOnError: true,
         verboseExceptions: true,
       );
+
       for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
         final FileSystemEntityType fileType = targetDirectory.fileSystem.typeSync(
           targetDirectory.fileSystem.path.join(targetDirectory.path, unzippedFile.basename),
@@ -461,8 +462,6 @@ class _MacOSUtils extends _PosixUtils {
         ErrorHandlingFileSystem.deleteIfExists(fileToReplace, recursive: true);
         unzippedFile.renameSync(fileToReplace.path);
       }
-    } on FileSystemException catch (e) {
-      _logger.printTrace('${e.message}: ${e.osError}');
     } finally {
       tempDirectory.deleteSync(recursive: true);
     }
