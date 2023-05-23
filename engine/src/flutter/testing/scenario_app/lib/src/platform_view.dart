@@ -112,6 +112,7 @@ class PlatformViewNoOverlayIntersectionScenario extends Scenario
   }
 }
 
+
 /// A platform view that is larger than the display size.
 /// This is only applicable on Android while using virtual displays.
 /// Related issue: https://github.com/flutter/flutter/issues/28978.
@@ -575,7 +576,7 @@ class PlatformViewClipRectAfterMovedScenario extends Scenario with _BasePlatform
       ..pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
 
     addPlatformView(
-      _numberOfFrames == 10? 10000: id,
+      _numberOfFrames == 10? 10000:id,
       dispatcher: view.platformDispatcher,
       sceneBuilder: builder,
     );
@@ -637,6 +638,7 @@ class PlatformViewClipRRectScenario extends PlatformViewScenario {
     finishBuilder(builder);
   }
 }
+
 
 /// Platform view with clip rrect.
 /// The bounding rect of the rrect is the same as PlatformView and only the corner radii clips the PlatformView.
@@ -876,187 +878,6 @@ class PlatformViewClipPathWithTransformScenario extends PlatformViewScenario {
   }
 }
 
-/// Two platform views, both have clip rects
-class TwoPlatformViewClipRect extends Scenario
-    with _BasePlatformViewScenarioMixin {
-  /// Creates the PlatformView scenario.
-  TwoPlatformViewClipRect(
-    super.view, {
-    required this.firstId,
-    required this.secondId,
-  });
-
-  /// The platform view identifier to use for the first platform view.
-  final int firstId;
-
-  /// The platform view identifier to use for the second platform view.
-  final int secondId;
-
-  @override
-  void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    builder.pushOffset(0, 600);
-    builder.pushClipRect(const Rect.fromLTRB(100, 100, 400, 400));
-
-    addPlatformView(
-      firstId,
-      dispatcher: view.platformDispatcher,
-      sceneBuilder: builder,
-      text: 'platform view 1',
-    );
-
-    builder.pop();
-    builder.pop();
-
-    // Use a different rect to differentiate from the 1st clip rect.
-    builder.pushClipRect(const Rect.fromLTRB(100, 100, 300, 300));
-
-    addPlatformView(
-      secondId,
-      dispatcher: view.platformDispatcher,
-      sceneBuilder: builder,
-      text: 'platform view 2',
-    );
-
-    builder.pop();
-    final Scene scene = builder.build();
-    view.render(scene);
-    scene.dispose();
-  }
-}
-
-/// Two platform views, both have clip rrects
-class TwoPlatformViewClipRRect extends Scenario
-    with _BasePlatformViewScenarioMixin {
-  /// Creates the PlatformView scenario.
-  TwoPlatformViewClipRRect(
-    super.view, {
-    required this.firstId,
-    required this.secondId,
-  });
-
-  /// The platform view identifier to use for the first platform view.
-  final int firstId;
-
-  /// The platform view identifier to use for the second platform view.
-  final int secondId;
-
-  @override
-  void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    builder.pushOffset(0, 600);
-    builder.pushClipRRect(
-      RRect.fromLTRBAndCorners(
-        0,
-        0,
-        500,
-        500,
-        topLeft: const Radius.circular(15),
-        topRight: const Radius.circular(50),
-        bottomLeft: const Radius.circular(50),
-      ),
-    );
-
-    addPlatformView(
-      firstId,
-      dispatcher: view.platformDispatcher,
-      sceneBuilder: builder,
-      text: 'platform view 1',
-    );
-
-    builder.pop();
-    builder.pop();
-
-    // Use a different rrect to differentiate from the 1st clip rrect.
-    builder.pushClipRRect(
-      RRect.fromLTRBAndCorners(
-        0,
-        0,
-        500,
-        500,
-        topLeft: const Radius.circular(100),
-        topRight: const Radius.circular(50),
-        bottomLeft: const Radius.circular(50),
-      ),
-    );
-
-    addPlatformView(
-      secondId,
-      dispatcher: view.platformDispatcher,
-      sceneBuilder: builder,
-      text: 'platform view 2',
-    );
-
-    builder.pop();
-    final Scene scene = builder.build();
-    view.render(scene);
-    scene.dispose();
-  }
-}
-
-/// Two platform views, both have clip path
-class TwoPlatformViewClipPath extends Scenario
-    with _BasePlatformViewScenarioMixin {
-  /// Creates the PlatformView scenario.
-  TwoPlatformViewClipPath(
-    super.view, {
-    required this.firstId,
-    required this.secondId,
-  });
-
-  /// The platform view identifier to use for the first platform view.
-  final int firstId;
-
-  /// The platform view identifier to use for the second platform view.
-  final int secondId;
-
-  @override
-  void onBeginFrame(Duration duration) {
-    final SceneBuilder builder = SceneBuilder();
-    builder.pushOffset(0, 600);
-    final Path path = Path()
-      ..moveTo(100, 100)
-      ..quadraticBezierTo(50, 250, 100, 400)
-      ..lineTo(350, 400)
-      ..cubicTo(400, 300, 300, 200, 350, 100)
-      ..close();
-
-    builder.pushClipPath(path);
-
-    addPlatformView(
-      firstId,
-      dispatcher: view.platformDispatcher,
-      sceneBuilder: builder,
-      text: 'platform view 1',
-    );
-
-    builder.pop();
-    builder.pop();
-
-    // Use a different path to differentiate from the 1st clip path.
-    final Path path2 = Path()
-      ..moveTo(100, 100)
-      ..quadraticBezierTo(100, 150, 100, 400)
-      ..lineTo(350, 350)
-      ..cubicTo(400, 300, 300, 200, 350, 200)
-      ..close();
-
-    builder.pushClipPath(path2);
-
-    addPlatformView(
-      secondId,
-      dispatcher: view.platformDispatcher,
-      sceneBuilder: builder,
-      text: 'platform view 2',
-    );
-
-    builder.pop();
-    final Scene scene = builder.build();
-    view.render(scene);
-    scene.dispose();
-  }
-}
-
 /// Platform view with transform.
 class PlatformViewTransformScenario extends PlatformViewScenario {
   /// Constructs a platform view with transform scenario.
@@ -1223,10 +1044,10 @@ class PlatformViewForOverlappingPlatformViewsScenario extends Scenario
 
   /// Creates the PlatformViewForOverlappingPlatformViewsScenario.
   PlatformViewForOverlappingPlatformViewsScenario(
-    super.view, {
-    required this.foregroundId,
-    required this.backgroundId,
-  }) {
+      super.view, {
+        required this.foregroundId,
+        required this.backgroundId,
+      }) {
     _nextFrame = _firstFrame;
   }
 
@@ -1330,7 +1151,7 @@ class PlatformViewForOverlappingPlatformViewsScenario extends Scenario
       view.platformDispatcher.sendPlatformMessage(
         'flutter/platform_views',
         message.buffer.asByteData(),
-        (ByteData? response) {},
+            (ByteData? response) {},
       );
     }
   }
@@ -1539,7 +1360,7 @@ class PlatformViewScrollingUnderWidget extends Scenario
     super.view, {
     required int firstPlatformViewId,
     required int lastPlatformViewId,
-  }) :  _firstPlatformViewId = firstPlatformViewId,
+  }) : _firstPlatformViewId = firstPlatformViewId,
        _lastPlatformViewId = lastPlatformViewId;
 
   final int _firstPlatformViewId;
@@ -1629,6 +1450,7 @@ void addPlatformView(
   }
 
   final String platformViewKey = '$viewType-$id';
+
   if (_createdPlatformViews.containsKey(platformViewKey)) {
     addPlatformViewToSceneBuilder(
       id,
@@ -1651,6 +1473,7 @@ void addPlatformView(
   const int valueString = 7;
   const int valueUint8List = 8;
   const int valueMap = 13;
+
   final Uint8List message = Uint8List.fromList(<int>[
     valueString,
     ..._encodeString('create'),
