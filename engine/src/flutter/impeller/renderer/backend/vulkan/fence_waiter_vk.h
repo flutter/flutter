@@ -13,6 +13,7 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "impeller/base/thread.h"
+#include "impeller/renderer/backend/vulkan/device_holder.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
@@ -33,7 +34,7 @@ class FenceWaiterVK {
  private:
   friend class ContextVK;
 
-  const vk::Device device_;
+  std::weak_ptr<DeviceHolder> device_holder_;
   std::unique_ptr<std::thread> waiter_thread_;
   std::mutex wait_set_mutex_;
   std::condition_variable wait_set_cv_;
@@ -41,11 +42,12 @@ class FenceWaiterVK {
   bool terminate_ = false;
   bool is_valid_ = false;
 
-  explicit FenceWaiterVK(vk::Device device);
+  explicit FenceWaiterVK(std::weak_ptr<DeviceHolder> device_holder);
 
   void Main();
 
-  std::optional<std::vector<vk::Fence>> TrimAndCreateWaitSetLocked();
+  std::optional<std::vector<vk::Fence>> TrimAndCreateWaitSetLocked(
+      std::shared_ptr<DeviceHolder> device_holder);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FenceWaiterVK);
 };

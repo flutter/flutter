@@ -17,11 +17,11 @@ namespace impeller {
 AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
                          uint32_t vulkan_api_version,
                          const vk::PhysicalDevice& physical_device,
-                         const vk::Device& logical_device,
+                         const std::shared_ptr<DeviceHolder>& device_holder,
                          const vk::Instance& instance,
                          PFN_vkGetInstanceProcAddr get_instance_proc_address,
                          PFN_vkGetDeviceProcAddr get_device_proc_address)
-    : context_(std::move(context)), device_(logical_device) {
+    : context_(std::move(context)), device_holder_(device_holder) {
   vk_ = fml::MakeRefCounted<vulkan::VulkanProcTable>(get_instance_proc_address);
 
   auto instance_handle = vulkan::VulkanHandle<VkInstance>(instance);
@@ -29,7 +29,8 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
     return;
   }
 
-  auto device_handle = vulkan::VulkanHandle<VkDevice>(logical_device);
+  auto device_handle =
+      vulkan::VulkanHandle<VkDevice>(device_holder->GetDevice());
   if (!vk_->SetupDeviceProcAddresses(device_handle)) {
     return;
   }
@@ -78,7 +79,7 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
   VmaAllocatorCreateInfo allocator_info = {};
   allocator_info.vulkanApiVersion = vulkan_api_version;
   allocator_info.physicalDevice = physical_device;
-  allocator_info.device = logical_device;
+  allocator_info.device = device_holder->GetDevice();
   allocator_info.instance = instance;
   allocator_info.pVulkanFunctions = &proc_table;
 
@@ -333,10 +334,15 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
   if (!IsValid()) {
     return nullptr;
   }
-  auto source = std::make_shared<AllocatedTextureSourceVK>(desc,        //
-                                                           allocator_,  //
-                                                           device_      //
-  );
+  auto device_holder = device_holder_.lock();
+  if (!device_holder) {
+    return nullptr;
+  }
+  auto source =
+      std::make_shared<AllocatedTextureSourceVK>(desc,                       //
+                                                 allocator_,                 //
+                                                 device_holder->GetDevice()  //
+      );
   if (!source->IsValid()) {
     return nullptr;
   }
