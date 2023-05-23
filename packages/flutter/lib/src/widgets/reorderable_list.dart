@@ -459,7 +459,7 @@ class SliverReorderableList extends StatefulWidget {
        );
 
   // An eyeballed value for a smooth scrolling experience.
-  static const double _kDefaultAutoScrollVelocityScalar = 40;
+  static const double _kDefaultAutoScrollVelocityScalar = 50;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
