@@ -444,14 +444,15 @@ void main() {
           await tester.pumpWidget(buildEditableText(obscured: true));
           await sendKeyCombination(tester, const SingleActivator(trigger));
 
+          // Both emojis that were partially selected are deleted entirely.
           expect(
             controller.text,
-            '👨‍👩‍👦👨‍👩‍👦',
+            '‍👩‍👦👨‍👩‍👦',
           );
 
           expect(
             controller.selection,
-            const TextSelection.collapsed(offset: 1),
+            const TextSelection.collapsed(offset: 0),
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
       });
