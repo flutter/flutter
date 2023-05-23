@@ -471,13 +471,16 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
     # flutter_desktop_darwin_unittests uses global state that isn't handled
     # correctly by gtest-parallel.
     # https://github.com/flutter/flutter/issues/104789
-    run_engine_executable(
-        build_dir,
-        'flutter_desktop_darwin_unittests',
-        executable_filter,
-        shuffle_flags,
-        coverage=coverage
-    )
+    if not os.path.basename(build_dir).startswith('host_debug'):
+      # Test is disabled for flaking in debug runs:
+      # https://github.com/flutter/flutter/issues/127441
+      run_engine_executable(
+          build_dir,
+          'flutter_desktop_darwin_unittests',
+          executable_filter,
+          shuffle_flags,
+          coverage=coverage
+      )
     extra_env = {
         # pylint: disable=line-too-long
         # See https://developer.apple.com/documentation/metal/diagnosing_metal_programming_issues_early?language=objc
