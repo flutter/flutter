@@ -1846,6 +1846,7 @@ targets:
   - name: Linux_android flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
     presubmit: true # TESTING CHANGE ONLY
+    bringup: false # TESTING CHANGE ONLY
     timeout: 60
     properties:
       tags: >
