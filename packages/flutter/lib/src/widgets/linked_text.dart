@@ -139,6 +139,8 @@ class LinkedText extends StatelessWidget {
          ),
        ];
 
+  // TODO(justinmc): Should this take a single span instead of a list? If you
+  // did want to linkify a list, you could wrap then in a single TextSpan.
   LinkedText.spans({
     super.key,
     required this.children,
@@ -159,14 +161,13 @@ class LinkedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (children.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return RichText(
       text: TextSpan(
         style: style,
-        //children: linkSpans(TextLinker.urlRangesFinder, children),
-        // TODO(justinmc): Need to handle all children (and none).
-        children: <InlineSpan>[
-          linkSpan(TextLinker.urlRangesFinder, children.first, onTap),
-        ],
+        children: linkSpans(TextLinker.urlRangesFinder, children, onTap).toList(),
       ),
     );
     /*
@@ -471,30 +472,37 @@ List<TextRange> _cleanRanges(Iterable<TextRange> ranges) {
   return nextRanges;
 }
 
-InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallback? onTap) {
-  /*
-  final String flattened = spans.fold<String>('', (String value, InlineSpan span) {
-    return value + span.toString();
-  });
-  print('justin linkSpans flattened to: $flattened');
-  */
-
-  if (span is! TextSpan) {
-    return span;
-  }
-
-  //print('justin linkSpan flattened to: ${span.toPlainText()}');
-
-  // Flatten the tree and find all ranges in the flat String. This must be done
+Iterable<InlineSpan> linkSpans(RangesFinder rangesFinder, Iterable<InlineSpan> spans, UriStringCallback? onTap) {
+  // Flatten the spans and find all ranges in the flat String. This must be done
   // cumulatively, and not during a traversal, because matches may occur across
   // span boundaries.
-  final String spanText = span.toPlainText();
-  final Iterable<(TextRange, String)> ranges = _getRanges(rangesFinder, spanText);
+  final String spansText = spans.fold<String>('', (String value, InlineSpan span) {
+    return value + span.toPlainText();
+  });
+  final Iterable<(TextRange, String)> ranges = _getRanges(rangesFinder, spansText);
 
-  print('justin ranges $ranges.');
+  final (Iterable<InlineSpan> output, _) =
+      _linkSpansRecurse(spans, ranges, 0, onTap);
+  return output;
+}
 
-  final (InlineSpan nextSpan, _) = _linkSpanRecurse(span, ranges, 0, onTap);
-  return nextSpan;
+(Iterable<InlineSpan>, Iterable<(TextRange, String)>) _linkSpansRecurse(Iterable<InlineSpan> spans, Iterable<(TextRange, String)> ranges, int index, UriStringCallback? onTap) {
+  final List<InlineSpan> output = <InlineSpan>[];
+  Iterable<(TextRange, String)> nextRanges = ranges;
+  int nextIndex = index;
+  for (final InlineSpan span in spans) {
+    final (InlineSpan childSpan, Iterable<(TextRange, String)> childRanges) = _linkSpanRecurse(
+      span,
+      nextRanges,
+      nextIndex,
+      onTap,
+    );
+    output.add(childSpan);
+    nextRanges = childRanges;
+    nextIndex += span.toPlainText().length; // TODO(justinmc): Performance? Maybe you could return the index rather than recalculating it?
+  }
+
+  return (output, nextRanges);
 }
 
 // index is the index of the start of `span` in the overall tree.
@@ -565,20 +573,19 @@ InlineSpan linkSpan(RangesFinder rangesFinder, InlineSpan span, UriStringCallbac
     }
   }
 
-  int nextIndex = index + (span.text?.length ?? 0);
+  // Recurse on the children.
   if (span.children?.isNotEmpty ?? false) {
-    for (final InlineSpan child in span.children!) {
-      final (InlineSpan childSpan, Iterable<(TextRange, String)> childRanges) = _linkSpanRecurse(
-        child,
-        nextRanges,
-        nextIndex,
-        onTap,
-      );
-      nextTree.children!.add(childSpan);
-      print('justin added to tree (child): |${nextTree.children!.last.toPlainText()}|');
-      nextRanges = childRanges.toList();
-      nextIndex += child.toPlainText().length; // TODO(justinmc): Performance?
-    }
+    final (
+      Iterable<InlineSpan> childrenSpans,
+      Iterable<(TextRange, String)> childrenRanges,
+    ) = _linkSpansRecurse(
+      span.children!,
+      nextRanges,
+      index + (span.text?.length ?? 0),
+      onTap,
+    );
+    nextRanges = childrenRanges.toList();
+    nextTree.children!.addAll(childrenSpans);
   }
 
   return (nextTree, nextRanges);
