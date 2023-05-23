@@ -14,6 +14,7 @@ import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'semantics_tester.dart';
 
@@ -2265,7 +2266,7 @@ void _testPlatformView() {
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    ui.platformViewRegistry.registerViewFactory(
+    ui_web.platformViewRegistry.registerViewFactory(
       'test-platform-view',
       (int viewId) => createDomHTMLDivElement()
         ..id = 'view-0'

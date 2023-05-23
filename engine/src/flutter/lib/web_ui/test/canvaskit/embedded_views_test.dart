@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'common.dart';
 import 'test_data.dart';
@@ -27,7 +28,7 @@ void testMain() {
 
     test('embeds interactive platform views', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -62,7 +63,7 @@ void testMain() {
 
     test('clips platform views with RRects', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -117,7 +118,7 @@ void testMain() {
 
     test('correctly transforms platform views', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -147,7 +148,7 @@ void testMain() {
     });
 
     test('correctly offsets platform views', () async {
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -185,7 +186,7 @@ void testMain() {
     }
 
     test('correctly offsets when clip chain length is changed', () async {
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -236,7 +237,7 @@ void testMain() {
 
     test('converts device pixels to logical pixels (no clips)', () async {
       window.debugOverrideDevicePixelRatio(4);
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -261,7 +262,7 @@ void testMain() {
 
     test('converts device pixels to logical pixels (with clips)', () async {
       window.debugOverrideDevicePixelRatio(4);
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -301,7 +302,7 @@ void testMain() {
       // Initialize all platform views to be used in the test.
       final List<int> platformViewIds = <int>[];
       for (int i = 0; i < 16; i++) {
-        ui.platformViewRegistry.registerViewFactory(
+        ui_web.platformViewRegistry.registerViewFactory(
           'test-platform-view',
           (int viewId) => createDomHTMLDivElement()..id = 'view-$i',
         );
@@ -454,7 +455,7 @@ void testMain() {
       // Initialize all platform views to be used in the test.
       final List<int> platformViewIds = <int>[];
       for (int i = 0; i < 20; i++) {
-        ui.platformViewRegistry.registerViewFactory(
+        ui_web.platformViewRegistry.registerViewFactory(
           'test-platform-view',
           (int viewId) => createDomHTMLDivElement()..id = 'view-$i',
         );
@@ -581,7 +582,7 @@ void testMain() {
     }, skip: isSafari);
 
     test('embeds and disposes of a platform view', () async {
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -621,7 +622,7 @@ void testMain() {
     });
 
     test('does not crash when resizing the window after textures have been registered', () async {
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -668,7 +669,7 @@ void testMain() {
 
     test('removed the DOM node of an unrendered platform view', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -728,7 +729,7 @@ void testMain() {
         'removes old SVG clip definitions from the DOM when the view is recomposited',
         () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'test-view',
       );
@@ -763,7 +764,7 @@ void testMain() {
     test('does not crash when a prerolled platform view is not composited',
         () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -784,7 +785,7 @@ void testMain() {
     test('does not crash when overlays are disabled', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       HtmlViewEmbedder.debugDisableOverlays = true;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -817,7 +818,7 @@ void testMain() {
       expect(SurfaceFactory.instance.maximumSurfaces, 2);
       expect(SurfaceFactory.instance.maximumOverlays, 1);
 
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -861,7 +862,7 @@ void testMain() {
         'of views is used', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       HtmlViewEmbedder.debugDisableOverlays = true;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
@@ -897,11 +898,11 @@ void testMain() {
 
     test('does not create overlays for invisible platform views', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
           'test-visible-view',
           (int viewId) =>
               createDomHTMLDivElement()..className = 'visible-platform-view');
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-invisible-view',
         (int viewId) =>
             createDomHTMLDivElement()..className = 'invisible-platform-view',

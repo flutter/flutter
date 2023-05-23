@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -164,7 +165,7 @@ void testMain() {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
       SurfaceFactory.instance.debugClear();
 
-      ui.platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
         (int viewId) => createDomHTMLDivElement()..id = 'view-0',
       );
