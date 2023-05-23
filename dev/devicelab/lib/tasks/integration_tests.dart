@@ -243,7 +243,7 @@ class IntegrationTest {
 
       if (withTalkBack) {
         if (device is! AndroidDevice) {
-          return TaskResult.failure('A test that enables TalkBack can only be run on Android device');
+          return TaskResult.failure('A test that enables TalkBack can only be run on Android devices');
         }
         await enableTalkBack();
       }
