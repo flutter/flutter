@@ -124,3 +124,39 @@ abstract final class AppleTestUtils {
     return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
   }
 }
+
+/// Matcher to be used for [ProcessResult] returned
+/// from a process run
+///
+/// Need to provide [expectedExitCode]
+class ProcessResultMatcher extends Matcher {
+  ProcessResultMatcher(this.expectedExitCode);
+
+  final int expectedExitCode;
+
+  @override
+  Description describe(Description description) =>
+      description.add('The expected exit code ($expectedExitCode) '
+          'did not match the actual exit code');
+
+  @override
+  bool matches(dynamic item, dynamic matchState) {
+    final ProcessResult result = item as ProcessResult;
+
+    return result.exitCode == expectedExitCode;
+  }
+
+  @override
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    final ProcessResult result = item! as ProcessResult;
+
+    mismatchDescription.add('Actual exit code was ${result.exitCode}');
+
+    return mismatchDescription;
+  }
+}
