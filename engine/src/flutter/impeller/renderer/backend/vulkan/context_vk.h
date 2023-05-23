@@ -33,7 +33,6 @@ class FenceWaiterVK;
 
 class ContextVK final : public Context,
                         public BackendCast<ContextVK, Context>,
-                        public DeviceHolder,
                         public std::enable_shared_from_this<ContextVK> {
  public:
   struct Settings {
@@ -108,10 +107,13 @@ class ContextVK final : public Context,
     return true;
   }
 
+  std::shared_ptr<DeviceHolder> GetDeviceHolder() const {
+    return device_holder_;
+  }
+
   vk::Instance GetInstance() const;
 
-  // |DeviceHolder|
-  const vk::Device& GetDevice() const override;
+  const vk::Device& GetDevice() const;
 
   const std::shared_ptr<fml::ConcurrentTaskRunner>
   GetConcurrentWorkerTaskRunner() const;
@@ -131,10 +133,16 @@ class ContextVK final : public Context,
   std::shared_ptr<FenceWaiterVK> GetFenceWaiter() const;
 
  private:
-  vk::UniqueInstance instance_;
+  struct DeviceHolderImpl : public DeviceHolder {
+    // |DeviceHolder|
+    const vk::Device& GetDevice() const override { return device.get(); }
+    vk::UniqueInstance instance;
+    vk::PhysicalDevice physical_device;
+    vk::UniqueDevice device;
+  };
+
+  std::shared_ptr<DeviceHolderImpl> device_holder_;
   std::unique_ptr<DebugReportVK> debug_report_;
-  vk::PhysicalDevice physical_device_;
-  vk::UniqueDevice device_;
   std::shared_ptr<Allocator> allocator_;
   std::shared_ptr<ShaderLibraryVK> shader_library_;
   std::shared_ptr<SamplerLibraryVK> sampler_library_;
