@@ -1,4 +1,4 @@
-Signature: 43d287276a201994c50af19750dd9949
+Signature: 63dcc0840a13f9b0e65497ae34248fe7
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8941,6 +8941,7 @@ ORIGIN: ../../../third_party/skia/src/base/SkSafeMath.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkBlitter_A8.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkChecksum.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp + ../../../third_party/skia/LICENSE
@@ -9059,6 +9060,7 @@ FILE: ../../../third_party/skia/src/base/SkSafeMath.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_A8.h
 FILE: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.h
 FILE: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp
+FILE: ../../../third_party/skia/src/core/SkChecksum.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.h
 FILE: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp
