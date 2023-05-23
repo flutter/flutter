@@ -149,7 +149,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   auto bridge =
       std::make_unique<flutter::AccessibilityBridge>(/*view=*/nil,
                                                      /*platform_view=*/platform_view.get(),
@@ -169,7 +171,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
@@ -196,7 +200,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -241,7 +247,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -271,7 +279,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
         /*delegate=*/mock_delegate,
         /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/flutterPlatformViewsController,
-        /*task_runners=*/runners);
+        /*task_runners=*/runners,
+        /*worker_task_runner=*/nil,
+        /*is_gpu_disabled_sync_switch=*/nil);
     id mockFlutterView = OCMClassMock([FlutterView class]);
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -328,7 +338,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
         /*delegate=*/mock_delegate,
         /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/flutterPlatformViewsController,
-        /*task_runners=*/runners);
+        /*task_runners=*/runners,
+        /*worker_task_runner=*/nil,
+        /*is_gpu_disabled_sync_switch=*/nil);
 
     MockFlutterPlatformFactory* factory = [[MockFlutterPlatformFactory new] autorelease];
     flutterPlatformViewsController->RegisterViewFactory(
@@ -371,7 +383,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -463,7 +477,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -533,7 +549,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/flutterPlatformViewsController,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -603,7 +621,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -669,7 +689,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id engine = OCMClassMock([FlutterEngine class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
@@ -714,7 +736,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -796,7 +820,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -869,7 +895,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -941,7 +969,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -996,7 +1026,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1091,7 +1123,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1175,7 +1209,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1265,7 +1301,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1333,7 +1371,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1400,7 +1440,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1473,7 +1515,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1548,7 +1592,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1619,7 +1665,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1692,7 +1740,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1747,7 +1797,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1807,7 +1859,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1875,7 +1929,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   fml::AutoResetWaitableEvent latch;
   thread_task_runner->PostTask([&] {
     auto weakFactory =
@@ -1908,7 +1964,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
-      /*task_runners=*/runners);
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/nil);
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
@@ -1956,7 +2014,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
         /*delegate=*/test_delegate,
         /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
-        /*task_runners=*/runners);
+        /*task_runners=*/runners,
+        /*worker_task_runner=*/nil,
+        /*is_gpu_disabled_sync_switch=*/nil);
 
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     auto flutterPlatformViewsController =
