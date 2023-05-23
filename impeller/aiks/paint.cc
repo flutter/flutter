@@ -5,7 +5,7 @@
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
-#include "impeller/entity/geometry.h"
+#include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
 
