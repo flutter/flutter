@@ -180,6 +180,7 @@ vars = {
   "upstream_libtess2": "https://github.com/memononen/libtess2.git",
   "upstream_libwebp": "https://chromium.googlesource.com/webm/libwebp.git",
   "upstream_libxml": "https://gitlab.gnome.org/GNOME/libxml2.git",
+  "upstream_leak_tracker": "https://github.com/dart-lang/leak_tracker.git",
   "upstream_linter": "https://github.com/dart-lang/linter.git",
   "upstream_logging": "https://github.com/dart-lang/logging.git",
   "upstream_markdown": "https://github.com/dart-lang/markdown.git",
@@ -400,6 +401,9 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/json_rpc_2':
    Var('dart_git') + '/json_rpc_2.git@b2ed6bd1659b932062b1ce5878f5c754ce68679f',
+
+  'src/third_party/dart/third_party/pkg/leak_tracker':
+   Var('dart_git') + '/leak_tracker.git@571c24aeee986767e6a5b8eef4056278cf747850',
 
   'src/third_party/dart/third_party/pkg/linter':
    Var('dart_git') + '/linter.git@599b5288ee883393bf3a9ae4d2cfe90c168cce91',
