@@ -83,6 +83,25 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
 /// order of the text (the order each [WidgetSpan] is encountered when the user
 /// reads the text).
 ///
+/// To use this mixin in a [RenderBox] class:
+///
+///  * Call [layoutInlineWidgets] in the `performLayout` and `computeDryLayout`
+///    implementation, and during intrinsic size calculations, to get the size
+///    information of the inline widgets as a `List` of `PlaceholderDimensions`.
+///    Determine the positioning of the inline widgets (which is usually done by
+///    a [TextPainter] using its line break algorithm).
+///
+///  * Call [positionInlineChildren] with the positioning information of the
+///    inline widgets.
+///
+///  * Implement [RenderBox.applyPaintTransform], optionally with
+///    [defaultApplyPaintTransform].
+///
+///  * Call [paintInlineWidgets] in [RenderBox.paint] to paint the inline widgets.
+///
+///  * Call [hitTestInlineWidgets] in [RenderBox.hitTestChildren] to hit test the
+///    inline widgets.
+///
 /// See also:
 ///
 ///  * [WidgetSpan.extractFromInlineSpan], a helper function for extracting
