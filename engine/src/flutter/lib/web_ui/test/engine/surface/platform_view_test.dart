@@ -7,7 +7,8 @@ import 'dart:async';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart';
+import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/matchers.dart';
 
@@ -19,17 +20,39 @@ void main() {
 }
 
 Future<void> testMain() async {
-  await webOnlyInitializePlatform();
+  await ui.webOnlyInitializePlatform();
 
   late PersistedPlatformView view;
 
+  test('importing platformViewRegistry from dart:ui is deprecated', () {
+    final void Function(String) oldPrintWarning = printWarning;
+
+    final List<String> warnings = <String>[];
+    printWarning = (String message) {
+      warnings.add(message);
+    };
+
+    // ignore: unnecessary_statements
+    ui_web.platformViewRegistry;
+    expect(warnings, isEmpty);
+
+    // ignore: unnecessary_statements
+    ui.platformViewRegistry;
+    expect(warnings, hasLength(1));
+    expect(warnings.single, contains('platformViewRegistry'));
+    expect(warnings.single, contains('deprecated'));
+    expect(warnings.single, contains('dart:ui_web'));
+
+    printWarning = oldPrintWarning;
+  });
+
   group('PersistedPlatformView', () {
     setUp(() async {
-      platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-0',
         (int viewId) => createDomHTMLDivElement(),
       );
-      platformViewRegistry.registerViewFactory(
+      ui_web.platformViewRegistry.registerViewFactory(
         'test-1',
         (int viewId) => createDomHTMLDivElement(),
       );
@@ -62,7 +85,7 @@ Future<void> testMain() async {
       });
 
       test('returns false when other view is not a PlatformView', () {
-        final PersistedOpacity anyView = PersistedOpacity(null, 1, Offset.zero)..build();
+        final PersistedOpacity anyView = PersistedOpacity(null, 1, ui.Offset.zero)..build();
         expect(view.canUpdateAsMatch(anyView), isFalse);
       });
     });
