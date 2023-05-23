@@ -178,8 +178,6 @@ class EdgeDraggingAutoScroller {
   ///
   /// It represents how the velocity scale with the over scroll distance. The
   /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
-  ///
-  /// Defaults to 7 if not set or set to null.
   /// {@endtemplate}
   final double velocityScalar;
 

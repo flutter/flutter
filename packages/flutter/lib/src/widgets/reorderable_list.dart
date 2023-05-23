@@ -257,6 +257,8 @@ class ReorderableList extends StatefulWidget {
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  ///
+  /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
   final double? autoScrollerVelocityScalar;
 
   /// The state from the closest instance of this class that encloses the given
@@ -489,6 +491,10 @@ class SliverReorderableList extends StatefulWidget {
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  ///
+  /// {@template flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
+  /// Defaults to 50 if not set or set to null.
+  /// {@endtemplate}
   final double autoScrollerVelocityScalar;
 
   @override
