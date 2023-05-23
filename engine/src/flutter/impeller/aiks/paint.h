@@ -15,7 +15,7 @@
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/entity.h"
-#include "impeller/entity/geometry.h"
+#include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/color.h"
 
 namespace impeller {

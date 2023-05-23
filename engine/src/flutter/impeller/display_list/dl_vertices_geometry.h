@@ -9,7 +9,7 @@
 
 #include "flutter/display_list/dl_vertices.h"
 
-#include "impeller/entity/geometry.h"
+#include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
