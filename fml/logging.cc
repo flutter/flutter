@@ -123,8 +123,9 @@ LogMessage::~LogMessage() {
   fx_logger_log_with_source(fx_log_get_logger(), fx_severity, nullptr, file_,
                             line_, stream_.str().c_str());
 #else
-  std::cerr << stream_.str();
-  std::cerr.flush();
+  // Don't use std::cerr here, because it may not be initialized properly yet.
+  fprintf(stderr, "%s", stream_.str().c_str());
+  fflush(stderr);
 #endif
 
   if (severity_ >= LOG_FATAL) {
