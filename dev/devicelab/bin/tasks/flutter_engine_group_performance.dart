@@ -20,6 +20,8 @@ Future<void> _withApkInstall(
   final DeviceDiscovery devices = DeviceDiscovery();
   final AndroidDevice device = await devices.workingDevice as AndroidDevice;
   await device.unlock();
+  // Force proper cleanup before trying to install app.
+  await device.adb(<String>['uninstall', bundleName]);
   await device.adb(<String>['install', '-r', apkPath]);
   try {
     await body(device);
