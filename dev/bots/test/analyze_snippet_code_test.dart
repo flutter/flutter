@@ -68,7 +68,7 @@ void main() {
     final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
-      'Found 18 snippet code errors.',
+      'Found 15 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
@@ -92,7 +92,7 @@ void main() {
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,
-      'Found 22 snippet code errors.',
+      'Found 19 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
