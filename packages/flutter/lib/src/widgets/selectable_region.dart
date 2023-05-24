@@ -246,7 +246,13 @@ class SelectableRegion extends StatefulWidget {
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
-  /// The separator to use when concatenating the selected text.
+  /// {@template flutter.widgets.SelectableRegion.separator}
+  /// The separator to use when concatenating the selected text. Defaults to an
+  /// empty string, which means the selected text will be concatenated without
+  /// any separator. If the selectable text is arranged vertically, this
+  /// should be set to `\n` so that the selected text is copied with the
+  /// expected formatting.
+  /// {@endtemplate}
   final String separator;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
@@ -1464,8 +1470,8 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates a [MultiSelectableSelectionContainerDelegate].
   ///
-  /// The [separator] is used to separate the text of each selectable in
-  /// [selectables].
+  /// The [separator] is inserted between the text of each selectable in
+  /// [selectables] when they are copied to the clipboard.
   MultiSelectableSelectionContainerDelegate({
      this.separator = '',
   });

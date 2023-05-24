@@ -586,7 +586,7 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
       await gesture.up();
 
-      // keyboard copy.
+      // Keyboard copy.
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
@@ -620,7 +620,7 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
       await gesture.up();
 
-      // keyboard copy.
+      // Keyboard copy.
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
@@ -663,7 +663,7 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
       await gesture.up();
 
-      // keyboard copy.
+      // Keyboard copy.
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
@@ -837,7 +837,7 @@ void main() {
       await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
       await gesture.up();
 
-      // keyboard copy.
+      // Keyboard copy.
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
       expect(clipboardData['text'], 'w are you?Good, and you?Fine');
@@ -877,7 +877,7 @@ void main() {
         await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
         await gesture.up();
 
-        // keyboard copy.
+        // Keyboard copy.
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Fine');
@@ -917,7 +917,7 @@ void main() {
         await gesture.moveTo(textOffsetToPosition(paragraph, 17)); // right after `Fine`.
         await gesture.up();
 
-        // keyboard copy.
+        // Keyboard copy.
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
         expect(clipboardData['text'], 'w are you?Fine');

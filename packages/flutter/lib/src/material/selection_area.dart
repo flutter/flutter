@@ -88,7 +88,7 @@ class SelectionArea extends StatefulWidget {
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
-  /// The separator to use when concatenating the selected text.
+  /// {@macro flutter.widgets.SelectableRegion.separator}
   final String separator;
 
   /// The child widget this selection area applies to.
