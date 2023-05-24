@@ -121,6 +121,54 @@ targets:
       - testing/**
       - shell/platform/android/**
 
+  - name: Linux builder_cache
+    enabled_branches:
+      - main
+    recipe: engine_v2/cache
+    bringup: true
+    presubmit: false
+    properties:
+      cache_name: "builder"
+      cache_root: "cache"
+      cache_paths: >-
+        [
+          "builder",
+          "git"
+        ]
+    timeout: 60
+
+  - name: Windows builder_cache
+    enabled_branches:
+      - main
+    recipe: engine_v2/cache
+    bringup: true
+    presubmit: false
+    properties:
+      cache_name: "builder"
+      cache_root: "cache"
+      cache_paths: >-
+        [
+          "builder",
+          "git"
+        ]
+    timeout: 60
+
+  - name: Mac builder_cache
+    enabled_branches:
+      - main
+    recipe: engine_v2/cache
+    bringup: true
+    presubmit: false
+    properties:
+      cache_name: "builder"
+      cache_root: "cache"
+      cache_paths: >-
+        [
+          "builder",
+          "git"
+        ]
+    timeout: 60
+
   - name: Linux Benchmarks
     enabled_branches:
       - main
