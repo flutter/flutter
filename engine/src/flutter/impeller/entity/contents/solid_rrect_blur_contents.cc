@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/entity/contents/rrect_shadow_contents.h"
+#include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include <optional>
 
 #include "impeller/entity/contents/content_context.h"
@@ -16,29 +16,29 @@
 
 namespace impeller {
 
-RRectShadowContents::RRectShadowContents() = default;
+SolidRRectBlurContents::SolidRRectBlurContents() = default;
 
-RRectShadowContents::~RRectShadowContents() = default;
+SolidRRectBlurContents::~SolidRRectBlurContents() = default;
 
-void RRectShadowContents::SetRRect(std::optional<Rect> rect,
-                                   Scalar corner_radius) {
+void SolidRRectBlurContents::SetRRect(std::optional<Rect> rect,
+                                      Scalar corner_radius) {
   rect_ = rect;
   corner_radius_ = corner_radius;
 }
 
-void RRectShadowContents::SetSigma(Sigma sigma) {
+void SolidRRectBlurContents::SetSigma(Sigma sigma) {
   sigma_ = sigma;
 }
 
-void RRectShadowContents::SetColor(Color color) {
+void SolidRRectBlurContents::SetColor(Color color) {
   color_ = color.Premultiply();
 }
 
-Color RRectShadowContents::GetColor() const {
+Color SolidRRectBlurContents::GetColor() const {
   return color_;
 }
 
-std::optional<Rect> RRectShadowContents::GetCoverage(
+std::optional<Rect> SolidRRectBlurContents::GetCoverage(
     const Entity& entity) const {
   if (!rect_.has_value()) {
     return std::nullopt;
@@ -52,9 +52,9 @@ std::optional<Rect> RRectShadowContents::GetCoverage(
   return bounds.TransformBounds(entity.GetTransformation());
 };
 
-bool RRectShadowContents::Render(const ContentContext& renderer,
-                                 const Entity& entity,
-                                 RenderPass& pass) const {
+bool SolidRRectBlurContents::Render(const ContentContext& renderer,
+                                    const Entity& entity,
+                                    RenderPass& pass) const {
   if (!rect_.has_value()) {
     return true;
   }
@@ -64,7 +64,11 @@ bool RRectShadowContents::Render(const ContentContext& renderer,
 
   VertexBufferBuilder<VS::PerVertexData> vtx_builder;
 
-  auto blur_radius = sigma_.sigma * 2;
+  // Clamp the max kernel width/height to 1000.
+  auto blur_sigma = std::min(sigma_.sigma, 250.0f);
+  // Increase quality by make the radius a bit bigger than the typical
+  // sigma->radius conversion we use for slower blurs.
+  auto blur_radius = blur_sigma * 2;
   auto positive_rect = rect_->GetPositive();
   {
     auto left = -blur_radius;
@@ -99,7 +103,7 @@ bool RRectShadowContents::Render(const ContentContext& renderer,
 
   FS::FragInfo frag_info;
   frag_info.color = color_;
-  frag_info.blur_sigma = sigma_.sigma;
+  frag_info.blur_sigma = blur_sigma;
   frag_info.rect_size = Point(positive_rect.size);
   frag_info.corner_radius =
       std::min(corner_radius_, std::min(positive_rect.size.width / 2.0f,

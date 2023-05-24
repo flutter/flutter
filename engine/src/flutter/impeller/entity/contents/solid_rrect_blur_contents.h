@@ -18,11 +18,14 @@ class Path;
 class HostBuffer;
 struct VertexBuffer;
 
-class RRectShadowContents final : public Contents {
+/// @brief  Draws a fast solid color blur of an rounded rectangle. Only supports
+/// RRects with fully symmetrical radii. Also produces correct results for
+/// rectangles (corner_radius=0) and circles (corner_radius=width/2=height/2).
+class SolidRRectBlurContents final : public Contents {
  public:
-  RRectShadowContents();
+  SolidRRectBlurContents();
 
-  ~RRectShadowContents() override;
+  ~SolidRRectBlurContents() override;
 
   void SetRRect(std::optional<Rect> rect, Scalar corner_radius = 0);
 
@@ -47,7 +50,7 @@ class RRectShadowContents final : public Contents {
 
   Color color_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(RRectShadowContents);
+  FML_DISALLOW_COPY_AND_ASSIGN(SolidRRectBlurContents);
 };
 
 }  // namespace impeller
