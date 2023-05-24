@@ -93,6 +93,7 @@ team:
     - '**/fix_data.yaml'
     - '**/*.expect'
     - '**/*test_fixes*'
+    - .github/**/*
     - dev/**/*
     - examples/**/*
     - packages/flutter_goldens/**/*
