@@ -1368,38 +1368,39 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: SearchAnchor(
-                  searchController: controller,
-                  builder: (BuildContext context, SearchController controller) {
-                    return const Icon(Icons.search);
-                  },
-                  suggestionsBuilder: (BuildContext context, SearchController controller) async {
-                    return <Widget>[
-                      ListTile(
-                          title: const Text(suggestion),
-                          onTap: () {
-                            setState(() {
-                              controller.closeView(suggestion);
-                            });
-                          }),
-                    ];
-                  },
-                ),
+        builder: (BuildContext context, StateSetter setState) {
+          return Material(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SearchAnchor(
+                searchController: controller,
+                builder: (BuildContext context, SearchController controller) {
+                  return const Icon(Icons.search);
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) async {
+                  return <Widget>[
+                    ListTile(
+                      title: const Text(suggestion),
+                      onTap: () {
+                        setState(() {
+                          controller.closeView(suggestion);
+                        });
+                      },
+                    ),
+                  ];
+                },
               ),
-            );
-          }
+            ),
+          );
+        },
       ),
     ));
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    final Finder listTile = find.widgetWithText(ListTile, suggestion);
-    expect(listTile, findsOneWidget);
-    await tester.tap(listTile);
+    final Finder text = find.text(suggestion);
+    expect(text, findsOneWidget);
+    await tester.tap(text);
     await tester.pumpAndSettle();
 
     expect(controller.isOpen, false);
