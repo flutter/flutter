@@ -1244,7 +1244,7 @@ class _SearchBarState extends State<SearchBar> {
                           enabledBorder: InputBorder.none,
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
                         )),
                       ),
                     ),
