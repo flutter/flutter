@@ -550,14 +550,13 @@ void main() {
         const SliverToBoxAdapter(child: SizedBox(height: 2400)),
       ],
     ));
+    await tester.pumpAndSettle();
     final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
     final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     expect(renderGroup.geometry!.scrollExtent, equals(600));
-    print('should repaint');
-    controller.jumpTo(600);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
     await tester.pumpAndSettle();
-    print('should repaint');
-    controller.jumpTo(570);
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 30));
     await tester.pumpAndSettle();
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-30.0));
   });
@@ -621,7 +620,7 @@ Widget _buildSliverCrossAxisGroup({
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
-  TestDelegate({this.stretchConfiguration, this.showOnScreenConfiguration});
+  TestDelegate();
 
   @override
   double get maxExtent => 60.0;
@@ -630,16 +629,10 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 60.0;
 
   @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(height: maxExtent);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(height: maxExtent, decoration: BoxDecoration(color: Colors.black));
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
-
-  @override
-  final OverScrollHeaderStretchConfiguration? stretchConfiguration;
-  @override
-  final PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration;
+  bool shouldRebuild(TestDelegate oldDelegate) => true;
 }

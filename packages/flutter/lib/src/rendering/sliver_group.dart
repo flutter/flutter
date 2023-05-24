@@ -49,6 +49,8 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 
   @override
   void performLayout() {
+    print('scroll offset is');
+    print(constraints.scrollOffset);
     // Iterate through each sliver.
     // Get the parent's dimensions.
     final double crossAxisExtent = constraints.crossAxisExtent;
@@ -111,6 +113,8 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
       final double paintCorrection = childLayoutGeometry.paintExtent > remainingExtent
         ? childLayoutGeometry.paintExtent - remainingExtent
         : 0.0;
+      print('printing child paintextent');
+      print(childLayoutGeometry.paintExtent);
       final double childExtent = child.geometry!.crossAxisExtent ?? extentPerFlexValue * (childParentData.crossAxisFlex ?? 0);
       // Set child parent data.
       switch (constraints.axis) {
