@@ -544,6 +544,31 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, CanRenderLinearGradientMaskBlur) {
+  Canvas canvas;
+
+  Paint paint = {
+      .color = Color::White(),
+      .color_source = ColorSource::MakeLinearGradient(
+          {200, 200}, {400, 400},
+          {Color::Red(), Color::White(), Color::Red(), Color::White(),
+           Color::Red(), Color::White(), Color::Red(), Color::White(),
+           Color::Red(), Color::White(), Color::Red()},
+          {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0},
+          Entity::TileMode::kClamp, {}),
+      .mask_blur_descriptor =
+          Paint::MaskBlurDescriptor{
+              .style = FilterContents::BlurStyle::kNormal,
+              .sigma = Sigma(20),
+          },
+  };
+
+  canvas.DrawCircle({300, 300}, 200, paint);
+  canvas.DrawRect(Rect::MakeLTRB(100, 300, 500, 600), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderRadialGradient) {
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
