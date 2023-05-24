@@ -2322,6 +2322,27 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderClippedBlur) {
+  Canvas canvas;
+  canvas.ClipRect(Rect::MakeXYWH(100, 150, 400, 400));
+  canvas.DrawCircle(
+      {400, 400}, 200,
+      {
+          .color = Color::Green(),
+          .image_filter =
+              [](const FilterInput::Ref& input, const Matrix& effect_transform,
+                 bool is_subpass) {
+                return FilterContents::MakeGaussianBlur(
+                    input, Sigma(20), Sigma(20),
+                    FilterContents::BlurStyle::kNormal,
+                    Entity::TileMode::kClamp, effect_transform);
+              },
+      });
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 // Regression test for https://github.com/flutter/flutter/issues/126701 .
 TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
   if (GetParam() != PlaygroundBackend::kMetal) {
