@@ -1979,6 +1979,7 @@ targets:
       task_name: hello_world__memory
 
   - name: Linux_android home_scroll_perf__timeline_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/127469
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
