@@ -40,7 +40,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   /// Detaches the `client` from the platform-appropriate selection context menus.
   static void detach(SelectionContainerDelegate client) => throw UnimplementedError();
 
-  /// Override this to provide a custom implementation of [ui_web.platformViewRegistry.registerViewFactory].
+  /// Override this to provide a custom implementation of `ui_web.platformViewRegistry.registerViewFactory`.
   ///
   /// This should only be used for testing.
   @visibleForTesting
