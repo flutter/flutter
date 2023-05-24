@@ -2119,7 +2119,7 @@ extension DomHistoryExtension on DomHistory {
   external JSVoid _go1();
   @JS('go')
   external JSVoid _go2(JSNumber delta);
-  void go([double? delta]) {
+  void go([int? delta]) {
     if (delta == null) {
       _go1();
     } else {

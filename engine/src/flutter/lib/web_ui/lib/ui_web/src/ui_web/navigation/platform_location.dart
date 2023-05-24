@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 
 import 'url_strategy.dart';
+
+/// Function type that handles pop state events.
+typedef EventListener = dynamic Function(Object event);
 
 /// Encapsulates all calls to DOM apis, which allows the [UrlStrategy] classes
 /// to be platform agnostic and testable.
@@ -15,13 +19,13 @@ abstract interface class PlatformLocation {
   /// Registers an event listener for the `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void addPopStateListener(DomEventListener fn);
+  void addPopStateListener(EventListener fn);
 
   /// Unregisters the given listener (added by [addPopStateListener]) from the
   /// `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void removePopStateListener(DomEventListener fn);
+  void removePopStateListener(EventListener fn);
 
   /// The `pathname` part of the URL in the browser address bar.
   ///
@@ -64,13 +68,16 @@ abstract interface class PlatformLocation {
   /// * `go(3)` moves forward 3 steps in hisotry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  void go(double count);
+  void go(int count);
 
   /// The base href where the Flutter app is being served.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
   String? getBaseHref();
 }
+
+final Map<EventListener, DomEventListener> _popStateListenersCache =
+    <EventListener, DomEventListener>{};
 
 /// Delegates to real browser APIs to provide platform location functionality.
 class BrowserPlatformLocation implements PlatformLocation {
@@ -80,14 +87,24 @@ class BrowserPlatformLocation implements PlatformLocation {
   DomLocation get _location => domWindow.location;
   DomHistory get _history => domWindow.history;
 
-  @override
-  void addPopStateListener(DomEventListener fn) {
-    domWindow.addEventListener('popstate', fn);
+  @visibleForTesting
+  DomEventListener getOrCreateDomEventListener(EventListener fn) {
+    return _popStateListenersCache.putIfAbsent(fn, () => createDomEventListener(fn));
   }
 
   @override
-  void removePopStateListener(DomEventListener fn) {
-    domWindow.removeEventListener('popstate', fn);
+  void addPopStateListener(EventListener fn) {
+    domWindow.addEventListener('popstate', getOrCreateDomEventListener(fn));
+  }
+
+  @override
+  void removePopStateListener(EventListener fn) {
+    assert(
+      _popStateListenersCache.containsKey(fn),
+      'Removing a listener that was never added or was removed already.',
+    );
+    domWindow.removeEventListener('popstate', getOrCreateDomEventListener(fn));
+    _popStateListenersCache.remove(fn);
   }
 
   @override
@@ -113,7 +130,7 @@ class BrowserPlatformLocation implements PlatformLocation {
   }
 
   @override
-  void go(double count) {
+  void go(int count) {
     _history.go(count);
   }
 
