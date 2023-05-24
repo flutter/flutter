@@ -34,7 +34,6 @@ HostPlatform _identifyMacBinaryArch(String path) {
   expect(
       result,
       ProcessResultMatcher(
-        0,
         stdoutSubstring: '${_dartBinary.path}: Mach-O 64-bit executable',
       ));
   final RegExpMatch? match = pattern.firstMatch(result.stdout as String);

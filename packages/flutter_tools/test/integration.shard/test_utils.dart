@@ -128,10 +128,11 @@ abstract final class AppleTestUtils {
 /// Matcher to be used for [ProcessResult] returned
 /// from a process run
 ///
-/// Need to provide [expectedExitCode]
+/// The default for [expectedExitCode] will be 0 while
+/// [stdoutSubstring] and [stderrSubstring] are both optional
 class ProcessResultMatcher extends Matcher {
-  ProcessResultMatcher(
-    this.expectedExitCode, {
+  ProcessResultMatcher({
+    this.expectedExitCode = 0,
     this.stdoutSubstring,
     this.stderrSubstring,
   });

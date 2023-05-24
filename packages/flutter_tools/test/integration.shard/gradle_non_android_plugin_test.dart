@@ -79,7 +79,7 @@ void main() {
       '--verbose',
     ], workingDirectory: exampleDir.path);
 
-    expect(result, ProcessResultMatcher(0));
+    expect(result, ProcessResultMatcher());
 
     final String exampleAppApk = fileSystem.path.join(
       exampleDir.path,
