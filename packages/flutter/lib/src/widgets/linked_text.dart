@@ -645,18 +645,21 @@ class InlineLink extends TextSpan {
     super.locale,
     // TODO(justinmc): I probably need to identify this as a link in semantics somehow?
     super.semanticsLabel,
-    TextStyle style = const TextStyle(
-      // TODO(justinmc): Correct color per-platform. Get it from Theme in
-      // Material somehow?
-      // And decide underline or no per-platform.
-      color: Color(0xff0000ff),
-      decoration: TextDecoration.underline,
-    ),
+    TextStyle style = defaultLinkStyle,
     VoidCallback? onTap,
   }) : super(
     style: style,
     mouseCursor: SystemMouseCursors.click,
     text: text,
     recognizer: onTap == null ? null : (TapGestureRecognizer()..onTap = onTap),
+  );
+
+  @visibleForTesting
+  static const defaultLinkStyle = TextStyle(
+    // TODO(justinmc): Correct color per-platform. Get it from Theme in
+    // Material somehow?
+    // And decide underline or no per-platform.
+    color: Color(0xff0000ff),
+    decoration: TextDecoration.underline,
   );
 }
