@@ -151,10 +151,10 @@ class HashUrlStrategy extends UrlStrategy {
 
   @override
   ui.VoidCallback addPopStateListener(PopStateListener fn) {
-    final DomEventListener wrappedFn = createDomEventListener((DomEvent event) {
+    void wrappedFn(Object event) {
       // `fn` expects `event.state`, not a `DomEvent`.
       fn((event as DomPopStateEvent).state);
-    });
+    }
     _platformLocation.addPopStateListener(wrappedFn);
     return () => _platformLocation.removePopStateListener(wrappedFn);
   }
@@ -199,7 +199,7 @@ class HashUrlStrategy extends UrlStrategy {
 
   @override
   Future<void> go(int count) {
-    _platformLocation.go(count.toDouble());
+    _platformLocation.go(count);
     return _waitForPopState();
   }
 
