@@ -614,6 +614,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.policy/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedclient/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.product.deprecatedconfiguration/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/meta.json
 ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 ../../../fuchsia/sdk/linux/meta
 ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
