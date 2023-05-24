@@ -90,6 +90,8 @@ void main() {
         expect(trailingSpan.style, null);
       });
     }
+
+    // TODO(justinmc): Test custom regex, test multiple TextLinkers.
   });
 
   testWidgets('can create tappable full urls from a nested tree', (WidgetTester tester) async {

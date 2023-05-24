@@ -425,7 +425,8 @@ class InlineLinkedText extends TextSpan {
          ).getSpans(text),
        );
 
-  /// Create an instance of [InlineLinkedText] where
+  /// Create an instance of [InlineLinkedText] with the given [textLinkers]
+  /// applied.
   ///
   /// {@macro flutter.widgets.LinkedText.textLinkers}
   ///
@@ -483,27 +484,6 @@ class InlineLinkedText extends TextSpan {
     return nextTextLinkerSingles;
   }
 
-  static List<TextRange> _cleanRanges(Iterable<TextRange> ranges) {
-    final List<TextRange> nextRanges = ranges.toList();
-
-    // Sort by start.
-    nextRanges.sort((TextRange a, TextRange b) {
-      return a.start.compareTo(b.start);
-    });
-
-    // Remove overlapping ranges.
-    int lastEnd = 0;
-    nextRanges.removeWhere((TextRange range) {
-      final bool overlaps = range.start < lastEnd;
-      if (!overlaps) {
-        lastEnd = range.end;
-      }
-      return overlaps;
-    });
-
-    return nextRanges;
-  }
-
   /// Apply the given `textLinker`s to the given `spans` and return the new
   /// resulting spans.
   static Iterable<InlineSpan> linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
@@ -519,17 +499,16 @@ class InlineLinkedText extends TextSpan {
         );
 
     final (Iterable<InlineSpan> output, _) =
-        _linkSpansRecurse(spans, textLinkerSingles, 0);
+        _linkSpansRecursive(spans, textLinkerSingles, 0);
     return output;
   }
 
-  // TODO(justinmc): Naming of these methods.
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerSingle>) _linkSpansRecurse(Iterable<InlineSpan> spans, Iterable<_TextLinkerSingle> textLinkerSingles, int index) {
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerSingle>) _linkSpansRecursive(Iterable<InlineSpan> spans, Iterable<_TextLinkerSingle> textLinkerSingles, int index) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerSingle> nextTextLinkerSingles = textLinkerSingles;
     int nextIndex = index;
     for (final InlineSpan span in spans) {
-      final (InlineSpan childSpan, Iterable<_TextLinkerSingle> childTextLinkerSingles) = _linkSpanRecurse(
+      final (InlineSpan childSpan, Iterable<_TextLinkerSingle> childTextLinkerSingles) = _linkSpanRecursive(
         span,
         nextTextLinkerSingles,
         nextIndex,
@@ -542,9 +521,8 @@ class InlineLinkedText extends TextSpan {
     return (output, nextTextLinkerSingles);
   }
 
-  // index is the index of the start of `span` in the overall tree.
-  static (InlineSpan, Iterable<_TextLinkerSingle>) _linkSpanRecurse(InlineSpan span, Iterable<_TextLinkerSingle> textLinkerSingles, int index) {
-    print('\n\njustin _linkSpanRecurse with index $index, ranges $textLinkerSingles.');
+  // index is the index of the start of `span` in the overall flattened tree.
+  static (InlineSpan, Iterable<_TextLinkerSingle>) _linkSpanRecursive(InlineSpan span, Iterable<_TextLinkerSingle> textLinkerSingles, int index) {
     if (span is! TextSpan) {
       // TODO(justinmc): Should actually remove span from ranges here.
       return (span, textLinkerSingles);
@@ -579,7 +557,6 @@ class InlineLinkedText extends TextSpan {
               textLinkerSingle.textRange.start - index,
             ),
           ));
-          print('justin added to tree (plain text): |${nextTree.children!.last.toPlainText()}|');
         }
         // Add the link itself.
         final int linkStart = math.max(textLinkerSingle.textRange.start, index);
@@ -591,14 +568,6 @@ class InlineLinkedText extends TextSpan {
           span.text!.substring(linkStart - index, lastLinkEnd - index),
           textLinkerSingle.matchedString,
         ));
-        // TODO(justinmc): The linkbuilder needs to take 2 strings, right? See the old way below.
-        /*
-        nextTree.children!.add(InlineLink(
-          onTap: () => onTap?.call(rangeText),
-          text: span.text!.substring(linkStart - index, lastLinkEnd - index),
-        ));
-        */
-        print('justin added to tree (link): |${nextTree.children!.last.toPlainText()}|');
         if (textLinkerSingle.textRange.end > textEnd) {
           // If we only partially used this range, keep it in nextRanges. Since
           // overlapping ranges have been removed, this must be the last relevant
@@ -614,7 +583,6 @@ class InlineLinkedText extends TextSpan {
         nextTree.children!.add(TextSpan(
           text: remainingText,
         ));
-        print('justin added to tree (plain text at end of ranges): |${nextTree.children!.last.toPlainText()}|');
       }
     }
 
@@ -623,7 +591,7 @@ class InlineLinkedText extends TextSpan {
       final (
         Iterable<InlineSpan> childrenSpans,
         Iterable<_TextLinkerSingle> childrenTextLinkerSingles,
-      ) = _linkSpansRecurse(
+      ) = _linkSpansRecursive(
         span.children!,
         nextTextLinkerSingles,
         index + (span.text?.length ?? 0),
