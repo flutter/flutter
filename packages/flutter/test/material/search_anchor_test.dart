@@ -1728,21 +1728,10 @@ void main() {
       inputDecorationTheme: inputDecorationTheme
     );
 
-    testWidgets('Overall InputDecorationTheme does not override text field style'
-        ' in SearchBar', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: theme,
-          home: const Center(
-            child: Material(
-              child: SearchBar(hintText: 'hint text'),
-            ),
-          ),
-        ),
-      );
-
+    void checkDecorationInSearchBar(WidgetTester tester) {
       final Finder textField = findTextField();
       final InputDecoration? decoration = tester.widget<TextField>(textField).decoration;
+
       expect(decoration?.border, InputBorder.none);
       expect(decoration?.focusedBorder, InputBorder.none);
       expect(decoration?.enabledBorder, InputBorder.none);
@@ -1757,6 +1746,23 @@ void main() {
       expect(decoration?.hoverColor, null);
       expect(decoration?.contentPadding, const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
+    }
+
+    testWidgets('Overall InputDecorationTheme does not override text field style'
+        ' in SearchBar', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: const Center(
+            child: Material(
+              child: SearchBar(hintText: 'hint text'),
+            ),
+          ),
+        ),
+      );
+
+      // Check input decoration in `SearchBar`
+      checkDecorationInSearchBar(tester);
 
       // Check search bar defaults.
       final Finder searchBarMaterial = find.descendant(
@@ -1795,22 +1801,8 @@ void main() {
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
 
-      final Finder textField = findTextField();
-      final InputDecoration? decoration = tester.widget<TextField>(textField).decoration;
-      expect(decoration?.border, InputBorder.none);
-      expect(decoration?.focusedBorder, InputBorder.none);
-      expect(decoration?.enabledBorder, InputBorder.none);
-      expect(decoration?.errorBorder, null);
-      expect(decoration?.focusedErrorBorder, null);
-      expect(decoration?.disabledBorder, null);
-      expect(decoration?.constraints, null);
-      expect(decoration?.isCollapsed, false);
-      expect(decoration?.filled, false);
-      expect(decoration?.fillColor, null);
-      expect(decoration?.focusColor, null);
-      expect(decoration?.hoverColor, null);
-      expect(decoration?.contentPadding, const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
-      expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
+      // Check input decoration in `SearchBar`
+      checkDecorationInSearchBar(tester);
 
       // Check search bar defaults in search view route.
       final Finder searchBarMaterial = find.descendant(
