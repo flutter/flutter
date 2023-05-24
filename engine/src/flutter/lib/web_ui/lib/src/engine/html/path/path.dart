@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../util.dart';
 import '../../validators.dart';
 import '../../vector_math.dart';
 import 'conic.dart';
@@ -1558,7 +1557,8 @@ class SurfacePath implements ui.Path {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
+    String result = super.toString();
+    assert(() {
       final StringBuffer sb = StringBuffer();
       sb.write('Path(');
       final PathRefIterator iter = PathRefIterator(pathRef);
@@ -1589,10 +1589,10 @@ class SurfacePath implements ui.Path {
         }
       }
       sb.write(')');
-      return sb.toString();
-    } else {
-      return super.toString();
-    }
+      result = sb.toString();
+      return true;
+    }());
+    return result;
   }
 }
 

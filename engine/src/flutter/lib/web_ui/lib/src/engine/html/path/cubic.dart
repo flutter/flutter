@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import '../../util.dart';
 import 'path_utils.dart';
 
 /// Chops cubic at Y extrema points and writes result to [dest].
@@ -45,7 +44,7 @@ QuadRoots _findCubicExtrema(double a, double b, double c, double d) {
 /// Subdivides cubic curve for a list of t values.
 void _chopCubicAt(
     List<double> tValues, Float32List points, Float32List outPts) {
-  if (assertionsEnabled) {
+  assert(() {
     for (int i = 0; i < tValues.length - 1; i++) {
       final double tValue = tValues[i];
       assert(tValue > 0 && tValue < 1,
@@ -57,7 +56,8 @@ void _chopCubicAt(
       assert(
           nextTValue > tValue, 'Expecting t value to monotonically increase');
     }
-  }
+    return true;
+  }());
   final int rootCount = tValues.length;
   if (0 == rootCount) {
     for (int i = 0; i < 8; i++) {

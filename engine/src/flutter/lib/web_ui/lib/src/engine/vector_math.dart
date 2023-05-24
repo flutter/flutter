@@ -1047,18 +1047,19 @@ class Matrix4 {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
+    String result = super.toString();
+    assert(() {
       String fmt(int index) {
         return storage[index].toStringAsFixed(2);
       }
 
-      return '[${fmt(0)}, ${fmt(4)}, ${fmt(8)}, ${fmt(12)}]\n'
-             '[${fmt(1)}, ${fmt(5)}, ${fmt(9)}, ${fmt(13)}]\n'
-             '[${fmt(2)}, ${fmt(6)}, ${fmt(10)}, ${fmt(14)}]\n'
-             '[${fmt(3)}, ${fmt(7)}, ${fmt(11)}, ${fmt(15)}]';
-    } else {
-      return super.toString();
-    }
+      result = '[${fmt(0)}, ${fmt(4)}, ${fmt(8)}, ${fmt(12)}]\n'
+               '[${fmt(1)}, ${fmt(5)}, ${fmt(9)}, ${fmt(13)}]\n'
+               '[${fmt(2)}, ${fmt(6)}, ${fmt(10)}, ${fmt(14)}]\n'
+               '[${fmt(3)}, ${fmt(7)}, ${fmt(11)}, ${fmt(15)}]';
+      return true;
+    }());
+    return result;
   }
 }
 

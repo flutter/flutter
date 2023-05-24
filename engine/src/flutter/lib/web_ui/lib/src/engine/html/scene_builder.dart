@@ -63,9 +63,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// This is used by tests.
   void debugAddSurface(PersistedSurface surface) {
-    if (assertionsEnabled) {
+    assert(() {
       _addSurface(surface);
-    }
+      return true;
+    }());
   }
 
   void _addSurface(PersistedSurface surface) {
@@ -275,10 +276,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   void addRetained(ui.EngineLayer retainedLayer) {
     final PersistedContainerSurface retainedSurface =
         retainedLayer as PersistedContainerSurface;
-    if (assertionsEnabled) {
-      assert(debugAssertSurfaceState(retainedSurface,
-          PersistedSurfaceState.active, PersistedSurfaceState.released));
-    }
+    assert(debugAssertSurfaceState(retainedSurface,
+      PersistedSurfaceState.active,
+      PersistedSurfaceState.released,
+    ));
     retainedSurface.tryRetain();
     _adoptSurface(retainedSurface);
   }

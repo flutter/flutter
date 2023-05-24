@@ -734,9 +734,16 @@ class CkParagraph implements ui.Paragraph {
 
   @override
   bool get debugDisposed {
-    if (assertionsEnabled) {
-      return _disposed;
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
     throw StateError('Paragraph.debugDisposed is only available when asserts are enabled.');
   }
 }
@@ -888,12 +895,13 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
   void pop() {
     if (_styleStack.length <= 1) {
       // The top-level text style is paragraph-level. We don't pop it off.
-      if (assertionsEnabled) {
+      assert(() {
         printWarning(
           'Cannot pop text style in ParagraphBuilder. '
           'Already popped all text styles from the style stack.',
         );
-      }
+        return true;
+      }());
       return;
     }
     _styleStack.removeLast();

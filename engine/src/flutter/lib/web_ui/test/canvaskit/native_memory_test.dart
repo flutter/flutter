@@ -252,17 +252,19 @@ class TestJsConstructor implements JsConstructor {
 
 class TestCountedRefOwner implements StackTraceDebugger {
   TestCountedRefOwner(TestSkDeletable nativeObject) {
-    if (assertionsEnabled) {
+    assert(() {
       _debugStackTrace = StackTrace.current;
-    }
+      return true;
+    }());
     ref = CountedRef<TestCountedRefOwner, TestSkDeletable>(
         nativeObject, this, 'TestCountedRefOwner');
   }
 
   TestCountedRefOwner.cloneOf(this.ref) {
-    if (assertionsEnabled) {
+    assert(() {
       _debugStackTrace = StackTrace.current;
-    }
+      return true;
+    }());
     ref.ref(this);
   }
 

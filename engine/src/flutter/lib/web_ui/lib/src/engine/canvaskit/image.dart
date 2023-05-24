@@ -226,9 +226,10 @@ class CkImage implements ui.Image, StackTraceDebugger {
   }
 
   void _init() {
-    if (assertionsEnabled) {
+    assert(() {
       _debugStackTrace = StackTrace.current;
-    }
+      return true;
+    }());
     ui.Image.onCreate?.call(this);
   }
 
@@ -274,9 +275,16 @@ class CkImage implements ui.Image, StackTraceDebugger {
 
   @override
   bool get debugDisposed {
-    if (assertionsEnabled) {
-      return _disposed;
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
     throw StateError(
         'Image.debugDisposed is only available when asserts are enabled.');
   }

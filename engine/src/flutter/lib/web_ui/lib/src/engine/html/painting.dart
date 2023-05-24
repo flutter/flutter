@@ -249,9 +249,8 @@ class SurfacePaintData {
 
   @override
   String toString() {
-    if (!assertionsEnabled) {
-      return super.toString();
-    } else {
+    String result = super.toString();
+    assert(() {
       final StringBuffer buffer = StringBuffer('SurfacePaintData(');
       if (blendMode != null) {
         buffer.write('blendMode = $blendMode; ');
@@ -282,8 +281,12 @@ class SurfacePaintData {
         buffer.write('colorFilter = $colorFilter; ');
       }
       buffer.write('isAntiAlias = $isAntiAlias)');
-      return buffer.toString();
-    }
+      result = buffer.toString();
+
+      return true;
+    }());
+
+    return result;
   }
 }
 

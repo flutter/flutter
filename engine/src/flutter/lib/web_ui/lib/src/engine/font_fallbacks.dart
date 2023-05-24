@@ -81,11 +81,17 @@ class FontFallbackManager {
   bool _scheduledCodePointCheck = false;
 
   Future<void> debugWhenIdle() {
-    if (assertionsEnabled) {
-      return _idleFuture;
-    } else {
-      throw UnimplementedError();
+    Future<void>? result;
+    assert(() {
+      result = _idleFuture;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
+    throw UnimplementedError();
   }
 
   /// Determines if the given [text] contains any code points which are not

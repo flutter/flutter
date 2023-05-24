@@ -31,13 +31,13 @@ const List<String> _auditedLibraries = <String>[
 ];
 
 Future<void> main(List<String> args) async {
-  bool areAssertionsEnabled = false;
+  bool shouldThrow = true;
   assert(() {
-    areAssertionsEnabled = true;
+    shouldThrow = false;
     return true;
   }());
 
-  if (!areAssertionsEnabled) {
+  if (shouldThrow) {
     throw ArgumentError(
       'This test must run with --enable-asserts',
     );

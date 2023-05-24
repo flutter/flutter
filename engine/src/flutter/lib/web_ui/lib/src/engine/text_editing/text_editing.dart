@@ -813,9 +813,12 @@ class EditingState {
 
   @override
   String toString() {
-    return assertionsEnabled
-        ? 'EditingState("$text", base:$baseOffset, extent:$extentOffset, composingBase:$composingBaseOffset, composingExtent:$composingExtentOffset)'
-        : super.toString();
+    String result = super.toString();
+    assert(() {
+      result = 'EditingState("$text", base:$baseOffset, extent:$extentOffset, composingBase:$composingBaseOffset, composingExtent:$composingExtentOffset)';
+      return true;
+    }());
+    return result;
   }
 
   /// Sets the selection values of a DOM element using this [EditingState].

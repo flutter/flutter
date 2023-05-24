@@ -217,12 +217,6 @@ String float64ListToCssTransform3d(List<double> matrix) {
   }
 }
 
-bool get assertionsEnabled {
-  bool k = false;
-  assert(k = true);
-  return k;
-}
-
 final Float32List _tempRectData = Float32List(4);
 
 /// Transforms a [ui.Rect] given the effective [transform].

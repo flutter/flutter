@@ -36,10 +36,12 @@ class SkiaFontCollection implements FlutterFontCollection {
   ///
   /// This should only be used in tests.
   List<RegisteredFont>? get debugRegisteredFonts {
-    if (!assertionsEnabled) {
-      return null;
-    }
-    return _registeredFonts;
+    List<RegisteredFont>? result;
+    assert(() {
+      result = _registeredFonts;
+      return true;
+    }());
+    return result;
   }
 
   final Map<String, List<SkFont>> familyToFontMap = <String, List<SkFont>>{};

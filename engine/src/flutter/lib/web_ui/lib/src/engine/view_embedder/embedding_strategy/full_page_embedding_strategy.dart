@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/util.dart' show assertionsEnabled, setElementStyle;
+import 'package:ui/src/engine/util.dart' show setElementStyle;
 
 import 'embedding_strategy.dart';
 
@@ -84,7 +84,7 @@ class FullPageEmbeddingStrategy extends EmbeddingStrategy {
   void _applyViewportMeta() {
     for (final DomElement viewportMeta
         in domDocument.head!.querySelectorAll('meta[name="viewport"]')) {
-      if (assertionsEnabled) {
+      assert(() {
         // Filter out the meta tag that the engine placed on the page. This is
         // to avoid UI flicker during hot restart. Hot restart will clean up the
         // old meta tag synchronously with the first post-restart frame.
@@ -95,7 +95,8 @@ class FullPageEmbeddingStrategy extends EmbeddingStrategy {
             'with Flutter. This tag will be replaced.',
           );
         }
-      }
+        return true;
+      }());
       viewportMeta.remove();
     }
 

@@ -11,14 +11,15 @@ import '../../engine.dart';
 class SurfaceFactory {
   SurfaceFactory(int maximumSurfaces)
       : maximumSurfaces = math.max(maximumSurfaces, 1) {
-    if (assertionsEnabled) {
+    assert(() {
       if (maximumSurfaces < 1) {
         printWarning('Attempted to create a $SurfaceFactory with '
             '$maximumSurfaces maximum surfaces. At least 1 surface is required '
             'for rendering.');
       }
       registerHotRestartListener(debugClear);
-    }
+      return true;
+    }());
   }
 
   /// The lazy-initialized singleton surface factory.
