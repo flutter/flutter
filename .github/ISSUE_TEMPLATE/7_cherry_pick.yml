@@ -6,6 +6,17 @@ assignees:
   - itsjustkevin
   - caseyhillers
 body:
+- type: markdown
+    attributes:
+      value: |
+<!---
+Flutter releases generally follow the given timeline:
+1. On Tuesday at 10 AM PT the CP list will be finalized for the week's release
+  A. If there's any stable CPs, a stable release will be shipped.
+  B. Based on discretion of the release team, a beta hotfix may be shipped.
+2. Tuesday the release engineer for the week will get the release prepped
+3. Wednesday morning at 10 AM PT the release will be shipped
+-->
   - type: input
     id: issue_link
     attributes:
@@ -37,6 +48,15 @@ body:
       description: >-
         Link to an open PR that cherrypick's this into the target release branch.
         The current branches can be found under release-caniddate-branch.version for [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)
+    validations:
+      required: true
+  - type: textarea
+    id: changelog_description
+    attributes:
+      label: Changelog Description
+      description: >-
+        Explain this CP in one line that is accessible to most Flutter developers
+        See https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices for examples
     validations:
       required: true
   - type: input
