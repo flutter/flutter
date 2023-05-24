@@ -16,6 +16,7 @@ import 'package:test/fake.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart' show FakeFlutterVersion;
 
 final SystemClock _testClock = SystemClock.fixed(DateTime(2015));
 final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate ~/ 2);
@@ -68,6 +69,10 @@ void main() {
             stdout: '0.1.2-3-1234abcd',
           ),
           FakeCommand(
+            command: const <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+            stdout: channel,
+          ),
+          FakeCommand(
             command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
             stdout: 'origin/$channel',
           ),
@@ -93,10 +98,6 @@ void main() {
           FakeCommand(
             command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
             stdout: getChannelUpToDateVersion().toString(),
-          ),
-          FakeCommand(
-            command: const <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-            stdout: channel,
           ),
         ]);
 
@@ -129,7 +130,7 @@ void main() {
       });
 
       testWithoutContext('prints nothing when Flutter installation looks out-of-date but is actually up-to-date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
@@ -150,7 +151,7 @@ void main() {
       });
 
       testWithoutContext('does not ping server when version stamp is up-to-date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampUpToDate,
@@ -172,7 +173,7 @@ void main() {
       });
 
       testWithoutContext('does not print warning if printed recently', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampUpToDate,
@@ -194,7 +195,7 @@ void main() {
       });
 
       testWithoutContext('pings server when version stamp is missing', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
@@ -212,7 +213,7 @@ void main() {
       });
 
       testWithoutContext('pings server when version stamp is out-of-date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
@@ -233,7 +234,7 @@ void main() {
       });
 
       testWithoutContext('does not print warning when unable to connect to server if not out of date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         cache.versionStamp = '{}';
 
@@ -250,7 +251,7 @@ void main() {
       });
 
       testWithoutContext('prints warning when unable to connect to server if really out of date', () async {
-        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(channel: channel);
+        final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
         final VersionCheckStamp stamp = VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
@@ -329,7 +330,7 @@ void main() {
           if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl,
         });
         return VersionUpstreamValidator(
-          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl, channel: 'master'),
+          version: FakeFlutterVersion(repositoryUrl: versionUpstreamUrl),
           platform: testPlatform,
         ).run();
       }
@@ -413,17 +414,13 @@ void main() {
         stdout: '0.1.2-3-1234abcd',
       ),
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
-        stdout: 'feature-branch',
-      ),
-      const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'feature-branch',
       ),
     ]);
 
     final FlutterVersion flutterVersion = globals.flutterVersion;
-    expect(flutterVersion.channel, 'feature-branch');
+    expect(flutterVersion.channel, '[user-branch]');
     expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
     expect(flutterVersion.getBranchName(), 'feature-branch');
     expect(flutterVersion.getVersionString(redactUnknownBranches: true), '[user-branch]/1234abcd');
@@ -455,7 +452,7 @@ void main() {
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
-    // Dev channel
+    // Beta channel
     gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre');
     expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-4.5.pre');
     expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
@@ -468,7 +465,7 @@ void main() {
     expect(gitTagVersion.devVersion, null);
     expect(gitTagVersion.devPatch, null);
 
-    // new tag release format, dev channel
+    // new tag release format, beta channel
     gitTagVersion = GitTagVersion.parse('1.2.3-4.5.pre-0-g$hash');
     expect(gitTagVersion.frameworkVersionFor(hash), '1.2.3-4.5.pre');
     expect(gitTagVersion.gitTag, '1.2.3-4.5.pre');
@@ -521,13 +518,13 @@ void main() {
     expect(gitTagVersion.frameworkVersionFor('abcd1234'), stableTag);
   });
 
-  testUsingContext('determine favors stable tag over dev tag if both identify HEAD', () {
+  testUsingContext('determine favors stable tag over beta tag if both identify HEAD', () {
     const String stableTag = '1.2.3';
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(
       <FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'tag', '--points-at', 'HEAD'],
-          // This tests the unlikely edge case where a dev release made it to stable without any cherry picks
+          // This tests the unlikely edge case where a beta release made it to stable without any cherry picks
           stdout: '1.2.3-6.0.pre\n$stableTag',
         ),
       ],
@@ -589,11 +586,11 @@ void main() {
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('determine does not fetch tags on dev/stable/beta', () {
+  testUsingContext('determine does not fetch tags on beta', () {
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-        stdout: 'dev',
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+        stdout: 'beta',
       ),
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
@@ -616,7 +613,7 @@ void main() {
   testUsingContext('determine calls fetch --tags on master', () {
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'master',
       ),
       const FakeCommand(
@@ -643,7 +640,7 @@ void main() {
   testUsingContext('determine uses overridden git url', () {
     final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
-        command: <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
         stdout: 'master',
       ),
       const FakeCommand(
@@ -700,14 +697,4 @@ class FakeCache extends Fake implements Cache {
       setVersionStamp = true;
     }
   }
-}
-
-class FakeFlutterVersion extends Fake implements FlutterVersion {
-  FakeFlutterVersion({required this.channel, this.repositoryUrl});
-
-  @override
-  final String channel;
-
-  @override
-  final String? repositoryUrl;
 }

@@ -357,17 +357,6 @@ class _SearchAnchorState extends State<SearchAnchor> {
     Navigator.of(context).pop();
   }
 
-  Rect? getRect(GlobalKey key) {
-    final BuildContext? context = key.currentContext;
-    if (context != null) {
-      final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
-      final Size boxSize = searchBarBox.size;
-      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero);
-      return boxLocation & boxSize;
-    }
-    return null;
-  }
-
   bool toggleVisibility() {
     setState(() {
       _anchorIsVisible = !_anchorIsVisible;
@@ -468,7 +457,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     if (context != null) {
       final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
       final Size boxSize = searchBarBox.size;
-      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero);
+      final NavigatorState navigator = Navigator.of(context);
+      final Offset boxLocation = searchBarBox.localToGlobal(Offset.zero, ancestor: navigator.context.findRenderObject());
       return boxLocation & boxSize;
     }
     return null;

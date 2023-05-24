@@ -675,7 +675,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    if (useMaterial3) const Divider(),
+                    if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
                     Expanded(child: picker),
                     actions,
                   ],
@@ -686,7 +686,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    if (useMaterial3) const VerticalDivider(),
+                    if (useMaterial3) VerticalDivider(width: 0, color: datePickerTheme.dividerColor),
                     Flexible(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -850,6 +850,7 @@ class _DatePickerHeader extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(
                 start: 24,
                 end: 12,
+                bottom: 12,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
