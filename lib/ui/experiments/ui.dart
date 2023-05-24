@@ -37,8 +37,10 @@ part '../painting.dart';
 part '../platform_dispatcher.dart';
 part '../plugins.dart';
 part '../pointer.dart';
-part 'scene.dart';
 part '../semantics.dart';
 part 'setup_hooks.dart';
 part '../text.dart';
 part '../window.dart';
+
+part 'gpu.dart';
+part 'scene.dart';

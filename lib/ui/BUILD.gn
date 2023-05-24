@@ -216,6 +216,12 @@ source_set("ui") {
       "painting/scene/scene_shader.h",
     ]
 
+    # Experimental "Impeller Dart" API.
+    sources += [
+      "gpu/context.cc",
+      "gpu/context.h",
+    ]
+
     deps += [ "//flutter/impeller/scene" ]
   }
 }
