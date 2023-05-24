@@ -116,6 +116,7 @@ void Playground::SetupContext(PlaygroundBackend backend) {
 
   impl_ = PlaygroundImpl::Create(backend, switches_);
   if (!impl_) {
+    FML_LOG(WARNING) << "PlaygroundImpl::Create failed.";
     return;
   }
 
