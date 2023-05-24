@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../util.dart';
 import 'path_utils.dart';
 
 /// Stores the path verbs, points and conic weights.
@@ -304,7 +303,7 @@ class PathRef {
           dx = vector1_0x.abs();
           dy = vector1_0y.abs();
         }
-        if (assertionsEnabled) {
+        assert(() {
           final int checkCornerIndex = SPath.nearlyEqual(controlPx, bounds.left)
               ? (SPath.nearlyEqual(controlPy, bounds.top)
                   ? _Corner.kUpperLeft
@@ -312,12 +311,12 @@ class PathRef {
               : (SPath.nearlyEqual(controlPy, bounds.top)
                   ? _Corner.kUpperRight
                   : _Corner.kLowerRight);
-          assert(checkCornerIndex == cornerIndex);
-        }
+          return checkCornerIndex == cornerIndex;
+        }());
         radii.add(ui.Radius.elliptical(dx, dy));
         ++cornerIndex;
       } else {
-        if (assertionsEnabled) {
+        assert(() {
           if (verb == SPath.kLineVerb) {
             final bool isVerticalOrHorizontal =
               SPath.nearlyEqual(pts[2], pts[0]) ||
@@ -329,7 +328,8 @@ class PathRef {
           } else {
             assert(verb == SPath.kCloseVerb);
           }
-        }
+          return true;
+        }());
       }
     }
     return ui.RRect.fromRectAndCorners(bounds,
@@ -634,6 +634,7 @@ class PathRef {
     debugValidate();
     int pCnt;
     int mask = 0;
+    String? throwError;
     switch (verb) {
       case SPath.kMoveVerb:
         pCnt = 1;
@@ -652,16 +653,21 @@ class PathRef {
       case SPath.kCloseVerb:
         pCnt = 0;
       case SPath.kDoneVerb:
-        if (assertionsEnabled) {
-          throw Exception('growForVerb called for kDone');
-        }
+        assert(() {
+          throwError = 'growForVerb called for kDone';
+          return true;
+        }());
         pCnt = 0;
       default:
-        if (assertionsEnabled) {
-          throw Exception('default is not reached');
-        }
+        assert(() {
+          throwError = 'growForVerb called for unknown verb';
+          return true;
+        }());
         pCnt = 0;
-        break;
+    }
+
+    if (throwError != null) {
+      throw Exception(throwError);
     }
 
     fSegmentMask |= mask;
@@ -694,6 +700,7 @@ class PathRef {
     startEdit();
     int pCnt;
     int mask = 0;
+    String? throwError;
     switch (verb) {
       case SPath.kMoveVerb:
         pCnt = numVbs;
@@ -712,16 +719,21 @@ class PathRef {
       case SPath.kCloseVerb:
         pCnt = 0;
       case SPath.kDoneVerb:
-        if (assertionsEnabled) {
-          throw Exception('growForVerb called for kDone');
-        }
+        assert(() {
+          throwError = 'growForVerb called for kDone';
+          return true;
+        }());
         pCnt = 0;
       default:
-        if (assertionsEnabled) {
-          throw Exception('default is not reached');
-        }
+        assert(() {
+          throwError = 'growForVerb called for unknown verb';
+          return true;
+        }());
         pCnt = 0;
-        break;
+    }
+
+    if (throwError != null) {
+      throw Exception(throwError);
     }
 
     fSegmentMask |= mask;

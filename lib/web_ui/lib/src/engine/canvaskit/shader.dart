@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../util.dart';
 import '../validators.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -105,10 +104,12 @@ class CkGradientLinear extends SimpleCkShader implements ui.Gradient {
   )   : assert(offsetIsValid(from)),
         assert(offsetIsValid(to)),
         matrix4 = matrix {
-    if (assertionsEnabled) {
-      assert(matrix4 == null || matrix4IsValid(matrix4!));
+    assert(matrix4 == null || matrix4IsValid(matrix4!));
+    // ignore: prefer_asserts_in_initializer_lists
+    assert(() {
       validateColorStops(colors, colorStops);
-    }
+      return true;
+    }());
   }
 
   final ui.Offset from;

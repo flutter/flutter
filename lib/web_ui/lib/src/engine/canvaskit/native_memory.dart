@@ -6,7 +6,6 @@ import 'dart:js_interop';
 import 'package:meta/meta.dart';
 
 import '../../engine.dart' show Instrumentation;
-import '../util.dart';
 import 'canvaskit_api.dart';
 
 /// Collects native objects that weren't explicitly disposed of using
@@ -130,9 +129,10 @@ class CountedRef<R extends StackTraceDebugger, T extends Object> {
   /// Creates a counted reference.
   CountedRef(T nativeObject, R debugReferrer, String debugLabel) {
     _ref = UniqueRef<T>(this, nativeObject, debugLabel);
-    if (assertionsEnabled) {
+    assert(() {
       debugReferrers.add(debugReferrer);
-    }
+      return true;
+    }());
     assert(refCount == debugReferrers.length);
   }
 
@@ -170,11 +170,18 @@ class CountedRef<R extends StackTraceDebugger, T extends Object> {
   /// If asserts are enabled, the [StackTrace]s representing when a reference
   /// was created.
   List<StackTrace> debugGetStackTraces() {
-    if (assertionsEnabled) {
-      return debugReferrers
+    List<StackTrace>? result;
+    assert(() {
+      result = debugReferrers
           .map<StackTrace>((R referrer) => referrer.debugStackTrace)
           .toList();
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
     throw UnsupportedError('');
   }
 

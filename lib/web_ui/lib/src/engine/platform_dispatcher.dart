@@ -452,7 +452,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     ui.PlatformMessageResponseCallback? callback,
   ) {
     // In widget tests we want to bypass processing of platform messages.
-    if (assertionsEnabled && ui.debugEmulateFlutterTesterEnvironment) {
+    bool returnImmediately = false;
+    assert(() {
+      if (ui.debugEmulateFlutterTesterEnvironment) {
+        returnImmediately = true;
+      }
+      return true;
+    }());
+
+    if (returnImmediately) {
       return;
     }
 
@@ -460,7 +468,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       print('Sent platform message on channel: "$name"');
     }
 
-    if (assertionsEnabled && name == 'flutter/debug-echo') {
+    bool allowDebugEcho = false;
+    assert(() {
+      allowDebugEcho = true;
+      return true;
+    }());
+
+    if (allowDebugEcho && name == 'flutter/debug-echo') {
       // Echoes back the data unchanged. Used for testing purposes.
       replyToPlatformMessage(callback, data);
       return;

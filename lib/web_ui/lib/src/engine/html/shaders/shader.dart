@@ -186,9 +186,11 @@ class GradientLinear extends EngineGradient {
         assert(offsetIsValid(to)),
         matrix4 = matrix == null ? null : FastMatrix32(matrix),
         super._() {
-    if (assertionsEnabled) {
+    // ignore: prefer_asserts_in_initializer_lists
+    assert(() {
       validateColorStops(colors, colorStops);
-    }
+      return true;
+    }());
   }
 
   final ui.Offset from;

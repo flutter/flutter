@@ -12,14 +12,14 @@ class DartPluginRegistrant {
   /// isolate. This can safely be executed multiple times on the same isolate,
   /// but should not be called on the Root isolate.
   static void ensureInitialized() {
-    throw UnimplementedError('`ensureInitialized` is not implemented on the web.');
+    throw UnimplementedError(
+        '`ensureInitialized` is not implemented on the web.');
   }
 }
 
-
 List<int> saveCompilationTrace() {
-  if (engine.assertionsEnabled) {
-    throw UnimplementedError('saveCompilationTrace is not implemented on the web.');
-  }
+  assert(
+    throw UnimplementedError('saveCompilationTrace is not implemented on the web.'),
+  );
   throw UnimplementedError();
 }

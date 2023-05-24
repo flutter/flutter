@@ -55,9 +55,16 @@ class RecordingCanvas {
 
   /// In debug mode returns the list of recorded paint commands for testing.
   List<PaintCommand> get debugPaintCommands {
-    if (assertionsEnabled) {
-      return _commands;
+    List<PaintCommand>? result;
+    assert(() {
+      result = _commands;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
     throw UnsupportedError('For debugging only.');
   }
 
@@ -184,15 +191,17 @@ class RecordingCanvas {
 
   /// Prints recorded commands.
   String? debugPrintCommands() {
-    if (assertionsEnabled) {
+    String? result;
+    assert(() {
       final StringBuffer debugBuf = StringBuffer();
       for (int i = 0; i < _commands.length; i++) {
         final PaintCommand command = _commands[i];
         debugBuf.writeln('ctx.$command;');
       }
-      return debugBuf.toString();
-    }
-    return null;
+      result = debugBuf.toString();
+      return true;
+    }());
+    return result;
   }
 
   void save() {
@@ -729,11 +738,12 @@ class PaintSave extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'save()';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'save()';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -747,11 +757,12 @@ class PaintRestore extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'restore()';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'restore()';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -768,11 +779,12 @@ class PaintTranslate extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'translate($dx, $dy)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'translate($dx, $dy)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -789,11 +801,12 @@ class PaintScale extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'scale($sx, $sy)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'scale($sx, $sy)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -809,11 +822,12 @@ class PaintRotate extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'rotate($radians)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'rotate($radians)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -829,11 +843,12 @@ class PaintTransform extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'transform(Matrix4.fromFloat32List(Float32List.fromList(<double>[${matrix4.join(', ')}])))';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'transform(Matrix4.fromFloat32List(Float32List.fromList(<double>[${matrix4.join(', ')}])))';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -850,11 +865,12 @@ class PaintSkew extends PaintCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'skew($sx, $sy)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'skew($sx, $sy)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -871,11 +887,12 @@ class PaintClipRect extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'clipRect($rect)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'clipRect($rect)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -891,11 +908,12 @@ class PaintClipRRect extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'clipRRect($rrect)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'clipRRect($rrect)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -911,11 +929,12 @@ class PaintClipPath extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'clipPath($path)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'clipPath($path)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -932,11 +951,12 @@ class PaintDrawColor extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawColor($color, $blendMode)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawColor($color, $blendMode)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -954,11 +974,12 @@ class PaintDrawLine extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawLine($p1, $p2, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawLine($p1, $p2, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -974,11 +995,12 @@ class PaintDrawPaint extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawPaint($paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawPaint($paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -996,11 +1018,12 @@ class PaintDrawVertices extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawVertices($vertices, $blendMode, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawVertices($vertices, $blendMode, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1018,11 +1041,12 @@ class PaintDrawPoints extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawPoints($pointMode, $points, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawPoints($pointMode, $points, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1039,11 +1063,12 @@ class PaintDrawRect extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawRect($rect, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawRect($rect, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1060,11 +1085,12 @@ class PaintDrawRRect extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawRRect($rrect, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawRRect($rrect, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1090,11 +1116,12 @@ class PaintDrawDRRect extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawDRRect($outer, $inner, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawDRRect($outer, $inner, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1111,11 +1138,12 @@ class PaintDrawOval extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawOval($rect, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawOval($rect, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1133,11 +1161,12 @@ class PaintDrawCircle extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawCircle($c, $radius, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawCircle($c, $radius, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1154,11 +1183,12 @@ class PaintDrawPath extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawPath($path, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawPath($path, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1178,11 +1208,12 @@ class PaintDrawShadow extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawShadow($path, $color, $elevation, $transparentOccluder)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawShadow($path, $color, $elevation, $transparentOccluder)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1200,11 +1231,12 @@ class PaintDrawImage extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawImage($image, $offset, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawImage($image, $offset, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1223,11 +1255,12 @@ class PaintDrawImageRect extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'drawImageRect($image, $src, $dst, $paint)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'drawImageRect($image, $src, $dst, $paint)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1244,11 +1277,12 @@ class PaintDrawParagraph extends DrawCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'DrawParagraph(${paragraph.plainText}, $offset)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'DrawParagraph(${paragraph.plainText}, $offset)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1276,11 +1310,12 @@ class Subpath {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'Subpath(${commands.join(', ')})';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'Subpath(${commands.join(', ')})';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1317,11 +1352,12 @@ class MoveTo extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'MoveTo($x, $y)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'MoveTo($x, $y)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1344,11 +1380,12 @@ class LineTo extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'LineTo($x, $y)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'LineTo($x, $y)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1476,11 +1513,12 @@ class Ellipse extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'Ellipse($x, $y, $radiusX, $radiusY)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'Ellipse($x, $y, $radiusX, $radiusY)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1516,11 +1554,12 @@ class QuadraticCurveTo extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'QuadraticCurveTo($x1, $y1, $x2, $y2)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'QuadraticCurveTo($x1, $y1, $x2, $y2)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1560,11 +1599,12 @@ class BezierCurveTo extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'BezierCurveTo($x1, $y1, $x2, $y2, $x3, $y3)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'BezierCurveTo($x1, $y1, $x2, $y2, $x3, $y3)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1617,11 +1657,12 @@ class RectCommand extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'Rect($x, $y, $width, $height)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'Rect($x, $y, $width, $height)';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1644,11 +1685,12 @@ class RRectCommand extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return '$rrect';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = '$rrect';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1665,11 +1707,12 @@ class CloseCommand extends PathCommand {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return 'Close()';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = 'Close()';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -1997,12 +2040,13 @@ class _PaintBounds {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
+    String result = super.toString();
+    assert(() {
       final ui.Rect bounds = computeBounds();
-      return '_PaintBounds($bounds of size ${bounds.size})';
-    } else {
-      return super.toString();
-    }
+      result = '_PaintBounds($bounds of size ${bounds.size})';
+      return true;
+    }());
+    return result;
   }
 }
 

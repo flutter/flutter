@@ -5,7 +5,6 @@
 import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
-import '../../util.dart';
 
 /// Creates shader program for target webgl version.
 ///
@@ -250,11 +249,12 @@ class ShaderMethod {
   }
 
   void addStatement(String statement) {
-    if (assertionsEnabled) {
-      _statements.add('  ' * _indentLevel + statement);
-    } else {
-      _statements.add(statement);
-    }
+    String itemToAdd = statement;
+    assert(() {
+      itemToAdd = '  ' * _indentLevel + statement;
+      return true;
+    }());
+    _statements.add(itemToAdd);
   }
 
   /// Adds statements to compute tiling in 0..1 coordinate space.

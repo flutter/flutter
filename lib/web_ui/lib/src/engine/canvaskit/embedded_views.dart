@@ -464,13 +464,19 @@ class HtmlViewEmbedder {
       }
 
       for (final int viewId in diffResult.viewsToAdd) {
-        if (assertionsEnabled) {
-          if (!platformViewManager.knowsViewId(viewId)) {
+        bool isViewInvalid = false;
+        assert(() {
+          isViewInvalid = !platformViewManager.knowsViewId(viewId);
+          if (isViewInvalid) {
             debugInvalidViewIds ??= <int>[];
-            debugInvalidViewIds.add(viewId);
-            continue;
+            debugInvalidViewIds!.add(viewId);
           }
+          return true;
+        }());
+        if (isViewInvalid) {
+          continue;
         }
+
         if (diffResult.addToBeginning) {
           final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
           skiaSceneHost.insertBefore(platformViewRoot, elementToInsertBefore);
@@ -511,12 +517,17 @@ class HtmlViewEmbedder {
       for (int i = 0; i < _compositionOrder.length; i++) {
         final int viewId = _compositionOrder[i];
 
-        if (assertionsEnabled) {
-          if (!platformViewManager.knowsViewId(viewId)) {
+        bool isViewInvalid = false;
+        assert(() {
+          isViewInvalid = !platformViewManager.knowsViewId(viewId);
+          if (isViewInvalid) {
             debugInvalidViewIds ??= <int>[];
-            debugInvalidViewIds.add(viewId);
-            continue;
+            debugInvalidViewIds!.add(viewId);
           }
+          return true;
+        }());
+        if (isViewInvalid) {
+          continue;
         }
 
         final DomElement platformViewRoot = _viewClipChains[viewId]!.root;
@@ -534,14 +545,11 @@ class HtmlViewEmbedder {
 
     disposeViews(unusedViews);
 
-    if (assertionsEnabled) {
-      if (debugInvalidViewIds != null && debugInvalidViewIds.isNotEmpty) {
-        throw AssertionError(
-          'Cannot render platform views: ${debugInvalidViewIds.join(', ')}. '
-          'These views have not been created, or they have been deleted.',
-        );
-      }
-    }
+    assert(
+      debugInvalidViewIds == null || debugInvalidViewIds!.isEmpty,
+      'Cannot render platform views: ${debugInvalidViewIds!.join(', ')}. '
+      'These views have not been created, or they have been deleted.',
+    );
   }
 
   void disposeViews(Set<int> viewsToDispose) {

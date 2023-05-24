@@ -1512,15 +1512,16 @@ class SemanticsObject {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
+    String result = super.toString();
+    assert(() {
       final String children = _childrenInTraversalOrder != null &&
               _childrenInTraversalOrder!.isNotEmpty
           ? '[${_childrenInTraversalOrder!.join(', ')}]'
           : '<empty>';
-      return '$runtimeType(#$id, children: $children)';
-    } else {
-      return super.toString();
-    }
+      result = '$runtimeType(#$id, children: $children)';
+      return true;
+    }());
+    return result;
   }
 }
 
