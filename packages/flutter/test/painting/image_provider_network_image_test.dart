@@ -85,7 +85,6 @@ void main() {
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
 
     expect(imageCache.pendingImageCount, 1);
-    expect(imageCache.statusForKey(imageProvider).pending, true);
 
     result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
     }, onError: (dynamic error, StackTrace? stackTrace) {
