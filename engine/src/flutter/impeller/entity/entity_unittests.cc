@@ -1365,8 +1365,7 @@ TEST_P(EntityTest, DrawAtlasNoColor) {
 }
 
 TEST_P(EntityTest, DrawAtlasWithColorAdvanced) {
-  // Draws the image as four squares stiched together. Because blend modes
-  // aren't implented this ends up as four solid color blocks.
+  // Draws the image as four squares stiched together.
   auto atlas = CreateTextureForFixture("bay_bridge.jpg");
   auto size = atlas->GetSize();
   // Divide image into four quadrants.
