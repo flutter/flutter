@@ -1208,20 +1208,23 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/126561.
     final PageController controller = PageController();
 
-    // Set the surface width to a value that reproduces the error.
     const double pixel6EmulatorWidth = 411.42857142857144;
-    await tester.binding.setSurfaceSize(const Size(pixel6EmulatorWidth, 600));
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: PageView(
-        controller: controller,
-        physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
-        children: const <Widget>[
-          Center(child: Text('First Page')),
-          Center(child: Text('Second Page')),
-          Center(child: Text('Third Page')),
-        ],
+      home: Center(
+        child: SizedBox(
+          width: pixel6EmulatorWidth,
+          child: PageView(
+            controller: controller,
+            physics: const PageScrollPhysics().applyTo(const ClampingScrollPhysics()),
+            children: const <Widget>[
+              Center(child: Text('First Page')),
+              Center(child: Text('Second Page')),
+              Center(child: Text('Third Page')),
+            ],
+          ),
+        ),
       ),
     ));
 
@@ -1241,8 +1244,5 @@ void main() {
 
     // Check the stretch factor in the first element of the transform matrix.
     expect(transform.transform.storage.first, 1.0);
-
-    // Reset TestWidgetsFlutterBinding surfaceSize.
-    await tester.binding.setSurfaceSize(null);
   });
 }
