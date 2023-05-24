@@ -368,15 +368,14 @@ void main() {
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
+
     expect(
-      e.toString(),
-      contains('TextPainter.paint called when text geometry was not yet calculated'),
+      () => painter.paint(MockCanvas(), Offset.zero),
+      throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
+        'message',
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      )),
     );
     painter.dispose();
   });
@@ -1310,15 +1309,13 @@ void main() {
       PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
     ]);
 
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
     expect(
-      e.toString(),
-      contains('TextPainter.paint called when text geometry was not yet calculated'),
+      () => painter.paint(MockCanvas(), Offset.zero),
+      throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
+        'message',
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      )),
     );
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
@@ -1348,16 +1345,14 @@ void main() {
       PlaceholderDimensions(size: Size(50, 30), alignment: ui.PlaceholderAlignment.bottom),
     ]);
 
-    Object? e;
-    try {
-      painter.paint(MockCanvas(), Offset.zero);
-    } catch (exception) {
-      e = exception;
-    }
     // In tests, paint() will throw an UnimplementedError due to missing drawParagraph method.
     expect(
-      e.toString(),
-      isNot(contains('TextPainter.paint called when text geometry was not yet calculated')),
+      () => painter.paint(MockCanvas(), Offset.zero),
+      isNot(throwsA(isA<StateError>().having(
+        (StateError error) => error.message,
+        'message',
+        contains('TextPainter.paint called when text geometry was not yet calculated'),
+      ))),
     );
     painter.dispose();
   }, skip: isBrowser && !isCanvasKit); // https://github.com/flutter/flutter/issues/56308
