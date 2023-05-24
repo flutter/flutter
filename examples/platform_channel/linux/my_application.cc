@@ -217,7 +217,7 @@ static void my_application_activate(GApplication* application) {
                            G_CALLBACK(up_device_added_cb), self);
   g_signal_connect_swapped(self->up_client, "device-removed",
                            G_CALLBACK(up_device_removed_cb), self);
-  g_autoptr(GPtrArray) devices = up_client_get_devices(self->up_client);
+  g_autoptr(GPtrArray) devices = up_client_get_devices2(self->up_client);
   for (guint i = 0; i < devices->len; i++) {
     g_autoptr(UpDevice) device =
         static_cast<UpDevice*>(g_ptr_array_index(devices, i));
