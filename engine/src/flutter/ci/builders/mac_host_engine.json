@@ -27,7 +27,9 @@
                 "debug",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
-                "--build-embedder-examples"
+                "--build-embedder-examples",
+                "--enable-impeller-vulkan",
+                "--use-glfw-swiftshader"
             ],
             "name": "host_debug",
             "ninja": {
@@ -146,7 +148,8 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples",
-                "--enable-impeller-vulkan"
+                "--enable-impeller-vulkan",
+                "--use-glfw-swiftshader"
             ],
             "name": "host_release",
             "ninja": {
