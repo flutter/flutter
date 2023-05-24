@@ -201,7 +201,7 @@ class ImageCache {
   }
 
   /// All keys inside the current cache.
-  Set<Object> get keys => {
+  Set<Object> get keys => <Object>{
     ..._liveImages.keys,
     ..._pendingImages.keys,
     ..._cache.keys,
