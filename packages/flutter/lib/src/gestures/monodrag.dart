@@ -77,6 +77,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
+    this.onlyDispatchDragCallbacksWhenThresholdMet = false,
     super.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
   }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
@@ -210,6 +211,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// If null then [kMaxFlingVelocity] is used.
   double? maxFlingVelocity;
 
+  /// Whether the drag callbacks should only be dispatched when the drag threshold
+  /// has been met.
+  ///
+  /// If true, the drag callbacks will only be dispatched when this recognizer has
+  /// won the arena and the drag threshold has been met.
+  ///
+  /// If false, the drag callbacks will be dispatched when this recognizer has won
+  /// the arena.
+  ///
+  /// This value defaults to false.
+  bool onlyDispatchDragCallbacksWhenThresholdMet;
+
   /// Determines the type of velocity estimation method to use for a potential
   /// drag gesture, when a new pointer is added.
   ///
@@ -284,6 +297,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _getDeltaForDetails(Offset delta);
   double? _getPrimaryValueFromOffset(Offset value);
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind, double? deviceTouchSlop);
+  bool _hasDragThresholdBeenMet = false;
 
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
@@ -386,6 +400,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           untransformedEndPosition: localPosition
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
+          _hasDragThresholdBeenMet = true;
           resolve(GestureDisposition.accepted);
         }
       }
@@ -401,7 +416,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
-    if (_state != _DragState.accepted) {
+    if (onlyDispatchDragCallbacksWhenThresholdMet ? _hasDragThresholdBeenMet && _state != _DragState.accepted : _state != _DragState.accepted) {
       _state = _DragState.accepted;
       final OffsetPair delta = _pendingDragOffset;
       final Duration? timestamp = _lastPendingEventTimestamp;
@@ -462,6 +477,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       case _DragState.accepted:
         _checkEnd(pointer);
     }
+    _hasDragThresholdBeenMet = false;
     _velocityTrackers.clear();
     _initialButtons = null;
     _state = _DragState.ready;
