@@ -5,12 +5,12 @@
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'a: accessibility':
   - any:
-    - accessibility
-    - semantics
+    - '**/*accessibility*'
+    - '**/*semantics*''
 
 'a: animation':
   - any:
-    - animation
+    - '**/*animation*'
 
 'a: internationalization':
   - any:
@@ -25,7 +25,7 @@
 
 'a: text input':
   - any:
-    - text
+    - '**/*text*'
 
 'd: api docs':
   - any:
@@ -45,30 +45,30 @@ engine:
 
 'f: cupertino':
   - any:
-    - cupertino
+    - '**/*cupertino*'
 
 'f: focus':
   - any:
-    - focus
+    - '**/*focus*'
 
 'f: gestures':
   - any:
-    - gestures
+    - '**/*gestures*'
 
 'f: material':
   - any:
-    - material
+    - '**/*material*'
 
 'f: routes':
   - any:
-    - navigator
-    - route
+    - '**/*navigator*'
+    - '**/*route*'
 
 'f: scrolling':
   - any:
-    - scroll
-    - sliver
-    - viewport
+    - '**/*scroll*'
+    - '**/*sliver*'
+    - '**/*viewport*'
 
 framework:
   - any:
