@@ -13,6 +13,10 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/switches.h"
 
+#if FML_OS_MACOSX
+#include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
+#endif
+
 namespace impeller {
 
 class PlaygroundTest : public Playground,
@@ -41,6 +45,10 @@ class PlaygroundTest : public Playground,
  private:
   // |Playground|
   bool ShouldKeepRendering() const;
+
+#if FML_OS_MACOSX
+  fml::ScopedNSAutoreleasePool autorelease_pool_;
+#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlaygroundTest);
 };
