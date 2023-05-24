@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/painting/image_cache.dart';
 
 import 'binding.dart';
 import 'debug.dart';
@@ -163,7 +164,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // have had a chance to track the key in the cache at all.
       // Schedule a microtask to give the cache a chance to add the key.
       scheduleMicrotask(() {
-        PaintingBinding.instance.imageCache.evict(key);
+        image_provider.ResizeImage.keysFor(PaintingBinding.instance.imageCache.keys, key)
+            .forEach(PaintingBinding.instance.imageCache.evict);
       });
       rethrow;
     } finally {
