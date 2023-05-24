@@ -150,12 +150,12 @@ class ProcessResultMatcher extends Matcher {
 
   @override
   Description describe(Description description) {
-    description.add('exitCode: $expectedExitCode');
+    description.add('a process with exit code $expectedExitCode');
     if (stdoutSubstring != null) {
-      description.add('\nstdout substring:\n$stdoutSubstring');
+      description.add(' and stdout: "$stdoutSubstring"');
     }
     if (stderrSubstring != null) {
-      description.add('\nstderr substring:\n$stderrSubstring');
+      description.add(' and stderr: "$stderrSubstring"');
     }
 
     return description;
