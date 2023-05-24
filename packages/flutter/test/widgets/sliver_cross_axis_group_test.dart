@@ -554,10 +554,15 @@ void main() {
     final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
     final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     expect(renderGroup.geometry!.scrollExtent, equals(600));
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+
+    controller.jumpTo(600);
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, 30));
+
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, -30));
+    await gesture.up();
     await tester.pumpAndSettle();
+
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-30.0));
   });
 }

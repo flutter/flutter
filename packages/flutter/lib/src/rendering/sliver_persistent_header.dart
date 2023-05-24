@@ -216,7 +216,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// The `overlapsContent` argument is passed to [updateChild].
   @protected
   void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
-    print('laying out persistent header');
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
       invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
@@ -310,8 +309,6 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
           offset += Offset(childMainAxisPosition(child!), 0.0);
       }
       context.paintChild(child!, offset);
-      print(offset);
-      print(paintBounds);
     }
   }
 
@@ -622,7 +619,6 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// Update the last known ScrollDirection when scrolling began.
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void updateScrollStartDirection(ScrollDirection direction) {
-    print(direction);
     _lastStartedScrollDirection = direction;
   }
 
