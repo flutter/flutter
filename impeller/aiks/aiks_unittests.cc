@@ -2246,6 +2246,19 @@ TEST_P(AiksTest, CanRenderDestructiveSaveLayer) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderMaskBlurHugeSigma) {
+  Canvas canvas;
+  canvas.DrawCircle({400, 400}, 300,
+                    {.color = Color::Green(),
+                     .mask_blur_descriptor = Paint::MaskBlurDescriptor{
+                         .style = FilterContents::BlurStyle::kNormal,
+                         .sigma = Sigma(99999),
+                     }});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
   auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     auto [a, b] = IMPELLER_PLAYGROUND_LINE(Point(50, 50), Point(300, 200), 30,
