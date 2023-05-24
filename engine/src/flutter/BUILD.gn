@@ -177,7 +177,10 @@ group("unittests") {
     }
 
     if (is_mac || is_linux || is_win) {
-      public_deps += [ "//flutter/impeller:impeller_unittests" ]
+      public_deps += [
+        "//flutter/impeller:impeller_dart_unittests",
+        "//flutter/impeller:impeller_unittests",
+      ]
     }
 
     if (is_mac) {

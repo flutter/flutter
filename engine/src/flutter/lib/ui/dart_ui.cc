@@ -12,6 +12,7 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
+#include "flutter/lib/ui/gpu/context.h"
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/codec.h"
@@ -315,6 +316,10 @@ typedef CanvasPath Path;
   V(SceneShader, SetCameraTransform, 2) \
   V(SceneShader, Dispose, 1)
 
+#define FFI_FUNCTION_LIST_GPU(V) V(GpuContext::InitializeDefault, 1)
+
+#define FFI_METHOD_LIST_GPU(V)
+
 #endif  // IMPELLER_ENABLE_3D
 
 #define FFI_FUNCTION_INSERT(FUNCTION, ARGS)     \
@@ -343,9 +348,13 @@ void* ResolveFfiNativeFunction(const char* name, uintptr_t args) {
 void InitDispatcherMap() {
   FFI_FUNCTION_LIST(FFI_FUNCTION_INSERT)
   FFI_METHOD_LIST(FFI_METHOD_INSERT)
+
 #ifdef IMPELLER_ENABLE_3D
   FFI_FUNCTION_LIST_3D(FFI_FUNCTION_INSERT)
   FFI_METHOD_LIST_3D(FFI_METHOD_INSERT)
+
+  FFI_FUNCTION_LIST_GPU(FFI_FUNCTION_INSERT)
+  FFI_METHOD_LIST_GPU(FFI_METHOD_INSERT)
 #endif  // IMPELLER_ENABLE_3D
 }
 
