@@ -212,8 +212,6 @@ class TextHeightRuler {
 
     _dimensions.appendToHost(host);
 
-    // [rulerHost] is not migrated yet so add a cast to [html.HtmlElement].
-    // This cast will be removed after the migration is complete.
     rulerHost.addElement(host);
     return host;
   }
