@@ -75,7 +75,7 @@ void main() {
   });
 
   testGesture('DragGestureRecognizer should not dispatch drag callbacks when it wins the arena if onlyDispatchDragCallbacksWhenThresholdMet is true and the threshold has not been met', (GestureTester tester) {
-    VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
     final List<String> dragCallbacks = <String>[];
     verticalDrag
       ..onlyDispatchDragCallbacksWhenThresholdMet = true
@@ -109,7 +109,7 @@ void main() {
   });
 
   testGesture('DragGestureRecognizer should dispatch drag callbacks when it wins the arena if onlyDispatchDragCallbacksWhenThresholdMet is false and the threshold has not been met', (GestureTester tester) {
-    VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
     final List<String> dragCallbacks = <String>[];
     verticalDrag
       ..onlyDispatchDragCallbacksWhenThresholdMet = false
