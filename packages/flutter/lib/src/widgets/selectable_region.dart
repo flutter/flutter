@@ -1924,14 +1924,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
       final List<Rect> rectsInside = _selectableContains(selectables[index], selectables);
-      bool positionInEncompassing = false;
+      bool positionInsideInnerRects = false;
       for (final Rect rect in rectsInside) {
         if (rect.contains(event.globalPosition)) {
-          positionInEncompassing = true;
+          positionInsideInnerRects = true;
           break;
         }
       }
-      if (globalRect.contains(event.globalPosition) && rectsInside.isEmpty || globalRect.contains(event.globalPosition) && !positionInEncompassing) {
+      if (globalRect.contains(event.globalPosition) && rectsInside.isEmpty || globalRect.contains(event.globalPosition) && !positionInsideInnerRects) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         dispatchSelectionEventToChild(selectables[index], event);
         if (selectables[index].value != existingGeometry) {
