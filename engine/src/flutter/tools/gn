@@ -593,6 +593,9 @@ def to_gn_args(args):
     if malioc_path:
       gn_args['impeller_malioc_path'] = malioc_path
 
+  if args.use_glfw_swiftshader:
+    gn_args['glfw_vulkan_library'] = r'\"libvk_swiftshader.dylib\"'
+
   # ANGLE is exclusively used for:
   #  - Windows at runtime
   #  - Non-fuchsia host unit tests (is_host_build evaluates to false).
@@ -1122,6 +1125,13 @@ def parse_args(args):
       help='Additional gn args to be passed to gn. If you '
       'need to use this, it should probably be another switch '
       'in //flutter/tools/gn.',
+  )
+
+  parser.add_argument(
+      '--use-glfw-swiftshader',
+      default=False,
+      action='store_true',
+      help='Forces glfw to use swiftshader.',
   )
 
   return parser.parse_args(args)
