@@ -2457,7 +2457,6 @@ flutter:
     });
 
     testUsingContext('IOSDeviceLogReader does not print logs', () async {
-      //
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
