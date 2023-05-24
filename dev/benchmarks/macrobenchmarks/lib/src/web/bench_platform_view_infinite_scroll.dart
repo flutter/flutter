@@ -4,19 +4,16 @@
 
 import 'dart:async';
 import 'dart:html' as html;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 
-// TODO(mdebbar): flutter/flutter#55000 Remove this conditional import once
-// web-only dart:ui_web APIs are exposed from a dedicated place.
-import 'platform_views/non_web.dart'
-    if (dart.library.html) 'platform_views/web.dart';
 import 'recorder.dart';
 
 const String benchmarkViewType = 'benchmark_element';
 
 void _registerFactory() {
-  platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
+  ui_web.platformViewRegistry.registerViewFactory(benchmarkViewType, (int viewId) {
     final html.Element htmlElement = html.DivElement();
     htmlElement.id = '${benchmarkViewType}_$viewId';
     htmlElement.innerText = 'Google';
