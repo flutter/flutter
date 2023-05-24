@@ -221,50 +221,25 @@ bool AtlasContents::Render(const ContentContext& renderer,
   dst_contents->SetSubAtlas(sub_atlas);
   dst_contents->SetCoverage(sub_coverage);
 
-  std::shared_ptr<Texture> new_texture;
-  if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
-    new_texture = renderer.MakeSubpass(
-        "Atlas Blend", sub_atlas->size,
-        [&](const ContentContext& context, RenderPass& pass) {
-          Entity entity;
-          entity.SetContents(dst_contents);
-          entity.SetBlendMode(BlendMode::kSource);
-          if (!entity.Render(context, pass)) {
-            return false;
-          }
-          if (blend_mode_ >= Entity::kLastPipelineBlendMode) {
-            auto contents = std::make_shared<FramebufferBlendContents>();
-            contents->SetBlendMode(blend_mode_);
-            contents->SetChildContents(src_contents);
-            entity.SetContents(std::move(contents));
-            entity.SetBlendMode(BlendMode::kSource);
-            return entity.Render(context, pass);
-          }
-          entity.SetContents(src_contents);
-          entity.SetBlendMode(blend_mode_);
-          return entity.Render(context, pass);
-        });
-  } else {
-    auto contents = ColorFilterContents::MakeBlend(
-        blend_mode_,
-        {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});
-    auto snapshot =
-        contents->RenderToSnapshot(renderer,      // renderer
-                                   entity,        // entity
-                                   std::nullopt,  // coverage_limit
-                                   std::nullopt,  // sampler_descriptor
-                                   true,          // msaa_enabled
-                                   "AtlasContents Snapshot");  // label
-    if (!snapshot.has_value()) {
-      return false;
-    }
-    new_texture = snapshot.value().texture;
+  Entity untransformed_entity;
+  auto contents = ColorFilterContents::MakeBlend(
+      blend_mode_,
+      {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});
+  auto snapshot =
+      contents->RenderToSnapshot(renderer,              // renderer
+                                 untransformed_entity,  // entity
+                                 std::nullopt,          // coverage_limit
+                                 std::nullopt,          // sampler_descriptor
+                                 true,                  // msaa_enabled
+                                 "AtlasContents Snapshot");  // label
+  if (!snapshot.has_value()) {
+    return false;
   }
 
   auto child_contents = AtlasTextureContents(*this);
   child_contents.SetAlpha(alpha_);
   child_contents.SetCoverage(coverage);
-  child_contents.SetTexture(new_texture);
+  child_contents.SetTexture(snapshot.value().texture);
   child_contents.SetUseDestination(true);
   child_contents.SetSubAtlas(sub_atlas);
   return child_contents.Render(renderer, entity, pass);
