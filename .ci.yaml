@@ -79,7 +79,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       xcode: 14e222b
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -93,7 +93,7 @@ platform_properties:
       device_type: none
       cpu: arm64
       xcode: 14e222b
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -109,7 +109,7 @@ platform_properties:
       xcode: 14e222b
       tags: >
         ["devicelab", "hostonly", "mac"]
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -123,7 +123,7 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14e222b
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -139,7 +139,7 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14e222b
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -176,7 +176,7 @@ platform_properties:
       cpu: x86
       device_os: iOS-16
       xcode: 14e222b
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -192,7 +192,7 @@ platform_properties:
       cpu: arm64
       device_os: iOS-16
       xcode: 14e222b
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2554,7 +2554,7 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2569,7 +2569,7 @@ targets:
           {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: basic_material_app_macos__compile
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2586,7 +2586,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_ios_framework_module_test
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2697,7 +2697,7 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_macos__start_up
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2713,7 +2713,7 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2758,7 +2758,7 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__compile
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2774,7 +2774,7 @@ targets:
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__start_up
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2813,7 +2813,7 @@ targets:
           {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: flutter_view_macos__start_up
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -2926,7 +2926,7 @@ targets:
           {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: hello_world_macos__compile
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
@@ -3042,7 +3042,7 @@ targets:
           {"dependency": "xcode", "version": "14e222b"}
         ]
       task_name: platform_view_macos__start_up
-      $flutter/osx_sdk2 : >-
+      $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
         }
