@@ -64,11 +64,18 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
     bool msaa_enabled,
     const std::string& label) const {
   auto coverage = GetCoverage(entity);
-  if (coverage_limit.has_value()) {
-    coverage = coverage->Intersection(*coverage_limit);
-  }
   if (!coverage.has_value()) {
     return std::nullopt;
+  }
+
+  // Pad Contents snapshots with 1 pixel borders to ensure correct sampling
+  // behavior. Not doing so results in a coverage leak for filters that support
+  // customizing the input sampling mode. Snapshots of contents should be
+  // theoretically treated as infinite size just like layers.
+  coverage = coverage->Expand(1);
+
+  if (coverage_limit.has_value()) {
+    coverage = coverage->Intersection(*coverage_limit);
   }
 
   auto texture = renderer.MakeSubpass(
