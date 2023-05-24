@@ -20,13 +20,10 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:134:14: (top-level declaration) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:136:21: (top-level declaration) (read_potentially_unassigned_final)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:147:12: (self-contained program) (unused_import)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:11: (self-contained program) (undefined_class)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:22: (self-contained program) (avoid_dynamic_calls)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:148:22: (self-contained program) (undefined_function)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (annotate_overrides)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (must_call_super)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:161:7: (top-level declaration) (undefined_identifier)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:165: Found "```" in code but it did not match RegExp: pattern=^ */// *```dart\$ flags= so something is wrong. Line was: "/// ```"',
+  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:152:10: (stateful widget) (annotate_overrides)',
+  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:152:10: (stateful widget) (must_call_super)',
+  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:160:7: (top-level declaration) (undefined_identifier)',
+  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:164: Found "```" in code but it did not match RegExp: pattern=^ */// *```dart\$ flags= so something is wrong. Line was: "/// ```"',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:9:12: (statement) (invalid_assignment)',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:18:4: Empty ```dart block in snippet code.',
 ];
@@ -71,7 +68,7 @@ void main() {
     final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
-      'Found 18 snippet code errors.',
+      'Found 15 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
@@ -95,7 +92,7 @@ void main() {
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,
-      'Found 22 snippet code errors.',
+      'Found 19 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
