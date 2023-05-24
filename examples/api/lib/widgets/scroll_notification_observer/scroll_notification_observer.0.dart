@@ -22,8 +22,8 @@ class ScrollNotificationObserverApp extends StatelessWidget {
       // state of this [ScrollNotificationObserver] from descendants
       // of the Scaffold widget.
       //
-      // If you're not using a [Scaffold] widget, use the [ScrollNotificationObserver]
-      // directly to notify its descendants of scroll notifications.
+      // If you're not using a [Scaffold] widget, you can create a  [ScrollNotificationObserver]
+      // to notify its descendants of scroll notifications by adding it to the subtree.
       home: Scaffold(
         appBar: AppBar(
           title: const Text('ScrollNotificationObserver Sample'),
