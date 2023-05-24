@@ -885,6 +885,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _leaveAllEntered();
     _activeTarget = null;
     _entry!.remove();
+    _entry!.dispose();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
     onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
@@ -896,10 +897,12 @@ class _DragAvatar<T extends Object> extends Drag {
     return Positioned(
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
-      child: IgnorePointer(
-        ignoring: ignoringFeedbackPointer,
-        ignoringSemantics: ignoringFeedbackSemantics,
-        child: feedback,
+      child: ExcludeSemantics(
+        excluding: ignoringFeedbackSemantics,
+        child: IgnorePointer(
+          ignoring: ignoringFeedbackPointer,
+          child: feedback,
+        ),
       ),
     );
   }

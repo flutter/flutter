@@ -29,14 +29,12 @@ class TestPointer {
     switch (kind) {
       case PointerDeviceKind.mouse:
         _device = device ?? 1;
-        break;
       case PointerDeviceKind.stylus:
       case PointerDeviceKind.invertedStylus:
       case PointerDeviceKind.touch:
       case PointerDeviceKind.trackpad:
       case PointerDeviceKind.unknown:
         _device = device ?? 0;
-        break;
     }
   }
 
@@ -102,15 +100,13 @@ class TestPointer {
       _buttons = buttons;
     }
     switch (event.runtimeType) {
-      case PointerDownEvent:
+      case const (PointerDownEvent):
         assert(!isDown);
         _isDown = true;
-        break;
-      case PointerUpEvent:
-      case PointerCancelEvent:
+      case const (PointerUpEvent):
+      case const (PointerCancelEvent):
         assert(isDown);
         _isDown = false;
-        break;
       default:
         break;
     }

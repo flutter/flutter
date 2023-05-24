@@ -18,6 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../tester/flutter_tester.dart';
+import '../web/web_device.dart';
 
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({ bool verboseHelp = false }) : super(
@@ -76,7 +77,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
-        help: 'Suppress analytics reporting when this command runs.');
+        help: 'Suppress analytics reporting for the current CLI invocation.');
+    argParser.addFlag('disable-telemetry',
+        negatable: false,
+        help: 'Disable telemetry reporting each time a flutter or dart '
+              'command runs, until it is re-enabled.');
+    argParser.addFlag('enable-telemetry',
+        negatable: false,
+        help: 'Enable telemetry reporting each time a flutter or dart '
+              'command runs.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -111,6 +120,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'List the special "flutter-tester" device in device listings. '
               'This headless device is used to test Flutter tooling.');
+    argParser.addFlag('show-web-server-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special "web-server" device in device listings.',
+    );
   }
 
   @override
@@ -162,13 +176,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> run(Iterable<String> args) {
-    // Have an invocation of 'build' print out it's sub-commands.
+    // Have invocations of 'build', 'custom-devices', and 'pub' print out
+    // their sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1) {
       if (args.first == 'build') {
         args = <String>['build', '-h'];
       } else if (args.first == 'custom-devices') {
         args = <String>['custom-devices', '-h'];
+      } else if (args.first == 'pub') {
+        args = <String>['pub', '-h'];
       }
     }
 
@@ -178,6 +195,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, Object?> contextOverrides = <Type, Object?>{};
+
+    // If the flag for enabling or disabling telemetry is passed in,
+    // we will return out
+    if (topLevelResults.wasParsed('disable-telemetry') ||
+        topLevelResults.wasParsed('enable-telemetry')) {
+      return;
+    }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
@@ -208,6 +232,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (((topLevelResults['show-test-device'] as bool?) ?? false)
         || topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
+    }
+    if (((topLevelResults['show-web-server-device'] as bool?) ?? false)
+        || topLevelResults['device-id'] == WebServerDevice.kWebServerDeviceId) {
+      WebServerDevice.showWebServerDevice = true;
     }
 
     // Set up the tooling configuration.

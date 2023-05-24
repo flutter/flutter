@@ -224,7 +224,7 @@ void main() {
       LogicalKeyboardKey.shiftLeft,
       platform: 'web',
     )..['metaState'] = 0;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
       SystemChannels.keyEvent.codec.encodeMessage(data2),
       (ByteData? data) {},
@@ -465,9 +465,27 @@ void main() {
     // trigger assertions.
     expect(record, isNull);
   }, variant: KeySimulatorTransitModeVariant.all());
+
+  testWidgets('debugPrintKeyboardEvents causes logging of key events', (WidgetTester tester) async {
+    final bool oldDebugPrintKeyboardEvents = debugPrintKeyboardEvents;
+    final DebugPrintCallback oldDebugPrint = debugPrint;
+    final StringBuffer messages = StringBuffer();
+    debugPrint = (String? message, {int? wrapWidth}) {
+      messages.writeln(message ?? '');
+    };
+    debugPrintKeyboardEvents = true;
+    try {
+      await simulateKeyDownEvent(LogicalKeyboardKey.keyA);
+    } finally {
+      debugPrintKeyboardEvents = oldDebugPrintKeyboardEvents;
+      debugPrint = oldDebugPrint;
+    }
+    final String messagesStr = messages.toString();
+    expect(messagesStr, contains('KEYBOARD: Key event received: '));
+    expect(messagesStr, contains('KEYBOARD: Pressed state before processing the event:'));
+    expect(messagesStr, contains('KEYBOARD: Pressed state after processing the event:'));
+  });
 }
-
-
 
 Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
   final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;

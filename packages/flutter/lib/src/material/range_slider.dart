@@ -560,11 +560,9 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
         case TextDirection.ltr:
           towardsStart = dx < 0;
           towardsEnd = dx > 0;
-          break;
         case TextDirection.rtl:
           towardsStart = dx > 0;
           towardsEnd = dx < 0;
-          break;
       }
       if (towardsStart) {
         return Thumb.start;
@@ -1141,11 +1139,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       case Thumb.start:
         text = labels!.start;
         labelPainter = _startLabelPainter;
-        break;
       case Thumb.end:
         text = labels!.end;
         labelPainter = _endLabelPainter;
-        break;
     }
 
     if (labels != null) {
@@ -1402,11 +1398,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       case TextDirection.rtl:
         startVisualPosition = 1.0 - startValue;
         endVisualPosition = 1.0 - endValue;
-        break;
       case TextDirection.ltr:
         startVisualPosition = startValue;
         endVisualPosition = endValue;
-        break;
     }
 
     final Rect trackRect = _sliderTheme.rangeTrackShape!.getPreferredRect(
@@ -1589,11 +1583,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         case TextDirection.ltr:
           innerOverflow += startOffset;
           innerOverflow -= endOffset;
-          break;
         case TextDirection.rtl:
           innerOverflow -= startOffset;
           innerOverflow += endOffset;
-          break;
       }
 
       _state.paintTopValueIndicator = (PaintingContext context, Offset offset) {
@@ -1706,11 +1698,9 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       case TextDirection.ltr:
         _startSemanticsNode!.rect = leftRect;
         _endSemanticsNode!.rect = rightRect;
-        break;
       case TextDirection.rtl:
         _startSemanticsNode!.rect = rightRect;
         _endSemanticsNode!.rect = leftRect;
-        break;
     }
 
     _startSemanticsNode!.updateWith(config: startSemanticsConfiguration);

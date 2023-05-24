@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Alles selecteren",
   "tabSemanticsLabel": "Tabblad $tabIndex van $tabCount",
   "modalBarrierDismissLabel": "Sluiten",
-  "searchTextFieldPlaceholderLabel": "Zoeken"
+  "searchTextFieldPlaceholderLabel": "Zoeken",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

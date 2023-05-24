@@ -184,7 +184,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     // a port forwarding failure and we complete with a null value.
     unawaited(process.exitCode.whenComplete(() {
       if (!completer.isCompleted) {
-        completer.complete(null);
+        completer.complete();
       }
     }));
 
@@ -309,7 +309,7 @@ class CustomDeviceAppSession {
         'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
-          'observatory-port=${debuggingOptions.deviceVmServicePort}',
+          'vm-service-port=${debuggingOptions.deviceVmServicePort}',
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           'enable-checked-mode=true',
           'verify-entry-points=true',
@@ -374,7 +374,7 @@ class CustomDeviceAppSession {
     assert(_process == null);
     _process = process;
 
-    final ProtocolDiscovery discovery = ProtocolDiscovery.observatory(
+    final ProtocolDiscovery discovery = ProtocolDiscovery.vmService(
       logReader,
       portForwarder: _device._config.usesPortForwarding ? _device.portForwarder : null,
       logger: _logger,
@@ -388,14 +388,14 @@ class CustomDeviceAppSession {
     // in the same microtask AFAICT but this way we're on the safe side.
     logReader.listenToProcessOutput(process);
 
-    final Uri? observatoryUri = await discovery.uri;
+    final Uri? vmServiceUri = await discovery.uri;
     await discovery.cancel();
 
     if (_device._config.usesPortForwarding) {
-      _forwardedHostPort = observatoryUri?.port;
+      _forwardedHostPort = vmServiceUri?.port;
     }
 
-    return LaunchResult.succeeded(observatoryUri: observatoryUri);
+    return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
   }
 
   void _maybeUnforwardPort() {
@@ -706,7 +706,7 @@ class CustomDevice extends Device {
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    if (supportsScreenshot == false) {
+    if (!supportsScreenshot) {
       throw UnsupportedError('Screenshotting is not supported for this device.');
     }
 
@@ -874,7 +874,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     );
 
     // remove all the devices we couldn't reach.
-    pingedDevices.removeWhere((_, bool value) => value == false);
+    pingedDevices.removeWhere((_, bool value) => !value);
 
     // return only the devices.
     return pingedDevices.keys.toList();

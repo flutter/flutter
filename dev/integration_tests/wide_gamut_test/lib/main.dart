@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async' show Completer;
 import 'dart:convert' show base64Decode;
+import 'dart:typed_data' show ByteData, Uint8List;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
@@ -135,13 +137,14 @@ const String _displayP3Logo =
     'gr3yrjmlwqXLjmWw1O2I5Wmp9Xxjyh+AVIZ6ADIAqcwClakzeMgApDILVKbO4CED'
     'kMosUJk6g4dUBuRfvf1am9VRqzYAAAAASUVORK5CYII=';
 
-void main() => run(Setup.blur);
+void main() => run(Setup.drawnImage);
 
 enum Setup {
   none,
   image,
   canvasSaveLayer,
   blur,
+  drawnImage,
 }
 
 void run(Setup setup) {
@@ -196,6 +199,42 @@ class _SaveLayerDrawer extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+Future<ui.Image> _drawImage() async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  const Size markerSize = Size(120, 120);
+  final double canvasSize = markerSize.height + 3;
+  final Canvas canvas = Canvas(
+    recorder,
+    Rect.fromLTWH(0, 0, canvasSize, canvasSize),
+  );
+
+  final Paint ovalPaint = Paint()..color = const Color(0xff00ff00);
+  final Path ovalPath = Path()
+    ..addOval(Rect.fromLTWH(
+      (canvasSize - markerSize.width) / 2,
+      1,
+      markerSize.width,
+      markerSize.height,
+    ));
+  canvas.drawPath(ovalPath, ovalPaint);
+
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image image = await picture.toImage(
+    canvasSize.toInt(),
+    (canvasSize + 0).toInt(),
+  );
+  final ByteData? byteData =
+      await image.toByteData(format: ui.ImageByteFormat.rawExtendedRgba128);
+  final Completer<ui.Image> completer = Completer<ui.Image>();
+  ui.decodeImageFromPixels(Uint8List.view(byteData!.buffer),
+      canvasSize.toInt(),
+      canvasSize.toInt(),
+      ui.PixelFormat.rgbaFloat32, (ui.Image image) {
+        completer.complete(image);
+      });
+  return completer.future;
+}
+
 Future<ui.Image> _loadImage() async {
   final ui.ImmutableBuffer buffer =
       await ui.ImmutableBuffer.fromUint8List(base64Decode(_displayP3Logo));
@@ -226,6 +265,12 @@ class _MyHomePageState extends State<MyHomePage> {
           _image = value;
         });
       });
+    } else if (widget.setup == Setup.drawnImage) {
+      _drawImage().then((ui.Image? value) {
+        setState(() {
+          _image = value;
+        });
+      });
     }
     super.initState();
   }
@@ -236,13 +281,12 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (widget.setup) {
       case Setup.none:
         imageWidget = Container();
-        break;
       case Setup.image:
         imageWidget = Image.memory(base64Decode(_displayP3Logo));
-        break;
+      case Setup.drawnImage:
+        imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
       case Setup.canvasSaveLayer:
         imageWidget = CustomPaint(painter: _SaveLayerDrawer(_image));
-        break;
       case Setup.blur:
         imageWidget = Stack(
           children: <Widget>[
@@ -258,7 +302,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Image.memory(base64Decode(_displayP3Logo))),
           ],
         );
-        break;
     }
 
     return Scaffold(

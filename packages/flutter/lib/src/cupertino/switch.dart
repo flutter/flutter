@@ -75,6 +75,9 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.applyTheme,
     this.focusColor,
+    this.focusNode,
+    this.onFocusChange,
+    this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
   });
 
@@ -129,6 +132,15 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// {@macro flutter.material.inkwell.onFocusChange}
+  final ValueChanged<bool>? onFocusChange;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
   /// Whether to apply the ambient [CupertinoThemeData].
@@ -303,10 +315,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _positionController.value -= delta;
-          break;
         case TextDirection.ltr:
           _positionController.value += delta;
-          break;
       }
     }
   }
@@ -325,7 +335,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -359,6 +368,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
           onShowFocusHighlight: _onShowFocusHighlight,
           actions: _actionMap,
           enabled: isInteractive,
+          focusNode: widget.focusNode,
+          onFocusChange: widget.onFocusChange,
+          autofocus: widget.autofocus,
           child: _CupertinoSwitchRenderObjectWidget(
             value: widget.value,
             activeColor: activeColor,
@@ -565,7 +577,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    if(value == _isFocused) {
+    if (value == _isFocused) {
       return;
     }
     _isFocused = value;
@@ -609,10 +621,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
-        break;
       case TextDirection.ltr:
         visualPosition = currentValue;
-        break;
     }
 
     final Paint paint = Paint()
@@ -627,7 +637,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    if(_isFocused) {
+    if (_isFocused) {
       // Paints a border around the switch in the focus color.
       final RRect borderTrackRRect = trackRRect.inflate(1.75);
 

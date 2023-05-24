@@ -63,6 +63,10 @@ enum BottomNavigationBarLandscapeLayout {
 /// A material widget that's displayed at the bottom of an app for selecting
 /// among a small number of views, typically between three and five.
 ///
+/// There is an updated version of this component, [NavigationBar], that's
+/// preferred for new applications and applications that are configured
+/// for Material 3 (see [ThemeData.useMaterial3]).
+///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
 /// provides quick navigation between the top-level views of an app. For larger
@@ -93,6 +97,18 @@ enum BottomNavigationBarLandscapeLayout {
 ///    [BottomNavigationBarItem.backgroundColor] of the selected item. In this
 ///    case it's assumed that each item will have a different background color
 ///    and that background color will contrast well with white.
+///
+/// ## Updating to [NavigationBar]
+///
+/// There is an updated version of this component, [NavigationBar],
+/// that's preferred for new applications and applications that are
+/// configured for Material 3 (see [ThemeData.useMaterial3]). The
+/// [NavigationBar] widget's visuals are a little bit different, see
+/// the Material 3 spec at
+/// <https://m3.material.io/components/navigation-bar/overview> for
+/// more details. The API is similar, destinations are defined with
+/// [NavigationDestination]s and [NavigationBar.onDestinationSelected]
+/// is called when a destination is tapped.
 ///
 /// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
@@ -516,10 +532,8 @@ class _BottomNavigationTile extends StatelessWidget {
     switch (type) {
       case BottomNavigationBarType.fixed:
         size = 1;
-        break;
       case BottomNavigationBarType.shifting:
         size = (flex! * 1000.0).round();
-        break;
     }
 
     Widget result = InkResponse(
@@ -869,7 +883,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   _backgroundColor = circle.color;
                   circle.dispose();
                 });
-                break;
               case AnimationStatus.dismissed:
               case AnimationStatus.forward:
               case AnimationStatus.reverse:
@@ -897,7 +910,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           break;
         case BottomNavigationBarType.shifting:
           _pushCircle(widget.currentIndex);
-          break;
       }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
@@ -935,10 +947,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (themeData.brightness) {
       case Brightness.light:
         themeColor = themeData.colorScheme.primary;
-        break;
       case Brightness.dark:
         themeColor = themeData.colorScheme.secondary;
-        break;
     }
 
     final TextStyle effectiveSelectedLabelStyle =
@@ -986,7 +996,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         colorTween = ColorTween(
           begin: widget.unselectedItemColor
@@ -996,7 +1005,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeData.colorScheme.surface,
         );
-        break;
     }
 
     final ColorTween labelColorTween;
@@ -1013,7 +1021,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         labelColorTween = ColorTween(
           begin: effectiveUnselectedLabelStyle.color
@@ -1025,7 +1032,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeColor,
         );
-        break;
     }
 
     final ColorTween iconColorTween;
@@ -1042,7 +1048,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         iconColorTween = ColorTween(
           begin: effectiveUnselectedIconTheme.color
@@ -1054,7 +1059,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeColor,
         );
-        break;
     }
 
     final List<Widget> tiles = <Widget>[];
@@ -1111,10 +1115,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
-        break;
       case BottomNavigationBarType.shifting:
         backgroundColor = _backgroundColor;
-        break;
     }
 
     return Semantics(
@@ -1284,10 +1286,8 @@ class _RadialPainter extends CustomPainter {
       switch (textDirection) {
         case TextDirection.rtl:
           leftFraction = 1.0 - circle.horizontalLeadingOffset;
-          break;
         case TextDirection.ltr:
           leftFraction = circle.horizontalLeadingOffset;
-          break;
       }
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(

@@ -96,10 +96,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     switch (position) {
       case DecorationPosition.background:
         label = 'bg';
-        break;
       case DecorationPosition.foreground:
         label = 'fg';
-        break;
     }
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_controller.dart';
+import 'scroll_delegate.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
 import 'sliver.dart';
@@ -400,9 +401,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   /// {@endtemplate}
   final int initialItemCount;
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -1138,7 +1137,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    for(int i = _itemsCount - 1 ; i >= 0; i--) {
+    for (int i = _itemsCount - 1 ; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }
   }

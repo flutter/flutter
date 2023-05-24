@@ -120,10 +120,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         inTraditionalMode = false;
-        break;
       case FocusHighlightMode.traditional:
         inTraditionalMode = true;
-        break;
     }
 
     if (focused && inTraditionalMode) {
@@ -377,10 +375,8 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     switch (textDirection!) {
       case TextDirection.rtl:
         left = clampDouble(buttonRect.right, 0.0, size.width) - childSize.width;
-        break;
       case TextDirection.ltr:
         left = clampDouble(buttonRect.left, 0.0, size.width - childSize.width);
-        break;
     }
 
     return Offset(left, menuLimits.top);
@@ -1407,7 +1403,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       items.add(DefaultTextStyle(
         style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
-          ignoringSemantics: false,
           child: _DropdownMenuItemContainer(
             alignment: widget.alignment,
             child: displayedHint,

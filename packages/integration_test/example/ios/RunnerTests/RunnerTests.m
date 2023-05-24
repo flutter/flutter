@@ -39,10 +39,6 @@ INTEGRATION_TEST_IOS_RUNNER(RunnerTests)
 
 @implementation FakeIntegrationTestPlugin
 @synthesize testResults;
-
-- (void)setupChannels:(id<FlutterBinaryMessenger>)binaryMessenger {
-}
-
 @end
 
 #pragma mark - Behavior tests
