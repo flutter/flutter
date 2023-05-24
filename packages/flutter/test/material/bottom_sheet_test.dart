@@ -200,6 +200,7 @@ void main() {
   });
 
   testWidgets('Tapping on a BottomSheet should not trigger a rebuild when enableDrag is true', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126833.
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int buildCount = 0;
 
