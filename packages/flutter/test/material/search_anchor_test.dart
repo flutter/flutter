@@ -1362,6 +1362,51 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
+  testWidgets('SearchAnchor suggestionsBuilder property could be async', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    const String suggestion = 'suggestion text';
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Material(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SearchAnchor(
+                searchController: controller,
+                builder: (BuildContext context, SearchController controller) {
+                  return const Icon(Icons.search);
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) async {
+                  return <Widget>[
+                    ListTile(
+                      title: const Text(suggestion),
+                      onTap: () {
+                        setState(() {
+                          controller.closeView(suggestion);
+                        });
+                      },
+                    ),
+                  ];
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    ));
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder text = find.text(suggestion);
+    expect(text, findsOneWidget);
+    await tester.tap(text);
+    await tester.pumpAndSettle();
+
+    expect(controller.isOpen, false);
+    expect(controller.value.text, suggestion);
+  });
+
   testWidgets('SearchAnchor.bar has a default search bar as the anchor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -1678,6 +1723,43 @@ void main() {
     await tester.pumpAndSettle();
 
     // No exception.
+  });
+
+  testWidgets('Docked search should position itself correctly based on closest navigator', (WidgetTester tester) async {
+    const double rootSpacing = 100.0;
+
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget? child) {
+        return Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(rootSpacing),
+            child: child,
+          ),
+        );
+      },
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                controller.openView();
+              },
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
 }
 

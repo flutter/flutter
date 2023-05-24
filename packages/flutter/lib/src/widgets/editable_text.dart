@@ -4246,7 +4246,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // --------------------------- Text Editing Actions ---------------------------
 
-  TextBoundary _characterBoundary() => widget.obscureText ? _CodeUnitBoundary(_value.text) : CharacterBoundary(_value.text);
+  TextBoundary _characterBoundary() => widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
   TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
@@ -5076,21 +5076,76 @@ class _ScribblePlaceholder extends WidgetSpan {
   }
 }
 
-/// A text boundary that uses code units as logical boundaries.
+/// A text boundary that uses code points as logical boundaries.
 ///
-/// This text boundary treats every character in input string as an utf-16 code
-/// unit. This can be useful when handling text without any grapheme cluster,
-/// e.g. password input in [EditableText]. If you are handling text that may
-/// include grapheme clusters, consider using [CharacterBoundary].
-class _CodeUnitBoundary extends TextBoundary {
-  const _CodeUnitBoundary(this._text);
+/// A code point represents a single character. This may be smaller than what is
+/// represented by a user-perceived character, or grapheme. For example, a
+/// single grapheme (in this case a Unicode extended grapheme cluster) like
+/// "👨‍👩‍👦" consists of five code points: the man emoji, a zero
+/// width joiner, the woman emoji, another zero width joiner, and the boy emoji.
+/// The [String] has a length of eight because each emoji consists of two code
+/// units.
+///
+/// Code units are the units by which Dart's String class is measured, which is
+/// encoded in UTF-16.
+///
+/// See also:
+///
+///  * [String.runes], which deals with code points like this class.
+///  * [String.characters], which deals with graphemes.
+///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
+///    boundaries are graphemes instead of code points.
+class _CodePointBoundary extends TextBoundary {
+  const _CodePointBoundary(this._text);
 
   final String _text;
 
+  // Returns true if the given position falls in the center of a surrogate pair.
+  bool _breaksSurrogatePair(int position) {
+    assert(position > 0 && position < _text.length && _text.length > 1);
+    return TextPainter.isHighSurrogate(_text.codeUnitAt(position - 1))
+        && TextPainter.isLowSurrogate(_text.codeUnitAt(position));
+  }
+
   @override
-  int getLeadingTextBoundaryAt(int position) => position.clamp(0, _text.length); // ignore_clamp_double_lint
+  int? getLeadingTextBoundaryAt(int position) {
+    if (_text.isEmpty || position < 0) {
+      return null;
+    }
+    if (position == 0) {
+      return 0;
+    }
+    if (position >= _text.length) {
+      return _text.length;
+    }
+    if (_text.length <= 1) {
+      return position;
+    }
+
+    return _breaksSurrogatePair(position)
+        ? position - 1
+        : position;
+  }
+
   @override
-  int getTrailingTextBoundaryAt(int position) => (position + 1).clamp(0, _text.length); // ignore_clamp_double_lint
+  int? getTrailingTextBoundaryAt(int position) {
+    if (_text.isEmpty || position >= _text.length) {
+      return null;
+    }
+    if (position < 0) {
+      return 0;
+    }
+    if (position == _text.length - 1) {
+      return _text.length;
+    }
+    if (_text.length <= 1) {
+      return position;
+    }
+
+    return _breaksSurrogatePair(position + 1)
+        ? position + 2
+        : position + 1;
+  }
 }
 
 // -------------------------------  Text Actions -------------------------------
