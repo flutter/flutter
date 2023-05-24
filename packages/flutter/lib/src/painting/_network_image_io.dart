@@ -7,7 +7,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/painting/image_cache.dart';
+import 'package:flutter/painting.dart';
 
 import 'binding.dart';
 import 'debug.dart';
