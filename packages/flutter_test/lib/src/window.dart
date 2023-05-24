@@ -511,7 +511,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestFlutterView> get views => _testViews.values;
 
   @override
-  Iterable<Display> get displays => _testDisplays.values;
+  Iterable<TestDisplay> get displays => _testDisplays.values;
 
   void _updateViewsAndDisplays() {
     final List<Object> extraDisplayKeys = <Object>[..._testDisplays.keys];
@@ -975,11 +975,11 @@ class TestFlutterView implements FlutterView {
 
 /// A version of [Display] that can be modified to allow for testing various
 /// use cases.
+///
+/// Updates to the [TestDisplay] will be surfaced through
+/// [PlatformDispatcher.onMetricsChanged].
 class TestDisplay implements Display {
   /// Creates a new [TestDisplay] backed by the given [Display].
-  ///
-  /// Updates to the [TestDisplay] will be surfaced through
-  /// [PlatformDispatcher.onMetricsChanged].
   TestDisplay(TestPlatformDispatcher platformDispatcher, Display display)
   : _platformDispatcher = platformDispatcher, _display = display;
 
