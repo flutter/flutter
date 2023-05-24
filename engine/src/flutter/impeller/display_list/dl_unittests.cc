@@ -21,7 +21,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_playground.h"
-#include "impeller/entity/contents/rrect_shadow_contents.h"
+#include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/scalar.h"
@@ -844,21 +844,21 @@ TEST_P(DisplayListTest, TransparentShadowProducesCorrectColor) {
   dispatcher.drawDisplayList(dl, 1);
   auto picture = dispatcher.EndRecordingAsPicture();
 
-  std::shared_ptr<RRectShadowContents> rrect_shadow;
-  picture.pass->IterateAllEntities([&rrect_shadow](Entity& entity) {
+  std::shared_ptr<SolidRRectBlurContents> rrect_blur;
+  picture.pass->IterateAllEntities([&rrect_blur](Entity& entity) {
     if (ScalarNearlyEqual(entity.GetTransformation().GetScale().x, 1.618f)) {
-      rrect_shadow =
-          std::static_pointer_cast<RRectShadowContents>(entity.GetContents());
+      rrect_blur = std::static_pointer_cast<SolidRRectBlurContents>(
+          entity.GetContents());
       return false;
     }
     return true;
   });
 
-  ASSERT_NE(rrect_shadow, nullptr);
-  ASSERT_EQ(rrect_shadow->GetColor().red, 0);
-  ASSERT_EQ(rrect_shadow->GetColor().green, 0);
-  ASSERT_EQ(rrect_shadow->GetColor().blue, 0);
-  ASSERT_EQ(rrect_shadow->GetColor().alpha, 0);
+  ASSERT_NE(rrect_blur, nullptr);
+  ASSERT_EQ(rrect_blur->GetColor().red, 0);
+  ASSERT_EQ(rrect_blur->GetColor().green, 0);
+  ASSERT_EQ(rrect_blur->GetColor().blue, 0);
+  ASSERT_EQ(rrect_blur->GetColor().alpha, 0);
 }
 
 // Draw a hexagon using triangle fan

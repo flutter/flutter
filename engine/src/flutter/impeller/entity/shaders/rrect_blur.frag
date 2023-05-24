@@ -27,7 +27,7 @@ float16_t RRectDistance(f16vec2 sample_position, f16vec2 half_size) {
 
 /// Closed form unidirectional rounded rect blur mask solution using the
 /// analytical Gaussian integral (with approximated erf).
-float16_t RRectShadowX(f16vec2 sample_position, f16vec2 half_size) {
+float16_t RRectBlurX(f16vec2 sample_position, f16vec2 half_size) {
   // Compute the X direction distance field (not incorporating the Y distance)
   // for the rounded rect.
   float16_t space =
@@ -46,7 +46,7 @@ float16_t RRectShadowX(f16vec2 sample_position, f16vec2 half_size) {
   return integral.y - integral.x;
 }
 
-float16_t RRectShadow(f16vec2 sample_position, f16vec2 half_size) {
+float16_t RRectBlur(f16vec2 sample_position, f16vec2 half_size) {
   // Limit the sampling range to 3 standard deviations in the Y direction from
   // the kernel center to incorporate 99.7% of the color contribution.
   float16_t half_sampling_range = frag_info.blur_sigma * 3.0hf;
@@ -60,8 +60,8 @@ float16_t RRectShadow(f16vec2 sample_position, f16vec2 half_size) {
   float16_t result = 0.0hf;
   for (int sample_i = 0; sample_i < kSampleCount; sample_i++) {
     float16_t y = begin_y + interval * (float16_t(sample_i) + 0.5hf);
-    result += RRectShadowX(f16vec2(sample_position.x, sample_position.y - y),
-                           half_size) *
+    result += RRectBlurX(f16vec2(sample_position.x, sample_position.y - y),
+                         half_size) *
               IPHalfGaussian(y, frag_info.blur_sigma) * interval;
   }
 
@@ -75,7 +75,7 @@ void main() {
   f16vec2 sample_position = f16vec2(v_position) - half_size;
 
   if (frag_info.blur_sigma > 0.0hf) {
-    frag_color *= RRectShadow(sample_position, half_size);
+    frag_color *= RRectBlur(sample_position, half_size);
   } else {
     frag_color *= -RRectDistance(sample_position, half_size);
   }
