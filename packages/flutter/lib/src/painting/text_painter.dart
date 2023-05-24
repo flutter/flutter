@@ -170,11 +170,11 @@ class WordBoundary extends TextBoundary {
   // single code point that represents a supplementary character.
   static int _codePointFromSurrogates(int highSurrogate, int lowSurrogate) {
     assert(
-      TextPainter._isHighSurrogate(highSurrogate),
+      TextPainter.isHighSurrogate(highSurrogate),
       'U+${highSurrogate.toRadixString(16).toUpperCase().padLeft(4, "0")}) is not a high surrogate.',
     );
     assert(
-      TextPainter._isLowSurrogate(lowSurrogate),
+      TextPainter.isLowSurrogate(lowSurrogate),
       'U+${lowSurrogate.toRadixString(16).toUpperCase().padLeft(4, "0")}) is not a low surrogate.',
     );
     const int base = 0x010000 - (0xD800 << 10) - 0xDC00;
@@ -991,17 +991,34 @@ class TextPainter {
     canvas.drawParagraph(_paragraph!, offset);
   }
 
-  // Returns true iff the given value is a valid UTF-16 high surrogate. The value
-  // must be a UTF-16 code unit, meaning it must be in the range 0x0000-0xFFFF.
-  //
-  // See also:
-  //   * https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF
-  static bool _isHighSurrogate(int value) {
+  // Returns true if value falls in the valid range of the UTF16 encoding.
+  static bool _isUTF16(int value) {
+    return value >= 0x0 && value <= 0xFFFFF;
+  }
+
+  /// Returns true iff the given value is a valid UTF-16 high (first) surrogate.
+  /// The value must be a UTF-16 code unit, meaning it must be in the range
+  /// 0x0000-0xFFFF.
+  ///
+  /// See also:
+  ///   * https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF
+  ///   * [isLowSurrogate], which checks the same thing for low (second)
+  /// surrogates.
+  static bool isHighSurrogate(int value) {
+    assert(_isUTF16(value));
     return value & 0xFC00 == 0xD800;
   }
 
-  // Whether the given UTF-16 code unit is a low (second) surrogate.
-  static bool _isLowSurrogate(int value) {
+  /// Returns true iff the given value is a valid UTF-16 low (second) surrogate.
+  /// The value must be a UTF-16 code unit, meaning it must be in the range
+  /// 0x0000-0xFFFF.
+  ///
+  /// See also:
+  ///   * https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF
+  ///   * [isHighSurrogate], which checks the same thing for high (first)
+  /// surrogates.
+  static bool isLowSurrogate(int value) {
+    assert(_isUTF16(value));
     return value & 0xFC00 == 0xDC00;
   }
 
@@ -1021,7 +1038,7 @@ class TextPainter {
       return null;
     }
     // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-    return _isHighSurrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+    return isHighSurrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
 
   /// Returns the closest offset before `offset` at which the input cursor can
@@ -1032,7 +1049,7 @@ class TextPainter {
       return null;
     }
     // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-    return _isLowSurrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+    return isLowSurrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 
   // Unicode value for a zero width joiner character.
@@ -1052,7 +1069,7 @@ class TextPainter {
     const int NEWLINE_CODE_UNIT = 10;
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner.
-    final bool needsSearch = _isHighSurrogate(prevCodeUnit) || _isLowSurrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
+    final bool needsSearch = isHighSurrogate(prevCodeUnit) || isLowSurrogate(prevCodeUnit) || _text!.codeUnitAt(offset) == _zwjUtf16 || _isUnicodeDirectionality(prevCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
@@ -1103,7 +1120,7 @@ class TextPainter {
     final int nextCodeUnit = plainText.codeUnitAt(min(offset, plainTextLength - 1));
 
     // Check for multi-code-unit glyphs such as emojis or zero width joiner
-    final bool needsSearch = _isHighSurrogate(nextCodeUnit) || _isLowSurrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
+    final bool needsSearch = isHighSurrogate(nextCodeUnit) || isLowSurrogate(nextCodeUnit) || nextCodeUnit == _zwjUtf16 || _isUnicodeDirectionality(nextCodeUnit);
     int graphemeClusterLength = needsSearch ? 2 : 1;
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty) {
@@ -1199,7 +1216,7 @@ class TextPainter {
       // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
       return null;
     }
-    return switch(_computeCaretMetrics(position)) {
+    return switch (_computeCaretMetrics(position)) {
       _LineCaretMetrics(:final double fullHeight) => fullHeight,
       _EmptyLineCaretMetrics() => null,
     };

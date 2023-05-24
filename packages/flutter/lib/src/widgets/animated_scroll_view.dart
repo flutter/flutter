@@ -1137,7 +1137,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    for(int i = _itemsCount - 1 ; i >= 0; i--) {
+    for (int i = _itemsCount - 1 ; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }
   }

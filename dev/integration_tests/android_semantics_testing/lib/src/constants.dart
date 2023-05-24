@@ -98,6 +98,7 @@ enum AndroidSemanticsAction {
   /// The Android id of the action.
   final int id;
 
+  // These indices need to be in sync with android_semantics_testing/android/app/src/main/java/com/yourcompany/platforminteraction/MainActivity.java
   static const int _kFocusIndex = 1 << 0;
   static const int _kClearFocusIndex = 1 << 1;
   static const int _kSelectIndex = 1 << 2;
