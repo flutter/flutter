@@ -1333,7 +1333,6 @@ class _BottomSheetGestureDetector extends StatelessWidget {
 }
 
 
-
 // BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
