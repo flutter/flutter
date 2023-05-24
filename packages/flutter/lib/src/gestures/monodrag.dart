@@ -420,7 +420,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
-    if (onlyDispatchDragCallbacksWhenThresholdMet ? _hasDragThresholdBeenMet && _state != _DragState.accepted : _state != _DragState.accepted) {
+    if (onlyDispatchDragCallbacksWhenThresholdMet ? _hasDragThresholdBeenMet : !onlyDispatchDragCallbacksWhenThresholdMet) {
       _checkDrag(pointer);
     }
   }
@@ -470,6 +470,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkDrag(int pointer) {
+    if (_state == _DragState.accepted) {
+      return;
+    }
     _state = _DragState.accepted;
     final OffsetPair delta = _pendingDragOffset;
     final Duration? timestamp = _lastPendingEventTimestamp;
