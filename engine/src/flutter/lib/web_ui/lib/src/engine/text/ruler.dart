@@ -197,9 +197,10 @@ class TextHeightRuler {
       ..border = '0'
       ..padding = '0';
 
-    if (assertionsEnabled) {
+    assert(() {
       host.setAttribute('data-ruler', 'line-height');
-    }
+      return true;
+    }());
 
     _dimensions.applyHeightStyle(textHeightStyle);
 

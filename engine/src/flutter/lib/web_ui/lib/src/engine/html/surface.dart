@@ -166,10 +166,12 @@ class PersistedSurfaceException implements Exception {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return '${surface.runtimeType}: $message';
-    }
-    return super.toString();
+    String result = super.toString();
+    assert(() {
+      result = '${surface.runtimeType}: $message';
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -356,7 +358,7 @@ abstract class PersistedSurface implements ui.EngineLayer {
   /// such as on the very first frame.
   @mustCallSuper
   void build() {
-    if (assertionsEnabled) {
+    assert(() {
       final DomElement? existingElement = rootElement;
       if (existingElement != null) {
         throw PersistedSurfaceException(
@@ -365,7 +367,8 @@ abstract class PersistedSurface implements ui.EngineLayer {
           'element ${existingElement.tagName}.',
         );
       }
-    }
+      return true;
+    }());
     assert(debugAssertSurfaceState(this, PersistedSurfaceState.created));
     rootElement = createElement();
     assert(rootElement != null);
@@ -420,9 +423,10 @@ abstract class PersistedSurface implements ui.EngineLayer {
 
     adoptElements(oldSurface);
 
-    if (assertionsEnabled) {
+    assert(() {
       rootElement!.setAttribute('flt-layer-state', 'updated');
-    }
+      return true;
+    }());
     state = PersistedSurfaceState.active;
     assert(rootElement != null);
   }
@@ -444,9 +448,10 @@ abstract class PersistedSurface implements ui.EngineLayer {
       // this surface's DOM elements.
       retainedSurfaces.add(this);
     }
-    if (assertionsEnabled) {
+    assert(() {
       rootElement!.setAttribute('flt-layer-state', 'retained');
-    }
+      return true;
+    }());
     if (debugExplainSurfaceStats) {
       surfaceStatsFor(this).retainSurfaceCount++;
     }
@@ -503,9 +508,10 @@ abstract class PersistedSurface implements ui.EngineLayer {
   DomElement defaultCreateElement(String tagName) {
     final DomElement element = createDomElement(tagName);
     element.style.position = 'absolute';
-    if (assertionsEnabled) {
+    assert(() {
       element.setAttribute('flt-layer-state', 'new');
-    }
+      return true;
+    }());
     return element;
   }
 
@@ -595,13 +601,14 @@ abstract class PersistedSurface implements ui.EngineLayer {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
+    String result = super.toString();
+    assert(() {
       final StringBuffer log = StringBuffer();
       debugPrint(log, 0);
-      return log.toString();
-    } else {
-      return super.toString();
-    }
+      result = log.toString();
+      return true;
+    }());
+    return result;
   }
 }
 
@@ -720,9 +727,10 @@ abstract class PersistedContainerSurface extends PersistedSurface {
       _updateManyToMany(oldSurface);
     }
 
-    if (assertionsEnabled) {
+    assert(() {
       _debugValidateContainerUpdate(oldSurface);
-    }
+      return true;
+    }());
   }
 
   // Children should override if they are performing clipping.
@@ -1212,11 +1220,12 @@ class _PersistedSurfaceMatch {
 
   @override
   String toString() {
-    if (assertionsEnabled) {
-      return '_PersistedSurfaceMatch(${newChild!.runtimeType}#${newChild!.hashCode}: $oldChildIndex, quality: $matchQuality)';
-    } else {
-      return super.toString();
-    }
+    String result = super.toString();
+    assert(() {
+      result = '_PersistedSurfaceMatch(${newChild!.runtimeType}#${newChild!.hashCode}: $oldChildIndex, quality: $matchQuality)';
+      return true;
+    }());
+    return result;
   }
 }
 

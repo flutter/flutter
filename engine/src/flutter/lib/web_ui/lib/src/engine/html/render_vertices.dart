@@ -64,9 +64,16 @@ class SurfaceVertices implements ui.Vertices {
 
   @override
   bool get debugDisposed {
-    if (assertionsEnabled) {
-      return _disposed;
+    bool? result;
+    assert(() {
+      result = _disposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
     throw StateError('Vertices.debugDisposed is only available when asserts are enabled.');
   }
 }

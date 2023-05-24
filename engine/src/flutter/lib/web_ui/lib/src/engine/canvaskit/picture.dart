@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -30,9 +29,16 @@ class CkPicture implements ui.Picture {
 
   @override
   bool get debugDisposed {
-    if (assertionsEnabled) {
-      return _isDisposed;
+    bool? result;
+    assert(() {
+      result = _isDisposed;
+      return true;
+    }());
+
+    if (result != null) {
+      return result!;
     }
+
     throw StateError('Picture.debugDisposed is only available when asserts are enabled.');
   }
 
