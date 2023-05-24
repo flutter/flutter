@@ -70,7 +70,7 @@ class _ScrollNotificationObserverExampleState extends State<ScrollNotificationOb
   void _handleScrollNotification(ScrollNotification notification) {
     // Check if the notification is a scroll update notification and if the
     // `notification.depth` is 0. This way we only listen to the scroll
-    // notifications from the inner scrollable.
+    // notifications from the closest scrollable, instead of those that may be nested.
     if (notification is ScrollUpdateNotification && defaultScrollNotificationPredicate(notification)) {
       final bool oldScrolledDown = _scrolledDown;
       final ScrollMetrics metrics = notification.metrics;
