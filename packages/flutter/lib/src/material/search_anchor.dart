@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -46,7 +47,7 @@ typedef SearchAnchorChildBuilder = Widget Function(BuildContext context, SearchC
 ///
 /// The `controller` callback provided to [SearchAnchor.suggestionsBuilder] can be used
 /// to close the search view and control the editable field on the view.
-typedef SuggestionsBuilder = Iterable<Widget> Function(BuildContext context, SearchController controller);
+typedef SuggestionsBuilder = FutureOr<Iterable<Widget>> Function(BuildContext context, SearchController controller);
 
 /// Signature for a function that creates a [Widget] to layout the suggestion list.
 ///
@@ -648,7 +649,7 @@ class _ViewContentState extends State<_ViewContent> {
   Size? _screenSize;
   late Rect _viewRect;
   late final SearchController _controller;
-  late Iterable<Widget> result;
+  Iterable<Widget> result = <Widget>[];
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -674,7 +675,6 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    result = widget.suggestionsBuilder(context, _controller);
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
     if (_screenSize != updatedScreenSize) {
@@ -683,6 +683,7 @@ class _ViewContentState extends State<_ViewContent> {
         _viewRect = Offset.zero & _screenSize!;
       }
     }
+    unawaited(updateSuggestions());
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
@@ -698,10 +699,13 @@ class _ViewContentState extends State<_ViewContent> {
     return widget.viewBuilder!(suggestions);
   }
 
-  void updateSuggestions() {
-    setState(() {
-      result = widget.suggestionsBuilder(context, _controller);
-    });
+  Future<void> updateSuggestions() async {
+    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
+    if (mounted) {
+      setState(() {
+        result = suggestions;
+      });
+    }
   }
 
   @override
