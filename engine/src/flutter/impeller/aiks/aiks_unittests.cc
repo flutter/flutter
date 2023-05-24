@@ -2526,5 +2526,37 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, TextForegroundShaderWithTransform) {
+  auto mapping = OpenFixtureAsSkData("Roboto-Regular.ttf");
+  ASSERT_NE(mapping, nullptr);
+
+  Scalar font_size = 100;
+  SkFont sk_font(SkTypeface::MakeFromData(mapping), font_size);
+
+  Paint text_paint;
+  text_paint.color = Color::Blue();
+
+  std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                               Color{0.1294, 0.5882, 0.9529, 1.0}};
+  std::vector<Scalar> stops = {
+      0.0,
+      1.0,
+  };
+  text_paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 0}, {100, 100}, std::move(colors), std::move(stops),
+      Entity::TileMode::kRepeat, {});
+
+  Canvas canvas;
+  canvas.Translate({100, 100});
+  canvas.Rotate(Radians(kPi / 4));
+
+  auto blob = SkTextBlob::MakeFromString("Hello", sk_font);
+  ASSERT_NE(blob, nullptr);
+  auto frame = TextFrameFromTextBlob(blob);
+  canvas.DrawTextFrame(frame, Point(), text_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
