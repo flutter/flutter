@@ -266,6 +266,9 @@ class _TextLayout {
   // This field is not final because the owner TextPainter could create a new
   // ui.Paragraph with the exact same text layout (for example, when only the
   // color of the text is changed).
+  //
+  // The creator of this _TextLayout is also responsible for disposing this
+  // object when it's no logner needed.
   ui.Paragraph _paragraph;
 
   // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
@@ -395,8 +398,12 @@ class _TextPainterLayoutCacheWithOffset {
 
   // ---- Cached Values ----
 
-  List<TextBox>? _inlinePlaceholderBoxes;
-  List<ui.LineMetrics>? _lineMetricsCache;
+  List<TextBox> get inlinePlaceholderBoxes => _cachedInlinePlaceholderBoxes ??= paragraph.getBoxesForPlaceholders();
+  List<TextBox>? _cachedInlinePlaceholderBoxes;
+
+  List<ui.LineMetrics> get lineMetrics => _cachedLineMetrics ??= paragraph.computeLineMetrics();
+  List<ui.LineMetrics>? _cachedLineMetrics;
+
   // Holds the TextPosition the last caret metrics were computed with. When new
   // values are passed in, we recompute the caret metrics only as necessary.
   TextPosition? _previousCaretPosition;
@@ -841,12 +848,11 @@ class TextPainter {
     if (layout == null) {
       return null;
     }
-    final List<TextBox> rawBoxes = layout._inlinePlaceholderBoxes
-                               ??= layout.paragraph.getBoxesForPlaceholders();
     final Offset offset = layout.paintOffset;
     if (!offset.dx.isFinite || !offset.dy.isFinite) {
       return <TextBox>[];
     }
+    final List<TextBox> rawBoxes = layout.inlinePlaceholderBoxes;
     if (offset == Offset.zero) {
       return rawBoxes;
     }
@@ -1401,16 +1407,16 @@ class TextPainter {
     assert(selection.isValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset cachedLayout = _layoutCache!;
+    final Offset offset = cachedLayout.paintOffset;
+    if (!offset.dx.isFinite || !offset.dy.isFinite) {
+      return <TextBox>[];
+    }
     final List<TextBox> boxes = cachedLayout.paragraph.getBoxesForRange(
       selection.start,
       selection.end,
       boxHeightStyle: boxHeightStyle,
       boxWidthStyle: boxWidthStyle,
     );
-    final Offset offset = cachedLayout.paintOffset;
-    if (!offset.dx.isFinite || !offset.dy.isFinite) {
-      return <TextBox>[];
-    }
     return offset == Offset.zero
       ? boxes
       : boxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
@@ -1501,11 +1507,11 @@ class TextPainter {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
     final _TextPainterLayoutCacheWithOffset layout = _layoutCache!;
-    final List<ui.LineMetrics> rawMetrics = layout._lineMetricsCache ??= layout.paragraph.computeLineMetrics();
     final Offset offset = layout.paintOffset;
     if (!offset.dx.isFinite || !offset.dy.isFinite) {
       return const <ui.LineMetrics>[];
     }
+    final List<ui.LineMetrics> rawMetrics = layout.lineMetrics;
     return offset == Offset.zero
       ? rawMetrics
       : rawMetrics.map((ui.LineMetrics metrics) => _shiftLineMetrics(metrics, offset)).toList(growable: false);
