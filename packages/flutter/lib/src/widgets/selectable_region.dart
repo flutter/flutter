@@ -1931,7 +1931,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           break;
         }
       }
-      if (globalRect.contains(event.globalPosition) && rectsInside.isEmpty || globalRect.contains(event.globalPosition) && !positionInsideInnerRects) {
+      if (globalRect.contains(event.globalPosition) && !positionInsideInnerRects) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         dispatchSelectionEventToChild(selectables[index], event);
         if (selectables[index].value != existingGeometry) {
