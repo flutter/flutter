@@ -277,7 +277,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// opened in the default way to match a native iOS 16.0 app. The behavior
   /// will match what will happen if the simple child image was passed as just
   /// the [child] parameter, instead of [builder]. This can be manipulated to
-  /// add more custamizability to the widget's animation.
+  /// add more customizability to the widget's animation.
   ///
   /// ```dart
   /// CupertinoContextMenu.builder(
@@ -564,7 +564,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         }
         _lastOverlayEntry?.remove();
         _lastOverlayEntry = null;
-        break;
 
       case AnimationStatus.completed:
         setState(() {
@@ -580,7 +579,6 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           _lastOverlayEntry = null;
           _openController.reset();
         });
-        break;
 
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
@@ -594,9 +592,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     if (status != AnimationStatus.dismissed) {
       return;
     }
-    setState(() {
-      _childHidden = false;
-    });
+    if (mounted) {
+      setState(() {
+        _childHidden = false;
+      });
+    }
     _route!.animation!.removeStatusListener(_routeAnimationStatusListener);
     _route = null;
   }

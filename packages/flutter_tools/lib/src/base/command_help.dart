@@ -97,6 +97,12 @@ class CommandHelp {
     'Detach (terminate "flutter run" but leave application running).',
   );
 
+  late final CommandHelpOption f = _makeOption(
+    'f',
+    'Dump focus tree to the console.',
+    'debugDumpFocusTree',
+  );
+
   late final CommandHelpOption g = _makeOption(
     'g',
     'Run source code generators.'

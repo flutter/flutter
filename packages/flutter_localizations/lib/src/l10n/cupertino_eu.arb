@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Hautatu guztiak",
   "tabSemanticsLabel": "$tabIndex/$tabCount fitxa",
   "modalBarrierDismissLabel": "Baztertu",
-  "searchTextFieldPlaceholderLabel": "Bilatu"
+  "searchTextFieldPlaceholderLabel": "Bilatu",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

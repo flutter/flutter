@@ -46,7 +46,7 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   bool get supported => globals.platform.isMacOS;
 
-  bool get configOnly => boolArgDeprecated('config-only');
+  bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {

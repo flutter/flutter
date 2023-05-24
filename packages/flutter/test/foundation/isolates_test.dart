@@ -80,8 +80,7 @@ Future<int> test5CallCompute(int value) {
   return compute(test5, value);
 }
 
-Future<void> expectFileSuccessfullyCompletes(String filename,
-    [bool unsound = false]) async {
+Future<void> expectFileSuccessfullyCompletes(String filename) async {
   // Run a Dart script that calls compute().
   // The Dart process will terminate only if the script exits cleanly with
   // all isolate ports closed.
@@ -93,12 +92,10 @@ Future<void> expectFileSuccessfullyCompletes(String filename,
   final String packageRoot = fs.path.dirname(fs.path.fromUri(platform.script));
   final String scriptPath =
       fs.path.join(packageRoot, 'test', 'foundation', filename);
-  final String nullSafetyArg =
-      unsound ? '--no-sound-null-safety' : '--sound-null-safety';
 
   // Enable asserts to also catch potentially invalid assertions.
   final ProcessResult result = await Process.run(
-      dartPath, <String>[nullSafetyArg, 'run', '--enable-asserts', scriptPath]);
+      dartPath, <String>['run', '--enable-asserts', scriptPath]);
   expect(result.exitCode, 0);
 }
 

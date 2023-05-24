@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -20,6 +21,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
 
 void main() {
   Daemon? daemon;
@@ -98,12 +100,14 @@ void main() {
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final bool supportsRuntimeMode = await device.supportsRuntimeMode(BuildMode.release);
       expect(fakeDevice.supportsRuntimeModeCalledBuildMode, BuildMode.release);
       expect(supportsRuntimeMode, true);
+    }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
     });
 
     testUsingContext('redirects logs', () async {
@@ -121,7 +125,7 @@ void main() {
       final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final DeviceLogReader logReader = await device.getLogReader();
@@ -153,7 +157,7 @@ void main() {
       dummyApplicationBinary.writeAsStringSync('dummy content');
       prebuiltApplicationPackage.applicationPackage = dummyApplicationBinary;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -161,8 +165,8 @@ void main() {
       final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
       applicationPackageFactory.applicationPackage = applicationPackage;
 
-      final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
-      fakeDevice.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
+      fakeDevice.launchResult = LaunchResult.succeeded(vmServiceUri: vmServiceUri);
 
       final LaunchResult launchResult = await device.startApp(
         prebuiltApplicationPackage,
@@ -170,8 +174,8 @@ void main() {
       );
 
       expect(launchResult.started, true);
-      // The returned observatoryUri was a forwarded port, so we cannot compare them directly.
-      expect(launchResult.observatoryUri!.path, observatoryUri.path);
+      // The returned vmServiceUri was a forwarded port, so we cannot compare them directly.
+      expect(launchResult.vmServiceUri!.path, vmServiceUri.path);
 
       expect(applicationPackageFactory.applicationBinaryRequested!.readAsStringSync(), 'dummy content');
       expect(applicationPackageFactory.platformRequested, TargetPlatform.android_arm);
@@ -183,6 +187,7 @@ void main() {
       expect(fakeDevice.stopAppPackage, applicationPackage);
       expect(stopAppResult, true);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       ApplicationPackageFactory: () => applicationPackageFactory,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => fakeProcessManager,
@@ -200,7 +205,7 @@ void main() {
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -212,6 +217,7 @@ void main() {
 
       expect(await screenshotOutputFile.readAsBytes(), screenshot);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => fakeProcessManager,
     });
@@ -267,6 +273,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   final bool ephemeral = false;
+
+  @override
+  bool get isConnected => true;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Android 12';

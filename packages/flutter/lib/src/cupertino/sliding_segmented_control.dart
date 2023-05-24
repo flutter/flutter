@@ -498,7 +498,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         break;
       case TextDirection.rtl:
         index = numOfChildren - 1 - index;
-        break;
     }
 
     return widget.children.keys.elementAt(index);
@@ -682,7 +681,6 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
         if (highlightedIndex != null) {
           highlightedIndex = index - 1 - highlightedIndex;
         }
-        break;
     }
 
     return UnconstrainedBox(

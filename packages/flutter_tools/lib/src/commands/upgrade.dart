@@ -47,6 +47,7 @@ class UpgradeCommand extends FlutterCommand {
         hide: !verboseHelp,
         help: 'Override the upgrade working directory. '
               'This is only intended to enable integration testing of the tool itself.'
+              // Also notably, this will override the FakeFlutterVersion if any is set!
       )
       ..addFlag(
         'verify-only',
@@ -71,16 +72,16 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArgDeprecated('working-directory') ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
     return _commandRunner.runCommand(
-      force: boolArgDeprecated('force'),
-      continueFlow: boolArgDeprecated('continue'),
-      testFlow: stringArgDeprecated('working-directory') != null,
+      force: boolArg('force'),
+      continueFlow: boolArg('continue'),
+      testFlow: stringArg('working-directory') != null,
       gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
-      flutterVersion: stringArgDeprecated('working-directory') == null
+      flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(workingDirectory: _commandRunner.workingDirectory),
-      verifyOnly: boolArgDeprecated('verify-only'),
+      verifyOnly: boolArg('verify-only'),
     );
   }
 }
@@ -88,7 +89,7 @@ class UpgradeCommand extends FlutterCommand {
 @visibleForTesting
 class UpgradeCommandRunner {
 
-  String? workingDirectory;
+  String? workingDirectory; // set in runCommand() above
 
   Future<FlutterCommandResult> runCommand({
     required bool force,
@@ -209,6 +210,22 @@ class UpgradeCommandRunner {
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
     persistentToolState.setShouldRedisplayWelcomeMessage(true);
+    if (globals.flutterVersion.channel == 'master' || globals.flutterVersion.channel == 'main') {
+      globals.printStatus(
+        '\n'
+        'This channel is intended for Flutter contributors. '
+        'This channel is not as thoroughly tested as the "beta" and "stable" channels. '
+        'We do not recommend using this channel for normal use as it more likely to contain serious regressions.\n'
+        '\n'
+        'For information on contributing to Flutter, see our contributing guide:\n'
+        '    https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md\n'
+        '\n'
+        'For the most up to date stable version of flutter, consider using the "beta" channel instead. '
+        'The Flutter "beta" channel enjoys all the same automated testing as the "stable" channel, '
+        'but is updated roughly once a month instead of once a quarter.\n'
+        'To change channel, run the "flutter channel beta" command.',
+      );
+    }
   }
 
   Future<bool> hasUncommittedChanges() async {

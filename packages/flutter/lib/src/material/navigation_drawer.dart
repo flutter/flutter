@@ -61,6 +61,7 @@ class NavigationDrawer extends StatelessWidget {
     this.indicatorShape,
     this.onDestinationSelected,
     this.selectedIndex = 0,
+    this.tilePadding = const EdgeInsets.symmetric(horizontal: 12.0),
   });
 
   /// The background color of the [Material] that holds the [NavigationDrawer]'s
@@ -98,7 +99,7 @@ class NavigationDrawer extends StatelessWidget {
   /// If that is also null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
 
-  /// The shape of the selected inidicator.
+  /// The shape of the selected indicator.
   ///
   /// If this is null, [NavigationDrawerThemeData.indicatorShape] is used.
   /// If that is also null, defaults to [StadiumBorder].
@@ -114,7 +115,7 @@ class NavigationDrawer extends StatelessWidget {
   /// [NavigationDrawerDestination] or null if no destination is selected.
   ///
   /// A valid [selectedIndex] satisfies 0 <= [selectedIndex] < number of [NavigationDrawerDestination].
-  /// For an invalid [selectedIndex] like `-1`, all desitinations will appear unselected.
+  /// For an invalid [selectedIndex] like `-1`, all destinations will appear unselected.
   final int? selectedIndex;
 
   /// Called when one of the [NavigationDrawerDestination] children is selected.
@@ -123,6 +124,11 @@ class NavigationDrawer extends StatelessWidget {
   ///
   /// Upon updating [selectedIndex], the [NavigationDrawer] will be rebuilt.
   final ValueChanged<int>? onDestinationSelected;
+
+  /// Defines the padding for [NavigationDrawerDestination] widgets (Drawer items).
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 12.0)`.
+  final EdgeInsetsGeometry tilePadding;
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +147,7 @@ class NavigationDrawer extends StatelessWidget {
             selectedAnimation: animation,
             indicatorColor: indicatorColor,
             indicatorShape: indicatorShape,
+            tilePadding: tilePadding,
             onTap: () {
               if (onDestinationSelected != null) {
                 onDestinationSelected!(index);
@@ -321,14 +328,14 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: info.tilePadding,
       child: _NavigationDestinationSemantics(
         child: SizedBox(
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
           child: InkWell(
             highlightColor: Colors.transparent,
             onTap: info.onTap,
-            borderRadius: const BorderRadius.all(Radius.circular(28.0)),
+            customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
             child: Stack(
               alignment: Alignment.center,
               children: <Widget>[
@@ -455,6 +462,7 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
     required this.indicatorShape,
     required this.onTap,
     required super.child,
+    required this.tilePadding,
   });
 
   /// Which destination index is this in the navigation drawer.
@@ -513,6 +521,11 @@ class _NavigationDrawerDestinationInfo extends InheritedWidget {
   /// This is computed by calling [NavigationDrawer.onDestinationSelected]
   /// with [index] passed in.
   final VoidCallback onTap;
+
+  /// Defines the padding for [NavigationDrawerDestination] widgets (Drawer items).
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: 12.0)`.
+  final EdgeInsetsGeometry tilePadding;
 
   /// Returns a non null [_NavigationDrawerDestinationInfo].
   ///
@@ -658,30 +671,32 @@ bool _isForwardOrCompleted(Animation<double> animation) {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
-  const _NavigationDrawerDefaultsM3(this.context)
-      : super(
-          elevation: 1.0,
-          tileHeight: 56.0,
-          indicatorShape: const StadiumBorder(),
-          indicatorSize: const Size(336.0, 56.0),
-        );
+  _NavigationDrawerDefaultsM3(this.context)
+    : super(
+        elevation: 1.0,
+        tileHeight: 56.0,
+        indicatorShape: const StadiumBorder(),
+        indicatorSize: const Size(336.0, 56.0),
+      );
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get indicatorColor => Theme.of(context).colorScheme.secondaryContainer;
+  Color? get indicatorColor => _colors.secondaryContainer;
 
   @override
   MaterialStateProperty<IconThemeData?>? get iconTheme {
@@ -690,7 +705,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
         size: 24.0,
         color: states.contains(MaterialState.selected)
             ? null
-            : Theme.of(context).colorScheme.onSurfaceVariant,
+            : _colors.onSurfaceVariant,
       );
     });
   }
@@ -698,11 +713,11 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
   @override
   MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      final TextStyle style = Theme.of(context).textTheme.labelLarge!;
+      final TextStyle style = _textTheme.labelLarge!;
       return style.apply(
         color: states.contains(MaterialState.selected)
-            ? Theme.of(context).colorScheme.onSecondaryContainer
-            : Theme.of(context).colorScheme.onSurfaceVariant,
+            ? _colors.onSecondaryContainer
+            : _colors.onSurfaceVariant,
       );
     });
   }

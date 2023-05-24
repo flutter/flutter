@@ -114,7 +114,7 @@ class StdoutHandler {
         }
       }
       if (message.length <= messageBoundaryKey.length) {
-        compilerOutput?.complete(null);
+        compilerOutput?.complete();
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
@@ -144,10 +144,8 @@ class StdoutHandler {
       switch (message[0]) {
         case '+':
           sources.add(Uri.parse(message.substring(1)));
-          break;
         case '-':
           sources.remove(Uri.parse(message.substring(1)));
-          break;
         default:
           _logger.printTrace('Unexpected prefix for $message uri - ignoring');
       }
@@ -167,37 +165,33 @@ class StdoutHandler {
 }
 
 /// List the preconfigured build options for a given build mode.
-List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
-  switch (mode) {
-    case BuildMode.debug:
-      return <String>[
-        // These checks allow the CLI to override the value of this define for unit
-        // testing the framework.
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
+    switch (mode) {
+      BuildMode.debug => <String>[
+          // These checks allow the CLI to override the value of this define for unit
+          // testing the framework.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=false',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          '--enable-asserts',
+        ],
+      BuildMode.profile => <String>[
+          // These checks allow the CLI to override the value of this define for
+          // benchmarks with most timeline traces disabled.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=true',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          ...kDartCompilerExperiments,
+        ],
+      BuildMode.release => <String>[
           '-Ddart.vm.profile=false',
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-          '-Ddart.vm.product=false',
-        '--enable-asserts',
-      ];
-    case BuildMode.profile:
-      return <String>[
-        // These checks allow the CLI to override the value of this define for
-        // benchmarks with most timeline traces disabled.
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
-          '-Ddart.vm.profile=true',
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-          '-Ddart.vm.product=false',
-        ...kDartCompilerExperiments,
-      ];
-    case BuildMode.release:
-      return <String>[
-        '-Ddart.vm.profile=false',
-        '-Ddart.vm.product=true',
-        ...kDartCompilerExperiments,
-      ];
-  }
-  throw Exception('Unknown BuildMode: $mode');
-}
+          '-Ddart.vm.product=true',
+          ...kDartCompilerExperiments,
+        ],
+      _ => throw Exception('Unknown BuildMode: $mode')
+    };
 
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
@@ -799,7 +793,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--platform',
         platformDill!,
       ],
-      if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if (unsafePackageSerialization) '--unsafe-package-serialization',
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
       ...?extraFrontEndOptions,
@@ -815,7 +809,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
           if (_stdoutHandler.compilerOutput?.isCompleted == false) {
-            _stdoutHandler.compilerOutput?.complete(null);
+            _stdoutHandler.compilerOutput?.complete();
             throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Autocomplete].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Autocomplete].
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -18,8 +18,14 @@ class AutocompleteExampleApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Autocomplete Basic User'),
         ),
-        body: const Center(
-          child: AutocompleteBasicUserExample(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text('Type below to autocomplete the following possible results: ${AutocompleteBasicUserExample._userOptions}.'),
+              const AutocompleteBasicUserExample(),
+            ],
+          ),
         ),
       ),
     );
@@ -73,9 +79,7 @@ class AutocompleteBasicUserExample extends StatelessWidget {
           return const Iterable<User>.empty();
         }
         return _userOptions.where((User option) {
-          return option
-              .toString()
-              .contains(textEditingValue.text.toLowerCase());
+          return option.toString().contains(textEditingValue.text.toLowerCase());
         });
       },
       onSelected: (User selection) {

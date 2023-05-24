@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [Overlay].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [Overlay].
 
 void main() => runApp(const OverlayApp());
 
@@ -65,13 +65,13 @@ class _OverlayExampleState extends State<OverlayExample> {
                           children: <Widget>[
                             Text(
                               'Explore page',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                ),
+                              style: TextStyle(
+                                color: Colors.red,
                               ),
+                            ),
                             Icon(
                               Icons.arrow_downward,
-                              color: Colors.red
+                              color: Colors.red,
                             ),
                           ],
                         );
@@ -80,13 +80,13 @@ class _OverlayExampleState extends State<OverlayExample> {
                           children: <Widget>[
                             Text(
                               'Commute page',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                ),
+                              style: TextStyle(
+                                color: Colors.green,
                               ),
+                            ),
                             Icon(
                               Icons.arrow_downward,
-                              color: Colors.green
+                              color: Colors.green,
                             ),
                           ],
                         );
@@ -95,13 +95,13 @@ class _OverlayExampleState extends State<OverlayExample> {
                           children: <Widget>[
                             Text(
                               'Saved page',
-                                style: TextStyle(
-                                  color: Colors.orange,
-                                ),
+                              style: TextStyle(
+                                color: Colors.orange,
                               ),
+                            ),
                             Icon(
                               Icons.arrow_downward,
-                              color: Colors.orange
+                              color: Colors.orange,
                             ),
                           ],
                         );

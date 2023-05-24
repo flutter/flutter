@@ -11,14 +11,14 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: example.MyApp(),
+          body: example.VerticalDividerExampleApp(),
         ),
       ),
     );
 
     expect(find.byType(VerticalDivider), findsOneWidget);
 
-    // Divider is positioned horizintally.
+    // Divider is positioned horizontally.
     Offset expanded = tester.getTopRight(find.byType(Expanded).first);
     expect(expanded.dx, tester.getTopLeft(find.byType(VerticalDivider)).dx);
 

@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -188,6 +191,28 @@ void main() {
     expect(find.byType(MenuItemButton), findsNWidgets(6));
     buttonSize = tester.getSize(find.widgetWithText(MenuItemButton, 'I0').last);
     expect(buttonSize.width, customSmallWidth);
+  });
+
+  testWidgets('The width property update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120567
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+
+    double customWidth = 250.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+
+    // Update width
+    customWidth = 400.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
   });
 
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
@@ -400,6 +425,70 @@ void main() {
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
+  });
+
+  testWidgets('Leading IconButton status test', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(buildTest(themeData, menuChildren, width: 100.0, menuHeight: 100.0));
+    await tester.pump();
+
+    Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up);
+    expect(iconButton, findsNothing);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+
+    await tester.tap(iconButton);
+    await tester.pump();
+
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up).first;
+    expect(iconButton, findsOneWidget);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down);
+    expect(iconButton, findsNothing);
+
+    // Tap outside
+    await tester.tapAt(const Offset(500.0, 500.0));
+    await tester.pump();
+
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up);
+    expect(iconButton, findsNothing);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+  });
+
+  testWidgets('Do not crash when resize window during menu opening', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState){
+            return DropdownMenu<TestMenu>(
+              width: MediaQuery.of(context).size.width,
+              dropdownMenuEntries: menuChildren,
+            );
+          },
+        ),
+      ),
+    ));
+
+    final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+
+    await tester.tap(iconButton);
+    await tester.pump();
+
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
+      matching: find.byType(Material),
+    ).last;
+    expect(menuMaterial, findsOneWidget);
+
+    // didChangeMetrics
+    tester.view.physicalSize = const Size(700.0, 700.0);
+    await tester.pump();
+
+    // Go without throw.
   });
 
   testWidgets('DropdownMenu can customize trailing icon button', (WidgetTester tester) async {
@@ -838,12 +927,10 @@ void main() {
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         isMobile = true;
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         isMobile = false;
-        break;
     }
     int expectedCount = isMobile ? 0 : 1;
 
@@ -1031,6 +1118,201 @@ void main() {
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets('If requestFocusOnTap is false, the mouse cursor should be clickable when hovered', (WidgetTester tester) async {
+    Widget buildDropdownMenu() => MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              requestFocusOnTap: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildDropdownMenu());
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, false);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('The menu has the same width as the input field in ListView', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123631
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Rect textInput = tester.getRect(find.byType(TextField));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final Finder findMenu = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString() == '_MenuPanel';
+    });
+    final Rect menu = tester.getRect(findMenu);
+    expect(textInput.width, menu.width);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              width: 200,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Rect textInput1 = tester.getRect(find.byType(TextField));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final Finder findMenu1 = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString() == '_MenuPanel';
+    });
+    final Rect menu1 = tester.getRect(findMenu1);
+    expect(textInput1.width, 200);
+    expect(menu1.width, 200);
+  });
+
+  testWidgets('Semantics does not include hint when input is not empty', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String hintText = 'I am hintText';
+    TestMenu? selectedValue;
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(
+                requestFocusOnTap: true,
+                dropdownMenuEntries: menuChildren,
+                hintText: hintText,
+                onSelected: (TestMenu? value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                },
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text(hintText));
+
+    expect(selectedValue?.label, null);
+    expect(node.label, hintText);
+    expect(node.value, '');
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 3').last);
+    await tester.pumpAndSettle();
+    expect(selectedValue?.label, 'Item 3');
+    expect(node.label, '');
+    expect(node.value, 'Item 3');
+  });
+
+  testWidgets('helperText is not visible when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame(bool hasError) {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+              errorText: hasError ? errorText : null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    expect(find.text(helperText), findsOneWidget);
+    expect(find.text(errorText), findsNothing);
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(find.text(helperText), findsNothing);
+    expect(find.text(errorText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect helperText when helperText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(helperText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect errorText when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              errorText: errorText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(errorText), findsOneWidget);
+  });
 }
 
 enum TestMenu {

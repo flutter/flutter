@@ -31,6 +31,9 @@ abstract class TextBoundary {
   /// `position`, or null if no boundaries can be found.
   ///
   /// The return value, if not null, is usually less than or equal to `position`.
+  ///
+  /// The range of the return value is given by the closed interval
+  /// `[0, string.length]`.
   int? getLeadingTextBoundaryAt(int position) {
     if (position < 0) {
       return null;
@@ -39,10 +42,13 @@ abstract class TextBoundary {
     return start >= 0 ? start : null;
   }
 
-  /// Returns the offset of the closest text boundaries after the given `position`,
-  /// or null if there is no boundaries can be found after `position`.
+  /// Returns the offset of the closest text boundary after the given
+  /// `position`, or null if there is no boundary can be found after `position`.
   ///
   /// The return value, if not null, is usually greater than `position`.
+  ///
+  /// The range of the return value is given by the closed interval
+  /// `[0, string.length]`.
   int? getTrailingTextBoundaryAt(int position) {
     final int end = getTextBoundaryAt(max(0, position)).end;
     return end >= 0 ? end : null;
@@ -59,7 +65,7 @@ abstract class TextBoundary {
   }
 }
 
-/// A [TextBoundary] subclass for retriving the range of the grapheme the given
+/// A [TextBoundary] subclass for retrieving the range of the grapheme the given
 /// `position` is in.
 ///
 /// The class is implemented using the

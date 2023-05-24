@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('should update magnifier position on drag', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.MagnifierExampleApp());
 
     Matcher isPositionedAt(Offset at) {
       return isA<Positioned>().having(
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets('should match golden', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp());
+    await tester.pumpWidget(const example.MagnifierExampleApp());
 
     final Offset centerOfFlutterLogo = tester.getCenter(find.byType(Positioned));
     const Offset dragDistance = Offset(10, 10);

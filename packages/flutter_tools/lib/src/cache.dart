@@ -19,7 +19,6 @@ import 'base/os.dart' show OperatingSystemUtils;
 import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
-import 'build_info.dart';
 import 'convert.dart';
 import 'features.dart';
 
@@ -537,7 +536,7 @@ class Cache {
   }
 
   String getHostPlatformArchName() {
-    return getNameForHostPlatformArch(_osUtils.hostPlatform);
+    return _osUtils.hostPlatform.platformName;
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
@@ -1005,6 +1004,19 @@ class ArtifactUpdater {
   @visibleForTesting
   final List<File> downloadedFiles = <File>[];
 
+  /// These filenames, should they exist after extracting an archive, should be deleted.
+  static const Set<String> _denylistedBasenames = <String>{'entitlements.txt', 'without_entitlements.txt'};
+  void _removeDenylistedFiles(Directory directory) {
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      if (_denylistedBasenames.contains(entity.basename)) {
+        entity.deleteSync();
+      }
+    }
+  }
+
   /// Download a zip archive from the given [url] and unzip it to [location].
   Future<void> downloadZipArchive(
     String message,
@@ -1121,6 +1133,7 @@ class ArtifactUpdater {
         _deleteIgnoringErrors(tempFile);
         continue;
       }
+      _removeDenylistedFiles(location);
       return;
     }
   }
@@ -1148,7 +1161,7 @@ class ArtifactUpdater {
       status.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
-        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.md'
+        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.yml'
       );
       status.resume();
     }

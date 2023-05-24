@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [ScaffoldState.showSnackBar].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ScaffoldState.showSnackBar].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShowSnackBarExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ShowSnackBarExampleApp extends StatelessWidget {
+  const ShowSnackBarExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ScaffoldState Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: ShowSnackBarExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ShowSnackBarExample extends StatelessWidget {
+  const ShowSnackBarExample({super.key});
 
   @override
   Widget build(BuildContext context) {
