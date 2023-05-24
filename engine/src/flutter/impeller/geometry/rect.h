@@ -252,6 +252,24 @@ struct TRect {
     return TRect(origin.x + offset.x, origin.y + offset.y, size.width,
                  size.height);
   }
+
+  /// @brief  Returns a rectangle with expanded edges. Negative expansion
+  ///         results in shrinking.
+  constexpr TRect<T> Expand(T left, T top, T right, T bottom) {
+    return TRect(origin.x - left,            //
+                 origin.y - top,             //
+                 size.width + left + right,  //
+                 size.height + top + bottom);
+  }
+
+  /// @brief  Returns a rectangle with expanded edges in all directions.
+  ///         Negative expansion results in shrinking.
+  constexpr TRect<T> Expand(T amount) {
+    return TRect(origin.x - amount,        //
+                 origin.y - amount,        //
+                 size.width + amount * 2,  //
+                 size.height + amount * 2);
+  }
 };
 
 using Rect = TRect<Scalar>;
