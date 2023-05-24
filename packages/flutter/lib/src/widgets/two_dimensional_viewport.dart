@@ -964,13 +964,15 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     // Subclass lays out children.
     layoutChildSequence();
 
-    _reifyChildren();
     assert(_debugCheckContentDimensions());
     _didResize = false;
     _needsDelegateRebuild = false;
     invokeLayoutCallback<BoxConstraints>((BoxConstraints _) {
       _childManager._endLayout();
       assert(_debugOrphans?.isEmpty ?? true);
+      // Organize children in paint order and complete parent data after
+      // un-used children are disposed of by the childManager.
+      _reifyChildren();
     });
   }
 
