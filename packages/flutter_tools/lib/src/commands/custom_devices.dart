@@ -537,7 +537,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     String? description,
     bool defaultsTo = true,
   }) async {
-    final String defaultsToStr = defaultsTo == true ? '[Y/n]' : '[y/N]';
+    final String defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
     logger.printStatus('$description $defaultsToStr (empty for default)');
     while (true) {
       final String input = await inputs.next;
@@ -784,7 +784,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     if (stringArg(_kJson) != null) {
       return runNonInteractively();
     }
-    if (boolArg(_kSsh) == true) {
+    if (boolArg(_kSsh)) {
       return runInteractivelySsh();
     }
     throw UnsupportedError('Unknown run mode');

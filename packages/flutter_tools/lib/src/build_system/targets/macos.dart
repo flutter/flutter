@@ -62,6 +62,8 @@ abstract class UnpackMacOS extends Target {
       basePath,
       environment.outputDir.path,
     ]);
+
+    _removeDenylistedFiles(environment.outputDir);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
@@ -79,6 +81,19 @@ abstract class UnpackMacOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     _thinFramework(environment, frameworkBinaryPath);
+  }
+
+  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+
+  void _removeDenylistedFiles(Directory directory) {
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      if (_copyDenylist.contains(entity.basename)) {
+        entity.deleteSync();
+      }
+    }
   }
 
   void _thinFramework(Environment environment, String frameworkBinaryPath) {

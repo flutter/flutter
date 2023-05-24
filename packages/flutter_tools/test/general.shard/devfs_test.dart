@@ -506,13 +506,13 @@ void main() {
     final MemoryIOSink frontendServerStdIn = MemoryIOSink();
     Stream<List<int>> frontendServerStdOut() async* {
       int processed = 0;
-      while(true) {
-        while(frontendServerStdIn.writes.length == processed) {
+      while (true) {
+        while (frontendServerStdIn.writes.length == processed) {
           await Future<dynamic>.delayed(const Duration(milliseconds: 5));
         }
 
         String? boundaryKey;
-        while(processed < frontendServerStdIn.writes.length) {
+        while (processed < frontendServerStdIn.writes.length) {
           final List<int> data = frontendServerStdIn.writes[processed];
           final String stringData = utf8.decode(data);
           if (stringData.startsWith('compile ')) {
