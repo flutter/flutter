@@ -2490,6 +2490,8 @@ void main() {
   });
 
   testWidgets('BottomNavigationBar linear landscape layout label RenderFlex overflow',(WidgetTester tester) async {
+    //Regression test for https://github.com/flutter/flutter/issues/112163
+
     tester.binding.window.physicalSizeTestValue = const Size(540, 340);
 
     await tester.pumpWidget(
@@ -2497,33 +2499,33 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Scaffold(
-                bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_rounded),
-                  label: 'Home Challenges',
-                  backgroundColor: Colors.grey,
-                  tooltip: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.date_range_rounded),
-                  label: 'Daily Challenges',
-                  backgroundColor: Colors.grey,
-                  tooltip: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.wind_power),
-                  label: 'Awards Challenges',
-                  backgroundColor: Colors.grey,
-                  tooltip: '',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bar_chart_rounded),
-                  label: 'Statistics Challenges',
-                  backgroundColor: Colors.grey,
-                  tooltip: '',
+              bottomNavigationBar: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                landscapeLayout: BottomNavigationBarLandscapeLayout.linear,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home_rounded),
+                    label: 'Home Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.date_range_rounded),
+                    label: 'Daily Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.wind_power),
+                    label: 'Awards Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.bar_chart_rounded),
+                    label: 'Statistics Challenges',
+                    backgroundColor: Colors.grey,
+                    tooltip: '',
                 ),
               ],
             ));

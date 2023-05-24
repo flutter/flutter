@@ -608,6 +608,9 @@ class _Tile extends StatelessWidget {
           children: <Widget>[
             icon,
             const SizedBox(width: 8),
+            // Flexible lets the overflow property of
+            // label to work and IntrinsicWidth gives label a
+            // resonable width preventing extra space before it.
             Flexible(child: IntrinsicWidth(child: label))
           ],
         ),
