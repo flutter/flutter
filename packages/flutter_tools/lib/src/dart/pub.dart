@@ -630,7 +630,7 @@ class _DefaultPub implements Pub {
         _logger.printStatus('''
 Found an existing Pub cache at $pubCachePath.
 It can be repaired by running `dart pub cache repair`.
-It can be reset by running `dart pub cache clear`.''');
+It can be reset by running `dart pub cache clean`.''');
       }
     }
     final String? home = _platform.environment['HOME'];
