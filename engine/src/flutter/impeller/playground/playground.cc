@@ -31,8 +31,7 @@
 #include "third_party/imgui/imgui.h"
 
 #if FML_OS_MACOSX
-#include <objc/message.h>
-#include <objc/runtime.h>
+#include "fml/platform/darwin/scoped_nsautorelease_pool.h"
 #endif
 
 namespace impeller {
@@ -183,23 +182,6 @@ void Playground::SetCursorPosition(Point pos) {
   cursor_position_ = pos;
 }
 
-#if FML_OS_MACOSX
-class AutoReleasePool {
- public:
-  AutoReleasePool() {
-    pool_ = reinterpret_cast<msg_send>(objc_msgSend)(
-        objc_getClass("NSAutoreleasePool"), sel_getUid("new"));
-  }
-  ~AutoReleasePool() {
-    reinterpret_cast<msg_send>(objc_msgSend)(pool_, sel_getUid("drain"));
-  }
-
- private:
-  typedef id (*msg_send)(void*, SEL);
-  id pool_;
-};
-#endif
-
 bool Playground::OpenPlaygroundHere(
     const Renderer::RenderCallback& render_callback) {
   if (!switches_.enable_playground) {
@@ -262,7 +244,7 @@ bool Playground::OpenPlaygroundHere(
 
   while (true) {
 #if FML_OS_MACOSX
-    AutoReleasePool pool;
+    fml::ScopedNSAutoreleasePool pool;
 #endif
     ::glfwPollEvents();
 
