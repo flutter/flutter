@@ -1783,6 +1783,34 @@ TEST(GeometryTest, RectMakePointBounds) {
   }
 }
 
+TEST(GeometryTest, RectExpand) {
+  {
+    auto a = Rect::MakeLTRB(100, 100, 200, 200);
+    auto b = a.Expand(1);
+    auto expected = Rect::MakeLTRB(99, 99, 201, 201);
+    ASSERT_RECT_NEAR(b, expected);
+  }
+  {
+    auto a = Rect::MakeLTRB(100, 100, 200, 200);
+    auto b = a.Expand(-1);
+    auto expected = Rect::MakeLTRB(101, 101, 199, 199);
+    ASSERT_RECT_NEAR(b, expected);
+  }
+
+  {
+    auto a = Rect::MakeLTRB(100, 100, 200, 200);
+    auto b = a.Expand(1, 2, 3, 4);
+    auto expected = Rect::MakeLTRB(99, 98, 203, 204);
+    ASSERT_RECT_NEAR(b, expected);
+  }
+  {
+    auto a = Rect::MakeLTRB(100, 100, 200, 200);
+    auto b = a.Expand(-1, -2, -3, -4);
+    auto expected = Rect::MakeLTRB(101, 102, 197, 196);
+    ASSERT_RECT_NEAR(b, expected);
+  }
+}
+
 TEST(GeometryTest, RectGetPositive) {
   {
     Rect r{100, 200, 300, 400};
