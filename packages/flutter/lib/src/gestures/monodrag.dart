@@ -401,7 +401,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         ).distance * (_getPrimaryValueFromOffset(movedLocally) ?? 1).sign;
         if (_hasSufficientGlobalDistanceToAccept(event.kind, gestureSettings?.touchSlop)) {
           _hasDragThresholdBeenMet = true;
-          resolve(GestureDisposition.accepted);
+          if (_acceptedActivePointers.contains(event.pointer)) {
+            _checkDrag(event.pointer);
+          } else {
+            resolve(GestureDisposition.accepted);
+          }
         }
       }
     }
@@ -417,44 +421,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
     if (onlyDispatchDragCallbacksWhenThresholdMet ? _hasDragThresholdBeenMet && _state != _DragState.accepted : _state != _DragState.accepted) {
-      _state = _DragState.accepted;
-      final OffsetPair delta = _pendingDragOffset;
-      final Duration? timestamp = _lastPendingEventTimestamp;
-      final Matrix4? transform = _lastTransform;
-      final Offset localUpdateDelta;
-      switch (dragStartBehavior) {
-        case DragStartBehavior.start:
-          _initialPosition = _initialPosition + delta;
-          localUpdateDelta = Offset.zero;
-        case DragStartBehavior.down:
-          localUpdateDelta = _getDeltaForDetails(delta.local);
-      }
-      _pendingDragOffset = OffsetPair.zero;
-      _lastPendingEventTimestamp = null;
-      _lastTransform = null;
-      _checkStart(timestamp, pointer);
-      if (localUpdateDelta != Offset.zero && onUpdate != null) {
-        final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
-        final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
-        final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
-          untransformedEndPosition: correctedLocalPosition,
-          untransformedDelta: localUpdateDelta,
-          transform: localToGlobal,
-        );
-        final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
-        final OffsetPair correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
-        _checkUpdate(
-          sourceTimeStamp: timestamp,
-          delta: localUpdateDelta,
-          primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
-          globalPosition: correctedPosition.global,
-          localPosition: correctedPosition.local,
-        );
-      }
-      // This acceptGesture might have been called only for one pointer, instead
-      // of all pointers. Resolve all pointers to `accepted`. This won't cause
-      // infinite recursion because an accepted pointer won't be accepted again.
-      resolve(GestureDisposition.accepted);
+      _checkDrag(pointer);
     }
   }
 
@@ -500,6 +467,47 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       );
       invokeCallback<void>('onDown', () => onDown!(details));
     }
+  }
+
+  void _checkDrag(int pointer) {
+    _state = _DragState.accepted;
+    final OffsetPair delta = _pendingDragOffset;
+    final Duration? timestamp = _lastPendingEventTimestamp;
+    final Matrix4? transform = _lastTransform;
+    final Offset localUpdateDelta;
+    switch (dragStartBehavior) {
+      case DragStartBehavior.start:
+        _initialPosition = _initialPosition + delta;
+        localUpdateDelta = Offset.zero;
+      case DragStartBehavior.down:
+        localUpdateDelta = _getDeltaForDetails(delta.local);
+    }
+    _pendingDragOffset = OffsetPair.zero;
+    _lastPendingEventTimestamp = null;
+    _lastTransform = null;
+    _checkStart(timestamp, pointer);
+    if (localUpdateDelta != Offset.zero && onUpdate != null) {
+      final Matrix4? localToGlobal = transform != null ? Matrix4.tryInvert(transform) : null;
+      final Offset correctedLocalPosition = _initialPosition.local + localUpdateDelta;
+      final Offset globalUpdateDelta = PointerEvent.transformDeltaViaPositions(
+        untransformedEndPosition: correctedLocalPosition,
+        untransformedDelta: localUpdateDelta,
+        transform: localToGlobal,
+      );
+      final OffsetPair updateDelta = OffsetPair(local: localUpdateDelta, global: globalUpdateDelta);
+      final OffsetPair correctedPosition = _initialPosition + updateDelta; // Only adds delta for down behaviour
+      _checkUpdate(
+        sourceTimeStamp: timestamp,
+        delta: localUpdateDelta,
+        primaryDelta: _getPrimaryValueFromOffset(localUpdateDelta),
+        globalPosition: correctedPosition.global,
+        localPosition: correctedPosition.local,
+      );
+    }
+    // This acceptGesture might have been called only for one pointer, instead
+    // of all pointers. Resolve all pointers to `accepted`. This won't cause
+    // infinite recursion because an accepted pointer won't be accepted again.
+    resolve(GestureDisposition.accepted);
   }
 
   void _checkStart(Duration? timestamp, int pointer) {
