@@ -635,7 +635,7 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(height: maxExtent, decoration: BoxDecoration(color: Colors.black));
+    return Container(height: maxExtent);
   }
 
   @override
