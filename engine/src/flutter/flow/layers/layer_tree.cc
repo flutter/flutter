@@ -111,7 +111,9 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   }
 
   LayerStateStack state_stack;
-  if (checkerboard_offscreen_layers_) {
+
+  // DrawCheckerboard is not supported on Impeller.
+  if (checkerboard_offscreen_layers_ && !frame.aiks_context()) {
     state_stack.set_checkerboard_func(DrawCheckerboard);
   }
 
