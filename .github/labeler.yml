@@ -14,14 +14,14 @@
 
 'a: internationalization':
   - any:
-    - packages/flutter_localizations/**
+    - packages/flutter_localizations/**/*
 
 'a: test':
   - any:
-    - packages/flutter_driver/**
-    - packages/flutter_goldens/**
-    - packages/flutter_goldens_client/**
-    - packages/flutter_test/**
+    - packages/flutter_driver/**/*
+    - packages/flutter_goldens/**/*
+    - packages/flutter_goldens_client/**/*
+    - packages/flutter_test/**/*
 
 'a: text input':
   - any:
@@ -29,15 +29,15 @@
 
 'd: api docs':
   - any:
-    - examples/api/**
+    - examples/api/**/*
 
 'd: examples':
   - any:
-    - examples/**
+    - examples/**/*
 
 documentation:
   - any:
-    - examples/api/**
+    - examples/api/**/*
 
 engine:
   - any:
@@ -72,20 +72,20 @@ engine:
 
 framework:
   - any:
-    - packages/flutter/**
-    - packages/flutter_driver/**
-    - packages/flutter_goldens/**
-    - packages/flutter_goldens_client/**
-    - packages/flutter_test/**
-    - packages/integration_test/**
+    - packages/flutter/**/*
+    - packages/flutter_driver/**/*
+    - packages/flutter_goldens/**/*
+    - packages/flutter_goldens_client/**/*
+    - packages/flutter_test/**/*
+    - packages/integration_test/**/*
 
 integration_test:
   - any:
-    - packages/integration_test/**
+    - packages/integration_test/**/*
 
 platform-ios:
   - any:
-    - packages/flutter_tools/lib/src/ios/**
+    - packages/flutter_tools/lib/src/ios/**/*
 
 team:
   - any:
@@ -93,14 +93,14 @@ team:
     - '**/fix_data.yaml'
     - '**/*.expect'
     - '**/*test_fixes*'
-    - dev/**
-    - examples/**
-    - packages/flutter_goldens/**
-    - packages/flutter_goldens_client/**
+    - dev/**/*
+    - examples/**/*
+    - packages/flutter_goldens/**/*
+    - packages/flutter_goldens_client/**/*
 
 'team: gallery':
   - any:
-    - examples/flutter_gallery/**
+    - examples/flutter_gallery/**/*
 
 tech-debt:
   - any:
@@ -110,5 +110,5 @@ tech-debt:
 
 tool:
   - any:
-    - packages/flutter_tools/**
-    - packages/fuchsia_remote_debug_protocol/**
+    - packages/flutter_tools/**/*
+    - packages/fuchsia_remote_debug_protocol/**/*
