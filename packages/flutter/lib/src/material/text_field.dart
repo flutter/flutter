@@ -798,7 +798,7 @@ class TextField extends StatefulWidget {
       decoration: TextDecoration.underline,
       decorationColor: Colors.red,
       decorationStyle: TextDecorationStyle.wavy,
-  );
+    );
 
   /// Default builder for [TextField]'s spell check suggestions toolbar.
   ///
