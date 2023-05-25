@@ -6,12 +6,11 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../common/matchers.dart';
-import 'common.dart';
+import '../common/test_initialization.dart';
+import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -19,56 +18,49 @@ void main() {
 
 void testMain() {
   group('Vertices', () {
-    setUpCanvasKitTest();
+    setUpUnitTests(setUpTestViewDimensions: false);
 
     test('can be constructed, drawn, and disposed of', () {
-      final CkVertices vertices = _testVertices();
-      expect(vertices, isA<CkVertices>());
-      expect(vertices.skiaObject, isNotNull);
+      final ui.Vertices vertices = _testVertices();
       expect(vertices.debugDisposed, isFalse);
 
-      final CkPictureRecorder recorder = CkPictureRecorder();
-      final CkCanvas canvas =
-          recorder.beginRecording(const ui.Rect.fromLTRB(0, 0, 100, 100));
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(
+        recorder,
+        const ui.Rect.fromLTRB(0, 0, 100, 100)
+      );
       canvas.drawVertices(
         vertices,
         ui.BlendMode.srcOver,
-        CkPaint(),
+        ui.Paint(),
       );
       vertices.dispose();
       expect(vertices.debugDisposed, isTrue);
-      expect(() => vertices.skiaObject, throwsA(isAssertionError));
     });
   });
 
   test('Vertices are not anti-aliased by default', () async {
     const ui.Rect region = ui.Rect.fromLTRB(0, 0, 500, 500);
-    final CkPictureRecorder recorder = CkPictureRecorder();
-    final CkCanvas canvas = recorder.beginRecording(region);
-    final CkVertices vertices = ui.Vertices.raw(
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final ui.Vertices vertices = ui.Vertices.raw(
       ui.VertexMode.triangles,
       Float32List.fromList(_circularVertices),
       indices: Uint16List.fromList(_circularVertexIndices),
-    ) as CkVertices;
+    );
     canvas.scale(3.0, 3.0);
     canvas.drawVertices(
       vertices,
       ui.BlendMode.srcOver,
-      CkPaint()..color = const ui.Color(0xFFFF0000),
+      ui.Paint()..color = const ui.Color(0xFFFF0000),
     );
 
-    final CkPicture verticesPicture = recorder.endRecording();
-
-    final LayerSceneBuilder builder = LayerSceneBuilder();
-    builder.pushOffset(0, 0);
-    builder.addPicture(ui.Offset.zero, verticesPicture);
-    CanvasKitRenderer.instance.rasterizer
-        .draw(builder.build().layerTree);
-    await matchGoldenFile('canvaskit_vertices_antialiased.png', region: region);
-  }, skip: isSafari);
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ui_vertices_antialiased.png', region: region);
+  }, skip: isHtml); // https://github.com/flutter/flutter/issues/127454
 }
 
-CkVertices _testVertices() {
+ui.Vertices _testVertices() {
   return ui.Vertices(
     ui.VertexMode.triangles,
     const <ui.Offset>[
@@ -87,7 +79,7 @@ CkVertices _testVertices() {
       ui.Color.fromRGBO(0, 0, 255, 1.0),
     ],
     indices: <int>[0, 1, 2],
-  ) as CkVertices;
+  );
 }
 
 const List<double> _circularVertices = <double>[
