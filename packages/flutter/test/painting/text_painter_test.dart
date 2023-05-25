@@ -1514,6 +1514,7 @@ void main() {
     }
     const double fontSize = 1.25;
     const String text = '12345';
+    assert((fontSize * text.length).truncate() != fontSize * text.length);
     final TextPainter painter = TextPainter(
       textDirection: TextDirection.ltr,
       text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
