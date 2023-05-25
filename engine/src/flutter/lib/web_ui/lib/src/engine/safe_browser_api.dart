@@ -246,7 +246,7 @@ extension ImageDecoderExtension on ImageDecoder {
 class ImageDecoderOptions {
   external factory ImageDecoderOptions({
     required JSString type,
-    required JSUint8Array data,
+    required JSAny data,
     required JSString premultiplyAlpha,
     JSNumber? desiredWidth,
     JSNumber? desiredHeight,
