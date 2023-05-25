@@ -77,7 +77,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
-        help: 'Suppress analytics reporting when this command runs.');
+        help: 'Suppress analytics reporting for the current CLI invocation.');
+    argParser.addFlag('disable-telemetry',
+        negatable: false,
+        help: 'Disable telemetry reporting when this command runs.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -96,7 +99,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
               'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
-              'This path is relative to "--local-engine-src-path" or "--local-engine-src-out" (q.v.).');
+              'This path is relative to "--local-engine-src-path" (see above).');
+
+    argParser.addOption('local-web-sdk',
+        hide: !verboseHelp,
+        help: 'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
+              'Use this to select a specific version of the web sdk if you have built multiple engine targets.\n'
+              'This path is relative to "--local-engine-src-path" (see above).');
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
@@ -179,6 +188,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, Object?> contextOverrides = <Type, Object?>{};
 
+    // If the disable-telemetry flag has been passed, return out
+    if (topLevelResults.wasParsed('disable-telemetry')) {
+      return;
+    }
+
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
     // terminal size changes during a run.
@@ -216,9 +230,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // Set up the tooling configuration.
     final EngineBuildPaths? engineBuildPaths = await globals.localEngineLocator?.findEnginePath(
-      topLevelResults['local-engine-src-path'] as String?,
-      topLevelResults['local-engine'] as String?,
-      topLevelResults['packages'] as String?,
+      engineSourcePath: topLevelResults['local-engine-src-path'] as String?,
+      localEngine: topLevelResults['local-engine'] as String?,
+      localWebSdk: topLevelResults['local-web-sdk'] as String?,
+      packagePath: topLevelResults['packages'] as String?,
     );
     if (engineBuildPaths != null) {
       contextOverrides.addAll(<Type, Object?>{
@@ -267,9 +282,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           String status;
           if (machineFlag) {
             final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
-            if (jsonOut != null) {
-              jsonOut['flutterRoot'] = Cache.flutterRoot!;
-            }
+            jsonOut['flutterRoot'] = Cache.flutterRoot!;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = globals.flutterVersion.toString();
@@ -278,7 +291,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           return;
         }
         if (machineFlag && topLevelResults.command?.name != 'analyze') {
-          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analzye --suggestions" command.', exitCode: 2);
+          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
       },

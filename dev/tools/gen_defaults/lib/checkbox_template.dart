@@ -74,7 +74,7 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
           return ${componentColor('md.comp.checkbox.error.hover.state-layer')};
         }
         if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.checkbox.error.focus.state-layer')}.withOpacity(0.12);
+          return ${componentColor('md.comp.checkbox.error.focus.state-layer')};
         }
       }
       if (states.contains(MaterialState.selected)) {
@@ -110,6 +110,11 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
 
   @override
   VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(${tokens['md.comp.checkbox.unselected.outline.width']})),
+  );
 }
 ''';
 }

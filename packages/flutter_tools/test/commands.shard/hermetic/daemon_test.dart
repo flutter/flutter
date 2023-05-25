@@ -86,9 +86,7 @@ void main() {
     });
 
     tearDown(() async {
-      if (daemon != null) {
-        return daemon.shutdown();
-      }
+      await daemon.shutdown();
       notifyingLogger.dispose();
       await daemonConnection.dispose();
     });
@@ -432,8 +430,8 @@ void main() {
         final String? applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
         // Try starting the app.
-        final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
-        device.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+        final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
+        device.launchResult = LaunchResult.succeeded(vmServiceUri: vmServiceUri);
         daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
           'id': 1,
           'method': 'device.startApp',
@@ -448,7 +446,7 @@ void main() {
         expect(device.startAppPackage, applicationPackage);
         final Map<String, Object?> startAppResult = startAppResponse.data['result']! as Map<String, Object?>;
         expect(startAppResult['started'], true);
-        expect(startAppResult['observatoryUri'], observatoryUri.toString());
+        expect(startAppResult['vmServiceUri'], vmServiceUri.toString());
 
         // Try stopping the app.
         daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
@@ -853,6 +851,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final bool ephemeral = false;
 
   @override
+  final bool isConnected = true;
+
+  @override
   Future<String> get sdkNameAndVersion async => 'Android 12';
 
   @override
@@ -886,15 +887,16 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late DeviceLogReader logReader;
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;
+
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,

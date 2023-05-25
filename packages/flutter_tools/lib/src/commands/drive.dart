@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -21,6 +22,7 @@ import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
 import '../globals.dart' as globals;
+import '../ios/devices.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/web_device.dart';
@@ -70,7 +72,6 @@ class DriveCommand extends RunCommandBase {
     addMultidexOption();
     argParser
       ..addFlag('keep-app-running',
-        defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
               'By default, "flutter drive" stops the application after tests are finished, '
               'and "--keep-app-running" overrides this. On the other hand, if "--use-existing-app" '
@@ -78,7 +79,7 @@ class DriveCommand extends RunCommandBase {
               'running, and "--no-keep-app-running" overrides it.',
       )
       ..addOption('use-existing-app',
-        help: 'Connect to an already running instance via the given observatory URL. '
+        help: 'Connect to an already running instance via the given Dart VM Service URL. '
               'If this option is given, the application will not be automatically started, '
               'and it will only be stopped if "--no-keep-app-running" is explicitly set.',
         valueHelp: 'url',
@@ -168,7 +169,7 @@ class DriveCommand extends RunCommandBase {
   // specified not to.
   @override
   bool get shouldRunPub {
-    if (argResults!.wasParsed('pub') && !boolArgDeprecated('pub')) {
+    if (argResults!.wasParsed('pub') && !boolArg('pub')) {
       return false;
     }
     return true;
@@ -193,15 +194,38 @@ class DriveCommand extends RunCommandBase {
   @override
   final List<String> aliases = <String>['driver'];
 
-  String? get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
-  String? get screenshot => stringArgDeprecated('screenshot');
+  String? get screenshot => stringArg('screenshot');
 
   @override
   bool get startPausedDefault => true;
 
   @override
   bool get cachePubGet => false;
+
+  String? get applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
+
+  Future<Device?> get targetedDevice async {
+    return findTargetDevice(
+      includeDevicesUnsupportedByProject: applicationBinaryPath == null,
+    );
+  }
+
+  // Network devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a network device,
+  // change it to be enabled.
+  @override
+  Future<bool> get disablePortPublication async {
+    final ArgResults? localArgResults = argResults;
+    final Device? device = await targetedDevice;
+    final bool isNetworkDevice = device is IOSDevice && device.isWirelesslyConnected;
+    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+      return false;
+    }
+    return !boolArg('publish-port');
+  }
 
   @override
   Future<void> validateCommand() async {
@@ -216,15 +240,14 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String testFile = _getTestFile()!;
+    final String? testFile = _getTestFile();
     if (testFile == null) {
       throwToolExit(null);
     }
     if (await _fileSystem.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
     }
-    final String? applicationBinaryPath = stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
-    final Device? device = await findTargetDevice(includeUnsupportedDevices: applicationBinaryPath == null);
+    final Device? device = await targetedDevice;
     if (device == null) {
       throwToolExit(null);
     }
@@ -237,7 +260,7 @@ class DriveCommand extends RunCommandBase {
       applicationPackageFactory: ApplicationPackageFactory.instance!,
       logger: _logger,
       processUtils: globals.processUtils,
-      dartSdkPath: globals.artifacts!.getHostArtifact(HostArtifact.engineDartBinary).path,
+      dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
     );
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -254,7 +277,7 @@ class DriveCommand extends RunCommandBase {
 
     bool screenshotTaken = false;
     try {
-      if (stringArgDeprecated('use-existing-app') == null) {
+      if (stringArg('use-existing-app') == null) {
         await driverService.start(
           buildInfo,
           device,
@@ -269,14 +292,14 @@ class DriveCommand extends RunCommandBase {
               'trace-startup': traceStartup,
             if (web)
               '--no-launch-chrome': true,
-            if (boolArgDeprecated('multidex'))
+            if (boolArg('multidex'))
               'multidex': true,
           }
         );
       } else {
-        final Uri? uri = Uri.tryParse(stringArgDeprecated('use-existing-app')!);
+        final Uri? uri = Uri.tryParse(stringArg('use-existing-app')!);
         if (uri == null) {
-          throwToolExit('Invalid VM Service URI: ${stringArgDeprecated('use-existing-app')}');
+          throwToolExit('Invalid VM Service URI: ${stringArg('use-existing-app')}');
         }
         await driverService.reuseApplication(
           uri,
@@ -291,16 +314,16 @@ class DriveCommand extends RunCommandBase {
         stringsArg('test-arguments'),
         <String, String>{},
         packageConfig,
-        chromeBinary: stringArgDeprecated('chrome-binary'),
-        headless: boolArgDeprecated('headless'),
+        chromeBinary: stringArg('chrome-binary'),
+        headless: boolArg('headless'),
         webBrowserFlags: stringsArg(FlutterOptions.kWebBrowserFlag),
-        browserDimension: stringArgDeprecated('browser-dimension')!.split(','),
-        browserName: stringArgDeprecated('browser-name'),
-        driverPort: stringArgDeprecated('driver-port') != null
-          ? int.tryParse(stringArgDeprecated('driver-port')!)
+        browserDimension: stringArg('browser-dimension')!.split(','),
+        browserName: stringArg('browser-name'),
+        driverPort: stringArg('driver-port') != null
+          ? int.tryParse(stringArg('driver-port')!)
           : null,
-        androidEmulator: boolArgDeprecated('android-emulator'),
-        profileMemory: stringArgDeprecated('profile-memory'),
+        androidEmulator: boolArg('android-emulator'),
+        profileMemory: stringArg('profile-memory'),
       );
 
       // If the test is sent a signal or times out, take a screenshot
@@ -319,11 +342,11 @@ class DriveCommand extends RunCommandBase {
         screenshotTaken = true;
       }
 
-      if (boolArgDeprecated('keep-app-running')) {
+      if (boolArg('keep-app-running')) {
         _logger.printStatus('Leaving the application running.');
       } else {
-        final File? skslFile = stringArgDeprecated('write-sksl-on-exit') != null
-          ? _fileSystem.file(stringArgDeprecated('write-sksl-on-exit'))
+        final File? skslFile = stringArg('write-sksl-on-exit') != null
+          ? _fileSystem.file(stringArg('write-sksl-on-exit'))
           : null;
         await driverService.stop(userIdentifier: userIdentifier, writeSkslOnExit: skslFile);
       }
@@ -397,7 +420,7 @@ class DriveCommand extends RunCommandBase {
 
   String? _getTestFile() {
     if (argResults!['driver'] != null) {
-      return stringArgDeprecated('driver');
+      return stringArg('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from

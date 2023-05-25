@@ -50,21 +50,28 @@ class WebTestCompiler {
     required BuildInfo buildInfo,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
-    HostArtifact platformDillArtifact = HostArtifact.webPlatformSoundKernelDill;
-    // TODO(zanderso): to support autodetect this would need to partition the source code into a
-    // a sound and unsound set and perform separate compilations.
+    late final String platformDillName;
+
+    // TODO(zanderso): to support autodetect this would need to partition the source code into
+    // a sound and unsound set and perform separate compilations
     final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
     if (buildInfo.nullSafetyMode == NullSafetyMode.unsound || buildInfo.nullSafetyMode == NullSafetyMode.autodetect) {
-      platformDillArtifact = HostArtifact.webPlatformKernelDill;
+      platformDillName = 'ddc_outline.dill';
       if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
         extraFrontEndOptions.add('--no-sound-null-safety');
       }
     } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
       languageVersion = currentLanguageVersion(_fileSystem, Cache.flutterRoot!);
+      platformDillName = 'ddc_outline_sound.dill';
       if (!extraFrontEndOptions.contains('--sound-null-safety')) {
         extraFrontEndOptions.add('--sound-null-safety');
       }
     }
+
+    final String platformDillPath = _fileSystem.path.join(
+      getWebPlatformBinariesDirectory(_artifacts, buildInfo.webRenderer).path,
+      platformDillName
+    );
 
     final Directory outputDirectory = _fileSystem.directory(testOutputDir)
       ..createSync(recursive: true);
@@ -116,9 +123,7 @@ class WebTestCompiler {
       initializeFromDill: cachedKernelPath,
       targetModel: TargetModel.dartdevc,
       extraFrontEndOptions: extraFrontEndOptions,
-      platformDill: _artifacts
-        .getHostArtifact(platformDillArtifact)
-        .absolute.uri.toString(),
+      platformDill: _fileSystem.file(platformDillPath).absolute.uri.toString(),
       dartDefines: buildInfo.dartDefines,
       librariesSpec: _artifacts.getHostArtifact(HostArtifact.flutterWebLibrariesJson).uri.toString(),
       packagesPath: buildInfo.packagesPath,

@@ -9,8 +9,8 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-String _toUpperCammel(String lowerCammel) {
-  return lowerCammel.substring(0, 1).toUpperCase() + lowerCammel.substring(1);
+String _toUpperCamel(String lowerCamel) {
+  return lowerCamel.substring(0, 1).toUpperCase() + lowerCamel.substring(1);
 }
 
 /// Generates the common/testing/key_codes.h based on the information in the key
@@ -23,7 +23,7 @@ class KeyCodesCcGenerator extends BaseCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Physical Key list');
     for (final PhysicalKeyEntry entry in keyData.entries) {
       lines.add(entry.usbHidCode, '''
-constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entry.usbHidCode)};''');
+constexpr uint64_t kPhysical${_toUpperCamel(entry.constantName)} = ${toHex(entry.usbHidCode)};''');
     }
     return lines.sortedJoin().trimRight();
   }
@@ -33,7 +33,7 @@ constexpr uint64_t kPhysical${_toUpperCammel(entry.constantName)} = ${toHex(entr
     final OutputLines<int> lines = OutputLines<int>('Logical Key list', behavior: DeduplicateBehavior.kSkip);
     for (final LogicalKeyEntry entry in logicalData.entries) {
       lines.add(entry.value, '''
-constexpr uint64_t kLogical${_toUpperCammel(entry.constantName)} = ${toHex(entry.value, digits: 11)};''');
+constexpr uint64_t kLogical${_toUpperCamel(entry.constantName)} = ${toHex(entry.value, digits: 11)};''');
     }
     return lines.sortedJoin().trimRight();
   }

@@ -207,12 +207,7 @@ class ToggleButtons extends StatelessWidget {
     this.borderWidth,
     this.direction = Axis.horizontal,
     this.verticalDirection = VerticalDirection.down,
-  }) :
-    assert(children != null),
-    assert(isSelected != null),
-    assert(children.length == isSelected.length),
-    assert(direction != null),
-    assert(direction == Axis.horizontal || verticalDirection != null);
+  }) : assert(children.length == isSelected.length);
 
   static const double _defaultBorderWidth = 1.0;
 
@@ -653,18 +648,6 @@ class ToggleButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(
-      !isSelected.any((bool val) => val == null),
-      'All elements of isSelected must be non-null.\n'
-      'The current list of isSelected values is as follows:\n'
-      '$isSelected',
-    );
-    assert(
-      focusNodes == null || !focusNodes!.any((FocusNode val) => val == null),
-      'All elements of focusNodes must be non-null.\n'
-      'The current list of focus node values is as follows:\n'
-      '$focusNodes',
-    );
-    assert(
       () {
         if (focusNodes != null) {
           return focusNodes!.length == children.length;
@@ -735,10 +718,8 @@ class ToggleButtons extends StatelessWidget {
           }
           assert(minPaddingSize.width >= 0.0);
           assert(minPaddingSize.height >= 0.0);
-          break;
         case MaterialTapTargetSize.shrinkWrap:
           minPaddingSize = Size.zero;
-          break;
       }
 
       Widget button = _SelectToggleButton(
@@ -1205,19 +1186,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       switch (textDirection) {
         case TextDirection.ltr:
           childParentData.offset = Offset(leadingBorderSide.width, borderSide.width);
-          break;
         case TextDirection.rtl:
           childParentData.offset = Offset(trailingBorderSide.width, borderSide.width);
-          break;
       }
     } else {
       switch (verticalDirection) {
         case VerticalDirection.down:
           childParentData.offset = Offset(borderSide.width, leadingBorderSide.width);
-          break;
         case VerticalDirection.up:
           childParentData.offset = Offset(borderSide.width, trailingBorderSide.width);
-          break;
       }
     }
   }
@@ -1371,7 +1348,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.right - rrect.trRadiusX, rrect.bottom);
             context.canvas.drawPath(horizontalPaths, horizontalPaint);
           }
-          break;
         case TextDirection.rtl:
           if (isLastButton) {
             final Path leadingPath = Path();
@@ -1411,7 +1387,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(outer.left - rrect.tlRadiusX, rrect.bottom);
             context.canvas.drawPath(horizontalPaths, horizontalPaint);
           }
-          break;
       }
     } else {
       switch (verticalDirection) {
@@ -1454,7 +1429,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom);
             context.canvas.drawPath(paths, paint);
           }
-          break;
         case VerticalDirection.up:
           if (isLastButton) {
             final Path bottomPath = Path();
@@ -1494,7 +1468,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
               ..lineTo(rrect.right, outer.bottom - leadingBorderSide.width);
             context.canvas.drawPath(paths, paint);
           }
-          break;
       }
     }
   }

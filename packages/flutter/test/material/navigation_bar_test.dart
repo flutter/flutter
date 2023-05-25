@@ -5,6 +5,12 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+<<<<<<< HEAD
+=======
+library;
+
+import 'dart:math';
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -267,8 +273,8 @@ void main() {
     expect(_getMaterial(tester).surfaceTintColor, null);
     expect(_getMaterial(tester).elevation, 0);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
-    expect(_indicator(tester)?.color, const Color(0x3d2196f3));
-    expect(_indicator(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
+    expect(_getIndicatorDecoration(tester)?.color, const Color(0x3d2196f3));
+    expect(_getIndicatorDecoration(tester)?.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)));
 
     // M3 settings from the token database.
     await tester.pumpWidget(
@@ -296,8 +302,8 @@ void main() {
     expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 3);
     expect(tester.getSize(find.byType(NavigationBar)).height, 80);
-    expect(_indicator(tester)?.color, const Color(0xff2196f3));
-    expect(_indicator(tester)?.shape, const StadiumBorder());
+    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
   testWidgets('NavigationBar shows tooltips with text scaling ', (WidgetTester tester) async {
@@ -870,10 +876,101 @@ void main() {
     expect(transform.getColumn(0)[0], 1.0);
   });
 
+<<<<<<< HEAD
+=======
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          bottomNavigationBar: NavigationBar(
+            indicatorColor: indicatorColor,
+            indicatorShape: indicatorShape,
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationBar());
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationBar(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+  });
+
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
+<<<<<<< HEAD
+=======
+    testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const Color color = Color(0xff0000ff);
+      const ShapeBorder shape = RoundedRectangleBorder();
+
+      Widget buildNavigationBar({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+        return MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            bottomNavigationBar: NavigationBar(
+              indicatorColor: indicatorColor,
+              indicatorShape: indicatorShape,
+              destinations: const <Widget>[
+                NavigationDestination(
+                  icon: Icon(Icons.ac_unit),
+                  label: 'AC',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.access_alarm),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildNavigationBar());
+
+      // Test default indicator color and shape.
+      expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondary.withOpacity(0.24));
+      expect(
+        _getIndicatorDecoration(tester)?.shape,
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+      );
+
+      await tester.pumpWidget(buildNavigationBar(indicatorColor: color, indicatorShape: shape));
+
+      // Test custom indicator color and shape.
+      expect(_getIndicatorDecoration(tester)?.color, color);
+      expect(_getIndicatorDecoration(tester)?.shape, shape);
+    });
+
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
     testWidgets('Navigation indicator renders ripple', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/116751.
       int selectedIndex = 0;
@@ -1131,6 +1228,55 @@ void main() {
 
       await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_onlyShowSelected_unselected_m2.png'));
     });
+<<<<<<< HEAD
+=======
+
+    testWidgets('Destination icon does not rebuild when tapped', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/122811.
+
+      Widget buildNavigationBar() {
+        return MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                int selectedIndex = 0;
+                return NavigationBar(
+                  selectedIndex: selectedIndex,
+                  destinations: const <Widget>[
+                    NavigationDestination(
+                      icon: IconWithRandomColor(icon: Icons.ac_unit),
+                      label: 'AC',
+                    ),
+                    NavigationDestination(
+                      icon: IconWithRandomColor(icon: Icons.access_alarm),
+                      label: 'Alarm',
+                    ),
+                  ],
+                  onDestinationSelected: (int i) {
+                    setState(() {
+                      selectedIndex = i;
+                    });
+                  },
+                );
+              }
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildNavigationBar());
+      Icon icon = tester.widget<Icon>(find.byType(Icon).last);
+      final Color initialColor = icon.color!;
+
+      // Trigger a rebuild.
+      await tester.tap(find.text('Alarm'));
+      await tester.pumpAndSettle();
+
+      // Icon color should be the same as before the rebuild.
+      icon = tester.widget<Icon>(find.byType(Icon).last);
+      expect(icon.color, initialColor);
+    });
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
   });
 }
 
@@ -1151,11 +1297,23 @@ Material _getMaterial(WidgetTester tester) {
   );
 }
 
-ShapeDecoration? _indicator(WidgetTester tester) {
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(FadeTransition),
       matching: find.byType(Container),
     ),
   ).decoration as ShapeDecoration?;
+}
+
+class IconWithRandomColor extends StatelessWidget {
+  const IconWithRandomColor({super.key, required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color randomColor = Color((Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+    return Icon(icon, color: randomColor);
+  }
 }

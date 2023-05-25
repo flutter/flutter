@@ -64,6 +64,9 @@ class DropdownMenuThemeData with Diagnosticable {
 
   /// Linearly interpolates between two dropdown menu themes.
   static DropdownMenuThemeData lerp(DropdownMenuThemeData? a, DropdownMenuThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return DropdownMenuThemeData(
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
@@ -112,7 +115,7 @@ class DropdownMenuTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the visual properties used by descendant [DropdownMenu]
   /// widgets.
@@ -162,7 +165,6 @@ class DropdownMenuTheme extends InheritedTheme {
   ///  * [of], which will return [ThemeData.dropdownMenuTheme] if it doesn't
   ///    find a [DropdownMenuTheme] ancestor, instead of returning null.
   static DropdownMenuThemeData? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 

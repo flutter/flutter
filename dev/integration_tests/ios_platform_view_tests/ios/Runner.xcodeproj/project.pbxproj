@@ -14,6 +14,7 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		E0440002299C782300D02513 /* ButtonFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E0440001299C782300D02513 /* ButtonFactory.m */; };
 		E09898DE2853DBE800064317 /* ViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E09898DD2853DBE800064317 /* ViewFactory.m */; };
 		E09898E12853DC3C00064317 /* TextFieldFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E09898E02853DC3C00064317 /* TextFieldFactory.m */; };
 		E09898E92853E9F000064317 /* PlatformViewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = E09898E82853E9F000064317 /* PlatformViewUITests.m */; };
@@ -57,6 +58,8 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E0440000299C782300D02513 /* ButtonFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ButtonFactory.h; sourceTree = "<group>"; };
+		E0440001299C782300D02513 /* ButtonFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ButtonFactory.m; sourceTree = "<group>"; };
 		E09898DC2853DBE800064317 /* ViewFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewFactory.h; sourceTree = "<group>"; };
 		E09898DD2853DBE800064317 /* ViewFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewFactory.m; sourceTree = "<group>"; };
 		E09898DF2853DC3C00064317 /* TextFieldFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextFieldFactory.h; sourceTree = "<group>"; };
@@ -120,6 +123,8 @@
 				7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */,
 				E09898DF2853DC3C00064317 /* TextFieldFactory.h */,
 				E09898E02853DC3C00064317 /* TextFieldFactory.m */,
+				E0440000299C782300D02513 /* ButtonFactory.h */,
+				E0440001299C782300D02513 /* ButtonFactory.m */,
 				E09898DC2853DBE800064317 /* ViewFactory.h */,
 				E09898DD2853DBE800064317 /* ViewFactory.m */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
@@ -256,6 +261,7 @@
 			files = (
 			);
 			inputPaths = (
+				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
 			);
 			name = "Thin Binary";
 			outputPaths = (
@@ -288,6 +294,7 @@
 			files = (
 				978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,
+				E0440002299C782300D02513 /* ButtonFactory.m in Sources */,
 				E09898E12853DC3C00064317 /* TextFieldFactory.m in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				E09898DE2853DBE800064317 /* ViewFactory.m in Sources */,

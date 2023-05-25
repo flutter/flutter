@@ -7,9 +7,11 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -28,8 +30,8 @@ import 'theme_data.dart';
 /// Input chips work together with other UI elements. They can appear:
 ///
 ///  * In a [Wrap] widget.
-///  * In a horizontally scrollable list, like a [ListView] whose
-///    scrollDirection is [Axis.horizontal].
+///  * In a horizontally scrollable list, for example configured such as a
+///    [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
 /// {@tool dartpad}
 /// This example shows how to create [InputChip]s with [onSelected] and
@@ -114,12 +116,7 @@ class InputChip extends StatelessWidget
       'This feature was deprecated after v2.10.0-0.3.pre.'
     )
     this.useDeleteButtonTooltip = true,
-  }) : assert(selected != null),
-       assert(isEnabled != null),
-       assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -199,7 +196,7 @@ class InputChip extends StatelessWidget
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _InputChipDefaultsM3(context, isEnabled)
+      ? _InputChipDefaultsM3(context, isEnabled, selected)
       : null;
     final Widget? resolvedDeleteIcon = deleteIcon
       ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
@@ -249,10 +246,10 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _InputChipDefaultsM3 extends ChipThemeData {
-  const _InputChipDefaultsM3(this.context, this.isEnabled)
+  _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
         elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
@@ -261,9 +258,12 @@ class _InputChipDefaultsM3 extends ChipThemeData {
 
   final BuildContext context;
   final bool isEnabled;
+  final bool isSelected;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
@@ -275,7 +275,9 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get selectedColor => Theme.of(context).colorScheme.secondaryContainer;
+  Color? get selectedColor => isEnabled
+    ? _colors.secondaryContainer
+    : _colors.onSurface.withOpacity(0.12);
 
   @override
   Color? get checkmarkColor => null;
@@ -284,18 +286,20 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get disabledColor => null;
 
   @override
-  Color? get deleteIconColor => Theme.of(context).colorScheme.onSecondaryContainer;
+  Color? get deleteIconColor => _colors.onSecondaryContainer;
 
   @override
-  BorderSide? get side => isEnabled
-    ? BorderSide(color: Theme.of(context).colorScheme.outline)
-    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+  BorderSide? get side => !isSelected
+    ? isEnabled
+      ? BorderSide(color: _colors.outline)
+      : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
       ? null
-      : Theme.of(context).colorScheme.onSurface,
+      : _colors.onSurface,
     size: 18.0,
   );
 
@@ -310,7 +314,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

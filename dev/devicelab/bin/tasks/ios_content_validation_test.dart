@@ -42,13 +42,23 @@ Future<void> main() async {
             throw TaskResult.failure('Usage archive event not sent');
           }
 
-          if (!output.contains('Warning: App icon is using the wrong size (e.g. Icon-App-20x20@1x.png).')) {
-            throw TaskResult.failure('Must validate incorrect app icon image size.');
-          }
-
-          // The project is still using Flutter template icon.
-          if (!output.contains('Warning: App icon is set to the default placeholder icon. Replace with unique icons.')) {
-            throw TaskResult.failure('Must validate template app icon.');
+          // The output contains extra time related prefix, so cannot use a single string.
+          const List<String> expectedValidationMessages = <String>[
+            '[!] App Settings Validation\n',
+            '    • Version Number: 1.0.0\n',
+            '    • Build Number: 1\n',
+            '    • Display Name: Hello\n',
+            '    • Deployment Target: 11.0\n',
+            '    • Bundle Identifier: com.example.hello\n',
+            '    ! Your application still contains the default "com.example" bundle identifier.\n',
+            '[!] App Icon and Launch Image Assets Validation\n',
+            '    ! App icon is set to the default placeholder icon. Replace with unique icons.\n',
+            '    ! App icon is using the incorrect size (e.g. Icon-App-20x20@1x.png).\n',
+            '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
+            'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
+          ];
+          if (expectedValidationMessages.any((String message) => !output.contains(message))) {
+            throw TaskResult.failure('Must have the expected validation message');
           }
         });
 

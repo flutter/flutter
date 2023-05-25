@@ -270,9 +270,9 @@ class DragAndDropAppState extends State<DragAndDropApp> {
               ],
             ),
           ),
-          Expanded(
+          const Expanded(
             child: Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),
                 Expanded(child: ExampleDragTarget()),

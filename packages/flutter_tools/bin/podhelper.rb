@@ -194,8 +194,8 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
   File.open(copied_podspec_path, 'w') do |podspec|
     podspec.write <<~EOF
       #
-      # NOTE: This podspec is NOT to be published. It is only used as a local source!
-      #       This is a generated file; do not edit or check into version control.
+      # This podspec is NOT to be published. It is only used as a local source!
+      # This is a generated file; do not edit or check into version control.
       #
 
       Pod::Spec.new do |s|
@@ -232,8 +232,8 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
   File.open(copied_podspec_path, 'w') do |podspec|
     podspec.write <<~EOF
       #
-      # NOTE: This podspec is NOT to be published. It is only used as a local source!
-      #       This is a generated file; do not edit or check into version control.
+      # This podspec is NOT to be published. It is only used as a local source!
+      # This is a generated file; do not edit or check into version control.
       #
 
       Pod::Spec.new do |s|
@@ -280,6 +280,11 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     plugin_name = plugin_hash['name']
     plugin_path = plugin_hash['path']
     has_native_build = plugin_hash.fetch('native_build', true)
+
+    # iOS and macOS code can be shared in "darwin" directory, otherwise
+    # respectively in "ios" or "macos" directories.
+    shared_darwin_source = plugin_hash.fetch('shared_darwin_source', false)
+    platform_directory = shared_darwin_source ? 'darwin' : platform
     next unless plugin_name && plugin_path && has_native_build
     symlink = File.join(symlink_plugins_dir, plugin_name)
     File.symlink(plugin_path, symlink)
@@ -287,7 +292,7 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     # Keep pod path relative so it can be checked into Podfile.lock.
     relative = flutter_relative_path_from_podfile(symlink)
 
-    pod plugin_name, path: File.join(relative, platform)
+    pod plugin_name, path: File.join(relative, platform_directory)
   end
 end
 
@@ -302,7 +307,7 @@ def flutter_parse_plugins_file(file, platform)
 
   # dependencies_hash.dig('plugins', 'ios') not available until Ruby 2.3
   return [] unless dependencies_hash.has_key?('plugins')
-  return [] unless dependencies_hash['plugins'].has_key?('ios')
+  return [] unless dependencies_hash['plugins'].has_key?(platform)
   dependencies_hash['plugins'][platform] || []
 end
 

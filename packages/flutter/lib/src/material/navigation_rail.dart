@@ -111,13 +111,13 @@ class NavigationRail extends StatefulWidget {
     this.minExtendedWidth,
     this.useIndicator,
     this.indicatorColor,
-  }) :  assert(destinations != null && destinations.length >= 2),
+    this.indicatorShape,
+  }) :  assert(destinations.length >= 2),
         assert(selectedIndex == null || (0 <= selectedIndex && selectedIndex < destinations.length)),
         assert(elevation == null || elevation > 0),
         assert(minWidth == null || minWidth > 0),
         assert(minExtendedWidth == null || minExtendedWidth > 0),
         assert((minWidth == null || minExtendedWidth == null) || minExtendedWidth >= minWidth),
-        assert(extended != null),
         assert(!extended || (labelType == null || labelType == NavigationRailLabelType.none));
 
   /// Sets the color of the Container that holds all of the [NavigationRail]'s
@@ -307,7 +307,17 @@ class NavigationRail extends StatefulWidget {
 
   /// Overrides the default value of [NavigationRail]'s selection indicator color,
   /// when [useIndicator] is true.
+  ///
+  /// If this is null, [NavigationRailThemeData.indicatorColor] is used. If
+  /// that is null, defaults to [ColorScheme.secondaryContainer].
   final Color? indicatorColor;
+
+  /// Overrides the default value of [NavigationRail]'s selection indicator shape,
+  /// when [useIndicator] is true.
+  ///
+  /// If this is null, [NavigationRailThemeData.indicatorShape] is used. If
+  /// that is null, defaults to [StadiumBorder].
+  final ShapeBorder? indicatorShape;
 
   /// Returns the animation that controls the [NavigationRail.extended] state.
   ///
@@ -397,7 +407,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     final NavigationRailLabelType labelType = widget.labelType ?? navigationRailTheme.labelType ?? defaults.labelType!;
     final bool useIndicator = widget.useIndicator ?? navigationRailTheme.useIndicator ?? defaults.useIndicator!;
     final Color? indicatorColor = widget.indicatorColor ?? navigationRailTheme.indicatorColor ?? defaults.indicatorColor;
-    final ShapeBorder? indicatorShape = navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
+    final ShapeBorder? indicatorShape = widget.indicatorShape ?? navigationRailTheme.indicatorShape ?? defaults.indicatorShape;
 
     // For backwards compatibility, in M2 the opacity of the unselected icons needs
     // to be set to the default if it isn't in the given theme. This can be removed
@@ -535,19 +545,7 @@ class _RailDestination extends StatelessWidget {
     required this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
-  }) : assert(minWidth != null),
-       assert(minExtendedWidth != null),
-       assert(icon != null),
-       assert(label != null),
-       assert(destinationAnimation != null),
-       assert(extendedTransitionAnimation != null),
-       assert(labelType != null),
-       assert(selected != null),
-       assert(iconTheme != null),
-       assert(labelTextStyle != null),
-       assert(onTap != null),
-       assert(indexLabel != null),
-       _positionAnimation = CurvedAnimation(
+  }) : _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
           reverseCurve: Curves.easeInOut.flipped,
@@ -580,7 +578,11 @@ class _RailDestination extends StatelessWidget {
     );
 
     final bool material3 = Theme.of(context).useMaterial3;
+<<<<<<< HEAD
     final EdgeInsets destionationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
+=======
+    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
     Offset indicatorOffset;
 
     final Widget themedIcon = IconTheme(
@@ -599,8 +601,13 @@ class _RailDestination extends StatelessWidget {
         // Split the destination spacing across the top and bottom to keep the icon centered.
         final Widget? spacing = material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
         indicatorOffset = Offset(
+<<<<<<< HEAD
           minWidth / 2 + destionationPadding.left,
           _verticalDestinationSpacingM3 / 2 + destionationPadding.top,
+=======
+          minWidth / 2 + destinationPadding.left,
+          _verticalDestinationSpacingM3 / 2 + destinationPadding.top,
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
         );
         final Widget iconPart = Column(
           children: <Widget>[
@@ -629,9 +636,7 @@ class _RailDestination extends StatelessWidget {
               children: <Widget>[
                 iconPart,
                 // For semantics when label is not showing,
-                SizedBox(
-                  width: 0,
-                  height: 0,
+                SizedBox.shrink(
                   child: Visibility.maintain(
                     visible: false,
                     child: label,
@@ -669,7 +674,6 @@ class _RailDestination extends StatelessWidget {
             ),
           );
         }
-        break;
       case NavigationRailLabelType.selected:
         final double appearingAnimationValue = 1 - _positionAnimation.value;
         final double verticalPadding = lerpDouble(_verticalDestinationPaddingNoLabel, _verticalDestinationPaddingWithLabel, appearingAnimationValue)!;
@@ -679,8 +683,13 @@ class _RailDestination extends StatelessWidget {
         final Widget topSpacing = SizedBox(height: material3 ? 0 : verticalPadding);
         final Widget labelSpacing = SizedBox(height: material3 ? lerpDouble(0, _verticalIconLabelSpacingM3, appearingAnimationValue)! : 0);
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : verticalPadding);
+<<<<<<< HEAD
         final double indicatorHorizontalPadding = (destionationPadding.left / 2) - (destionationPadding.right / 2);
         final double indicatorVerticalPadding = destionationPadding.top;
+=======
+        final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
+        final double indicatorVerticalPadding = destinationPadding.top;
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
         indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
           indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
@@ -721,14 +730,18 @@ class _RailDestination extends StatelessWidget {
             ),
           ),
         );
-        break;
       case NavigationRailLabelType.all:
         final double minHeight = material3 ? 0 : minWidth;
         final Widget topSpacing = SizedBox(height: material3 ? 0 : _verticalDestinationPaddingWithLabel);
         final Widget labelSpacing = SizedBox(height: material3 ? _verticalIconLabelSpacingM3 : 0);
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : _verticalDestinationPaddingWithLabel);
+<<<<<<< HEAD
         final double indicatorHorizontalPadding = (destionationPadding.left / 2) - (destionationPadding.right / 2);
         final double indicatorVerticalPadding = destionationPadding.top;
+=======
+        final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
+        final double indicatorVerticalPadding = destinationPadding.top;
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
         indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
           indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
@@ -756,7 +769,6 @@ class _RailDestination extends StatelessWidget {
             ],
           ),
         );
-        break;
     }
 
     final ColorScheme colors = Theme.of(context).colorScheme;
@@ -912,11 +924,11 @@ class NavigationRailDestination {
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,
+    this.indicatorColor,
+    this.indicatorShape,
     required this.label,
     this.padding,
-  }) : selectedIcon = selectedIcon ?? icon,
-       assert(icon != null),
-       assert(label != null);
+  }) : selectedIcon = selectedIcon ?? icon;
 
   /// The icon of the destination.
   ///
@@ -945,6 +957,12 @@ class NavigationRailDestination {
   ///    icons.
   final Widget selectedIcon;
 
+  /// The color of the [indicatorShape] when this destination is selected.
+  final Color? indicatorColor;
+
+  /// The shape of the selection indicator.
+  final ShapeBorder? indicatorShape;
+
   /// The label for the destination.
   ///
   /// The label must be provided when used with the [NavigationRail]. When the
@@ -961,7 +979,7 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   const _ExtendedNavigationRailAnimation({
     required this.animation,
     required super.child,
-  }) : assert(child != null);
+  });
 
   final Animation<double> animation;
 
@@ -1030,7 +1048,7 @@ class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _NavigationRailDefaultsM3 extends NavigationRailThemeData {
   _NavigationRailDefaultsM3(this.context)

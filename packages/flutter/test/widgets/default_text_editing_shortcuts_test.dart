@@ -45,7 +45,7 @@ void main() {
     );
   }
 
-  group('iOS: do not delete/backspace events', () {
+  group('iOS: do not handle delete/backspace events', () {
     final TargetPlatformVariant iOS = TargetPlatformVariant.only(TargetPlatform.iOS);
     final FocusNode editable = FocusNode();
     final FocusNode spy = FocusNode();

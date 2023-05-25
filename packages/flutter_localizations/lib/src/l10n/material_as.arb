@@ -128,5 +128,10 @@
   "keyboardKeySpace": "স্পেচ",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "মেনু বাৰ মেনু"
+  "menuBarMenuLabel": "মেনু বাৰ মেনু",
+  "currentDateLabel": "আজি",
+  "scrimLabel": "স্ক্ৰিম",
+  "bottomSheetLabel": "তলৰ শ্বীট",
+  "scrimOnTapHint": "$modalRouteContentName বন্ধ কৰক",
+  "keyboardKeyShift": "শ্বিফ্ট"
 }

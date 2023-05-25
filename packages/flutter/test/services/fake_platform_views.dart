@@ -151,7 +151,7 @@ class FakeAndroidViewController implements AndroidViewController {
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeAndroidPlatformView> get views => _views.values;
@@ -370,7 +370,7 @@ class FakeAndroidPlatformViewsController {
 
 class FakeIosPlatformViewsController {
   FakeIosPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeUiKitView> get views => _views.values;
@@ -473,7 +473,7 @@ class FakeIosPlatformViewsController {
 
 class FakeHtmlPlatformViewsController {
   FakeHtmlPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
   }
 
   Iterable<FakeHtmlPlatformView> get views => _views.values;

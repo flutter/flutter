@@ -347,7 +347,7 @@ class CupertinoListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
-    final double dividerHeight = 1.0 / MediaQuery.of(context).devicePixelRatio;
+    final double dividerHeight = 1.0 / MediaQuery.devicePixelRatioOf(context);
 
     // Long divider is used for wrapping the top and bottom of rows.
     // Only used in CupertinoListSectionType.base mode.
@@ -420,10 +420,8 @@ class CupertinoListSection extends StatelessWidget {
       switch (type) {
         case CupertinoListSectionType.insetGrouped:
           childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
-          break;
         case CupertinoListSectionType.base:
           childrenGroupBorderRadius = BorderRadius.zero;
-          break;
       }
 
       // Refactored the decorate children group in one place to avoid repeating it

@@ -2,58 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Expanded].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Expanded].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ExpandedApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ExpandedApp extends StatelessWidget {
+  const ExpandedApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: _title,
-      home: MyStatelessWidget(),
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Expanded Row Sample'),
+        ),
+        body: const ExpandedExample(),
+      ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ExpandedExample extends StatelessWidget {
+  const ExpandedExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Expanded Row Sample'),
-      ),
-      body: Center(
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              flex: 2,
-              child: Container(
-                color: Colors.amber,
-                height: 100,
-              ),
-            ),
-            Container(
-              color: Colors.blue,
+    return Center(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            flex: 2,
+            child: Container(
+              color: Colors.amber,
               height: 100,
-              width: 50,
             ),
-            Expanded(
-              child: Container(
-                color: Colors.amber,
-                height: 100,
-              ),
+          ),
+          Container(
+            color: Colors.blue,
+            height: 100,
+            width: 50,
+          ),
+          Expanded(
+            child: Container(
+              color: Colors.amber,
+              height: 100,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

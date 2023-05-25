@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 class TestDragData {
   const TestDragData(
@@ -556,6 +557,34 @@ void main() {
   );
 
   testWidgets(
+    'WidgetTester.tap appears in stack trace on error',
+    (WidgetTester tester) async {
+      // Regression test from https://github.com/flutter/flutter/pull/123946
+      await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: Text('target'))));
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.text('target')), pointer: 1);
+      addTearDown(() => gesture.up());
+
+      Trace? stackTrace;
+      try {
+        await tester.tap(find.text('target'), pointer: 1);
+      } on Error catch (e) {
+        stackTrace = Trace.from(e.stackTrace!);
+      }
+      expect(stackTrace, isNotNull);
+
+      final int tapFrame = stackTrace!.frames.indexWhere(
+              (Frame frame) => frame.member == 'WidgetController.tap');
+      expect(tapFrame, greaterThanOrEqualTo(0));
+      expect(stackTrace.frames[tapFrame].package, 'flutter_test');
+      expect(stackTrace.frames[tapFrame+1].member, 'main.<fn>');
+      expect(stackTrace.frames[tapFrame+1].package, null);
+    },
+  );
+
+  testWidgets(
     'ensureVisible: scrolls to make widget visible',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -711,6 +740,25 @@ void main() {
     });
   });
 
+  testWidgets('platformDispatcher exposes the platformDispatcher from binding', (WidgetTester tester) async {
+    expect(tester.platformDispatcher, tester.binding.platformDispatcher);
+  });
+
+  testWidgets('view exposes the implicitView from platformDispatcher', (WidgetTester tester) async {
+    expect(tester.view, tester.platformDispatcher.implicitView);
+  });
+
+  testWidgets('viewOf finds a view when the view is implicit', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Center(
+        child: Text('Test'),
+      )
+    ));
+
+    expect(() => tester.viewOf(find.text('Test')), isNot(throwsA(anything)));
+    expect(tester.viewOf(find.text('Test')), isA<TestFlutterView>());
+  });
+
   group('SemanticsController', () {
     group('find', () {
       testWidgets('throws when there are no semantics', (WidgetTester tester) async {
@@ -727,10 +775,10 @@ void main() {
 
       testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Scaffold(
               body: Row(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('hello'),
                   Text('hello'),
                 ],
@@ -876,7 +924,7 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We look for a SingleChildScrollView since the view itself isn't
-        // important for accessiblity, so it won't show up in the traversal
+        // important for accessibility, so it won't show up in the traversal
         expect(
           () => tester.semantics.simulatedAccessibilityTraversal(start: find.byType(SingleChildScrollView)),
           throwsA(isA<StateError>()),

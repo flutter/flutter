@@ -15,6 +15,11 @@ void main() {
     expect(const SliderThemeData().hashCode, const SliderThemeData().copyWith().hashCode);
   });
 
+  test('SliderThemeData lerp special cases', () {
+    const SliderThemeData data = SliderThemeData();
+    expect(identical(SliderThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Default SliderThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SliderThemeData().debugFillProperties(builder);
@@ -900,7 +905,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              data: MediaQueryData(textScaleFactor: textScale),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1082,7 +1087,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              data: MediaQueryData(textScaleFactor: textScale),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -1870,7 +1875,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: MediaQuery(
-              data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+              data: MediaQueryData(textScaleFactor: textScale),
               child: Material(
                 child: Row(
                   children: <Widget>[
@@ -2080,7 +2085,7 @@ void main() {
             home: Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
-                data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(textScaleFactor: textScale),
+                data: MediaQueryData(textScaleFactor: textScale),
                 child: Material(
                   child: Row(
                     children: <Widget>[

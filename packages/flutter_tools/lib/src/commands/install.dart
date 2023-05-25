@@ -19,6 +19,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     requiresPubspecYaml();
     usesApplicationBinaryOption();
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
     usesDeviceUserOption();
     usesFlavorOption();
     argParser.addFlag('uninstall-only',
@@ -35,12 +36,15 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   final String category = FlutterCommandCategory.tools;
 
+  @override
+  bool get refreshWirelessDevices => true;
+
   Device? device;
 
-  bool get uninstallOnly => boolArgDeprecated('uninstall-only');
-  String? get userIdentifier => stringArgDeprecated(FlutterOptions.kDeviceUser);
+  bool get uninstallOnly => boolArg('uninstall-only');
+  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
 
-  String? get _applicationBinaryPath => stringArgDeprecated(FlutterOptions.kUseApplicationBinary);
+  String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   File? get _applicationBinary => _applicationBinaryPath == null ? null : globals.fs.file(_applicationBinaryPath);
 
   @override
@@ -104,10 +108,6 @@ Future<bool> installApp(
   String? userIdentifier,
   bool uninstall = true
 }) async {
-  if (package == null) {
-    return false;
-  }
-
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling old version...');

@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/basic_messaging.dart';
 import 'src/method_calls.dart';
@@ -15,7 +14,6 @@ import 'src/pair.dart';
 import 'src/test_step.dart';
 
 void main() {
-  enableFlutterDriverExtension();
   runApp(const TestApp());
 }
 

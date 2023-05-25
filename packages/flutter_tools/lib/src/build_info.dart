@@ -6,13 +6,13 @@ import 'package:package_config/package_config_types.dart';
 
 import 'artifacts.dart';
 import 'base/config.dart';
-import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
+import 'web/compile.dart';
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -35,6 +35,7 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
+    this.webRenderer = WebRendererMode.autoDetect,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.dartDefineConfigJsonMap,
@@ -123,6 +124,9 @@ class BuildInfo {
 
   /// A list of Dart experiments.
   final List<String> dartExperiments;
+
+  /// When compiling to web, which web renderer mode we are using (html, canvaskit, auto)
+  final WebRendererMode webRenderer;
 
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
@@ -232,18 +236,15 @@ class BuildInfo {
       kBuildMode: getNameForBuildMode(mode),
       if (dartDefines.isNotEmpty)
         kDartDefines: encodeDartDefines(dartDefines),
-      if (dartObfuscation != null)
-        kDartObfuscation: dartObfuscation.toString(),
+      kDartObfuscation: dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         kExtraFrontEndOptions: extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         kExtraGenSnapshotOptions: extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         kSplitDebugInfo: splitDebugInfoPath!,
-      if (trackWidgetCreation != null)
-        kTrackWidgetCreation: trackWidgetCreation.toString(),
-      if (treeShakeIcons != null)
-        kIconTreeShakerFlag: treeShakeIcons.toString(),
+      kTrackWidgetCreation: trackWidgetCreation.toString(),
+      kIconTreeShakerFlag: treeShakeIcons.toString(),
       if (bundleSkSLPath != null)
         kBundleSkSLPath: bundleSkSLPath!,
       if (codeSizeDirectory != null)
@@ -272,24 +273,20 @@ class BuildInfo {
     final Map<String, String> environmentMap = <String, String>{
       if (dartDefines.isNotEmpty)
         'DART_DEFINES': encodeDartDefines(dartDefines),
-      if (dartObfuscation != null)
-        'DART_OBFUSCATION': dartObfuscation.toString(),
+      'DART_OBFUSCATION': dartObfuscation.toString(),
       if (extraFrontEndOptions.isNotEmpty)
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
       if (splitDebugInfoPath != null)
         'SPLIT_DEBUG_INFO': splitDebugInfoPath!,
-      if (trackWidgetCreation != null)
-        'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
-      if (treeShakeIcons != null)
-        'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
+      'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
+      'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
       if (bundleSkSLPath != null)
         'BUNDLE_SKSL_PATH': bundleSkSLPath!,
-      if (packagesPath != null)
-        'PACKAGE_CONFIG': packagesPath,
+      'PACKAGE_CONFIG': packagesPath,
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
@@ -312,18 +309,15 @@ class BuildInfo {
     final List<String> result = <String>[
       if (dartDefines.isNotEmpty)
         '-Pdart-defines=${encodeDartDefines(dartDefines)}',
-      if (dartObfuscation != null)
-        '-Pdart-obfuscation=$dartObfuscation',
+      '-Pdart-obfuscation=$dartObfuscation',
       if (extraFrontEndOptions.isNotEmpty)
         '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
       if (extraGenSnapshotOptions.isNotEmpty)
         '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
       if (splitDebugInfoPath != null)
         '-Psplit-debug-info=$splitDebugInfoPath',
-      if (trackWidgetCreation != null)
-        '-Ptrack-widget-creation=$trackWidgetCreation',
-      if (treeShakeIcons != null)
-        '-Ptree-shake-icons=$treeShakeIcons',
+      '-Ptrack-widget-creation=$trackWidgetCreation',
+      '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
       if (bundleSkSLPath != null)
@@ -400,16 +394,16 @@ class BuildMode {
     throw ArgumentError('$value is not a supported build mode');
   }
 
-  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
+  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
   static const BuildMode debug = BuildMode._('debug');
 
-  /// Built in AOT mode with some optimizations and an observatory.
+  /// Built in AOT mode with some optimizations and a VM service.
   static const BuildMode profile = BuildMode._('profile');
 
-  /// Built in AOT mode with all optimizations and no observatory.
+  /// Built in AOT mode with all optimizations and no VM service.
   static const BuildMode release = BuildMode._('release');
 
-  /// Built in JIT mode with all optimizations and no observatory.
+  /// Built in JIT mode with all optimizations and no VM service.
   static const BuildMode jitRelease = BuildMode._('jit_release');
 
   static const List<BuildMode> values = <BuildMode>[
@@ -606,8 +600,9 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   Artifacts artifacts,
 ) {
   // Handle single-arch local engines.
-  if (artifacts is LocalEngineArtifacts) {
-    final String localEngineName = artifacts.localEngineName;
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    final String localEngineName = localEngineInfo.localEngineName;
     if (localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
@@ -628,8 +623,9 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
 /// The default set of macOS device architectures to build for.
 List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   // Handle single-arch local engines.
-  if (artifacts is LocalEngineArtifacts) {
-    if (artifacts.localEngineName.contains('_arm64')) {
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
+  if (localEngineInfo != null) {
+    if (localEngineInfo.localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
     return <DarwinArch>[ DarwinArch.x86_64 ];
@@ -855,18 +851,16 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
+FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
+  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
+}
+
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null) {
-    return 'build';
-  }
   final Config localConfig = config ?? globals.config;
   final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  if (localConfig == null) {
-    return 'build';
-  }
 
   final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
   if (localFilesystem.path.isAbsolute(buildDir)) {
@@ -903,8 +897,8 @@ String getMacOSBuildDirectory() {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'web');
+String getWebBuildDirectory([bool isWasm = false]) {
+  return globals.fs.path.join(getBuildDirectory(), isWasm ? 'web_wasm' : 'web');
 }
 
 /// Returns the Linux build output directory.

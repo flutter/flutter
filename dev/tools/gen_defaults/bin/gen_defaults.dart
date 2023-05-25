@@ -27,14 +27,17 @@ import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
 import 'package:gen_defaults/color_scheme_template.dart';
+import 'package:gen_defaults/date_picker_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
 import 'package:gen_defaults/divider_template.dart';
 import 'package:gen_defaults/drawer_template.dart';
+import 'package:gen_defaults/expansion_tile_template.dart';
 import 'package:gen_defaults/fab_template.dart';
 import 'package:gen_defaults/filter_chip_template.dart';
 import 'package:gen_defaults/icon_button_template.dart';
 import 'package:gen_defaults/input_chip_template.dart';
 import 'package:gen_defaults/input_decorator_template.dart';
+import 'package:gen_defaults/list_tile_template.dart';
 import 'package:gen_defaults/menu_template.dart';
 import 'package:gen_defaults/navigation_bar_template.dart';
 import 'package:gen_defaults/navigation_drawer_template.dart';
@@ -42,6 +45,8 @@ import 'package:gen_defaults/navigation_rail_template.dart';
 import 'package:gen_defaults/popup_menu_template.dart';
 import 'package:gen_defaults/progress_indicator_template.dart';
 import 'package:gen_defaults/radio_template.dart';
+import 'package:gen_defaults/search_bar_template.dart';
+import 'package:gen_defaults/search_view_template.dart';
 import 'package:gen_defaults/segmented_button_template.dart';
 import 'package:gen_defaults/slider_template.dart';
 import 'package:gen_defaults/snackbar_template.dart';
@@ -49,6 +54,7 @@ import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
 import 'package:gen_defaults/tabs_template.dart';
 import 'package:gen_defaults/text_field_template.dart';
+import 'package:gen_defaults/time_picker_template.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
@@ -98,10 +104,13 @@ Future<void> main(List<String> args) async {
     'navigation_drawer.json',
     'navigation_rail.json',
     'navigation_tab_primary.json',
+    'navigation_tab_secondary.json',
     'palette.json',
     'progress_indicator_circular.json',
     'progress_indicator_linear.json',
     'radio_button.json',
+    'search_bar.json',
+    'search_view.json',
     'segmented_button_outlined.json',
     'shape.json',
     'sheet_bottom.json',
@@ -145,15 +154,21 @@ Future<void> main(List<String> args) async {
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
   ColorSchemeTemplate('ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
+  DatePickerTemplate('DatePicker', '$materialLib/date_picker_theme.dart', tokens).updateFile();
   DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
   DividerTemplate('Divider', '$materialLib/divider.dart', tokens).updateFile();
   DrawerTemplate('Drawer', '$materialLib/drawer.dart', tokens).updateFile();
+  ExpansionTileTemplate('ExpansionTile', '$materialLib/expansion_tile.dart', tokens).updateFile();
   FABTemplate('FAB', '$materialLib/floating_action_button.dart', tokens).updateFile();
   FilterChipTemplate('ChoiceChip', '$materialLib/choice_chip.dart', tokens).updateFile();
   FilterChipTemplate('FilterChip', '$materialLib/filter_chip.dart', tokens).updateFile();
-  IconButtonTemplate('IconButton', '$materialLib/icon_button.dart', tokens).updateFile();
+  IconButtonTemplate('md.comp.icon-button', 'IconButton', '$materialLib/icon_button.dart', tokens).updateFile();
+  IconButtonTemplate('md.comp.filled-icon-button', 'FilledIconButton', '$materialLib/icon_button.dart', tokens).updateFile();
+  IconButtonTemplate('md.comp.filled-tonal-icon-button', 'FilledTonalIconButton', '$materialLib/icon_button.dart', tokens).updateFile();
+  IconButtonTemplate('md.comp.outlined-icon-button', 'OutlinedIconButton', '$materialLib/icon_button.dart', tokens).updateFile();
   InputChipTemplate('InputChip', '$materialLib/input_chip.dart', tokens).updateFile();
+  ListTileTemplate('LisTile', '$materialLib/list_tile.dart', tokens).updateFile();
   InputDecoratorTemplate('InputDecorator', '$materialLib/input_decorator.dart', tokens).updateFile();
   MenuTemplate('Menu', '$materialLib/menu_anchor.dart', tokens).updateFile();
   NavigationBarTemplate('NavigationBar', '$materialLib/navigation_bar.dart', tokens).updateFile();
@@ -162,11 +177,14 @@ Future<void> main(List<String> args) async {
   PopupMenuTemplate('PopupMenu', '$materialLib/popup_menu.dart', tokens).updateFile();
   ProgressIndicatorTemplate('ProgressIndicator', '$materialLib/progress_indicator.dart', tokens).updateFile();
   RadioTemplate('Radio<T>', '$materialLib/radio.dart', tokens).updateFile();
-  SegmentedButtonTemplate('SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
+  SearchBarTemplate('SearchBar', '$materialLib/search_anchor.dart', tokens).updateFile();
+  SearchViewTemplate('SearchView', '$materialLib/search_anchor.dart', tokens).updateFile();
+  SegmentedButtonTemplate('md.comp.outlined-segmented-button', 'SegmentedButton', '$materialLib/segmented_button.dart', tokens).updateFile();
   SnackbarTemplate('md.comp.snackbar', 'Snackbar', '$materialLib/snack_bar.dart', tokens).updateFile();
   SliderTemplate('md.comp.slider', 'Slider', '$materialLib/slider.dart', tokens).updateFile();
   SurfaceTintTemplate('SurfaceTint', '$materialLib/elevation_overlay.dart', tokens).updateFile();
   SwitchTemplate('Switch', '$materialLib/switch.dart', tokens).updateFile();
+  TimePickerTemplate('TimePicker', '$materialLib/time_picker.dart', tokens).updateFile();
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
   TabsTemplate('Tabs', '$materialLib/tabs.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();

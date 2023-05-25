@@ -257,10 +257,10 @@ Map<String, dynamic> getDesiredCapabilities(
           async_io.LogType.browser: 'INFO',
           async_io.LogType.performance: 'ALL',
         },
-        'chromeOptions': <String, dynamic>{
+        'goog:chromeOptions': <String, dynamic>{
           if (chromeBinary != null)
             'binary': chromeBinary,
-          'w3c': false,
+          'w3c': true,
           'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',

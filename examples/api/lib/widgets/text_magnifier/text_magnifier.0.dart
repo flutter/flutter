@@ -5,10 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp(text: 'Hello world!'));
+void main() => runApp(const TextMagnifierExampleApp(text: 'Hello world!'));
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class TextMagnifierExampleApp extends StatelessWidget {
+  const TextMagnifierExampleApp({
     super.key,
     this.textDirection = TextDirection.ltr,
     required this.text,
@@ -62,8 +62,7 @@ class CustomMagnifier extends StatelessWidget {
     // positioning cases.
     return ValueListenableBuilder<MagnifierInfo>(
         valueListenable: magnifierInfo,
-        builder: (BuildContext context,
-            MagnifierInfo currentMagnifierInfo, _) {
+        builder: (BuildContext context, MagnifierInfo currentMagnifierInfo, _) {
           // We want to position the magnifier at the global position of the gesture.
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 
@@ -82,7 +81,7 @@ class CustomMagnifier extends StatelessWidget {
             ),
           );
 
-          // Finally, align the magnifier to the bottom center. The inital anchor is
+          // Finally, align the magnifier to the bottom center. The initial anchor is
           // the top left, so subtract bottom center alignment.
           magnifierPosition -= Alignment.bottomCenter.alongSize(magnifierSize);
 

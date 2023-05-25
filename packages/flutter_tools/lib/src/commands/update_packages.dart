@@ -39,6 +39,10 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
+  // https://github.com/flutter/flutter/issues/116376
+  'path_provider_android': '2.0.21',
+  // https://github.com/flutter/flutter/issues/122039
+  'flutter_plugin_android_lifecycle': '2.0.8',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -134,7 +138,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   );
 
   Future<void> _downloadCoverageData() async {
-    final String urlBase = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
+    final String urlBase = globals.platform.environment[kFlutterStorageBaseUrl] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
     final List<int>? data = await _net.fetchUrl(
       coverageUri,
@@ -175,15 +179,15 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner!.getRepoPackages();
 
-    final bool forceUpgrade = boolArgDeprecated('force-upgrade');
-    final bool isPrintPaths = boolArgDeprecated('paths');
-    final bool isPrintTransitiveClosure = boolArgDeprecated('transitive-closure');
-    final bool isVerifyOnly = boolArgDeprecated('verify-only');
-    final bool isConsumerOnly = boolArgDeprecated('consumer-only');
-    final bool offline = boolArgDeprecated('offline');
+    final bool forceUpgrade = boolArg('force-upgrade');
+    final bool isPrintPaths = boolArg('paths');
+    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
+    final bool isVerifyOnly = boolArg('verify-only');
+    final bool isConsumerOnly = boolArg('consumer-only');
+    final bool offline = boolArg('offline');
     final bool doUpgrade = forceUpgrade || isPrintPaths || isPrintTransitiveClosure;
 
-    if (boolArgDeprecated('crash')) {
+    if (boolArg('crash')) {
       throw StateError('test crash please ignore.');
     }
 
@@ -438,8 +442,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       context: PubContext.updatePackages,
       project: FlutterProject.fromDirectory(syntheticPackageDir),
       upgrade: doUpgrade,
-      offline: boolArgDeprecated('offline'),
+      offline: boolArg('offline'),
       flutterRootOverride: temporaryFlutterSdk?.path,
+      outputMode: PubOutputMode.none,
     );
 
     if (doUpgrade) {
@@ -479,15 +484,15 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    if (boolArgDeprecated('transitive-closure')) {
+    if (boolArg('transitive-closure')) {
       tree._dependencyTree.forEach((String from, Set<String> to) {
         globals.printStatus('$from -> $to');
       });
       return true;
     }
 
-    if (boolArgDeprecated('paths')) {
-      showDependencyPaths(from: stringArgDeprecated('from')!, to: stringArgDeprecated('to')!, tree: tree);
+    if (boolArg('paths')) {
+      showDependencyPaths(from: stringArg('from')!, to: stringArg('to')!, tree: tree);
       return true;
     }
 
@@ -521,7 +526,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     );
     try {
       // int.tryParse will not accept null, but will convert empty string to null
-      final int? maxJobs = int.tryParse(stringArgDeprecated('jobs') ?? '');
+      final int? maxJobs = int.tryParse(stringArg('jobs') ?? '');
       final TaskQueue<void> queue = TaskQueue<void>(maxJobs: maxJobs);
       for (final Directory dir in packages) {
         unawaited(queue.add(() async {
@@ -533,7 +538,7 @@ class UpdatePackagesCommand extends FlutterCommand {
             // All dependencies should already have been downloaded by the fake
             // package, so the concurrent checks can all happen offline.
             offline: true,
-            printProgress: false,
+            outputMode: PubOutputMode.none,
           );
           stopwatch.stop();
           final double seconds = stopwatch.elapsedMilliseconds / 1000.0;
@@ -593,11 +598,11 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
     }
 
-    for (_DependencyLink path in paths) {
+    for (_DependencyLink? path in paths) {
       final StringBuffer buf = StringBuffer();
       while (path != null) {
         buf.write(path.to);
-        path = path.from!;
+        path = path.from;
         if (path != null) {
           buf.write(' <- ');
         }
@@ -768,10 +773,8 @@ class PubspecYaml {
           }
         } else {
           // We're in a section we care about. Try to parse out the dependency:
-          final PubspecDependency? dependency = PubspecDependency.parse(line, filename: filename);
+          final PubspecDependency? dependency = PubspecDependency.parse(line, filename: filename, isDevDependency: seenDev);
           if (dependency != null) { // We got one!
-            // Track whether or not this a dev dependency.
-            dependency.isDevDependency = seenDev;
             result.add(dependency);
             if (dependency.kind == DependencyKind.unknown) {
               // If we didn't get a version number, then we need to be ready to
@@ -873,7 +876,6 @@ class PubspecYaml {
   /// that depend on the Flutter or Dart SDK directly and are thus automatically
   /// pinned).
   void apply(PubDependencyTree versions, Set<String> specialDependencies) {
-    assert(versions != null);
     final List<String> output = <String>[]; // the string data to output to the file, line by line
     final Set<String> directDependencies = <String>{}; // packages this pubspec directly depends on (i.e. not transitive)
     final Set<String> devDependencies = <String>{};
@@ -952,7 +954,6 @@ class PubspecYaml {
               endOfDirectDependencies = output.length;
             }
             endOfDevDependencies = output.length;
-            break;
           case Section.builders:
           case Section.dependencyOverrides:
           case Section.header:
@@ -962,7 +963,6 @@ class PubspecYaml {
             if (data.lockLine != null) {
               output.add(data.lockLine!);
             }
-            break;
         }
       } else {
         // Not a header, not a dependency, just pass that through unmodified.
@@ -1196,9 +1196,14 @@ class PubspecDependency extends PubspecLine {
     required DependencyKind kind,
     required this.version,
     required this.sourcePath,
+    required this.isDevDependency,
   }) : _kind = kind;
 
-  static PubspecDependency? parse(String line, { required String filename }) {
+  static PubspecDependency? parse(
+    String line, {
+    required String filename,
+    required bool isDevDependency,
+  }) {
     // We recognize any line that:
     //  * starts with exactly two spaces, no more or less
     //  * has some content, then a colon
@@ -1247,7 +1252,15 @@ class PubspecDependency extends PubspecLine {
     if (colonIndex != -1) {
       version = line.substring(colonIndex + 1, hashIndex != -1 ? hashIndex : line.length).trim();
     }
-    return PubspecDependency(line, package, suffix, isTransitive: isTransitive, version: version, kind: stripped.isEmpty ? DependencyKind.unknown : DependencyKind.normal, sourcePath: filename);
+    return PubspecDependency(
+      line,
+      package,
+      suffix,
+      isTransitive: isTransitive,
+      version: version,
+      kind: stripped.isEmpty ? DependencyKind.unknown : DependencyKind.normal, sourcePath: filename,
+      isDevDependency: isDevDependency,
+    );
   }
 
   final String name; // the package name
@@ -1255,7 +1268,7 @@ class PubspecDependency extends PubspecLine {
   final String version; // the version string if found, or blank.
   final bool isTransitive; // whether the suffix matched kTransitiveMagicString
   final String sourcePath; // the filename of the pubspec.yaml file, for error messages
-  late bool isDevDependency; // Whether this dependency is under the `dev dependencies` section.
+  final bool isDevDependency; // Whether this dependency is under the `dev dependencies` section.
 
   DependencyKind get kind => _kind;
   DependencyKind _kind = DependencyKind.normal;
@@ -1272,8 +1285,7 @@ class PubspecDependency extends PubspecLine {
   /// dependencies/dev_dependencies section, or a dependency_overrides section.
   /// We track this so that we can put ourselves in the right section when
   /// generating the fake pubspec.yaml.
-  bool get lockIsOverride => _lockIsOverride;
-  late bool _lockIsOverride;
+  bool _lockIsOverride = false;
 
   static const String _pathPrefix = '    path: ';
   static const String _sdkPrefix = '    sdk: ';
@@ -1306,7 +1318,6 @@ class PubspecDependency extends PubspecLine {
   /// We return true if we parsed it and stored the line in lockLine.
   /// We return false if we parsed it and it's a git dependency that needs the next few lines.
   bool parseLock(String line, String pubspecPath, { required bool lockIsOverride }) {
-    assert(lockIsOverride != null);
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
@@ -1364,14 +1375,12 @@ class PubspecDependency extends PubspecLine {
       case DependencyKind.unknown:
       case DependencyKind.overridden:
         assert(kind != DependencyKind.unknown);
-        break;
       case DependencyKind.normal:
         if (!kManuallyPinnedDependencies.containsKey(name)) {
           dependencies.writeln('  $name: $versionToUse');
         }
-        break;
       case DependencyKind.path:
-        if (lockIsOverride) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln('    path: $_lockTarget');
@@ -1379,9 +1388,8 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    path: $_lockTarget');
         }
-        break;
       case DependencyKind.sdk:
-        if (lockIsOverride) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln('    sdk: $_lockTarget');
@@ -1389,9 +1397,8 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln('    sdk: $_lockTarget');
         }
-        break;
       case DependencyKind.git:
-        if (lockIsOverride) {
+        if (_lockIsOverride) {
           dependencies.writeln('  $name: $versionToUse');
           overrides.writeln('  $name:');
           overrides.writeln(lockLine);
@@ -1399,7 +1406,6 @@ class PubspecDependency extends PubspecLine {
           dependencies.writeln('  $name:');
           dependencies.writeln(lockLine);
         }
-        break;
     }
   }
 
@@ -1427,7 +1433,7 @@ String generateFakePubspec(
   final bool verbose = doUpgrade;
   result.writeln('name: flutter_update_packages');
   result.writeln('environment:');
-  result.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  result.writeln("  sdk: '>=2.12.0 <4.0.0'");
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   if (kManuallyPinnedDependencies.isNotEmpty) {
@@ -1540,8 +1546,6 @@ class PubDependencyTree {
     required Set<String> exclude,
     List<String>? result,
   }) {
-    assert(seen != null);
-    assert(exclude != null);
     result ??= <String>[];
     final Set<String>? dependencies = _dependencyTree[package];
     if (dependencies == null) {
@@ -1575,9 +1579,6 @@ String _computeChecksum(Iterable<String> names, String Function(String name) get
   final List<String> sortedNames = names.toList()..sort();
   for (final String name in sortedNames) {
     final String version = getVersion(name);
-    if (version == null) {
-      continue;
-    }
     final String value = '$name: $version';
     // Each code unit is 16 bits.
     for (final int codeUnit in value.codeUnits) {
@@ -1640,7 +1641,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 ''');
 
     output.writeln('dependencies:');
@@ -1672,7 +1673,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=1.11.0 <3.0.0'
+  sdk: '>=3.0.0-0 <4.0.0'
 ''');
 
   return directory;

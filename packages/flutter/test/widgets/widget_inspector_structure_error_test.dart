@@ -29,7 +29,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
       try {
-        expect(service.getEventsDispatched('Flutter.Error'), isEmpty);
+        expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
 
         // Set callback that doesn't call presentError.
         bool onErrorCalled = false;
@@ -49,7 +49,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
 
         // Verify structured errors are not shown.
         expect(onErrorCalled, true);
-        expect(service.getEventsDispatched('Flutter.Error'), isEmpty);
+        expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
 
         // Set callback that calls presentError.
         onErrorCalled = false;
@@ -64,9 +64,9 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
         expect(onErrorCalled, true);
         // Structured errors are not supported on web.
         if (!kIsWeb) {
-          expect(service.getEventsDispatched('Flutter.Error'), hasLength(1));
+          expect(service.dispatchedEvents('Flutter.Error'), hasLength(1));
         } else {
-          expect(service.getEventsDispatched('Flutter.Error'), isEmpty);
+          expect(service.dispatchedEvents('Flutter.Error'), isEmpty);
         }
 
         // Verify disabling structured errors sets the default FlutterError.presentError

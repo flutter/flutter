@@ -577,9 +577,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -671,9 +669,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -765,9 +761,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -858,9 +852,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -952,9 +944,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -1046,9 +1036,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -2652,10 +2640,10 @@ void main() {
       navigationRail: NavigationRail(
         labelType: NavigationRailLabelType.none,
         selectedIndex: 0,
-        destinations:  <NavigationRailDestination>[
+        destinations:  const <NavigationRailDestination>[
           NavigationRailDestination(
             icon: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Icon(Icons.umbrella),
                 Positioned(
                   top: 0,
@@ -2667,13 +2655,13 @@ void main() {
                 ),
               ],
             ),
-            label: const Text('Abc'),
+            label: Text('Abc'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.umbrella),
             label: Text('Def'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.bookmark_border),
             label: Text('Ghi'),
           ),
@@ -3102,6 +3090,50 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     transform = tester.widget<Transform>(transformFinder).transform;
     expect(transform.getColumn(0)[0], 1.0);
+  });
+
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationRail({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    useIndicator: true,
+                    indicatorColor: indicatorColor,
+                    indicatorShape: indicatorShape,
+                    selectedIndex: 0,
+                    destinations: _destinations(),
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationRail());
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationRail(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
   });
 
   group('Material 2', () {
@@ -4823,10 +4855,10 @@ void main() {
         navigationRail: NavigationRail(
           labelType: NavigationRailLabelType.none,
           selectedIndex: 0,
-          destinations:  <NavigationRailDestination>[
+          destinations:  const <NavigationRailDestination>[
             NavigationRailDestination(
               icon: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Icon(Icons.umbrella),
                   Positioned(
                     top: 0,
@@ -4838,13 +4870,13 @@ void main() {
                   ),
                 ],
               ),
-              label: const Text('Abc'),
+              label: Text('Abc'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.umbrella),
               label: Text('Def'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.bookmark_border),
               label: Text('Ghi'),
             ),
@@ -4913,7 +4945,6 @@ void main() {
       final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
       expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
     });
-
   }); // End Material 2 group
 }
 
@@ -5135,4 +5166,13 @@ Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}
       ),
     ),
   );
+}
+
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }

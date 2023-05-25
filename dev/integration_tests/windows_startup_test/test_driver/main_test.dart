@@ -23,4 +23,13 @@ void main() {
 
     await driver.close();
   }, timeout: Timeout.none);
+
+  test('Windows app template can convert string from UTF16 to UTF8', () async {
+    final FlutterDriver driver = await FlutterDriver.connect(printCommunication: true);
+    final String result = await driver.requestData('verifyStringConversion');
+
+    expect(result, equals('success'));
+
+    await driver.close();
+  }, timeout: Timeout.none);
 }

@@ -1,5 +1,5 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
   "md.comp.icon-button.disabled.icon.color": "onSurface",
   "md.comp.icon-button.disabled.icon.opacity": 0.38,
@@ -18,7 +18,7 @@
   "md.comp.icon-button.state-layer.size": 40.0,
   "md.comp.icon-button.unselected.focus.icon.color": "onSurfaceVariant",
   "md.comp.icon-button.unselected.focus.state-layer.color": "onSurfaceVariant",
-  "md.comp.icon-button.unselected.focus.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
+  "md.comp.icon-button.unselected.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.icon-button.unselected.hover.icon.color": "onSurfaceVariant",
   "md.comp.icon-button.unselected.hover.state-layer.color": "onSurfaceVariant",
   "md.comp.icon-button.unselected.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",

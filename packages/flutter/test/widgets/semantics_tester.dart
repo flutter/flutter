@@ -53,12 +53,6 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       assert(label != null),
-       assert(value != null),
-       assert(increasedValue != null),
-       assert(decreasedValue != null),
-       assert(hint != null),
-       assert(children != null),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -82,15 +76,9 @@ class TestSemantics {
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       assert(label != null),
-       assert(increasedValue != null),
-       assert(decreasedValue != null),
-       assert(value != null),
-       assert(hint != null),
        rect = TestSemantics.rootRect,
        elevation = 0.0,
        thickness = 0.0,
-       assert(children != null),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -125,13 +113,7 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       assert(label != null),
-       assert(value != null),
-       assert(increasedValue != null),
-       assert(decreasedValue != null),
-       assert(hint != null),
        transform = _applyRootChildScale(transform),
-       assert(children != null),
        tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// The unique identifier for this node.
@@ -381,22 +363,22 @@ class TestSemantics {
     if (actions is int && actions != 0 || actions is List<SemanticsAction> && (actions as List<SemanticsAction>).isNotEmpty) {
       buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
     }
-    if (label != null && label != '') {
+    if (label != '') {
       buf.writeln("$indent  label: '$label',");
     }
-    if (value != null && value != '') {
+    if (value != '') {
       buf.writeln("$indent  value: '$value',");
     }
-    if (increasedValue != null && increasedValue != '') {
+    if (increasedValue != '') {
       buf.writeln("$indent  increasedValue: '$increasedValue',");
     }
-    if (decreasedValue != null && decreasedValue != '') {
+    if (decreasedValue != '') {
       buf.writeln("$indent  decreasedValue: '$decreasedValue',");
     }
-    if (hint != null && hint != '') {
+    if (hint != '') {
       buf.writeln("$indent  hint: '$hint',");
     }
-    if (tooltip != null && tooltip != '') {
+    if (tooltip != '') {
       buf.writeln("$indent  tooltip: '$tooltip',");
     }
     if (textDirection != null) {
@@ -439,7 +421,7 @@ class SemanticsTester {
   /// You should call [dispose] at the end of a test that creates a semantics
   /// tester.
   SemanticsTester(this.tester) {
-    _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+    _semanticsHandle = tester.ensureSemantics();
 
     // This _extra_ clean-up is needed for the case when a test fails and
     // therefore fails to call dispose() explicitly. The test is still required
@@ -505,6 +487,7 @@ class SemanticsTester {
     TextDirection? textDirection,
     List<SemanticsAction>? actions,
     List<SemanticsFlag>? flags,
+    Set<SemanticsTag>? tags,
     double? scrollPosition,
     double? scrollExtentMax,
     double? scrollExtentMin,
@@ -551,6 +534,12 @@ class SemanticsTester {
         final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags) {
+          return false;
+        }
+      }
+      if (tags != null) {
+        final Set<SemanticsTag>? actualTags = node.getSemanticsData().tags;
+        if (!setEquals<SemanticsTag>(actualTags, tags)) {
           return false;
         }
       }
@@ -644,7 +633,8 @@ class SemanticsTester {
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is int) {
-      list = SemanticsFlag.values.values
+      // ignore: deprecated_member_use
+      list = SemanticsFlag.doNotUseWillBeDeletedWithoutWarningValuesAsList
           .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
@@ -659,7 +649,8 @@ class SemanticsTester {
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
-      list = SemanticsAction.values.values
+      // ignore: deprecated_member_use
+      list = SemanticsAction.doNotUseWillBeDeletedWithoutWarningValuesAsList
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
       list = actions as List<SemanticsAction>;
@@ -690,21 +681,21 @@ class SemanticsTester {
     if (nodeData.actions != 0) {
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
     }
-    if (node.label != null && node.label.isNotEmpty) {
+    if (node.label.isNotEmpty) {
       // Escape newlines and text directionality control characters.
       final String escapedLabel = node.label.replaceAll('\n', r'\n').replaceAll('\u202a', r'\u202a').replaceAll('\u202c', r'\u202c');
       buf.writeln("  label: '$escapedLabel',");
     }
-    if (node.value != null && node.value.isNotEmpty) {
+    if (node.value.isNotEmpty) {
       buf.writeln("  value: '${node.value}',");
     }
-    if (node.increasedValue != null && node.increasedValue.isNotEmpty) {
+    if (node.increasedValue.isNotEmpty) {
       buf.writeln("  increasedValue: '${node.increasedValue}',");
     }
-    if (node.decreasedValue != null && node.decreasedValue.isNotEmpty) {
+    if (node.decreasedValue.isNotEmpty) {
       buf.writeln("  decreasedValue: '${node.decreasedValue}',");
     }
-    if (node.hint != null && node.hint.isNotEmpty) {
+    if (node.hint.isNotEmpty) {
       buf.writeln("  hint: '${node.hint}',");
     }
     if (node.textDirection != null) {
@@ -732,11 +723,7 @@ class _HasSemantics extends Matcher {
     required this.ignoreTransform,
     required this.ignoreId,
     required this.childOrder,
-  }) : assert(_semantics != null),
-       assert(ignoreRect != null),
-       assert(ignoreId != null),
-       assert(ignoreTransform != null),
-       assert(childOrder != null);
+  });
 
   final TestSemantics _semantics;
   final bool ignoreRect;
@@ -818,6 +805,7 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
+    this.tags,
     this.scrollPosition,
     this.scrollExtentMax,
     this.scrollExtentMin,
@@ -828,6 +816,7 @@ class _IncludesNodeWith extends Matcher {
        value != null ||
        actions != null ||
        flags != null ||
+       tags != null ||
        scrollPosition != null ||
        scrollExtentMax != null ||
        scrollExtentMin != null ||
@@ -843,6 +832,7 @@ class _IncludesNodeWith extends Matcher {
   final TextDirection? textDirection;
   final List<SemanticsAction>? actions;
   final List<SemanticsFlag>? flags;
+  final Set<SemanticsTag>? tags;
   final double? scrollPosition;
   final double? scrollExtentMax;
   final double? scrollExtentMin;
@@ -861,6 +851,7 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
+      tags: tags,
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
@@ -887,6 +878,7 @@ class _IncludesNodeWith extends Matcher {
       if (textDirection != null) ' (${textDirection!.name})',
       if (actions != null) 'actions "${actions!.join(', ')}"',
       if (flags != null) 'flags "${flags!.join(', ')}"',
+      if (tags != null) 'tags "${tags!.join(', ')}"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
@@ -911,6 +903,7 @@ Matcher includesNodeWith({
   TextDirection? textDirection,
   List<SemanticsAction>? actions,
   List<SemanticsFlag>? flags,
+  Set<SemanticsTag>? tags,
   double? scrollPosition,
   double? scrollExtentMax,
   double? scrollExtentMin,
@@ -927,6 +920,7 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
+    tags: tags,
     scrollPosition: scrollPosition,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,

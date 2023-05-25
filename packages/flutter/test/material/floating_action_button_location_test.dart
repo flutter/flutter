@@ -125,15 +125,14 @@ void main() {
           // Measure the delta in rotation.
           // Check that it never grows by more than a safe amount.
           //
-          // Note that there may be multiple transitions all active at
+          // There may be multiple transitions all active at
           // the same time. We are concerned only with the closest one.
           final Iterable<RotationTransition> rotationTransitions = tester.widgetList(
             find.byType(RotationTransition),
           );
           final Iterable<double> currentRotations = rotationTransitions.map((RotationTransition t) => t.turns.value);
 
-          if (previousRotations != null && previousRotations!.isNotEmpty
-              && currentRotations != null && currentRotations.isNotEmpty
+          if (previousRotations != null && previousRotations!.isNotEmpty && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
             for (final double currentRotation in currentRotations) {
@@ -318,8 +317,8 @@ void main() {
           appBar: AppBar(),
           floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
           floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
-          body: Column(
-            children: const <Widget>[
+          body: const Column(
+            children: <Widget>[
               ListTile(
                 leading: CircleAvatar(),
               ),
@@ -1739,16 +1738,13 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     double fabX;
-    assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
-        break;
       case TextDirection.ltr:
         final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
         fabX = startPadding;
-        break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return Offset(fabX, fabY);

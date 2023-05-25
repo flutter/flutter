@@ -67,7 +67,7 @@ abstract class AndroidAssetBundle extends Target {
       outputDirectory,
       targetPlatform: TargetPlatform.android,
       buildMode: buildMode,
-      shaderTarget: ShaderTarget.sksl,
+      shaderTarget: ShaderTarget.impellerAndroid,
     );
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
@@ -182,7 +182,7 @@ class AndroidAot extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/android.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.hostArtifact(HostArtifact.engineDartBinary),
+    const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       mode: buildMode,

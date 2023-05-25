@@ -12,10 +12,10 @@ class SwitchTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends SwitchThemeData {
-  _${blockName}DefaultsM3(BuildContext context)
-    : _colors = Theme.of(context).colorScheme;
+  _${blockName}DefaultsM3(this.context);
 
-  final ColorScheme _colors;
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   MaterialStateProperty<Color> get thumbColor {
@@ -82,6 +82,19 @@ class _${blockName}DefaultsM3 extends SwitchThemeData {
         return ${componentColor('md.comp.switch.unselected.focus.track')};
       }
       return ${componentColor('md.comp.switch.unselected.track')};
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color?> get trackOutlineColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return Colors.transparent;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return ${componentColor('md.comp.switch.disabled.unselected.track.outline')}.withOpacity(${opacity('md.comp.switch.disabled.track.opacity')});
+      }
+      return ${componentColor('md.comp.switch.unselected.track.outline')};
     });
   }
 
@@ -186,19 +199,6 @@ class _SwitchConfigM3 with _SwitchConfig {
 
   @override
   double get trackHeight => ${tokens['md.comp.switch.track.height']};
-
-  @override
-  MaterialStateProperty<Color?> get trackOutlineColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.selected)) {
-        return null;
-      }
-      if (states.contains(MaterialState.disabled)) {
-        return ${componentColor('md.comp.switch.disabled.unselected.track.outline')}.withOpacity(${opacity('md.comp.switch.disabled.track.opacity')});
-      }
-      return ${componentColor('md.comp.switch.unselected.track.outline')};
-    });
-  }
 
   @override
   double get trackWidth => ${tokens['md.comp.switch.track.width']};

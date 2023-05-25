@@ -8,11 +8,13 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
+import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
 const String gobMirror =
@@ -41,9 +43,7 @@ class PreparePackageException implements Exception {
   @override
   String toString() {
     String output = runtimeType.toString();
-    if (message != null) {
-      output += ': $message';
-    }
+    output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
@@ -54,7 +54,9 @@ class PreparePackageException implements Exception {
 
 enum Branch {
   beta,
-  stable;
+  stable,
+  master,
+  main;
 }
 
 /// A helper class for classes that want to run a process, optionally have the
@@ -189,7 +191,7 @@ class ArchiveCreator {
       subprocessOutput: subprocessOutput,
       platform: platform,
     )..environment['PUB_CACHE'] = path.join(
-      flutterRoot.absolute.path, '.pub-cache',
+      tempDir.path, '.pub-cache',
     );
     final String flutterExecutable = path.join(
       flutterRoot.absolute.path,
@@ -287,7 +289,7 @@ class ArchiveCreator {
   /// Used when an output filename is not given.
   Future<String> get _archiveName async {
     final String os = platform.operatingSystem.toLowerCase();
-    // Include the intended host archetecture in the file name for non-x64.
+    // Include the intended host architecture in the file name for non-x64.
     final String arch = await _dartArch == 'x64' ? '' : '${await _dartArch}_';
     // We don't use .tar.xz on Mac because although it can unpack them
     // on the command line (with tar), the "Archive Utility" that runs
@@ -330,7 +332,7 @@ class ArchiveCreator {
   /// Validates the integrity of the release package.
   ///
   /// Currently only checks that macOS binaries are codesigned. Will throw a
-  /// [PreparePackageException] if the test failes.
+  /// [PreparePackageException] if the test fails.
   Future<void> _validate() async {
     // Only validate in strict mode, which means `--publish`
     if (!strict || !platform.isMacOS) {
@@ -426,6 +428,104 @@ class ArchiveCreator {
     await _unzipArchive(gitFile, workingDirectory: minGitPath);
   }
 
+  /// Downloads an archive of every package that is present in the temporary
+  /// pub-cache from pub.dev. Stores the archives in
+  /// $flutterRoot/.pub-preload-cache.
+  ///
+  /// These archives will be installed in the user-level cache on first
+  /// following flutter command that accesses the cache.
+  ///
+  /// Precondition: all packages currently in the PUB_CACHE of [_processRunner]
+  /// are installed from pub.dev.
+  Future<void> _downloadPubPackageArchives() async {
+    final Pool pool = Pool(10); // Number of simultaneous downloads.
+    final http.Client client = http.Client();
+    final Directory preloadCache = Directory(path.join(flutterRoot.path, '.pub-preload-cache'));
+    preloadCache.createSync(recursive: true);
+    /// Fetch a single package.
+    Future<void> fetchPackageArchive(String name, String version) async {
+      await pool.withResource(() async {
+        stderr.write('Fetching package archive for $name-$version.\n');
+        int retries = 7;
+        while (true) {
+          retries-=1;
+          try {
+            final Uri packageListingUrl =
+              Uri.parse('https://pub.dev/api/packages/$name');
+            // Fetch the package listing to obtain the package download url.
+            final http.Response packageListingResponse =
+                await client.get(packageListingUrl);
+            if (packageListingResponse.statusCode != 200) {
+              throw Exception('Downloading $packageListingUrl failed. Status code ${packageListingResponse.statusCode}.');
+            }
+            final dynamic decodedPackageListing = json.decode(packageListingResponse.body);
+            if (decodedPackageListing is! Map) {
+              throw const FormatException('Package listing should be a map');
+            }
+            final dynamic versions =  decodedPackageListing['versions'];
+            if (versions is! List) {
+              throw const FormatException('.versions should be a list');
+            }
+            final Map<String, dynamic> versionDescription = versions.firstWhere(
+              (dynamic description) {
+                if (description is! Map) {
+                  throw const FormatException('.versions elements should be maps');
+                }
+                return description['version'] == version;
+              },
+              orElse: () => throw FormatException('Could not find $name-$version in package listing')
+            ) as Map<String, dynamic>;
+            final dynamic downloadUrl = versionDescription['archive_url'];
+            if (downloadUrl is! String) {
+              throw const FormatException('archive_url should be a string');
+            }
+            final dynamic archiveSha256 = versionDescription['archive_sha256'];
+            if (archiveSha256 is! String) {
+              throw const FormatException('archive_sha256 should be a string');
+            }
+            final http.Request request = http.Request('get', Uri.parse(downloadUrl));
+            final http.StreamedResponse response = await client.send(request);
+            if (response.statusCode != 200) {
+              throw Exception('Downloading ${request.url} failed. Status code ${response.statusCode}.');
+            }
+            final File archiveFile = File(
+              path.join(preloadCache.path, '$name-$version.tar.gz'),
+            );
+            await response.stream.pipe(archiveFile.openWrite());
+            final Stream<List<int>> archiveStream = archiveFile.openRead();
+            final Digest r = await sha256.bind(archiveStream).first;
+            if (hex.encode(r.bytes) != archiveSha256) {
+              throw Exception('Hash mismatch of downloaded archive');
+            }
+          } on Exception catch (e) {
+            stderr.write('Failed downloading $name-$version. $e\n');
+            if (retries > 0) {
+              stderr.write('Retrying download of $name-$version...');
+              // Retry.
+              continue;
+            } else {
+              rethrow;
+            }
+          }
+          break;
+        }
+      });
+    }
+    final Map<String, dynamic> cacheDescription =
+        json.decode(await _runFlutter(<String>['pub', 'cache', 'list'])) as Map<String, dynamic>;
+    final Map<String, dynamic> packages = cacheDescription['packages'] as Map<String, dynamic>;
+    final List<Future<void>> downloads = <Future<void>>[];
+    for (final MapEntry<String, dynamic> package in packages.entries) {
+      final String name = package.key;
+      final Map<String, dynamic> versions = package.value as Map<String, dynamic>;
+      for (final String version in versions.keys) {
+        downloads.add(fetchPackageArchive(name, version));
+      }
+    }
+    await Future.wait(downloads);
+    client.close();
+  }
+
   /// Prepare the archive repo so that it has all of the caches warmed up and
   /// is configured for the user to begin working.
   Future<void> _populateCaches() async {
@@ -446,7 +546,7 @@ class ArchiveCreator {
         workingDirectory: tempDir,
       );
     }
-
+    await _downloadPubPackageArchives();
     // Yes, we could just skip all .packages files when constructing
     // the archive, but some are checked in, and we don't want to skip
     // those.
@@ -795,8 +895,8 @@ class ArchivePublisher {
   }
 }
 
-/// Prepares a flutter git repo to be packaged up for distribution.
-/// It mainly serves to populate the .pub-cache with any appropriate Dart
+/// Prepares a flutter git repo to be packaged up for distribution. It mainly
+/// serves to populate the .pub-preload-cache with any appropriate Dart
 /// packages, and the flutter cache in bin/cache with the appropriate
 /// dependencies and snapshots.
 ///

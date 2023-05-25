@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
@@ -37,7 +38,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidGenSnapshotArtifacts(this, platform: platform));
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
-    registerArtifact(FlutterWebSdk(this, platform: platform));
+    registerArtifact(FlutterWebSdk(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
@@ -100,7 +101,7 @@ class PubDependencies extends ArtifactSet {
       logger: _logger,
       throwOnError: false,
     );
-    if (packageConfig == null || packageConfig == PackageConfig.empty) {
+    if (packageConfig == PackageConfig.empty) {
       return false;
     }
     for (final Package package in packageConfig.packages) {
@@ -127,7 +128,8 @@ class PubDependencies extends ArtifactSet {
       project: _projectFactory.fromDirectory(
         fileSystem.directory(fileSystem.path.join(_flutterRoot(), 'packages', 'flutter_tools'))
       ),
-      offline: offline
+      offline: offline,
+      outputMode: PubOutputMode.none,
     );
   }
 }
@@ -158,15 +160,12 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache, {required Platform platform})
-   : _platform = platform,
-     super(
+  FlutterWebSdk(Cache cache)
+   : super(
       'flutter_web_sdk',
       cache,
       DevelopmentArtifact.web,
     );
-
-  final Platform _platform;
 
   @override
   Directory get location => cache.getWebSdkDirectory();
@@ -180,46 +179,9 @@ class FlutterWebSdk extends CachedArtifact {
     FileSystem fileSystem,
     OperatingSystemUtils operatingSystemUtils,
   ) async {
-    String platformName = 'flutter-web-sdk-';
-    if (_platform.isMacOS) {
-      platformName += 'darwin-x64';
-    } else if (_platform.isLinux) {
-      platformName += 'linux-x64';
-    } else if (_platform.isWindows) {
-      platformName += 'windows-x64';
-    }
-    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/flutter-web-sdk.zip');
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
-    // This is a temporary work-around for not being able to safely download into a shared directory.
-    final FileSystem fileSystem = location.fileSystem;
-    for (final FileSystemEntity entity in location.listSync(recursive: true)) {
-      if (entity is File) {
-        final List<String> segments = fileSystem.path.split(entity.path);
-        segments.remove('flutter_web_sdk');
-        final String newPath = fileSystem.path.joinAll(segments);
-        final File newFile = fileSystem.file(newPath);
-        if (!newFile.existsSync()) {
-          newFile.createSync(recursive: true);
-        }
-        entity.copySync(newPath);
-      }
-    }
-
-    // If the flutter_web_sdk folder doesn't already contain CanvasKit, then
-    // download it from CIPD.
-    // TODO(hterkelsen): This whole section can be removed when we are always building
-    //   CanvasKit as part of flutter_web_sdk. See https://github.com/flutter/flutter/issues/113073
-    final File expectedCanvasKitFile = fileSystem.file(fileSystem.path.join(location.path, 'canvaskit', 'canvaskit.wasm'));
-    if (!expectedCanvasKitFile.existsSync()) {
-      final String canvasKitVersion = cache.getVersionFor('canvaskit')!;
-      final String canvasKitUrl = '${cache.cipdBaseUrl}/flutter/web/canvaskit_bundle/+/$canvasKitVersion';
-      return artifactUpdater.downloadZipArchive(
-        'Downloading CanvasKit...',
-        Uri.parse(canvasKitUrl),
-        location,
-      );
-    }
   }
 }
 
@@ -340,7 +302,7 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
     if (_platform.isLinux || ignorePlatformFiltering) {
       final String arch = cache.getHostPlatformArchName();
       return <List<String>>[
-        <String>['linux-$arch', 'linux-$arch/linux-$arch-flutter-gtk.zip'],
+        <String>['linux-$arch', 'linux-$arch-debug/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-profile', 'linux-$arch-profile/linux-$arch-flutter-gtk.zip'],
         <String>['linux-$arch-release', 'linux-$arch-release/linux-$arch-flutter-gtk.zip'],
       ];
@@ -431,7 +393,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
         ],
         environment: <String, String>{
           if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+            AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
         },
       );
       if (processResult.exitCode != 0) {
@@ -845,7 +807,7 @@ class IosUsbArtifacts extends CachedArtifact {
 // remove from existing host folder.
 // https://github.com/flutter/flutter/issues/38935
 const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
-  <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
+  <String>['windows-x64', 'windows-x64-debug/windows-x64-flutter.zip'],
   <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
   <String>['windows-x64-profile', 'windows-x64-profile/windows-x64-flutter.zip'],
   <String>['windows-x64-release', 'windows-x64-release/windows-x64-flutter.zip'],

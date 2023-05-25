@@ -116,9 +116,7 @@ class BenchMouseRegionGridHover extends WidgetRecorder {
   }
 }
 
-class _UntilNextFrame {
-  _UntilNextFrame._();
-
+abstract final class _UntilNextFrame {
   static Completer<void>? _completer;
 
   static Future<void> wait() {
@@ -159,9 +157,7 @@ class _Tester {
     final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);
     stopwatch.stop();
-    if (onDataPoint != null) {
-      onDataPoint(stopwatch.elapsed);
-    }
+    onDataPoint(stopwatch.elapsed);
     await _UntilNextFrame.wait();
   }
 

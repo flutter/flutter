@@ -27,8 +27,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
-  }) : assert(applicationPackage != null),
-       assert(launchActivity != null);
+  });
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -172,7 +171,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
-    final String? packageId = manifests.first.getAttribute('package');
+
+    // Starting from AGP version 7.3, the `package` attribute in Manifest.xml
+    // can be replaced with the `namespace` attribute under the `android` section in `android/app/build.gradle`.
+    final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
     for (final XmlElement activity in document.findAllElements('activity')) {
@@ -300,7 +302,7 @@ class ApkManifestData {
   }
 
   static ApkManifestData? parseFromXmlDump(String data, Logger logger) {
-    if (data == null || data.trim().isEmpty) {
+    if (data.trim().isEmpty) {
       return null;
     }
 
@@ -325,7 +327,6 @@ class ApkManifestData {
           case 'A':
             currentElement
                 .addChild(_Attribute.fromLine(line, currentElement));
-            break;
           case 'E':
             final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);

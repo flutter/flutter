@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_builder.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('showing and hiding the custom context menu in TextField with a specific selection', (WidgetTester tester) async {
     await tester.pumpWidget(
-      example.MyApp(),
+      const example.EditableTextToolbarBuilderExampleApp(),
     );
+
+    expect(BrowserContextMenu.enabled, !kIsWeb);
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 

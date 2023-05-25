@@ -25,8 +25,8 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Text('column1', textDirection: TextDirection.ltr),
             Text('column2', textDirection: TextDirection.ltr),
             Text('column3', textDirection: TextDirection.ltr),
@@ -46,9 +46,9 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: SelectionContainer.disabled(
+        child: const SelectionContainer.disabled(
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Text('column1', textDirection: TextDirection.ltr),
               Text('column2', textDirection: TextDirection.ltr),
               Text('column3', textDirection: TextDirection.ltr),
@@ -69,7 +69,7 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: Column(
+        child: const Column(
         ),
       ),
     );
@@ -80,8 +80,8 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: Column(
-          children: const <Widget>[
+        child: const Column(
+          children: <Widget>[
             Text('column1', textDirection: TextDirection.ltr),
           ],
         ),
@@ -94,7 +94,7 @@ void main() {
       SelectionContainer(
         registrar: registrar,
         delegate: delegate,
-        child: Column(
+        child: const Column(
         ),
       ),
     );
@@ -111,8 +111,8 @@ void main() {
         registrar: registrar,
         child: SelectionContainer(
           delegate: delegate,
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: <Widget>[
               Text('column1', textDirection: TextDirection.ltr),
             ],
           ),

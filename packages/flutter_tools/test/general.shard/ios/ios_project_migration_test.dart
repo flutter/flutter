@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/cocoapods_script_symlink.dart';
 import 'package:flutter_tools/src/migrations/xcode_project_object_version_migration.dart';
 import 'package:flutter_tools/src/migrations/xcode_script_build_phase_migration.dart';
+import 'package:flutter_tools/src/migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -1102,6 +1103,114 @@ platform :ios, '11.0'
 			);
 ''');
       expect(testLogger.statusText, contains('Removing script build phase dependency analysis'));
+    });
+  });
+
+  group('update Xcode Thin Binary build phase to have input path', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeIosProject project;
+    late File xcodeProjectInfoFile;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      testLogger = BufferLogger.test();
+      project = FakeIosProject();
+      xcodeProjectInfoFile = memoryFileSystem.file('project.pbxproj');
+      project.xcodeProjectInfoFile = xcodeProjectInfoFile;
+    });
+
+    testWithoutContext('skipped if files are missing', () {
+      final XcodeThinBinaryBuildPhaseInputPathsMigration iosProjectMigration = XcodeThinBinaryBuildPhaseInputPathsMigration(
+        project,
+        testLogger,
+      );
+      iosProjectMigration.migrate();
+      expect(xcodeProjectInfoFile.existsSync(), isFalse);
+
+      expect(testLogger.traceText, contains('Xcode project not found, skipping script build phase dependency analysis removal'));
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if nothing to upgrade', () {
+      const String xcodeProjectInfoFileContents = r'''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
+			);
+      ''';
+      xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
+
+      final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
+
+      final XcodeThinBinaryBuildPhaseInputPathsMigration iosProjectMigration = XcodeThinBinaryBuildPhaseInputPathsMigration(
+        project,
+        testLogger,
+      );
+      iosProjectMigration.migrate();
+
+      expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
+      expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('Thin Binary inputPaths is migrated', () {
+      xcodeProjectInfoFile.writeAsStringSync(r'''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+''');
+
+      final XcodeThinBinaryBuildPhaseInputPathsMigration iosProjectMigration = XcodeThinBinaryBuildPhaseInputPathsMigration(
+        project,
+        testLogger,
+      );
+      iosProjectMigration.migrate();
+
+      expect(xcodeProjectInfoFile.readAsStringSync(), r'''
+/* Begin PBXShellScriptBuildPhase section */
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
+			);
+
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+''');
+      expect(testLogger.statusText, contains('Adding input path to Thin Binary build phase.'));
     });
   });
 }

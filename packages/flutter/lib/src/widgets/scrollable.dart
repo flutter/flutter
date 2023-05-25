@@ -11,23 +11,20 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import 'actions.dart';
 import 'basic.dart';
-import 'focus_manager.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
-import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'scroll_activity.dart';
 import 'scroll_configuration.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
-import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scrollable_helpers.dart';
 import 'selectable_region.dart';
 import 'selection_container.dart';
 import 'ticker_provider.dart';
@@ -100,24 +97,23 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(axisDirection != null),
-       assert(dragStartBehavior != null),
-       assert(viewportBuilder != null),
-       assert(excludeFromSemantics != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
+  /// {@template flutter.widgets.Scrollable.axisDirection}
   /// The direction in which this widget scrolls.
   ///
-  /// For example, if the [axisDirection] is [AxisDirection.down], increasing
-  /// the scroll position will cause content below the bottom of the viewport to
-  /// become visible through the viewport. Similarly, if [axisDirection] is
-  /// [AxisDirection.right], increasing the scroll position will cause content
-  /// beyond the right edge of the viewport to become visible through the
-  /// viewport.
+  /// For example, if the [Scrollable.axisDirection] is [AxisDirection.down],
+  /// increasing the scroll position will cause content below the bottom of the
+  /// viewport to become visible through the viewport. Similarly, if the
+  /// axisDirection is [AxisDirection.right], increasing the scroll position
+  /// will cause content beyond the right edge of the viewport to become visible
+  /// through the viewport.
   ///
   /// Defaults to [AxisDirection.down].
+  /// {@endtemplate}
   final AxisDirection axisDirection;
 
+  /// {@template flutter.widgets.Scrollable.controller}
   /// An object that can be used to control the position to which this widget is
   /// scrolled.
   ///
@@ -129,12 +125,17 @@ class Scrollable extends StatefulWidget {
   /// scroll position (see [ScrollController.offset]), or change it (see
   /// [ScrollController.animateTo]).
   ///
+  /// If null, a [ScrollController] will be created internally by [Scrollable]
+  /// in order to create and manage the [ScrollPosition].
+  ///
   /// See also:
   ///
-  ///  * [ensureVisible], which animates the scroll position to reveal a given
-  ///    [BuildContext].
+  ///  * [Scrollable.ensureVisible], which animates the scroll position to
+  ///    reveal a given [BuildContext].
+  /// {@endtemplate}
   final ScrollController? controller;
 
+  /// {@template flutter.widgets.Scrollable.physics}
   /// How the widgets should respond to user input.
   ///
   /// For example, determines how the widget continues to animate after the
@@ -143,9 +144,9 @@ class Scrollable extends StatefulWidget {
   /// Defaults to matching platform conventions via the physics provided from
   /// the ambient [ScrollConfiguration].
   ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// If an explicit [ScrollBehavior] is provided to
+  /// [Scrollable.scrollBehavior], the [ScrollPhysics] provided by that behavior
+  /// will take precedence after [Scrollable.physics].
   ///
   /// The physics can be changed dynamically, but new physics will only take
   /// effect if the _class_ of the provided object changes. Merely constructing
@@ -160,6 +161,7 @@ class Scrollable extends StatefulWidget {
   ///  * [AlwaysScrollableScrollPhysics], which can be used to indicate that the
   ///    scrollable should react to scroll requests (and possible overscroll)
   ///    even if the scrollable's contents fit without scrolling being necessary.
+  /// {@endtemplate}
   final ScrollPhysics? physics;
 
   /// Builds the viewport through which the scrollable content is displayed.
@@ -363,7 +365,7 @@ class Scrollable extends StatefulWidget {
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context) {
-    final _ScrollableScope? widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope?;
+    final _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     if (widget == null) {
       return false;
     }
@@ -421,8 +423,7 @@ class _ScrollableScope extends InheritedWidget {
     required this.scrollable,
     required this.position,
     required super.child,
-  }) : assert(scrollable != null),
-       assert(child != null);
+  });
 
   final ScrollableState scrollable;
   final ScrollPosition position;
@@ -445,6 +446,9 @@ class _ScrollableScope extends InheritedWidget {
 /// [Scrollable], provide it with a [ScrollPhysics].
 class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, RestorationMixin
     implements ScrollContext {
+
+  // GETTERS
+
   /// The manager for this [Scrollable] widget's viewport position.
   ///
   /// To control what kind of [ScrollPosition] is created for a [Scrollable],
@@ -453,17 +457,49 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   ScrollPosition get position => _position!;
   ScrollPosition? _position;
 
-  final _RestorableScrollOffset _persistedScrollOffset = _RestorableScrollOffset();
+  /// The resolved [ScrollPhysics] of the [ScrollableState].
+  ScrollPhysics? get resolvedPhysics => _physics;
+  ScrollPhysics? _physics;
+
+  /// An [Offset] that represents the absolute distance from the origin, or 0,
+  /// of the [ScrollPosition] expressed in the associated [Axis].
+  ///
+  /// Used by [EdgeDraggingAutoScroller] to progress the position forward when a
+  /// drag gesture reaches the edge of the [Viewport].
+  Offset get deltaToScrollOrigin {
+    switch (axisDirection) {
+      case AxisDirection.down:
+        return Offset(0, position.pixels);
+      case AxisDirection.up:
+        return Offset(0, -position.pixels);
+      case AxisDirection.left:
+        return Offset(-position.pixels, 0);
+      case AxisDirection.right:
+        return Offset(position.pixels, 0);
+    }
+  }
+
+  ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
 
-  late ScrollBehavior _configuration;
-  ScrollPhysics? _physics;
-  ScrollController? _fallbackScrollController;
-  MediaQueryData? _mediaQueryData;
+  @override
+  TickerProvider get vsync => this;
 
-  ScrollController get _effectiveScrollController => widget.controller ?? _fallbackScrollController!;
+  @override
+  BuildContext? get notificationContext => _gestureDetectorKey.currentContext;
+
+  @override
+  BuildContext get storageContext => context;
+
+  @override
+  String? get restorationId => widget.restorationId;
+  final _RestorableScrollOffset _persistedScrollOffset = _RestorableScrollOffset();
+
+  late ScrollBehavior _configuration;
+  ScrollController? _fallbackScrollController;
+  DeviceGestureSettings? _mediaQueryGestureSettings;
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
@@ -516,7 +552,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   void didChangeDependencies() {
-    _mediaQueryData = MediaQuery.maybeOf(context);
+    _mediaQueryGestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -580,7 +616,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.dispose();
   }
 
-
   // SEMANTICS
 
   final GlobalKey _scrollSemanticsKey = GlobalKey();
@@ -635,11 +670,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..gestureSettings = _mediaQueryData?.gestureSettings;
+                  ..gestureSettings = _mediaQueryGestureSettings
+                  ..supportedDevices = _configuration.dragDevices;
               },
             ),
           };
-          break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
@@ -656,11 +691,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..gestureSettings = _mediaQueryData?.gestureSettings;
+                  ..gestureSettings = _mediaQueryGestureSettings
+                  ..supportedDevices = _configuration.dragDevices;
               },
             ),
           };
-          break;
       }
     }
     _lastCanDrag = value;
@@ -669,9 +704,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       _gestureDetectorKey.currentState!.replaceGestureRecognizers(_gestureRecognizers);
     }
   }
-
-  @override
-  TickerProvider get vsync => this;
 
   @override
   @protected
@@ -685,12 +717,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
-
-  @override
-  BuildContext? get notificationContext => _gestureDetectorKey.currentContext;
-
-  @override
-  BuildContext get storageContext => context;
 
   // TOUCH HANDLERS
 
@@ -727,6 +753,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   void _handleDragCancel() {
+    if (_gestureDetectorKey.currentContext == null) {
+      // The cancel was caused by the GestureDetector getting disposed, which
+      // means we will get disposed momentarily as well and shouldn't do
+      // any work.
+      return;
+    }
     // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
@@ -755,12 +787,31 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     );
   }
 
-  // Returns the delta that should result from applying [event] with axis and
-  // direction taken into account.
+  // Returns the delta that should result from applying [event] with axis,
+  // direction, and any modifiers specified by the ScrollBehavior taken into
+  // account.
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = widget.axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    late double delta;
+    final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
+    final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains) &&
+      // Axes are only flipped for physical mouse wheel input.
+      // On some platforms, like web, trackpad input is handled through pointer
+      // signals, but should not be included in this axis modifying behavior.
+      // This is because on a trackpad, all directional axes are available to
+      // the user, while mouse scroll wheels typically are restricted to one
+      // axis.
+      event.kind == PointerDeviceKind.mouse;
+
+    switch (widget.axis) {
+      case Axis.horizontal:
+        delta = flipAxes
+          ? event.scrollDelta.dy
+          : event.scrollDelta.dx;
+      case Axis.vertical:
+        delta = flipAxes
+          ? event.scrollDelta.dx
+          : event.scrollDelta.dy;
+    }
 
     if (axisDirectionIsReversed(widget.axisDirection)) {
       delta *= -1;
@@ -857,7 +908,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
-      clipBehavior: widget.clipBehavior,
+      decorationClipBehavior: widget.clipBehavior,
     );
 
     result = _configuration.buildScrollbar(
@@ -886,9 +937,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
     properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
   }
-
-  @override
-  String? get restorationId => widget.restorationId;
 }
 
 /// A widget to handle selection for a scrollable.
@@ -945,151 +993,6 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
       delegate: _selectionDelegate,
       child: widget.child,
     );
-  }
-}
-
-/// An auto scroller that scrolls the [scrollable] if a drag gesture drags close
-/// to its edge.
-///
-/// The scroll velocity is controlled by the [velocityScalar]:
-///
-/// velocity = <distance of overscroll> * [velocityScalar].
-class EdgeDraggingAutoScroller {
-  /// Creates a auto scroller that scrolls the [scrollable].
-  EdgeDraggingAutoScroller(this.scrollable, {this.onScrollViewScrolled, this.velocityScalar = _kDefaultAutoScrollVelocityScalar});
-
-  // An eyeballed value for a smooth scrolling experience.
-  static const double _kDefaultAutoScrollVelocityScalar = 7;
-
-  /// The [Scrollable] this auto scroller is scrolling.
-  final ScrollableState scrollable;
-
-  /// Called when a scroll view is scrolled.
-  ///
-  /// The scroll view may be scrolled multiple times in a row until the drag
-  /// target no longer triggers the auto scroll. This callback will be called
-  /// in between each scroll.
-  final VoidCallback? onScrollViewScrolled;
-
-  /// The velocity scalar per pixel over scroll.
-  ///
-  /// It represents how the velocity scale with the over scroll distance. The
-  /// auto-scroll velocity = <distance of overscroll> * velocityScalar.
-  final double velocityScalar;
-
-  late Rect _dragTargetRelatedToScrollOrigin;
-
-  /// Whether the auto scroll is in progress.
-  bool get scrolling => _scrolling;
-  bool _scrolling = false;
-
-  double _offsetExtent(Offset offset, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return offset.dx;
-      case Axis.vertical:
-        return offset.dy;
-    }
-  }
-
-  double _sizeExtent(Size size, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
-  }
-
-  AxisDirection get _axisDirection => scrollable.axisDirection;
-  Axis get _scrollDirection => axisDirectionToAxis(_axisDirection);
-
-  /// Starts the auto scroll if the [dragTarget] is close to the edge.
-  ///
-  /// The scroll starts to scroll the [scrollable] if the target rect is close
-  /// to the edge of the [scrollable]; otherwise, it remains stationary.
-  ///
-  /// If the scrollable is already scrolling, calling this method updates the
-  /// previous dragTarget to the new value and continues scrolling if necessary.
-  void startAutoScrollIfNecessary(Rect dragTarget) {
-    final Offset deltaToOrigin = _getDeltaToScrollOrigin(scrollable);
-    _dragTargetRelatedToScrollOrigin = dragTarget.translate(deltaToOrigin.dx, deltaToOrigin.dy);
-    if (_scrolling) {
-      // The change will be picked up in the next scroll.
-      return;
-    }
-    if (!_scrolling) {
-      _scroll();
-    }
-  }
-
-  /// Stop any ongoing auto scrolling.
-  void stopAutoScroll() {
-    _scrolling = false;
-  }
-
-  Future<void> _scroll() async {
-    final RenderBox scrollRenderBox = scrollable.context.findRenderObject()! as RenderBox;
-    final Rect globalRect = MatrixUtils.transformRect(
-        scrollRenderBox.getTransformTo(null),
-        Rect.fromLTWH(0, 0, scrollRenderBox.size.width, scrollRenderBox.size.height)
-    );
-    assert(
-      globalRect.size.width >= _dragTargetRelatedToScrollOrigin.size.width &&
-      globalRect.size.height >= _dragTargetRelatedToScrollOrigin.size.height,
-      'Drag target size is larger than scrollable size, which may cause bouncing',
-    );
-    _scrolling = true;
-    double? newOffset;
-    const double overDragMax = 20.0;
-
-    final Offset deltaToOrigin = _getDeltaToScrollOrigin(scrollable);
-    final Offset viewportOrigin = globalRect.topLeft.translate(deltaToOrigin.dx, deltaToOrigin.dy);
-    final double viewportStart = _offsetExtent(viewportOrigin, _scrollDirection);
-    final double viewportEnd = viewportStart + _sizeExtent(globalRect.size, _scrollDirection);
-
-    final double proxyStart = _offsetExtent(_dragTargetRelatedToScrollOrigin.topLeft, _scrollDirection);
-    final double proxyEnd = _offsetExtent(_dragTargetRelatedToScrollOrigin.bottomRight, _scrollDirection);
-    switch (_axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        if (proxyEnd > viewportEnd && scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
-          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels - overDrag);
-        } else if (proxyStart < viewportStart && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
-          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
-        }
-        break;
-      case AxisDirection.right:
-      case AxisDirection.down:
-        if (proxyStart < viewportStart && scrollable.position.pixels > scrollable.position.minScrollExtent) {
-          final double overDrag = math.min(viewportStart - proxyStart, overDragMax);
-          newOffset = math.max(scrollable.position.minScrollExtent, scrollable.position.pixels -  overDrag);
-        } else if (proxyEnd > viewportEnd && scrollable.position.pixels < scrollable.position.maxScrollExtent) {
-          final double overDrag = math.min(proxyEnd - viewportEnd, overDragMax);
-          newOffset = math.min(scrollable.position.maxScrollExtent, scrollable.position.pixels + overDrag);
-        }
-        break;
-    }
-
-    if (newOffset == null || (newOffset - scrollable.position.pixels).abs() < 1.0) {
-      // Drag should not trigger scroll.
-      _scrolling = false;
-      return;
-    }
-    final Duration duration = Duration(milliseconds: (1000 / velocityScalar).round());
-    await scrollable.position.animateTo(
-      newOffset,
-      duration: duration,
-      curve: Curves.linear,
-    );
-    if (onScrollViewScrolled != null) {
-      onScrollViewScrolled!();
-    }
-    if (_scrolling) {
-      await _scroll();
-    }
   }
 }
 
@@ -1422,26 +1325,21 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       case SelectionEventType.startEdgeUpdate:
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.endEdgeUpdate:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         ensureChildUpdated(selectable);
-        break;
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
         ensureChildUpdated(selectable);
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
-        break;
       case SelectionEventType.clear:
         _selectableEndEdgeUpdateRecords.remove(selectable);
         _selectableStartEdgeUpdateRecords.remove(selectable);
-        break;
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
-        break;
     }
     return super.dispatchSelectionEventToChild(selectable, event);
   }
@@ -1490,41 +1388,6 @@ Offset _getDeltaToScrollOrigin(ScrollableState scrollableState) {
   }
 }
 
-/// Describes the aspects of a Scrollable widget to inform inherited widgets
-/// like [ScrollBehavior] for decorating.
-///
-/// Decorations like [GlowingOverscrollIndicator]s and [Scrollbar]s require
-/// information about the Scrollable in order to be initialized.
-@immutable
-class ScrollableDetails {
-  /// Creates a set of details describing the [Scrollable]. The [direction]
-  /// cannot be null.
-  const ScrollableDetails({
-    required this.direction,
-    required this.controller,
-    this.clipBehavior,
-  });
-
-  /// The direction in which this widget scrolls.
-  ///
-  /// Cannot be null.
-  final AxisDirection direction;
-
-  /// A [ScrollController] that can be used to control the position of the
-  /// [Scrollable] widget.
-  ///
-  /// This can be used by [ScrollBehavior] to apply a [Scrollbar] to the associated
-  /// [Scrollable].
-  final ScrollController controller;
-
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// This can be used by [MaterialScrollBehavior] to clip [StretchingOverscrollIndicator].
-  ///
-  /// Defaults to null.
-  final Clip? clipBehavior;
-}
-
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be
 /// excluded from the scrollable area for semantics purposes.
 ///
@@ -1546,8 +1409,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     required this.allowImplicitScrolling,
     required this.semanticChildCount,
     super.child,
-  }) : assert(position != null),
-       assert(semanticChildCount == null || semanticChildCount >= 0);
+  }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
@@ -1580,7 +1442,6 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
        _semanticChildCount = semanticChildCount,
-       assert(position != null),
        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
@@ -1589,7 +1450,6 @@ class _RenderScrollSemantics extends RenderProxyBox {
   ScrollPosition get position => _position;
   ScrollPosition _position;
   set position(ScrollPosition value) {
-    assert(value != null);
     if (value == _position) {
       return;
     }
@@ -1639,6 +1499,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
+      _innerNode = null;
       super.assembleSemanticsNode(node, config, children);
       return;
     }
@@ -1671,256 +1532,6 @@ class _RenderScrollSemantics extends RenderProxyBox {
   void clearSemantics() {
     super.clearSemantics();
     _innerNode = null;
-  }
-}
-
-/// A typedef for a function that can calculate the offset for a type of scroll
-/// increment given a [ScrollIncrementDetails].
-///
-/// This function is used as the type for [Scrollable.incrementCalculator],
-/// which is called from a [ScrollAction].
-typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
-
-/// Describes the type of scroll increment that will be performed by a
-/// [ScrollAction] on a [Scrollable].
-///
-/// This is used to configure a [ScrollIncrementDetails] object to pass to a
-/// [ScrollIncrementCalculator] function on a [Scrollable].
-///
-/// {@template flutter.widgets.ScrollIncrementType.intent}
-/// This indicates the *intent* of the scroll, not necessarily the size. Not all
-/// scrollable areas will have the concept of a "line" or "page", but they can
-/// respond to the different standard key bindings that cause scrolling, which
-/// are bound to keys that people use to indicate a "line" scroll (e.g.
-/// control-arrowDown keys) or a "page" scroll (e.g. pageDown key). It is
-/// recommended that at least the relative magnitudes of the scrolls match
-/// expectations.
-/// {@endtemplate}
-enum ScrollIncrementType {
-  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
-  /// distance it should move when the user requests to scroll by a "line".
-  ///
-  /// The distance a "line" scrolls refers to what should happen when the key
-  /// binding for "scroll down/up by a line" is triggered. It's up to the
-  /// [ScrollIncrementCalculator] function to decide what that means for a
-  /// particular scrollable.
-  line,
-
-  /// Indicates that the [ScrollIncrementCalculator] should return the scroll
-  /// distance it should move when the user requests to scroll by a "page".
-  ///
-  /// The distance a "page" scrolls refers to what should happen when the key
-  /// binding for "scroll down/up by a page" is triggered. It's up to the
-  /// [ScrollIncrementCalculator] function to decide what that means for a
-  /// particular scrollable.
-  page,
-}
-
-/// A details object that describes the type of scroll increment being requested
-/// of a [ScrollIncrementCalculator] function, as well as the current metrics
-/// for the scrollable.
-class ScrollIncrementDetails {
-  /// A const constructor for a [ScrollIncrementDetails].
-  ///
-  /// All of the arguments must not be null, and are required.
-  const ScrollIncrementDetails({
-    required this.type,
-    required this.metrics,
-  })  : assert(type != null),
-        assert(metrics != null);
-
-  /// The type of scroll this is (e.g. line, page, etc.).
-  ///
-  /// {@macro flutter.widgets.ScrollIncrementType.intent}
-  final ScrollIncrementType type;
-
-  /// The current metrics of the scrollable that is being scrolled.
-  final ScrollMetrics metrics;
-}
-
-/// An [Intent] that represents scrolling the nearest scrollable by an amount
-/// appropriate for the [type] specified.
-///
-/// The actual amount of the scroll is determined by the
-/// [Scrollable.incrementCalculator], or by its defaults if that is not
-/// specified.
-class ScrollIntent extends Intent {
-  /// Creates a const [ScrollIntent] that requests scrolling in the given
-  /// [direction], with the given [type].
-  const ScrollIntent({
-    required this.direction,
-    this.type = ScrollIncrementType.line,
-  })  : assert(direction != null),
-        assert(type != null);
-
-  /// The direction in which to scroll the scrollable containing the focused
-  /// widget.
-  final AxisDirection direction;
-
-  /// The type of scrolling that is intended.
-  final ScrollIncrementType type;
-}
-
-/// An [Action] that scrolls the [Scrollable] that encloses the current
-/// [primaryFocus] by the amount configured in the [ScrollIntent] given to it.
-///
-/// If a Scrollable cannot be found above the current [primaryFocus], the
-/// [PrimaryScrollController] will be considered for default handling of
-/// [ScrollAction]s.
-///
-/// If [Scrollable.incrementCalculator] is null for the scrollable, the default
-/// for a [ScrollIntent.type] set to [ScrollIncrementType.page] is 80% of the
-/// size of the scroll window, and for [ScrollIncrementType.line], 50 logical
-/// pixels.
-class ScrollAction extends Action<ScrollIntent> {
-  @override
-  bool isEnabled(ScrollIntent intent) {
-    final FocusNode? focus = primaryFocus;
-    final bool contextIsValid = focus != null && focus.context != null;
-    if (contextIsValid) {
-      // Check for primary scrollable within the current context
-      if (Scrollable.maybeOf(focus.context!) != null) {
-        return true;
-      }
-      // Check for fallback scrollable with context from PrimaryScrollController
-      final ScrollController? primaryScrollController = PrimaryScrollController.maybeOf(focus.context!);
-      return primaryScrollController != null && primaryScrollController.hasClients;
-    }
-    return false;
-  }
-
-  /// Returns the scroll increment for a single scroll request, for use when
-  /// scrolling using a hardware keyboard.
-  ///
-  /// Must not be called when the position is null, or when any of the position
-  /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  /// null. The type and state arguments must not be null, and the widget must
-  /// have already been laid out so that the position fields are valid.
-  static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
-    assert(type != null);
-    assert(state.position != null);
-    assert(state.position.hasPixels);
-    assert(state.position.viewportDimension != null);
-    assert(state.position.maxScrollExtent != null);
-    assert(state.position.minScrollExtent != null);
-    assert(state._physics == null || state._physics!.shouldAcceptUserOffset(state.position));
-    if (state.widget.incrementCalculator != null) {
-      return state.widget.incrementCalculator!(
-        ScrollIncrementDetails(
-          type: type,
-          metrics: state.position,
-        ),
-      );
-    }
-    switch (type) {
-      case ScrollIncrementType.line:
-        return 50.0;
-      case ScrollIncrementType.page:
-        return 0.8 * state.position.viewportDimension;
-    }
-  }
-
-  /// Find out how much of an increment to move by, taking the different
-  /// directions into account.
-  static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = _calculateScrollIncrement(state, type: intent.type);
-    switch (intent.direction) {
-      case AxisDirection.down:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return -increment;
-          case AxisDirection.down:
-            return increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.up:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return increment;
-          case AxisDirection.down:
-            return -increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.left:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return -increment;
-          case AxisDirection.left:
-            return increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
-      case AxisDirection.right:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return increment;
-          case AxisDirection.left:
-            return -increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
-    }
-  }
-
-  @override
-  void invoke(ScrollIntent intent) {
-    ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
-    if (state == null) {
-      final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);
-      assert (() {
-        if (primaryScrollController.positions.length != 1) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary(
-              'A ScrollAction was invoked with the PrimaryScrollController, but '
-              'more than one ScrollPosition is attached.',
-            ),
-            ErrorDescription(
-              'Only one ScrollPosition can be manipulated by a ScrollAction at '
-              'a time.',
-            ),
-            ErrorHint(
-              'The PrimaryScrollController can be inherited automatically by '
-              'descendant ScrollViews based on the TargetPlatform and scroll '
-              'direction. By default, the PrimaryScrollController is '
-              'automatically inherited on mobile platforms for vertical '
-              'ScrollViews. ScrollView.primary can also override this behavior.',
-            ),
-          ]);
-        }
-        return true;
-      }());
-
-      if (primaryScrollController.position.context.notificationContext == null
-          && Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!) == null) {
-        return;
-      }
-      state = Scrollable.maybeOf(primaryScrollController.position.context.notificationContext!);
-    }
-    assert(state != null, '$ScrollAction was invoked on a context that has no scrollable parent');
-    assert(state!.position.hasPixels, 'Scrollable must be laid out before it can be scrolled via a ScrollAction');
-    assert(state!.position.viewportDimension != null);
-    assert(state!.position.maxScrollExtent != null);
-    assert(state!.position.minScrollExtent != null);
-
-    // Don't do anything if the user isn't allowed to scroll.
-    if (state!._physics != null && !state._physics!.shouldAcceptUserOffset(state.position)) {
-      return;
-    }
-    final double increment = getDirectionalIncrement(state, intent);
-    if (increment == 0.0) {
-      return;
-    }
-    state.position.moveTo(
-      state.position.pixels + increment,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeInOut,
-    );
   }
 }
 

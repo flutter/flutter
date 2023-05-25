@@ -174,7 +174,6 @@ class WebFlutterDriver extends FlutterDriver {
       driverLog('WebFlutterDriver', message);
     }
     if (_logCommunicationToFile) {
-      assert(_logFilePathName != null);
       final File file = fs.file(_logFilePathName);
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${DateTime.now()} $message\n', mode: FileMode.append, flush: true);
@@ -274,11 +273,12 @@ class FlutterWebConnection {
     final String sessionId = settings['session-id'].toString();
     final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
     final async_io.WebDriver driver = async_io.WebDriver(
-        sessionUri,
-        sessionId,
-        json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
-        async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
-        _convertToSpec(settings['session-spec'].toString().toLowerCase()));
+      sessionUri,
+      sessionId,
+      json.decode(settings['session-capabilities'] as String) as Map<String, dynamic>,
+      async_io.AsyncIoRequestClient(sessionUri.resolve('session/$sessionId/')),
+      async_io.WebDriverSpec.W3c,
+    );
     if (settings['android-chrome-on-emulator'] == true) {
       final Uri localUri = Uri.parse(url);
       // Converts to Android Emulator Uri.
@@ -361,15 +361,4 @@ Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? ti
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
-}
-
-async_io.WebDriverSpec _convertToSpec(String specString) {
-  switch (specString.toLowerCase()) {
-    case 'webdriverspec.w3c':
-      return async_io.WebDriverSpec.W3c;
-    case 'webdriverspec.jsonwire':
-      return async_io.WebDriverSpec.JsonWire;
-    default:
-      return async_io.WebDriverSpec.Auto;
-  }
 }

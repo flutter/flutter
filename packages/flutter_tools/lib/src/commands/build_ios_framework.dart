@@ -109,13 +109,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   Future<List<BuildInfo>> getBuildInfos() async {
     final List<BuildInfo> buildInfos = <BuildInfo>[];
 
-    if (boolArgDeprecated('debug')) {
+    if (boolArg('debug')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
     }
-    if (boolArgDeprecated('profile')) {
+    if (boolArg('profile')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
     }
-    if (boolArgDeprecated('release')) {
+    if (boolArg('release')) {
       buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
     }
 
@@ -216,14 +216,14 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   Future<void> validateCommand() async {
     await super.validateCommand();
 
-    if (boolArgDeprecated('universal')) {
+    if (boolArg('universal')) {
       throwToolExit('--universal has been deprecated, only XCFrameworks are supported.');
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String outputArgument = stringArgDeprecated('output')
+    final String outputArgument = stringArg('output')
         ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
@@ -247,8 +247,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         modeDirectory.deleteSync(recursive: true);
       }
 
-      if (boolArgDeprecated('cocoapods')) {
-        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArgDeprecated('force'));
+      if (boolArg('cocoapods')) {
+        produceFlutterPodspec(buildInfo.mode, modeDirectory, force: boolArg('force'));
       } else {
         // Copy Flutter.xcframework.
         await _produceFlutterFramework(buildInfo, modeDirectory);
@@ -496,7 +496,7 @@ end
         'SYMROOT=${iPhoneBuildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static') ?? false)
+        if (boolArg('static'))
           'MACH_O_TYPE=staticlib',
       ];
 
@@ -522,7 +522,7 @@ end
         'SYMROOT=${simulatorBuildOutput.path}',
         'ONLY_ACTIVE_ARCH=NO', // No device targeted, so build all valid architectures.
         'BUILD_LIBRARY_FOR_DISTRIBUTION=YES',
-        if (boolArg('static') ?? false)
+        if (boolArg('static'))
           'MACH_O_TYPE=staticlib',
       ];
 

@@ -59,6 +59,17 @@ TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
   ).run;
 }
 
+TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool enableImpeller = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_non_intersecting.dart',
+    'platform_views_scroll_perf_non_intersecting',
+    testDriver: 'test_driver/scroll_perf_non_intersecting_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
 TaskFunction createAndroidTextureScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
@@ -609,6 +620,19 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createAnimatedBlurBackropFilterPerfTest({
+  bool enableImpeller = false,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_blur_backdrop_filter_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool enableImpeller = false,
 }) {
@@ -674,7 +698,6 @@ class StartupTest {
             '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm:
           await flutter('build', options: <String>[
             'apk',
@@ -684,7 +707,6 @@ class StartupTest {
             '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm64:
           await flutter('build', options: <String>[
             'apk',
@@ -694,9 +716,9 @@ class StartupTest {
             '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
           break;
         case DeviceOperatingSystem.ios:
         case DeviceOperatingSystem.macos:
@@ -708,7 +730,6 @@ class StartupTest {
           ]);
           final String buildRoot = path.join(testDirectory, 'build');
           applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
-          break;
         case DeviceOperatingSystem.windows:
           await flutter('build', options: <String>[
             'windows',
@@ -725,7 +746,6 @@ class StartupTest {
             'Profile',
             '$basename.exe'
           );
-          break;
       }
 
       const int maxFailures = 3;
@@ -812,7 +832,6 @@ class DevtoolsStartupTest {
             '--target-platform=android-arm,android-arm64',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm:
           await flutter('build', options: <String>[
             'apk',
@@ -821,7 +840,6 @@ class DevtoolsStartupTest {
             '--target-platform=android-arm',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm64:
           await flutter('build', options: <String>[
             'apk',
@@ -830,7 +848,6 @@ class DevtoolsStartupTest {
             '--target-platform=android-arm64',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.ios:
           await flutter('build', options: <String>[
             'ios',
@@ -838,25 +855,27 @@ class DevtoolsStartupTest {
             '--profile',
           ]);
           applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
-          break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
+        case DeviceOperatingSystem.linux:
         case DeviceOperatingSystem.macos:
         case DeviceOperatingSystem.windows:
           break;
       }
 
-      final Process process = await startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+      final Process process = await startFlutter(
         'run',
-        '--no-android-gradle-daemon',
-        '--no-publish-port',
-        '--verbose',
-        '--profile',
-        '-d',
-        device.deviceId,
-        if (applicationBinaryPath != null)
-          '--use-application-binary=$applicationBinaryPath',
-       ]);
+        options: <String>[
+          '--no-android-gradle-daemon',
+          '--no-publish-port',
+          '--verbose',
+          '--profile',
+          '-d',
+          device.deviceId,
+          if (applicationBinaryPath != null)
+            '--use-application-binary=$applicationBinaryPath',
+       ],
+      );
       final Completer<void> completer = Completer<void>();
       bool sawLine = false;
       process.stdout
@@ -1173,6 +1192,7 @@ class WebCompileTest {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
+      await flutter('clean');
       await flutter('packages', options: <String>['get']);
       final Stopwatch? watch = measureBuildTime ? Stopwatch() : null;
       watch?.start();
@@ -1181,6 +1201,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
+        '--no-web-resources-cdn',
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');
@@ -1368,7 +1389,6 @@ class CompileTest {
           );
           metrics.addAll(sizeMetrics);
         }
-        break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
@@ -1384,7 +1404,6 @@ class CompileTest {
         if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromApk(apkPath));
         }
-        break;
       case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
@@ -1399,11 +1418,12 @@ class CompileTest {
         if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromApk(apkPath));
         }
-        break;
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.linux:
+        throw Exception('Unsupported option for Linux devices');
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
@@ -1425,7 +1445,6 @@ class CompileTest {
         // rather a directory containing an .exe and .dll files.
         // The release size is set to the size of the produced .exe file
         releaseSizeInBytes = exe.lengthSync();
-        break;
     }
 
     metrics.addAll(<String, dynamic>{
@@ -1453,28 +1472,25 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
-        break;
       case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
-        break;
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
         throw Exception('Unsupported option for Fuchsia devices');
+      case DeviceOperatingSystem.linux:
+        throw Exception('Unsupported option for Linux devices');
       case DeviceOperatingSystem.macos:
         unawaited(stderr.flush());
         options.insert(0, 'macos');
-        break;
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
-        break;
     }
     watch.start();
     await flutter('build', options: options);
@@ -1502,7 +1518,6 @@ class CompileTest {
           'Flutter.framework',
           'Flutter',
         ));
-        break;
       case DeviceOperatingSystem.macos:
         frameworkDirectory = path.join(
           appPath,
@@ -1514,12 +1529,12 @@ class CompileTest {
           'FlutterMacOS.framework',
           'FlutterMacOS',
         )); // https://github.com/flutter/flutter/issues/70413
-        break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
       case DeviceOperatingSystem.androidArm64:
       case DeviceOperatingSystem.fake:
       case DeviceOperatingSystem.fuchsia:
+      case DeviceOperatingSystem.linux:
       case DeviceOperatingSystem.windows:
         throw Exception('Called ${CompileTest.getSizesFromDarwinApp} with $operatingSystem.');
     }
@@ -1868,10 +1883,7 @@ class _UnzipListEntry {
     required this.uncompressedSize,
     required this.compressedSize,
     required this.path,
-  }) : assert(uncompressedSize != null),
-       assert(compressedSize != null),
-       assert(compressedSize <= uncompressedSize),
-       assert(path != null);
+  }) : assert(compressedSize <= uncompressedSize);
 
   final int uncompressedSize;
   final int compressedSize;

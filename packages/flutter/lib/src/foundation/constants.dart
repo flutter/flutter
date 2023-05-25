@@ -69,6 +69,3 @@ const double precisionErrorTolerance = 1e-10;
 
 /// A constant that is true if the application was compiled to run on the web.
 const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
-
-/// A constant that is true if the application is using canvasKit
-const bool isCanvasKit = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');

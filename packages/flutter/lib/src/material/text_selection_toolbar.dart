@@ -15,8 +15,11 @@ import 'material.dart';
 import 'material_localizations.dart';
 
 const double _kToolbarHeight = 44.0;
+<<<<<<< HEAD
 
 // Padding between the toolbar and the anchor.
+=======
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
 const double _kToolbarContentDistance = 8.0;
 
 /// A fully-functional Material-style text selection toolbar.
@@ -79,6 +82,14 @@ class TextSelectionToolbar extends StatelessWidget {
   final ToolbarBuilder toolbarBuilder;
 
   /// The size of the text selection handles.
+<<<<<<< HEAD
+=======
+  ///
+  /// See also:
+  ///
+  ///  * [SpellCheckSuggestionsToolbar], which references this value to calculate
+  ///    the padding between the toolbar and anchor.
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
   static const double kHandleSize = 22.0;
 
   /// Padding between the toolbar and the anchor.
@@ -100,7 +111,11 @@ class TextSelectionToolbar extends StatelessWidget {
         anchorBelow + const Offset(0.0, kToolbarContentDistanceBelow);
 
     const double screenPadding = CupertinoTextSelectionToolbar.kToolbarScreenPadding;
+<<<<<<< HEAD
     final double paddingAbove = MediaQuery.of(context).padding.top
+=======
+    final double paddingAbove = MediaQuery.paddingOf(context).top
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
         + screenPadding;
     final double availableHeight = anchorAbovePadded.dy - _kToolbarContentDistance - paddingAbove;
     final bool fitsAbove = _kToolbarHeight <= availableHeight;
@@ -238,8 +253,7 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
     required Widget super.child,
     required this.overflowOpen,
     required this.textDirection,
-  }) : assert(child != null),
-       assert(overflowOpen != null);
+  });
 
   final bool overflowOpen;
   final TextDirection textDirection;
@@ -363,13 +377,11 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 // Renders the menu items in the correct positions in the menu and its overflow
 // submenu based on calculating which item would first overflow.
 class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
-  _TextSelectionToolbarItemsLayout({
+  const _TextSelectionToolbarItemsLayout({
     required this.isAbove,
     required this.overflowOpen,
     required super.children,
-  }) : assert(children != null),
-       assert(isAbove != null),
-       assert(overflowOpen != null);
+  });
 
   final bool isAbove;
   final bool overflowOpen;
@@ -412,9 +424,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   _RenderTextSelectionToolbarItemsLayout({
     required bool isAbove,
     required bool overflowOpen,
-  }) : assert(overflowOpen != null),
-       assert(isAbove != null),
-       _isAbove = isAbove,
+  }) : _isAbove = isAbove,
        _overflowOpen = overflowOpen,
        super();
 

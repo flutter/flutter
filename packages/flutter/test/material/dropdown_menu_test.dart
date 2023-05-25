@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -125,7 +128,7 @@ void main() {
 
     final Finder textField = find.byType(TextField);
     final Size anchorSize = tester.getSize(textField);
-    expect(anchorSize, const Size(180.0, 54.0));
+    expect(anchorSize, const Size(180.0, 56.0));
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -143,7 +146,7 @@ void main() {
 
     final Finder anchor = find.byType(TextField);
     final Size size = tester.getSize(anchor);
-    expect(size, const Size(200.0, 54.0));
+    expect(size, const Size(200.0, 56.0));
 
     await tester.tap(anchor);
     await tester.pumpAndSettle();
@@ -428,7 +431,7 @@ void main() {
     expect(menuMaterial, findsOneWidget);
   });
 
-  testWidgets('Down key can highlight the menu item', (WidgetTester tester) async {
+  testWidgets('Down key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -468,9 +471,9 @@ void main() {
     );
     item0material = tester.widget<Material>(button0Material);
     expect(item0material.color, Colors.transparent); // the previous item should not be highlighted.
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Up key can highlight the menu item', (WidgetTester tester) async {
+  testWidgets('Up key can highlight the menu item on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -510,9 +513,10 @@ void main() {
 
     item5material = tester.widget<Material>(button5Material);
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('The text input should match the label of the menu item while pressing down key', (WidgetTester tester) async {
+  testWidgets('The text input should match the label of the menu item '
+      'while pressing down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -540,9 +544,10 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 2'), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('The text input should match the label of the menu item while pressing up key', (WidgetTester tester) async {
+  testWidgets('The text input should match the label of the menu item '
+      'while pressing up key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -570,9 +575,9 @@ void main() {
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(find.widgetWithText(TextField, 'Item 3'), findsOneWidget);
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Disabled button will be skipped while pressing up/down key', (WidgetTester tester) async {
+  testWidgets('Disabled button will be skipped while pressing up/down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     final List<DropdownMenuEntry<TestMenu>> menuWithDisabledItems = <DropdownMenuEntry<TestMenu>>[
       const DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Item 0'),
@@ -614,9 +619,32 @@ void main() {
     );
     final Material item3Material = tester.widget<Material>(button3Material);
     expect(item3Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Searching is enabled by default', (WidgetTester tester) async {
+  testWidgets('Searching is enabled by default on mobile platforms if initialSelection is non null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          initialSelection: TestMenu.mainMenu1,
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    final Finder buttonMaterial = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'Menu 1').last,
+      matching: find.byType(Material),
+    );
+    final Material itemMaterial = tester.widget<Material>(buttonMaterial);
+    expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('Searching is enabled by default on desktop platform', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -638,9 +666,9 @@ void main() {
     );
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12)); // Menu 1 button is highlighted.
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Highlight can move up/down from the searching result', (WidgetTester tester) async {
+  testWidgets('Highlight can move up/down starting from the searching result on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
@@ -684,7 +712,7 @@ void main() {
     );
     final Material item5Material = tester.widget<Material>(button5Material);
     expect(item5Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
-  });
+  }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Filtering is disabled by default', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -692,6 +720,7 @@ void main() {
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           dropdownMenuEntries: menuChildren,
         ),
       ),
@@ -715,6 +744,7 @@ void main() {
       theme: themeData,
       home: Scaffold(
         body: DropdownMenu<TestMenu>(
+          requestFocusOnTap: true,
           enableFilter: true,
           dropdownMenuEntries: menuChildren,
         ),
@@ -748,6 +778,7 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return Scaffold(
             body: DropdownMenu<TestMenu>(
+              requestFocusOnTap: true,
               enableFilter: true,
               dropdownMenuEntries: menuChildren,
               controller: controller,
@@ -804,29 +835,45 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
+    late final bool isMobile;
+    switch (themeData.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        isMobile = true;
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        isMobile = false;
+    }
+    int expectedCount = isMobile ? 0 : 1;
+
     // Test onSelected on key press
     await simulateKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(selectionCount, 1);
+    expect(selectionCount, expectedCount);
+    // The desktop platform closed the menu when a completion action is pressed. So we need to reopen it.
+    if (!isMobile) {
+      await tester.tap(find.byType(DropdownMenu<TestMenu>));
+      await tester.pump();
+    }
 
     // Disabled item doesn't trigger onSelected callback.
-    await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    await tester.pump();
     final Finder item1 = find.widgetWithText(MenuItemButton, 'Item 1').last;
     await tester.tap(item1);
     await tester.pumpAndSettle();
 
-    expect(controller.text, 'Item 0');
-    expect(selectionCount, 1);
+    expect(controller.text, isMobile ? '' : 'Item 0');
+    expect(selectionCount, expectedCount);
 
     final Finder item2 = find.widgetWithText(MenuItemButton, 'Item 2').last;
     await tester.tap(item2);
     await tester.pumpAndSettle();
 
     expect(controller.text, 'Item 2');
-    expect(selectionCount, 2);
+    expect(selectionCount, ++expectedCount);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
@@ -835,18 +882,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.text, 'Item 3');
-    expect(selectionCount, 3);
+    expect(selectionCount, ++expectedCount);
 
-    // When typing something in the text field without selecting any of the options,
+    // On desktop platforms, when typing something in the text field without selecting any of the options,
     // the onSelected should not be called.
-    await tester.enterText(find.byType(TextField).first, 'New Item');
-    expect(controller.text, 'New Item');
-    expect(selectionCount, 3);
-    expect(find.widgetWithText(TextField, 'New Item'), findsOneWidget);
-    await tester.enterText(find.byType(TextField).first, '');
-    expect(selectionCount, 3);
-    expect(controller.text.isEmpty, true);
-  });
+    if (!isMobile) {
+      await tester.enterText(find.byType(TextField).first, 'New Item');
+      expect(controller.text, 'New Item');
+      expect(selectionCount, expectedCount);
+      expect(find.widgetWithText(TextField, 'New Item'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, '');
+      expect(selectionCount, expectedCount);
+      expect(controller.text.isEmpty, true);
+    }
+  }, variant: TargetPlatformVariant.all());
 
 
   testWidgets('The selectedValue gives an initial text and highlights the according item', (WidgetTester tester) async {
@@ -881,6 +930,302 @@ void main() {
     // Validate the item 3 is highlighted.
     final Material itemMaterial = tester.widget<Material>(buttonMaterial);
     expect(itemMaterial.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+  });
+
+  testWidgets('The default text input field should not be focused on mobile platforms '
+      'when it is tapped', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+
+    Widget buildDropdownMenu() => MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Test default condition.
+    await tester.pumpWidget(buildDropdownMenu());
+    await tester.pump();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField result = tester.widget<TextField>(textFieldFinder);
+    expect(result.canRequestFocus, false);
+  }, variant: TargetPlatformVariant.mobile());
+
+  testWidgets('The text input field should be focused on desktop platforms '
+      'when it is tapped', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+
+    Widget buildDropdownMenu() => MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildDropdownMenu());
+    await tester.pump();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField result = tester.widget<TextField>(textFieldFinder);
+    expect(result.canRequestFocus, true);
+  }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('If requestFocusOnTap is true, the text input field can request focus, '
+    'otherwise it cannot request focus', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+
+    Widget buildDropdownMenu({required bool requestFocusOnTap}) => MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              requestFocusOnTap: requestFocusOnTap,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Set requestFocusOnTap to true.
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: true));
+    await tester.pump();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, true);
+    // Open the dropdown menu.
+    await tester.tap(textFieldFinder);
+    await tester.pump();
+    // Make a selection.
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    await tester.pump();
+    expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
+
+    // Set requestFocusOnTap to false.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: false));
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder1 = find.byType(TextField);
+    final TextField textField1 = tester.widget<TextField>(textFieldFinder1);
+    expect(textField1.canRequestFocus, false);
+    // Open the dropdown menu.
+    await tester.tap(textFieldFinder1);
+    await tester.pump();
+    // Make a selection.
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 0').last);
+    await tester.pump();
+    expect(find.widgetWithText(TextField, 'Item 0'), findsOneWidget);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('If requestFocusOnTap is false, the mouse cursor should be clickable when hovered', (WidgetTester tester) async {
+    Widget buildDropdownMenu() => MaterialApp(
+      home: Scaffold(
+        body: Column(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              requestFocusOnTap: false,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildDropdownMenu());
+    await tester.pumpAndSettle();
+
+    final Finder textFieldFinder = find.byType(TextField);
+    final TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, false);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('The menu has the same width as the input field in ListView', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/123631
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Rect textInput = tester.getRect(find.byType(TextField));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final Finder findMenu = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString() == '_MenuPanel';
+    });
+    final Rect menu = tester.getRect(findMenu);
+    expect(textInput.width, menu.width);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: ListView(
+          children: <Widget>[
+            DropdownMenu<TestMenu>(
+              width: 200,
+              dropdownMenuEntries: menuChildren,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Rect textInput1 = tester.getRect(find.byType(TextField));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final Finder findMenu1 = find.byWidgetPredicate((Widget widget) {
+      return widget.runtimeType.toString() == '_MenuPanel';
+    });
+    final Rect menu1 = tester.getRect(findMenu1);
+    expect(textInput1.width, 200);
+    expect(menu1.width, 200);
+  });
+
+  testWidgets('Semantics does not include hint when input is not empty', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String hintText = 'I am hintText';
+    TestMenu? selectedValue;
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) => MaterialApp(
+          theme: themeData,
+          home: Scaffold(
+            body: Center(
+              child: DropdownMenu<TestMenu>(
+                requestFocusOnTap: true,
+                dropdownMenuEntries: menuChildren,
+                hintText: hintText,
+                onSelected: (TestMenu? value) {
+                  setState(() {
+                    selectedValue = value;
+                  });
+                },
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final SemanticsNode node = tester.getSemantics(find.text(hintText));
+
+    expect(selectedValue?.label, null);
+    expect(node.label, hintText);
+    expect(node.value, '');
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, 'Item 3').last);
+    await tester.pumpAndSettle();
+    expect(selectedValue?.label, 'Item 3');
+    expect(node.label, '');
+    expect(node.value, 'Item 3');
+  });
+
+  testWidgets('helperText is not visible when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame(bool hasError) {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+              errorText: hasError ? errorText : null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    expect(find.text(helperText), findsOneWidget);
+    expect(find.text(errorText), findsNothing);
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(find.text(helperText), findsNothing);
+    expect(find.text(errorText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect helperText when helperText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String helperText = 'I am helperText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              helperText: helperText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(helperText), findsOneWidget);
+  });
+
+  testWidgets('DropdownMenu can respect errorText when errorText is not null', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    const String errorText = 'I am errorText';
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: themeData,
+        home: Scaffold(
+          body: Center(
+            child: DropdownMenu<TestMenu>(
+              dropdownMenuEntries: menuChildren,
+              errorText: errorText,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text(errorText), findsOneWidget);
   });
 }
 

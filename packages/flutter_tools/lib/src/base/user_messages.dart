@@ -176,10 +176,10 @@ class UserMessages {
       'Launch Xcode and install additional required components when prompted or run:\n'
       '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
-      'Xcode not installed; this is necessary for iOS development.\n'
+      'Xcode not installed; this is necessary for iOS and macOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
   String get xcodeIncomplete =>
-      'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
+      'Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.\n'
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
@@ -265,16 +265,15 @@ class UserMessages {
       'for information about installing additional components.';
   String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
       "matching '$deviceId'.";
-  String get flutterNoDevicesFound => 'No devices found';
+  String get flutterNoDevicesFound => 'No devices found.';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>
       'If you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
   String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
   String flutterFoundSpecifiedDevices(int count, String deviceId) =>
       'Found $count devices with name or id matching $deviceId:';
-  String get flutterMultipleDevicesFound => 'Multiple devices found:';
   String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one (To quit, press "q/Q")';
+  String get flutterChooseOne => 'Please choose one (or "q" to quit)';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
@@ -310,10 +309,12 @@ class UserMessages {
       'Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
       "Please ensure that $engineSourcePath is a Flutter engine 'src' directory and that "
       "you have compiled the engine in that directory, which should produce an 'out' directory";
-  String get runnerLocalEngineRequired =>
-      'You must specify --local-engine if you are using a locally built engine.';
+  String get runnerLocalEngineOrWebSdkRequired =>
+      'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
   String runnerNoEngineBuild(String engineBuildPath) =>
       'No Flutter engine build found at $engineBuildPath.';
+  String runnerNoWebSdk(String webSdkPath) =>
+      'No Flutter web sdk found at $webSdkPath.';
   String runnerWrongFlutterInstance(String flutterRoot, String currentDir) =>
       "Warning: the 'flutter' tool you are currently running is not the one from the current directory:\n"
       '  running Flutter  : $flutterRoot\n'

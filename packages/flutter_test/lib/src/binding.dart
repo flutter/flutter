@@ -99,7 +99,7 @@ mixin TestDefaultBinaryMessengerBinding on BindingBase, ServicesBinding {
   }
 
   /// The current [TestDefaultBinaryMessengerBinding], if one has been created.
-  static TestDefaultBinaryMessengerBinding? get instance => _instance;
+  static TestDefaultBinaryMessengerBinding get instance => BindingBase.checkInstance(_instance);
   static TestDefaultBinaryMessengerBinding? _instance;
 
   @override
@@ -182,17 +182,44 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
-  TestWidgetsFlutterBinding() : _window = TestWindow(window: ui.window) {
+  TestWidgetsFlutterBinding() : platformDispatcher = TestPlatformDispatcher(
+    platformDispatcher: PlatformDispatcher.instance,
+  ) {
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;
   }
 
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// This represents a combination of a [TestPlatformDispatcher] and a singular
+  /// [TestFlutterView]. Platform-specific test values can be set through
+  /// [WidgetTester.platformDispatcher] instead. When testing individual widgets
+  /// or applications using [WidgetTester.pumpWidget], view-specific test values
+  /// can be set through [WidgetTester.view]. If multiple views are defined, the
+  /// appropriate view can be found using [WidgetTester.viewOf] if a sub-view
+  /// is needed.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetTester.platformDispatcher] for changing platform-specific values
+  ///   for testing.
+  /// * [WidgetTester.view] and [WidgetTester.viewOf] for changing view-specific
+  ///   values for testing.
+  /// * [BindingBase.window] for guidance dealing with this property outside of
+  ///   a testing context.
+  @Deprecated(
+    'Use WidgetTester.platformDispatcher or WidgetTester.view instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.9.0-0.1.pre.'
+  )
   @override
-  TestWindow get window => _window;
-  final TestWindow _window;
+  late final TestWindow window;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _window.platformDispatcher;
+  final TestPlatformDispatcher platformDispatcher;
 
   @override
   TestRestorationManager get restorationManager {
@@ -346,6 +373,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
+    // This is intialized here because it's needed for the `super.initInstances`
+    // call. It can't be handled as a ctor initializer because it's dependent
+    // on `platformDispatcher`. It can't be handled in the ctor itself because
+    // the base class ctor is called first and calls `initInstances`.
+    window = TestWindow.fromPlatformDispatcher(platformDispatcher: platformDispatcher);
+
     super.initInstances();
     _instance = this;
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
@@ -360,6 +393,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
+  }
+
+  @override
+  bool debugCheckZone(String entryPoint) {
+    // We skip all the zone checks in tests because the test framework makes heavy use
+    // of zones and so the zones never quite match the way the framework expects.
+    return true;
   }
 
   /// Whether there is currently a test executing.
@@ -465,6 +505,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// then flushes microtasks.
   ///
   /// Set to null to use the default surface size.
+  ///
+  /// To avoid affecting other tests by leaking state, a test that
+  /// uses this method should always reset the surface size to the default.
+  /// For example, using `addTearDown`:
+  /// ```dart
+  ///   await binding.setSurfaceSize(someSize);
+  ///   addTearDown(() => binding.setSurfaceSize(null));
+  /// ```
+  ///
+  /// See also [TestFlutterView.physicalSize], which has a similar effect.
+  // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
@@ -478,8 +529,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   ViewConfiguration createViewConfiguration() {
-    final double devicePixelRatio = window.devicePixelRatio;
-    final Size size = _surfaceSize ?? window.physicalSize / devicePixelRatio;
+    final FlutterView view = platformDispatcher.implicitView!;
+    final double devicePixelRatio = view.devicePixelRatio;
+    final Size size = _surfaceSize ?? view.physicalSize / devicePixelRatio;
     return ViewConfiguration(
       size: size,
       devicePixelRatio: devicePixelRatio,
@@ -772,14 +824,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     VoidCallback invariantTester,
     String description,
   ) {
-    assert(description != null);
     assert(inTest);
 
     // Set the handler only if there is currently none.
-    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null)) {
       _announcementHandler = _handleAnnouncementMessage;
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, _announcementHandler);
     }
@@ -808,9 +859,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     FlutterError.demangleStackTrace = (StackTrace stack) {
       // package:stack_trace uses ZoneSpecification.errorCallback to add useful
-      // information to stack traces, in this case the Trace and Chain classes
-      // can be present. Because these StackTrace implementations do not follow
-      // the format the framework expects, we covert them to a vm trace here.
+      // information to stack traces, meaning Trace and Chain classes can be
+      // present. Because these StackTrace implementations do not follow the
+      // format the framework expects, we convert them to a vm trace here.
       if (stack is stack_trace.Trace) {
         return stack.vmTrace;
       }
@@ -868,7 +919,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // directly called again.
       DiagnosticsNode treeDump;
       try {
-        treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
+        treeDump = rootElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
         // We try to stringify the tree dump here (though we immediately discard the result) because
         // we want to make sure that if it can't be serialised, we replace it with a message that
         // says the tree could not be serialised. Otherwise, the real exception might get obscured
@@ -1068,10 +1119,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _parentZone = null;
     buildOwner!.focusManager.dispose();
 
-    if (TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(
             SystemChannels.accessibility.name, _announcementHandler)) {
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
       _announcementHandler = null;
     }
@@ -1194,7 +1245,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<T> Function() callback, {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
-    assert(additionalTime != null);
     assert(() {
       if (_pendingAsyncTasks == null) {
         return true;
@@ -1333,9 +1383,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(inTest);
     try {
       debugBuildingDirtyElements = true;
-      buildOwner!.buildScope(renderViewElement!);
+      buildOwner!.buildScope(rootElement!);
       if (_phase != EnginePhase.build) {
-        assert(renderView != null);
         pipelineOwner.flushLayout();
         if (_phase != EnginePhase.layout) {
           pipelineOwner.flushCompositingBits();
@@ -1383,7 +1432,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     )
     Duration? timeout,
   }) {
-    assert(description != null);
     assert(!inTest);
     assert(_currentFakeAsync == null);
     assert(_clock == null);
@@ -1727,7 +1775,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: window,
+      view: platformDispatcher.implicitView!,
     );
     renderView.prepareInitialFrame();
   }
@@ -1777,7 +1825,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           _handleViewNeedsPaint();
         }
         super.handlePointerEvent(event);
-        break;
       case TestBindingEventSource.device:
         if (shouldPropagateDevicePointerEvents) {
           super.handlePointerEvent(event);
@@ -1792,7 +1839,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             () => super.handlePointerEvent(localEvent)
           );
         }
-        break;
     }
   }
 
@@ -1801,7 +1847,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
         super.dispatchEvent(event, hitTestResult);
-        break;
       case TestBindingEventSource.device:
         assert(hitTestResult != null || event is PointerAddedEvent || event is PointerRemovedEvent);
         if (shouldPropagateDevicePointerEvents) {
@@ -1812,7 +1857,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         if (hitTestResult != null) {
           deviceEventDispatcher!.dispatchEvent(event, hitTestResult);
         }
-        break;
     }
   }
 
@@ -1885,7 +1929,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     )
     Duration? timeout,
   }) {
-    assert(description != null);
     assert(!inTest);
     _inTest = true;
     _liveTestRenderView._setDescription(description);
@@ -1917,9 +1960,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return TestViewConfiguration(
+    return TestViewConfiguration.fromView(
       size: _surfaceSize ?? _kDefaultTestViewportSize,
-      window: window,
+      view: platformDispatcher.implicitView!,
     );
   }
 
@@ -1943,20 +1986,31 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
 /// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
-  /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
+  /// Deprecated. Will be removed in a future version of Flutter.
   ///
-  /// If a [window] instance is not provided it defaults to [ui.window].
+  /// This property has been deprecated to prepare for Flutter's upcoming
+  /// support for multiple views and multiple windows.
+  ///
+  /// Use [TestViewConfiguration.fromView] instead.
+  @Deprecated(
+    'Use TestViewConfiguration.fromView instead. '
+    'Deprecated to prepare for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   factory TestViewConfiguration({
     Size size = _kDefaultTestViewportSize,
     ui.FlutterView? window,
   }) {
-    return TestViewConfiguration._(size, window ?? ui.window);
+    return TestViewConfiguration.fromView(size: size, view: window ?? ui.window);
   }
 
-  TestViewConfiguration._(Size size, ui.FlutterView window)
-    : _paintMatrix = _getMatrix(size, window.devicePixelRatio, window),
-      _hitTestMatrix = _getMatrix(size, 1.0, window),
-      super(size: size, devicePixelRatio: window.devicePixelRatio);
+  /// Creates a [TestViewConfiguration] with the given size and view.
+  ///
+  /// The [size] defaults to 800x600.
+  TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
+      : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
+        _hitTestMatrix = _getMatrix(size, 1.0, view),
+        super(devicePixelRatio: view.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
     final double inverseRatio = devicePixelRatio / window.devicePixelRatio;
@@ -2020,7 +2074,7 @@ class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
     required super.configuration,
     required this.onNeedPaint,
-    required super.window,
+    required super.view,
   });
 
   @override
@@ -2038,7 +2092,6 @@ class _LiveTestRenderView extends RenderView {
     fontSize: 10.0,
   );
   void _setDescription(String value) {
-    assert(value != null);
     if (value.isEmpty) {
       _label = null;
       return;
@@ -2081,7 +2134,7 @@ class _LiveTestRenderView extends RenderView {
         .where((int pointer) => _pointers[pointer]!.decay == 0)
         .toList()
         .forEach(_pointers.remove);
-      if (dirty && onNeedPaint != null) {
+      if (dirty) {
         scheduleMicrotask(onNeedPaint);
       }
     }

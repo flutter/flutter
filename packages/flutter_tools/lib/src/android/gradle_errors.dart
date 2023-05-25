@@ -11,6 +11,7 @@ import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_utils.dart';
 import 'multidex.dart';
@@ -338,7 +339,6 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
     final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
-    assert(licenseFailure != null);
     final Match? licenseMatch = licenseFailure.firstMatch(line);
     globals.printBox(
       '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
@@ -380,7 +380,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       workingDirectory: project.android.hostAppGradleRoot.path,
       environment: <String, String>{
         if (javaPath != null)
-          'JAVA_HOME': javaPath!,
+          AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
       },
     );
     // Extract build types and product flavors.
@@ -463,8 +463,8 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
     globals.printBox(
       'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
       '$textInBold\n'
-      "Note that your app won't be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n"
-      'Alternatively, try to find a version of this plugin that supports these lower versions of the Android SDK.\n'
+      'Following this change, your app will not be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n'
+      'Consider searching for a version of this plugin that supports these lower versions of the Android SDK instead.\n'
       'For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration',
       title: _boxTitle,
     );

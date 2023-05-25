@@ -159,9 +159,6 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _sliderType = _SliderType.material,
-       assert(value != null),
-       assert(min != null),
-       assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -202,9 +199,6 @@ class Slider extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
   }) : _sliderType = _SliderType.adaptive,
-       assert(value != null),
-       assert(min != null),
-       assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max,
          'Value $value is not between minimum $min and maximum $max'),
@@ -437,7 +431,7 @@ class Slider extends StatefulWidget {
   /// the slider thumb is focused, hovered, or dragged.
   ///
   /// If this property is null, [Slider] will use [activeColor] with
-  /// with an opacity of 0.12, If null, [SliderThemeData.overlayColor]
+  /// an opacity of 0.12, If null, [SliderThemeData.overlayColor]
   /// will be used.
   ///
   /// If that is also null, If [ThemeData.useMaterial3] is true,
@@ -654,28 +648,20 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         switch (textDirection) {
           case TextDirection.rtl:
             renderSlider.decreaseAction();
-            break;
           case TextDirection.ltr:
             renderSlider.increaseAction();
-            break;
         }
-        break;
       case _SliderAdjustmentType.left:
         switch (textDirection) {
           case TextDirection.rtl:
             renderSlider.increaseAction();
-            break;
           case TextDirection.ltr:
             renderSlider.decreaseAction();
-            break;
         }
-        break;
       case _SliderAdjustmentType.up:
         renderSlider.increaseAction();
-        break;
       case _SliderAdjustmentType.down:
         renderSlider.decreaseAction();
-        break;
     }
   }
 
@@ -735,7 +721,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
       case _SliderType.adaptive: {
         final ThemeData theme = Theme.of(context);
-        assert(theme.platform != null);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -826,7 +811,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name
     // in range_slider.dart.
-    Size screenSize() => MediaQuery.of(context).size;
+    Size screenSize() => MediaQuery.sizeOf(context);
 
     VoidCallback? handleDidGainAccessibilityFocus;
     switch (theme.platform) {
@@ -843,17 +828,14 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
             focusNode.requestFocus();
           }
         };
-        break;
     }
 
     final Map<ShortcutActivator, Intent> shortcutMap;
-    switch (MediaQuery.of(context).navigationMode) {
+    switch (MediaQuery.navigationModeOf(context)) {
       case NavigationMode.directional:
         shortcutMap = _directionalNavShortcutMap;
-        break;
       case NavigationMode.traditional:
         shortcutMap = _traditionalNavShortcutMap;
-        break;
     }
 
     final double textScaleFactor = theme.useMaterial3
@@ -861,8 +843,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       // This needs to be updated when accessibility
       // guidelines are available on the material specs page
       // https://m3.material.io/components/sliders/accessibility.
-      ? math.min(MediaQuery.of(context).textScaleFactor, 1.3)
-      : MediaQuery.of(context).textScaleFactor;
+      ? math.min(MediaQuery.textScaleFactorOf(context), 1.3)
+      : MediaQuery.textScaleFactorOf(context);
 
     return Semantics(
       container: true,
@@ -994,7 +976,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       platform: Theme.of(context).platform,
       hasFocus: hasFocus,
       hovering: hovering,
-      gestureSettings: MediaQuery.of(context).gestureSettings,
+      gestureSettings: MediaQuery.gestureSettingsOf(context),
     );
   }
 
@@ -1018,7 +1000,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..platform = Theme.of(context).platform
       ..hasFocus = hasFocus
       ..hovering = hovering
-      ..gestureSettings = MediaQuery.of(context).gestureSettings;
+      ..gestureSettings = MediaQuery.gestureSettingsOf(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
   }
@@ -1043,10 +1025,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     required bool hasFocus,
     required bool hovering,
     required DeviceGestureSettings gestureSettings,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
+  }) : assert(value >= 0.0 && value <= 1.0),
         assert(secondaryTrackValue == null || (secondaryTrackValue >= 0.0 && secondaryTrackValue <= 1.0)),
-        assert(state != null),
-        assert(textDirection != null),
         _platform = platform,
         _semanticFormatterCallback = semanticFormatterCallback,
         _label = label,
@@ -1138,7 +1118,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double get value => _value;
   double _value;
   set value(double newValue) {
-    assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
+    assert(newValue >= 0.0 && newValue <= 1.0);
     final double convertedValue = isDiscrete ? _discretize(newValue) : newValue;
     if (convertedValue == _value) {
       return;
@@ -1224,7 +1204,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     _sliderTheme = value;
-    markNeedsPaint();
+    _updateLabelPainter();
   }
 
   double get textScaleFactor => _textScaleFactor;
@@ -1272,7 +1252,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (value == _textDirection) {
       return;
     }
@@ -1284,7 +1263,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
   set hasFocus(bool value) {
-    assert(value != null);
     if (value == _hasFocus) {
       return;
     }
@@ -1297,7 +1275,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool get hovering => _hovering;
   bool _hovering;
   set hovering(bool value) {
-    assert(value != null);
     if (value == _hovering) {
       return;
     }
@@ -1310,7 +1287,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   bool _hoveringThumb = false;
   bool get hoveringThumb => _hoveringThumb;
   set hoveringThumb(bool value) {
-    assert(value != null);
     if (value == _hoveringThumb) {
       return;
     }
@@ -1502,10 +1478,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
-          break;
         case TextDirection.ltr:
           _currentDragValue += valueDelta;
-          break;
       }
       onChanged!(_discretize(_currentDragValue));
     }
@@ -1528,6 +1502,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (!_state.mounted) {
+      return;
+    }
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
       // We need to add the drag first so that it has priority.
@@ -1576,11 +1553,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       case TextDirection.rtl:
         visualPosition = 1.0 - value;
         secondaryVisualPosition = (secondaryValue != null) ? (1.0 - secondaryValue) : null;
-        break;
       case TextDirection.ltr:
         visualPosition = value;
         secondaryVisualPosition = (secondaryValue != null) ? secondaryValue : null;
-        break;
     }
 
     final Rect trackRect = _sliderTheme.trackShape!.getPreferredRect(
@@ -1888,15 +1863,14 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)
-    : _colors = Theme.of(context).colorScheme,
-      super(trackHeight: 4.0);
+    : super(trackHeight: 4.0);
 
   final BuildContext context;
-  final ColorScheme _colors;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
 
   @override
   Color? get activeTrackColor => _colors.primary;

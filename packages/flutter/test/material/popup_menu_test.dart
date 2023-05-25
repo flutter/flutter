@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -736,7 +737,6 @@ void main() {
                   expect(newRect.left, lessThan(rect.left));
                 }
               }
-              break;
             case TextDirection.ltr:
               expect(newRect.left, rect.left);
               if (doneHorizontally) {
@@ -748,7 +748,6 @@ void main() {
                   expect(newRect.right, greaterThan(rect.right));
                 }
               }
-              break;
           }
           rect = newRect;
         } while (tester.binding.hasScheduledFrame);
@@ -780,7 +779,6 @@ void main() {
               }
               expect(newRect.top, rect.top);
               expect(newRect.bottom, greaterThan(rect.bottom));
-              break;
             case 1:
               if (newRect.top == rect.top) {
                 verticalStage = 2;
@@ -789,11 +787,9 @@ void main() {
               }
               expect(newRect.top, lessThan(rect.top));
               expect(newRect.bottom, rect.bottom);
-              break;
             case 2:
               expect(newRect.bottom, rect.bottom);
               expect(newRect.top, rect.top);
-              break;
             default:
               assert(false);
           }
@@ -809,7 +805,6 @@ void main() {
                   expect(newRect.left, lessThan(rect.left));
                 }
               }
-              break;
             case TextDirection.ltr:
               expect(newRect.left, rect.left);
               if (doneHorizontally) {
@@ -821,7 +816,6 @@ void main() {
                   expect(newRect.right, greaterThan(rect.right));
                 }
               }
-              break;
           }
           rect = newRect;
         } while (tester.binding.hasScheduledFrame);
@@ -1200,7 +1194,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1284,7 +1282,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -1403,7 +1405,11 @@ void main() {
                   ),
                 ],
               ),
-              TestSemantics(),
+              TestSemantics(
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
+                  label: 'Dismiss',
+                  textDirection: TextDirection.ltr,
+              ),
             ],
           ),
         ],
@@ -2443,7 +2449,7 @@ void main() {
                       value: 1,
                       child: Builder(
                         builder: (BuildContext context) {
-                          mediaQueryPadding = MediaQuery.of(context).padding;
+                          mediaQueryPadding = MediaQuery.paddingOf(context);
                           return Text('-1-' * 500); // A long long text string.
                         },
                       ),
@@ -3012,6 +3018,168 @@ void main() {
     material = tester.widget<Material>(find.byType(Material).last);
     expect(material.clipBehavior, Clip.hardEdge);
   });
+
+  testWidgets('Uses closed loop focus traversal', (WidgetTester tester) async {
+    FocusNode nodeA() => Focus.of(find.text('A').evaluate().single);
+    FocusNode nodeB() => Focus.of(find.text('B').evaluate().single);
+
+    final GlobalKey popupButtonKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: PopupMenuButton<String>(
+            key: popupButtonKey,
+            itemBuilder: (_) => const <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'a',
+                child: Text('A'),
+              ),
+              PopupMenuItem<String>(
+                value: 'b',
+                child: Text('B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Open the popup to build and show the menu contents.
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    Future<bool> nextFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const NextFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    Future<bool> previousFocus() async {
+      final bool result = Actions.invoke(
+        primaryFocus!.context!,
+        const PreviousFocusIntent(),
+      )! as bool;
+      await tester.pump();
+      return result;
+    }
+
+    // Start at A
+    nodeA().requestFocus();
+    await tester.pump();
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+
+    // A -> B
+    expect(await nextFocus(), true);
+    expect(nodeA().hasFocus, false);
+    expect(nodeB().hasFocus, true);
+
+    // B -> A (wrap around)
+    expect(await nextFocus(), true);
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+
+    // B <- A
+    expect(await previousFocus(), true);
+    expect(nodeA().hasFocus, false);
+    expect(nodeB().hasFocus, true);
+
+    // A <- B (wrap around)
+    expect(await previousFocus(), true);
+    expect(nodeA().hasFocus, true);
+    expect(nodeB().hasFocus, false);
+  });
+
+  testWidgets('Popup menu scrollbar inherits ScrollbarTheme', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    const ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(
+      thumbColor: MaterialStatePropertyAll<Color?>(Color(0xffff0000)),
+      thumbVisibility: MaterialStatePropertyAll<bool?>(true),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          scrollbarTheme: scrollbarTheme,
+          useMaterial3: true,
+        ),
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<void>(
+                key: popupButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<void>>[
+                    const PopupMenuItem<void>(
+                      height: 1000,
+                      child: Text('Example'),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Test Scrollbar thumb color.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xffff0000)),
+    );
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Test local ScrollbarTheme overrides global ScrollbarTheme.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          scrollbarTheme: scrollbarTheme,
+          useMaterial3: true,
+        ),
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              ScrollbarTheme(
+                data: scrollbarTheme.copyWith(
+                  thumbColor: const MaterialStatePropertyAll<Color?>(Color(0xff0000ff)),
+                ),
+                child: PopupMenuButton<void>(
+                  key: popupButtonKey,
+                  itemBuilder: (BuildContext context) {
+                    return <PopupMenuEntry<void>>[
+                      const PopupMenuItem<void>(
+                        height: 1000,
+                        child: Text('Example'),
+                      ),
+                    ];
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Scrollbar), findsOneWidget);
+    // Scrollbar thumb color should be updated.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(color: const Color(0xff0000ff)),
+    );
+  }, variant: TargetPlatformVariant.desktop());
 }
 
 class TestApp extends StatelessWidget {
@@ -3033,7 +3201,7 @@ class TestApp extends StatelessWidget {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQueryData.fromView(View.of(context)),
         child: Directionality(
           textDirection: textDirection,
           child: Navigator(

@@ -28,12 +28,12 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await Clipboard.setData(const ClipboardData(text: 'empty'));
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   group('SelectableRegion', () {
@@ -72,6 +72,37 @@ void main() {
 
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
+
+    testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/119776
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Navigator(
+            pages: <Page<void>> [
+              MaterialPage<void>(
+                child: Column(
+                  children: <Widget>[
+                    const Text('How are you?'),
+                    SelectableRegion(
+                      focusNode: FocusNode(),
+                      selectionControls: materialTextSelectionControls,
+                      child: const SelectAllWidget(child: SizedBox(width: 100, height: 100)),
+                    ),
+                    const Text('Fine, thank you.'),
+                  ],
+                ),
+              ),
+              const MaterialPage<void>(
+                child: Scaffold(body: Text('Foreground Page')),
+              ),
+            ],
+            onPopPage: (_, __) => false,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
@@ -347,14 +378,12 @@ void main() {
           log.last,
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(log, isEmpty);
-        break;
     }
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
@@ -409,8 +438,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -449,8 +478,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 SelectionContainer.disabled(child: Text('Good, and you?')),
                 Text('Fine, thank you.'),
@@ -490,8 +519,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -529,8 +558,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -665,8 +694,8 @@ void main() {
           home: SelectableRegion(
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -813,8 +842,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('جيد وانت؟', textDirection: TextDirection.rtl),
                 Text('Fine, thank you.'),
@@ -842,7 +871,7 @@ void main() {
       // Add a little offset to cross the boundary between paragraph 2 and 3.
       await gesture.moveTo(textOffsetToPosition(paragraph3, 6) + const Offset(0, 1));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 2, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 8));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 9));
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
 
       await gesture.up();
@@ -854,8 +883,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -895,6 +924,7 @@ void main() {
           ),
         ),
       );
+
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
       addTearDown(gesture.removePointer);
@@ -954,8 +984,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -995,8 +1025,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1031,8 +1061,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1067,8 +1097,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1102,8 +1132,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1141,8 +1171,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1201,8 +1231,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1229,12 +1259,10 @@ void main() {
         case TargetPlatform.windows:
           alt = false;
           control = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           alt = true;
           control = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1296,12 +1324,12 @@ void main() {
 
       await sendKeyCombination(tester, SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: alt, control: control));
       await tester.pump();
-      // Ho[w are you]?
+      // Ho[w are ]you?
       // Good, and you?
       // Fine, thank you.
       expect(paragraph1.selections.length, 1);
       expect(paragraph1.selections[0].start, 2);
-      expect(paragraph1.selections[0].end, 11);
+      expect(paragraph1.selections[0].end, 8);
       expect(paragraph2.selections.length, 0);
     }, variant: TargetPlatformVariant.all());
 
@@ -1311,8 +1339,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1339,12 +1367,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1402,8 +1428,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1430,12 +1456,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1480,8 +1504,8 @@ void main() {
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Text('How are you?'),
                 Text('Good, and you?'),
                 Text('Fine, thank you.'),
@@ -1573,7 +1597,7 @@ void main() {
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
           (WidgetTester tester) async {
-        const String text = 'Monkies and rabbits in my soup';
+        const String text = 'Monkeys and rabbits in my soup';
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1637,6 +1661,8 @@ void main() {
   });
 
   testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
@@ -1646,7 +1672,6 @@ void main() {
         ),
       ),
     );
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1659,7 +1684,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
 
     // Hide the toolbar by changing orientation.
-    tester.binding.window.physicalSizeTestValue = const Size(1800.0, 2400.0);
+    tester.view.physicalSize = const Size(1800.0, 2400.0);
     await tester.pumpAndSettle();
     expect(find.text('Copy'), findsNothing);
 
@@ -1674,6 +1699,111 @@ void main() {
   },
     skip: kIsWeb, // [intended] Web uses its native context menu.
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+  );
+
+  testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    expect(buttonItems.length, 2);
+    expect(buttonItems[0].type, ContextMenuButtonType.copy);
+
+    // Press `Copy` item
+    buttonItems[0].onPressed.call();
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+    // In Android copy should clear the selection.
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        expect(regionState.selectionOverlay, isNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
+      case TargetPlatform.iOS:
+        expect(regionState.selectionOverlay, isNotNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(regionState.selectionOverlay, isNotNull);
+    }
+  },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
+    List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionHandleControls,
+          contextMenuBuilder: (
+            BuildContext context,
+            SelectableRegionState selectableRegionState,
+          ) {
+            buttonItems = selectableRegionState.contextMenuButtonItems;
+            return const SizedBox.shrink();
+          },
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
+    await tester.pump(kLongPressTimeout);
+    // `are` is selected.
+    expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    expect(buttonItems.length, 2);
+    expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
+
+    // Press `Select All` item
+    buttonItems[1].onPressed.call();
+
+    final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        expect(regionState.selectionOverlay, isNotNull);
+        expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
+        expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        // Test doesn't run these platforms.
+        break;
+    }
+
+  },
+    skip: kIsWeb, // [intended]
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia }),
   );
 
   testWidgets('builds the correct button items', (WidgetTester tester) async {
@@ -1750,6 +1880,51 @@ void main() {
     expect(content, isNotNull);
     expect(content!.plainText, 'How');
   });
+
+  group('BrowserContextMenu', () {
+    setUp(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      });
+      await BrowserContextMenu.disableContextMenu();
+    });
+
+    tearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+    });
+
+    testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            onSelectionChanged: (SelectedContent? selectedContent) {},
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+
+      final SelectableRegionState state =
+          tester.state<SelectableRegionState>(find.byType(SelectableRegion));
+      expect(find.text('Copy'), findsNothing);
+
+      state.selectAll(SelectionChangedCause.toolbar);
+      await tester.pumpAndSettle();
+      expect(find.text('Copy'), findsOneWidget);
+
+      state.hideToolbar();
+      await tester.pumpAndSettle();
+      expect(find.text('Copy'), findsNothing);
+    },
+      skip: !kIsWeb, // [intended]
+    );
+  });
 }
 
 class SelectionSpy extends LeafRenderObjectWidget {
@@ -1808,15 +1983,15 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
@@ -1897,15 +2072,15 @@ class RenderSelectAll extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  SelectionGeometry _value = SelectionGeometry(
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,

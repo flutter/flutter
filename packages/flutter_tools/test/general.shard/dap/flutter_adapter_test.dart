@@ -101,6 +101,44 @@ void main() {
         expect(adapter.pidsToTerminate, isNot(contains(123)));
       });
 
+
+      group('supportsRestartRequest', () {
+        void testRestartSupport(bool supportsRestart) {
+          test('notifies client for supportsRestart: $supportsRestart', () async {
+            final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+              fileSystem: MemoryFileSystem.test(style: fsStyle),
+              platform: platform,
+              supportsRestart: supportsRestart,
+            );
+
+            final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+              cwd: '/project',
+              program: 'foo.dart',
+            );
+
+            // Listen for a Capabilities event that modifies 'supportsRestartRequest'.
+            final Future<CapabilitiesEventBody> capabilitiesUpdate = adapter
+                .dapToClientMessages
+                .where((Map<String, Object?> message) => message['event'] == 'capabilities')
+                .map((Map<String, Object?> message) => message['body'] as Map<String, Object?>?)
+                .where((Map<String, Object?>? body) => body != null).cast<Map<String, Object?>>()
+                .map(CapabilitiesEventBody.fromJson)
+                .firstWhere((CapabilitiesEventBody body) => body.capabilities.supportsRestartRequest != null);
+
+            await adapter.configurationDoneRequest(MockRequest(), null, () {});
+            final Completer<void> launchCompleter = Completer<void>();
+            await adapter.launchRequest(MockRequest(), args, launchCompleter.complete);
+            await launchCompleter.future;
+
+            // Ensure the Capabilities update has the expected value.
+            expect((await capabilitiesUpdate).capabilities.supportsRestartRequest, supportsRestart);
+          });
+        }
+
+        testRestartSupport(true);
+        testRestartSupport(false);
+      });
+
       test('calls "app.stop" on terminateRequest', () async {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
@@ -147,6 +185,47 @@ void main() {
 
         expect(adapter.dapToFlutterRequests, isNot(contains('app.stop')));
       });
+
+      test('includes Dart Debug extension progress update', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+          preAppStart: (MockFlutterDebugAdapter adapter) {
+            adapter.simulateRawStdout('Waiting for connection from Dart debug extension…');
+          }
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+
+        // Begin listening for progress events up until `progressEnd` (but don't await yet).
+        final Future<List<List<Object?>>> progressEventsFuture =
+            adapter.dapToClientProgressEvents
+              .takeWhile((Map<String, Object?> message) => message['event'] != 'progressEnd')
+              .map((Map<String, Object?> message) => <Object?>[message['event'], (message['body']! as Map<String, Object?>)['message']])
+              .toList();
+
+        // Initialize with progress support.
+        await adapter.initializeRequest(
+          MockRequest(),
+          InitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
+          (_) {},
+        );
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        // Ensure we got the expected events prior to the
+        final List<List<Object?>> progressEvents = await progressEventsFuture;
+        expect(progressEvents, containsAllInOrder(<List<String>>[
+          <String>['progressStart', 'Launching…'],
+          <String>['progressUpdate', 'Please click the Dart Debug extension button in the spawned browser window'],
+          // progressEnd isn't included because we used takeWhile to stop when it arrived above.
+        ]));
+      });
     });
 
     group('attachRequest', () {
@@ -166,6 +245,34 @@ void main() {
         await responseCompleter.future;
 
         expect(adapter.processArgs, containsAllInOrder(<String>['attach', '--machine']));
+      });
+
+      test('runs "flutter attach" with program if passed in', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+        final Completer<void> responseCompleter = Completer<void>();
+
+        final FlutterAttachRequestArguments args =
+            FlutterAttachRequestArguments(
+          cwd: '/project',
+          program: 'program/main.dart',
+        );
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.attachRequest(
+            MockRequest(), args, responseCompleter.complete);
+        await responseCompleter.future;
+
+        expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--target',
+              'program/main.dart'
+            ]));
       });
 
       test('does not record the VMs PID for terminating', () async {
@@ -221,6 +328,11 @@ void main() {
           platform: platform,
         );
 
+        // Start listening for the forwarded event (don't await it yet, it won't
+        // be triggered until the call below).
+        final Future<Map<String, Object?>> forwardedEvent = adapter.dapToClientMessages
+            .firstWhere((Map<String, Object?> data) => data['event'] == 'flutter.forwardedEvent');
+
         // Simulate Flutter asking for a URL to be launched.
         adapter.simulateStdoutMessage(<String, Object?>{
           'event': 'app.webLaunchUrl',
@@ -230,11 +342,8 @@ void main() {
           }
         });
 
-        // Allow the handler to be processed.
-        await pumpEventQueue(times: 5000);
-
-        // Find the forwarded event.
-        final Map<String, Object?> message = adapter.dapToClientMessages.singleWhere((Map<String, Object?> data) => data['event'] == 'flutter.forwardedEvent');
+        // Wait for the forwarded event.
+        final Map<String, Object?> message = await forwardedEvent;
         // Ensure the body of the event matches the original event sent by Flutter.
         expect(message['body'], <String, Object?>{
           'event': 'app.webLaunchUrl',

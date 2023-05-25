@@ -70,11 +70,11 @@
   "dateOutOfRangeLabel": "ក្រៅចន្លោះ។",
   "saveButtonLabel": "រក្សាទុក",
   "datePickerHelpText": "ជ្រើសរើស​កាល​បរិច្ឆេទ",
-  "dateRangePickerHelpText": "ជ្រើស​រើស​ចន្លោះ",
+  "dateRangePickerHelpText": "ជ្រើសរើសចន្លោះ",
   "calendarModeButtonLabel": "ប្ដូរទៅ​ប្រតិទិន",
   "inputDateModeButtonLabel": "ប្ដូរទៅ​ការបញ្ចូល",
-  "timePickerDialHelpText": "ជ្រើសរើស​ពេលវេលា",
-  "timePickerInputHelpText": "បញ្ចូលពេលវេលា",
+  "timePickerDialHelpText": "ជ្រើសរើសម៉ោង",
+  "timePickerInputHelpText": "បញ្ចូលម៉ោង",
   "timePickerHourLabel": "ម៉ោង",
   "timePickerMinuteLabel": "នាទី​",
   "invalidTimeLabel": "បញ្ចូលពេលវេលា​ដែល​ត្រឹមត្រូវ",
@@ -129,5 +129,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "ម៉ឺនុយរបារម៉ឺនុយ"
+  "menuBarMenuLabel": "ម៉ឺនុយរបារម៉ឺនុយ",
+  "currentDateLabel": "ថ្ងៃនេះ",
+  "scrimLabel": "ផ្ទាំងស្រអាប់",
+  "bottomSheetLabel": "សន្លឹក​ខាងក្រោម",
+  "scrimOnTapHint": "បិទ $modalRouteContentName",
+  "keyboardKeyShift": "Shift"
 }

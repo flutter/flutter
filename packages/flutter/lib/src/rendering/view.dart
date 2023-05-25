@@ -68,10 +68,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox? child,
     required ViewConfiguration configuration,
-    required ui.FlutterView window,
-  }) : assert(configuration != null),
-       _configuration = configuration,
-       _window = window {
+    required ui.FlutterView view,
+  }) : _configuration = configuration,
+       _view = view {
     this.child = child;
   }
 
@@ -88,7 +87,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
-    assert(value != null);
     if (configuration == value) {
       return;
     }
@@ -101,7 +99,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  final ui.FlutterView _window;
+  final ui.FlutterView _view;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -201,7 +199,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///  * [Layer.findAllAnnotations], which is used by this method to find all
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   HitTestResult hitTestMouseTrackers(Offset position) {
-    assert(position != null);
     final BoxHitTestResult result = BoxHitTestResult();
     hitTest(result, position: position);
     return result;
@@ -237,7 +234,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      _window.render(scene);
+      _view.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
@@ -258,7 +255,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
   void updateSemantics(ui.SemanticsUpdate update) {
-    _window.updateSemantics(update);
+    _view.updateSemantics(update);
   }
 
   void _updateSystemChrome() {
@@ -290,7 +287,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       bounds.center.dx,
       // The vertical center of the system status bar. The system status bar
       // height is kept as top window padding.
-      _window.padding.top / 2.0,
+      _view.padding.top / 2.0,
     );
     // Center of the navigation bar
     final Offset bottom = Offset(
@@ -301,7 +298,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       // from the bottom because available pixels are in (0..bottom) range.
       // I.e. for a device with 1920 height, bound.bottom is 1920, but the most
       // bottom drawn pixel is at 1919 position.
-      bounds.bottom - 1.0 - _window.padding.bottom / 2.0,
+      bounds.bottom - 1.0 - _view.padding.bottom / 2.0,
     );
     final SystemUiOverlayStyle? upperOverlayStyle = layer!.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
@@ -309,7 +306,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         lowerOverlayStyle = layer!.find<SystemUiOverlayStyle>(bottom);
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
@@ -378,10 +374,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${kIsWeb ? 'Web' :  Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<Size>('view size', _view.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty('device pixel ratio', _view.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (_window.platformDispatcher.semanticsEnabled) {
+    if (_view.platformDispatcher.semanticsEnabled) {
       properties.add(DiagnosticsNode.message('semantics enabled'));
     }
   }

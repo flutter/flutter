@@ -46,7 +46,7 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// Creates a [TestDefaultBinaryMessenger] instance.
   ///
   /// The [delegate] instance must not be null.
-  TestDefaultBinaryMessenger(this.delegate): assert(delegate != null);
+  TestDefaultBinaryMessenger(this.delegate);
 
   /// The delegate [BinaryMessenger].
   final BinaryMessenger delegate;

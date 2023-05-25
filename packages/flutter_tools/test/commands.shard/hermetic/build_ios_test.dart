@@ -366,7 +366,7 @@ void main() {
     );
 
     expect(testLogger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
-    expect(testLogger.statusText, contains('flutter pub global activate devtools; flutter pub global run devtools --appSizeBase='));
+    expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
     expect(usage.events, contains(
       const TestUsageEvent('code-size-analysis', 'ios'),
     ));
@@ -564,73 +564,6 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
     });
-
-   testUsingContext('Default bundle identifier error should be hidden if there is another xcresult issue.', () async {
-      final BuildCommand command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-      );
-
-      createMinimalMockProjectFiles();
-
-      await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
-        throwsToolExit(),
-      );
-
-      expect(testLogger.errorText, contains("Use of undeclared identifier 'asdas'"));
-      expect(testLogger.errorText, contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'));
-      expect(testLogger.errorText, isNot(contains('It appears that your application still contains the default signing identifier.')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        }),
-        setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
-        setUpRsyncCommand(),
-      ]),
-      Platform: () => macosPlatform,
-      EnvironmentType: () => EnvironmentType.physical,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(productBundleIdentifier: 'com.example'),
-    });
-
-    testUsingContext('Show default bundle identifier error if there are no other errors.', () async {
-      final BuildCommand command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-      );
-
-      createMinimalMockProjectFiles();
-
-      await expectLater(
-        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
-        throwsToolExit(),
-      );
-
-      expect(testLogger.errorText, contains('It appears that your application still contains the default signing identifier.'));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand,
-        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        }),
-        setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
-        setUpRsyncCommand(),
-      ]),
-      Platform: () => macosPlatform,
-      EnvironmentType: () => EnvironmentType.physical,
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(productBundleIdentifier: 'com.example'),
-    });
-
 
     testUsingContext('Display xcresult issues with no provisioning profile.', () async {
       final BuildCommand command = BuildCommand(

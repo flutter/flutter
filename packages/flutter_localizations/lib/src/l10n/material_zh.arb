@@ -129,5 +129,10 @@
   "keyboardKeySpace": "空格键",
   "keyboardKeyMetaMacOs": "⌘",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "菜单栏的菜单"
+  "menuBarMenuLabel": "菜单栏的菜单",
+  "currentDateLabel": "今天",
+  "scrimLabel": "纱罩",
+  "bottomSheetLabel": "底部动作条",
+  "scrimOnTapHint": "关闭 $modalRouteContentName",
+  "keyboardKeyShift": "Shift"
 }

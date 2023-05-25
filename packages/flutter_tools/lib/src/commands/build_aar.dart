@@ -6,7 +6,6 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
-
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -79,9 +78,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<CustomDimensions> get usageValues async {
     final FlutterProject flutterProject = _getProject();
-    if (flutterProject == null) {
-      return const CustomDimensions();
-    }
 
     String projectType;
     if (flutterProject.manifest.isModule) {
@@ -102,9 +98,8 @@ class BuildAarCommand extends BuildSubCommand {
   final String description = 'Build a repository containing an AAR and a POM file.\n\n'
       'By default, AARs are built for `release`, `debug` and `profile`.\n'
       'The POM file is used to include the dependencies that the AAR was compiled against.\n'
-      'To learn more about how to use these artifacts, see '
-      'https://flutter.dev/go/build-aar\n'
-      'Note: this command builds applications assuming that the entrypoint is lib/main.dart. '
+      'To learn more about how to use these artifacts, see: https://flutter.dev/go/build-aar\n'
+      'This command assumes that the entrypoint is "lib/main.dart". '
       'This cannot currently be configured.';
 
   @override
@@ -117,7 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
     final Iterable<AndroidArch> targetArchitectures =
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
-    final String? buildNumberArg = stringArgDeprecated('build-number');
+    final String? buildNumberArg = stringArg('build-number');
     final String buildNumber = argParser.options.containsKey('build-number')
       && buildNumberArg != null
       && buildNumberArg.isNotEmpty
@@ -126,7 +121,7 @@ class BuildAarCommand extends BuildSubCommand {
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (boolArgDeprecated(buildMode)) {
+      if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(

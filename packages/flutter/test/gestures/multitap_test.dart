@@ -68,11 +68,10 @@ void main() {
   });
 
   testGesture('Can filter based on device kind', (GestureTester tester) {
-    final MultiTapGestureRecognizer tap =
-        MultiTapGestureRecognizer(
-          longTapDelay: kLongPressTimeout,
-          kind: PointerDeviceKind.touch,
-        );
+    final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(
+      longTapDelay: kLongPressTimeout,
+      supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
+    );
 
     final List<String> log = <String>[];
 
@@ -142,35 +141,5 @@ void main() {
     log.clear();
 
     tap.dispose();
-  });
-
-  testWidgets('DoubleTapGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        DoubleTapGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
-  });
-
-  testWidgets('MultiTapGestureRecognizer asserts when kind and supportedDevices are both set', (WidgetTester tester) async {
-    expect(
-      () {
-        MultiTapGestureRecognizer(
-            kind: PointerDeviceKind.touch,
-            supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
-        );
-      },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-        'description', contains('kind == null || supportedDevices == null')),
-      ),
-    );
   });
 }

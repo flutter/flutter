@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
 
 class SpyFixedExtentScrollController extends FixedExtentScrollController {
   /// Override for test visibility only.
@@ -118,7 +119,7 @@ void main() {
 
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '1').first),
-        const Offset(0.0, 175.0),
+        offsetMoreOrLessEquals(const Offset(0.0, 170.0), epsilon: 0.5),
       );
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '0').first),
@@ -347,7 +348,7 @@ void main() {
       // The item that was in the center now moved a bit.
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')),
-        const Offset(200.0, 280.0),
+        const Offset(200.0, 250.0),
       );
 
       await tester.pumpAndSettle();
@@ -366,7 +367,7 @@ void main() {
       expect(
         tester.getTopLeft(find.widgetWithText(SizedBox, '10')).dy,
         // It's down by 100.0 now.
-        moreOrLessEquals(350.0, epsilon: 0.5),
+        moreOrLessEquals(340.0, epsilon: 0.5),
       );
       expect(selectedItems, <int>[9]);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
@@ -526,6 +527,63 @@ void main() {
     await tester.pumpWidget(const SizedBox.expand());
     expect(controller.hasListeners, false);
     expect(controller.positions.length, 0);
+  });
+
+  testWidgets('Registers taps and does not crash with certain diameterRatio', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126491
+
+    final List<int> children = List<int>.generate(100, (int index) => index);
+    final List<int> paintedChildren = <int>[];
+    final Set<int> tappedChildren = <int>{};
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: Center(
+          child: SizedBox(
+            height: 120,
+            child: CupertinoPicker(
+              itemExtent: 55,
+              diameterRatio: 0.9,
+              onSelectedItemChanged: (int index) {},
+              children: children
+                .map<Widget>((int index) =>
+                  GestureDetector(
+                    key: ValueKey<int>(index),
+                    onTap: () {
+                      tappedChildren.add(index);
+                    },
+                    child: SizedBox(
+                      width: 55,
+                      height: 55,
+                      child: CustomPaint(
+                        painter: TestCallbackPainter(onPaint: () {
+                          paintedChildren.add(index);
+                        }),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Children are painted two times for whatever reason
+    expect(paintedChildren, <int>[0, 0, 1, 1]);
+
+    // Expect hitting 0 and 1, which are painted
+    await tester.tap(find.byKey(const ValueKey<int>(0)));
+    expect(tappedChildren, const <int>[0]);
+
+    await tester.tap(find.byKey(const ValueKey<int>(1)));
+    expect(tappedChildren, const <int>[0, 1]);
+
+    // The third child is not painted, so is not hit
+    await tester.tap(find.byKey(const ValueKey<int>(2)), warnIfMissed: false);
+    expect(tappedChildren, const <int>[0, 1]);
   });
 
 }

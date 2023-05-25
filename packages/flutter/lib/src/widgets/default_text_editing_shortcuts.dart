@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'actions.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
-import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'shortcuts.dart';
 import 'text_editing_intents.dart';
 
@@ -34,18 +34,18 @@ import 'text_editing_intents.dart';
 /// ```dart
 /// @override
 /// Widget build(BuildContext context) {
-///   // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
+///   // If using WidgetsApp or its descendants MaterialApp or CupertinoApp,
 ///   // then DefaultTextEditingShortcuts is already being inserted into the
 ///   // widget tree.
-///   return DefaultTextEditingShortcuts(
+///   return const DefaultTextEditingShortcuts(
 ///     child: Center(
 ///       child: Shortcuts(
-///         shortcuts: const <ShortcutActivator, Intent>{
+///         shortcuts: <ShortcutActivator, Intent>{
 ///           SingleActivator(LogicalKeyboardKey.arrowDown, alt: true): NextFocusIntent(),
 ///           SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): PreviousFocusIntent(),
 ///         },
 ///         child: Column(
-///           children: const <Widget>[
+///           children: <Widget>[
 ///             TextField(
 ///               decoration: InputDecoration(
 ///                 hintText: 'alt + down moves to the next field.',
@@ -89,7 +89,7 @@ import 'text_editing_intents.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     // If using WidgetsApp or its descendents MaterialApp or CupertinoApp,
+///     // If using WidgetsApp or its descendants MaterialApp or CupertinoApp,
 ///     // then DefaultTextEditingShortcuts is already being inserted into the
 ///     // widget tree.
 ///     return DefaultTextEditingShortcuts(
@@ -207,6 +207,9 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: false, collapseSelection: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, control: true): const ExtendSelectionToNextWordBoundaryIntent(forward: true, collapseSelection: false),
 
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, control: true): const ExtendSelectionToNextParagraphBoundaryIntent(forward: false, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, control: true): const ExtendSelectionToNextParagraphBoundaryIntent(forward: true, collapseSelection: false),
+
     // Page Up / Down: Move selection by page.
     const SingleActivator(LogicalKeyboardKey.pageUp): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.pageDown): const ExtendSelectionVerticallyToAdjacentPageIntent(forward: true, collapseSelection: true),
@@ -303,8 +306,8 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: false, collapseSelection: false),
-    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionVerticallyToAdjacentLineIntent(forward: true, collapseSelection: false),
+    const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: false),
+    const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: true),
 
     const SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): const ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     const SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): const ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),
@@ -412,16 +415,10 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     SingleActivator(LogicalKeyboardKey.arrowLeft, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowDown, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowLeft, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowRight, meta: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.arrowUp, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): DoNothingAndStopPropagationTextIntent(),
-    SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.pageUp, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.pageDown, shift: true): DoNothingAndStopPropagationTextIntent(),
     SingleActivator(LogicalKeyboardKey.end, shift: true): DoNothingAndStopPropagationTextIntent(),
@@ -452,6 +449,12 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
     const SingleActivator(LogicalKeyboardKey.tab, shift: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
     const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, alt: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
+    const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true, meta: true): const DoNothingAndStopPropagationTextIntent(),
   };
 
   // Hand backspace/delete events that do not depend on text layout (delete
@@ -560,8 +563,8 @@ Intent? intentForMacOSSelector(String selectorName) {
 
     'moveWordLeftAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: false),
     'moveWordRightAndModifySelection:': ExtendSelectionToNextWordBoundaryOrCaretLocationIntent(forward: true),
-    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: false, collapseAtReversal: true),
-    'moveParagraphForwardAndModifySelection:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: false, collapseAtReversal: true),
+    'moveParagraphBackwardAndModifySelection:': ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: false),
+    'moveParagraphForwardAndModifySelection:': ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent(forward: true),
 
     'moveToLeftEndOfLine:': ExtendSelectionToLineBreakIntent(forward: false, collapseSelection: true),
     'moveToRightEndOfLine:': ExtendSelectionToLineBreakIntent(forward: true, collapseSelection: true),

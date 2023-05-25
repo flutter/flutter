@@ -14,8 +14,7 @@ import 'process.dart';
 
 /// A snapshot build configuration.
 class SnapshotType {
-  SnapshotType(this.platform, this.mode)
-    : assert(mode != null);
+  SnapshotType(this.platform, this.mode);
 
   final TargetPlatform? platform;
   final BuildMode mode;
@@ -145,7 +144,7 @@ class AOTSnapshotter {
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
     bool shouldStrip = true;
-    if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
+    if (extraGenSnapshotOptions.isNotEmpty) {
       _logger.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       for (final String option in extraGenSnapshotOptions) {
         if (option == '--no-strip') {
@@ -170,7 +169,7 @@ class AOTSnapshotter {
       ]);
     }
 
-    // When buiding for iOS and splitting out debug info, we want to strip
+    // When building for iOS and splitting out debug info, we want to strip
     // manually after the dSYM export, instead of in the `gen_snapshot`.
     final bool stripAfterBuild;
     if (targetingApplePlatform) {
@@ -206,11 +205,11 @@ class AOTSnapshotter {
         .createSync(recursive: true);
     }
 
-    // Optimization arguments.
+    // Debugging information.
     genSnapshotArgs.addAll(<String>[
-      // Faster async/await
       if (shouldSplitDebugInfo) ...<String>[
         '--dwarf-stack-traces',
+        '--resolve-dwarf-paths',
         '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
       ],
       if (dartObfuscation)
@@ -301,6 +300,7 @@ class AOTSnapshotter {
       '-dynamiclib',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-fapplication-extension',
       '-install_name', '@rpath/App.framework/App',
       '-o', appLib,
       assemblyO,

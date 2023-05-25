@@ -5,7 +5,6 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/project_migrator.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cmake_project.dart';
 import 'package:flutter_tools/src/migrations/cmake_custom_command_migration.dart';
@@ -164,17 +163,4 @@ class FakeCmakeProject extends Fake implements CmakeBasedProject {
 
   @override
   final File managedCmakeFile;
-}
-
-class FakeCmakeMigrator extends ProjectMigrator {
-  FakeCmakeMigrator()
-    : super(BufferLogger.test());
-
-  @override
-  void migrate() { }
-
-  @override
-  String migrateLine(String line) {
-    return line;
-  }
 }

@@ -26,7 +26,7 @@ class TickerMode extends StatefulWidget {
     super.key,
     required this.enabled,
     required this.child,
-  }) : assert(enabled != null);
+  });
 
   /// The requested ticker mode for this subtree.
   ///
@@ -95,7 +95,7 @@ class TickerMode extends StatefulWidget {
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
   static ValueNotifier<bool> getNotifier(BuildContext context) {
-    final _EffectiveTickerMode? widget = context.getElementForInheritedWidgetOfExactType<_EffectiveTickerMode>()?.widget as _EffectiveTickerMode?;
+    final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? ValueNotifier<bool>(true);
   }
 
@@ -151,7 +151,7 @@ class _EffectiveTickerMode extends InheritedWidget {
     required this.enabled,
     required this.notifier,
     required super.child,
-  }) : assert(enabled != null);
+  });
 
   final bool enabled;
   final ValueNotifier<bool> notifier;

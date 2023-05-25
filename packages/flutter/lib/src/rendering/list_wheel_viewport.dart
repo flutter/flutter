@@ -10,6 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
@@ -55,6 +56,17 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
   ///
   /// This must be maintained by the [ListWheelChildManager].
   int? index;
+
+  /// Transform applied to this child during painting.
+  ///
+  /// Can be used to find the local bounds of this child in the viewport,
+  /// and then use it, for example, in hit testing.
+  ///
+  /// May be null if child was laid out, but not painted
+  /// by the parent, but normally this shouldn't happen,
+  /// because [RenderListWheelViewport] paints all of the
+  /// children it has laid out.
+  Matrix4? transform;
 }
 
 /// Render, onto a wheel, a bigger sequential set of objects inside this viewport.
@@ -149,25 +161,13 @@ class RenderListWheelViewport
     bool renderChildrenOutsideViewport = false,
     Clip clipBehavior = Clip.none,
     List<RenderBox>? children,
-  }) : assert(childManager != null),
-       assert(offset != null),
-       assert(diameterRatio != null),
-       assert(diameterRatio > 0, diameterRatioZeroMessage),
-       assert(perspective != null),
+  }) : assert(diameterRatio > 0, diameterRatioZeroMessage),
        assert(perspective > 0),
        assert(perspective <= 0.01, perspectiveTooHighMessage),
-       assert(offAxisFraction != null),
-       assert(useMagnifier != null),
-       assert(magnification != null),
        assert(magnification > 0),
-       assert(overAndUnderCenterOpacity != null),
        assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
-       assert(itemExtent != null),
-       assert(squeeze != null),
        assert(squeeze > 0),
        assert(itemExtent > 0),
-       assert(renderChildrenOutsideViewport != null),
-       assert(clipBehavior != null),
        assert(
          !renderChildrenOutsideViewport || clipBehavior == Clip.none,
          clipBehaviorAndRenderChildrenOutsideViewportConflict,
@@ -225,7 +225,6 @@ class RenderListWheelViewport
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
-    assert(value != null);
     if (value == _offset) {
       return;
     }
@@ -270,7 +269,6 @@ class RenderListWheelViewport
   double get diameterRatio => _diameterRatio;
   double _diameterRatio;
   set diameterRatio(double value) {
-    assert(value != null);
     assert(
       value > 0,
       diameterRatioZeroMessage,
@@ -300,7 +298,6 @@ class RenderListWheelViewport
   double get perspective => _perspective;
   double _perspective;
   set perspective(double value) {
-    assert(value != null);
     assert(value > 0);
     assert(
       value <= 0.01,
@@ -342,7 +339,6 @@ class RenderListWheelViewport
   double get offAxisFraction => _offAxisFraction;
   double _offAxisFraction = 0.0;
   set offAxisFraction(double value) {
-    assert(value != null);
     if (value == _offAxisFraction) {
       return;
     }
@@ -356,7 +352,6 @@ class RenderListWheelViewport
   bool get useMagnifier => _useMagnifier;
   bool _useMagnifier = false;
   set useMagnifier(bool value) {
-    assert(value != null);
     if (value == _useMagnifier) {
       return;
     }
@@ -376,7 +371,6 @@ class RenderListWheelViewport
   double get magnification => _magnification;
   double _magnification = 1.0;
   set magnification(double value) {
-    assert(value != null);
     assert(value > 0);
     if (value == _magnification) {
       return;
@@ -396,7 +390,6 @@ class RenderListWheelViewport
   double get overAndUnderCenterOpacity => _overAndUnderCenterOpacity;
   double _overAndUnderCenterOpacity = 1.0;
   set overAndUnderCenterOpacity(double value) {
-    assert(value != null);
     assert(value >= 0 && value <= 1);
     if (value == _overAndUnderCenterOpacity) {
       return;
@@ -414,7 +407,6 @@ class RenderListWheelViewport
   double get itemExtent => _itemExtent;
   double _itemExtent;
   set itemExtent(double value) {
-    assert(value != null);
     assert(value > 0);
     if (value == _itemExtent) {
       return;
@@ -447,7 +439,6 @@ class RenderListWheelViewport
   double get squeeze => _squeeze;
   double _squeeze;
   set squeeze(double value) {
-    assert(value != null);
     assert(value > 0);
     if (value == _squeeze) {
       return;
@@ -470,7 +461,6 @@ class RenderListWheelViewport
   bool get renderChildrenOutsideViewport => _renderChildrenOutsideViewport;
   bool _renderChildrenOutsideViewport;
   set renderChildrenOutsideViewport(bool value) {
-    assert(value != null);
     assert(
       !renderChildrenOutsideViewport || clipBehavior == Clip.none,
       clipBehaviorAndRenderChildrenOutsideViewportConflict,
@@ -489,7 +479,6 @@ class RenderListWheelViewport
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -636,7 +625,6 @@ class RenderListWheelViewport
   ///
   /// This relies on the [childManager] maintaining [ListWheelParentData.index].
   int indexOf(RenderBox child) {
-    assert(child != null);
     final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
     assert(childParentData.index != null);
     return childParentData.index!;
@@ -988,12 +976,14 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
+    final Offset paintOriginOffset = offset + offsetToCenter;
+
     // Paint child cylindrically, without [overAndUnderCenterOpacity].
     void painter(PaintingContext context, Offset offset) {
       context.paintChild(
         child,
         // Paint everything in the center (e.g. angle = 0), then transform.
-        offset + offsetToCenter,
+        paintOriginOffset,
       );
     }
 
@@ -1009,6 +999,12 @@ class RenderListWheelViewport
       // Pre-transform painting function.
       overAndUnderCenterOpacity == 1 ? painter : opacityPainter,
     );
+
+    final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
+    // Save the final transform that accounts both for the offset and cylindrical transform.
+    final Matrix4 transform = _centerOriginTransform(cylindricalTransform)
+      ..translate(paintOriginOffset.dx, paintOriginOffset.dy);
+    childParentData.transform = transform;
   }
 
   /// Return the Matrix4 transformation that would zoom in content in the
@@ -1038,12 +1034,20 @@ class RenderListWheelViewport
     return result;
   }
 
-  /// This returns the matrices relative to the **untransformed plane's viewport
-  /// painting coordinates** system.
+  static bool _debugAssertValidHitTestOffsets(String context, Offset offset1, Offset offset2) {
+    if (offset1 != offset2) {
+      throw FlutterError("$context - hit test expected values didn't match: $offset1 != $offset2");
+    }
+    return true;
+  }
+
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     final ListWheelParentData parentData = child.parentData! as ListWheelParentData;
-    transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
+    final Matrix4? paintTransform = parentData.transform;
+    if (paintTransform != null) {
+      transform.multiply(paintTransform);
+    }
   }
 
   @override
@@ -1055,7 +1059,35 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    RenderBox? child = lastChild;
+    while (child != null) {
+      final ListWheelParentData childParentData = child.parentData! as ListWheelParentData;
+      final Matrix4? transform = childParentData.transform;
+      // Skip not painted children
+      if (transform != null) {
+        final bool isHit = result.addWithPaintTransform(
+          transform: transform,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(() {
+              final Matrix4? inverted = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
+              if (inverted == null) {
+                return _debugAssertValidHitTestOffsets('Null inverted transform', transformed, position);
+              }
+              return _debugAssertValidHitTestOffsets('MatrixUtils.transformPoint', transformed, MatrixUtils.transformPoint(inverted, position));
+            }());
+            return child!.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit) {
+          return true;
+        }
+      }
+      child = childParentData.previousSibling;
+    }
+    return false;
+  }
 
   @override
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect? rect }) {

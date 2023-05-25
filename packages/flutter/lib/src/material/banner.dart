@@ -5,9 +5,11 @@
 import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
+import 'color_scheme.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -106,15 +108,13 @@ class MaterialBanner extends StatefulWidget {
     this.shadowColor,
     this.dividerColor,
     this.padding,
+    this.margin,
     this.leadingPadding,
     this.forceActionsBelow = false,
     this.overflowAlignment = OverflowBarAlignment.end,
     this.animation,
     this.onVisible,
-  }) : assert(elevation == null || elevation >= 0.0),
-       assert(content != null),
-       assert(actions != null),
-       assert(forceActionsBelow != null);
+  }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
   ///
@@ -188,6 +188,12 @@ class MaterialBanner extends StatefulWidget {
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
   final EdgeInsetsGeometry? padding;
 
+  /// Empty space to surround the [MaterialBanner].
+  ///
+  /// If the [margin] is null then this defaults to
+  /// 0 if the banner's [elevation] is 0, 10 otherwise.
+  final EdgeInsetsGeometry? margin;
+
   /// The amount of space by which to inset the [leading] widget.
   ///
   /// This defaults to `EdgeInsetsDirectional.only(end: 16.0)`.
@@ -239,7 +245,11 @@ class MaterialBanner extends StatefulWidget {
       elevation: elevation,
       leading: leading,
       backgroundColor: backgroundColor,
+      surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
+      dividerColor: dividerColor,
       padding: padding,
+      margin: margin,
       leadingPadding: leadingPadding,
       forceActionsBelow: forceActionsBelow,
       overflowAlignment: overflowAlignment,
@@ -293,7 +303,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
     assert(widget.actions.isNotEmpty);
 
@@ -321,6 +331,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final double elevation = widget.elevation ?? bannerTheme.elevation ?? 0.0;
+    final EdgeInsetsGeometry margin = widget.margin ?? EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0);
     final Color backgroundColor = widget.backgroundColor
         ?? bannerTheme.backgroundColor
         ?? defaults.backgroundColor!;
@@ -337,7 +348,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? defaults.contentTextStyle;
 
     Widget materialBanner = Container(
-      margin: EdgeInsets.only(bottom: elevation > 0 ? 10.0 : 0.0),
+      margin: margin,
       child: Material(
         elevation: elevation,
         color: backgroundColor,
@@ -399,7 +410,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
       onDismiss: () {
         ScaffoldMessenger.of(context).removeCurrentMaterialBanner(reason: MaterialBannerClosedReason.dismiss);
       },
-      child: mediaQueryData.accessibleNavigation
+      child: accessibleNavigation
           ? materialBanner
           : SlideTransition(
         position: slideOutAnimation,
@@ -408,7 +419,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     );
 
     final Widget materialBannerTransition;
-    if (mediaQueryData.accessibleNavigation) {
+    if (accessibleNavigation) {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(
@@ -453,25 +464,27 @@ class _BannerDefaultsM2 extends MaterialBannerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _BannerDefaultsM3 extends MaterialBannerThemeData {
-  const _BannerDefaultsM3(this.context)
+  _BannerDefaultsM3(this.context)
     : super(elevation: 1.0);
 
   final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color? get backgroundColor => _colors.surface;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
-  Color? get dividerColor => Theme.of(context).colorScheme.outlineVariant;
+  Color? get dividerColor => _colors.outlineVariant;
 
   @override
-  TextStyle? get contentTextStyle => Theme.of(context).textTheme.bodyMedium;
+  TextStyle? get contentTextStyle => _textTheme.bodyMedium;
 }
 
 // END GENERATED TOKEN PROPERTIES - Banner

@@ -34,6 +34,7 @@ class _PluginPlatformInfo {
     this.pluginClass,
     this.dartPluginClass,
     this.androidPackage,
+    this.sharedDarwinSource = false,
     this.fileName
   }) : assert(pluginClass != null || dartPluginClass != null),
        assert(androidPackage == null || pluginClass != null);
@@ -46,6 +47,8 @@ class _PluginPlatformInfo {
 
   /// The package entry for an Android plugin implementation using pluginClass.
   final String? androidPackage;
+
+  final bool sharedDarwinSource;
 
   /// The fileName entry for a web plugin implementation.
   final String? fileName;
@@ -61,6 +64,8 @@ class _PluginPlatformInfo {
         '${indentation}dartPluginClass: $dartPluginClass',
       if (androidPackage != null)
         '${indentation}package: $androidPackage',
+      if (sharedDarwinSource)
+        '${indentation}sharedDarwinSource: true',
       if (fileName != null)
         '${indentation}fileName: $fileName',
     ].join('\n');
@@ -374,8 +379,6 @@ flutter:
       required String name,
       required List<String> dependencies,
     }) {
-      assert(name != null);
-      assert(dependencies != null);
 
       final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
       pluginDirectory
@@ -407,8 +410,6 @@ dependencies:
       required Map<String, _PluginPlatformInfo> platforms,
       List<String> dependencies = const <String>[],
     }) {
-      assert(name != null);
-      assert(dependencies != null);
 
       final Iterable<String> platformSections = platforms.entries.map((MapEntry<String, _PluginPlatformInfo> entry) => '''
       ${entry.key}:
@@ -595,14 +596,14 @@ dependencies:
       });
 
       testUsingContext(
-        '.flutter-plugins-dependencies indicates native build inclusion', () async {
+        '.flutter-plugins-dependencies contains plugin platform info', () async {
         createPlugin(
           name: 'plugin-a',
           platforms: const <String, _PluginPlatformInfo>{
             // Native-only; should include native build.
             'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
             // Hybrid native and Dart; should include native build.
-            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar'),
+            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar', sharedDarwinSource: true),
             // Web; should not have the native build key at all since it doesn't apply.
             'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
             // Dart-only; should not include native build.
@@ -618,20 +619,45 @@ dependencies:
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
         final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
-        final Map<String, dynamic>? plugins = jsonContent['plugins'] as Map<String, dynamic>?;
+        final Map<String, dynamic>? actualPlugins = jsonContent['plugins'] as Map<String, dynamic>?;
 
-        // Extracts the native_build key (if any) from the first plugin for the
-        // given platform.
-        bool? getNativeBuildValue(String platform) {
-          final List<Map<String, dynamic>> platformPlugins = (plugins![platform]
-            as List<dynamic>).cast<Map<String, dynamic>>();
-          expect(platformPlugins.length, 1);
-          return platformPlugins[0]['native_build'] as bool?;
-        }
-        expect(getNativeBuildValue('android'), true);
-        expect(getNativeBuildValue('ios'), true);
-        expect(getNativeBuildValue('web'), null);
-        expect(getNativeBuildValue('windows'), false);
+        final Map<String, Object> expectedPlugins = <String, Object>{
+          'ios': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'shared_darwin_source': true,
+              'native_build': true,
+              'dependencies': <String>[]
+            }
+          ],
+          'android': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'native_build': true,
+              'dependencies': <String>[]
+            }
+          ],
+          'macos': <Map<String, Object>>[],
+          'linux': <Map<String, Object>>[],
+          'windows': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'native_build': false,
+              'dependencies': <String>[]
+            }
+          ],
+          'web': <Map<String, Object>>[
+            <String, Object>{
+              'name': 'plugin-a',
+              'path': '/.tmp_rand0/flutter_plugin.rand0/',
+              'dependencies': <String>[]
+            }
+          ]
+        };
+        expect(actualPlugins, expectedPlugins);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),

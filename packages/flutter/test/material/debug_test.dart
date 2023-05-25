@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Chip(label: Text('label')));
+    await tester.pumpWidget(const Center(child: Chip(label: Text('label'))));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
@@ -25,10 +25,11 @@ void main() {
     expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[4], isA<DiagnosticsBlock>());
     expect(
-      error.toStringDeep(),
+      error.toStringDeep(), startsWith(
       'FlutterError\n'
       '   No Material widget found.\n'
-      '   Chip widgets require a Material widget ancestor.\n'
+      '   Chip widgets require a Material widget ancestor within the\n'
+      '   closest LookupBoundary.\n'
       '   In Material Design, most widgets are conceptually "printed" on a\n'
       "   sheet of material. In Flutter's material library, that material\n"
       '   is represented by the Material widget. It is the Material widget\n'
@@ -41,12 +42,13 @@ void main() {
       '   The specific widget that could not find a Material ancestor was:\n'
       '     Chip\n'
       '   The ancestors of this widget were:\n'
-      '     [root]\n',
-    );
+      '     Center\n'
+      // End of ancestor chain omitted, not relevant for test.
+    ));
   });
 
   testWidgets('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
-    await tester.pumpWidget(const BackButton());
+    await tester.pumpWidget(const Center(child: BackButton()));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
     final FlutterError error = exception as FlutterError;
@@ -63,7 +65,7 @@ void main() {
     expect(error.diagnostics[4], isA<DiagnosticsProperty<Element>>());
     expect(error.diagnostics[5], isA<DiagnosticsBlock>());
     expect(
-      error.toStringDeep(),
+      error.toStringDeep(), startsWith(
       'FlutterError\n'
       '   No MaterialLocalizations found.\n'
       '   BackButton widgets require MaterialLocalizations to be provided\n'
@@ -77,8 +79,9 @@ void main() {
       '   ancestor was:\n'
       '     BackButton\n'
       '   The ancestors of this widget were:\n'
-      '     [root]\n',
-    );
+      '     Center\n'
+      // End of ancestor chain omitted, not relevant for test.
+    ));
   });
 
   testWidgets('debugCheckHasScaffold control test', (WidgetTester tester) async {
@@ -134,11 +137,11 @@ void main() {
       '     _FadeUpwardsPageTransition\n'
       '     AnimatedBuilder\n'
       '     RepaintBoundary\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Semantics\n'
       '     FocusScope\n'
       '     PrimaryScrollController\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '     Builder\n'
       '     PageStorage\n'
@@ -149,23 +152,23 @@ void main() {
       '     AnimatedBuilder\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
       '     Semantics\n'
+      '     _RenderTheaterMarker\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
-      '     _Theatre\n'
+      '     _Theater\n'
       '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
       '     UnmanagedRestorationScope\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
       '     AbsorbPointer\n'
       '     Listener\n'
       '     HeroControllerScope\n'
       '     Navigator-[GlobalObjectKey<NavigatorState> _WidgetsAppState#00000]\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Semantics\n'
       '     FocusScope\n'
       '     DefaultSelectionStyle\n'
@@ -189,34 +192,31 @@ void main() {
       '     _LocalizationsScope-[GlobalKey#00000]\n'
       '     Semantics\n'
       '     Localizations\n'
-      '     MediaQuery\n'
-      '     _MediaQueryFromWindow\n'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     Shortcuts\n'
-      '     _ShortcutRegistrarMarker\n'
+      '     _ShortcutRegistrarScope\n'
       '     ShortcutRegistrar\n'
       '     TapRegionSurface\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusTraversalGroupMarker\n'
       '     FocusTraversalGroup\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '${kIsWeb
           ? '     Semantics\n'
-            '     _FocusMarker\n'
+            '     _FocusInheritedScope\n'
             '     Focus\n'
             '     Shortcuts\n'
            : ''}'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     Shortcuts\n'
       '     DefaultTextEditingShortcuts\n'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     Shortcuts\n'
       '     _SharedAppModel\n'
@@ -227,11 +227,15 @@ void main() {
       '     RootRestorationScope\n'
       '     WidgetsApp-[GlobalObjectKey _MaterialAppState#00000]\n'
       '     Semantics\n'
-      '     _FocusMarker\n'
+      '     _FocusInheritedScope\n'
       '     Focus\n'
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
+      '     View-[GlobalObjectKey TestFlutterView#00000]\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
       '   or WidgetsApp widget at the top of your application widget tree.\n'
@@ -247,18 +251,15 @@ void main() {
     );
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Builder(
-            builder: (BuildContext context) {
-              return Scaffold(
-                key: scaffoldKey,
-                body: Container(),
-              );
-            },
-          ),
+      child: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              key: scaffoldKey,
+              body: Container(),
+            );
+          },
         ),
       ),
     ));
@@ -274,12 +275,9 @@ void main() {
     // Pump widget to rebuild without ScaffoldMessenger
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          key: scaffoldKey,
-          body: Container(),
-        ),
+      child: Scaffold(
+        key: scaffoldKey,
+        body: Container(),
       ),
     ));
     // Tap SnackBarAction to dismiss.
@@ -358,7 +356,7 @@ void main() {
       '     MediaQuery\n'
       '     LayoutId-[<_ScaffoldSlot.snackBar>]\n'
       '     CustomMultiChildLayout\n'
-      '     _ActionsMarker\n'
+      '     _ActionsScope\n'
       '     Actions\n'
       '     AnimatedBuilder\n'
       '     DefaultTextStyle\n'
@@ -374,8 +372,11 @@ void main() {
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'
-      '     MediaQuery\n'
       '     Directionality\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
+      '     View-[GlobalObjectKey TestFlutterView#00000]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n'

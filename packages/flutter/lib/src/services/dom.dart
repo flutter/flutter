@@ -115,7 +115,7 @@ typedef DomEventListener = void Function(DomEvent event);
 @staticInterop
 class DomEvent {}
 
-/// [DomEvent] reqiured extension.
+/// [DomEvent] required extension.
 extension DomEventExtension on DomEvent {
   /// Get the event type.
   external String get type;
@@ -134,7 +134,7 @@ extension DomEventExtension on DomEvent {
 @staticInterop
 class DomProgressEvent extends DomEvent {}
 
-/// [DomProgressEvent] reqiured extension.
+/// [DomProgressEvent] required extension.
 extension DomProgressEventExtension on DomProgressEvent {
   /// Amount of work done.
   external int? get loaded;
@@ -182,7 +182,7 @@ extension DomDocumentExtension on DomDocument {
 @JS('window.document')
 external DomDocument get domDocument;
 
-/// Cretaes a new DOM event.
+/// Creates a new DOM event.
 DomEvent createDomEvent(String type, String name) {
   final DomEvent event = domDocument.createEvent(type);
   event.initEvent(name, true, true);
@@ -336,8 +336,11 @@ class DomCSSStyleSheet extends DomStyleSheet {}
 /// [DomCSSStyleSheet]'s required extension.
 extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
   /// Inserts a rule into this style sheet.
-  int insertRule(String rule, [int? index]) => js_util
-      .callMethod(this, 'insertRule', <Object>[rule, if (index != null) index]);
+  int insertRule(String rule, [int? index]) =>
+    js_util.callMethod<double>(this, 'insertRule', <Object>[
+      rule,
+      if (index != null) index.toDouble()
+    ]).toInt();
 }
 
 /// A list of token.

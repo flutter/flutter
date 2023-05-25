@@ -359,7 +359,7 @@ void main() {
       globals.fs.directory('bundle.app').createSync();
       globals.fs.file('bundle.app/Info.plist').createSync();
       testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-      final PrebuiltIOSApp iosApp = (IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?)!;
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app'))! as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
@@ -410,7 +410,7 @@ void main() {
             .file(globals.fs.path.join(bundleAppDir.path, 'Info.plist'))
             .createSync();
       };
-      final PrebuiltIOSApp iosApp = (IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?)!;
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa'))! as PrebuiltIOSApp;
       expect(testLogger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
@@ -543,6 +543,92 @@ void main() {
         ),
       );
     }, overrides: overrides);
+
+    testUsingContext('returns project launch image dirname', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(iosApp.projectLaunchImageDirName, globals.fs.path.join('ios', launchImageDirSuffix));
+    }, overrides: overrides);
+
+    testUsingContext('returns template launch image dirname for Contents.json', () async {
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner',
+      );
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(
+        iosApp.templateLaunchImageDirNameForContentsJson,
+        globals.fs.path.join(
+          Cache.flutterRoot!,
+          'packages',
+          'flutter_tools',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          launchImageDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
+
+    testUsingContext('returns template launch image dirname for images', () async {
+      final String toolsDir = globals.fs.path.join(
+        Cache.flutterRoot!,
+        'packages',
+        'flutter_tools',
+      );
+      final String packageConfigPath = globals.fs.path.join(
+          toolsDir,
+          '.dart_tool',
+          'package_config.json'
+      );
+      globals.fs.file(packageConfigPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "flutter_template_images",
+      "rootUri": "/flutter_template_images",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''');
+      final BuildableIOSApp iosApp = BuildableIOSApp(
+        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        'com.foo.bar',
+        'Runner');
+      final String launchImageDirSuffix = globals.fs.path.join(
+        'Runner',
+        'Assets.xcassets',
+        'LaunchImage.imageset',
+      );
+      expect(
+        await iosApp.templateLaunchImageDirNameForImages,
+        globals.fs.path.absolute(
+          'flutter_template_images',
+          'templates',
+          'app_shared',
+          'ios.tmpl',
+          launchImageDirSuffix,
+        ),
+      );
+    }, overrides: overrides);
   });
 
   group('FuchsiaApp', () {
@@ -575,7 +661,7 @@ void main() {
 
     testUsingContext('Success with far file', () {
       globals.fs.file('bundle.far').createSync();
-      final PrebuiltFuchsiaApp fuchsiaApp = (FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far')) as PrebuiltFuchsiaApp?)!;
+      final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(globals.fs.file('bundle.far'))! as PrebuiltFuchsiaApp;
       expect(testLogger.errorText, isEmpty);
       expect(fuchsiaApp.id, 'bundle.far');
       expect(fuchsiaApp.applicationPackage.path, globals.fs.file('bundle.far').path);

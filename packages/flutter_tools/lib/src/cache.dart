@@ -107,8 +107,8 @@ class DevelopmentArtifact {
 ///
 /// To enable Flutter users in these environments, the Flutter tool supports
 /// custom artifact mirrors that the administrators of such environments may
-/// provide. To use an artifact mirror, the user defines the
-/// `FLUTTER_STORAGE_BASE_URL` environment variable that points to the mirror.
+/// provide. To use an artifact mirror, the user defines the [kFlutterStorageBaseUrl]
+/// (`FLUTTER_STORAGE_BASE_URL`) environment variable that points to the mirror.
 /// Flutter tool reads this variable and uses it instead of the default URLs.
 ///
 /// For more details on specific URLs used to download artifacts, see
@@ -450,15 +450,15 @@ class Cache {
   /// during the installation of the Flutter SDK.
   ///
   /// By default the base URL is https://storage.googleapis.com. However, if
-  /// `FLUTTER_STORAGE_BASE_URL` environment variable is provided, the
-  /// environment variable value is returned instead.
+  /// `FLUTTER_STORAGE_BASE_URL` environment variable ([kFlutterStorageBaseUrl])
+  /// is provided, the environment variable value is returned instead.
   ///
   /// See also:
   ///
   ///  * [cipdBaseUrl], which determines how CIPD artifacts are fetched.
   ///  * [Cache] class-level dartdocs that explain how artifact mirrors work.
   String get storageBaseUrl {
-    final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
     if (overrideUrl == null) {
       return 'https://storage.googleapis.com';
     }
@@ -466,7 +466,7 @@ class Cache {
     try {
       Uri.parse(overrideUrl);
     } on FormatException catch (err) {
-      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
+      throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
     _maybeWarnAboutStorageOverride(overrideUrl);
     return overrideUrl;
@@ -479,8 +479,8 @@ class Cache {
   /// from [storageBaseUrl].
   ///
   /// By default the base URL is https://chrome-infra-packages.appspot.com/dl.
-  /// However, if `FLUTTER_STORAGE_BASE_URL` environment variable is provided,
-  /// then the following value is used:
+  /// However, if `FLUTTER_STORAGE_BASE_URL` environment variable is provided
+  /// ([kFlutterStorageBaseUrl]), then the following value is used:
   ///
   ///     FLUTTER_STORAGE_BASE_URL/flutter_infra_release/cipd
   ///
@@ -492,7 +492,7 @@ class Cache {
   ///    which contains information about CIPD.
   ///  * [Cache] class-level dartdocs that explain how artifact mirrors work.
   String get cipdBaseUrl {
-    final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
     if (overrideUrl == null) {
       return 'https://chrome-infra-packages.appspot.com/dl';
     }
@@ -501,7 +501,7 @@ class Cache {
     try {
       original = Uri.parse(overrideUrl);
     } on FormatException catch (err) {
-      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
+      throwToolExit('"$kFlutterStorageBaseUrl" contains an invalid URL:\n$err');
     }
 
     final String cipdOverride = original.replace(
@@ -520,7 +520,7 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
-    _logger.printError(
+    _logger.printWarning(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );
@@ -575,7 +575,7 @@ class Cache {
     final List<String> paths = <String>[];
     for (final ArtifactSet artifact in _artifacts) {
       final Map<String, String> env = artifact.environment;
-      if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
+      if (!env.containsKey('DYLD_LIBRARY_PATH')) {
         continue;
       }
       final String path = env['DYLD_LIBRARY_PATH']!;
@@ -721,7 +721,7 @@ class Cache {
 
 /// Representation of a set of artifacts used by the tool.
 abstract class ArtifactSet {
-  ArtifactSet(this.developmentArtifact) : assert(developmentArtifact != null);
+  ArtifactSet(this.developmentArtifact);
 
   /// The development artifact.
   final DevelopmentArtifact developmentArtifact;
@@ -1065,11 +1065,11 @@ class ArtifactUpdater {
         }
         continue;
       } on ArgumentError catch (error) {
-        final String? overrideUrl = _platform.environment['FLUTTER_STORAGE_BASE_URL'];
+        final String? overrideUrl = _platform.environment[kFlutterStorageBaseUrl];
         if (overrideUrl != null && url.toString().contains(overrideUrl)) {
           _logger.printError(error.toString());
           throwToolExit(
-            'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
+            'The value of $kFlutterStorageBaseUrl ($overrideUrl) could not be '
             'parsed as a valid url. Please see https://flutter.dev/community/china '
             'for an example of how to use it.\n'
             'Full URL: $url',
@@ -1148,7 +1148,7 @@ class ArtifactUpdater {
       status.pause();
       _logger.printWarning(
         'Downloading an artifact that may not be reachable in some environments (e.g. firewalled environments): $url\n'
-        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.md'
+        'This should not have happened. This is likely a Flutter SDK bug. Please file an issue at https://github.com/flutter/flutter/issues/new?template=1_activation.yml'
       );
       status.resume();
     }

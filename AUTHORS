@@ -2,6 +2,12 @@
 # to the Flutter project. Names should be added to the list like so:
 #
 #   Name/Organization <email address>
+#
+# Anyone who has contributed to the Flutter project in any way (not
+# limited to submitting PRs) is welcome to submit a PR to add their
+# name to this file.
+#
+# Thanks to everyone for your contributions!
 
 Google Inc.
 The Chromium Authors
@@ -99,4 +105,14 @@ Nguyễn Phúc Lợi <nploi1998@gmail.com>
 Jingyi Chen <jingyichen@link.cuhk.edu.cn>
 Junhua Lin <1075209054@qq.com>
 Tomasz Gucio <tgucio@gmail.com>
+<<<<<<< HEAD
 Eli Albert <crasowas@gmail.com>
+=======
+Jason C.H <ctrysbita@outlook.com>
+Hubert Jóźwiak <hjozwiakdx@gmail.com>
+David Neuy <quantjump@gmail.com>
+Eli Albert <crasowas@gmail.com>
+Jan Kuß <jan@kuss.dev>
+André Sousa <andrelvsousa@gmail.com>
+Bartek Pacia <barpac02@gmail.com>
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2

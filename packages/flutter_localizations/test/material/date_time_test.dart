@@ -107,13 +107,18 @@ void main() {
         expect(await formatTimeOfDay(tester, const Locale('ja'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
       });
 
+      testWidgets('formats ${TimeOfDayFormat.HH_dot_mm}', (WidgetTester tester) async {
+        expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 20, minute: 32)), '20.32');
+        expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
+      });
+
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('fr', 'CA'), const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('zh'), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
-        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), 'முற்பகல் 9:32');
+        expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
       });
     });
 

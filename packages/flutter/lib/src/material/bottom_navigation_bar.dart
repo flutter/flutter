@@ -199,21 +199,20 @@ class BottomNavigationBar extends StatefulWidget {
     this.enableFeedback,
     this.landscapeLayout,
     this.useLegacyColorScheme = true,
-  }) : assert(items != null),
-       assert(items.length >= 2),
+  }) : assert(items.length >= 2),
        assert(
         items.every((BottomNavigationBarItem item) => item.label != null),
         'Every item must have a non-null label',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(elevation == null || elevation >= 0.0),
-       assert(iconSize != null && iconSize >= 0.0),
+       assert(iconSize >= 0.0),
        assert(
          selectedItemColor == null || fixedColor == null,
          'Either selectedItemColor or fixedColor can be specified, but not both',
        ),
-       assert(selectedFontSize != null && selectedFontSize >= 0.0),
-       assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+       assert(selectedFontSize >= 0.0),
+       assert(unselectedFontSize >= 0.0),
        selectedItemColor = selectedItemColor ?? fixedColor;
 
   /// Defines the appearance of the button items that are arrayed within the
@@ -421,13 +420,7 @@ class _BottomNavigationTile extends StatelessWidget {
     required this.mouseCursor,
     required this.enableFeedback,
     required this.layout,
-  }) : assert(type != null),
-       assert(item != null),
-       assert(animation != null),
-       assert(selected != null),
-       assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(mouseCursor != null);
+  });
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -523,10 +516,8 @@ class _BottomNavigationTile extends StatelessWidget {
     switch (type) {
       case BottomNavigationBarType.fixed:
         size = 1;
-        break;
       case BottomNavigationBarType.shifting:
         size = (flex! * 1000.0).round();
-        break;
     }
 
     Widget result = InkResponse(
@@ -607,8 +598,7 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData data = MediaQuery.of(context);
-    if (data.orientation == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.linear) {
+    if (MediaQuery.orientationOf(context) == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.linear) {
       return Align(
         heightFactor: 1,
         child: Row(
@@ -634,8 +624,7 @@ class _TileIcon extends StatelessWidget {
     required this.item,
     required this.selectedIconTheme,
     required this.unselectedIconTheme,
-  }) : assert(selected != null),
-       assert(item != null);
+  });
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -678,13 +667,7 @@ class _Label extends StatelessWidget {
     required this.unselectedLabelStyle,
     required this.showSelectedLabels,
     required this.showUnselectedLabels,
-  }) : assert(colorTween != null),
-       assert(animation != null),
-       assert(item != null),
-       assert(selectedLabelStyle != null),
-       assert(unselectedLabelStyle != null),
-       assert(showSelectedLabels != null),
-       assert(showUnselectedLabels != null);
+  });
 
   final ColorTween colorTween;
   final Animation<double> animation;
@@ -877,7 +860,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   _backgroundColor = circle.color;
                   circle.dispose();
                 });
-                break;
               case AnimationStatus.dismissed:
               case AnimationStatus.forward:
               case AnimationStatus.reverse:
@@ -905,7 +887,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           break;
         case BottomNavigationBarType.shifting:
           _pushCircle(widget.currentIndex);
-          break;
       }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
@@ -935,7 +916,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context);
     final BottomNavigationBarThemeData bottomTheme = BottomNavigationBarTheme.of(context);
@@ -944,10 +924,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     switch (themeData.brightness) {
       case Brightness.light:
         themeColor = themeData.colorScheme.primary;
-        break;
       case Brightness.dark:
         themeColor = themeData.colorScheme.secondary;
-        break;
     }
 
     final TextStyle effectiveSelectedLabelStyle =
@@ -995,7 +973,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         colorTween = ColorTween(
           begin: widget.unselectedItemColor
@@ -1005,7 +982,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeData.colorScheme.surface,
         );
-        break;
     }
 
     final ColorTween labelColorTween;
@@ -1022,7 +998,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         labelColorTween = ColorTween(
           begin: effectiveUnselectedLabelStyle.color
@@ -1034,7 +1009,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeColor,
         );
-        break;
     }
 
     final ColorTween iconColorTween;
@@ -1051,7 +1025,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? widget.fixedColor
             ?? themeColor,
         );
-        break;
       case BottomNavigationBarType.shifting:
         iconColorTween = ColorTween(
           begin: effectiveUnselectedIconTheme.color
@@ -1063,7 +1036,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ?? bottomTheme.selectedItemColor
             ?? themeColor,
         );
-        break;
     }
 
     final List<Widget> tiles = <Widget>[];
@@ -1114,16 +1086,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     final BottomNavigationBarLandscapeLayout layout = widget.landscapeLayout
       ?? bottomTheme.landscapeLayout
       ?? BottomNavigationBarLandscapeLayout.spread;
-    final double additionalBottomPadding = MediaQuery.of(context).viewPadding.bottom;
+    final double additionalBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     Color? backgroundColor;
     switch (_effectiveType) {
       case BottomNavigationBarType.fixed:
         backgroundColor = widget.backgroundColor ?? bottomTheme.backgroundColor;
-        break;
       case BottomNavigationBarType.shifting:
         backgroundColor = _backgroundColor;
-        break;
     }
 
     return Semantics(
@@ -1180,14 +1150,13 @@ class _Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData data = MediaQuery.of(context);
     Widget alignedChild = child;
-    if (data.orientation == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.centered) {
+    if (MediaQuery.orientationOf(context) == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.centered) {
       alignedChild = Align(
         alignment: Alignment.bottomCenter,
         heightFactor: 1,
         child: SizedBox(
-          width: data.size.height,
+          width: MediaQuery.sizeOf(context).height,
           child: child,
         ),
       );
@@ -1207,9 +1176,7 @@ class _Circle {
     required this.index,
     required this.color,
     required TickerProvider vsync,
-  }) : assert(state != null),
-       assert(index != null),
-       assert(color != null) {
+  }) {
     controller = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,
@@ -1252,8 +1219,7 @@ class _RadialPainter extends CustomPainter {
   _RadialPainter({
     required this.circles,
     required this.textDirection,
-  }) : assert(circles != null),
-       assert(textDirection != null);
+  });
 
   final List<_Circle> circles;
   final TextDirection textDirection;
@@ -1297,10 +1263,8 @@ class _RadialPainter extends CustomPainter {
       switch (textDirection) {
         case TextDirection.rtl:
           leftFraction = 1.0 - circle.horizontalLeadingOffset;
-          break;
         case TextDirection.ltr:
           leftFraction = circle.horizontalLeadingOffset;
-          break;
       }
       final Offset center = Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = Tween<double>(

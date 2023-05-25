@@ -70,6 +70,7 @@ void main() {
         processManager: processManager,
         terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
       );
       runner = createTestCommandRunner(command);
 
@@ -88,13 +89,14 @@ void main() {
           const FakeCommand(
             // artifact paths are from Artifacts.test() and stable
             command: <String>[
-              'HostArtifact.engineDartSdkPath/bin/dart',
+              'Artifact.engineDartSdkPath/bin/dart',
               '--disable-dart-dev',
-              'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+              'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
               '--sdk',
-              'HostArtifact.engineDartSdkPath',
+              'Artifact.engineDartSdkPath',
+              '--suppress-analytics',
             ],
             exitCode: SIGABRT,
             stderr: stderr,

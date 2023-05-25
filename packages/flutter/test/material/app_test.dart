@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -410,8 +404,11 @@ void main() {
     );
   });
 
-  testWidgets("WidgetsApp don't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
+  testWidgets("WidgetsApp doesn't rebuild routes when MediaQuery updates", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37878
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+    addTearDown(tester.view.reset);
+
     int routeBuildCount = 0;
     int dependentBuildCount = 0;
 
@@ -435,8 +432,7 @@ void main() {
     expect(dependentBuildCount, equals(1));
 
     // didChangeMetrics
-    tester.binding.window.physicalSizeTestValue = const Size(42, 42);
-    addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    tester.view.physicalSize = const Size(42, 42);
 
     await tester.pump();
 
@@ -444,8 +440,7 @@ void main() {
     expect(dependentBuildCount, equals(2));
 
     // didChangeTextScaleFactor
-    tester.binding.platformDispatcher.textScaleFactorTestValue = 42;
-    addTearDown(tester.binding.platformDispatcher.clearTextScaleFactorTestValue);
+    tester.platformDispatcher.textScaleFactorTestValue = 42;
 
     await tester.pump();
 
@@ -453,8 +448,7 @@ void main() {
     expect(dependentBuildCount, equals(3));
 
     // didChangePlatformBrightness
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-    addTearDown(tester.binding.platformDispatcher.clearPlatformBrightnessTestValue);
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
 
     await tester.pump();
 
@@ -462,8 +456,7 @@ void main() {
     expect(dependentBuildCount, equals(4));
 
     // didChangeAccessibilityFeatures
-    tester.binding.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-    addTearDown(tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     await tester.pump();
 
@@ -475,7 +468,7 @@ void main() {
     double? textScaleFactor;
     await tester.pumpWidget(MaterialApp(
       home: Builder(builder:(BuildContext context) {
-        textScaleFactor = MediaQuery.of(context).textScaleFactor;
+        textScaleFactor = MediaQuery.textScaleFactorOf(context);
         return Container();
       }),
     ));
@@ -527,8 +520,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses regular theme when themeMode is light', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a light platformBrightness.
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a light platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
 
     late ThemeData appliedTheme;
     await tester.pumpWidget(
@@ -550,8 +545,8 @@ void main() {
     );
     expect(appliedTheme.brightness, Brightness.light);
 
-    // Mock the Window to explicitly report a dark platformBrightness.
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -573,8 +568,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses darkTheme when themeMode is dark', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a light platformBrightness.
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a light platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
 
     late ThemeData appliedTheme;
     await tester.pumpWidget(
@@ -596,8 +593,8 @@ void main() {
     );
     expect(appliedTheme.brightness, Brightness.dark);
 
-    // Mock the Window to explicitly report a dark platformBrightness.
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -619,9 +616,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses regular theme when themeMode is system and platformBrightness is light', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a light platformBrightness.
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a light platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
 
     late ThemeData appliedTheme;
 
@@ -646,8 +644,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses darkTheme when themeMode is system and platformBrightness is dark', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a dark platformBrightness.
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
 
     late ThemeData appliedTheme;
     await tester.pumpWidget(
@@ -670,9 +670,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses light theme when platformBrightness is dark but no dark theme is provided', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a dark platformBrightness.
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
 
     late ThemeData appliedTheme;
 
@@ -694,9 +695,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses fallback light theme when platformBrightness is dark but no theme is provided at all', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a dark platformBrightness.
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
 
     late ThemeData appliedTheme;
 
@@ -715,9 +717,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses fallback light theme when platformBrightness is light and a dark theme is provided', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a dark platformBrightness.
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
 
     late ThemeData appliedTheme;
 
@@ -739,9 +742,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses dark theme when platformBrightness is dark', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a dark platformBrightness.
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a dark platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
 
     late ThemeData appliedTheme;
 
@@ -766,8 +770,10 @@ void main() {
   });
 
   testWidgets('MaterialApp uses high contrast theme when appropriate', (WidgetTester tester) async {
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
-    tester.binding.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -789,12 +795,13 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.blue);
-    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue();
   });
 
   testWidgets('MaterialApp uses high contrast dark theme when appropriate', (WidgetTester tester) async {
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-    tester.binding.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -822,12 +829,13 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.green);
-    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue();
   });
 
   testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (WidgetTester tester) async {
-    tester.binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-    tester.binding.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
 
     late ThemeData appliedTheme;
 
@@ -849,8 +857,6 @@ void main() {
     );
 
     expect(appliedTheme.primaryColor, Colors.lightGreen);
-    tester.binding.platformDispatcher.clearAccessibilityFeaturesTestValue();
-    tester.binding.platformDispatcher.clearPlatformBrightnessTestValue();
   });
 
   testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
@@ -935,10 +941,11 @@ void main() {
     expect(scaffoldRebuilds, 2);
   });
 
-  testWidgets('MaterialApp switches themes when the Window platformBrightness changes.', (WidgetTester tester) async {
-    // Mock the Window to explicitly report a light platformBrightness.
-    final TestWidgetsFlutterBinding binding = tester.binding;
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+  testWidgets('MaterialApp switches themes when the platformBrightness changes.', (WidgetTester tester) async {
+    addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+    // Mock the test to explicitly report a light platformBrightness.
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
 
     ThemeData? themeBeforeBrightnessChange;
     ThemeData? themeAfterBrightnessChange;
@@ -966,7 +973,7 @@ void main() {
 
     // Switch the platformBrightness from light to dark and pump the widget tree
     // to process changes.
-    binding.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
 
     expect(themeBeforeBrightnessChange!.brightness, Brightness.light);
@@ -1444,6 +1451,89 @@ void main() {
     );
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
+
+  testWidgets('Assert in buildScrollbar that controller != null when using it (vertical)', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScrollConfiguration(
+        // Avoid the default ones here.
+        behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return Container(height: 1000.0);
+            },
+          ),
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(
+      direction: AxisDirection.down,
+    );
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        // Does not throw if we aren't using it.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(
+          () {
+            defaultBehavior.buildScrollbar(capturedContext, child, details);
+          },
+          throwsA(
+            isA<AssertionError>().having((AssertionError error) => error.toString(),
+              'description', contains('details.controller != null')),
+          ),
+        );
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('Assert in buildScrollbar that controller != null when using it (horizontal)', (WidgetTester tester) async {
+    const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: ScrollConfiguration(
+        // Avoid the default ones here.
+        behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return Container(height: 1000.0);
+            },
+          ),
+        ),
+      ),
+    ));
+
+    const ScrollableDetails details = ScrollableDetails(
+      direction: AxisDirection.left,
+    );
+    final Widget child = Container();
+
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        // Does not throw if we aren't using it.
+        // Horizontal axis gets no scrollbars for all platforms.
+        defaultBehavior.buildScrollbar(capturedContext, child, details);
+    }
+  }, variant: TargetPlatformVariant.all());
 }
 
 class MockScrollBehavior extends ScrollBehavior {

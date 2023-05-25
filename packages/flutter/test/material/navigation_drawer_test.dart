@@ -11,7 +11,7 @@ void main() {
     int mutatedIndex = -1;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final ThemeData theme= ThemeData.from(colorScheme: const ColorScheme.light());
-    widgetSetup(tester, 3000, windowHeight: 3000);
+    widgetSetup(tester, 3000, viewHeight: 3000);
     final Widget widget = _buildWidget(
       scaffoldKey,
       NavigationDrawer(
@@ -23,7 +23,7 @@ void main() {
           ),
           NavigationDrawerDestination(
             icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-            label: Text('Alarm',style: theme.textTheme.bodySmall),
+            label: Text('Alarm', style: theme.textTheme.bodySmall),
           ),
         ],
         onDestinationSelected: (int i) {
@@ -68,7 +68,7 @@ void main() {
             ),
             NavigationDrawerDestination(
               icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm',style: theme.textTheme.bodySmall),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
             ),
           ],
           onDestinationSelected: (int i) {},
@@ -97,7 +97,7 @@ void main() {
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-          label: Text('Alarm',style: theme.textTheme.bodySmall),
+          label: Text('Alarm', style: theme.textTheme.bodySmall),
         ),
       ],
     );
@@ -134,7 +134,7 @@ void main() {
               ),
               NavigationDrawerDestination(
                 icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-                label: Text('Alarm',style: theme.textTheme.bodySmall),
+                label: Text('Alarm', style: theme.textTheme.bodySmall),
               ),
             ],
             onDestinationSelected: (int i) {},
@@ -148,13 +148,17 @@ void main() {
     expect(_getMaterial(tester).color, ThemeData().colorScheme.surface);
     expect(_getMaterial(tester).surfaceTintColor, ThemeData().colorScheme.surfaceTint);
     expect(_getMaterial(tester).elevation, 1);
-    expect(_indicator(tester)?.color, const Color(0xff2196f3));
-    expect(_indicator(tester)?.shape, const StadiumBorder());
+    expect(_getIndicatorDecoration(tester)?.color, const Color(0xff2196f3));
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
   });
 
   testWidgets('Navigation drawer is scrollable', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+<<<<<<< HEAD
     widgetSetup(tester, 500, windowHeight: 300);
+=======
+    widgetSetup(tester, 500, viewHeight: 300);
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
     await tester.pumpWidget(
       _buildWidget(
         scaffoldKey,
@@ -201,8 +205,13 @@ void main() {
 
   testWidgets('Safe Area test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+<<<<<<< HEAD
     const double windowHeight = 300;
     widgetSetup(tester, 500, windowHeight: windowHeight);
+=======
+    const double viewHeight = 300;
+    widgetSetup(tester, 500, viewHeight: viewHeight);
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -237,7 +246,11 @@ void main() {
     );
 
     // No Safe area padding at the bottom.
+<<<<<<< HEAD
     expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, windowHeight);
+=======
+    expect(tester.getBottomRight(find.widgetWithText(NavigationDrawerDestination,'Label4')).dy, viewHeight);
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
    });
 
   testWidgets('Navigation drawer semantics', (WidgetTester tester) async {
@@ -256,7 +269,7 @@ void main() {
             ),
             NavigationDrawerDestination(
               icon: Icon(Icons.access_alarm, color: theme.iconTheme.color),
-              label: Text('Alarm',style: theme.textTheme.bodySmall),
+              label: Text('Alarm', style: theme.textTheme.bodySmall),
             ),
           ],
         ),
@@ -309,6 +322,57 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationDrawer({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: NavigationDrawer(
+            indicatorColor: indicatorColor,
+            indicatorShape: indicatorShape,
+            children: <Widget>[
+              Text('Headline', style: theme.textTheme.bodyLarge),
+              const NavigationDrawerDestination(
+                icon: Icon(Icons.ac_unit),
+                label: Text('AC'),
+              ),
+              const NavigationDrawerDestination(
+                icon: Icon(Icons.access_alarm),
+                label: Text('Alarm'),
+              ),
+            ],
+            onDestinationSelected: (int i) { },
+          ),
+          body: Container(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationDrawer());
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+    // Test that InkWell for hover, focus and pressed use default shape.
+    expect(_getInkWell(tester)?.customBorder, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationDrawer(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+    // Test that InkWell for hover, focus and pressed use custom shape.
+    expect(_getInkWell(tester)?.customBorder, shape);
+  });
 }
 
 Widget _buildWidget(GlobalKey<ScaffoldState> scaffoldKey, Widget child) {
@@ -329,7 +393,14 @@ Material _getMaterial(WidgetTester tester) {
   );
 }
 
-ShapeDecoration? _indicator(WidgetTester tester) {
+InkWell? _getInkWell(WidgetTester tester) {
+  return tester.firstWidget<InkWell>(
+    find.descendant(
+        of: find.byType(NavigationDrawer), matching: find.byType(InkWell)),
+  );
+}
+
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
       .firstWidget<Container>(
         find.descendant(
@@ -340,11 +411,8 @@ ShapeDecoration? _indicator(WidgetTester tester) {
       .decoration as ShapeDecoration?;
 }
 
-void widgetSetup(WidgetTester tester, double windowWidth,
-    {double? windowHeight}) {
-  final double height = windowHeight ?? 1000;
-  tester.binding.window.devicePixelRatioTestValue = 2;
-  final double dpi = tester.binding.window.devicePixelRatio;
-  tester.binding.window.physicalSizeTestValue =
-      Size(windowWidth * dpi, height * dpi);
+void widgetSetup(WidgetTester tester, double viewWidth, {double viewHeight = 1000}) {
+  tester.view.devicePixelRatio = 2;
+  final double dpi = tester.view.devicePixelRatio;
+  tester.view.physicalSize = Size(viewWidth * dpi, viewHeight * dpi);
 }

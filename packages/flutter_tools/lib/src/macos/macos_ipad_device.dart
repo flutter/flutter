@@ -14,7 +14,6 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
-import '../ios/application_package.dart';
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -55,11 +54,11 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) => null;
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
 
   @override
   Future<LaunchResult> startApp(
-    IOSApp package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     required DebuggingOptions debuggingOptions,
@@ -74,13 +73,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   Future<bool> stopApp(
-    IOSApp app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async => false;
 
   @override
-  Future<void> buildForDevice(
-    covariant IOSApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {

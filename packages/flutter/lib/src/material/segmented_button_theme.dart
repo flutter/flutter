@@ -62,6 +62,9 @@ class SegmentedButtonThemeData with Diagnosticable {
 
   /// Linearly interpolates between two segmented button themes.
   static SegmentedButtonThemeData lerp(SegmentedButtonThemeData? a, SegmentedButtonThemeData? b, double t) {
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return SegmentedButtonThemeData(
       style: ButtonStyle.lerp(a?.style, b?.style, t),
       selectedIcon: t < 0.5 ? a?.selectedIcon : b?.selectedIcon,
@@ -107,7 +110,7 @@ class SegmentedButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the visual properties used by descendant [SegmentedButton]
   /// widgets.
@@ -158,7 +161,6 @@ class SegmentedButtonTheme extends InheritedTheme {
   ///  * [of], which will return [ThemeData.segmentedButtonTheme] if it doesn't
   ///    find a [SegmentedButtonTheme] ancestor, instead of returning null.
   static SegmentedButtonThemeData? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>()?.data;
   }
 

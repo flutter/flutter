@@ -72,7 +72,7 @@ class ApplicationSwitcherDescription {
 
 /// Specifies a system overlay at a particular location.
 ///
-/// Used by [SystemChrome.setEnabledSystemUIOverlays].
+/// Used by [SystemChrome.setEnabledSystemUIMode].
 enum SystemUiOverlay {
   /// The status bar provided by the embedder on the top of the application
   /// surface, if any.
@@ -182,7 +182,9 @@ enum SystemUiMode {
 
 /// Specifies a preference for the style of the system overlays.
 ///
-/// Used by [SystemChrome.setSystemUIOverlayStyle].
+/// Used by [AppBar.systemOverlayStyle] for declaratively setting the style of
+/// the system overlays, and by [SystemChrome.setSystemUIOverlayStyle] for
+/// imperatively setting the style of the systeme overlays.
 @immutable
 class SystemUiOverlayStyle {
   /// Creates a new [SystemUiOverlayStyle].
@@ -356,11 +358,7 @@ List<String> _stringify(List<dynamic> list) => <String>[
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
-class SystemChrome {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  SystemChrome._();
-
+abstract final class SystemChrome {
   /// Specifies the set of orientations the application interface can
   /// be displayed in.
   ///
@@ -398,36 +396,6 @@ class SystemChrome {
         'primaryColor': description.primaryColor,
       },
     );
-  }
-
-  /// Specifies the set of system overlays to have visible when the application
-  /// is running.
-  ///
-  /// The `overlays` argument is a list of [SystemUiOverlay] enum values
-  /// denoting the overlays to show.
-  ///
-  /// If a particular overlay is unsupported on the platform, enabling or
-  /// disabling that overlay will be ignored.
-  ///
-  /// The settings here can be overridden by the platform when System UI becomes
-  /// necessary for functionality.
-  ///
-  /// For example, on Android, when the keyboard becomes visible, it will enable the
-  /// navigation bar and status bar system UI overlays. When the keyboard is closed,
-  /// Android will not restore the previous UI visibility settings, and the UI
-  /// visibility cannot be changed until 1 second after the keyboard is closed to
-  /// prevent malware locking users from navigation buttons.
-  ///
-  /// To regain "fullscreen" after text entry, the UI overlays should be set again
-  /// after a delay of 1 second. This can be achieved through [restoreSystemUIOverlays]
-  /// or calling this again. Otherwise, the original UI overlay settings will be
-  /// automatically restored only when the application loses and regains focus.
-  @Deprecated(
-    'Migrate to setEnabledSystemUIMode. '
-    'This feature was deprecated after v2.3.0-17.0.pre.'
-  )
-  static Future<void> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await setEnabledSystemUIMode(SystemUiMode.manual, overlays: overlays);
   }
 
   /// Specifies the [SystemUiMode] to have visible when the application
@@ -508,7 +476,7 @@ class SystemChrome {
   }
 
   /// Restores the system overlays to the last settings provided via
-  /// [setEnabledSystemUIOverlays]. May be used when the platform force enables/disables
+  /// [setEnabledSystemUIMode]. May be used when the platform force enables/disables
   /// UI elements.
   ///
   /// For example, when the Android keyboard disables hidden status and navigation bars,
@@ -522,8 +490,8 @@ class SystemChrome {
     );
   }
 
-  /// Specifies the style to use for the system overlays that are visible (if
-  /// any).
+  /// Specifies the style to use for the system overlays (e.g. the status bar on
+  /// Android or iOS, the system navigation bar on Android) that are visible (if any).
   ///
   /// This method will schedule the embedder update to be run in a microtask.
   /// Any subsequent calls to this method during the current event loop will
@@ -534,22 +502,19 @@ class SystemChrome {
   /// system UI styles. For instance, to change the system UI style on a new
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///
-  /// However, the [AppBar] widget automatically sets the system overlay style
-  /// based on its [AppBar.brightness], so configure that instead of calling
-  /// this method directly. Likewise, do the same for [CupertinoNavigationBar]
-  /// via [CupertinoNavigationBar.backgroundColor].
+  /// The [AppBar] widget automatically sets the system overlay style based on
+  /// its [AppBar.systemOverlayStyle], so configure that instead of calling this
+  /// method directly. Likewise, do the same for [CupertinoNavigationBar] via
+  /// [CupertinoNavigationBar.backgroundColor].
   ///
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// {@tool snippet}
-  /// ```dart
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-  ///   return const Placeholder();
-  /// }
-  /// ```
+  /// {@tool sample}
+  /// The following example uses an `AppBar` to set the system status bar color and
+  /// the system navigation bar color.
+  ///
+  /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.0.dart **
   /// {@end-tool}
   ///
   /// For more complex control of the system overlay styles, consider using
@@ -561,23 +526,25 @@ class SystemChrome {
   /// to configure the system styles when an app bar is not used. When an app
   /// bar is used, apps should not enclose the app bar in an annotated region
   /// because one is automatically created. If an app bar is used and the app
-  /// bar is enclosed in an annotated region, the app bar overlay style supercedes
+  /// bar is enclosed in an annotated region, the app bar overlay style supersedes
   /// the status bar properties defined in the enclosing annotated region overlay
-  /// style and the enclosing annotated region overlay style supercedes the app bar
+  /// style and the enclosing annotated region overlay style supersedes the app bar
   /// overlay style navigation bar properties.
   ///
   /// {@tool sample}
-  /// The following example creates a widget that changes the status bar color
-  /// to a random value on Android.
+  /// The following example uses an `AnnotatedRegion<SystemUiOverlayStyle>` to set
+  /// the system status bar color and the system navigation bar color.
   ///
   /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
   /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///  * [AppBar.systemOverlayStyle], a convenient property for declaratively setting
+  ///    the style of the system overlays.
+  ///  * [AnnotatedRegion], the widget used to place a `SystemUiOverlayStyle` into
+  ///    the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
-    assert(style != null);
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.
       _pendingStyle = style;

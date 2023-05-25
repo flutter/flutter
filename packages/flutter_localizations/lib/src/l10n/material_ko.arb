@@ -70,7 +70,7 @@
   "dateOutOfRangeLabel": "범위를 벗어났습니다.",
   "saveButtonLabel": "저장",
   "datePickerHelpText": "날짜 선택",
-  "dateRangePickerHelpText": "범위 선택",
+  "dateRangePickerHelpText": "기간 선택",
   "calendarModeButtonLabel": "캘린더 모드로 전환",
   "inputDateModeButtonLabel": "입력 모드로 전환",
   "timePickerDialHelpText": "시간 선택",
@@ -129,5 +129,10 @@
   "keyboardKeySpace": "스페이스",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "메뉴 바 메뉴"
+  "menuBarMenuLabel": "메뉴 바 메뉴",
+  "currentDateLabel": "오늘",
+  "scrimLabel": "스크림",
+  "bottomSheetLabel": "하단 시트",
+  "scrimOnTapHint": "$modalRouteContentName 닫기",
+  "keyboardKeyShift": "Shift"
 }

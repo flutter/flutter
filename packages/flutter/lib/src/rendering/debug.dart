@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
@@ -306,6 +307,81 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugDisablePhysicalShapeLayers ||
         debugDisableOpacityLayers) {
       throw FlutterError(reason);
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Returns true if the given [Axis] is bounded within the given
+/// [BoxConstraints] in both the main and cross axis, throwing an exception
+/// otherwise.
+///
+/// This is used by viewports during `performLayout` and `computeDryLayout`
+/// because bounded constraints are required in order to layout their children.
+bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
+  assert(() {
+    if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+      switch (axis) {
+        case Axis.vertical:
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Vertical viewport was given unbounded height.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'vertical space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'vertical space for the children. In this case, consider using a '
+                'Column or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError(
+              'Vertical viewport was given unbounded width.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a vertical viewport was given an unlimited amount of '
+              'horizontal space in which to expand.',
+            );
+          }
+        case Axis.horizontal:
+          if (!constraints.hasBoundedWidth) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('Horizontal viewport was given unbounded width.'),
+              ErrorDescription(
+                'Viewports expand in the scrolling direction to fill their container. '
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'horizontal space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.',
+              ),
+              ErrorHint(
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'horizontal space for the children. In this case, consider using a '
+                'Row or Wrap instead. Otherwise, consider using a '
+                'CustomScrollView to concatenate arbitrary slivers into a '
+                'single scrollable.',
+              ),
+            ]);
+          }
+          if (!constraints.hasBoundedHeight) {
+            throw FlutterError(
+              'Horizontal viewport was given unbounded height.\n'
+              'Viewports expand in the cross axis to fill their container and '
+              'constrain their children to match their extent in the cross axis. '
+              'In this case, a horizontal viewport was given an unlimited amount of '
+              'vertical space in which to expand.',
+            );
+          }
+      }
     }
     return true;
   }());

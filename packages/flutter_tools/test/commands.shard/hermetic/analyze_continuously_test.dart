@@ -60,7 +60,7 @@ void main() {
     pubspecFile.writeAsStringSync('''
   name: foo_project
   environment:
-    sdk: '>=2.10.0 <3.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
   ''');
 
     final File dartFile = fileSystem.file(fileSystem.path.join(directory.path, 'lib', 'main.dart'));
@@ -92,13 +92,14 @@ void main() {
       );
 
       final AnalysisServer server = AnalysisServer(
-        globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+        globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
         <String>[tempDir.path],
         fileSystem: fileSystem,
         platform: platform,
         processManager: processManager,
         logger: logger,
         terminal: terminal,
+        suppressAnalytics: true,
       );
 
       int errorCount = 0;
@@ -132,13 +133,14 @@ void main() {
     );
 
     final AnalysisServer server = AnalysisServer(
-      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
       logger: logger,
       terminal: terminal,
+      suppressAnalytics: true,
     );
 
     int errorCount = 0;
@@ -159,13 +161,14 @@ void main() {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     final AnalysisServer server = AnalysisServer(
-      globals.artifacts!.getHostArtifact(HostArtifact.engineDartSdkPath).path,
+      globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
       fileSystem: fileSystem,
       platform: platform,
       processManager: processManager,
       logger: logger,
       terminal: terminal,
+      suppressAnalytics: true,
     );
 
     int errorCount = 0;
@@ -179,19 +182,19 @@ void main() {
     await server.dispose();
   });
 
-  testUsingContext('Can run AnalysisService with customized cache location', () async {
+  testUsingContext('Can run AnalysisService without suppressing analytics', () async {
     final StreamController<List<int>> stdin = StreamController<List<int>>();
     final FakeProcessManager processManager = FakeProcessManager.list(
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'HostArtifact.engineDartSdkPath/bin/dart',
+            'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'HostArtifact.engineDartSdkPath',
+            'Artifact.engineDartSdkPath',
           ],
           stdin: IOSink(stdin.sink),
         ),
@@ -206,6 +209,46 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: false,
+    );
+
+    final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
+    commandRunner.addCommand(command);
+    unawaited(commandRunner.run(<String>['analyze', '--watch']));
+    await stdin.stream.first;
+
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testUsingContext('Can run AnalysisService with customized cache location', () async {
+    final StreamController<List<int>> stdin = StreamController<List<int>>();
+    final FakeProcessManager processManager = FakeProcessManager.list(
+      <FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartSdkPath/bin/dart',
+            '--disable-dart-dev',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            '--disable-server-feature-completion',
+            '--disable-server-feature-search',
+            '--sdk',
+            'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
+          ],
+          stdin: IOSink(stdin.sink),
+        ),
+      ]);
+
+    final Artifacts artifacts = Artifacts.test();
+    final AnalyzeCommand command = AnalyzeCommand(
+      terminal: Terminal.test(),
+      artifacts: artifacts,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      processManager: processManager,
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
     );
 
     final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
@@ -228,13 +271,14 @@ void main() {
       <FakeCommand>[
         FakeCommand(
           command: const <String>[
-            'HostArtifact.engineDartSdkPath/bin/dart',
+            'Artifact.engineDartSdkPath/bin/dart',
             '--disable-dart-dev',
-            'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+            'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
             '--sdk',
-            'HostArtifact.engineDartSdkPath',
+            'Artifact.engineDartSdkPath',
+            '--suppress-analytics',
           ],
           stdin: IOSink(stdin.sink),
           stdout: '''
@@ -254,6 +298,7 @@ void main() {
       fileSystem: fileSystem,
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
     );
 
     await FakeAsync().run((FakeAsync time) async {
@@ -281,13 +326,14 @@ void main() {
         <FakeCommand>[
           FakeCommand(
               command: const <String>[
-                'HostArtifact.engineDartSdkPath/bin/dart',
+                'Artifact.engineDartSdkPath/bin/dart',
                 '--disable-dart-dev',
-                'HostArtifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
+                'Artifact.engineDartSdkPath/bin/snapshots/analysis_server.dart.snapshot',
                 '--disable-server-feature-completion',
                 '--disable-server-feature-search',
                 '--sdk',
-                'HostArtifact.engineDartSdkPath',
+                'Artifact.engineDartSdkPath',
+                '--suppress-analytics',
               ],
               stdin: IOSink(stdin.sink),
               stdout: '''
@@ -307,6 +353,7 @@ void main() {
       fileSystem: MemoryFileSystem.test(),
       processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
     );
 
     await FakeAsync().run((FakeAsync time) async {

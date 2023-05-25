@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math';
 import 'dart:ui';
@@ -31,8 +32,10 @@ void main() {
   });
 
   testWidgets('Image filter - blur with offset', (WidgetTester tester) async {
+    final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
+        key: key,
         child: Transform.translate(
           offset: const Offset(50, 50),
           child: ImageFiltered(
@@ -43,7 +46,7 @@ void main() {
       ),
     );
     await expectLater(
-      find.byType(ImageFiltered),
+      find.byKey(key),
       matchesGoldenFile('image_filter_blur_offset.png'),
     );
   });
@@ -119,8 +122,10 @@ void main() {
   testWidgets('Image filter - matrix with offset', (WidgetTester tester) async {
     final Matrix4 matrix = Matrix4.rotationZ(pi / 18);
     final ImageFilter matrixFilter = ImageFilter.matrix(matrix.storage);
+    final Key key = GlobalKey();
     await tester.pumpWidget(
       RepaintBoundary(
+        key: key,
         child: Transform.translate(
           offset: const Offset(50, 50),
           child: ImageFiltered(
@@ -147,7 +152,7 @@ void main() {
       ),
     );
     await expectLater(
-      find.byType(ImageFiltered),
+      find.byKey(key),
       matchesGoldenFile('image_filter_matrix_offset.png'),
     );
   });
@@ -174,7 +179,7 @@ void main() {
   });
 
   testWidgets('Image filter - enabled and disabled', (WidgetTester tester) async {
-    Future<void> pumpWithEnabledStaet(bool enabled) async {
+    Future<void> pumpWithEnabledState(bool enabled) async {
       await tester.pumpWidget(
         RepaintBoundary(
           child: ImageFiltered(
@@ -186,11 +191,11 @@ void main() {
       );
     }
 
-    await pumpWithEnabledStaet(false);
+    await pumpWithEnabledState(false);
     expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
 
 
-    await pumpWithEnabledStaet(true);
+    await pumpWithEnabledState(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));
   });
 }

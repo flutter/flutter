@@ -18,7 +18,9 @@ void main() {
 
     // Enables the semantics should not schedule any frames if the root widget
     // has not been attached.
-    binding.setSemanticsEnabled(true);
+    expect(binding.semanticsEnabled, isFalse);
+    binding.ensureSemantics();
+    expect(binding.semanticsEnabled, isTrue);
     expect(SchedulerBinding.instance.framesEnabled, isFalse);
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
 

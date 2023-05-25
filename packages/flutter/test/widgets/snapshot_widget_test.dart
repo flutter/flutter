@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:ui' as ui;
 
@@ -240,7 +241,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
-  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encounted with SnapshotMode.permissive', (WidgetTester tester) async {
+  testWidgets('RenderSnapshotWidget does not take a snapshot if a platform view is encountered with SnapshotMode.permissive', (WidgetTester tester) async {
     final SnapshotController controller = SnapshotController(allowSnapshotting: true);
     await tester.pumpWidget(
       Center(
@@ -263,12 +264,11 @@ void main() {
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
 
   testWidgets('SnapshotWidget should have same result when enabled', (WidgetTester tester) async {
-    tester.binding.window
-      ..physicalSizeTestValue = const Size(10, 10)
-      ..devicePixelRatioTestValue = 1;
-    addTearDown(() => tester.binding.window
-      ..clearPhysicalSizeTestValue()
-      ..clearDevicePixelRatioTestValue());
+    addTearDown(tester.view.reset);
+
+    tester.view
+      ..physicalSize = const Size(10, 10)
+      ..devicePixelRatio = 1;
 
     const ValueKey<String> repaintBoundaryKey = ValueKey<String>('boundary');
     final SnapshotController controller = SnapshotController();
@@ -297,23 +297,6 @@ void main() {
 
     await expectLater(find.byKey(repaintBoundaryKey), matchesReferenceImage(imageWhenDisabled));
   }, skip: kIsWeb); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/106689
-}
-
-class TestController extends SnapshotController {
-  int addedListenerCount = 0;
-  int removedListenerCount = 0;
-
-  @override
-  void addListener(ui.VoidCallback listener) {
-    addedListenerCount += 1;
-    super.addListener(listener);
-  }
-
-  @override
-  void removeListener(ui.VoidCallback listener) {
-    removedListenerCount += 1;
-    super.removeListener(listener);
-  }
 }
 
 class TestPlatformView extends SingleChildRenderObjectWidget {
@@ -387,8 +370,7 @@ class TestDependencies extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window)
-          .copyWith(devicePixelRatio: devicePixelRatio),
+        data: const MediaQueryData().copyWith(devicePixelRatio: devicePixelRatio),
         child: child,
       ),
     );

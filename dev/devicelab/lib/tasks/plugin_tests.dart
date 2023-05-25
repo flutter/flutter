@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../framework/framework.dart';
+import '../framework/ios.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
@@ -32,6 +33,7 @@ class PluginTest {
     this.pluginCreateEnvironment,
     this.appCreateEnvironment,
     this.dartOnlyPlugin = false,
+    this.sharedDarwinSource = false,
     this.template = 'plugin',
   });
 
@@ -40,6 +42,7 @@ class PluginTest {
   final Map<String, String>? pluginCreateEnvironment;
   final Map<String, String>? appCreateEnvironment;
   final bool dartOnlyPlugin;
+  final bool sharedDarwinSource;
   final String template;
 
   Future<TaskResult> call() async {
@@ -57,9 +60,15 @@ class PluginTest {
       if (dartOnlyPlugin) {
         await plugin.convertDefaultPluginToDartPlugin();
       }
+      if (sharedDarwinSource) {
+        await plugin.convertDefaultPluginToSharedDarwinPlugin();
+      }
       section('Test plugin');
       if (runFlutterTest) {
-        await plugin.test();
+        await plugin.runFlutterTest();
+        if (!dartOnlyPlugin) {
+          await plugin.example.runNativeTests(buildTarget);
+        }
       }
       section('Create Flutter app');
       final _FlutterProject app = await _FlutterProject.create(tempDir, options, buildTarget,
@@ -73,7 +82,7 @@ class PluginTest {
         await app.build(buildTarget, validateNativeBuildProject: !dartOnlyPlugin);
         if (runFlutterTest) {
           section('Test app');
-          await app.test();
+          await app.runFlutterTest();
         }
       } finally {
         await plugin.delete();
@@ -97,6 +106,10 @@ class _FlutterProject {
   String get rootPath => path.join(parent.path, name);
 
   File get pubspecFile => File(path.join(rootPath, 'pubspec.yaml'));
+
+  _FlutterProject get example {
+    return _FlutterProject(Directory(path.join(rootPath)), 'example');
+  }
 
   Future<void> addPlugin(String plugin, {String? pluginPath}) async {
     final File pubspec = pubspecFile;
@@ -151,10 +164,143 @@ class $dartPluginClass {
     }
   }
 
-  Future<void> test() async {
+  /// Converts an iOS/macOS plugin created from the standard template to a shared
+  /// darwin directory plugin.
+  Future<void> convertDefaultPluginToSharedDarwinPlugin() async {
+    // Convert the metadata.
+    final File pubspec = pubspecFile;
+    String pubspecContent = await pubspec.readAsString();
+    const String originalIOSKey = '\n      ios:\n';
+    const String originalMacOSKey = '\n      macos:\n';
+    if (!pubspecContent.contains(originalIOSKey) || !pubspecContent.contains(originalMacOSKey)) {
+      print(pubspecContent);
+      throw TaskResult.failure('Missing expected darwin platform plugin keys');
+    }
+    pubspecContent = pubspecContent.replaceAll(
+        originalIOSKey,
+        '$originalIOSKey        sharedDarwinSource: true\n'
+    );
+    pubspecContent = pubspecContent.replaceAll(
+        originalMacOSKey,
+        '$originalMacOSKey        sharedDarwinSource: true\n'
+    );
+    await pubspec.writeAsString(pubspecContent, flush: true);
+
+    // Copy ios to darwin, and delete macos.
+    final Directory iosDir = Directory(path.join(rootPath, 'ios'));
+    final Directory darwinDir = Directory(path.join(rootPath, 'darwin'));
+    recursiveCopy(iosDir, darwinDir);
+
+    await iosDir.delete(recursive: true);
+    await Directory(path.join(rootPath, 'macos')).delete(recursive: true);
+
+    final File podspec = File(path.join(darwinDir.path, '$name.podspec'));
+    String podspecContent = await podspec.readAsString();
+    if (!podspecContent.contains('s.platform =')) {
+      print(podspecContent);
+      throw TaskResult.failure('Missing expected podspec platform');
+    }
+
+    // Remove "s.platform = :ios" to work on all platforms, including macOS.
+    podspecContent = podspecContent.replaceFirst(RegExp(r'.*s\.platform.*'), '');
+    podspecContent = podspecContent.replaceFirst("s.dependency 'Flutter'", "s.ios.dependency 'Flutter'\ns.osx.dependency 'FlutterMacOS'");
+
+    await podspec.writeAsString(podspecContent, flush: true);
+
+    // Make PlugintestPlugin.swift compile on iOS and macOS with target conditionals.
+    final String pluginClass = '${name[0].toUpperCase()}${name.substring(1)}Plugin';
+    print('pluginClass: $pluginClass');
+    final File pluginRegister = File(path.join(darwinDir.path, 'Classes', '$pluginClass.swift'));
+    final String pluginRegisterContent = '''
+#if os(macOS)
+import FlutterMacOS
+#elseif os(iOS)
+import Flutter
+#endif
+
+public class $pluginClass: NSObject, FlutterPlugin {
+  public static func register(with registrar: FlutterPluginRegistrar) {
+#if os(macOS)
+    let channel = FlutterMethodChannel(name: "$name", binaryMessenger: registrar.messenger)
+#elseif os(iOS)
+    let channel = FlutterMethodChannel(name: "$name", binaryMessenger: registrar.messenger())
+#endif
+    let instance = $pluginClass()
+    registrar.addMethodCallDelegate(instance, channel: channel)
+  }
+
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+#if os(macOS)
+    result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+#elseif os(iOS)
+    result("iOS " + UIDevice.current.systemVersion)
+#endif
+  }
+}
+''';
+    await pluginRegister.writeAsString(pluginRegisterContent, flush: true);
+  }
+
+  Future<void> runFlutterTest() async {
     await inDirectory(Directory(rootPath), () async {
       await flutter('test');
     });
+  }
+
+  Future<void> runNativeTests(String buildTarget) async {
+    // Native unit tests rely on building the app first to generate necessary
+    // build files.
+    await build(buildTarget, validateNativeBuildProject: false);
+
+    switch(buildTarget) {
+      case 'apk':
+        if (await exec(
+          path.join('.', 'gradlew'),
+          <String>['testDebugUnitTest'],
+          workingDirectory: path.join(rootPath, 'android'),
+          canFail: true,
+        ) != 0) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+      case 'ios':
+        await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+          if (!await runXcodeTests(
+            platformDirectory: path.join(rootPath, 'ios'),
+            destination: 'id=$deviceId',
+            configuration: 'Debug',
+            testName: 'native_plugin_unit_tests_ios',
+            skipCodesign: true,
+          )) {
+            throw TaskResult.failure('Platform unit tests failed');
+          }
+        });
+      case 'linux':
+        if (await exec(
+          path.join(rootPath, 'build', 'linux', 'x64', 'release', 'plugins', 'plugintest', 'plugintest_test'),
+          <String>[],
+          canFail: true,
+        ) != 0) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+      case 'macos':
+        if (!await runXcodeTests(
+          platformDirectory: path.join(rootPath, 'macos'),
+          destination: 'platform=macOS',
+          configuration: 'Debug',
+          testName: 'native_plugin_unit_tests_macos',
+          skipCodesign: true,
+        )) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+      case 'windows':
+        if (await exec(
+          path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
+          <String>[],
+          canFail: true,
+        ) != 0) {
+          throw TaskResult.failure('Platform unit tests failed');
+        }
+    }
   }
 
   static Future<_FlutterProject> create(
@@ -195,7 +341,7 @@ class $dartPluginClass {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString = target == 'ios'
-        ? "s.platform = :ios, '9.0'"
+        ? "s.platform = :ios, '11.0'"
         : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {

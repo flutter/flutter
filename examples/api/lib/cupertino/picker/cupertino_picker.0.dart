@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [CupertinoPicker].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoPicker].
 
 const double _kItemExtent = 32.0;
 const List<String> _fruitNames = <String>[
@@ -29,6 +29,7 @@ class CupertinoPickerApp extends StatelessWidget {
     );
   }
 }
+
 class CupertinoPickerExample extends StatefulWidget {
   const CupertinoPickerExample({super.key});
 
@@ -57,7 +58,7 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
           top: false,
           child: child,
         ),
-      )
+      ),
     );
   }
 
@@ -86,6 +87,10 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                     squeeze: 1.2,
                     useMagnifier: true,
                     itemExtent: _kItemExtent,
+                    // This sets the initial item.
+                    scrollController: FixedExtentScrollController(
+                      initialItem: _selectedFruit,
+                    ),
                     // This is called when selected item is changed.
                     onSelectedItemChanged: (int selectedItem) {
                       setState(() {
@@ -93,16 +98,13 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
                       });
                     },
                     children: List<Widget>.generate(_fruitNames.length, (int index) {
-                      return Center(
-                        child: Text(
-                          _fruitNames[index],
-                        ),
-                      );
+                      return Center(child: Text(_fruitNames[index]));
                     }),
                   ),
                 ),
                 // This displays the selected fruit name.
-                child: Text(_fruitNames[_selectedFruit],
+                child: Text(
+                  _fruitNames[_selectedFruit],
                   style: const TextStyle(
                     fontSize: 22.0,
                   ),

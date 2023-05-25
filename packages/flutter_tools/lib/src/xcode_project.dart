@@ -336,7 +336,7 @@ class IosProject extends XcodeBasedProject {
       xcodeProject.path,
       buildContext: buildContext,
     );
-    if (buildSettings != null && buildSettings.isNotEmpty) {
+    if (buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
       return buildSettings;
     }

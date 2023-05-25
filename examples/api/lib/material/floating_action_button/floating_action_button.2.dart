@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [FloatingActionButton].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [FloatingActionButton].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const FloatingActionButtonExampleApp());
+
+class FloatingActionButtonExampleApp extends StatelessWidget {
+  const FloatingActionButtonExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {

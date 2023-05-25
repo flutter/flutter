@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
@@ -38,7 +40,7 @@ class AndroidSdk {
     reinitialize();
   }
 
-  static const String _javaHomeEnvironmentVariable = 'JAVA_HOME';
+  static const String javaHomeEnvironmentVariable = 'JAVA_HOME';
   static const String _javaExecutable = 'java';
 
   /// The Android SDK root directory.
@@ -409,46 +411,141 @@ class AndroidSdk {
     return null;
   }
 
-  /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  static String? findJavaBinary({
+  /// Returns the version of java in the format \d(.\d)+(.\d)+
+  /// Returns null if version not found.
+  String? getJavaVersion({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessUtils processUtils,
+  }) {
+    final String? javaBinary = findJavaBinary(
+      androidStudio: androidStudio,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: platform,
+    );
+    if (javaBinary == null) {
+      globals.printTrace('Could not find java binary to get version.');
+      return null;
+    }
+    final RunResult result = processUtils.runSync(
+      <String>[javaBinary, '--version'],
+      environment: sdkManagerEnv,
+    );
+    if (result.exitCode != 0) {
+      globals.printTrace(
+          'java --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
+    }
+    return parseJavaVersion(result.stdout);
+  }
+
+  /// Extracts JDK version from the output of java --version.
+  @visibleForTesting
+  static String? parseJavaVersion(String rawVersionOutput) {
+    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
+    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    final Iterable<RegExpMatch> matches =
+        jdkVersionRegex.allMatches(rawVersionOutput);
+    if (matches.isEmpty) {
+      globals.logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+    final String? versionString = matches.first.group(0);
+    if (versionString == null || versionString.split('_').isEmpty) {
+      globals.logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
+      return null;
+    }
+    // Trim away _d+ from versions 1.8 and below.
+    return versionString.split('_').first;
+  }
+
+  /// A value that would be appropriate to use as JAVA_HOME.
+  ///
+  /// This method considers jdk in the following order:
+  /// * the JDK bundled with Android Studio, if one is found;
+  /// * the JAVA_HOME in the ambient environment, if set;
+  String? get javaHome {
+    return findJavaHome(
+      androidStudio: globals.androidStudio,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      platform: globals.platform,
+    );
+  }
+
+
+  static String? findJavaHome({
     required AndroidStudio? androidStudio,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
   }) {
     if (androidStudio?.javaPath != null) {
-      return fileSystem.path.join(androidStudio!.javaPath!, 'bin', 'java');
+      globals.printTrace("Using Android Studio's java.");
+      return androidStudio!.javaPath!;
     }
 
-    final String? javaHomeEnv = platform.environment[_javaHomeEnvironmentVariable];
+    final String? javaHomeEnv = platform.environment[javaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
-      // Trust JAVA_HOME.
-      return fileSystem.path.join(javaHomeEnv, 'bin', 'java');
+      globals.printTrace('Using JAVA_HOME from environment valuables.');
+      return javaHomeEnv;
     }
+    return null;
+  }
 
-    // MacOS specific logic to avoid popping up a dialog window.
-    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
-    if (platform.isMacOS) {
-      try {
-        final String javaHomeOutput = globals.processUtils.runSync(
-          <String>['/usr/libexec/java_home', '-v', '1.8'],
-          throwOnError: true,
-          hideStdout: true,
-        ).stdout.trim();
-        if (javaHomeOutput != null) {
-          if ((javaHomeOutput != null) && (javaHomeOutput.isNotEmpty)) {
-            final String javaHome = javaHomeOutput.split('\n').last.trim();
-            return fileSystem.path.join(javaHome, 'bin', 'java');
-          }
-        }
-      } on Exception { /* ignore */ }
+  /// Finds the java binary that is used for all operations across the tool.
+  ///
+  /// This comes from [findJavaHome] if that method returns non-null;
+  /// otherwise, it gets from searching PATH.
+  // TODO(andrewkolos): To prevent confusion when debugging Android-related
+  // issues (see https://github.com/flutter/flutter/issues/122609 for an example),
+  // this logic should be consistently followed by any Java-dependent operation
+  // across the  the tool (building Android apps, interacting with the Android SDK, etc.).
+  // Currently, this consistency is fragile since the logic used for building
+  // Android apps exists independently of this method.
+  // See https://github.com/flutter/flutter/issues/124252.
+  static String? findJavaBinary({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+  }) {
+    final String? javaHome = findJavaHome(
+      androidStudio: androidStudio,
+      fileSystem: fileSystem,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: platform,
+    );
+
+    if (javaHome != null) {
+      return fileSystem.path.join(javaHome, 'bin', 'java');
     }
 
     // Fallback to PATH based lookup.
-    return operatingSystemUtils.which(_javaExecutable)?.path;
+    final String? pathJava = operatingSystemUtils.which(_javaExecutable)?.path;
+    if (pathJava != null) {
+      globals.printTrace('Using java from PATH.');
+    } else {
+      globals.printTrace('Could not find java path.');
+    }
+    return pathJava;
+  }
+
+  // Returns a user visible String that says the tool failed to parse
+  // the version of java along with the output.
+  static String _formatJavaVersionWarning(String javaVersionRaw) {
+    return 'Could not parse java version from: \n'
+        '$javaVersionRaw \n'
+        'If there is a version please look for an existing bug '
+        'https://github.com/flutter/flutter/issues/'
+        ' and if one does not exist file a new issue.';
   }
 
   Map<String, String>? _sdkManagerEnv;
+
   /// Returns an environment with the Java folder added to PATH for use in calling
   /// Java-based Android SDK commands such as sdkmanager and avdmanager.
   Map<String, String> get sdkManagerEnv {
@@ -463,8 +560,8 @@ class AndroidSdk {
       );
       if (javaBinary != null && globals.platform.environment['PATH'] != null) {
         _sdkManagerEnv!['PATH'] = globals.fs.path.dirname(javaBinary) +
-                                 globals.os.pathVarSeparator +
-                                 globals.platform.environment['PATH']!;
+                                  globals.os.pathVarSeparator +
+                                  globals.platform.environment['PATH']!;
       }
     }
     return _sdkManagerEnv!;
@@ -500,10 +597,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     required this.platformName,
     required this.buildToolsVersion,
     required FileSystem fileSystem,
-  }) : assert(sdkLevel != null),
-       assert(platformName != null),
-       assert(buildToolsVersion != null),
-       _fileSystem = fileSystem;
+  }) : _fileSystem = fileSystem;
 
   final AndroidSdk sdk;
   final int sdkLevel;

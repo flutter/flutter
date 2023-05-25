@@ -308,6 +308,7 @@ class Parser {
           switch(tokenStr) {
             case 'plural':
               matchedType = ST.plural;
+<<<<<<< HEAD
               break;
             case 'select':
               matchedType = ST.select;
@@ -315,6 +316,12 @@ class Parser {
             case 'other':
               matchedType = ST.other;
               break;
+=======
+            case 'select':
+              matchedType = ST.select;
+            case 'other':
+              matchedType = ST.other;
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
           }
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
@@ -374,13 +381,10 @@ class Parser {
             // Theoretically, we can never get here.
             throw L10nException('ICU Syntax Error.');
           }
-          break;
         case ST.placeholderExpr:
           parseAndConstructNode(ST.placeholderExpr, 0);
-          break;
         case ST.pluralExpr:
           parseAndConstructNode(ST.pluralExpr, 0);
-          break;
         case ST.pluralParts:
           if (tokens.isNotEmpty && (
               tokens[0].type == ST.identifier ||
@@ -392,7 +396,6 @@ class Parser {
           } else {
             parseAndConstructNode(ST.pluralParts, 1);
           }
-          break;
         case ST.pluralPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.pluralPart, 0);
@@ -409,10 +412,8 @@ class Parser {
               tokens[0].positionInMessage,
             );
           }
-          break;
         case ST.selectExpr:
           parseAndConstructNode(ST.selectExpr, 0);
-          break;
         case ST.selectParts:
           if (tokens.isNotEmpty && (
             tokens[0].type == ST.identifier ||
@@ -423,7 +424,6 @@ class Parser {
           } else {
             parseAndConstructNode(ST.selectParts, 1);
           }
-          break;
         case ST.selectPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.selectPart, 0);
@@ -440,7 +440,6 @@ class Parser {
               tokens[0].positionInMessage
             );
           }
-          break;
         // At this point, we are only handling terminal symbols.
         // ignore: no_default_cases
         default:
@@ -492,23 +491,24 @@ class Parser {
     ST.other: 'other',
   };
 
-  // Compress the syntax tree. Note that after
-  // parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr,
-  // ST.pluralExpr, and ST.selectExpr) are structured as a linked list See diagram
-  // below. This
-  // function compresses these parts into a single children array (and does this
-  // for ST.pluralParts and ST.selectParts as well). Then it checks extra syntax
-  // rules. Essentially, it converts
+  // Compress the syntax tree.
   //
-  //            Message
-  //            /     \
-  //    PluralExpr  Message
-  //                /     \
-  //            String  Message
-  //                    /     \
-  //            SelectExpr   ...
+  // After `parse(lex(message))`, the individual parts (`ST.string`,
+  // `ST.placeholderExpr`, `ST.pluralExpr`, and `ST.selectExpr`) are structured
+  // as a linked list (see diagram below). This function compresses these parts
+  // into a single children array (and does this for `ST.pluralParts` and
+  // `ST.selectParts` as well). Then it checks extra syntax rules. Essentially, it
+  // converts:
   //
-  // to
+  //             Message
+  //             /     \
+  //     PluralExpr  Message
+  //                 /     \
+  //             String  Message
+  //                     /     \
+  //             SelectExpr   ...
+  //
+  // ...to:
   //
   //                Message
   //               /   |   \
@@ -529,7 +529,6 @@ class Parser {
           node = node.children[1];
         }
         syntaxTree.children = children;
-        break;
       // ignore: no_default_cases
       default:
         node.children.forEach(compress);
@@ -567,7 +566,6 @@ class Parser {
             );
           }
         }
-        break;
       case ST.selectParts:
         if (children.every((Node node) => node.children[0].type != ST.other)) {
           throw L10nParserException(
@@ -578,7 +576,6 @@ class Parser {
             syntaxTree.positionInMessage,
           );
         }
-        break;
       // ignore: no_default_cases
       default:
         break;

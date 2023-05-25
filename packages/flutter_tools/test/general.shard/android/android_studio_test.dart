@@ -4,6 +4,8 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -850,6 +852,180 @@ void main() {
       Platform: () => linuxPlatform,
       ProcessManager: () => FakeProcessManager.any(),
     });
+<<<<<<< HEAD
+=======
+  });
+
+  group('latestValid', () {
+    late Platform platform;
+    late FileSystem fileSystem;
+
+    setUp(() {
+      platform = FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'LOCALAPPDATA': r'C:\Users\Dash\AppData\Local',
+        }
+      );
+      fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    });
+
+    testUsingContext('choses the install with the latest version', () {
+      const List<String> versions = <String> [
+        '4.0',
+        '2022.0',
+        '3.1',
+      ];
+
+      for (final String version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
+          .createSync(recursive: true);
+      }
+
+      expect(AndroidStudio.allInstalled().length, 3);
+      expect(AndroidStudio.latestValid()!.version, Version(2022, 0, 0));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('prefers installs with known versions over installs with unknown versions', () {
+      const List<String> versions = <String> [
+        '3.0',
+        'unknown',
+      ];
+
+      for (final String version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
+          .createSync(recursive: true);
+      }
+
+      expect(AndroidStudio.allInstalled().length, 2);
+      expect(AndroidStudio.latestValid()!.version, Version(3, 0, 0));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('choses install with lexicographically greatest directory if no installs have known versions', () {
+      const List<String> versions = <String> [
+        'Apple',
+        'Zucchini',
+        'Banana',
+      ];
+
+      for (final String version in versions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
+          .createSync(recursive: true);
+      }
+
+      expect(AndroidStudio.allInstalled().length, 3);
+      expect(AndroidStudio.latestValid()!.directory, r'C:\Program Files\AndroidStudioZucchini');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('choses install with lexicographically greatest directory if all installs have the same version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
+      fileSystem.directory(r'C:\Program Files\AndroidStudioPreview4.0')
+        .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.0\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio4.0');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio4.0')
+        .createSync(recursive: true);
+
+      expect(AndroidStudio.allInstalled().length, 2);
+      expect(AndroidStudio.latestValid()!.directory, contains('Preview'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('always chooses the install configured by --android-studio-dir, even if the install is invalid', () {
+      const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
+
+      // The directory exists, but nothing is inside.
+      fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
+      (globals.processManager as FakeProcessManager).excludedExecutables.add(
+        fileSystem.path.join(configuredAndroidStudioDir, 'jre', 'bin', 'java'),
+      );
+
+      const List<String> validVersions = <String> [
+        '4.0',
+        '2.0',
+        '3.1',
+      ];
+
+      for (final String version in validVersions) {
+        fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+        fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
+          .createSync(recursive: true);
+      }
+
+      const List<String> validJavaPaths = <String>[
+        r'C:\Program Files\AndroidStudio4.0\jre\bin\java',
+        r'C:\Program Files\AndroidStudio2.0\jre\bin\java',
+        r'C:\Program Files\AndroidStudio3.1\jre\bin\java',
+      ];
+
+      for (final String javaPath in validJavaPaths) {
+        (globals.processManager as FakeProcessManager).addCommand(FakeCommand(
+          command: <String>[
+            globals.fs.path.join(javaPath),
+            '-version',
+          ],
+        ));
+      }
+
+      expect(AndroidStudio.allInstalled().length, 4);
+      final AndroidStudio chosenInstall = AndroidStudio.latestValid()!;
+      expect(chosenInstall.directory, configuredAndroidStudioDir);
+      expect(chosenInstall.isValid, false);
+    }, overrides: <Type, Generator>{
+      Config: () => Config.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.empty(),
+    });
+
+    testUsingContext('throws a ToolExit if --android-studio-dir is configured but the directory does not exist', () async {
+      const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
+
+      expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
+      expect(() => AndroidStudio.latestValid(), throwsA(
+        (dynamic e) => e is ToolExit &&
+          e.message!.startsWith('Could not find the Android Studio installation at the manually configured path')
+        )
+      );
+    }, overrides: <Type, Generator>{
+      Config: () => Config.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+>>>>>>> d3d8effc686d73e0114d71abdcccef63fa1f25d2
   });
 }
 

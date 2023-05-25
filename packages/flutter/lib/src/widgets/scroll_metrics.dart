@@ -46,6 +46,7 @@ mixin ScrollMetrics {
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
+    double? devicePixelRatio,
   }) {
     return FixedScrollMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -53,6 +54,7 @@ mixin ScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
 
@@ -60,7 +62,7 @@ mixin ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value should typically be non-null and less than or equal to
+  /// This value is typically less than or equal to
   /// [maxScrollExtent]. It can be negative infinity, if the scroll is unbounded.
   double get minScrollExtent;
 
@@ -68,7 +70,7 @@ mixin ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value should typically be non-null and greater than or equal to
+  /// This value is typically greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
 
@@ -124,6 +126,10 @@ mixin ScrollMetrics {
   /// The quantity of content conceptually "below" the viewport in the scrollable.
   /// This is the content below the content described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
+
+  /// The [FlutterView.devicePixelRatio] of the view that the [Scrollable]
+  /// associated with this metrics object is drawn into.
+  double get devicePixelRatio;
 }
 
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
@@ -137,6 +143,7 @@ class FixedScrollMetrics with ScrollMetrics {
     required double? pixels,
     required double? viewportDimension,
     required this.axisDirection,
+    required this.devicePixelRatio,
   }) : _minScrollExtent = minScrollExtent,
        _maxScrollExtent = maxScrollExtent,
        _pixels = pixels,
@@ -169,6 +176,9 @@ class FixedScrollMetrics with ScrollMetrics {
 
   @override
   final AxisDirection axisDirection;
+
+  @override
+  final double devicePixelRatio;
 
   @override
   String toString() {

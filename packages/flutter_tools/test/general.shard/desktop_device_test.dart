@@ -86,7 +86,7 @@ void main() {
         ),
       ]);
       final FakeDesktopDevice device = setUpDesktopDevice(processManager: processManager, fileSystem: fileSystem);
-      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildMode.debug);
+      final String? executableName = device.executablePathForDevice(FakeApplicationPackage(), BuildInfo.debug);
       fileSystem.file(executableName).writeAsStringSync('\n');
       final FakeApplicationPackage package = FakeApplicationPackage();
       final LaunchResult result = await device.startApp(
@@ -96,7 +96,7 @@ void main() {
       );
 
       expect(result.started, true);
-      expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
+      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1/0'));
     });
 
     testWithoutContext('Null executable path fails gracefully', () async {
@@ -357,8 +357,7 @@ class FakeDesktopDevice extends DesktopDevice {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  Future<void> buildForDevice(
-    ApplicationPackage package, {
+  Future<void> buildForDevice({
     String? mainPath,
     BuildInfo? buildInfo,
   }) async {
@@ -368,11 +367,11 @@ class FakeDesktopDevice extends DesktopDevice {
 
   // Dummy implementation that just returns the build mode name.
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildMode buildMode) {
+  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
     if (nullExecutablePathForDevice) {
       return null;
     }
-    return buildMode == null ? 'null' : getNameForBuildMode(buildMode);
+    return getNameForBuildMode(buildInfo.mode);
   }
 }
 

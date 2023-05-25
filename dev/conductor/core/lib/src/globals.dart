@@ -103,7 +103,7 @@ bool getBoolFromEnvOrArgs(
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
-    return (env[envName]?.toUpperCase()) == 'TRUE';
+    return env[envName]?.toUpperCase() == 'TRUE';
   }
   return argResults[name] as bool;
 }
@@ -126,7 +126,7 @@ List<String> getValuesFromEnvOrArgs(
   if (env[envName] != null && env[envName] != '') {
     return env[envName]!.split(',');
   }
-  final List<String> argValues = argResults[name] as List<String>;
+  final List<String>? argValues = argResults[name] as List<String>?;
   if (argValues != null) {
     return argValues;
   }
@@ -160,12 +160,10 @@ String getNewPrLink({
       candidateBranch = state.framework.candidateBranch;
       workingBranch = state.framework.workingBranch;
       repoLabel = 'Framework';
-      break;
     case 'engine':
       candidateBranch = state.engine.candidateBranch;
       workingBranch = state.engine.workingBranch;
       repoLabel = 'Engine';
-      break;
     default:
       throw ConductorException('Expected repoName to be one of flutter or engine but got $repoName.');
   }

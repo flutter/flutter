@@ -163,9 +163,7 @@ class BasicMessageChannel<T> {
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const BasicMessageChannel(this.name, this.codec, { BinaryMessenger? binaryMessenger })
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -253,9 +251,7 @@ class MethodChannel {
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger ])
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -300,7 +296,6 @@ class MethodChannel {
   /// nullable.
   @optionalTypeArgs
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
-    assert(method != null);
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
       !kReleaseMode && debugProfilePlatformChannels ?
@@ -345,10 +340,7 @@ class MethodChannel {
   /// <https://flutter.dev/developing-packages/>:
   ///
   /// ```dart
-  /// class Music {
-  ///   // Class cannot be instantiated.
-  ///   const Music._();
-  ///
+  /// abstract final class Music {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
@@ -535,7 +527,7 @@ class MethodChannel {
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
     assert(
-      _binaryMessenger != null || ServicesBinding.instance != null,
+      _binaryMessenger != null || BindingBase.debugBindingType() != null,
       'Cannot set the method call handler before the binary messenger has been initialized. '
       'This happens when you call setMethodCallHandler() before the WidgetsFlutterBinding '
       'has been initialized. You can fix this by either calling WidgetsFlutterBinding.ensureInitialized() '
@@ -609,9 +601,7 @@ class EventChannel {
   /// Neither [name] nor [codec] may be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
   const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
-      : assert(name != null),
-        assert(codec != null),
-        _binaryMessenger = binaryMessenger;
+      : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;

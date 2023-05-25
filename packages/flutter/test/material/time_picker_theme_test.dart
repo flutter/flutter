@@ -14,6 +14,11 @@ void main() {
     expect(const TimePickerThemeData().hashCode, const TimePickerThemeData().copyWith().hashCode);
   });
 
+  test('TimePickerThemeData lerp special cases', () {
+    const TimePickerThemeData data = TimePickerThemeData();
+    expect(identical(TimePickerThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TimePickerThemeData null fields by default', () {
     const TimePickerThemeData timePickerTheme = TimePickerThemeData();
     expect(timePickerTheme.backgroundColor, null);
@@ -75,21 +80,21 @@ void main() {
 
     expect(description, <String>[
       'backgroundColor: Color(0xffffffff)',
-      'hourMinuteTextColor: Color(0xffffffff)',
-      'hourMinuteColor: Color(0xffffffff)',
-      'dayPeriodTextColor: Color(0xffffffff)',
+      'dayPeriodBorderSide: BorderSide',
       'dayPeriodColor: Color(0xffffffff)',
-      'dialHandColor: Color(0xffffffff)',
+      'dayPeriodShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'dayPeriodTextColor: Color(0xffffffff)',
+      'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'dialBackgroundColor: Color(0xffffffff)',
+      'dialHandColor: Color(0xffffffff)',
       'dialTextColor: Color(0xffffffff)',
       'entryModeIconColor: Color(0xffffffff)',
-      'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
-      'dayPeriodTextStyle: TextStyle(<all styles inherited>)',
       'helpTextStyle: TextStyle(<all styles inherited>)',
-      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+      'hourMinuteColor: Color(0xffffffff)',
       'hourMinuteShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'dayPeriodShape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'dayPeriodBorderSide: BorderSide',
+      'hourMinuteTextColor: Color(0xffffffff)',
+      'hourMinuteTextStyle: TextStyle(<all styles inherited>)',
+      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)'
     ]);
   });
 
@@ -107,7 +112,7 @@ void main() {
     expect(
       dial,
       paints
-        ..circle(color: defaultTheme.colorScheme.onBackground.withOpacity(0.12)) // Dial background color.
+        ..circle(color: defaultTheme.colorScheme.onSurface.withOpacity(0.08)) // Dial background color.
         ..circle(color: Color(defaultTheme.colorScheme.primary.value)), // Dial hand color.
     );
 
@@ -162,10 +167,10 @@ void main() {
         .copyWith(color: defaultTheme.colorScheme.onSurface),
     );
     // ignore: avoid_dynamic_calls
-    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
-      secondaryLabels.first.painter.text.style,
+      selectedLabels.first.painter.text.style,
       Typography.material2014().englishLike.bodyLarge!
         .merge(Typography.material2014().white.bodyLarge)
         .copyWith(color: defaultTheme.colorScheme.onPrimary),
@@ -186,7 +191,7 @@ void main() {
     expect(pmMaterial.color, Colors.transparent);
 
     final Color expectedBorderColor = Color.alphaBlend(
-      defaultTheme.colorScheme.onBackground.withOpacity(0.38),
+      defaultTheme.colorScheme.onSurface.withOpacity(0.38),
       defaultTheme.colorScheme.surface,
     );
     final Material dayPeriodMaterial = _dayPeriodMaterial(tester);
@@ -220,7 +225,7 @@ void main() {
 
     final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.filled, true);
-    expect(hourDecoration.fillColor, defaultTheme.colorScheme.onSurface.withOpacity(0.12));
+    expect(hourDecoration.fillColor, MaterialStateColor.resolveWith((Set<MaterialState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12)));
     expect(hourDecoration.enabledBorder, const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)));
     expect(hourDecoration.errorBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.error, width: 2)));
     expect(hourDecoration.focusedBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.primary, width: 2)));
@@ -307,10 +312,10 @@ void main() {
           .copyWith(color: _unselectedColor),
     );
     // ignore: avoid_dynamic_calls
-    final List<dynamic> secondaryLabels = dialPainter.secondaryLabels as List<dynamic>;
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
     expect(
       // ignore: avoid_dynamic_calls
-      secondaryLabels.first.painter.text.style,
+      selectedLabels.first.painter.text.style,
       Typography.material2014().englishLike.bodyLarge!
           .merge(Typography.material2014().white.bodyLarge)
           .copyWith(color: _selectedColor),

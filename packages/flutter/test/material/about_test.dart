@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -332,10 +333,6 @@ void main() {
       fontSize: 20,
       color: Colors.indigo,
     );
-    const TextStyle subtitleTextStyle = TextStyle(
-      fontSize: 15,
-      color: Colors.indigo,
-    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -352,10 +349,7 @@ void main() {
             ),
           ),
           appBarTheme: const AppBarTheme(
-            textTheme: TextTheme(
-              titleLarge: titleTextStyle,
-              titleSmall: subtitleTextStyle,
-            ),
+            titleTextStyle: titleTextStyle,
             foregroundColor: Colors.indigo,
           ),
         ),
@@ -376,8 +370,6 @@ void main() {
     // Check for titles style.
     final Text title = tester.widget(find.text('AAA'));
     expect(title.style, titleTextStyle);
-    final Text subtitle = tester.widget(find.text('1 license.'));
-    expect(subtitle.style, subtitleTextStyle);
   });
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
@@ -910,16 +902,73 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoScrollbar), findsNothing);
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoScrollbar), findsOneWidget);
-        break;
       case null:
         break;
     }
     expect(find.byType(Scrollbar), findsOneWidget);
     expect(find.byType(RawScrollbar), findsNothing);
 
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('ListView of license entries is primary', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120710
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+         LicenseEntryWithLineBreaks(
+          <String>['AAA'],
+          // Add enough content to scroll
+          List<String>.generate(500, (int index) => 'BBBB').join('\n'),
+        ),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        title: 'Flutter Code Sample',
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) => TextButton(
+              child: const Text('Show License Page'),
+              onPressed: () {
+                showLicensePage(context: context);
+              },
+            ),
+          ),
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Show License Page'), findsOneWidget);
+    await tester.tap(find.text('Show License Page'));
+    await tester.pumpAndSettle();
+
+    // Check for packages.
+    expect(find.text('AAA'), findsOneWidget);
+    // Check license is displayed after entering into license page for 'AAA'.
+    await tester.tap(find.text('AAA'));
+    await tester.pumpAndSettle();
+
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget.
+    switch (debugDefaultTargetPlatformOverride) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        expect(find.byType(CupertinoScrollbar), findsNothing);
+      case TargetPlatform.iOS:
+        expect(find.byType(CupertinoScrollbar), findsOneWidget);
+      case null:
+        break;
+    }
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(RawScrollbar), findsNothing);
+    await tester.drag(find.byType(ListView), const Offset(0.0, 20.0));
+    await tester.pumpAndSettle(); // No exception triggered.
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('LicensePage padding', (WidgetTester tester) async {
@@ -996,6 +1045,267 @@ void main() {
     // Padding between app icon and app powered text.
     final double appIconBottomPadding = tester.getTopLeft(appPowered).dy - tester.getBottomLeft(appIcon).dy;
     expect(appIconBottomPadding, 18.0);
+  });
+
+  testWidgets('Error handling test', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() => Stream<LicenseEntry>.error(Exception('Injected failure')));
+    await tester.pumpWidget(const MaterialApp(home: Material(child: AboutListTile())));
+    await tester.tap(find.byType(ListTile));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.tap(find.text('VIEW LICENSES'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    final Finder finder = find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_PackagesView');
+    // force the stream to complete (has to be done in a runAsync block since it's areal async process)
+    await tester.runAsync(() => (tester.firstState(finder) as dynamic).licenses as Future<dynamic>); // ignore: avoid_dynamic_calls
+    expect(tester.takeException().toString(), 'Exception: Injected failure');
+    await tester.pumpAndSettle();
+    expect(tester.takeException().toString(), 'Exception: Injected failure');
+    expect(find.text('Exception: Injected failure'), findsOneWidget);
+  });
+
+  testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
+    const TextDirection textDirection = TextDirection.ltr;
+    const Size defaultSize = Size(800.0, 600.0);
+    const Size wideSize = Size(1200.0, 600.0);
+    const String title = 'License ABC';
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Finish rendering the page.
+
+    // If the layout width is less than 840.0 pixels, nested layout is
+    // used which positions license page title at the top center.
+    Offset titleOffset = tester.getCenter(find.text(title));
+    expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
+    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
+
+    // Configure a wide window to show the lateral UI.
+    await tester.binding.setSurfaceSize(wideSize);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Finish rendering the page.
+
+    // If the layout width is greater than 840.0 pixels, lateral UI layout
+    // is used which positions license page title and packageList
+    // at the top left.
+    titleOffset = tester.getTopRight(find.text(title));
+    expect(titleOffset, const Offset(292.0, 136.0));
+    expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
+    expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
+  });
+
+  testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
+    const TextDirection textDirection = TextDirection.rtl;
+    const Size defaultSize = Size(800.0, 600.0);
+    const Size wideSize = Size(1200.0, 600.0);
+    const String title = 'License ABC';
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Finish rendering the page.
+
+    // If the layout width is less than 840.0 pixels, nested layout is
+    // used which positions license page title at the top center.
+    Offset titleOffset = tester.getCenter(find.text(title));
+    expect(titleOffset, Offset(defaultSize.width / 2, 92.0));
+    expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
+
+    // Configure a wide window to show the lateral UI.
+    await tester.binding.setSurfaceSize(wideSize);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        title: title,
+        home: Scaffold(
+          body: Directionality(
+            textDirection: textDirection,
+            child: LicensePage(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Finish rendering the page.
+
+    // If the layout width is greater than 840.0 pixels, lateral UI layout
+    // is used which positions license page title and packageList
+    // at the top right.
+    titleOffset = tester.getTopLeft(find.text(title));
+    expect(titleOffset, const Offset(908.0, 136.0));
+    expect(titleOffset.dx, greaterThan(wideSize.width - 320)); // Default master view width is 320.0.
+    expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(defaultSize);
+  });
+
+  testWidgets('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/108991
+    final ThemeData theme = ThemeData(
+      appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)),
+      useMaterial3: true,
+    );
+    const String title = 'License ABC';
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
+
+    // Configure a wide window to show the lateral UI.
+    await tester.binding.setSurfaceSize(const Size(1200.0, 600.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        title: title,
+        theme: theme,
+        home: const Scaffold(
+          body: LicensePage(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Finish rendering the page.
+
+    final RenderParagraph renderParagraph = tester.renderObject(find.text('ABC').last) as RenderParagraph;
+
+    // License page title should not use AppBarTheme's foregroundColor.
+    expect(renderParagraph.text.style!.color, isNot(theme.appBarTheme.foregroundColor));
+
+    // License page title in the lateral UI uses default text style color.
+    expect(renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
+
+    // Configure to show the default layout.
+    await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
+  });
+
+  testWidgets('License page default title text color in the nested UI', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/108991
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const String title = 'License ABC';
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        title: title,
+        theme: theme,
+        home: const Scaffold(
+          body: LicensePage(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Finish rendering the page.
+
+    // Currently in the master view.
+    expect(find.text('License ABC'), findsOneWidget);
+
+    // Navigate to the license page.
+    await tester.tap(find.text('ABC'));
+    await tester.pumpAndSettle();
+
+    // Master view is no longer visible.
+    expect(find.text('License ABC'), findsNothing);
+
+    final RenderParagraph renderParagraph = tester.renderObject(find.text('ABC').first) as RenderParagraph;
+    expect(renderParagraph.text.style!.color, theme.textTheme.titleLarge!.color);
+  });
+
+  group('Material 2', () {
+    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
+    // is turned on by default, these tests can be removed.
+
+    testWidgets('License page default title text color in the nested UI', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/108991
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      const String title = 'License ABC';
+      LicenseRegistry.addLicense(() {
+        return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+          const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+        ]);
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          title: title,
+          theme: theme,
+          home: const Scaffold(
+            body: LicensePage(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle(); // Finish rendering the page.
+
+      // Currently in the master view.
+      expect(find.text('License ABC'), findsOneWidget);
+
+      // Navigate to the license page.
+      await tester.tap(find.text('ABC'));
+      await tester.pumpAndSettle();
+
+      // Master view is no longer visible.
+      expect(find.text('License ABC'), findsNothing);
+
+      final RenderParagraph renderParagraph = tester.renderObject(find.text('ABC').first) as RenderParagraph;
+      expect(renderParagraph.text.style!.color, theme.primaryTextTheme.titleLarge!.color);
+    });
   });
 }
 

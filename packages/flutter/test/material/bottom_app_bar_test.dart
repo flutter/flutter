@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -197,8 +198,60 @@ void main() {
 
     final PhysicalShape physicalShape =
       tester.widget(find.byType(PhysicalShape).at(0));
+    final Material material = tester.widget(find.byType(Material).at(1));
 
     expect(physicalShape.color, const Color(0xff0000ff));
+    expect(material.color, null); /* no value in Material 2. */
+  });
+
+
+  testWidgets('color overrides theme color with Material 3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(useMaterial3: true).copyWith(
+          bottomAppBarColor: const Color(0xffffff00)),
+        home: Builder(
+          builder: (BuildContext context) {
+            return const Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: BottomAppBar(
+                  color: Color(0xff0000ff),
+                ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape =
+      tester.widget(find.byType(PhysicalShape).at(0));
+    final Material material = tester.widget(find.byType(Material).at(1));
+
+    expect(physicalShape.color, const Color(0xff0000ff));
+    expect(material.color, const Color(0xff0000ff));
+  });
+
+  testWidgets('Shadow color is transparent in Material 3', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true,
+        ),
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+          bottomNavigationBar: BottomAppBar(
+            color: Color(0xff0000ff),
+          ),
+        ),
+      )
+    );
+
+    final Material material = tester.widget(find.byType(Material).at(1));
+
+    expect(material.shadowColor, Colors.transparent);
   });
 
   testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
@@ -562,6 +615,44 @@ void main() {
 
     physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
     expect(physicalShape.clipper.toString(), 'ShapeBorderClipper');
+  });
+
+  testWidgets('BottomAppBar adds bottom padding to height', (WidgetTester tester) async {
+    const double bottomPadding = 35.0;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: bottomPadding),
+          viewPadding: EdgeInsets.only(bottom: bottomPadding),
+        ),
+        child: MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Scaffold(
+            floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+            floatingActionButton: FloatingActionButton(onPressed: () { }),
+            bottomNavigationBar: BottomAppBar(
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Rect bottomAppBar = tester.getRect(find.byType(BottomAppBar));
+    final Rect iconButton = tester.getRect(find.widgetWithIcon(IconButton, Icons.search));
+    final Rect fab = tester.getRect(find.byType(FloatingActionButton));
+
+    // The height of the bottom app bar should be its height(default is 80.0) + bottom safe area height.
+    expect(bottomAppBar.height, 80.0 + bottomPadding);
+
+    // The vertical position of the icon button and fab should be center of the area excluding the bottom padding.
+    final double barCenter = bottomAppBar.topLeft.dy + (bottomAppBar.height - bottomPadding) / 2;
+    expect(iconButton.center.dy, barCenter);
+    expect(fab.center.dy, barCenter);
   });
 }
 

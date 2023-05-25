@@ -98,7 +98,7 @@ void main() {
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final bool supportsRuntimeMode = await device.supportsRuntimeMode(BuildMode.release);
@@ -121,7 +121,7 @@ void main() {
       final FakeDeviceLogReader fakeLogReader = FakeDeviceLogReader();
       fakeDevice.logReader = fakeLogReader;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
       final DeviceLogReader logReader = await device.getLogReader();
@@ -153,7 +153,7 @@ void main() {
       dummyApplicationBinary.writeAsStringSync('dummy content');
       prebuiltApplicationPackage.applicationPackage = dummyApplicationBinary;
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -161,8 +161,8 @@ void main() {
       final FakeApplicationPackage applicationPackage = FakeApplicationPackage();
       applicationPackageFactory.applicationPackage = applicationPackage;
 
-      final Uri observatoryUri = Uri.parse('http://127.0.0.1:12345/observatory');
-      fakeDevice.launchResult = LaunchResult.succeeded(observatoryUri: observatoryUri);
+      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:12345/vmService');
+      fakeDevice.launchResult = LaunchResult.succeeded(vmServiceUri: vmServiceUri);
 
       final LaunchResult launchResult = await device.startApp(
         prebuiltApplicationPackage,
@@ -170,8 +170,8 @@ void main() {
       );
 
       expect(launchResult.started, true);
-      // The returned observatoryUri was a forwarded port, so we cannot compare them directly.
-      expect(launchResult.observatoryUri!.path, observatoryUri.path);
+      // The returned vmServiceUri was a forwarded port, so we cannot compare them directly.
+      expect(launchResult.vmServiceUri!.path, vmServiceUri.path);
 
       expect(applicationPackageFactory.applicationBinaryRequested!.readAsStringSync(), 'dummy content');
       expect(applicationPackageFactory.platformRequested, TargetPlatform.android_arm);
@@ -200,7 +200,7 @@ void main() {
 
       final ProxiedDevices proxiedDevices = ProxiedDevices(clientDaemonConnection, logger: bufferLogger);
 
-      final List<Device> devices = await proxiedDevices.devices;
+      final List<Device> devices = await proxiedDevices.devices();
       expect(devices, hasLength(1));
       final Device device = devices[0];
 
@@ -269,6 +269,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final bool ephemeral = false;
 
   @override
+  bool get isConnected => true;
+
+  @override
   Future<String> get sdkNameAndVersion async => 'Android 12';
 
   @override
@@ -302,7 +305,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late DeviceLogReader logReader;
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant ApplicationPackage? app,
+    ApplicationPackage? app,
     bool includePastLogs = false,
   }) => logReader;
 
@@ -310,7 +313,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late LaunchResult launchResult;
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage? package, {
     String? mainPath,
     String? route,
     DebuggingOptions? debuggingOptions,

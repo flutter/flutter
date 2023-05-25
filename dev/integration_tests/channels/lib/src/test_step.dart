@@ -82,7 +82,7 @@ class TestStepResult {
         Text('Error: ${_toString(error)}'),
         const Text(' '),
         Text(
-          status.toString().substring('TestStatus.'.length),
+          status.name,
           key: ValueKey<String>(
               status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
@@ -92,6 +92,11 @@ class TestStepResult {
   }
 
   static bool deepEquals(dynamic a, dynamic b) => _deepEquals(a, b);
+
+  @override
+  String toString() {
+    return 'TestStepResult($status)';
+  }
 }
 
 Future<TestStepResult> resultOfHandshake(

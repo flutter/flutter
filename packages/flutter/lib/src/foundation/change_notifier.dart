@@ -104,12 +104,34 @@ const String _flutterFoundationLibrary = 'package:flutter/foundation.dart';
 /// It is O(1) for adding listeners and O(N) for removing listeners and dispatching
 /// notifications (where N is the number of listeners).
 ///
-/// {@macro flutter.flutter.animatedbuilder_changenotifier.rebuild}
+/// ## Using ChangeNotifier subclasses for data models
+///
+/// A data structure can extend or mix in [ChangeNotifier] to implement the
+/// [Listenable] interface and thus become usable with widgets that listen for
+/// changes to [Listenable]s, such as [ListenableBuilder].
+///
+/// {@tool dartpad}
+/// The following example implements a simple counter that utilizes a
+/// [ListenableBuilder] to limit rebuilds to only the [Text] widget containing
+/// the count. The current count is stored in a [ChangeNotifier] subclass, which
+/// rebuilds the [ListenableBuilder]'s contents when its value is changed.
+///
+/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.2.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// In this case, the [ChangeNotifier] subclass encapsulates a list, and notifies
+/// the clients any time an item is added to the list. This example only supports
+/// adding items; as an exercise, consider adding buttons to remove items from
+/// the list as well.
+///
+/// ** See code in examples/api/lib/widgets/transitions/listenable_builder.3.dart **
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
-class ChangeNotifier implements Listenable {
+mixin class ChangeNotifier implements Listenable {
   int _count = 0;
   // The _listeners is intentionally set to a fixed-length _GrowableList instead
   // of const [].
@@ -466,6 +488,19 @@ class _MergingListenable extends Listenable {
 /// When [value] is replaced with something that is not equal to the old
 /// value as evaluated by the equality operator ==, this class notifies its
 /// listeners.
+///
+/// ## Limitations
+///
+/// Because this class only notifies listeners when the [value]'s _identity_
+/// changes, listeners will not be notified when mutable state within the
+/// value itself changes.
+///
+/// For example, a `ValueNotifier<List<int>>` will not notify its listeners
+/// when the _contents_ of the list are changed.
+///
+/// As a result, this class is best used with only immutable data types.
+///
+/// For mutable data types, consider extending [ChangeNotifier] directly.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {

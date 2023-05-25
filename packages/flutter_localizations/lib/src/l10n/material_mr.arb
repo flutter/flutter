@@ -23,7 +23,7 @@
   "selectedRowCountTitleOther": "$selectedRowCount आयटम निवडले",
   "cancelButtonLabel": "रद्द करा",
   "closeButtonLabel": "बंद करा",
-  "continueButtonLabel": "सुरू ठेवा",
+  "continueButtonLabel": "पुढे सुरू ठेवा",
   "copyButtonLabel": "कॉपी करा",
   "cutButtonLabel": "कट करा",
   "okButtonLabel": "ओके",
@@ -71,7 +71,7 @@
   "dateOutOfRangeLabel": "श्रेणीच्या बाहेर आहे.",
   "saveButtonLabel": "सेव्ह करा",
   "datePickerHelpText": "तारीख निवडा",
-  "dateRangePickerHelpText": "श्रेणी निवडा",
+  "dateRangePickerHelpText": "रेंज निवडा",
   "calendarModeButtonLabel": "कॅलेंडरवर स्विच करा",
   "inputDateModeButtonLabel": "इनपुटवर स्विच करा",
   "timePickerDialHelpText": "वेळ निवडा",
@@ -130,5 +130,10 @@
   "keyboardKeySpace": "स्पेस",
   "keyboardKeyMetaMacOs": "कमांड",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "मेनू बार मेनू"
+  "menuBarMenuLabel": "मेनू बार मेनू",
+  "currentDateLabel": "आज",
+  "scrimLabel": "स्क्रिम",
+  "bottomSheetLabel": "तळाशी असलेली शीट",
+  "scrimOnTapHint": "$modalRouteContentName बंद करा",
+  "keyboardKeyShift": "शिफ्ट"
 }

@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=1000"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'dart:async';
 import 'dart:convert';
@@ -164,6 +165,20 @@ void main() {
     expect(result.exitCode, 1);
   });
 
+  testWithoutContext('flutter test should run a test with an exact name in URI format', () async {
+    final ProcessResult result = await _runFlutterTest('uri_format', automatedTestsDirectory, flutterTestDirectory,
+      query: 'full-name=exactTestName');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
+    expect(result.exitCode, 0);
+  });
+
+  testWithoutContext('flutter test should run a test by line number in URI format', () async {
+    final ProcessResult result = await _runFlutterTest('uri_format', automatedTestsDirectory, flutterTestDirectory,
+      query: 'line=11');
+    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
+    expect(result.exitCode, 0);
+  });
+
   testWithoutContext('flutter test should test runs to completion', () async {
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
       extraArguments: const <String>['--verbose']);
@@ -196,6 +211,56 @@ void main() {
 
   testWithoutContext('flutter gold skips tests where the expectations are missing', () async {
     return _testFile('flutter_gold', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+  });
+
+  testWithoutContext('flutter test should respect --serve-observatory', () async {
+    late final Process process;
+    late final StreamSubscription<String> sub;
+    try {
+      process = await _runFlutterTestConcurrent('trivial', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--start-paused', '--serve-observatory']);
+      final Completer<Uri> completer = Completer<Uri>();
+      final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
+      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+        if (!completer.isCompleted && vmServiceUriRegExp.hasMatch(e)) {
+          completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
+        }
+      });
+      final Uri vmServiceUri = await completer.future;
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(vmServiceUri);
+      final HttpClientResponse response = await request.close();
+      final String content = await response.transform(utf8.decoder).join();
+      expect(content.contains('Dart VM Observatory'), true);
+    } finally {
+      await sub.cancel();
+      process.kill();
+    }
+  });
+
+  testWithoutContext('flutter test should serve DevTools', () async {
+    late final Process process;
+    late final StreamSubscription<String> sub;
+    try {
+      process = await _runFlutterTestConcurrent('trivial', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--start-paused']);
+      final Completer<Uri> completer = Completer<Uri>();
+      final RegExp devToolsUriRegExp = RegExp(r'The Flutter DevTools debugger and profiler is available at: (http://[^\s]+)');
+      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+        if (!completer.isCompleted && devToolsUriRegExp.hasMatch(e)) {
+          completer.complete(Uri.parse(devToolsUriRegExp.firstMatch(e)!.group(1)!));
+        }
+      });
+      final Uri devToolsUri = await completer.future;
+      final HttpClient client = HttpClient();
+      final HttpClientRequest request = await client.getUrl(devToolsUri);
+      final HttpClientResponse response = await request.close();
+      final String content = await response.transform(utf8.decoder).join();
+      expect(content.contains('DevTools'), true);
+    } finally {
+      await sub.cancel();
+      process.kill();
+    }
   });
 }
 
@@ -289,6 +354,52 @@ Future<ProcessResult> _runFlutterTest(
   String workingDirectory,
   String testDirectory, {
   List<String> extraArguments = const <String>[],
+  String? query,
+}) async {
+
+  String testPath;
+  if (testName == null) {
+    // Test everything in the directory.
+    testPath = testDirectory;
+    final Directory directoryToTest = fileSystem.directory(testPath);
+    if (!directoryToTest.existsSync()) {
+      fail('missing test directory: $directoryToTest');
+    }
+  } else {
+    // Test just a specific test file.
+    testPath = fileSystem.path.join(testDirectory, '${testName}_test.dart');
+    final File testFile = fileSystem.file(testPath);
+    if (!testFile.existsSync()) {
+      fail('missing test file: $testFile');
+    }
+  }
+
+  final List<String> args = <String>[
+    'test',
+    '--no-color',
+    '--no-version-check',
+    '--no-pub',
+    '--reporter',
+    'compact',
+    ...extraArguments,
+    if (query != null) Uri.file(testPath).replace(query: query).toString()
+    else testPath,
+  ];
+
+  return Process.run(
+    flutterBin, // Uses the precompiled flutter tool for faster tests,
+    args,
+    workingDirectory: workingDirectory,
+    stdoutEncoding: utf8,
+    stderrEncoding: utf8,
+  );
+}
+
+Future<Process> _runFlutterTestConcurrent(
+  String? testName,
+  String workingDirectory,
+  String testDirectory, {
+  List<String> extraArguments = const <String>[],
 }) async {
 
   String testPath;
@@ -319,11 +430,9 @@ Future<ProcessResult> _runFlutterTest(
     testPath,
   ];
 
-  return Process.run(
+  return Process.start(
     flutterBin, // Uses the precompiled flutter tool for faster tests,
     args,
     workingDirectory: workingDirectory,
-    stdoutEncoding: utf8,
-    stderrEncoding: utf8,
   );
 }

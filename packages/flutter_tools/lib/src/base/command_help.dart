@@ -97,6 +97,12 @@ class CommandHelp {
     'Detach (terminate "flutter run" but leave application running).',
   );
 
+  late final CommandHelpOption f = _makeOption(
+    'f',
+    'Dump focus tree to the console.',
+    'debugDumpFocusTree',
+  );
+
   late final CommandHelpOption g = _makeOption(
     'g',
     'Run source code generators.'
@@ -220,7 +226,7 @@ class CommandHelpOption {
   /// Text shown in parenthesis to give the context.
   final String inParenthesis;
 
-  bool get _hasTextInParenthesis => inParenthesis != null && inParenthesis.isNotEmpty;
+  bool get _hasTextInParenthesis => inParenthesis.isNotEmpty;
 
   int get _rawMessageLength => key.length + description.length;
 

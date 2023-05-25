@@ -128,5 +128,10 @@
   "keyboardKeySpace": "Space",
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "ਮੀਨੂ ਬਾਰ ਮੀਨੂ"
+  "menuBarMenuLabel": "ਮੀਨੂ ਬਾਰ ਮੀਨੂ",
+  "currentDateLabel": "ਅੱਜ",
+  "scrimLabel": "ਸਕ੍ਰਿਮ",
+  "bottomSheetLabel": "ਹੇਠਲੀ ਸ਼ੀਟ",
+  "scrimOnTapHint": "$modalRouteContentName ਨੂੰ ਬੰਦ ਕਰੋ",
+  "keyboardKeyShift": "Shift"
 }

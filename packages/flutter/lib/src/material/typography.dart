@@ -211,43 +211,30 @@ class Typography with Diagnosticable {
     TextTheme tall,
   ) {
     assert(platform != null || (black != null && white != null));
-    assert(englishLike != null);
-    assert(dense != null);
-    assert(tall != null);
     switch (platform) {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
         white ??= whiteCupertino;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         black ??= blackMountainView;
         white ??= whiteMountainView;
-        break;
       case TargetPlatform.windows:
         black ??= blackRedmond;
         white ??= whiteRedmond;
-        break;
       case TargetPlatform.macOS:
         black ??= blackRedwoodCity;
         white ??= whiteRedwoodCity;
-        break;
       case TargetPlatform.linux:
         black ??= blackHelsinki;
         white ??= whiteHelsinki;
-        break;
       case null:
         break;
     }
     return Typography._(black!, white!, englishLike, dense, tall);
   }
 
-  const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall)
-    : assert(black != null),
-      assert(white != null),
-      assert(englishLike != null),
-      assert(dense != null),
-      assert(tall != null);
+  const Typography._(this.black, this.white, this.englishLike, this.dense, this.tall);
 
   /// A Material Design text theme with dark glyphs.
   ///
@@ -305,7 +292,6 @@ class Typography with Diagnosticable {
 
   /// Returns one of [englishLike], [dense], or [tall].
   TextTheme geometryThemeFor(ScriptCategory category) {
-    assert(category != null);
     switch (category) {
       case ScriptCategory.englishLike:
         return englishLike;
@@ -338,6 +324,9 @@ class Typography with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Typography lerp(Typography a, Typography b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return Typography._(
       TextTheme.lerp(a.black, b.black, t),
       TextTheme.lerp(a.white, b.white, t),
@@ -759,7 +748,7 @@ class Typography with Diagnosticable {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
+// Token database version: v0_162
 
 class _M3Typography {
   _M3Typography._();

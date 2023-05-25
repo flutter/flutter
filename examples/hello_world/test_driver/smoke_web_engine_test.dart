@@ -39,10 +39,10 @@ void main() {
       await Future<void>.delayed(const Duration(seconds: 2));
 
       final WebElement? fltSemantics = await driver.webDriver.execute(
-        'return document.querySelector("flt-glass-pane")?.shadowRoot.querySelector("flt-semantics")',
+        'return document.querySelector("flt-semantics")',
         <dynamic>[],
       ) as WebElement?;
       expect(fltSemantics, isNotNull);
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/124174
   });
 }

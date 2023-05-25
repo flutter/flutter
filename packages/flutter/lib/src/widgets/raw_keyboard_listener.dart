@@ -47,10 +47,7 @@ class RawKeyboardListener extends StatefulWidget {
     this.includeSemantics = true,
     this.onKey,
     required this.child,
-  }) : assert(focusNode != null),
-       assert(autofocus != null),
-       assert(includeSemantics != null),
-       assert(child != null);
+  });
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;

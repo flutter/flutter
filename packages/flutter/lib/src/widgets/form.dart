@@ -2,11 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
+
+// Duration for delay before announcement in IOS so that the announcement won't be interrupted.
+const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 
 // Examples can assume:
 // late BuildContext context;
@@ -46,8 +55,7 @@ class Form extends StatefulWidget {
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : assert(child != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -184,12 +192,10 @@ class FormState extends State<Form> {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate();
-        break;
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate();
         }
-        break;
       case AutovalidateMode.disabled:
         break;
     }
@@ -238,8 +244,22 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
+    String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+      errorMessage += field.errorText ?? '';
+    }
+
+    if(errorMessage.isNotEmpty) {
+      final TextDirection directionality = Directionality.of(context);
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        unawaited(Future<void>(() async {
+          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+        }));
+      } else {
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }
     }
     return !hasError;
   }
@@ -296,7 +316,7 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 /// Use a [GlobalKey] with [FormField] if you want to retrieve its current
 /// state, for example if you want one form field to depend on another.
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
@@ -318,8 +338,7 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
     this.restorationId,
-  }) : assert(builder != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -497,12 +516,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
           _validate();
-          break;
         case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
             _validate();
           }
-          break;
         case AutovalidateMode.disabled:
           break;
       }
