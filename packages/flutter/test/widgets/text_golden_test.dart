@@ -520,7 +520,7 @@ void main() {
 
   testWidgets('Text Inline widget', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      Theme(data: ThemeData(useMaterial3: false), child: Center(
         child: RepaintBoundary(
           child: Material(
             child: Directionality(
@@ -604,7 +604,7 @@ void main() {
             ),
           ),
         ),
-      ),
+      )),
     );
     await expectLater(
       find.byType(Container),
