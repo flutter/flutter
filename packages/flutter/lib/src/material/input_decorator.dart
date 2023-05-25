@@ -961,6 +961,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       top: math.max(0, contentPadding.top + densityOffset.dy / 2),
       bottom: math.max(0, contentPadding.bottom + densityOffset.dy / 2),
     );
+    // TODO(justinmc): This is still 0.
+    //print('justin $effectiveContentPadding');
     final BoxConstraints contentConstraints = containerConstraints.copyWith(
       maxWidth: containerConstraints.maxWidth - effectiveContentPadding.horizontal,
     );
@@ -1084,6 +1086,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + fixBelowInput
       + effectiveContentPadding.bottom;
     final double contentHeight = math.max(fixIconHeight, contentHeightWithoutIcon);
+    // TODO(justinmc): contentHeight appears to not have changed.
+    //print('justin contentHeightWithoutIcon $contentHeightWithoutIcon, contentHeight $contentHeight, old contentHeight $oldContentHeight');
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension;
@@ -1096,6 +1100,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // suffix icon, center it next to the icon.
     final double undersizedContentIconAdjustment =
         math.max(0, fixIconHeight - contentHeightWithoutIcon) / 2.0;
+    print('justin undersizedContentIconAdjustment $undersizedContentIconAdjustment = ($fixIconHeight - $contentHeightWithoutIcon) / 2.0');
 
     // Ensure the text is vertically centered in cases where the content is
     // shorter than kMinInteractiveDimension.
@@ -1120,7 +1125,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment
+      //+ interactiveAdjustment
       + undersizedContentIconAdjustment;
     final double maxContentHeight = containerHeight
         - effectiveContentPadding.top
@@ -1128,8 +1133,22 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         - topHeight;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
-    final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
+    //final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
+    // TODO(justinmc): Maybe it's better to do this ternary in textAlignVerticalFactor?
+    final double textAlignVerticalOffset = minContainerHeight > contentHeight
+      // Ensure the text is vertically centered in cases where the content is
+      // shorter than kMinInteractiveDimension.
+      ? (minContainerHeight - contentHeight) / 2.0
+      : maxVerticalOffset * textAlignVerticalFactor;
     final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
+    //debugger();
+    /*
+    print('justin inputBaseline $inputBaseline, textAlignVerticalOffset $textAlignVerticalOffset = $maxVerticalOffset * $textAlignVerticalFactor');
+    print('justin maxV $maxVerticalOffset = $maxContentHeight - $alignableHeight');
+    print('justin maxContentHeight = $maxContentHeight = $containerHeight - padding - $topHeight');
+    print('justin alignableHeight = $alignableHeight = $fixAboveInput + $inputHeight + $fixBelowInput');
+    */
+    print('justin minContainerHeight > contentHeight: $minContainerHeight > $contentHeight');
 
     // The three main alignments for the baseline when an outline is present are
     //
