@@ -55,6 +55,10 @@ platform_properties:
       cpu: x86
       os: Mac-12
       xcode: 14e222b
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e222b"
+        }
     dimensions:
       mac_model: "Macmini8,1|Macmini9,1"
   windows:
@@ -479,7 +483,9 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       $flutter/osx_sdk : >-
-        { "sdk_version": "14e222b" }
+        {
+          "sdk_version": "14e222b"
+        }
     drone_dimensions:
       - os=Mac-12
 
@@ -499,6 +505,15 @@ targets:
           "ios-16-4_14e222b",
           "ios-16-2_14c18"
         ]
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14e222b",
+          "runtime_versions":
+            [
+              "ios-16-4_14e222b",
+              "ios-16-2_14c18"
+            ]
+        }
     timeout: 75
 
   - name: Mac Host clang-tidy
@@ -561,7 +576,9 @@ targets:
       release_build: "true"
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
-        { "sdk_version": "14e222b" }
+        {
+          "sdk_version": "14e222b"
+        }
       dependencies: >-
         [
           {"dependency": "jazzy", "version": "0.14.1"}
