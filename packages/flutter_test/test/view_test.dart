@@ -452,9 +452,4 @@ class _FakeFlutterView implements FlutterView {
   }
 }
 
-class _FakeDisplay implements TestDisplay {
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
-  }
-}
+class _FakeDisplay extends Fake implements TestDisplay { }
