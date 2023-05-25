@@ -4,11 +4,15 @@
     // VSCode formats files on save by default. Since Flutter source code is
     // hand-formatted, the default settings are changed to prevent inadvertent
     // reformatting of code.
-    "editor.formatOnSave": false,
-    "editor.formatOnType": false,
+    "[dart]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
 
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
-    ]
+    ],
+    "files.trimTrailingWhitespace": true
 }

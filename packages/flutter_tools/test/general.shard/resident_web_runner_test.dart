@@ -63,20 +63,28 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
     'streamId': 'Isolate',
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'reloadSources',
-    'alias': 'Flutter Tools',
+    'service': kReloadSourcesServiceName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'flutterVersion',
-    'alias': 'Flutter Tools',
+    'service': kFlutterVersionServiceName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'flutterMemoryInfo',
-    'alias': 'Flutter Tools',
+    'service': kFlutterMemoryInfoServiceName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': 'flutterGetIOSBuildOptions',
-    'alias': 'Flutter Tools',
+    'service': kFlutterGetIOSBuildOptionsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetAndroidBuildVariantsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetIOSUniversalLinkSettingsServiceName,
+    'alias': kFlutterToolAlias,
   }),
   FakeVmServiceRequest(
     method: 'streamListen',
@@ -611,7 +619,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-          method: 'hotRestart',
+          method: kHotRestartServiceName,
           jsonResponse: <String, Object>{
             'type': 'Success',
           }),
@@ -684,7 +692,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-          method: 'hotRestart',
+          method: kHotRestartServiceName,
           jsonResponse: <String, Object>{
             'type': 'Success',
           }),
@@ -883,7 +891,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        method: 'hotRestart',
+        method: kHotRestartServiceName,
         jsonResponse: <String, Object>{
           'type': 'Failed',
         },
@@ -910,7 +918,7 @@ void main() {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
       const FakeVmServiceRequest(
-        method: 'hotRestart',
+        method: kHotRestartServiceName,
         // Failed response,
         errorCode: RPCErrorCodes.kInternalError,
       ),

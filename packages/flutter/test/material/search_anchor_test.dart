@@ -755,6 +755,7 @@ void main() {
     expect(material.elevation, 6.0);
     expect(material.color, colorScheme.surface);
     expect(material.surfaceTintColor, colorScheme.surfaceTint);
+    expect(material.clipBehavior, Clip.antiAlias);
 
     final Finder findDivider = find.byType(Divider);
     final Container dividerContainer = tester.widget<Container>(find.descendant(of: findDivider, matching: find.byType(Container)).first);
@@ -1361,6 +1362,51 @@ void main() {
     expect(controller.value.text, suggestion);
   });
 
+  testWidgets('SearchAnchor suggestionsBuilder property could be async', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    const String suggestion = 'suggestion text';
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Material(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SearchAnchor(
+                searchController: controller,
+                builder: (BuildContext context, SearchController controller) {
+                  return const Icon(Icons.search);
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) async {
+                  return <Widget>[
+                    ListTile(
+                      title: const Text(suggestion),
+                      onTap: () {
+                        setState(() {
+                          controller.closeView(suggestion);
+                        });
+                      },
+                    ),
+                  ];
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    ));
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Finder text = find.text(suggestion);
+    expect(text, findsOneWidget);
+    await tester.tap(text);
+    await tester.pumpAndSettle();
+
+    expect(controller.isOpen, false);
+    expect(controller.value.text, suggestion);
+  });
+
   testWidgets('SearchAnchor.bar has a default search bar as the anchor', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -1559,6 +1605,161 @@ void main() {
 
     final Rect searchViewRectRTL = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
     expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
+  });
+
+  testWidgets('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(500.0, 600.0);
+    tester.view.devicePixelRatio = 1.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController controller) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              ),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    // Open the search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+
+    // Change window size
+    tester.view.physicalSize = const Size(250.0, 200.0);
+    tester.view.devicePixelRatio = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsNothing);
+  });
+
+  testWidgets('Full-screen search view route should stay if the window size changes', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(500.0, 600.0);
+    tester.view.devicePixelRatio = 1.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: true,
+          builder: (BuildContext context, SearchController controller) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              ),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    // Open a full-screen search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+
+    // Change window size
+    tester.view.physicalSize = const Size(250.0, 200.0);
+    tester.view.devicePixelRatio = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+  });
+
+  testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/126590.
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(5, (int index) {
+                final String item = 'item $index';
+                return ListTile(
+                  leading: const Icon(Icons.history),
+                  title: Text(item),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {},
+                );
+              });
+            }),
+        ),
+      ),
+    ));
+
+    // Open search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // Pop search view route
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
+    // No exception.
+  });
+
+  testWidgets('Docked search should position itself correctly based on closest navigator', (WidgetTester tester) async {
+    const double rootSpacing = 100.0;
+
+    await tester.pumpWidget(MaterialApp(
+      builder: (BuildContext context, Widget? child) {
+        return Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(rootSpacing),
+            child: child,
+          ),
+        );
+      },
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController controller) {
+            return IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                controller.openView();
+              },
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
 }
 

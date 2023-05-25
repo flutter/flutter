@@ -323,7 +323,7 @@ class DrawerButtonIcon extends StatelessWidget {
 /// A [DrawerButton] is an [IconButton] with a "drawer" icon. When pressed, the
 /// close button calls [ScaffoldState.openDrawer] to the [Scaffold.drawer].
 ///
-/// The default behaviour on press can be overriden with [onPressed].
+/// The default behaviour on press can be overridden with [onPressed].
 ///
 /// See also:
 ///
@@ -388,7 +388,7 @@ class EndDrawerButtonIcon extends StatelessWidget {
 /// A [EndDrawerButton] is an [IconButton] with a "drawer" icon. When pressed, the
 /// end drawer button calls [ScaffoldState.openEndDrawer] to open the [Scaffold.endDrawer].
 ///
-/// The default behaviour on press can be overriden with [onPressed].
+/// The default behaviour on press can be overridden with [onPressed].
 ///
 /// See also:
 ///

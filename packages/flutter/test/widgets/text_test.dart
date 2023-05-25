@@ -1225,9 +1225,11 @@ void main() {
               width: 400,
               child: Center(
                 child: RichText(
+                  // 400 is not wide enough for this string. The part after the
+                  // whitespace is going to be broken into a 2nd line.
                   text: const TextSpan(text: 'fwefwefwewfefewfwe fwfwfwefweabcdefghijklmnopqrstuvwxyz'),
                   textWidthBasis: TextWidthBasis.longestLine,
-                  textDirection: TextDirection.ltr,
+                  textDirection: TextDirection.rtl,
                 ),
               ),
             ),
@@ -1239,11 +1241,12 @@ void main() {
           return false;
         }
         final ui.Paragraph paragraph = arguments[0] as ui.Paragraph;
-        if (paragraph.longestLine > paragraph.width) {
-          throw 'paragraph width (${paragraph.width}) greater than its longest line (${paragraph.longestLine}).';
-        }
-        if (paragraph.width >= 400) {
-          throw 'paragraph.width (${paragraph.width}) >= 400';
+        final Offset offset = arguments[1] as Offset;
+        final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+        for (final ui.LineMetrics line in lines) {
+          if (line.left + offset.dx + line.width >= 400) {
+            throw 'line $line is greater than the max width constraints';
+          }
         }
         return true;
       }));
@@ -1583,6 +1586,39 @@ void main() {
 
       await tester.tap(find.text('Hello World'));
       expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: SelectionArea(
+        child: Text('Flutter'),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
+  testWidgets('Mouse hovering over selectable Text uses default selection style mouse cursor', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: DefaultSelectionStyle.merge(
+          mouseCursor: SystemMouseCursors.click,
+          child: const Text('Flutter'),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 }
 

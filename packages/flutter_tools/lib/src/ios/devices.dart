@@ -261,6 +261,7 @@ class IOSDevice extends Device {
     required this.cpuArchitecture,
     required this.connectionInterface,
     required this.isConnected,
+    required this.devModeEnabled,
     String? sdkVersion,
     required Platform platform,
     required IOSDeploy iosDeploy,
@@ -322,6 +323,8 @@ class IOSDevice extends Device {
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
+
+  bool devModeEnabled = false;
 
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;
@@ -451,7 +454,7 @@ class IOSDevice extends Device {
         _logger.printError('');
         return LaunchResult.failed();
       }
-      packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
+      packageId = buildResult.xcodeBuildExecution?.buildSettings[IosProject.kProductBundleIdKey];
     }
 
     packageId ??= package.id;
@@ -496,7 +499,7 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port foward if debugging with a network device.
+        // Don't port foward if debugging with a wireless device.
         vmServiceDiscovery = ProtocolDiscovery.vmService(
           deviceLogReader,
           portForwarder: isWirelesslyConnected ? null : portForwarder,
@@ -523,6 +526,7 @@ class IOSDevice extends Device {
         _logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
         _logger.printError('  open ios/Runner.xcworkspace');
         _logger.printError('');
+        await dispose();
         return LaunchResult.failed();
       }
 
@@ -546,6 +550,7 @@ class IOSDevice extends Device {
             "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again."
           );
         } else {
+          iosDeployDebugger?.checkForSymbolsFiles(_fileSystem);
           iosDeployDebugger?.pauseDumpBacktraceResume();
         }
       });
@@ -556,6 +561,7 @@ class IOSDevice extends Device {
         final Uri? serviceURL = await vmServiceDiscovery?.uri;
         if (serviceURL == null) {
           await iosDeployDebugger?.stopAndDumpBacktrace();
+          await dispose();
           return LaunchResult.failed();
         }
 
@@ -576,7 +582,7 @@ class IOSDevice extends Device {
           this,
           usesIpv6: ipv6,
           deviceVmservicePort: serviceURL.port,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
 
         mDNSLookupTimer.cancel();
@@ -586,12 +592,14 @@ class IOSDevice extends Device {
       timer.cancel();
       if (localUri == null) {
         await iosDeployDebugger?.stopAndDumpBacktrace();
+        await dispose();
         return LaunchResult.failed();
       }
       return LaunchResult.succeeded(vmServiceUri: localUri);
     } on ProcessException catch (e) {
       await iosDeployDebugger?.stopAndDumpBacktrace();
       _logger.printError(e.message);
+      await dispose();
       return LaunchResult.failed();
     } finally {
       startAppStatus.stop();
@@ -606,7 +614,7 @@ class IOSDevice extends Device {
     // If the debugger is not attached, killing the ios-deploy process won't stop the app.
     final IOSDeployDebugger? deployDebugger = iosDeployDebugger;
     if (deployDebugger != null && deployDebugger.debuggerAttached) {
-      return deployDebugger.exit() == true;
+      return deployDebugger.exit();
     }
     return false;
   }

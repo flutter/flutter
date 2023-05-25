@@ -205,9 +205,9 @@ int smallestButton(int buttons) => buttons & (-buttons);
 /// Example:
 ///
 /// ```dart
-///   assert(isSingleButton(0x1) == true);
-///   assert(isSingleButton(0x11) == false);
-///   assert(isSingleButton(0) == false);
+///   assert(isSingleButton(0x1));
+///   assert(!isSingleButton(0x11));
+///   assert(!isSingleButton(0));
 /// ```
 ///
 /// See also:

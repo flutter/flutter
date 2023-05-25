@@ -561,9 +561,7 @@ class _SnackBarState extends State<SnackBar> {
         : theme.copyWith(
             colorScheme: ColorScheme(
               primary: colorScheme.onPrimary,
-              primaryVariant: colorScheme.onPrimary,
               secondary: buttonColor,
-              secondaryVariant: colorScheme.onSecondary,
               surface: colorScheme.onSurface,
               background: defaults.backgroundColor!,
               error: colorScheme.onError,
@@ -728,6 +726,7 @@ class _SnackBarState extends State<SnackBar> {
       shape: shape,
       elevation: elevation,
       color: backgroundColor,
+      clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
         child: accessibleNavigation || theme.useMaterial3

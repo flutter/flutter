@@ -127,6 +127,8 @@ class DropdownMenu<T> extends StatefulWidget {
     this.trailingIcon,
     this.label,
     this.hintText,
+    this.helperText,
+    this.errorText,
     this.selectedTrailingIcon,
     this.enableFilter = false,
     this.enableSearch = true,
@@ -182,6 +184,31 @@ class DropdownMenu<T> extends StatefulWidget {
   ///
   /// Defaults to null;
   final String? hintText;
+
+  /// Text that provides context about the [DropdownMenu]'s value, such
+  /// as how the value will be used.
+  ///
+  /// If non-null, the text is displayed below the input field, in
+  /// the same location as [errorText]. If a non-null [errorText] value is
+  /// specified then the helper text is not shown.
+  ///
+  /// Defaults to null;
+  ///
+  /// See also:
+  ///
+  /// * [InputDecoration.helperText], which is the text that provides context about the [InputDecorator.child]'s value.
+  final String? helperText;
+
+  /// Text that appears below the input field and the border to show the error message.
+  ///
+  /// If non-null, the border's color animates to red and the [helperText] is not shown.
+  ///
+  /// Defaults to null;
+  ///
+  /// See also:
+  ///
+  /// * [InputDecoration.errorText], which is the text that appears below the [InputDecorator.child] and the border.
+  final String? errorText;
 
   /// An optional icon at the end of the text field to indicate that the text
   /// field is pressed.
@@ -515,7 +542,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           controller: _controller,
           menuChildren: menu,
           crossAxisUnconstrained: false,
-          onClose: () { setState(() {}); }, // To update the status of the IconButton
           builder: (BuildContext context, MenuController controller, Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
@@ -579,6 +605,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     enabled: widget.enabled,
                     label: widget.label,
                     hintText: widget.hintText,
+                    helperText: widget.helperText,
+                    errorText: widget.errorText,
                     prefixIcon: widget.leadingIcon != null ? Container(
                       key: _leadingKey,
                       child: widget.leadingIcon
@@ -620,6 +648,11 @@ class _DropdownMenuBody extends MultiChildRenderObjectWidget {
       width: width,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderDropdownMenuBody renderObject) {
+    renderObject.width = width;
+  }
 }
 
 class _DropdownMenuBodyParentData extends ContainerBoxParentData<RenderBox> { }
@@ -629,10 +662,18 @@ class _RenderDropdownMenuBody extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, _DropdownMenuBodyParentData> {
 
   _RenderDropdownMenuBody({
-    this.width,
-  });
+    double? width,
+  }) : _width = width;
 
-  final double? width;
+  double? get width => _width;
+  double? _width;
+  set width(double? value) {
+    if (_width == value) {
+      return;
+    }
+    _width = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {
