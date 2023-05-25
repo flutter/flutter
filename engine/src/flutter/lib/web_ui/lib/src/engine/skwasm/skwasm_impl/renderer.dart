@@ -11,7 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-// TODO(jacksongardner): Actually implement skwasm renderer.
 class SkwasmRenderer implements Renderer {
   late DomCanvasElement sceneElement;
   late SkwasmSurface surface;

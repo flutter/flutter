@@ -34,6 +34,7 @@ export 'skwasm_impl/raw/raw_shaders.dart';
 export 'skwasm_impl/raw/raw_skdata.dart';
 export 'skwasm_impl/raw/raw_skstring.dart';
 export 'skwasm_impl/raw/raw_surface.dart';
+export 'skwasm_impl/raw/raw_vertices.dart';
 export 'skwasm_impl/raw/skwasm_module.dart';
 export 'skwasm_impl/raw/text/raw_line_metrics.dart';
 export 'skwasm_impl/raw/text/raw_paragraph.dart';
