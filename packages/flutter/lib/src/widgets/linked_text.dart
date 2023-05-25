@@ -143,6 +143,7 @@ class LinkedText extends StatelessWidget {
   // did want to linkify a list, you could wrap then in a single TextSpan.
   LinkedText.spans({
     super.key,
+    // TODO(justinmc): This is a bad name since it seems like it would take widgets. RichText uses `text` for one. Maybe `spans`?
     required this.children,
     UriStringCallback? onTap,
     this.style,
@@ -174,23 +175,23 @@ class LinkedText extends StatelessWidget {
       return const SizedBox.shrink();
     }
     /*
-    return RichText(
-      text: TextSpan(
+    return Text.rich(
+      TextSpan(
         style: style,
         children: linkSpans(TextLinker.urlRangesFinder, children, onTap).toList(),
       ),
     );
     */
-    return RichText(
-      text: InlineLinkedText.spans(
+    return Text.rich(
+      InlineLinkedText.spans(
         style: style ?? DefaultTextStyle.of(context).style,
         textLinkers: textLinkers,
         children: children,
       ),
     );
     /*
-    return RichText(
-      text: InlineLinkedText.textLinkers(
+    return Text.rich(
+      InlineLinkedText.textLinkers(
         style: style ?? DefaultTextStyle.of(context).style,
         text: text,
         textLinkers: textLinkers,
