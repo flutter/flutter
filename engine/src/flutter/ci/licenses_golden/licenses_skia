@@ -1,4 +1,4 @@
-Signature: 319c1e5826ea66e2590b241b9ceee064
+Signature: a4745e2f88b890c8fdb52b9692f93d68
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3331,8 +3331,9 @@ ORIGIN: ../../../third_party/skia/src/pathops/SkPathOpsConic.h + ../../../third_
 ORIGIN: ../../../third_party/skia/src/pathops/SkPathOpsCurve.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkPathOpsWinding.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkDocument_PDF_None.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/pdf/SkJpegInfo.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkJpegInfo.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/pdf/SkJpegInfo_libjpegturbo.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/pdf/SkJpegInfo_none.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFBitmap.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFBitmap.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFMetadata.cpp + ../../../third_party/skia/LICENSE
@@ -3620,8 +3621,9 @@ FILE: ../../../third_party/skia/src/pathops/SkPathOpsConic.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsCurve.cpp
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsWinding.cpp
 FILE: ../../../third_party/skia/src/pdf/SkDocument_PDF_None.cpp
-FILE: ../../../third_party/skia/src/pdf/SkJpegInfo.cpp
 FILE: ../../../third_party/skia/src/pdf/SkJpegInfo.h
+FILE: ../../../third_party/skia/src/pdf/SkJpegInfo_libjpegturbo.cpp
+FILE: ../../../third_party/skia/src/pdf/SkJpegInfo_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFBitmap.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFBitmap.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFMetadata.cpp
