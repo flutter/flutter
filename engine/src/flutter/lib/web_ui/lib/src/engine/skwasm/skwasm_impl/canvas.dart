@@ -259,21 +259,47 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void drawPoints(
-      ui.PointMode pointMode, List<ui.Offset> points, ui.Paint paint) {
-    throw UnimplementedError();
-  }
+    ui.PointMode pointMode,
+    List<ui.Offset> points,
+    ui.Paint paint
+  ) => withStackScope((StackScope scope) {
+    final RawPointArray rawPoints = scope.convertPointArrayToNative(points);
+    canvasDrawPoints(
+      _handle,
+      pointMode.index,
+      rawPoints,
+      points.length,
+      (paint as SkwasmPaint).handle,
+    );
+  });
 
   @override
   void drawRawPoints(
-      ui.PointMode pointMode, Float32List points, ui.Paint paint) {
-    throw UnimplementedError();
-  }
+    ui.PointMode pointMode,
+    Float32List points,
+    ui.Paint paint
+  ) => withStackScope((StackScope scope) {
+    final RawPointArray rawPoints = scope.convertDoublesToNative(points);
+    canvasDrawPoints(
+      _handle,
+      pointMode.index,
+      rawPoints,
+      points.length ~/ 2,
+      (paint as SkwasmPaint).handle,
+    );
+  });
 
   @override
   void drawVertices(
-      ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    throw UnimplementedError();
-  }
+    ui.Vertices vertices,
+    ui.BlendMode blendMode,
+    ui.Paint paint,
+  ) => canvasDrawVertices(
+    _handle,
+    (vertices as SkwasmVertices).handle,
+    blendMode.index,
+    (paint as SkwasmPaint).handle,
+  );
 
   @override
   void drawAtlas(
@@ -284,9 +310,27 @@ class SkwasmCanvas implements SceneCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) {
-    throw UnimplementedError();
-  }
+  ) => withStackScope((StackScope scope) {
+    final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
+    final RawRect rawRects = scope.convertRectsToNative(rects);
+    final RawColorArray rawColors = colors != null
+      ? scope.convertColorArrayToNative(colors)
+      : nullptr;
+    final RawRect rawCullRect = cullRect != null
+      ? scope.convertRectToNative(cullRect)
+      : nullptr;
+    canvasDrawAtlas(
+      _handle,
+      (atlas as SkwasmImage).handle,
+      rawTransforms,
+      rawRects,
+      rawColors,
+      transforms.length,
+      (blendMode ?? ui.BlendMode.src).index,
+      rawCullRect,
+      (paint as SkwasmPaint).handle,
+    );
+  });
 
   @override
   void drawRawAtlas(
@@ -297,9 +341,27 @@ class SkwasmCanvas implements SceneCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) {
-    throw UnimplementedError();
-  }
+  ) => withStackScope((StackScope scope) {
+    final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
+    final RawRect rawRects = scope.convertDoublesToNative(rects);
+    final RawColorArray rawColors = colors != null
+      ? scope.convertIntsToUint32Native(colors)
+      : nullptr;
+    final RawRect rawCullRect = cullRect != null
+      ? scope.convertRectToNative(cullRect)
+      : nullptr;
+    canvasDrawAtlas(
+      _handle,
+      (atlas as SkwasmImage).handle,
+      rawTransforms,
+      rawRects,
+      rawColors,
+      rstTransforms.length ~/ 4,
+      (blendMode ?? ui.BlendMode.src).index,
+      rawCullRect,
+      (paint as SkwasmPaint).handle,
+    );
+  });
 
   @override
   void drawShadow(

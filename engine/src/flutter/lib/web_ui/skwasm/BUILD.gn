@@ -27,6 +27,7 @@ wasm_lib("skwasm") {
     "text/paragraph_style.cpp",
     "text/strut_style.cpp",
     "text/text_style.cpp",
+    "vertices.cpp",
     "wrappers.h",
   ]
 
