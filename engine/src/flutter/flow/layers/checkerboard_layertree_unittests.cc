@@ -46,43 +46,52 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_bounds)}));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRectData{layer_bounds, ClipOp::kIntersect,
-                                           MockCanvas::kSoft_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{child_bounds, DlPaint(), nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  {
+    DisplayListBuilder expected_builder;
+    /* (ClipRect)layer::Paint */ {
+      expected_builder.Save();
+      {
+        expected_builder.ClipRect(layer_bounds, DlCanvas::ClipOp::kIntersect,
+                                  true);
+        expected_builder.SaveLayer(&child_bounds);
+        {
+          /* mock_layer::Paint */ {
+            expected_builder.DrawPath(child_path, child_paint);
+          }
+        }
+        expected_builder.Restore();
+      }
+      expected_builder.Restore();
+    }
+    EXPECT_TRUE(
+        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+  }
 
-  mock_canvas().reset_draw_calls();
-
+  reset_display_list();
   layer->Paint(checkerboard_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRectData{layer_bounds, ClipOp::kIntersect,
-                                           MockCanvas::kSoft_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{child_bounds, DlPaint(), nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path, child_paint}},
-           // start DrawCheckerboard calls
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawRectData{child_bounds, checkerboard_paint()}},
-           // end DrawCheckerboard calls
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  {
+    DisplayListBuilder expected_builder;
+    /* (ClipRect)layer::Paint */ {
+      expected_builder.Save();
+      {
+        expected_builder.ClipRect(layer_bounds, DlCanvas::ClipOp::kIntersect,
+                                  true);
+        expected_builder.SaveLayer(&child_bounds);
+        {
+          /* mock_layer::Paint */ {
+            expected_builder.DrawPath(child_path, child_paint);
+          }
+          expected_builder.DrawRect(child_path.getBounds(),
+                                    checkerboard_paint());
+        }
+        expected_builder.Restore();
+      }
+      expected_builder.Restore();
+    }
+    EXPECT_TRUE(
+        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+  }
 }
 
 TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerCheckBoard) {
@@ -114,43 +123,52 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerCheckBoard) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_path)}));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipPathData{layer_path, ClipOp::kIntersect,
-                                           MockCanvas::kSoft_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{child_bounds, clip_paint, nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  {
+    DisplayListBuilder expected_builder;
+    /* (ClipRect)layer::Paint */ {
+      expected_builder.Save();
+      {
+        expected_builder.ClipPath(layer_path, DlCanvas::ClipOp::kIntersect,
+                                  true);
+        expected_builder.SaveLayer(&child_bounds);
+        {
+          /* mock_layer::Paint */ {
+            expected_builder.DrawPath(child_path, child_paint);
+          }
+        }
+        expected_builder.Restore();
+      }
+      expected_builder.Restore();
+    }
+    EXPECT_TRUE(
+        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+  }
 
-  mock_canvas().reset_draw_calls();
-
+  reset_display_list();
   layer->Paint(checkerboard_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipPathData{layer_path, ClipOp::kIntersect,
-                                           MockCanvas::kSoft_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{child_bounds, clip_paint, nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path, child_paint}},
-           // start DrawCheckerboard calls
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawRectData{child_bounds, checkerboard_paint()}},
-           // end DrawCheckerboard calls
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  {
+    DisplayListBuilder expected_builder;
+    /* (ClipRect)layer::Paint */ {
+      expected_builder.Save();
+      {
+        expected_builder.ClipPath(layer_path, DlCanvas::ClipOp::kIntersect,
+                                  true);
+        expected_builder.SaveLayer(&child_bounds);
+        {
+          /* mock_layer::Paint */ {
+            expected_builder.DrawPath(child_path, child_paint);
+          }
+          expected_builder.DrawRect(child_path.getBounds(),
+                                    checkerboard_paint());
+        }
+        expected_builder.Restore();
+      }
+      expected_builder.Restore();
+    }
+    EXPECT_TRUE(
+        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+  }
 }
 
 TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
@@ -181,43 +199,52 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_matrix);
   EXPECT_EQ(mock_layer->parent_mutators(), std::vector({Mutator(layer_rrect)}));
 
-  layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRRectData{layer_rrect, ClipOp::kIntersect,
-                                            MockCanvas::kSoft_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{child_bounds, clip_paint, nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path, child_paint}},
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  layer->Paint(display_list_paint_context());
+  {
+    DisplayListBuilder expected_builder;
+    /* (ClipRect)layer::Paint */ {
+      expected_builder.Save();
+      {
+        expected_builder.ClipRRect(layer_rrect, DlCanvas::ClipOp::kIntersect,
+                                   true);
+        expected_builder.SaveLayer(&child_bounds);
+        {
+          /* mock_layer::Paint */ {
+            expected_builder.DrawPath(child_path, child_paint);
+          }
+        }
+        expected_builder.Restore();
+      }
+      expected_builder.Restore();
+    }
+    EXPECT_TRUE(
+        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+  }
 
-  mock_canvas().reset_draw_calls();
-
+  reset_display_list();
   layer->Paint(checkerboard_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector(
-          {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
-           MockCanvas::DrawCall{
-               1, MockCanvas::ClipRRectData{layer_rrect, ClipOp::kIntersect,
-                                            MockCanvas::kSoft_ClipEdgeStyle}},
-           MockCanvas::DrawCall{
-               1,
-               MockCanvas::SaveLayerData{child_bounds, clip_paint, nullptr, 2}},
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawPathData{child_path, child_paint}},
-           // start DrawCheckerboard calls
-           MockCanvas::DrawCall{
-               2, MockCanvas::DrawRectData{child_bounds, checkerboard_paint()}},
-           // end DrawCheckerboard calls
-           MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-           MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  {
+    DisplayListBuilder expected_builder;
+    /* (ClipRect)layer::Paint */ {
+      expected_builder.Save();
+      {
+        expected_builder.ClipRRect(layer_rrect, DlCanvas::ClipOp::kIntersect,
+                                   true);
+        expected_builder.SaveLayer(&child_bounds);
+        {
+          /* mock_layer::Paint */ {
+            expected_builder.DrawPath(child_path, child_paint);
+          }
+          expected_builder.DrawRect(child_path.getBounds(),
+                                    checkerboard_paint());
+        }
+        expected_builder.Restore();
+      }
+      expected_builder.Restore();
+    }
+    EXPECT_TRUE(
+        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+  }
 }
 
 #endif

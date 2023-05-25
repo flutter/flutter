@@ -120,7 +120,7 @@ class ComplexityCalculatorHelper
 
   void setAntiAlias(bool aa) override { current_paint_.setAntiAlias(aa); }
 
-  void setStyle(DlDrawStyle style) override {
+  void setDrawStyle(DlDrawStyle style) override {
     current_paint_.setDrawStyle(style);
   }
 

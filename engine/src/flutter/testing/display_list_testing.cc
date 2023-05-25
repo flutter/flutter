@@ -354,7 +354,7 @@ void DisplayListStreamDispatcher::setAntiAlias(bool aa) {
 void DisplayListStreamDispatcher::setDither(bool dither) {
   startl() << "setDither(" << dither << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::setStyle(DlDrawStyle style) {
+void DisplayListStreamDispatcher::setDrawStyle(DlDrawStyle style) {
   startl() << "setStyle(" << style << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::setColor(DlColor color) {

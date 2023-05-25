@@ -28,7 +28,7 @@ class IgnoreAttributeDispatchHelper : public virtual DlOpReceiver {
   void setInvertColors(bool invert) override {}
   void setStrokeCap(DlStrokeCap cap) override {}
   void setStrokeJoin(DlStrokeJoin join) override {}
-  void setStyle(DlDrawStyle style) override {}
+  void setDrawStyle(DlDrawStyle style) override {}
   void setStrokeWidth(float width) override {}
   void setStrokeMiter(float limit) override {}
   void setColor(DlColor color) override {}

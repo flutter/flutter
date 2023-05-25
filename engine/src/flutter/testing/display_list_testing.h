@@ -59,7 +59,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
 
   void setAntiAlias(bool aa) override;
   void setDither(bool dither) override;
-  void setStyle(DlDrawStyle style) override;
+  void setDrawStyle(DlDrawStyle style) override;
   void setColor(DlColor color) override;
   void setStrokeWidth(SkScalar width) override;
   void setStrokeMiter(SkScalar limit) override;

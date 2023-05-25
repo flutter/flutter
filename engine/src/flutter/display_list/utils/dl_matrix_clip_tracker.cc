@@ -108,6 +108,7 @@ DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
   SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
   saved_.emplace_back(std::make_unique<Data3x3>(matrix, cull));
   current_ = saved_.back().get();
+  save();  // saved_[0] will always be the initial settings
 }
 
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
@@ -121,6 +122,7 @@ DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     saved_.emplace_back(std::make_unique<Data4x4>(m44, cull));
   }
   current_ = saved_.back().get();
+  save();  // saved_[0] will always be the initial settings
 }
 
 // clang-format off
@@ -172,8 +174,18 @@ void DisplayListMatrixClipTracker::save() {
 }
 
 void DisplayListMatrixClipTracker::restore() {
-  saved_.pop_back();
-  current_ = saved_.back().get();
+  if (saved_.size() > 2) {
+    saved_.pop_back();
+    current_ = saved_.back().get();
+  }
+}
+
+void DisplayListMatrixClipTracker::reset() {
+  while (saved_.size() > 1) {
+    saved_.pop_back();
+    current_ = saved_.back().get();
+  }
+  save();  // saved_[0] will always be the initial settings
 }
 
 void DisplayListMatrixClipTracker::restoreToCount(int restore_count) {

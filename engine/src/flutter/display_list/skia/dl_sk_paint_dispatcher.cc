@@ -51,7 +51,7 @@ void DlSkPaintDispatchHelper::setStrokeCap(DlStrokeCap cap) {
 void DlSkPaintDispatchHelper::setStrokeJoin(DlStrokeJoin join) {
   paint_.setStrokeJoin(ToSk(join));
 }
-void DlSkPaintDispatchHelper::setStyle(DlDrawStyle style) {
+void DlSkPaintDispatchHelper::setDrawStyle(DlDrawStyle style) {
   paint_.setStyle(ToSk(style));
 }
 void DlSkPaintDispatchHelper::setStrokeWidth(SkScalar width) {

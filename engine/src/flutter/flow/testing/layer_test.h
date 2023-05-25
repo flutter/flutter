@@ -88,7 +88,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
         checkerboard_context_{
             // clang-format off
             .state_stack                   = checkerboard_state_stack_,
-            .canvas                        = &TestT::mock_canvas(),
+            .canvas                        = &display_list_builder_,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
@@ -101,7 +101,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     preroll_state_stack_.set_preroll_delegate(kGiantRect, SkMatrix::I());
     paint_state_stack_.set_delegate(&TestT::mock_canvas());
     display_list_state_stack_.set_delegate(&display_list_builder_);
-    checkerboard_state_stack_.set_delegate(&TestT::mock_canvas());
+    checkerboard_state_stack_.set_delegate(&display_list_builder_);
     checkerboard_state_stack_.set_checkerboard_func(draw_checkerboard);
     checkerboard_paint_.setColor(checkerboard_color_);
   }

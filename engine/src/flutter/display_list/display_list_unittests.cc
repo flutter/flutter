@@ -30,6 +30,10 @@ DlOpReceiver& DisplayListBuilderTestingAccessor(DisplayListBuilder& builder) {
   return builder.asReceiver();
 }
 
+DlPaint DisplayListBuilderTestingAttributes(DisplayListBuilder& builder) {
+  return builder.CurrentAttributes();
+}
+
 namespace testing {
 
 static std::vector<testing::DisplayListInvocationGroup> allGroups =
@@ -87,10 +91,48 @@ class DisplayListTestBase : public BaseT {
     return dl;
   }
 
+  static void check_defaults(
+      DisplayListBuilder& builder,
+      const SkRect& cull_rect = DisplayListBuilder::kMaxCullRect) {
+    DlPaint builder_paint = DisplayListBuilderTestingAttributes(builder);
+    DlPaint defaults;
+
+    EXPECT_EQ(builder_paint.isAntiAlias(), defaults.isAntiAlias());
+    EXPECT_EQ(builder_paint.isDither(), defaults.isDither());
+    EXPECT_EQ(builder_paint.isInvertColors(), defaults.isInvertColors());
+    EXPECT_EQ(builder_paint.getColor(), defaults.getColor());
+    EXPECT_EQ(builder_paint.getBlendMode(), defaults.getBlendMode());
+    EXPECT_EQ(builder_paint.getDrawStyle(), defaults.getDrawStyle());
+    EXPECT_EQ(builder_paint.getStrokeWidth(), defaults.getStrokeWidth());
+    EXPECT_EQ(builder_paint.getStrokeMiter(), defaults.getStrokeMiter());
+    EXPECT_EQ(builder_paint.getStrokeCap(), defaults.getStrokeCap());
+    EXPECT_EQ(builder_paint.getStrokeJoin(), defaults.getStrokeJoin());
+    EXPECT_EQ(builder_paint.getColorSource(), defaults.getColorSource());
+    EXPECT_EQ(builder_paint.getColorFilter(), defaults.getColorFilter());
+    EXPECT_EQ(builder_paint.getImageFilter(), defaults.getImageFilter());
+    EXPECT_EQ(builder_paint.getMaskFilter(), defaults.getMaskFilter());
+    EXPECT_EQ(builder_paint.getPathEffect(), defaults.getPathEffect());
+    EXPECT_EQ(builder_paint, defaults);
+    EXPECT_TRUE(builder_paint.isDefault());
+
+    EXPECT_EQ(builder.GetTransform(), SkMatrix());
+    EXPECT_EQ(builder.GetTransformFullPerspective(), SkM44());
+
+    EXPECT_EQ(builder.GetLocalClipBounds(), cull_rect);
+    EXPECT_EQ(builder.GetDestinationClipBounds(), cull_rect);
+
+    EXPECT_EQ(builder.GetSaveCount(), 1);
+  }
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(DisplayListTestBase);
 };
 using DisplayListTest = DisplayListTestBase<::testing::Test>;
+
+TEST_F(DisplayListTest, Defaults) {
+  DisplayListBuilder builder;
+  check_defaults(builder);
+}
 
 TEST_F(DisplayListTest, EmptyBuild) {
   DisplayListBuilder builder;
@@ -115,6 +157,199 @@ TEST_F(DisplayListTest, BuilderCanBeReused) {
   builder.DrawRect(kTestBounds, DlPaint());
   auto dl2 = builder.Build();
   ASSERT_TRUE(dl->Equals(dl2));
+}
+
+TEST_F(DisplayListTest, SaveRestoreRestoresTransform) {
+  SkRect cull_rect = SkRect::MakeLTRB(-10.0f, -10.0f, 500.0f, 500.0f);
+  DisplayListBuilder builder(cull_rect);
+
+  builder.Save();
+  builder.Translate(10.0f, 10.0f);
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.Scale(10.0f, 10.0f);
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.Skew(0.1f, 0.1f);
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.Rotate(45.0f);
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.Transform(SkMatrix::Scale(10.0f, 10.0f));
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.Transform2DAffine(1.0f, 0.0f, 12.0f,  //
+                            0.0f, 1.0f, 35.0f);
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.Transform(SkM44(SkMatrix::Scale(10.0f, 10.0f)));
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.TransformFullPerspective(1.0f, 0.0f, 0.0f, 12.0f,  //
+                                   0.0f, 1.0f, 0.0f, 35.0f,  //
+                                   0.0f, 0.0f, 1.0f, 5.0f,   //
+                                   0.0f, 0.0f, 0.0f, 1.0f);
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+}
+
+TEST_F(DisplayListTest, BuildRestoresTransform) {
+  SkRect cull_rect = SkRect::MakeLTRB(-10.0f, -10.0f, 500.0f, 500.0f);
+  DisplayListBuilder builder(cull_rect);
+
+  builder.Translate(10.0f, 10.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.Scale(10.0f, 10.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.Skew(0.1f, 0.1f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.Rotate(45.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.Transform(SkMatrix::Scale(10.0f, 10.0f));
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.Transform2DAffine(1.0f, 0.0f, 12.0f,  //
+                            0.0f, 1.0f, 35.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.Transform(SkM44(SkMatrix::Scale(10.0f, 10.0f)));
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.TransformFullPerspective(1.0f, 0.0f, 0.0f, 12.0f,  //
+                                   0.0f, 1.0f, 0.0f, 35.0f,  //
+                                   0.0f, 0.0f, 1.0f, 5.0f,   //
+                                   0.0f, 0.0f, 0.0f, 1.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+}
+
+TEST_F(DisplayListTest, SaveRestoreRestoresClip) {
+  SkRect cull_rect = SkRect::MakeLTRB(-10.0f, -10.0f, 500.0f, 500.0f);
+  DisplayListBuilder builder(cull_rect);
+
+  builder.Save();
+  builder.ClipRect({0.0f, 0.0f, 10.0f, 10.0f});
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.ClipRRect(SkRRect::MakeRectXY({0.0f, 0.0f, 5.0f, 5.0f}, 2.0f, 2.0f));
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+
+  builder.Save();
+  builder.ClipPath(SkPath().addOval({0.0f, 0.0f, 10.0f, 10.0f}));
+  builder.Restore();
+  check_defaults(builder, cull_rect);
+}
+
+TEST_F(DisplayListTest, BuildRestoresClip) {
+  SkRect cull_rect = SkRect::MakeLTRB(-10.0f, -10.0f, 500.0f, 500.0f);
+  DisplayListBuilder builder(cull_rect);
+
+  builder.ClipRect({0.0f, 0.0f, 10.0f, 10.0f});
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.ClipRRect(SkRRect::MakeRectXY({0.0f, 0.0f, 5.0f, 5.0f}, 2.0f, 2.0f));
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  builder.ClipPath(SkPath().addOval({0.0f, 0.0f, 10.0f, 10.0f}));
+  builder.Build();
+  check_defaults(builder, cull_rect);
+}
+
+TEST_F(DisplayListTest, BuildRestoresAttributes) {
+  SkRect cull_rect = SkRect::MakeLTRB(-10.0f, -10.0f, 500.0f, 500.0f);
+  DisplayListBuilder builder(cull_rect);
+  DlOpReceiver& receiver = ToReceiver(builder);
+
+  receiver.setAntiAlias(true);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setDither(true);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setInvertColors(true);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setColor(DlColor::kRed());
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setBlendMode(DlBlendMode::kColorBurn);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setDrawStyle(DlDrawStyle::kStrokeAndFill);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setStrokeWidth(300.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setStrokeMiter(300.0f);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setStrokeCap(DlStrokeCap::kRound);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setStrokeJoin(DlStrokeJoin::kRound);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setColorSource(&kTestSource1);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setColorFilter(&kTestMatrixColorFilter1);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setImageFilter(&kTestBlurImageFilter1);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setMaskFilter(&kTestMaskFilter1);
+  builder.Build();
+  check_defaults(builder, cull_rect);
+
+  receiver.setPathEffect(kTestPathEffect1.get());
+  builder.Build();
+  check_defaults(builder, cull_rect);
 }
 
 TEST_F(DisplayListTest, BuilderBoundsTransformComparedToSkia) {
