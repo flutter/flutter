@@ -9,14 +9,14 @@ body:
 - type: markdown
   attributes:
       value: |
-<!---
-Flutter releases generally follow the given timeline:
-1. On Tuesday at 10 AM PT the CP list will be finalized for the week's release
-  A. If there's any stable CPs, a stable release will be shipped.
-  B. Based on discretion of the release team, a beta hotfix may be shipped.
-2. Tuesday the release engineer for the week will get the release prepped
-3. Wednesday morning at 10 AM PT the release will be shipped
--->
+        <!---
+        Flutter releases generally follow the given timeline:
+        1. On Tuesday at 10 AM PT the CP list will be finalized for the week's release
+          A. If there's any stable CPs, a stable release will be shipped.
+          B. Based on discretion of the release team, a beta hotfix may be shipped.
+        2. Tuesday the release engineer for the week will get the release prepped
+        3. Wednesday morning at 10 AM PT the release will be shipped
+        -->
   - type: input
     id: issue_link
     attributes:
