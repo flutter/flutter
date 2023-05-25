@@ -73,6 +73,24 @@ class HighContrastSupport {
   }
 }
 
+class EngineFlutterDisplay extends ui.Display {
+  EngineFlutterDisplay({
+    required this.id,
+    required this.devicePixelRatio,
+    required this.size,
+    required this.refreshRate,
+  });
+
+  @override
+  final int id;
+  @override
+  final double devicePixelRatio;
+  @override
+  final ui.Size size;
+  @override
+  final double refreshRate;
+}
+
 /// Platform event dispatcher.
 ///
 /// This is the central entry point for platform messages and configuration
@@ -135,7 +153,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   @override
-  Iterable<ui.Display> get displays => <ui.Display>[];
+  Iterable<ui.Display> get displays => <ui.Display>[
+    EngineFlutterDisplay(
+      id: 0,
+      size: ui.Size(domWindow.screen?.width ?? 0, domWindow.screen?.height ?? 0),
+      devicePixelRatio: domWindow.devicePixelRatio,
+      refreshRate: 60,
+    )
+  ];
 
   /// The current list of windows.
   @override

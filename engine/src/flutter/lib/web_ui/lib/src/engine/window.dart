@@ -29,24 +29,6 @@ const bool debugPrintPlatformMessages = false;
 /// The view ID for the implicit flutter view provided by the platform.
 const int kImplicitViewId = 0;
 
-class EngineFlutterDisplay extends ui.Display {
-  EngineFlutterDisplay({
-    required this.id,
-    required this.devicePixelRatio,
-    required this.size,
-    required this.refreshRate,
-  });
-
-  @override
-  final int id;
-  @override
-  final double devicePixelRatio;
-  @override
-  final ui.Size size;
-  @override
-  final double refreshRate;
-}
-
 /// The Web implementation of [ui.SingletonFlutterWindow].
 class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   EngineFlutterWindow(this.viewId, this.platformDispatcher) {
@@ -66,12 +48,7 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
 
   @override
   ui.Display get display {
-    return EngineFlutterDisplay(
-      id: 0,
-      size: ui.Size(domWindow.screen?.width ?? 0, domWindow.screen?.height ?? 0),
-      devicePixelRatio: domWindow.devicePixelRatio,
-      refreshRate: 60,
-    );
+    return ui.PlatformDispatcher.instance.displays.first;
   }
 
   @override
