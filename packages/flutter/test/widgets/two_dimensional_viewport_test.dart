@@ -1689,24 +1689,6 @@ void main() {
       expect(error.toString(), contains('child.hasSize'));
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('asserts the children have been laid out with parentUsesSize: true', (WidgetTester tester) async {
-      final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
-        maxXIndex: 5,
-        maxYIndex: 5,
-        builder: (BuildContext context, ChildVicinity vicinity) {
-          return const SizedBox.square(dimension: 200);
-        }
-      );
-      await tester.pumpWidget(simpleBuilderTest(
-        delegate: delegate,
-        // Will cause the test implementation to not actually layout the
-        // children it asked for.
-        useParentSize: false,
-      ));
-      final AssertionError error = tester.takeException() as AssertionError;
-      expect(error.toString(), contains('parentUsesSize'));
-    }, variant: TargetPlatformVariant.all());
-
     testWidgets('does not support intrinsics', (WidgetTester tester) async {
       final Map<ChildVicinity, UniqueKey> childKeys = <ChildVicinity, UniqueKey>{};
       final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(

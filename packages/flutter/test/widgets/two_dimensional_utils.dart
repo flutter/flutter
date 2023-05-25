@@ -42,7 +42,6 @@ Widget simpleBuilderTest({
   String? restorationID,
   bool useCacheExtent = false,
   bool applyDimensions = true,
-  bool useParentSize = true,
   bool forgetToLayoutChild = false,
   bool setLayoutOffset = true,
 }) {
@@ -59,7 +58,6 @@ Widget simpleBuilderTest({
         clipBehavior: clipBehavior ?? Clip.hardEdge,
         delegate: delegate ?? builderDelegate,
         applyDimensions: applyDimensions,
-        useParentSize: useParentSize,
         forgetToLayoutChild: forgetToLayoutChild,
         setLayoutOffset: setLayoutOffset,
       ),
@@ -82,7 +80,6 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     super.clipBehavior = Clip.hardEdge,
     this.useCacheExtent = false,
     this.applyDimensions = true,
-    this.useParentSize = true,
     this.forgetToLayoutChild = false,
     this.setLayoutOffset = true,
   }) : super(delegate: delegate);
@@ -90,7 +87,6 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
   // Piped through for testing in RenderTwoDimensionalViewport
   final bool useCacheExtent;
   final bool applyDimensions;
-  final bool useParentSize;
   final bool forgetToLayoutChild;
   final bool setLayoutOffset;
 
@@ -107,7 +103,6 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
       clipBehavior: clipBehavior,
       useCacheExtent: useCacheExtent,
       applyDimensions: applyDimensions,
-      useParentSize: useParentSize,
       forgetToLayoutChild: forgetToLayoutChild,
       setLayoutOffset: setLayoutOffset,
     );
@@ -127,7 +122,6 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
     super.clipBehavior = Clip.hardEdge,
     this.useCacheExtent = false,
     this.applyDimensions = true,
-    this.useParentSize = true,
     this.forgetToLayoutChild = false,
     this.setLayoutOffset = true,
   }) : super(delegate: delegate);
@@ -135,7 +129,6 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
   // Piped through for testing in RenderTwoDimensionalViewport
   final bool useCacheExtent;
   final bool applyDimensions;
-  final bool useParentSize;
   final bool forgetToLayoutChild;
   final bool setLayoutOffset;
 
@@ -153,7 +146,6 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
       clipBehavior: clipBehavior,
       useCacheExtent: useCacheExtent,
       applyDimensions: applyDimensions,
-      useParentSize: useParentSize,
       forgetToLayoutChild: forgetToLayoutChild,
       setLayoutOffset: setLayoutOffset,
     );
@@ -185,7 +177,6 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     super.cacheExtent,
     super.clipBehavior = Clip.hardEdge,
     this.applyDimensions = true,
-    this.useParentSize = true,
     this.setLayoutOffset = true,
     this.useCacheExtent = false,
     this.forgetToLayoutChild = false,
@@ -194,7 +185,6 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
   // These are to test conditions to validate subclass implementations after
   // layoutChildSequence
   final bool applyDimensions;
-  final bool useParentSize;
   final bool setLayoutOffset;
   final bool useCacheExtent;
   final bool forgetToLayoutChild;
@@ -234,10 +224,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
         final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
         if (!forgetToLayoutChild) {
-          child.layout(
-            constraints.tighten(width: 200.0, height: 200.0),
-            parentUsesSize: useParentSize,
-          );
+          child.layout(constraints.tighten(width: 200.0, height: 200.0));
         }
 
         if (setLayoutOffset) {
@@ -393,14 +380,7 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     required super.childManager,
     super.cacheExtent,
     super.clipBehavior = Clip.hardEdge,
-    this.applyDimensions = true,
-    this.useParentSize = true,
-    this.setLayoutOffset = true,
   }) : super(delegate: delegate);
-
-  final bool applyDimensions; // Testing error message
-  final bool useParentSize; // Testing error message
-  final bool setLayoutOffset; // Testing error message
 
   @override
   void layoutChildSequence() {
@@ -431,21 +411,14 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
       for (int row = leadingRow; row <= trailingRow; row++) {
         final ChildVicinity vicinity = ChildVicinity(xIndex: column, yIndex: row);
         final RenderBox child = buildOrObtainChildFor(vicinity)!;
-        child.layout(
-          constraints.tighten(width: 200.0, height: 200.0),
-          parentUsesSize: useParentSize,
-        );
+        child.layout(constraints.tighten(width: 200.0, height: 200.0));
 
-        if (setLayoutOffset) {
-          parentDataOf(child).layoutOffset = Offset(xLayoutOffset, yLayoutOffset);
-        }
+        parentDataOf(child).layoutOffset = Offset(xLayoutOffset, yLayoutOffset);
         yLayoutOffset += 200;
       }
       xLayoutOffset += 200;
     }
-    if (applyDimensions) {
-      verticalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.height);
-      horizontalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.width);
-    }
+    verticalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.height);
+    horizontalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.width);
   }
 }
