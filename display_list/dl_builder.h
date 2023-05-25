@@ -247,6 +247,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
       DisplayListBuilder& builder);
   friend DlOpReceiver& DisplayListBuilderTestingAccessor(
       DisplayListBuilder& builder);
+  friend DlPaint DisplayListBuilderTestingAttributes(
+      DisplayListBuilder& builder);
 
   void SetAttributesFromPaint(const DlPaint& paint,
                               const DisplayListAttributeFlags flags);
@@ -282,9 +284,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
     }
   }
   // |DlOpReceiver|
-  void setStyle(DlDrawStyle style) override {
+  void setDrawStyle(DlDrawStyle style) override {
     if (current_.getDrawStyle() != style) {
-      onSetStyle(style);
+      onSetDrawStyle(style);
     }
   }
   // |DlOpReceiver|
@@ -341,6 +343,8 @@ class DisplayListBuilder final : public virtual DlCanvas,
       onSetMaskFilter(filter);
     }
   }
+
+  DlPaint CurrentAttributes() const { return current_; }
 
   // |DlOpReceiver|
   void save() override { Save(); }
@@ -654,7 +658,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void onSetInvertColors(bool invert);
   void onSetStrokeCap(DlStrokeCap cap);
   void onSetStrokeJoin(DlStrokeJoin join);
-  void onSetStyle(DlDrawStyle style);
+  void onSetDrawStyle(DlDrawStyle style);
   void onSetStrokeWidth(SkScalar width);
   void onSetStrokeMiter(SkScalar limit);
   void onSetColor(DlColor color);

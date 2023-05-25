@@ -32,7 +32,8 @@ bool DlPaint::operator==(DlPaint const& other) const {
          Equals(colorSource_, other.colorSource_) &&  //
          Equals(colorFilter_, other.colorFilter_) &&  //
          Equals(imageFilter_, other.imageFilter_) &&  //
-         Equals(maskFilter_, other.maskFilter_);
+         Equals(maskFilter_, other.maskFilter_) &&    //
+         Equals(pathEffect_, other.pathEffect_);
 }
 
 const DlPaint DlPaint::kDefault;
