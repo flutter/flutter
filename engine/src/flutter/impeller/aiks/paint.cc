@@ -27,16 +27,9 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(const Path& path,
 }
 
 std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
-    std::unique_ptr<Geometry> geometry) const {
+    std::shared_ptr<Geometry> geometry) const {
   auto contents = color_source.GetContents(*this);
   contents->SetGeometry(std::move(geometry));
-  return contents;
-}
-
-std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
-    const std::shared_ptr<Geometry>& geometry) const {
-  auto contents = color_source.GetContents(*this);
-  contents->SetGeometry(geometry);
   return contents;
 }
 

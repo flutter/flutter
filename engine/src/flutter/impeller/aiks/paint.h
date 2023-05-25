@@ -94,10 +94,7 @@ struct Paint {
                                                     bool cover = false) const;
 
   std::shared_ptr<Contents> CreateContentsForGeometry(
-      std::unique_ptr<Geometry> geometry) const;
-
-  std::shared_ptr<Contents> CreateContentsForGeometry(
-      const std::shared_ptr<Geometry>& geometry) const;
+      std::shared_ptr<Geometry> geometry) const;
 
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;
