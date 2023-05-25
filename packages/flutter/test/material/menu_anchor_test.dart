@@ -3093,7 +3093,7 @@ void main() {
             child: SubmenuButton(
               onHover: (bool value) {},
               style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
-              menuChildren: [],
+              menuChildren: const <Widget>[],
               child: const Text('ABC'),
             ),
           ),
