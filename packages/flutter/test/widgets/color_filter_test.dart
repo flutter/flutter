@@ -41,7 +41,7 @@ void main() {
           colorFilter: sepia,
           child: MaterialApp(
             title: 'Flutter Demo',
-            theme: ThemeData(primarySwatch: Colors.blue),
+            theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: false),
             home: Scaffold(
               appBar: AppBar(
                 title: const Text('Sepia ColorFilter Test'),
