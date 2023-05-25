@@ -1239,10 +1239,17 @@ class _SearchBarState extends State<SearchBar> {
                         controller: widget.controller,
                         style: effectiveTextStyle,
                         decoration: InputDecoration(
-                          border: InputBorder.none,
                           hintText: widget.hintText,
+                        ).applyDefaults(InputDecorationTheme(
                           hintStyle: effectiveHintStyle,
-                        ),
+
+                          // The configuration below is to make sure that the text field
+                          // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                          enabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                        )),
                       ),
                     ),
                   )

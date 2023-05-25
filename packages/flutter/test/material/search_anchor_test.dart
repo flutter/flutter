@@ -31,29 +31,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(searchBarMaterial);
-    expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
-    expect(material.borderRadius, null);
-    expect(material.clipBehavior, Clip.none);
-    expect(material.color, colorScheme.surface);
-    expect(material.elevation, 6.0);
-    expect(material.shadowColor, colorScheme.shadow);
-    expect(material.surfaceTintColor, colorScheme.surfaceTint);
-    expect(material.shape, const StadiumBorder());
-
-    final Text helperText = tester.widget(find.text('hint text'));
-    expect(helperText.style?.color, colorScheme.onSurfaceVariant);
-    expect(helperText.style?.fontSize, 16.0);
-    expect(helperText.style?.fontFamily, 'Roboto');
-    expect(helperText.style?.fontWeight, FontWeight.w400);
-
-    const String input = 'entered text';
-    await tester.enterText(find.byType(SearchBar), input);
-    final EditableText inputText = tester.widget(find.text(input));
-    expect(inputText.style.color, colorScheme.onSurface);
-    expect(inputText.style.fontSize, 16.0);
-    expect(helperText.style?.fontFamily, 'Roboto');
-    expect(inputText.style.fontWeight, FontWeight.w400);
+    checkSearchBarDefaults(tester, colorScheme, material);
   });
 
   testWidgets('SearchBar respects controller property', (WidgetTester tester) async {
@@ -643,19 +621,21 @@ void main() {
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
     await tester.pump();
-    final Text helperText = tester.widget(find.text('hint text'));
+    Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
     await tester.pump();
+    helperText = tester.widget(find.text('hint text'));
+    expect(helperText.style?.color, pressedColor);
     await gesture.removePointer();
-    expect(helperText.style?.color, hoveredColor);
 
     // On focused.
     await tester.tap(find.byType(SearchBar));
     await tester.pump();
-    expect(helperText.style?.color, hoveredColor);
+    helperText = tester.widget(find.text('hint text'));
+    expect(helperText.style?.color, focusedColor);
   });
 
   testWidgets('SearchBar respects textStyle property', (WidgetTester tester) async {
@@ -676,19 +656,21 @@ void main() {
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
     await tester.pump();
-    final EditableText inputText = tester.widget(find.text('input text'));
+    EditableText inputText = tester.widget(find.text('input text'));
     expect(inputText.style.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
     await tester.pump();
     await gesture.removePointer();
-    expect(inputText.style.color, hoveredColor);
+    inputText = tester.widget(find.text('input text'));
+    expect(inputText.style.color, pressedColor);
 
     // On focused.
     await tester.tap(find.byType(SearchBar));
     await tester.pump();
-    expect(inputText.style.color, hoveredColor);
+    inputText = tester.widget(find.text('input text'));
+    expect(inputText.style.color, focusedColor);
   });
 
   testWidgets('hintStyle can override textStyle for hintText', (WidgetTester tester) async {
@@ -709,19 +691,21 @@ void main() {
     // On hovered.
     final TestGesture gesture = await _pointGestureToSearchBar(tester);
     await tester.pump();
-    final Text helperText = tester.widget(find.text('hint text'));
+    Text helperText = tester.widget(find.text('hint text'));
     expect(helperText.style?.color, hoveredColor);
 
     // On pressed.
     await gesture.down(tester.getCenter(find.byType(SearchBar)));
     await tester.pump();
     await gesture.removePointer();
-    expect(helperText.style?.color, hoveredColor);
+    helperText = tester.widget(find.text('hint text'));
+    expect(helperText.style?.color, pressedColor);
 
     // On focused.
     await tester.tap(find.byType(SearchBar));
     await tester.pump();
-    expect(helperText.style?.color, hoveredColor);
+    helperText = tester.widget(find.text('hint text'));
+    expect(helperText.style?.color, focusedColor);
   });
 
   testWidgets('The search view defaults', (WidgetTester tester) async {
@@ -1761,6 +1745,161 @@ void main() {
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
     expect(searchViewRect.topLeft, equals(const Offset(rootSpacing, rootSpacing)));
   });
+
+
+  // regression tests for https://github.com/flutter/flutter/issues/126623
+  group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
+
+    const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
+      focusColor: Colors.green,
+      hoverColor: Colors.blue,
+      outlineBorder: BorderSide(color: Colors.pink, width: 10),
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 20),
+      hintStyle: TextStyle(color: Colors.purpleAccent),
+      fillColor: Colors.tealAccent,
+      filled: true,
+      isCollapsed: true,
+      border: OutlineInputBorder(),
+      focusedBorder: UnderlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      errorBorder: UnderlineInputBorder(),
+      focusedErrorBorder: UnderlineInputBorder(),
+      disabledBorder: UnderlineInputBorder(),
+      constraints: BoxConstraints(maxWidth: 300),
+    );
+    final ThemeData theme = ThemeData(
+      useMaterial3: true,
+      inputDecorationTheme: inputDecorationTheme
+    );
+
+    void checkDecorationInSearchBar(WidgetTester tester) {
+      final Finder textField = findTextField();
+      final InputDecoration? decoration = tester.widget<TextField>(textField).decoration;
+
+      expect(decoration?.border, InputBorder.none);
+      expect(decoration?.focusedBorder, InputBorder.none);
+      expect(decoration?.enabledBorder, InputBorder.none);
+      expect(decoration?.errorBorder, null);
+      expect(decoration?.focusedErrorBorder, null);
+      expect(decoration?.disabledBorder, null);
+      expect(decoration?.constraints, null);
+      expect(decoration?.isCollapsed, false);
+      expect(decoration?.filled, false);
+      expect(decoration?.fillColor, null);
+      expect(decoration?.focusColor, null);
+      expect(decoration?.hoverColor, null);
+      expect(decoration?.contentPadding, const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+      expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
+    }
+
+    testWidgets('Overall InputDecorationTheme does not override text field style'
+        ' in SearchBar', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: const Center(
+            child: Material(
+              child: SearchBar(hintText: 'hint text'),
+            ),
+          ),
+        ),
+      );
+
+      // Check input decoration in `SearchBar`
+      checkDecorationInSearchBar(tester);
+
+      // Check search bar defaults.
+      final Finder searchBarMaterial = find.descendant(
+        of: find.byType(SearchBar),
+        matching: find.byType(Material),
+      );
+
+      final Material material = tester.widget<Material>(searchBarMaterial);
+      checkSearchBarDefaults(tester, theme.colorScheme, material);
+    });
+
+    testWidgets('Overall InputDecorationTheme does not override text field style'
+        ' in the search view route', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Material(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SearchAnchor(
+                  viewHintText: 'hint text',
+                  builder: (BuildContext context, SearchController controller) {
+                    return const Icon(Icons.search);
+                  },
+                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    return <Widget>[];
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+
+      // Check input decoration in `SearchBar`
+      checkDecorationInSearchBar(tester);
+
+      // Check search bar defaults in search view route.
+      final Finder searchBarMaterial = find.descendant(
+        of: find.descendant(of: findViewContent(), matching: find.byType(SearchBar)),
+        matching: find.byType(Material),
+      ).first;
+
+      final Material material = tester.widget<Material>(searchBarMaterial);
+      expect(material.color, Colors.transparent);
+      expect(material.elevation, 0.0);
+      final Text hintText = tester.widget(find.text('hint text'));
+      expect(hintText.style?.color, theme.colorScheme.onSurfaceVariant);
+
+      const String input = 'entered text';
+      await tester.enterText(find.byType(SearchBar), input);
+      final EditableText inputText = tester.widget(find.text(input));
+      expect(inputText.style.color, theme.colorScheme.onSurface);
+    });
+  });
+}
+
+Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
+  expect(material.animationDuration, const Duration(milliseconds: 200));
+  expect(material.borderOnForeground, true);
+  expect(material.borderRadius, null);
+  expect(material.clipBehavior, Clip.none);
+  expect(material.color, colorScheme.surface);
+  expect(material.elevation, 6.0);
+  expect(material.shadowColor, colorScheme.shadow);
+  expect(material.surfaceTintColor, colorScheme.surfaceTint);
+  expect(material.shape, const StadiumBorder());
+
+  final Text helperText = tester.widget(find.text('hint text'));
+  expect(helperText.style?.color, colorScheme.onSurfaceVariant);
+  expect(helperText.style?.fontSize, 16.0);
+  expect(helperText.style?.fontFamily, 'Roboto');
+  expect(helperText.style?.fontWeight, FontWeight.w400);
+
+  const String input = 'entered text';
+  await tester.enterText(find.byType(SearchBar), input);
+  final EditableText inputText = tester.widget(find.text(input));
+  expect(inputText.style.color, colorScheme.onSurface);
+  expect(inputText.style.fontSize, 16.0);
+  expect(helperText.style?.fontFamily, 'Roboto');
+  expect(inputText.style.fontWeight, FontWeight.w400);
+}
+
+Finder findTextField() {
+  return find.descendant(
+    of: find.byType(SearchBar),
+    matching: find.byType(TextField)
+  );
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
