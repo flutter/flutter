@@ -38,11 +38,6 @@ config("allow_posix_names") {
 }
 
 source_set("txt") {
-  defines = []
-  if (flutter_use_fontconfig) {
-    defines += [ "FLUTTER_USE_FONTCONFIG" ]
-  }
-
   sources = [
     "src/skia/paragraph_builder_skia.cc",
     "src/skia/paragraph_builder_skia.h",
@@ -96,8 +91,9 @@ source_set("txt") {
     "//third_party/skia/modules/skparagraph",
   ]
 
+  libs = []
   if (flutter_use_fontconfig) {
-    deps += [ "//third_party/fontconfig" ]
+    libs += [ "fontconfig" ]
   }
 
   if (is_mac || is_ios) {
