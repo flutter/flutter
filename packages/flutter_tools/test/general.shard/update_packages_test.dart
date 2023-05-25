@@ -110,6 +110,8 @@ void main() {
         'archive',
         'path_provider_android',
         'flutter_plugin_android_lifecycle',
+        'test_core',
+        'test_api',
       ]),
     );
   });
