@@ -292,7 +292,7 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
 
 @implementation FlutterViewWrapper {
   FlutterView* _flutterView;
-  FlutterViewController* _controller;
+  __weak FlutterViewController* _controller;
 }
 
 - (instancetype)initWithFlutterView:(FlutterView*)view

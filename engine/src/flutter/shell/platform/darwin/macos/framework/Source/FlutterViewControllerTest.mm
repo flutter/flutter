@@ -69,6 +69,7 @@
 - (bool)testFlutterViewIsConfigured;
 - (bool)testLookupKeyAssets;
 - (bool)testLookupKeyAssetsWithPackage;
+- (bool)testViewControllerIsReleased;
 
 + (void)respondFalseForSendEvent:(const FlutterKeyEvent&)event
                         callback:(nullable FlutterKeyEventCallback)callback
@@ -249,6 +250,10 @@ TEST(FlutterViewControllerTest, testLookupKeyAssets) {
 
 TEST(FlutterViewControllerTest, testLookupKeyAssetsWithPackage) {
   ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testLookupKeyAssetsWithPackage]);
+}
+
+TEST(FlutterViewControllerTest, testViewControllerIsReleased) {
+  ASSERT_TRUE([[FlutterViewControllerTestObjC alloc] testViewControllerIsReleased]);
 }
 
 }  // namespace flutter::testing
@@ -1012,6 +1017,26 @@ static void SwizzledNoop(id self, SEL _cmd) {}
 
     [events removeAllObjects];
   };
+
+  return true;
+}
+
+- (bool)testViewControllerIsReleased {
+  __weak FlutterViewController* weakController;
+  @autoreleasepool {
+    id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+
+    FlutterRenderer* renderer_ = [[FlutterRenderer alloc] initWithFlutterEngine:engineMock];
+    OCMStub([engineMock renderer]).andReturn(renderer_);
+
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                  nibName:@""
+                                                                                   bundle:nil];
+    [viewController loadView];
+    weakController = viewController;
+  }
+
+  EXPECT_EQ(weakController, nil);
 
   return true;
 }
