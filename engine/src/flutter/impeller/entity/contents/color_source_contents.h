@@ -41,7 +41,6 @@ class ColorSourceContents : public Contents {
 
   Scalar GetOpacity() const;
 
- protected:
   const std::shared_ptr<Geometry>& GetGeometry() const;
 
  private:
