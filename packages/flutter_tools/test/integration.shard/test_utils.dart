@@ -124,3 +124,82 @@ abstract final class AppleTestUtils {
     return nmOutput.isEmpty ? const <String>[] : nmOutput.split('\n');
   }
 }
+
+/// Matcher to be used for [ProcessResult] returned
+/// from a process run
+///
+/// The default for [expectedExitCode] will be 0 while
+/// [stdoutSubstring] and [stderrSubstring] are both optional
+class ProcessResultMatcher extends Matcher {
+  ProcessResultMatcher({
+    this.expectedExitCode = 0,
+    this.stdoutSubstring,
+    this.stderrSubstring,
+  });
+
+  /// The expected exit code to get returned from a process run
+  final int expectedExitCode;
+
+  /// Substring to find in the process's stdout
+  final String? stdoutSubstring;
+
+  /// Substring to find in the process's stderr
+  final String? stderrSubstring;
+
+  bool _foundStdout = true;
+  bool _foundStderr = true;
+
+  @override
+  Description describe(Description description) {
+    description.add('a process with exit code $expectedExitCode');
+    if (stdoutSubstring != null) {
+      description.add(' and stdout: "$stdoutSubstring"');
+    }
+    if (stderrSubstring != null) {
+      description.add(' and stderr: "$stderrSubstring"');
+    }
+
+    return description;
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    final ProcessResult result = item as ProcessResult;
+
+    if (stdoutSubstring != null) {
+      _foundStdout = (result.stdout as String).contains(stdoutSubstring!);
+      matchState['stdout'] = result.stdout;
+    }
+
+    if (stderrSubstring != null) {
+      _foundStderr = (result.stderr as String).contains(stderrSubstring!);
+      matchState['stderr'] = result.stderr;
+    }
+
+    return result.exitCode == expectedExitCode && _foundStdout && _foundStderr;
+  }
+
+  @override
+  Description describeMismatch(
+    Object? item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    final ProcessResult result = item! as ProcessResult;
+
+    if (result.exitCode != expectedExitCode) {
+      mismatchDescription.add('Actual exitCode was ${result.exitCode}');
+    }
+
+    if (matchState.containsKey('stdout')) {
+      mismatchDescription.add('Actual stdout:\n${matchState["stdout"]}');
+    }
+
+    if (matchState.containsKey('stderr')) {
+      mismatchDescription.add('Actual stderr:\n${matchState["stderr"]}');
+    }
+
+    return mismatchDescription;
+  }
+}
