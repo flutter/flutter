@@ -30,7 +30,7 @@ class DlDispatcher final : public flutter::DlOpReceiver {
   void setDither(bool dither) override;
 
   // |flutter::DlOpReceiver|
-  void setStyle(flutter::DlDrawStyle style) override;
+  void setDrawStyle(flutter::DlDrawStyle style) override;
 
   // |flutter::DlOpReceiver|
   void setColor(flutter::DlColor color) override;

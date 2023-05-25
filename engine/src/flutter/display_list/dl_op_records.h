@@ -145,7 +145,9 @@ struct SetStyleOp final : DLOp {
 
   const DlDrawStyle style;
 
-  void dispatch(DispatchContext& ctx) const { ctx.receiver.setStyle(style); }
+  void dispatch(DispatchContext& ctx) const {
+    ctx.receiver.setDrawStyle(style);
+  }
 };
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct SetStrokeWidthOp final : DLOp {

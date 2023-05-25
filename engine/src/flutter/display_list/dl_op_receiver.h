@@ -45,7 +45,7 @@ class DlOpReceiver {
   // attributes is not affected by |save| and |restore|.
   virtual void setAntiAlias(bool aa) = 0;
   virtual void setDither(bool dither) = 0;
-  virtual void setStyle(DlDrawStyle style) = 0;
+  virtual void setDrawStyle(DlDrawStyle style) = 0;
   virtual void setColor(DlColor color) = 0;
   virtual void setStrokeWidth(float width) = 0;
   virtual void setStrokeMiter(float limit) = 0;
