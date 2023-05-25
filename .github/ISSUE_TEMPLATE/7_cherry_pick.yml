@@ -7,7 +7,7 @@ assignees:
   - caseyhillers
 body:
 - type: markdown
-    attributes:
+  attributes:
       value: |
 <!---
 Flutter releases generally follow the given timeline:
