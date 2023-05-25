@@ -15,23 +15,6 @@ void main() {
   late String flutterBin;
   late Directory exampleAppDir;
 
-  ProcessResult runSync(List<String> cmd, [int expectedCode = 0]) {
-    final ProcessResult result = processManager.runSync(
-      cmd,
-      workingDirectory: tempDir.path,
-    );
-
-    if (result.exitCode != expectedCode) {
-      fail(
-        'Sub-process "${cmd.join(' ')}" exited with unexpected code ${result.exitCode}\n\n'
-         'stdout:\n${result.stdout}\n\n'
-         'stderr:\n${result.stderr}',
-      );
-    }
-
-    return result;
-  }
-
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_build_test.');
     flutterBin = fileSystem.path.join(
@@ -41,7 +24,7 @@ void main() {
     );
     exampleAppDir = tempDir.childDirectory('bbb').childDirectory('example');
 
-    runSync(
+    processManager.runSync(
       <String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -51,6 +34,7 @@ void main() {
         'bbb',
         '-v',
       ],
+      workingDirectory: tempDir.path,
     );
   });
 
@@ -68,7 +52,7 @@ void main() {
       // Ensure file is gone prior to configOnly running.
       await gradleFile.delete();
 
-      final ProcessResult result = runSync(
+      final ProcessResult result = processManager.runSync(
         <String>[
           flutterBin,
           ...getLocalEngineArguments(),
@@ -77,6 +61,7 @@ void main() {
           '--target-platform=android-arm',
           '--config-only',
         ],
+        workingDirectory: exampleAppDir.path,
       );
 
       expect(gradleFile, exists);
@@ -85,5 +70,3 @@ void main() {
     },
   );
 }
-
-

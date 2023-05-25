@@ -140,7 +140,7 @@ function upgrade_flutter () (
 
     # Fetch Dart...
     rm -f "$FLUTTER_ROOT/version"
-    rm -f "$FLUTTER_ROOT/.version.json"
+    rm -f "$FLUTTER_ROOT/bin/cache/flutter.version.json"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
