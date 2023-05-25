@@ -320,7 +320,6 @@ void main() {
   });
 }
 
-
 Matcher matchesSnapshot(FlutterViewSnapshot expected) => _FlutterViewSnapshotMatcher(expected);
 
 class _FlutterViewSnapshotMatcher extends Matcher {
@@ -432,7 +431,7 @@ class FlutterViewSnapshot {
   final ViewPadding viewPadding;
 }
 
-class _FakeFlutterView implements FlutterView {
+class _FakeFlutterView extends Fake implements FlutterView {
   SemanticsUpdate? lastSemanticsUpdate;
   Scene? lastRenderedScene;
 
@@ -444,11 +443,6 @@ class _FakeFlutterView implements FlutterView {
   @override
   void render(Scene scene) {
     lastRenderedScene = scene;
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return null;
   }
 }
 

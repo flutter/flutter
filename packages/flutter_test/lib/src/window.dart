@@ -525,12 +525,30 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
     final List<Object> extraViewKeys = <Object>[..._testViews.keys];
     for (final FlutterView view in _platformDispatcher.views) {
+      // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
+      late final TestDisplay display;
+      try {
+        final Display realDisplay = view.display;
+        if (_testDisplays.containsKey(realDisplay.id)) {
+          display = _testDisplays[view.display.id]!;
+        } else {
+          display = _UnsupportedDisplay(
+            this,
+            view,
+            'PlatformDispatcher did not contain a Display with id ${realDisplay.id}, '
+            'which was expected by FlutterView ($view)',
+          );
+        }
+      } catch (error){
+        display = _UnsupportedDisplay(this, view, error);
+      }
+
       extraViewKeys.remove(view.viewId);
       if (!_testViews.containsKey(view.viewId)) {
         _testViews[view.viewId] = TestFlutterView(
           view: view,
           platformDispatcher: this,
-          display: _testDisplays[view.display.id]!,
+          display: display,
         );
       }
     }
@@ -1086,6 +1104,42 @@ class TestDisplay implements Display {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
+  }
+}
+
+// TODO(pdblasi-google): Remove this once the Display API is stable and supported on all platforms
+class _UnsupportedDisplay implements TestDisplay {
+  _UnsupportedDisplay(this._platformDispatcher, this._view, this.error);
+
+  final FlutterView _view;
+  final Object? error;
+
+  @override
+  final TestPlatformDispatcher _platformDispatcher;
+
+  @override
+  double get devicePixelRatio => _devicePixelRatio ?? _view.devicePixelRatio;
+  @override
+  double? _devicePixelRatio;
+  @override
+  set devicePixelRatio(double value) {
+    _devicePixelRatio = value;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  @override
+  void resetDevicePixelRatio() {
+    _devicePixelRatio = null;
+    _platformDispatcher.onMetricsChanged?.call();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnsupportedError(
+      'The Display API is unsupported in this context. '
+      'As of the last metrics change on PlatformDispatcher, this was the error '
+      'given when trying to prepare the display for testing: $error',
+    );
   }
 }
 
