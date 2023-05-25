@@ -206,16 +206,18 @@ class KernelSnapshot extends Target {
         forceLinkPlatform = false;
     }
 
-    final String? targetOS = switch(targetPlatform) {
+    final String? targetOS = switch (targetPlatform) {
       TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
-      TargetPlatform.android || TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 || TargetPlatform.android_x64 ||
-      TargetPlatform.android_x86 => 'android',
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 ||
+      TargetPlatform.android_x86 =>
+        'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
-      TargetPlatform.linux_arm64 ||
-      TargetPlatform.linux_x64 => 'linux',
-      TargetPlatform.windows_x64 =>'windows',
+      TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
+      TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
     };
 

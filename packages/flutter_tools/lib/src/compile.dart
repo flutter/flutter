@@ -294,10 +294,11 @@ class KernelCompiler {
       if (aot) ...<String>[
         '--aot',
         '--tfa',
-      ],
-      if (targetOS != null) ...<String>[
-        '--target-os',
-        targetOS,
+        // The --target-os flag only makes sense for whole program compilation.
+        if (targetOS != null) ...<String>[
+          '--target-os',
+          targetOS,
+        ],
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
