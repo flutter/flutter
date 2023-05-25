@@ -332,7 +332,14 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
     final List<TestBundle> bundles = _filterBundlesForSuites(filteredSuites);
     final ArtifactDependencies artifacts = _artifactsForSuites(filteredSuites);
     if (boolArg('generate-builder-json')) {
-      print(generateBuilderJson(config));
+      final String configString = generateBuilderJson(config);
+      final io.File configFile = io.File(path.join(
+        environment.flutterDirectory.path,
+        'ci',
+        'builders',
+        'linux_web_engine.json',
+      ));
+      configFile.writeAsStringSync(configString);
       return true;
     }
     if (isList || isVerbose) {
