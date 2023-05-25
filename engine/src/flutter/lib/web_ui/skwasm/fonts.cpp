@@ -29,9 +29,8 @@ SKWASM_EXPORT void fontCollection_dispose(FlutterFontCollection* collection) {
 }
 
 SKWASM_EXPORT SkTypeface* typeface_create(SkData* fontData) {
-  fontData->ref();
   auto typeface =
-      SkFontMgr::RefDefault()->makeFromData(sk_sp<SkData>(fontData));
+      SkFontMgr::RefDefault()->makeFromData(sk_ref_sp<SkData>(fontData));
   return typeface.release();
 }
 
@@ -76,12 +75,12 @@ SKWASM_EXPORT void fontCollection_registerTypeface(
     FlutterFontCollection* collection,
     SkTypeface* typeface,
     SkString* fontName) {
-  typeface->ref();
   if (fontName) {
     SkString alias = *fontName;
-    collection->provider->registerTypeface(sk_sp<SkTypeface>(typeface), alias);
+    collection->provider->registerTypeface(sk_ref_sp<SkTypeface>(typeface),
+                                           alias);
   } else {
-    collection->provider->registerTypeface(sk_sp<SkTypeface>(typeface));
+    collection->provider->registerTypeface(sk_ref_sp<SkTypeface>(typeface));
   }
 }
 

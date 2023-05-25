@@ -18,6 +18,7 @@ wasm_lib("skwasm") {
     "path.cpp",
     "picture.cpp",
     "shaders.cpp",
+    "skwasm_support.h",
     "string.cpp",
     "surface.cpp",
     "text/line_metrics.cpp",
@@ -41,9 +42,13 @@ wasm_lib("skwasm") {
     "-sUSE_PTHREADS=1",
     "-lexports.js",
     "-sEXPORTED_FUNCTIONS=[stackAlloc]",
-    "-sEXPORTED_RUNTIME_METHODS=[addFunction,removeFunction]",
+    "-sEXPORTED_RUNTIME_METHODS=[addFunction,removeFunction,skwasm_registerObject,skwasm_unregisterObject,skwasm_getObject,skwasm_transferObjectToThread]",
     "-Wno-pthreads-mem-growth",
+    "--js-library",
+    rebase_path("library_skwasm_support.js"),
   ]
+
+  inputs = [ rebase_path("library_skwasm_support.js") ]
 
   if (is_debug) {
     ldflags += [

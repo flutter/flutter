@@ -37,17 +37,14 @@ SKWASM_EXPORT SkImageFilter* imageFilter_createMatrix(SkScalar* matrix33,
 
 SKWASM_EXPORT SkImageFilter* imageFilter_createFromColorFilter(
     SkColorFilter* filter) {
-  filter->ref();
-  return SkImageFilters::ColorFilter(sk_sp<SkColorFilter>(filter), nullptr)
+  return SkImageFilters::ColorFilter(sk_ref_sp<SkColorFilter>(filter), nullptr)
       .release();
 }
 
 SKWASM_EXPORT SkImageFilter* imageFilter_compose(SkImageFilter* outer,
                                                  SkImageFilter* inner) {
-  outer->ref();
-  inner->ref();
-  return SkImageFilters::Compose(sk_sp<SkImageFilter>(outer),
-                                 sk_sp<SkImageFilter>(inner))
+  return SkImageFilters::Compose(sk_ref_sp<SkImageFilter>(outer),
+                                 sk_ref_sp<SkImageFilter>(inner))
       .release();
 }
 
@@ -84,10 +81,8 @@ SKWASM_EXPORT SkColorFilter* colorFilter_createLinearToSRGBGamma() {
 
 SKWASM_EXPORT SkColorFilter* colorFilter_compose(SkColorFilter* outer,
                                                  SkColorFilter* inner) {
-  outer->ref();
-  inner->ref();
-  return SkColorFilters::Compose(sk_sp<SkColorFilter>(outer),
-                                 sk_sp<SkColorFilter>(inner))
+  return SkColorFilters::Compose(sk_ref_sp<SkColorFilter>(outer),
+                                 sk_ref_sp<SkColorFilter>(inner))
       .release();
 }
 

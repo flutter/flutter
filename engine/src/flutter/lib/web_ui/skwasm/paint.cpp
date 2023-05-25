@@ -87,34 +87,17 @@ SKWASM_EXPORT SkScalar paint_getMiterLImit(SkPaint* paint) {
 }
 
 SKWASM_EXPORT void paint_setShader(SkPaint* paint, SkShader* shader) {
-  if (shader == nullptr) {
-    paint->setShader(nullptr);
-    return;
-  }
-  shader->ref();
-  paint->setShader(sk_sp<SkShader>(shader));
+  paint->setShader(sk_ref_sp<SkShader>(shader));
 }
 
 SKWASM_EXPORT void paint_setImageFilter(SkPaint* paint, SkImageFilter* filter) {
-  if (filter == nullptr) {
-    paint->setImageFilter(nullptr);
-  }
-  filter->ref();
-  paint->setImageFilter(sk_sp<SkImageFilter>(filter));
+  paint->setImageFilter(sk_ref_sp<SkImageFilter>(filter));
 }
 
 SKWASM_EXPORT void paint_setColorFilter(SkPaint* paint, SkColorFilter* filter) {
-  if (filter == nullptr) {
-    paint->setColorFilter(nullptr);
-  }
-  filter->ref();
-  paint->setColorFilter(sk_sp<SkColorFilter>(filter));
+  paint->setColorFilter(sk_ref_sp<SkColorFilter>(filter));
 }
 
 SKWASM_EXPORT void paint_setMaskFilter(SkPaint* paint, SkMaskFilter* filter) {
-  if (filter == nullptr) {
-    paint->setMaskFilter(nullptr);
-  }
-  filter->ref();
-  paint->setMaskFilter(sk_sp<SkMaskFilter>(filter));
+  paint->setMaskFilter(sk_ref_sp<SkMaskFilter>(filter));
 }

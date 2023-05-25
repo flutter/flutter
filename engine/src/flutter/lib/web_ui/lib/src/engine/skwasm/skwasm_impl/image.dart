@@ -65,10 +65,13 @@ class SkwasmImage implements ui.Image {
   bool get debugDisposed => _isDisposed;
 
   @override
-  SkwasmImage clone() => this;
+  SkwasmImage clone() {
+    imageRef(handle);
+    return SkwasmImage(handle);
+  }
 
   @override
-  bool isCloneOf(ui.Image other) => identical(this, other);
+  bool isCloneOf(ui.Image other) => other is SkwasmImage && handle == other.handle;
 
   @override
   List<StackTrace>? debugGetOpenHandleStackTraces() => null;

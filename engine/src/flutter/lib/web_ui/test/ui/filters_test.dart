@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -19,37 +18,20 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-// TODO(jacksongardner): Skwasm doesn't support image codecs yet. Once it does,
-// we can just replace this roundabout loading mechanism with a normal image
-// load using flutter APIs.
-Future<Uint8ClampedList> rgbaTestImageData() async {
-  final DomHTMLImageElement image = createDomHTMLImageElement();
-  image.src = '/test_images/mandrill_128.png';
-  await image.decode();
-  final DomCanvasElement canvas = createDomCanvasElement(width: 128, height: 128);
-  final DomCanvasRenderingContext2D context = canvas.getContext('2d')! as DomCanvasRenderingContext2D;
-  context.drawImage(image, 0, 0);
-  return context.getImageData(0, 0, 128, 128).data;
-}
-
 Future<void> testMain() async {
   setUpUnitTests(
     setUpTestViewDimensions: false,
   );
 
-  final Uint8List testImageData = Uint8List.fromList(await rgbaTestImageData());
   const ui.Rect region = ui.Rect.fromLTWH(0, 0, 128, 128);
 
   Future<void> drawTestImageWithPaint(ui.Paint paint) async {
-    final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    ui.decodeImageFromPixels(
-      testImageData,
-      128,
-      128,
-      ui.PixelFormat.rgba8888,
-      (ui.Image image) => imageCompleter.complete(image),
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/mandrill_128.png')
     );
-    final ui.Image image = await imageCompleter.future;
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    final ui.Image image = info.image;
     expect(image.width, 128);
     expect(image.height, 128);
     final ui.PictureRecorder recorder = ui.PictureRecorder();

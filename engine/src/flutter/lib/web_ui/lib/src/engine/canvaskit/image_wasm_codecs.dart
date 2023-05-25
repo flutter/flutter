@@ -12,12 +12,8 @@ library image_wasm_codecs;
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../util.dart';
-import 'canvaskit_api.dart';
-import 'image.dart';
-import 'native_memory.dart';
 
 /// The CanvasKit implementation of [ui.Codec].
 ///

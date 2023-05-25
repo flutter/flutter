@@ -128,9 +128,7 @@ SKWASM_EXPORT SkShader* shader_createRuntimeEffectShader(
     size_t childCount) {
   std::vector<sk_sp<SkShader>> childPointers;
   for (size_t i = 0; i < childCount; i++) {
-    auto child = children[i];
-    child->ref();
-    childPointers.emplace_back(child);
+    childPointers.emplace_back(sk_ref_sp<SkShader>(children[i]));
   }
   return runtimeEffect
       ->makeShader(SkData::MakeWithCopy(uniforms->data(), uniforms->size()),

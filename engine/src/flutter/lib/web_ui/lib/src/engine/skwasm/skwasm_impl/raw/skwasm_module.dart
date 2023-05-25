@@ -19,6 +19,19 @@ class SkwasmInstance {}
 extension SkwasmInstanceExtension on SkwasmInstance {
   external JSNumber addFunction(JSFunction function, JSString signature);
   external void removeFunction(JSNumber functionPointer);
+
+  @JS('skwasm_registerObject')
+  external void skwasmRegisterObject(JSNumber objectId, JSAny object);
+
+  @JS('skwasm_unregisterObject')
+  external void skwasmUnregisterObject(JSNumber objectId);
+
+  @JS('skwasm_getObject')
+  external JSAny skwasmGetObject(JSNumber objectId);
+
+  @JS('skwasm_transferObjectToThread')
+  external void skwasmTransferObjectToThread(JSNumber objectId, JSNumber threadId);
+
   external WebAssemblyMemory get wasmMemory;
 }
 
