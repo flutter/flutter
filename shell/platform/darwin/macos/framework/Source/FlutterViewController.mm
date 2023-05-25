@@ -372,6 +372,10 @@ void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
   std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
 
   FlutterViewId _id;
+
+  // FlutterViewController does not actually uses the synchronizer, but only
+  // passes it to FlutterView.
+  FlutterThreadSynchronizer* _threadSynchronizer;
 }
 
 @synthesize viewId = _viewId;
@@ -541,14 +545,20 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return _bridge;
 }
 
-- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(FlutterViewId)viewId {
+- (void)setUpWithEngine:(FlutterEngine*)engine
+                 viewId:(FlutterViewId)viewId
+     threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
   _viewId = viewId;
+  _threadSynchronizer = threadSynchronizer;
+  [_threadSynchronizer registerView:_viewId];
 }
 
 - (void)detachFromEngine {
   NSAssert(_engine != nil, @"Not attached to any engine.");
+  [_threadSynchronizer deregisterView:_viewId];
+  _threadSynchronizer = nil;
   _engine = nil;
 }
 
@@ -858,7 +868,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                           commandQueue:(id<MTLCommandQueue>)commandQueue {
   return [[FlutterView alloc] initWithMTLDevice:device
                                    commandQueue:commandQueue
-                                reshapeListener:self];
+                                reshapeListener:self
+                             threadSynchronizer:_threadSynchronizer
+                                         viewId:_viewId];
 }
 
 - (void)onKeyboardLayoutChanged {
