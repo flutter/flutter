@@ -103,7 +103,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Determine whether this subtree represents a button.
   ///
-  /// If this is null, the screen reader will not announce "button" when this button
+  /// If this is null, the screen reader will not announce "button" when this
   /// is focused. This is useful for [MenuItemButton] and [SubmenuButton] when we
   /// traverse the menu system.
   ///
