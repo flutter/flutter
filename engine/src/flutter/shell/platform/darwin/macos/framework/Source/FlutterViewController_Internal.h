@@ -39,11 +39,14 @@
 - (BOOL)isDispatchingKeyEvent:(nonnull NSEvent*)event;
 
 /**
- * Set the `engine` and `id` of this controller.
+ * Set up the controller with `engine` and `id`, and other engine-level classes.
  *
- * This method is called by FlutterEngine.
+ * This method is called by FlutterEngine. A view controller must be set up
+ * before being used, and must be set up only once until detachFromEngine:.
  */
-- (void)attachToEngine:(nonnull FlutterEngine*)engine withId:(FlutterViewId)viewId;
+- (void)setUpWithEngine:(nonnull FlutterEngine*)engine
+                 viewId:(FlutterViewId)viewId
+     threadSynchronizer:(nonnull FlutterThreadSynchronizer*)threadSynchronizer;
 
 /**
  * Reset the `engine` and `id` of this controller.
