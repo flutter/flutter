@@ -72,13 +72,12 @@ class _ScrollNotificationObserverExampleState extends State<ScrollNotificationOb
     // `notification.depth` is 0. This way we only listen to the scroll
     // notifications from the closest scrollable, instead of those that may be nested.
     if (notification is ScrollUpdateNotification && defaultScrollNotificationPredicate(notification)) {
-      final bool oldScrolledDown = _scrolledDown;
       final ScrollMetrics metrics = notification.metrics;
-      // `_scrolledDown` will be true if the user is scrolling down.
-      _scrolledDown = metrics.extentBefore > 0;
-      // Only update the state if the scrolled down value changed.
-      if (_scrolledDown != oldScrolledDown) {
-        setState(() {});
+      // Check if the user scrolled down.
+      if (_scrolledDown != metrics.extentBefore > 0) {
+        setState(() {
+          _scrolledDown = metrics.extentBefore > 0;
+        });
       }
     }
   }
