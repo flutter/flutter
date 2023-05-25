@@ -18,6 +18,10 @@ void testMain() {
   ensureFlutterViewEmbedderInitialized();
 
   group('PlatformDispatcher', () {
+    test('reports at least one display', () {
+      expect(ui.PlatformDispatcher.instance.displays.length, greaterThan(0));
+    });
+
     test('high contrast in accessibilityFeatures has the correct value', () {
       final MockHighContrastSupport mockHighContrast =
           MockHighContrastSupport();
