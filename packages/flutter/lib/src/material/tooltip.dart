@@ -429,8 +429,6 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   // Device ids are added to this set in _handleMouseEnter, and removed in
   // _handleMouseExit. The set is cleared in _handleTapToDismiss, typically when
   // a PointerDown event interacts with some other UI component.
-  //
-  // The _handleMouseEnter and _handleMouseExit calls should be balanced.
   final Set<int> _activeHoveringPointerDevices = <int>{};
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
@@ -648,12 +646,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    // A PointerDown event that interacts with other UI components could dismiss
-    // the tooltip and clear the the _activeHoveringPointerDevices set.
     if (!mounted || _activeHoveringPointerDevices.isEmpty) {
       return;
     }
-    assert(_activeHoveringPointerDevices.isNotEmpty);
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
       _scheduleDismissTooltip(withDelay: _hoverShowDuration);
