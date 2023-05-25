@@ -21,6 +21,9 @@ external SurfaceHandle surfaceCreateFromCanvas(
   Pointer<Int8> querySelector
 );
 
+@Native<UnsignedLong Function(SurfaceHandle)>(symbol: 'surface_getThreadId', isLeaf: true)
+external int surfaceGetThreadId(SurfaceHandle handle);
+
 @Native<Void Function(SurfaceHandle, OnRenderCallbackHandle)>(
   symbol: 'surface_setCallbackHandler',
   isLeaf: true)

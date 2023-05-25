@@ -381,17 +381,3 @@ class CkImage implements ui.Image, StackTraceDebugger {
     return '[$width\u00D7$height]';
   }
 }
-
-/// Data for a single frame of an animated image.
-class AnimatedImageFrameInfo implements ui.FrameInfo {
-  AnimatedImageFrameInfo(this._duration, this._image);
-
-  final Duration _duration;
-  final CkImage _image;
-
-  @override
-  Duration get duration => _duration;
-
-  @override
-  ui.Image get image => _image;
-}

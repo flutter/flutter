@@ -21,10 +21,15 @@ class SkwasmSurface {
     return surface;
   }
 
-  SkwasmSurface._fromHandle(this._handle);
-  final SurfaceHandle _handle;
+  SkwasmSurface._fromHandle(this.handle) : threadId = surfaceGetThreadId(handle);
+  final SurfaceHandle handle;
   OnRenderCallbackHandle _callbackHandle = nullptr;
   final Map<int, Completer<int>> _pendingCallbacks = <int, Completer<int>>{};
+
+  final int threadId;
+
+  int _currentObjectId = 0;
+  int acquireObjectId() => ++_currentObjectId;
 
   void _initialize() {
     _callbackHandle =
@@ -34,20 +39,20 @@ class SkwasmSurface {
           'vii'.toJS
         ).toDart.toInt()
       );
-    surfaceSetCallbackHandler(_handle, _callbackHandle);
+    surfaceSetCallbackHandler(handle, _callbackHandle);
   }
 
   void setSize(int width, int height) =>
-    surfaceSetCanvasSize(_handle, width, height);
+    surfaceSetCanvasSize(handle, width, height);
 
   Future<void> renderPicture(SkwasmPicture picture) {
-    final int callbackId = surfaceRenderPicture(_handle, picture.handle);
+    final int callbackId = surfaceRenderPicture(handle, picture.handle);
     return _registerCallback(callbackId);
   }
 
   Future<ByteData> rasterizeImage(SkwasmImage image, ui.ImageByteFormat format) async {
     final int callbackId = surfaceRasterizeImage(
-      _handle,
+      handle,
       image.handle,
       format.index,
     );
@@ -76,7 +81,7 @@ class SkwasmSurface {
   }
 
   void dispose() {
-    surfaceDestroy(_handle);
+    surfaceDestroy(handle);
     skwasmInstance.removeFunction(_callbackHandle.address.toJS);
   }
 }
