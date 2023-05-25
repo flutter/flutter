@@ -484,6 +484,9 @@ static std::optional<Entity> PipelineBlend(
 
   auto dst_snapshot =
       inputs[0]->GetSnapshot("PipelineBlend(Dst)", renderer, entity);
+  if (!dst_snapshot.has_value()) {
+    return std::nullopt;
+  }
 
   ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
                                                  RenderPass& pass) {
