@@ -44,7 +44,8 @@ constexpr FlutterViewId kFlutterDefaultViewId = 0ll;
 - (nullable instancetype)initWithMTLDevice:(nonnull id<MTLDevice>)device
                               commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
                            reshapeListener:(nonnull id<FlutterViewReshapeListener>)reshapeListener
-    NS_DESIGNATED_INITIALIZER;
+                        threadSynchronizer:(nonnull FlutterThreadSynchronizer*)threadSynchronizer
+                                    viewId:(int64_t)viewId NS_DESIGNATED_INITIALIZER;
 
 - (nullable instancetype)initWithFrame:(NSRect)frameRect
                            pixelFormat:(nullable NSOpenGLPixelFormat*)format NS_UNAVAILABLE;
@@ -59,12 +60,6 @@ constexpr FlutterViewId kFlutterDefaultViewId = 0ll;
 @property(readonly, nonatomic, nonnull) FlutterSurfaceManager* surfaceManager;
 
 /**
- * Must be called when shutting down. Unblocks raster thread and prevents any further
- * synchronization.
- */
-- (void)shutdown;
-
-/**
  * By default, the `FlutterSurfaceManager` creates two layers to manage Flutter
  * content, the content layer and containing layer. To set the native background
  * color, onto which the Flutter content is drawn, call this method with the
@@ -72,15 +67,5 @@ constexpr FlutterViewId kFlutterDefaultViewId = 0ll;
  * with.
  */
 - (void)setBackgroundColor:(nonnull NSColor*)color;
-
-@end
-
-@interface FlutterView (FlutterViewPrivate)
-
-/**
- * Returns FlutterThreadSynchronizer for this view.
- * Used for FlutterEngineTest.
- */
-- (nonnull FlutterThreadSynchronizer*)threadSynchronizer;
 
 @end

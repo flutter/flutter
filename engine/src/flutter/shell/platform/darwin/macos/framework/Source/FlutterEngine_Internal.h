@@ -195,4 +195,8 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 
 @end
 
+@interface FlutterEngine (Tests)
+- (nonnull FlutterThreadSynchronizer*)testThreadSynchronizer;
+@end
+
 NS_ASSUME_NONNULL_END
