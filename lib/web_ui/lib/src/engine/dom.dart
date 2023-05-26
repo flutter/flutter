@@ -3278,14 +3278,6 @@ extension DomIntlExtension on DomIntl {
   external JSAny? get v8BreakIterator;
 }
 
-/// Similar to [js_util.callMethod] but allows for providing a non-string method
-/// name.
-T _jsCallMethod<T>(Object o, Object method,
-    [List<Object?> args = const <Object?>[]]) {
-  final Object actualMethod = js_util.getProperty(o, method);
-  return js_util.callMethod<T>(actualMethod, 'apply', <Object?>[o, args]);
-}
-
 @JS('Intl.Segmenter')
 @staticInterop
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter
@@ -3310,7 +3302,7 @@ class DomSegments {}
 extension DomSegmentsExtension on DomSegments {
   DomIteratorWrapper<DomSegment> iterator() {
     final DomIterator segmentIterator =
-        _jsCallMethod(this, domSymbol.iterator) as DomIterator;
+        js_util.callMethod(this, domSymbol.iterator, const <Object?>[]) as DomIterator;
     return DomIteratorWrapper<DomSegment>(segmentIterator);
   }
 }
