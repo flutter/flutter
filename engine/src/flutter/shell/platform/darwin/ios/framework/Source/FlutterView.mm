@@ -44,12 +44,6 @@
 }
 
 - (BOOL)isWideGamutSupported {
-#if TARGET_OS_SIMULATOR
-  // As of Xcode 14.1, the wide gamut surface pixel formats are not supported by
-  // the simulator.
-  return NO;
-#endif
-
   if (![_delegate isUsingImpeller]) {
     return NO;
   }
@@ -74,7 +68,7 @@
   if (self) {
     _delegate = delegate;
     _isWideGamutEnabled = isWideGamutEnabled;
-    if (_isWideGamutEnabled && self.isWideGamutSupported) {
+    if (_isWideGamutEnabled && !self.isWideGamutSupported) {
       FML_DLOG(WARNING) << "Rendering wide gamut colors is turned on but isn't "
                            "supported, downgrading the color gamut to sRGB.";
     }
