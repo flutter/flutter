@@ -856,16 +856,15 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         // Can't hit a child that is not visible.
         continue;
       }
-      final Rect childRect = childParentData.paintOffset! & child.size;
-      if (childRect.contains(position)) {
-        result.addWithPaintOffset(
-          offset: childParentData.paintOffset,
-          position: position,
-          hitTest: (BoxHitTestResult result, Offset transformed) {
-            assert(transformed == position - childParentData.paintOffset!);
-            return child.hitTest(result, position: transformed);
-          },
-        );
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.paintOffset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.paintOffset!);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit) {
         return true;
       }
     }
