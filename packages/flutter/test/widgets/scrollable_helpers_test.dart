@@ -549,4 +549,33 @@ void main() {
       equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)),
     );
   }, variant: KeySimulatorTransitModeVariant.all());
+
+  testWidgets('Can scroll using intents only', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          children: const <Widget>[
+            SizedBox(height: 600.0, child: Text('The cow as white as milk')),
+            SizedBox(height: 600.0, child: Text('The cape as red as blood')),
+            SizedBox(height: 600.0, child: Text('The hair as yellow as corn')),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('The cow as white as milk'), findsOneWidget);
+    expect(find.text('The cape as red as blood'), findsNothing);
+    expect(find.text('The hair as yellow as corn'), findsNothing);
+    Actions.invoke(tester.element(find.byType(SliverList)), const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page));
+    await tester.pump(); // start scroll
+    await tester.pump(const Duration(milliseconds: 1000)); // end scroll
+    expect(find.text('The cow as white as milk'), findsOneWidget);
+    expect(find.text('The cape as red as blood'), findsOneWidget);
+    expect(find.text('The hair as yellow as corn'), findsNothing);
+    Actions.invoke(tester.element(find.byType(SliverList)), const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page));
+    await tester.pump(); // start scroll
+    await tester.pump(const Duration(milliseconds: 1000)); // end scroll
+    expect(find.text('The cow as white as milk'), findsNothing);
+    expect(find.text('The cape as red as blood'), findsOneWidget);
+    expect(find.text('The hair as yellow as corn'), findsOneWidget);
+  });
 }
