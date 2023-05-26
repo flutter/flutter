@@ -1,4 +1,4 @@
-Signature: 5a161224d3b5ee49dd884f9608d6c3f6
+Signature: dd248cc2b80a505e0220c488e179fad6
 
 ====================================================================================================
 LIBRARY: etc1
@@ -387,6 +387,7 @@ FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
 FILE: ../../../third_party/skia/relnotes/sksurface_methods.md
+FILE: ../../../third_party/skia/relnotes/sktablecolorfilter.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -3139,7 +3140,6 @@ ORIGIN: ../../../third_party/skia/include/core/SkPixmap.h + ../../../third_party
 ORIGIN: ../../../third_party/skia/include/core/SkPoint3.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkRSXform.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkTraceMemoryDump.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/effects/SkTableColorFilter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/GrContextOptions.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/gl/GrGLTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr_android.h + ../../../third_party/skia/LICENSE
@@ -3429,7 +3429,6 @@ FILE: ../../../third_party/skia/include/core/SkPixmap.h
 FILE: ../../../third_party/skia/include/core/SkPoint3.h
 FILE: ../../../third_party/skia/include/core/SkRSXform.h
 FILE: ../../../third_party/skia/include/core/SkTraceMemoryDump.h
-FILE: ../../../third_party/skia/include/effects/SkTableColorFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrContextOptions.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLTypes.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_android.h
