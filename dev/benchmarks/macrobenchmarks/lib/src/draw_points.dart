@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
-import 'web/platform_views/web.dart';
 
 class DrawPointsPage extends StatefulWidget  {
   const DrawPointsPage({super.key});
