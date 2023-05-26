@@ -425,6 +425,10 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   TapGestureRecognizer? _tapRecognizer;
 
   // The ids of mouse devices that are keeping the tooltip from being dismissed.
+  //
+  // Device ids are added to this set in _handleMouseEnter, and removed in
+  // _handleMouseExit. The set is cleared in _handleTapToDismiss, typically when
+  // a PointerDown event interacts with some other UI component.
   final Set<int> _activeHoveringPointerDevices = <int>{};
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
@@ -469,18 +473,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       'timer must not be active when the tooltip is fading out',
     );
     switch (_controller.status) {
-      case AnimationStatus.dismissed:
-        if (withDelay.inMicroseconds > 0) {
-          _timer ??= Timer(withDelay, show);
-        } else {
-          show();
-        }
+      case AnimationStatus.dismissed when withDelay.inMicroseconds > 0:
+        _timer ??= Timer(withDelay, show);
       // If the tooltip is already fading in or fully visible, skip the
       // animation and show the tooltip immediately.
+      case AnimationStatus.dismissed:
       case AnimationStatus.forward:
       case AnimationStatus.reverse:
       case AnimationStatus.completed:
-        // Fade in if needed and schedule to hide.
         show();
     }
   }
@@ -646,10 +646,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleMouseExit(PointerExitEvent event) {
-    if (!mounted) {
+    if (!mounted || _activeHoveringPointerDevices.isEmpty) {
       return;
     }
-    assert(_activeHoveringPointerDevices.isNotEmpty);
     _activeHoveringPointerDevices.remove(event.device);
     if (_activeHoveringPointerDevices.isEmpty) {
       _scheduleDismissTooltip(withDelay: _hoverShowDuration);
@@ -699,45 +698,36 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return 24.0;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return 32.0;
-    }
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => 24.0,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS     => 32.0,
+    };
   }
 
   EdgeInsets _getDefaultPadding() {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
-    }
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS     => const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+    };
   }
 
   double _getDefaultFontSize() {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return 12.0;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return 14.0;
-    }
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => 12.0,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS     => 14.0,
+    };
   }
 
   void _createNewEntry() {

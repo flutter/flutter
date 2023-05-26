@@ -1993,7 +1993,7 @@ void main() {
     }
   });
 
-  testWidgets('Tooltip trigger mode ignores mouse events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip trigger mode ignores mouse events', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Tooltip(
@@ -2021,7 +2021,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
   });
 
-  testWidgets('Tooltip does not block other mouse regions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip does not block other mouse regions', (WidgetTester tester) async {
     bool entered = false;
 
     await tester.pumpWidget(
@@ -2046,7 +2046,7 @@ void main() {
     expect(entered, isTrue);
   });
 
-  testWidgets('Does not rebuild on mouse connect/disconnect', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not rebuild on mouse connect/disconnect', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/117627
     int buildCount = 0;
     await tester.pumpWidget(
@@ -2099,6 +2099,165 @@ void main() {
 
     await _testGestureTap(tester, textSpan);
     expect(isTapped, isTrue);
+  });
+
+  testWidgetsWithLeakTracking('Hold mouse button down and hover over the Tooltip widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture mouseGesture = await tester.startGesture(Offset.zero, kind: PointerDeviceKind.mouse);
+    addTearDown(mouseGesture.removePointer);
+    await mouseGesture.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      find.text(tooltipText), findsOneWidget, reason: 'Tooltip should be visible when hovered.');
+
+    await mouseGesture.up();
+    await tester.pump(const Duration(days: 10));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(tooltipText),
+      findsOneWidget,
+      reason: 'Tooltip should be visible even when there is a PointerUp when hovered.',
+    );
+
+    await mouseGesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(tooltipText),
+      findsNothing,
+      reason: 'Tooltip should be dismissed with no hovering mouse cursor.' ,
+    );
+  });
+
+  testWidgetsWithLeakTracking('Hovered text should dismiss when clicked outside', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Avoid using startGesture here to avoid the PointDown event from also being
+    // interpreted as a PointHover event by the Tooltip.
+    final TestGesture mouseGesture1 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouseGesture1.removePointer);
+    await mouseGesture1.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(tooltipText), findsOneWidget, reason: 'Tooltip should be visible when hovered.');
+
+    // Tapping on the Tooltip widget should dismiss the tooltip, since the
+    // trigger mode is longPress.
+    await tester.tap(find.byTooltip(tooltipText));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+    await mouseGesture1.removePointer();
+
+    final TestGesture mouseGesture2 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouseGesture2.removePointer);
+    await mouseGesture2.moveTo(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(tooltipText), findsOneWidget, reason: 'Tooltip should be visible when hovered.');
+
+    await tester.tapAt(Offset.zero);
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing, reason: 'Tapping outside of the Tooltip widget should dismiss the tooltip.');
+  });
+
+  testWidgetsWithLeakTracking('Mouse tap and hover over the Tooltip widget', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/127575 .
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.longPress,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The PointDown event is also interpreted as a PointHover event by the
+    // Tooltip. This should be pretty rare but since it's more of a tap event
+    // than a hover event, the tooltip shouldn't show unless the triggerMode
+    // is set to tap.
+    final TestGesture mouseGesture1 = await tester.startGesture(
+      tester.getCenter(find.byTooltip(tooltipText)),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(mouseGesture1.removePointer);
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      find.text(tooltipText),
+      findsNothing,
+      reason: 'Tooltip should NOT be visible when hovered and tapped, when trigger mode is not tap',
+    );
+    await mouseGesture1.up();
+    await mouseGesture1.removePointer();
+    await tester.pump(const Duration(days: 10));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: SizedBox.square(
+            dimension: 10.0,
+            child: Tooltip(
+              message: tooltipText,
+              waitDuration: Duration(seconds: 1),
+              triggerMode: TooltipTriggerMode.tap,
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture mouseGesture2 = await tester.startGesture(
+      tester.getCenter(find.byTooltip(tooltipText)),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(mouseGesture2.removePointer);
+    // The tap should be ignored, since Tooltip does not track "trigger gestures"
+    // for mouse devices.
+    await tester.pump(const Duration(milliseconds: 100));
+    await mouseGesture2.up();
+    await tester.pump(const Duration(seconds: 1));
+    expect(
+      find.text(tooltipText),
+      findsNothing,
+      reason: 'Tooltip should NOT be visible when hovered and tapped, when trigger mode is tap',
+    );
   });
 }
 
