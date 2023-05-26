@@ -129,6 +129,7 @@ source_set("flutter_windows_source") {
   public_deps = [
     "//flutter/fml:string_conversion",
     "//flutter/shell/platform/common:common_cpp_accessibility",
+    "//flutter/shell/platform/common:common_cpp_enums",
   ]
 
   deps = [

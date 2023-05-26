@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+#import "FlutterAppLifecycleDelegate.h"
 #import "FlutterBinaryMessenger.h"
 #import "FlutterDartProject.h"
 #import "FlutterMacros.h"
@@ -26,7 +27,8 @@
  * code.
  */
 FLUTTER_DARWIN_EXPORT
-@interface FlutterEngine : NSObject <FlutterTextureRegistry, FlutterPluginRegistry>
+@interface FlutterEngine
+    : NSObject <FlutterTextureRegistry, FlutterPluginRegistry, FlutterAppLifecycleDelegate>
 
 /**
  * Initializes an engine with the given project.
