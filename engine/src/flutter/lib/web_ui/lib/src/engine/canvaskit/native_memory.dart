@@ -20,7 +20,7 @@ import 'package:ui/src/engine.dart';
 /// 4. GC decides to perform a GC cycle and collects CkPaint.
 /// 5. The finalizer function is called with the SkPaint as the sole argument.
 /// 6. We call `delete` on SkPaint.
-DomFinalizationRegistry _finalizationRegistry = DomFinalizationRegistry(
+DomFinalizationRegistry _finalizationRegistry = createDomFinalizationRegistry(
   (UniqueRef<Object> uniq) {
     uniq.collect();
   }.toJS
