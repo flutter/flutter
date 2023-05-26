@@ -145,6 +145,7 @@ class EngineAutofillForm {
     this.elements,
     this.items,
     this.formIdentifier = '',
+    this.insertionReferenceNode,
   });
 
   final DomHTMLFormElement formElement;
@@ -153,6 +154,7 @@ class EngineAutofillForm {
 
   final Map<String, AutofillInfo>? items;
 
+  final DomHTMLElement? insertionReferenceNode;
   /// Identifier for the form.
   ///
   /// It is constructed by concatenating unique ids of input elements on the
@@ -189,6 +191,7 @@ class EngineAutofillForm {
     final Map<String, DomHTMLElement> elements = <String, DomHTMLElement>{};
     final Map<String, AutofillInfo> items = <String, AutofillInfo>{};
     final DomHTMLFormElement formElement = createDomHTMLFormElement();
+    DomHTMLElement? insertionReferenceNode;
 
     // Validation is in the framework side.
     formElement.noValidate = true;
@@ -209,6 +212,7 @@ class EngineAutofillForm {
         AutofillInfo.fromFrameworkMessage(focusedElementAutofill);
 
     if (fields != null) {
+      bool fieldIsFocusedElement = false;
       for (final Map<String, dynamic> field in
           fields.cast<Map<String, dynamic>>()) {
         final Map<String, dynamic> autofillInfo = field.readJson('autofill');
@@ -234,6 +238,17 @@ class EngineAutofillForm {
           items[autofill.uniqueIdentifier] = autofill;
           elements[autofill.uniqueIdentifier] = htmlElement;
           formElement.append(htmlElement);
+
+          // We want to track the node in the position directly after our focused
+          // element, so we can later insert that element in the correct position
+          // right before this node.
+          if(fieldIsFocusedElement){
+            insertionReferenceNode = htmlElement;
+            fieldIsFocusedElement = false;
+          }
+        } else {
+          // current field is the focused element that we create elsewhere
+          fieldIsFocusedElement = true;
         }
       }
     } else {
@@ -268,16 +283,21 @@ class EngineAutofillForm {
 
     formElement.append(submitButton);
 
+    // If the focused node is at the end of the form, we'll default to inserting
+    // it before the submit field.
+    insertionReferenceNode ??= submitButton;
+
     return EngineAutofillForm(
       formElement: formElement,
       elements: elements,
       items: items,
       formIdentifier: formIdentifier,
+      insertionReferenceNode: insertionReferenceNode
     );
   }
 
   void placeForm(DomHTMLElement mainTextEditingElement) {
-    formElement.append(mainTextEditingElement);
+    formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
     defaultTextEditingRoot.append(formElement);
   }
 
