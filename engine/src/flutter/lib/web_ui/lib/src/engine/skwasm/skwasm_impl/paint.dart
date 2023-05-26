@@ -8,15 +8,11 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmPaint implements ui.Paint {
-  factory SkwasmPaint() {
-    return SkwasmPaint._fromHandle(paintCreate());
-  }
+class SkwasmPaint extends SkwasmObjectWrapper<RawPaint> implements ui.Paint {
+  SkwasmPaint() : super(paintCreate(), _registry);
 
-  SkwasmPaint._fromHandle(this._handle);
-  PaintHandle _handle;
-
-  PaintHandle get handle => _handle;
+  static final SkwasmFinalizationRegistry<RawPaint> _registry =
+    SkwasmFinalizationRegistry<RawPaint>(paintDispose);
 
   ui.BlendMode _cachedBlendMode = ui.BlendMode.srcOver;
 
@@ -47,51 +43,51 @@ class SkwasmPaint implements ui.Paint {
   set blendMode(ui.BlendMode blendMode) {
     if (_cachedBlendMode != blendMode) {
       _cachedBlendMode = blendMode;
-      paintSetBlendMode(_handle, blendMode.index);
+      paintSetBlendMode(handle, blendMode.index);
     }
   }
 
   @override
-  ui.PaintingStyle get style => ui.PaintingStyle.values[paintGetStyle(_handle)];
+  ui.PaintingStyle get style => ui.PaintingStyle.values[paintGetStyle(handle)];
 
   @override
-  set style(ui.PaintingStyle style) => paintSetStyle(_handle, style.index);
+  set style(ui.PaintingStyle style) => paintSetStyle(handle, style.index);
 
   @override
-  double get strokeWidth => paintGetStrokeWidth(_handle);
+  double get strokeWidth => paintGetStrokeWidth(handle);
 
   @override
-  set strokeWidth(double width) => paintSetStrokeWidth(_handle, width);
+  set strokeWidth(double width) => paintSetStrokeWidth(handle, width);
 
   @override
-  ui.StrokeCap get strokeCap => ui.StrokeCap.values[paintGetStrokeCap(_handle)];
+  ui.StrokeCap get strokeCap => ui.StrokeCap.values[paintGetStrokeCap(handle)];
 
   @override
-  set strokeCap(ui.StrokeCap cap) => paintSetStrokeCap(_handle, cap.index);
+  set strokeCap(ui.StrokeCap cap) => paintSetStrokeCap(handle, cap.index);
 
   @override
-  ui.StrokeJoin get strokeJoin => ui.StrokeJoin.values[paintGetStrokeJoin(_handle)];
+  ui.StrokeJoin get strokeJoin => ui.StrokeJoin.values[paintGetStrokeJoin(handle)];
 
   @override
-  set strokeJoin(ui.StrokeJoin join) => paintSetStrokeJoin(_handle, join.index);
+  set strokeJoin(ui.StrokeJoin join) => paintSetStrokeJoin(handle, join.index);
 
   @override
-  bool get isAntiAlias => paintGetAntiAlias(_handle);
+  bool get isAntiAlias => paintGetAntiAlias(handle);
 
   @override
-  set isAntiAlias(bool value) => paintSetAntiAlias(_handle, value);
+  set isAntiAlias(bool value) => paintSetAntiAlias(handle, value);
 
   @override
-  ui.Color get color => ui.Color(paintGetColorInt(_handle));
+  ui.Color get color => ui.Color(paintGetColorInt(handle));
 
   @override
-  set color(ui.Color color) => paintSetColorInt(_handle, color.value);
+  set color(ui.Color color) => paintSetColorInt(handle, color.value);
 
   @override
-  double get strokeMiterLimit => paintGetMiterLimit(_handle);
+  double get strokeMiterLimit => paintGetMiterLimit(handle);
 
   @override
-  set strokeMiterLimit(double limit) => paintSetMiterLimit(_handle, limit);
+  set strokeMiterLimit(double limit) => paintSetMiterLimit(handle, limit);
 
   @override
   ui.Shader? get shader => _shader;
@@ -102,7 +98,7 @@ class SkwasmPaint implements ui.Paint {
     _shader = skwasmShader;
     final ShaderHandle shaderHandle =
       skwasmShader != null ? skwasmShader.handle : nullptr;
-    paintSetShader(_handle, shaderHandle);
+    paintSetShader(handle, shaderHandle);
   }
 
   @override

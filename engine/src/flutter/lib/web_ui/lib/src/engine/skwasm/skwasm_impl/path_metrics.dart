@@ -19,11 +19,13 @@ class SkwasmPathMetrics extends IterableBase<ui.PathMetric>
   late Iterator<ui.PathMetric> iterator = SkwasmPathMetricIterator(path, forceClosed);
 }
 
-class SkwasmPathMetricIterator implements Iterator<ui.PathMetric> {
+class SkwasmPathMetricIterator extends SkwasmObjectWrapper<RawContourMeasureIter> implements Iterator<ui.PathMetric> {
   SkwasmPathMetricIterator(SkwasmPath path, bool forceClosed)
-      : _handle = contourMeasureIterCreate(path.handle, forceClosed, 1.0);
+      : super(contourMeasureIterCreate(path.handle, forceClosed, 1.0), _registry);
 
-  final ContourMeasureIterHandle _handle;
+  static final SkwasmFinalizationRegistry<RawContourMeasureIter> _registry =
+    SkwasmFinalizationRegistry<RawContourMeasureIter>(contourMeasureIterDispose);
+
   SkwasmPathMetric? _current;
   int _nextIndex = 0;
 
@@ -40,7 +42,7 @@ class SkwasmPathMetricIterator implements Iterator<ui.PathMetric> {
 
   @override
   bool moveNext() {
-    final ContourMeasureHandle measureHandle = contourMeasureIterNext(_handle);
+    final ContourMeasureHandle measureHandle = contourMeasureIterNext(handle);
     if (measureHandle == nullptr) {
       _current = null;
       return false;
@@ -52,10 +54,11 @@ class SkwasmPathMetricIterator implements Iterator<ui.PathMetric> {
   }
 }
 
-class SkwasmPathMetric implements ui.PathMetric {
-  SkwasmPathMetric(this._handle, this.contourIndex);
+class SkwasmPathMetric extends SkwasmObjectWrapper<RawContourMeasure> implements ui.PathMetric {
+  SkwasmPathMetric(ContourMeasureHandle handle, this.contourIndex) : super(handle, _registry);
 
-  final ContourMeasureHandle _handle;
+  static final SkwasmFinalizationRegistry<RawContourMeasure> _registry =
+    SkwasmFinalizationRegistry<RawContourMeasure>(contourMeasureDispose);
 
   @override
   final int contourIndex;
@@ -63,7 +66,7 @@ class SkwasmPathMetric implements ui.PathMetric {
   @override
   ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
     return SkwasmPath.fromHandle(
-        contourMeasureGetSegment(_handle, start, end, startWithMoveTo));
+        contourMeasureGetSegment(handle, start, end, startWithMoveTo));
   }
 
   @override
@@ -73,7 +76,7 @@ class SkwasmPathMetric implements ui.PathMetric {
       final Pointer<Float> outTangent =
           Pointer<Float>.fromAddress(outPosition.address + sizeOf<Float>() * 2);
       final bool result =
-          contourMeasureGetPosTan(_handle, distance, outPosition, outTangent);
+          contourMeasureGetPosTan(handle, distance, outPosition, outTangent);
       assert(result);
       return ui.Tangent(
         ui.Offset(outPosition[0], outPosition[1]),
@@ -83,8 +86,8 @@ class SkwasmPathMetric implements ui.PathMetric {
   }
 
   @override
-  bool get isClosed => contourMeasureIsClosed(_handle);
+  bool get isClosed => contourMeasureIsClosed(handle);
 
   @override
-  double get length => contourMeasureLength(_handle);
+  double get length => contourMeasureLength(handle);
 }

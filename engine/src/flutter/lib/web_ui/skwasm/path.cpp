@@ -13,7 +13,7 @@ SKWASM_EXPORT SkPath* path_create() {
   return new SkPath();
 }
 
-SKWASM_EXPORT void path_destroy(SkPath* path) {
+SKWASM_EXPORT void path_dispose(SkPath* path) {
   delete path;
 }
 

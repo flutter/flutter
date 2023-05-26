@@ -30,7 +30,7 @@ external ContourMeasureHandle contourMeasureIterNext(
     symbol: 'contourMeasureIter_dispose')
 external void contourMeasureIterDispose(ContourMeasureIterHandle handle);
 
-@Native<Void Function(ContourMeasureHandle)>(symbol: 'contourMesaure_dispose')
+@Native<Void Function(ContourMeasureHandle)>(symbol: 'contourMeasure_dispose')
 external void contourMeasureDispose(ContourMeasureHandle handle);
 
 @Native<Float Function(ContourMeasureHandle)>(symbol: 'contourMeasure_length')

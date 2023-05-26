@@ -20,7 +20,7 @@ SKWASM_EXPORT SkPaint* paint_create() {
   return paint;
 }
 
-SKWASM_EXPORT void paint_destroy(SkPaint* paint) {
+SKWASM_EXPORT void paint_dispose(SkPaint* paint) {
   delete paint;
 }
 

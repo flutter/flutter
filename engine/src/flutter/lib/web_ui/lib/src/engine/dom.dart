@@ -3435,3 +3435,35 @@ class DomTextDecoder {
 extension DomTextDecoderExtension on DomTextDecoder {
   external JSString decode(JSTypedArray buffer);
 }
+
+@JS('window.FinalizationRegistry')
+@staticInterop
+class DomFinalizationRegistry {
+  external factory DomFinalizationRegistry(JSFunction cleanup);
+}
+
+extension DomFinalizationRegistryExtension on DomFinalizationRegistry {
+  @JS('register')
+  external JSVoid _register1(JSAny target, JSAny value);
+
+  @JS('register')
+  external JSVoid _register2(JSAny target, JSAny value, JSAny token);
+  void register(Object target, Object value, [Object? token]) {
+      if (token != null) {
+        _register2(target.toJSAnyShallow, value.toJSAnyShallow, token.toJSAnyShallow);
+      } else {
+        _register1(target.toJSAnyShallow, value.toJSAnyShallow);
+      }
+  }
+
+  @JS('unregister')
+  external JSVoid _unregister(JSAny token);
+  void unregister(Object token) => _unregister(token.toJSAnyShallow);
+}
+
+@JS('window.FinalizationRegistry')
+external JSAny? get _finalizationRegistryConstructor;
+
+/// Whether the current browser supports `FinalizationRegistry`.
+bool browserSupportsFinalizationRegistry =
+    _finalizationRegistryConstructor != null;

@@ -16,8 +16,8 @@ typedef PaintHandle = Pointer<RawPaint>;
 @Native<PaintHandle Function()>(symbol: 'paint_create', isLeaf: true)
 external PaintHandle paintCreate();
 
-@Native<Void Function(PaintHandle)>(symbol: 'paint_destroy', isLeaf: true)
-external void paintDestroy(PaintHandle paint);
+@Native<Void Function(PaintHandle)>(symbol: 'paint_dispose', isLeaf: true)
+external void paintDispose(PaintHandle paint);
 
 @Native<Void Function(PaintHandle, Int)>(symbol: 'paint_setBlendMode', isLeaf: true)
 external void paintSetBlendMode(PaintHandle paint, int blendMode);
