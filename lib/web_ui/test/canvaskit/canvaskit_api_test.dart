@@ -1907,7 +1907,7 @@ void _paragraphTests() {
     // FinalizationRegistry because it depends on GC, which cannot be controlled,
     // So the test simply tests that a FinalizationRegistry can be constructed
     // and its `register` method can be called.
-    final DomFinalizationRegistry registry = DomFinalizationRegistry((String arg) {}.toJS);
+    final DomFinalizationRegistry registry = createDomFinalizationRegistry((String arg) {}.toJS);
     registry.register(Object(), Object());
   });
 }
