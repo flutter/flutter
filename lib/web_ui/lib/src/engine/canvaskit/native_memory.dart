@@ -4,13 +4,23 @@
 
 import 'dart:js_interop';
 import 'package:meta/meta.dart';
-
-import '../../engine.dart' show Instrumentation;
-import 'canvaskit_api.dart';
+import 'package:ui/src/engine.dart';
 
 /// Collects native objects that weren't explicitly disposed of using
 /// [UniqueRef.dispose] or [CountedRef.unref].
-SkObjectFinalizationRegistry _finalizationRegistry = createSkObjectFinalizationRegistry(
+///
+/// We use this to delete Skia objects when their "Ck" wrapper is garbage
+/// collected.
+///
+/// Example sequence of events:
+///
+/// 1. A (CkPaint, SkPaint) pair created.
+/// 2. The paint is used to paint some picture.
+/// 3. CkPaint is dropped by the app.
+/// 4. GC decides to perform a GC cycle and collects CkPaint.
+/// 5. The finalizer function is called with the SkPaint as the sole argument.
+/// 6. We call `delete` on SkPaint.
+DomFinalizationRegistry _finalizationRegistry = DomFinalizationRegistry(
   (UniqueRef<Object> uniq) {
     uniq.collect();
   }.toJS
@@ -18,7 +28,7 @@ SkObjectFinalizationRegistry _finalizationRegistry = createSkObjectFinalizationR
 
 NativeMemoryFinalizationRegistry nativeMemoryFinalizationRegistry = NativeMemoryFinalizationRegistry();
 
-/// An indirection to [SkObjectFinalizationRegistry] to enable tests provide a
+/// An indirection to [DomFinalizationRegistry] to enable tests provide a
 /// mock implementation of a finalization registry.
 class NativeMemoryFinalizationRegistry {
   void register(Object owner, UniqueRef<Object> ref) {

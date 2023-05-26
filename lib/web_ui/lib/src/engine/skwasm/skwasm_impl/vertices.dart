@@ -10,7 +10,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmVertices implements ui.Vertices {
+class SkwasmVertices extends SkwasmObjectWrapper<RawVertices> implements ui.Vertices {
   factory SkwasmVertices(
     ui.VertexMode mode,
     List<ui.Offset> positions, {
@@ -69,19 +69,8 @@ class SkwasmVertices implements ui.Vertices {
     ));
   });
 
-  SkwasmVertices._(this.handle);
+  SkwasmVertices._(VerticesHandle handle) : super(handle, _registry);
 
-  final VerticesHandle handle;
-  bool _isDisposed = false;
-
-  @override
-  bool get debugDisposed => _isDisposed;
-
-  @override
-  void dispose() {
-    if (!_isDisposed) {
-      verticesDispose(handle);
-      _isDisposed = true;
-    }
-  }
+  static final SkwasmFinalizationRegistry<RawVertices> _registry =
+    SkwasmFinalizationRegistry<RawVertices>(verticesDispose);
 }

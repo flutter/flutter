@@ -15,6 +15,7 @@ export 'skwasm_impl/filters.dart';
 export 'skwasm_impl/font_collection.dart';
 export 'skwasm_impl/image.dart';
 export 'skwasm_impl/layers.dart';
+export 'skwasm_impl/memory.dart';
 export 'skwasm_impl/paint.dart';
 export 'skwasm_impl/paragraph.dart';
 export 'skwasm_impl/path.dart';

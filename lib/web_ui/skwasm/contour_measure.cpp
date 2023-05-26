@@ -23,6 +23,10 @@ SKWASM_EXPORT SkContourMeasure* contourMeasureIter_next(
   return next.get();
 }
 
+SKWASM_EXPORT void contourMeasureIter_dispose(SkContourMeasureIter* iter) {
+  delete iter;
+}
+
 SKWASM_EXPORT void contourMeasure_dispose(SkContourMeasure* measure) {
   measure->unref();
 }

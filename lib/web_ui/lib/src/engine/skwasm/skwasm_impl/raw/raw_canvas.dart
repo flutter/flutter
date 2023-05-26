@@ -13,9 +13,6 @@ final class RawCanvas extends Opaque {}
 
 typedef CanvasHandle = Pointer<RawCanvas>;
 
-@Native<Void Function(CanvasHandle)>(symbol: 'canvas_destroy', isLeaf: true)
-external void canvasDestroy(CanvasHandle canvas);
-
 @Native<Void Function(CanvasHandle)>(symbol: 'canvas_save', isLeaf: true)
 external void canvasSave(CanvasHandle canvas);
 
