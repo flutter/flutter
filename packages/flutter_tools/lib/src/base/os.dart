@@ -31,7 +31,7 @@ abstract class OperatingSystemUtils {
         processManager: processManager,
       );
     } else if (platform.isMacOS) {
-      return _MacOSUtils(
+      return MacOSUtils(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
@@ -357,8 +357,9 @@ class _LinuxUtils extends _PosixUtils {
   }
 }
 
-class _MacOSUtils extends _PosixUtils {
-  _MacOSUtils({
+@visibleForTesting
+class MacOSUtils extends _PosixUtils {
+  MacOSUtils({
     required super.fileSystem,
     required super.logger,
     required super.platform,
@@ -431,13 +432,18 @@ class _MacOSUtils extends _PosixUtils {
   /// corresponding entity in the [targetDirectory] before moving from the
   /// temporary directory to the [targetDirectory].
   @override
-  void unzip(File file, Directory targetDirectory) {
+  void unzip(
+    File file,
+    Directory targetDirectory, {
+    @visibleForTesting
+    Directory? testTempDirectory,
+  }) {
     if (!_processManager.canRun('unzip')) {
       // unzip is not available. this error message is modeled after the download
       // error in bin/internal/update_dart_sdk.sh
       throwToolExit('Missing "unzip" tool. Unable to extract ${file.path}.\nConsider running "brew install unzip".');
     }
-    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
+    final Directory tempDirectory = testTempDirectory ?? _fileSystem.systemTempDirectory.createTempSync('flutter_${file.basename}.');
     try {
       // Unzip to a temporary directory.
       _processUtils.runSync(
@@ -447,31 +453,50 @@ class _MacOSUtils extends _PosixUtils {
       );
 
       for (final FileSystemEntity unzippedFile in tempDirectory.listSync(followLinks: false)) {
+        // Delete existing file/directory/link with matching name
+        // before copying files to avoid type mismatching.
+        _deleteExisting(targetDirectory, unzippedFile.basename);
+
         final FileSystemEntityType fileType = unzippedFile.fileSystem.typeSync(
           unzippedFile.path,
           followLinks: false,
         );
 
-        // Delete existing version in the target directory.
-        // Then copy from the temporary directory to target directory.
+        // Copy from the temporary directory to target directory.
         if (fileType == FileSystemEntityType.directory) {
           final Directory destinationDirectory = targetDirectory.childDirectory(unzippedFile.basename);
-          ErrorHandlingFileSystem.deleteIfExists(destinationDirectory, recursive: true);
           copyPathSync(unzippedFile.path, destinationDirectory.path);
         } else if (fileType == FileSystemEntityType.link) {
           final Link tempLink = unzippedFile as Link;
           final Link destinationLink = targetDirectory.childLink(unzippedFile.basename);
-          ErrorHandlingFileSystem.deleteIfExists(destinationLink, recursive: true);
           destinationLink.createSync(tempLink.targetSync(), recursive: true);
-        } else {
+        } else if (fileType == FileSystemEntityType.file) {
           final File tempFile = unzippedFile as File;
           final File destinationFile = targetDirectory.childFile(unzippedFile.basename);
-          ErrorHandlingFileSystem.deleteIfExists(destinationFile, recursive: true);
           tempFile.copySync(destinationFile.path);
         }
       }
     } finally {
       tempDirectory.deleteSync(recursive: true);
+    }
+  }
+
+  /// Delete existing file/directory/link with matching name.
+  void _deleteExisting(Directory targetDirectory, String fileName) {
+    final FileSystemEntityType fileType = targetDirectory.fileSystem.typeSync(
+      targetDirectory.fileSystem.path.join(targetDirectory.path, fileName),
+      followLinks: false,
+    );
+
+    if (fileType == FileSystemEntityType.directory) {
+      final Directory destinationDirectory = targetDirectory.childDirectory(fileName);
+      ErrorHandlingFileSystem.deleteIfExists(destinationDirectory, recursive: true);
+    } else if (fileType == FileSystemEntityType.link) {
+      final Link destinationLink = targetDirectory.childLink(fileName);
+      ErrorHandlingFileSystem.deleteIfExists(destinationLink, recursive: true);
+    } else if (fileType == FileSystemEntityType.file) {
+      final File destinationFile = targetDirectory.childFile(fileName);
+      ErrorHandlingFileSystem.deleteIfExists(destinationFile, recursive: true);
     }
   }
 }

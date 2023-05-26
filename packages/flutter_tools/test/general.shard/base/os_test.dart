@@ -6,10 +6,12 @@ import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -626,18 +628,39 @@ void main() {
   });
 
   group('unzip on macOS', () {
-    testWithoutContext('unzip and copy to empty folder', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
+    late FileSystem fileSystem;
+    late Directory targetDirectory;
+    late Directory tempDirectory;
+    setUp(() {
+      fileSystem = globals.localFileSystem;
+      targetDirectory = fileSystem.systemTempDirectory.childDirectory('target');
+      tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+    });
 
+    tearDown(() {
+      ErrorHandlingFileSystem.deleteIfExists(targetDirectory, recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
+    });
+
+    testWithoutContext('uses class MacOSUtils', () {
       final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'macos'),
         processManager: fakeProcessManager,
       );
+      expect(macOSUtils is MacOSUtils, isTrue);
+    });
 
-      final Directory targetDirectory = fileSystem.currentDirectory;
-      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+    testWithoutContext('unzip and copy to empty folder', () {
+      final MacOSUtils macOSUtils = MacOSUtils(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(operatingSystem: 'macos'),
+        processManager: fakeProcessManager,
+      );
+
+      tempDirectory.createSync();
       fakeProcessManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -651,36 +674,45 @@ void main() {
           onRun: () {
             expect(tempDirectory, exists);
             tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
-            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+            tempDirectory.childDirectory('dirB').childLink('fileB').createSync('dirA/fileA', recursive: true);
+            tempDirectory.childFile('fileC').createSync(recursive: true);
+            tempDirectory.childLink('linkD').createSync('dirA/fileA', recursive: true);
           },
         ),
       ]);
 
-      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory, testTempDirectory: tempDirectory);
+
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(tempDirectory, isNot(exists));
       expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
-      expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirB').childLink('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirB').childLink('fileB').targetSync(), 'dirA/fileA');
+      expect(targetDirectory.childFile('fileC').existsSync(), isTrue);
+      expect(targetDirectory.childLink('linkD').existsSync(), isTrue);
+      expect(targetDirectory.childLink('linkD').targetSync(), 'dirA/fileA');
     });
 
     testWithoutContext('unzip and copy to preexisting folder', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-
-      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+      final MacOSUtils macOSUtils = MacOSUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'macos'),
         processManager: fakeProcessManager,
       );
 
-      final Directory targetDirectory = fileSystem.currentDirectory;
       final File origFileA = targetDirectory.childDirectory('dirA').childFile('fileA');
       origFileA.createSync(recursive: true);
-      origFileA.writeAsStringSync('old');
+      origFileA.writeAsStringSync('old A');
+      final File origFileB = targetDirectory.childFile('fileB');
+      origFileB.createSync(recursive: true);
+      origFileB.writeAsStringSync('old B');
       expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
-      expect(targetDirectory.childDirectory('dirA').childFile('fileA').readAsStringSync(), 'old');
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').readAsStringSync(), 'old A');
+      expect(targetDirectory.childFile('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childFile('fileB').readAsStringSync(), 'old B');
 
-      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      tempDirectory.createSync();
       fakeProcessManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -695,36 +727,43 @@ void main() {
             expect(tempDirectory, exists);
             final File newFileA = tempDirectory.childDirectory('dirA').childFile('fileA');
             newFileA.createSync(recursive: true);
-            newFileA.writeAsStringSync('new');
-            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+            newFileA.writeAsStringSync('new A');
+            final File newFileB = tempDirectory.childFile('fileB');
+            newFileB.createSync(recursive: true);
+            newFileB.writeAsStringSync('new B');
+            tempDirectory.childLink('linkC').createSync('dirA/fileA', recursive: true);
           },
         ),
       ]);
 
-      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory, testTempDirectory: tempDirectory);
+
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(tempDirectory, isNot(exists));
       expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
-      expect(targetDirectory.childDirectory('dirA').childFile('fileA').readAsStringSync(), 'new');
-      expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirA').childFile('fileA').readAsStringSync(), 'new A');
+      expect(targetDirectory.childFile('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childFile('fileB').readAsStringSync(), 'new B');
+      expect(targetDirectory.childLink('linkC').existsSync(), isTrue);
+      expect(targetDirectory.childLink('linkC').targetSync(), 'dirA/fileA');
     });
 
     testWithoutContext('unzip and copy to preexisting folder with type mismatch', () {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-
-      final OperatingSystemUtils macOSUtils = OperatingSystemUtils(
+      final MacOSUtils macOSUtils = MacOSUtils(
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: FakePlatform(operatingSystem: 'macos'),
         processManager: fakeProcessManager,
       );
 
-      final Directory targetDirectory = fileSystem.currentDirectory;
       final Directory origFileA = targetDirectory.childDirectory('dirA').childDirectory('fileA');
       origFileA.createSync(recursive: true);
       expect(targetDirectory.childDirectory('dirA').childDirectory('fileA').existsSync(), isTrue);
+      final Directory origFileB = targetDirectory.childDirectory('fileB');
+      origFileB.createSync(recursive: true);
+      expect(targetDirectory.childDirectory('fileB').existsSync(), isTrue);
 
-      final Directory tempDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_foo.zip.rand0');
+      tempDirectory.createSync();
       fakeProcessManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
@@ -738,16 +777,19 @@ void main() {
           onRun: () {
             expect(tempDirectory, exists);
             tempDirectory.childDirectory('dirA').childFile('fileA').createSync(recursive: true);
-            tempDirectory.childDirectory('dirB').childFile('fileB').createSync(recursive: true);
+            tempDirectory.childFile('fileB').createSync(recursive: true);
           },
         ),
       ]);
 
-      macOSUtils.unzip(fileSystem.file('foo.zip'), fileSystem.currentDirectory);
+      macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory, testTempDirectory: tempDirectory);
+
       expect(fakeProcessManager, hasNoRemainingExpectations);
       expect(tempDirectory, isNot(exists));
       expect(targetDirectory.childDirectory('dirA').childFile('fileA').existsSync(), isTrue);
-      expect(targetDirectory.childDirectory('dirB').childFile('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('dirA').childDirectory('fileA').existsSync(), isFalse);
+      expect(targetDirectory.childFile('fileB').existsSync(), isTrue);
+      expect(targetDirectory.childDirectory('fileB').existsSync(), isFalse);
     });
   });
 
