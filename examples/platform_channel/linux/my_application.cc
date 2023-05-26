@@ -217,12 +217,13 @@ static void my_application_activate(GApplication* application) {
                            G_CALLBACK(up_device_added_cb), self);
   g_signal_connect_swapped(self->up_client, "device-removed",
                            G_CALLBACK(up_device_removed_cb), self);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-// TODO(cbracken): https://github.com/flutter/flutter/issues/127506
-// Migrate to up_client_get_devices2 once available.
+#if UP_CHECK_VERSION(0, 99, 8)
+  // up_client_get_devices was deprecated and replaced with
+  // up_client_get_devices2 in libupower 0.99.8.
+  g_autoptr(GPtrArray) devices = up_client_get_devices2(self->up_client);
+#else
   g_autoptr(GPtrArray) devices = up_client_get_devices(self->up_client);
-#pragma clang diagnostic pop
+#endif
   for (guint i = 0; i < devices->len; i++) {
     g_autoptr(UpDevice) device =
         static_cast<UpDevice*>(g_ptr_array_index(devices, i));
