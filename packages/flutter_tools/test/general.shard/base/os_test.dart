@@ -679,6 +679,22 @@ void main() {
             tempDirectory.childLink('linkD').createSync('dirA/fileA', recursive: true);
           },
         ),
+        FakeCommand(command: <String>[
+          'rsync',
+          '-8',
+          '-av',
+          '--delete',
+          tempDirectory.childDirectory('dirA').path,
+          targetDirectory.path,
+        ]),
+        FakeCommand(command: <String>[
+          'rsync',
+          '-8',
+          '-av',
+          '--delete',
+          tempDirectory.childDirectory('dirB').path,
+          targetDirectory.path,
+        ]),
       ]);
 
       macOSUtils.unzip(fileSystem.file('foo.zip'), targetDirectory, testTempDirectory: tempDirectory);

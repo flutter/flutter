@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
-import 'error_handling_io.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'logger.dart';
@@ -426,11 +425,7 @@ class MacOSUtils extends _PosixUtils {
     return _hostPlatform!;
   }
 
-  /// Unzip into a temporary directory.
-  ///
-  /// For every file/directory/link in the unzipped file, delete the
-  /// corresponding entity in the [targetDirectory] before moving from the
-  /// temporary directory to the [targetDirectory].
+  // unzip, then rsync
   @override
   void unzip(
     File file,
@@ -447,7 +442,7 @@ class MacOSUtils extends _PosixUtils {
     try {
       // Unzip to a temporary directory.
       _processUtils.runSync(
-        <String>['unzip', '-o', '-q', file.path, '-d', tempDirectory.path],
+        <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
         throwOnError: true,
         verboseExceptions: true,
       );
