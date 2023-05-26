@@ -84,7 +84,7 @@ class _ToggleButtonsExampleState extends State<ToggleButtonsExample> {
             showSelectedIcon: false,
             // SegmentedButton uses a Set<T> to track its selection state.
             selected: _segmentedButtonSelection,
-            // This callback returns a set of selected segment values.
+            // This callback updates the set of selected segment values.
             onSelectionChanged: (Set<ShirtSize> newSelection) {
               setState(() {
                 _segmentedButtonSelection = newSelection;
