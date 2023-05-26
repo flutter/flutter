@@ -25,6 +25,9 @@
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 
 // The rasterizer will tell Skia to purge cached resources that have not been
@@ -867,3 +870,5 @@ Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
 Rasterizer::Screenshot::~Screenshot() = default;
 
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

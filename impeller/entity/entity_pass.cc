@@ -34,6 +34,9 @@
 #include "impeller/entity/contents/checkerboard_contents.h"
 #endif  // IMPELLER_DEBUG
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 EntityPass::EntityPass() = default;
@@ -910,3 +913,5 @@ void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

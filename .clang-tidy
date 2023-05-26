@@ -2,6 +2,7 @@
 # Note: Some of the checks here are used as errors selectively, see
 # //ci/lint.sh
 Checks: "bugprone-use-after-move,\
+bugprone-unchecked-optional-access,\
 clang-analyzer-*,\
 clang-diagnostic-*,\
 darwin-*,\

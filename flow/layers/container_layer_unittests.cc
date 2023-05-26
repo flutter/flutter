@@ -13,6 +13,9 @@
 #include "gtest/gtest.h"
 #include "include/core/SkMatrix.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 namespace testing {
 
@@ -762,3 +765,5 @@ TEST_F(ContainerLayerDiffTest, ReplaceLayer) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

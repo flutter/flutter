@@ -10,6 +10,9 @@
 
 #include "gtest/gtest.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 namespace testing {
 
@@ -114,3 +117,5 @@ TEST(SwitchesTest, NoEnableImpeller) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -14,6 +14,9 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 static std::optional<SamplerAddressMode> TileModeToAddressMode(
@@ -195,3 +198,5 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

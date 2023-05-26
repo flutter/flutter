@@ -6,6 +6,9 @@
 #include "impeller/aiks/canvas.h"
 #include "impeller/geometry/path_builder.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 namespace testing {
 
@@ -335,3 +338,5 @@ TEST(AiksCanvasTest, PathClipDiffAgainstFullyCoveredCullRect) {
 
 }  // namespace testing
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)
