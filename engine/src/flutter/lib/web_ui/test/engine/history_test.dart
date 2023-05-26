@@ -717,6 +717,11 @@ void testMain() {
       // A listener that was never added.
       expect(() => location.removePopStateListener(myNonAddedListener), throwsAssertionError);
     });
+
+    test('returns a non-empty baseUri', () {
+      const BrowserPlatformLocation location = BrowserPlatformLocation();
+      expect(location.getBaseHref(), isNotNull);
+    });
   });
 }
 
