@@ -161,7 +161,7 @@ import 'dart:developer' as developer;
 ''');
   }
   buffer.write('''
-import 'package:test_api/src/remote_listener.dart';
+import 'package:test_api/backend.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
 
