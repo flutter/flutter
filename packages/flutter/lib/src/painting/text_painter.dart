@@ -271,9 +271,13 @@ class _TextLayout {
   // object when it's no logner needed.
   ui.Paragraph _paragraph;
 
+  /// Whether to enable the rounding in _applyFloatingPointHack and SkParagraph.
+  static const bool _shouldApplyFloatingPointHack = !bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK');
+
   // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
   // remove this hack as well as the flooring in `layout`.
-  static double _applyFloatingPointHack(double layoutValue) => layoutValue.ceilToDouble();
+  @pragma('vm:prefer-inline')
+  static double _applyFloatingPointHack(double layoutValue) => _shouldApplyFloatingPointHack ? layoutValue.ceilToDouble() : layoutValue;
 
   /// Whether this layout has been invalidated and disposed.
   ///
