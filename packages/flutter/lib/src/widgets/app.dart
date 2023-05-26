@@ -707,7 +707,7 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
   /// The callback to use when receiving a [NavigationNotification].
   ///
-  /// By default, calls [SystemNavigator.updateNavigationStackStatus].
+  /// By default, calls [SystemNavigator.setFrameworkHandlesBacks].
   ///
   /// If null, [NavigationNotification] is not listened for at all, and so will
   /// continue propagate.
@@ -1331,7 +1331,7 @@ class WidgetsApp extends StatefulWidget {
     //print('justin notified! canPop? ${canPop()}/${notification.canPop}. isRoot? $_isRoot.');
     // TODO(justinmc): Make this overridable for complex cases of mixed Navigator and GoRouter etc.?
     print('justin WidgetsApps notification listener updating status to ${notification.canPop}');
-    SystemNavigator.updateNavigationStackStatus(notification.canPop);
+    SystemNavigator.setFrameworkHandlesBacks(notification.canPop);
     return true;
   }
 

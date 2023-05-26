@@ -8,24 +8,25 @@ import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 abstract final class SystemNavigator {
-  // TODO(justinmc): Think about this default, and startup, and what happens in
-  // your example where the first route is a nestednavigator.
-  static bool _frameworkHandlesPop = true;
+  // By default, when the app starts, it does not handle backs.
+  static bool _frameworkHandlesBacks = false;
 
-  /// Inform the platform of whether or not the navigation stack is empty.
+  /// Inform the platform of whether or not the Flutter framework will handle
+  /// back events.
   ///
   /// Currently, this is used only on Android to inform its use of the
-  /// predictive back gesture when exiting the app.
+  /// predictive back gesture when exiting the app. When true, predictive back
+  /// is disabled.
   ///
   /// See also:
   ///
   ///  * The
   ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
   ///    for predictive back in native Android apps.
-  static Future<void> updateNavigationStackStatus(bool frameworkHandlesPop) async {
+  static Future<void> setFrameworkHandlesBacks(bool frameworkHandlesBacks) async {
     // Yes, because this should include the presence of CanPopScopes too, not
     // just the presence of routes.
-    if (frameworkHandlesPop == _frameworkHandlesPop) {
+    if (frameworkHandlesBacks == _frameworkHandlesBacks) {
       return;
     }
     // Currently, this method call is only relevant on Android.
@@ -42,15 +43,15 @@ abstract final class SystemNavigator {
       case TargetPlatform.android:
         // Set the local boolean before the call is made, so that duplicate
         // calls to this method don't cause duplicate calls to the platform.
-        _frameworkHandlesPop = frameworkHandlesPop;
+        _frameworkHandlesBacks = frameworkHandlesBacks;
         try {
-          print('justin telling platform frameworkHandlesPop: $frameworkHandlesPop');
+          print('justin telling platform frameworkHandlesPop: $frameworkHandlesBacks');
           await SystemChannels.platform.invokeMethod<void>(
-            'SystemNavigator.updateNavigationStackStatus',
-            frameworkHandlesPop,
+            'SystemNavigator.setFrameworkhandlesBacks',
+            frameworkHandlesBacks,
           );
         } catch (error) {
-          _frameworkHandlesPop = !frameworkHandlesPop;
+          _frameworkHandlesBacks = !frameworkHandlesBacks;
           rethrow;
         }
     }
