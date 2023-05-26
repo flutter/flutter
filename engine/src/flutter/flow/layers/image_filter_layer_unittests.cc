@@ -15,6 +15,9 @@
 #include "include/core/SkPath.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 namespace testing {
 
@@ -710,3 +713,5 @@ TEST_F(ImageFilterLayerDiffTest, ImageFilterLayerInflatestChildSize) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

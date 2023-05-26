@@ -9,6 +9,8 @@ namespace impeller {
 size_t RuntimeUniformDescription::GetSize() const {
   size_t size = dimensions.rows * dimensions.cols * bit_width / 8u;
   if (array_elements.value_or(0) > 0) {
+    // Covered by check on the line above.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
     size *= array_elements.value();
   }
   return size;

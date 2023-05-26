@@ -16,6 +16,9 @@
 #include "flutter/flow/raster_cache_util.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 
 static bool IsDisplayListWorthRasterizing(
@@ -170,3 +173,5 @@ bool DisplayListRasterCacheItem::TryToPrepareRasterCache(
       });
 }
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

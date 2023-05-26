@@ -278,6 +278,7 @@ targets:
     runIf:
       - DEPS
       - .ci.yaml
+      - .clang-tidy
       - tools/**
       - ci/**
       - "**.h"
@@ -298,6 +299,7 @@ targets:
     runIf:
       - DEPS
       - .ci.yaml
+      - .clang-tidy
       - tools/**
       - ci/**
       - "**.h"
@@ -541,6 +543,7 @@ targets:
     runIf:
       - DEPS
       - .ci.yaml
+      - .clang-tidy
       - tools/**
       - ci/**
       - "**.h"
@@ -563,6 +566,7 @@ targets:
     runIf:
       - DEPS
       - .ci.yaml
+      - .clang-tidy
       - tools/**
       - ci/**
       - "**.h"

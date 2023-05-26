@@ -11,6 +11,9 @@
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 namespace testing {
 
@@ -289,3 +292,5 @@ TEST_P(TypographerTest, MaybeHasOverlapping) {
 
 }  // namespace testing
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)
