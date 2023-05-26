@@ -648,6 +648,65 @@ void main() {
     // If renderHeader._lastStartedScrollDirection is not ScrollDirection.forward, then we shouldn't see the header at all.
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
+
+  testWidgets('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        const SliverAppBar(
+          toolbarHeight: 30,
+          expandedHeight: 60,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(600));
+
+    controller.jumpTo(600);
+    await tester.pumpAndSettle();
+
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+  });
+
+  testWidgets('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        const SliverAppBar(
+          toolbarHeight: 30,
+          expandedHeight: 60,
+          floating: true,
+          snap: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(600));
+
+    controller.jumpTo(600);
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 10));
+    await tester.pumpAndSettle();
+
+    // Since snap should cause an animation to fully expand, the paintOffset should be -50.0.
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
 }
 
 Widget _buildSliverList({
@@ -689,21 +748,23 @@ Widget _buildSliverCrossAxisGroup({
   bool reverse = false,
   List<Widget> otherSlivers = const <Widget>[],
 }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Align(
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        height: viewportHeight,
-        width: viewportWidth,
-        child: CustomScrollView(
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          slivers: <Widget>[SliverCrossAxisGroup(slivers: slivers), ...otherSlivers],
+  return MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: viewportHeight,
+          width: viewportWidth,
+          child: CustomScrollView(
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+            controller: controller,
+            slivers: <Widget>[SliverCrossAxisGroup(slivers: slivers), ...otherSlivers],
+          ),
         ),
       ),
-    ),
+    )
   );
 }
 

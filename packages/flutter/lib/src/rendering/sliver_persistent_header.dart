@@ -367,10 +367,13 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
 
   @override
   void performLayout() {
+
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
     layoutChild(constraints.scrollOffset, maxExtent);
     final double paintExtent = maxExtent - constraints.scrollOffset;
+
+
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
@@ -651,6 +654,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   @override
   void performLayout() {
+    print('paint extent');
+    print('constraints remaining paint extent');
+    print(this.constraints.remainingPaintExtent);
+    print(this.constraints.userScrollDirection);
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
