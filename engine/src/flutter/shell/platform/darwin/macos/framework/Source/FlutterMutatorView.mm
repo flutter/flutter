@@ -389,6 +389,48 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
   }
 }
 
+/// Updates the PlatformView and PlatformView container views.
+///
+/// Re-nests _platformViewContainer in the innermost clip view, applies transforms to the underlying
+/// CALayer, adds the platform view as a subview of the container, and sets the axis-aligned clip
+/// rect around the tranformed view.
+- (void)updatePlatformViewWithBounds:(CGRect)untransformedBounds
+                   transformedBounds:(CGRect)transformedBounds
+                           transform:(CATransform3D)transform
+                            clipRect:(CGRect)clipRect {
+  // Create the PlatformViewContainer view if necessary.
+  if (_platformViewContainer == nil) {
+    _platformViewContainer = [[NSView alloc] initWithFrame:self.bounds];
+    _platformViewContainer.wantsLayer = YES;
+  }
+
+  // Nest the PlatformViewContainer view in the innermost path clip view.
+  NSView* containerSuperview = _pathClipViews.count == 0 ? self : _pathClipViews.lastObject;
+  [containerSuperview addSubview:_platformViewContainer];
+  _platformViewContainer.frame = self.bounds;
+
+  // Add the
+  [_platformViewContainer addSubview:_platformView];
+  _platformView.frame = untransformedBounds;
+
+  // Transform for the platform view is finalTransform adjusted for bounding rect origin.
+  _platformViewContainer.layer.sublayerTransform =
+      CATransform3DTranslate(transform, -transformedBounds.origin.x / transform.m11 /* scaleX */,
+                             -transformedBounds.origin.y / transform.m22 /* scaleY */, 0);
+
+  // By default NSView clips children to frame. If masterClip is tighter than mutator view frame,
+  // the frame is set to masterClip and child offset adjusted to compensate for the difference.
+  if (!CGRectEqualToRect(clipRect, transformedBounds)) {
+    FML_DCHECK(self.subviews.count == 1);
+    auto subview = self.subviews.firstObject;
+    FML_DCHECK(subview.frame.origin.x == 0 && subview.frame.origin.y == 0);
+    subview.frame = CGRectMake(transformedBounds.origin.x - clipRect.origin.x,
+                               transformedBounds.origin.y - clipRect.origin.y,
+                               subview.frame.size.width, subview.frame.size.height);
+    self.frame = clipRect;
+  }
+}
+
 /// Whenever possible view will be clipped using layer bounds.
 /// If clipping to path is needed, CAShapeLayer(s) will be used as mask.
 /// Clipping to round rect only clips to path if round corners are intersected.
@@ -423,35 +465,11 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
   NSMutableArray* paths = RoundedRectClipsFromMutations(masterClip, mutations);
   [self updatePathClipViewsWithPaths:paths];
 
-  // Used to apply sublayer transform.
-  if (_platformViewContainer == nil) {
-    _platformViewContainer = [[NSView alloc] initWithFrame:self.bounds];
-    _platformViewContainer.wantsLayer = YES;
-  }
-
-  NSView* lastView = _pathClipViews.count == 0 ? self : _pathClipViews.lastObject;
-  [lastView addSubview:_platformViewContainer];
-  _platformViewContainer.frame = self.bounds;
-
-  [_platformViewContainer addSubview:_platformView];
-  _platformView.frame = untransformedBoundingRect;
-
-  // Transform for the platform view is finalTransform adjusted for bounding rect origin.
-  _platformViewContainer.layer.sublayerTransform = CATransform3DTranslate(
-      finalTransform, -finalBoundingRect.origin.x / finalTransform.m11 /* scaleX */,
-      -finalBoundingRect.origin.y / finalTransform.m22 /* scaleY */, 0);
-
-  // By default NSView clips children to frame. If masterClip is tighter than mutator view frame,
-  // the frame is set to masterClip and child offset adjusted to compensate for the difference.
-  if (!CGRectEqualToRect(masterClip, finalBoundingRect)) {
-    FML_DCHECK(self.subviews.count == 1);
-    auto subview = self.subviews.firstObject;
-    FML_DCHECK(subview.frame.origin.x == 0 && subview.frame.origin.y == 0);
-    subview.frame = CGRectMake(finalBoundingRect.origin.x - masterClip.origin.x,
-                               finalBoundingRect.origin.y - masterClip.origin.y,
-                               subview.frame.size.width, subview.frame.size.height);
-    self.frame = masterClip;
-  }
+  /// Update PlatformViewContainer, PlatformView, and apply transforms and axis-aligned clip rect.
+  [self updatePlatformViewWithBounds:untransformedBoundingRect
+                   transformedBounds:finalBoundingRect
+                           transform:finalTransform
+                            clipRect:masterClip];
 }
 
 @end
