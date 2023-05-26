@@ -13,6 +13,25 @@ import 'mock_canvas.dart';
 import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
+void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
+  int index = 0;
+  RenderBox? previousBox;
+  span.visitChildren((InlineSpan span) {
+    if (span is! WidgetSpan) {
+      return true;
+    }
+
+    final RenderBox box = inlineRenderBoxes[index];
+    box.parentData = TextParentData()
+                      ..span = span
+                      ..previousSibling = previousBox;
+    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
+    index += 1;
+    previousBox = box;
+    return true;
+  });
+}
+
 class _FakeEditableTextState with TextSelectionDelegate {
   @override
   TextEditingValue textEditingValue = TextEditingValue.empty;
@@ -1327,7 +1346,7 @@ void main() {
         selection: const TextSelection.collapsed(offset: 3),
         children: renderBoxes,
       );
-
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable);
       editable.hasFocus = true;
       pumpFrame();
@@ -1370,6 +1389,7 @@ void main() {
         children: renderBoxes,
       );
 
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable);
       editable.hasFocus = true;
       pumpFrame();
@@ -1415,6 +1435,7 @@ void main() {
       );
 
       // Force a line wrap
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: const BoxConstraints(maxWidth: 75));
       editable.hasFocus = true;
       pumpFrame();
@@ -1465,6 +1486,7 @@ void main() {
       );
 
       // Force a line wrap
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: const BoxConstraints(maxWidth: 75));
       editable.hasFocus = true;
       pumpFrame();
@@ -1520,6 +1542,7 @@ void main() {
         children: renderBoxes,
       );
 
+      _applyParentData(renderBoxes, editable.text!);
       // Force a line wrap
       layout(editable, constraints: const BoxConstraints(maxWidth: 75));
       editable.hasFocus = true;
@@ -1554,6 +1577,7 @@ void main() {
         selectionColor: Colors.black,
         textDirection: TextDirection.ltr,
         cursorColor: Colors.red,
+        cursorWidth: 0.0,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1571,12 +1595,12 @@ void main() {
         textScaleFactor: 2.0,
         children: renderBoxes,
       );
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: const BoxConstraints(maxWidth: screenWidth));
-      editable.hasFocus = true;
-      final double maxIntrinsicWidth = editable.computeMaxIntrinsicWidth(fixedHeight);
-      pumpFrame();
-
-      expect(maxIntrinsicWidth, 278);
+      expect(editable.computeMaxIntrinsicWidth(fixedHeight),
+        2.0 * 10.0 * 4 + 14.0 * 7 + 1.0,
+        reason: "intrinsic width = scale factor * width of 'test' + width of 'one two' + _caretMargin",
+      );
     });
 
     test('hits correct WidgetSpan when not scrolled', () {
@@ -1613,6 +1637,7 @@ void main() {
         ),
         children: renderBoxes,
       );
+      _applyParentData(renderBoxes, editable.text!);
       layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
       // Prepare for painting after layout.
       pumpFrame(phase: EnginePhase.compositingBits);
