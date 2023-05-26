@@ -45,7 +45,8 @@ Engine::Engine(
     std::unique_ptr<Animator> animator,
     fml::WeakPtr<IOManager> io_manager,
     const std::shared_ptr<FontCollection>& font_collection,
-    std::unique_ptr<RuntimeController> runtime_controller)
+    std::unique_ptr<RuntimeController> runtime_controller,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)
     : delegate_(delegate),
       settings_(settings),
       animator_(std::move(animator)),
@@ -54,7 +55,8 @@ Engine::Engine(
       image_decoder_(ImageDecoder::Make(settings_,
                                         task_runners,
                                         std::move(image_decoder_task_runner),
-                                        std::move(io_manager))),
+                                        std::move(io_manager),
+                                        gpu_disabled_switch)),
       task_runners_(task_runners),
       weak_factory_(this) {
   pointer_data_dispatcher_ = dispatcher_maker(*this);
@@ -71,7 +73,8 @@ Engine::Engine(Delegate& delegate,
                fml::WeakPtr<IOManager> io_manager,
                fml::RefPtr<SkiaUnrefQueue> unref_queue,
                fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-               std::shared_ptr<VolatilePathTracker> volatile_path_tracker)
+               std::shared_ptr<VolatilePathTracker> volatile_path_tracker,
+               const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)
     : Engine(delegate,
              dispatcher_maker,
              vm.GetConcurrentWorkerTaskRunner(),
@@ -80,7 +83,8 @@ Engine::Engine(Delegate& delegate,
              std::move(animator),
              io_manager,
              std::make_shared<FontCollection>(),
-             nullptr) {
+             nullptr,
+             gpu_disabled_switch) {
   runtime_controller_ = std::make_unique<RuntimeController>(
       *this,                                 // runtime delegate
       &vm,                                   // VM
@@ -112,7 +116,8 @@ std::unique_ptr<Engine> Engine::Spawn(
     std::unique_ptr<Animator> animator,
     const std::string& initial_route,
     const fml::WeakPtr<IOManager>& io_manager,
-    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) const {
   auto result = std::make_unique<Engine>(
       /*delegate=*/delegate,
       /*dispatcher_maker=*/dispatcher_maker,
@@ -123,7 +128,8 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*animator=*/std::move(animator),
       /*io_manager=*/io_manager,
       /*font_collection=*/font_collection_,
-      /*runtime_controller=*/nullptr);
+      /*runtime_controller=*/nullptr,
+      /*gpu_disabled_switch=*/gpu_disabled_switch);
   result->runtime_controller_ = runtime_controller_->Spawn(
       /*p_client=*/*result,
       /*advisory_script_uri=*/settings.advisory_script_uri,

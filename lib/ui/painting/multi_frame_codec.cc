@@ -159,6 +159,7 @@ MultiFrameCodec::State::GetNextFrameImage(
     // without mipmap creation there is no command buffer encoding done.
     return ImageDecoderImpeller::UploadTextureToShared(
         impeller_context, std::make_shared<SkBitmap>(bitmap),
+        std::make_shared<fml::SyncSwitch>(),
         /*create_mips=*/false);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING

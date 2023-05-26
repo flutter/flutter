@@ -162,7 +162,8 @@ TEST_F(EngineTest, Create) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(runtime_controller_));
+        /*runtime_controller=*/std::move(runtime_controller_),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
     EXPECT_TRUE(engine);
   });
 }
@@ -183,7 +184,8 @@ TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
     fml::RefPtr<PlatformMessageResponse> response =
         fml::MakeRefCounted<MockResponse>();
@@ -209,7 +211,8 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRoute) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
     fml::RefPtr<PlatformMessageResponse> response =
         fml::MakeRefCounted<MockResponse>();
@@ -242,7 +245,8 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
     fml::RefPtr<PlatformMessageResponse> response =
         fml::MakeRefCounted<MockResponse>();
@@ -274,10 +278,12 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
-    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                               std::string(), io_manager_, snapshot_delegate_);
+    auto spawn =
+        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
+                      std::string(), io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     EXPECT_EQ(&engine->GetFontCollection(), &spawn->GetFontCollection());
   });
@@ -300,10 +306,12 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
-    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                               "/foo", io_manager_, snapshot_delegate_);
+    auto spawn =
+        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr, "/foo",
+                      io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     ASSERT_EQ("/foo", spawn->InitialRoute());
   });
@@ -332,14 +340,16 @@ TEST_F(EngineTest, SpawnResetsViewportMetrics) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
     auto& old_platform_data = engine->GetRuntimeController()->GetPlatformData();
     EXPECT_EQ(old_platform_data.viewport_metrics.physical_width, kViewWidth);
     EXPECT_EQ(old_platform_data.viewport_metrics.physical_height, kViewHeight);
 
-    auto spawn = engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
-                               std::string(), io_manager_, snapshot_delegate_);
+    auto spawn =
+        engine->Spawn(delegate_, dispatcher_maker_, settings_, nullptr,
+                      std::string(), io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     auto& new_viewport_metrics =
         spawn->GetRuntimeController()->GetPlatformData().viewport_metrics;
@@ -365,14 +375,15 @@ TEST_F(EngineTest, SpawnWithCustomSettings) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
     Settings custom_settings = settings_;
     custom_settings.persistent_isolate_data =
         std::make_shared<fml::DataMapping>("foo");
     auto spawn =
         engine->Spawn(delegate_, dispatcher_maker_, custom_settings, nullptr,
-                      std::string(), io_manager_, snapshot_delegate_);
+                      std::string(), io_manager_, snapshot_delegate_, nullptr);
     EXPECT_TRUE(spawn != nullptr);
     auto new_persistent_isolate_data =
         const_cast<RuntimeController*>(spawn->GetRuntimeController())
@@ -405,7 +416,8 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
-        /*runtime_controller=*/std::move(mock_runtime_controller));
+        /*runtime_controller=*/std::move(mock_runtime_controller),
+        /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
     engine->LoadDartDeferredLibraryError(error_id, error_message, true);
   });
