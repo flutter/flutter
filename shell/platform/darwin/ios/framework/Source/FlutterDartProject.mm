@@ -157,9 +157,15 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   settings.domain_network_policy = "";
 
   // Whether to enable wide gamut colors.
+#if TARGET_OS_SIMULATOR
+  // As of Xcode 14.1, the wide gamut surface pixel formats are not supported by
+  // the simulator.
+  settings.enable_wide_gamut = false;
+#else
   NSNumber* nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
   BOOL enableWideGamut = nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES;
   settings.enable_wide_gamut = enableWideGamut;
+#endif
 
   // TODO(dnfield): We should reverse the order for all these settings so that command line options
   // are preferred to plist settings. https://github.com/flutter/flutter/issues/124049
