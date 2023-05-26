@@ -6,7 +6,7 @@
 'a: accessibility':
   - any:
     - '**/*accessibility*'
-    - '**/*semantics*''
+    - '**/*semantics*'
 
 'a: animation':
   - any:
