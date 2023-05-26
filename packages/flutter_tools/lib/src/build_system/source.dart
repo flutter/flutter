@@ -178,7 +178,7 @@ class SourceVisitor implements ResolvedFiles {
       .getArtifactPath(artifact, platform: platform, mode: mode);
     if (environment.fileSystem.isDirectorySync(path)) {
       sources.addAll(<File>[
-        for (FileSystemEntity entity in environment.fileSystem.directory(path).listSync(recursive: true))
+        for (final FileSystemEntity entity in environment.fileSystem.directory(path).listSync(recursive: true))
           if (entity is File)
             entity,
       ]);
@@ -206,7 +206,7 @@ class SourceVisitor implements ResolvedFiles {
     final FileSystemEntity entity = environment.artifacts.getHostArtifact(artifact);
     if (entity is Directory) {
       sources.addAll(<File>[
-        for (FileSystemEntity entity in entity.listSync(recursive: true))
+        for (final FileSystemEntity entity in entity.listSync(recursive: true))
           if (entity is File)
             entity,
       ]);

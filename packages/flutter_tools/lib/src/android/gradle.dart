@@ -930,7 +930,7 @@ Iterable<String> listApkPaths(
   ];
   if (androidBuildInfo.splitPerAbi) {
     return <String>[
-      for (AndroidArch androidArch in androidBuildInfo.targetArchs)
+      for (final AndroidArch androidArch in androidBuildInfo.targetArchs)
         <String>[
           'app',
           androidArch.archName,

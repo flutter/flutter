@@ -433,7 +433,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       } while (currentStart < endTime!);
       return Timeline.fromJson(<String, Object>{
         'traceEvents': <Object?> [
-          for (Map<String, Object?>? chunk in chunks)
+          for (final Map<String, Object?>? chunk in chunks)
             ...chunk!['traceEvents']! as List<Object?>,
         ],
       });

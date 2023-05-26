@@ -1448,7 +1448,7 @@ class _ContextMenuSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               actions.first,
-              for (Widget action in actions.skip(1))
+              for (final Widget action in actions.skip(1))
                 DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(
