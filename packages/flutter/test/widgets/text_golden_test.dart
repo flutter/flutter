@@ -191,6 +191,7 @@ void main() {
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             backgroundColor: Colors.transparent,
             body: RepaintBoundary(
@@ -616,6 +617,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: RepaintBoundary(
             child: Material(
               child: Container(
@@ -662,6 +664,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: RepaintBoundary(
             child: Material(
               child: Container(
