@@ -24,7 +24,6 @@ class SkwasmRenderer implements Renderer {
     return SkwasmPath.combine(op, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 
-
   @override
   ui.Path copyPath(ui.Path src) {
     return SkwasmPath.from(src as SkwasmPath);

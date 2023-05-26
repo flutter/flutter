@@ -21,9 +21,9 @@ typedef PictureHandle = Pointer<RawPicture>;
 external PictureRecorderHandle pictureRecorderCreate();
 
 @Native<Void Function(PictureRecorderHandle)>(
-  symbol: 'pictureRecorder_destroy',
+  symbol: 'pictureRecorder_dispose',
   isLeaf: true)
-external void pictureRecorderDestroy(PictureRecorderHandle picture);
+external void pictureRecorderDispose(PictureRecorderHandle picture);
 
 @Native<CanvasHandle Function(PictureRecorderHandle, RawRect)>(
   symbol: 'pictureRecorder_beginRecording',

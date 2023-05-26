@@ -16,8 +16,8 @@ typedef PathHandle = Pointer<RawPath>;
 @Native<PathHandle Function()>(symbol: 'path_create', isLeaf: true)
 external PathHandle pathCreate();
 
-@Native<Void Function(PathHandle)>(symbol: 'path_destroy', isLeaf: true)
-external void pathDestroy(PathHandle path);
+@Native<Void Function(PathHandle)>(symbol: 'path_dispose', isLeaf: true)
+external void pathDispose(PathHandle path);
 
 @Native<PathHandle Function(PathHandle)>(symbol: 'path_copy', isLeaf: true)
 external PathHandle pathCopy(PathHandle path);

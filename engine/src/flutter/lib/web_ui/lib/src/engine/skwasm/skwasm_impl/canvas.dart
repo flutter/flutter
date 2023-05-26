@@ -18,9 +18,9 @@ class SkwasmCanvas implements SceneCanvas {
   SkwasmCanvas.fromHandle(this._handle);
   CanvasHandle _handle;
 
-  void delete() {
-    canvasDestroy(_handle);
-  }
+  // Note that we do not need to deal with the finalizer registry here, because
+  // the underlying native skia object is tied directly to the lifetime of the
+  // associated SkPictureRecorder.
 
   @override
   void save() {

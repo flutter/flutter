@@ -3384,45 +3384,6 @@ extension JsConstructorExtension on JsConstructor {
   String get name => _name.toDart;
 }
 
-/// Attaches a weakly referenced object to another object and calls a finalizer
-/// with the latter when weakly referenced object is garbage collected.
-///
-/// We use this to delete Skia objects when their "Ck" wrapper is garbage
-/// collected.
-///
-/// Example sequence of events:
-///
-/// 1. A (CkPaint, SkPaint) pair created.
-/// 2. The paint is used to paint some picture.
-/// 3. CkPaint is dropped by the app.
-/// 4. GC decides to perform a GC cycle and collects CkPaint.
-/// 5. The finalizer function is called with the SkPaint as the sole argument.
-/// 6. We call `delete` on SkPaint.
-@JS('window.FinalizationRegistry')
-@staticInterop
-class SkObjectFinalizationRegistry {}
-
-SkObjectFinalizationRegistry createSkObjectFinalizationRegistry(JSFunction cleanup) {
-  return js_util.callConstructor(
-    _finalizationRegistryConstructor!.toObjectShallow,
-    <Object>[cleanup],
-  );
-}
-
-extension SkObjectFinalizationRegistryExtension on SkObjectFinalizationRegistry {
-  @JS('register')
-  external JSVoid _register(JSAny ckObject, JSAny skObject);
-  void register(Object ckObject, Object skObject) =>
-      _register(ckObject.toJSAnyShallow, skObject.toJSAnyShallow);
-}
-
-@JS('window.FinalizationRegistry')
-external JSAny? get _finalizationRegistryConstructor;
-
-/// Whether the current browser supports `FinalizationRegistry`.
-bool browserSupportsFinalizationRegistry =
-    _finalizationRegistryConstructor != null;
-
 @JS()
 @staticInterop
 class SkData {}
