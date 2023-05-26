@@ -1756,21 +1756,12 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
     }
     child!.layout(constraints, parentUsesSize: true);
     final SliverGeometry childLayoutGeometry = child!.geometry!;
-    geometry = SliverGeometry(
-      scrollExtent: childLayoutGeometry.scrollExtent - childLayoutGeometry.maxScrollObstructionExtent,
-      paintExtent: childLayoutGeometry.paintExtent,
-      paintOrigin: childLayoutGeometry.paintOrigin,
-      layoutExtent: math.max(0, childLayoutGeometry.paintExtent - childLayoutGeometry.maxScrollObstructionExtent),
-      maxPaintExtent: childLayoutGeometry.maxPaintExtent,
-      maxScrollObstructionExtent: childLayoutGeometry.maxScrollObstructionExtent,
-      hitTestExtent: childLayoutGeometry.hitTestExtent,
-      visible: childLayoutGeometry.visible,
-      hasVisualOverflow: childLayoutGeometry.hasVisualOverflow,
-      scrollOffsetCorrection: childLayoutGeometry.scrollOffsetCorrection,
+    geometry = childLayoutGeometry.copyWith(
+      layoutExtent: math.max(0, childLayoutGeometry.paintExtent),
     );
     handle._setExtents(
-      childLayoutGeometry.maxScrollObstructionExtent,
-      childLayoutGeometry.maxScrollObstructionExtent,
+      geometry!.layoutExtent - childLayoutGeometry.maxScrollObstructionExtent,
+      geometry!.scrollExtent,
     );
   }
 
