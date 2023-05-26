@@ -4726,7 +4726,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const SliverAppBar.large(
-                  title: Text(title),
+                  title: Text(title, maxLines: 1),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -4771,7 +4771,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const SliverAppBar.medium(
-                  title: Text(title),
+                  title: Text(title, maxLines: 1),
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -4820,7 +4820,7 @@ void main() {
             child: CustomScrollView(
               slivers: <Widget>[
                 const SliverAppBar.large(
-                  title: Text(title),
+                  title: Text(title, maxLines: 1),
                 ),
                 SliverToBoxAdapter(
                   child: Container(

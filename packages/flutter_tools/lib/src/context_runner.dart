@@ -14,6 +14,7 @@ import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
 import 'android/gradle.dart';
 import 'android/gradle_utils.dart';
+import 'android/java.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -97,11 +98,11 @@ Future<T> runInContext<T>(
         androidStudio: globals.androidStudio,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
-        operatingSystemUtils: globals.os,
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
         androidStudio: globals.androidStudio,
+        java: globals.java,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -216,6 +217,7 @@ Future<T> runInContext<T>(
       Doctor: () => Doctor(logger: globals.logger),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
+        java: globals.java,
         androidSdk: globals.androidSdk,
         processManager: globals.processManager,
         logger: globals.logger,
@@ -252,6 +254,13 @@ Future<T> runInContext<T>(
         featureFlags: featureFlags,
         xcode: globals.xcode!,
         platform: globals.platform,
+      ),
+      Java: () => Java.find(
+        androidStudio: globals.androidStudio,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        platform: globals.platform,
+        processManager: globals.processManager
       ),
       LocalEngineLocator: () => LocalEngineLocator(
         userMessages: userMessages,
