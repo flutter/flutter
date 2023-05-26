@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -139,7 +140,11 @@ void main() {
       // Test help text position.
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(helpTextBottomLeft.dx, 72.0);
-      expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0);
+      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+      // A bug in the HTML renderer and/or Chrome 96+ causes a
+      // discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+      expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0 + (hasIssue99933 ? 1.0 : 0.0));
 
       // Test the header position.
       final Offset firstDateHeaderTopLeft = tester.getTopLeft(firstDateHeaderText);
