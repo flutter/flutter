@@ -1871,8 +1871,8 @@ void main() {
       await tester.pump();
       expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9937155332430823));
 
-      // Scroll should not have translated the box such that the box is still at the
-      // center of the InteractiveViewer
+      // Scroll should not have translated the box, so the box should still be at the
+      // center of the InteractiveViewer.
       Vector3 translation = transformationController.value.getTranslation();
       expect(translation.x, moreOrLessEquals(-99.37155332430822));
       expect(translation.y, moreOrLessEquals(-99.37155332430822));
@@ -1881,6 +1881,8 @@ void main() {
       scrollAmnt = const Offset(-138, 0);
       await tester.sendEventToBinding(pointer.scroll(scrollAmnt));
       await tester.pump();
+
+      // Horizontal scroll should not cause a scale change.
       expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9937155332430823));
 
       // Horizontal scroll should not have changed the translation of the box.
