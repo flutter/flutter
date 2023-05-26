@@ -5697,8 +5697,11 @@ void main() {
           return false;
         }
         final Rect clipRect = arguments[0] as Rect;
-        // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
-        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 133.0, 16.0)));
+        // _kFinalLabelScale = 0.75
+        const double width = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+          ? 100 / 0.75
+          : 133.0;
+        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
         return true;
       }),
     );
