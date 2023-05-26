@@ -103,7 +103,12 @@ impeller_component("impeller_unittests") {
   }
 
   if (glfw_vulkan_library != "") {
-    deps += [ "//third_party/swiftshader" ]
+    deps += [
+      "//third_party/swiftshader",
+      "//third_party/vulkan-deps/vulkan-loader/src:libvulkan",
+      "//third_party/vulkan_validation_layers",
+      "//third_party/vulkan_validation_layers:vulkan_gen_json_files",
+    ]
   }
 
   if (impeller_enable_compute) {
