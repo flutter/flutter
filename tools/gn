@@ -594,7 +594,8 @@ def to_gn_args(args):
       gn_args['impeller_malioc_path'] = malioc_path
 
   if args.use_glfw_swiftshader:
-    gn_args['glfw_vulkan_library'] = r'\"libvk_swiftshader.dylib\"'
+    if get_host_os() == 'mac':
+      gn_args['glfw_vulkan_library'] = r'\"libvulkan.dylib\"'
 
   # ANGLE is exclusively used for:
   #  - Windows at runtime
