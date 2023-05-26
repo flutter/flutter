@@ -218,7 +218,7 @@ String generateTestEntrypoint({
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api//backend.dart';
+  import 'package:test_api/backend.dart';
 
   Future<void> main() async {
     ui.debugEmulateFlutterTesterEnvironment = true;
