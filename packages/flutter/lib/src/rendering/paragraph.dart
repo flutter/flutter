@@ -47,7 +47,7 @@ class PlaceholderSpanIndexSemanticsTag extends SemanticsTag {
 }
 
 /// Parent data used by [RenderParagraph] and [RenderEditable] to annotate
-/// inline widgets with.
+/// inline contents (such as [WidgetSpan]s) with.
 class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox> {
   /// The offset at which to paint the child in the parent's coordinate system.
   ///
@@ -57,7 +57,7 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
   Offset? get offset => _offset;
   Offset? _offset;
 
-  /// The [WidgetSpan] associated with this inline widget.
+  /// The [PlaceholderSpan] associated with this render child.
   ///
   /// This field is usually set by a [ParentDataWidget], and is typically not
   /// null when `performLayout` is called.
@@ -75,17 +75,17 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
 }
 
 /// A mixin that provides useful default behaviors for text [RenderBox]es
-/// ([RenderParagraph] and [RenderEditable] for example) with inline widget
+/// ([RenderParagraph] and [RenderEditable] for example) with inline content
 /// children managed by the [ContainerRenderObjectMixin] mixin.
 ///
 /// This mixin assumes every child managed by the [ContainerRenderObjectMixin]
-/// mixin corresponds to a [WidgetSpan], and they are organized in logical
-/// order of the text (the order each [WidgetSpan] is encountered when the user
-/// reads the text).
+/// mixin corresponds to a [PlaceholderSpan], and they are organized in logical
+/// order of the text (the order each [PlaceholderSpan] is encountered when the
+/// user reads the text).
 ///
 /// To use this mixin in a [RenderBox] class:
 ///
-///  * Call [layoutInlineWidgets] in the `performLayout` and `computeDryLayout`
+///  * Call [layoutInlineChildren] in the `performLayout` and `computeDryLayout`
 ///    implementation, and during intrinsic size calculations, to get the size
 ///    information of the inline widgets as a `List` of `PlaceholderDimensions`.
 ///    Determine the positioning of the inline widgets (which is usually done by
@@ -97,16 +97,16 @@ class TextParentData extends ParentData with ContainerParentDataMixin<RenderBox>
 ///  * Implement [RenderBox.applyPaintTransform], optionally with
 ///    [defaultApplyPaintTransform].
 ///
-///  * Call [paintInlineWidgets] in [RenderBox.paint] to paint the inline widgets.
+///  * Call [paintInlineChildren] in [RenderBox.paint] to paint the inline widgets.
 ///
-///  * Call [hitTestInlineWidgets] in [RenderBox.hitTestChildren] to hit test the
+///  * Call [hitTestInlineChildren] in [RenderBox.hitTestChildren] to hit test the
 ///    inline widgets.
 ///
 /// See also:
 ///
 ///  * [WidgetSpan.extractFromInlineSpan], a helper function for extracting
 ///    [WidgetSpan]s from an [InlineSpan] tree.
-mixin RenderInlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
+mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectMixin<RenderBox, TextParentData> {
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! TextParentData) {
@@ -135,29 +135,28 @@ mixin RenderInlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMix
         );
   }
 
-  /// Computes the layout for every inline widget children using the given
-  /// `layoutChild` function and the `maxWidth` constraint.
+  /// Computes the layout for every inline child using the given `layoutChild`
+  /// function and the `maxWidth` constraint.
   ///
   /// Returns a list of [PlaceholderDimensions], representing the layout results
   /// for each child managed by the [ContainerRenderObjectMixin] mixin.
   ///
   /// Since this method does not impose a maximum height constraint on the
-  /// inline widget children, some children may become taller than this
-  /// [RenderBox].
+  /// inline children, some children may become taller than this [RenderBox].
   ///
   /// See also:
   ///
   ///  * [TextPainter.setPlaceholderDimensions], the method that usually takes
   ///    the layout results from this method as the input.
   @protected
-  List<PlaceholderDimensions> layoutInlineWidgets(double maxWidth, ChildLayouter layoutChild) {
+  List<PlaceholderDimensions> layoutInlineChildren(double maxWidth, ChildLayouter layoutChild) {
     return <PlaceholderDimensions>[
       for (RenderBox? child = firstChild; child != null; child = childAfter(child))
         _layoutChild(child, maxWidth, layoutChild),
     ];
   }
 
-  /// Positions each inline widget according to the coordinates provided in the
+  /// Positions each inline child according to the coordinates provided in the
   /// `boxes` list.
   ///
   /// The `boxes` list must be in logical order, which is the order each child
@@ -204,12 +203,12 @@ mixin RenderInlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMix
     }
   }
 
-  /// Paints each inline widget child.
+  /// Paints each inline child.
   ///
   /// Render children whose [TextParentData.offset] is null will be skipped by
   /// this method.
   @protected
-  void paintInlineWidgets(PaintingContext context, Offset offset) {
+  void paintInlineChildren(PaintingContext context, Offset offset) {
     RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData childParentData = child.parentData! as TextParentData;
@@ -222,12 +221,12 @@ mixin RenderInlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMix
     }
   }
 
-  /// Performs a hit test on each inline widget child.
+  /// Performs a hit test on each inline child.
   ///
   /// Render children whose [TextParentData.offset] is null will be skipped by
   /// this method.
   @protected
-  bool hitTestInlineWidgets(BoxHitTestResult result, Offset position) {
+  bool hitTestInlineChildren(BoxHitTestResult result, Offset position) {
     RenderBox? child = firstChild;
     while (child != null) {
       final TextParentData childParentData = child.parentData! as TextParentData;
@@ -250,7 +249,7 @@ mixin RenderInlineWidgetContainerDefaults on RenderBox, ContainerRenderObjectMix
 }
 
 /// A render object that displays a paragraph of text.
-class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineWidgetContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
+class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineChildrenContainerDefaults, RelayoutWhenSystemFontsChangeMixin {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -603,7 +602,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
       double.infinity,
       (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
     ));
@@ -616,7 +615,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(
       double.infinity,
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line. Therefore, using 0.0 as a dummy for the height.
@@ -630,7 +629,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(width, ChildLayoutHelper.dryLayoutChild));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
@@ -696,14 +695,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // Hit test text spans.
     final TextPosition textPosition = _textPainter.getPositionForOffset(position);
     final Object? span = _textPainter.text!.getSpanForPosition(textPosition);
     if (span is HitTestTarget) {
       result.add(HitTestEntry(span));
       return true;
     }
-    return hitTestInlineWidgets(result, position);
+    return hitTestInlineChildren(result, position);
   }
 
   bool _needsClipping = false;
@@ -750,7 +748,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(layoutInlineWidgets(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     return constraints.constrain(_textPainter.size);
   }
@@ -758,7 +756,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineWidgets(constraints.maxWidth, ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild);
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
@@ -869,7 +867,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _textPainter.paint(context.canvas, offset);
 
-    paintInlineWidgets(context, offset);
+    paintInlineChildren(context, offset);
 
     if (_needsClipping) {
       if (_overflowShader != null) {

@@ -1537,7 +1537,7 @@ void main() {
     expect(paragraph.getMinIntrinsicWidth(0.0), 200);
   });
 
-  testWidgets('can compute IntrinsicHeight for widget span with text scaling', (WidgetTester tester) async {
+  testWidgets('can compute intrinsic width and height for widget span with text scaling', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59316
     const Key textKey = Key('RichText');
     Widget textWithNestedInlineSpans({ required double textScaleFactor, required double screenWidth }) {

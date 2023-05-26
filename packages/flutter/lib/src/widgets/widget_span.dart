@@ -90,9 +90,11 @@ class WidgetSpan extends PlaceholderSpan {
   /// Helper function for extracting [WidgetSpan]s in preorder, from the given
   /// [InlineSpan] as a list of widgets.
   ///
-  /// The extracted widgets will be annotated with necessary semantics
-  /// information. This function is used by [EditableText] and [RichText] so
-  /// calling it directly is rarely necessary.
+  /// The `textScaleFactor` is the the number of font pixels for each logical
+  /// pixel.
+  ///
+  /// This function is used by [EditableText] and [RichText] so calling it
+  /// directly is rarely necessary.
   static List<Widget> extractFromInlineSpan(InlineSpan span, double textScaleFactor) {
     final List<Widget> widgets = <Widget>[];
     int index = 0;
@@ -265,7 +267,7 @@ class _WidgetSpanParentData extends ParentDataWidget<TextParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => RenderInlineWidgetContainerDefaults;
+  Type get debugTypicalAncestorWidgetClass => RenderInlineChildrenContainerDefaults;
 }
 
 // A RenderObjectWidget that automatically applies text scaling on inline
@@ -385,13 +387,20 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
   void paint(PaintingContext context, Offset offset) {
     final RenderBox? child = this.child;
     if (child == null) {
+      layer = null;
       return;
     }
-    context.pushTransform(
+    if (scale == 1.0) {
+      context.paintChild(child, offset);
+      layer = null;
+      return;
+    }
+    layer = context.pushTransform(
       needsCompositing,
       offset,
       Matrix4.diagonal3Values(scale, scale, 1.0),
       (PaintingContext context, Offset offset) => context.paintChild(child, offset),
+      oldLayer: layer as TransformLayer?
     );
   }
 
