@@ -87,34 +87,19 @@
                                                                 @"composingExtent" : @(-1),
                                                               }];
 
-  NSDictionary* expectedState = @{
-    @"selectionBase" : @(0),
-    @"selectionExtent" : @(0),
-    @"selectionAffinity" : @"TextAffinity.upstream",
-    @"selectionIsDirectional" : @(NO),
-    @"composingBase" : @(-1),
-    @"composingExtent" : @(-1),
-    @"text" : @"Text",
-  };
-
-  NSData* updateCall = [[FlutterJSONMethodCodec sharedInstance]
-      encodeMethodCall:[FlutterMethodCall
-                           methodCallWithMethodName:@"TextInputClient.updateEditingState"
-                                          arguments:@[ @(1), expectedState ]]];
-
-  OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-
   [plugin handleMethodCall:call
                     result:^(id){
                     }];
 
-  @try {
-    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-  } @catch (...) {
-    return false;
-  }
+  // Verify editing state was set.
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Text");
+  EXPECT_STREQ([editingState[@"selectionAffinity"] UTF8String], "TextAffinity.upstream");
+  EXPECT_FALSE([editingState[@"selectionIsDirectional"] boolValue]);
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 0);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 0);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], -1);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], -1);
   return true;
 }
 
@@ -298,30 +283,15 @@
                     result:^(id){
                     }];
 
-  NSDictionary* expectedState = @{
-    @"selectionBase" : @(2),
-    @"selectionExtent" : @(2),
-    @"selectionAffinity" : @"TextAffinity.upstream",
-    @"selectionIsDirectional" : @(NO),
-    @"composingBase" : @(-1),
-    @"composingExtent" : @(-1),
-    @"text" : @"Te",
-  };
-
-  NSData* updateCall = [[FlutterJSONMethodCodec sharedInstance]
-      encodeMethodCall:[FlutterMethodCall
-                           methodCallWithMethodName:@"TextInputClient.updateEditingState"
-                                          arguments:@[ @(1), expectedState ]]];
-
-  OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-
-  @try {
-    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-  } @catch (...) {
-    return false;
-  }
+  // Verify editing state was set.
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Te");
+  EXPECT_STREQ([editingState[@"selectionAffinity"] UTF8String], "TextAffinity.upstream");
+  EXPECT_FALSE([editingState[@"selectionIsDirectional"] boolValue]);
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 2);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 2);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], -1);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], -1);
   return true;
 }
 
@@ -902,20 +872,15 @@
                     result:^(id){
                     }];
 
-  // The setEditingState call is ACKed back to the framework.
-  @try {
-    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock
-            sendOnChannel:@"flutter/textinput"
-                  message:[OCMArg checkWithBlock:^BOOL(NSData* callData) {
-                    FlutterMethodCall* call =
-                        [[FlutterJSONMethodCodec sharedInstance] decodeMethodCall:callData];
-                    return [[call method]
-                        isEqualToString:@"TextInputClient.updateEditingStateWithDeltas"];
-                  }]]);
-  } @catch (...) {
-    return false;
-  }
+  // Verify editing state was set.
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Text");
+  EXPECT_STREQ([editingState[@"selectionAffinity"] UTF8String], "TextAffinity.upstream");
+  EXPECT_FALSE([editingState[@"selectionIsDirectional"] boolValue]);
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 0);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 0);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], -1);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], -1);
   return true;
 }
 
@@ -1505,58 +1470,31 @@
                                                                 @"composingExtent" : @(-1),
                                                               }];
 
-  NSDictionary* expectedState = @{
-    @"selectionBase" : @(4),
-    @"selectionExtent" : @(4),
-    @"selectionAffinity" : @"TextAffinity.upstream",
-    @"selectionIsDirectional" : @(NO),
-    @"composingBase" : @(-1),
-    @"composingExtent" : @(-1),
-    @"text" : @"Text",
-  };
-
-  NSData* updateCall = [[FlutterJSONMethodCodec sharedInstance]
-      encodeMethodCall:[FlutterMethodCall
-                           methodCallWithMethodName:@"TextInputClient.updateEditingState"
-                                          arguments:@[ @(1), expectedState ]]];
-
-  OCMExpect(  // NOLINT(google-objc-avoid-throwing-exception)
-      [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-
   [plugin handleMethodCall:call
                     result:^(id){
                     }];
 
-  @try {
-    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-  } @catch (...) {
-    return false;
-  }
+  // Verify editing state was set.
+  NSDictionary* editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Text");
+  EXPECT_STREQ([editingState[@"selectionAffinity"] UTF8String], "TextAffinity.upstream");
+  EXPECT_FALSE([editingState[@"selectionIsDirectional"] boolValue]);
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 4);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 4);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], -1);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], -1);
 
   [plugin doCommandBySelector:@selector(insertNewline:)];
 
-  NSDictionary* updatedState = @{
-    @"selectionBase" : @(5),
-    @"selectionExtent" : @(5),
-    @"selectionAffinity" : @"TextAffinity.upstream",
-    @"selectionIsDirectional" : @(NO),
-    @"composingBase" : @(-1),
-    @"composingExtent" : @(-1),
-    @"text" : @"Text\n",
-  };
-
-  updateCall = [[FlutterJSONMethodCodec sharedInstance]
-      encodeMethodCall:[FlutterMethodCall
-                           methodCallWithMethodName:@"TextInputClient.updateEditingState"
-                                          arguments:@[ @(1), updatedState ]]];
-
-  @try {
-    OCMVerify(  // NOLINT(google-objc-avoid-throwing-exception)
-        [binaryMessengerMock sendOnChannel:@"flutter/textinput" message:updateCall]);
-  } @catch (...) {
-    return false;
-  }
+  // Verify editing state was set.
+  editingState = [plugin editingState];
+  EXPECT_STREQ([editingState[@"text"] UTF8String], "Text\n");
+  EXPECT_STREQ([editingState[@"selectionAffinity"] UTF8String], "TextAffinity.upstream");
+  EXPECT_FALSE([editingState[@"selectionIsDirectional"] boolValue]);
+  EXPECT_EQ([editingState[@"selectionBase"] intValue], 5);
+  EXPECT_EQ([editingState[@"selectionExtent"] intValue], 5);
+  EXPECT_EQ([editingState[@"composingBase"] intValue], -1);
+  EXPECT_EQ([editingState[@"composingExtent"] intValue], -1);
 
   return true;
 }
