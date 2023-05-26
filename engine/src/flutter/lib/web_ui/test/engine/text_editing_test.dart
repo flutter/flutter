@@ -2176,6 +2176,47 @@ Future<void> testMain() async {
       expect(autofillForm, isNull);
     });
 
+    test('placeForm() should place element in correct position', () {
+      final List<dynamic> fields = createFieldValues(<String>[
+        'email',
+        'username',
+        'password',
+      ], <String>[
+        'field1',
+        'field2',
+        'field3'
+      ]);
+      final EngineAutofillForm autofillForm =
+          EngineAutofillForm.fromFrameworkMessage(
+              createAutofillInfo('email', 'field1'), fields)!;
+
+      expect(autofillForm.elements, hasLength(2));
+
+      List<DomHTMLInputElement> formChildNodes =
+          autofillForm.formElement.childNodes.toList() as List<DomHTMLInputElement>;
+
+      // Only username, password, submit nodes are created
+      expect(formChildNodes, hasLength(3));
+      expect(formChildNodes[0].name, 'username');
+      expect(formChildNodes[1].name, 'current-password');
+      expect(formChildNodes[2].type, 'submit');
+      // insertion point for email should be before username
+      expect(autofillForm.insertionReferenceNode, formChildNodes[0]);
+
+      final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
+      testInputElement.name = 'email';
+      autofillForm.placeForm(testInputElement);
+
+      formChildNodes = autofillForm.formElement.childNodes.toList()
+          as List<DomHTMLInputElement>;
+      // email node should be placed before username
+      expect(formChildNodes, hasLength(4));
+      expect(formChildNodes[0].name, 'email');
+      expect(formChildNodes[1].name, 'username');
+      expect(formChildNodes[2].name, 'current-password');
+      expect(formChildNodes[3].type, 'submit');
+    });
+
     tearDown(() {
       clearForms();
     });
