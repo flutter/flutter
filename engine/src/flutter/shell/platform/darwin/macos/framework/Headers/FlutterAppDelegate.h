@@ -7,10 +7,11 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "FlutterAppLifecycleDelegate.h"
 #import "FlutterMacros.h"
 
 /**
- * `NSApplicationDelegate` subclass for simple apps that want default behavior.
+ * |NSApplicationDelegate| subclass for simple apps that want default behavior.
  *
  * This class implements the following behaviors:
  *   * Updates the application name of items in the application menu to match the name in
@@ -33,10 +34,22 @@ FLUTTER_DARWIN_EXPORT
 @property(weak, nonatomic) IBOutlet NSMenu* applicationMenu;
 
 /**
- * The primary application window containing a FlutterViewController. This is primarily intended
- * for use in single-window applications.
+ * The primary application window containing a FlutterViewController. This is
+ * primarily intended for use in single-window applications.
  */
 @property(weak, nonatomic) IBOutlet NSWindow* mainFlutterWindow;
+
+/**
+ * Adds an object implementing |FlutterAppLifecycleDelegate| to the list of
+ * delegates to be informed of application lifecycle events.
+ */
+- (void)addApplicationLifecycleDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate;
+
+/**
+ * Removes an object implementing |FlutterAppLifecycleDelegate| to the list of
+ * delegates to be informed of application lifecycle events.
+ */
+- (void)removeApplicationLifecycleDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate;
 
 @end
 

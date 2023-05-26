@@ -42,6 +42,9 @@ struct _FlView {
   // Pointer button state recorded for sending status updates.
   int64_t button_state;
 
+  // Current state information for the window associated with this view.
+  GdkWindowState window_state;
+
   // Flutter system channel handlers.
   FlAccessibilityPlugin* accessibility_plugin;
   FlKeyboardManager* keyboard_manager;
@@ -59,7 +62,9 @@ struct _FlView {
   /* FlKeyboardViewDelegate related properties */
   KeyboardLayoutNotifier keyboard_layout_notifier;
   GdkKeymap* keymap;
-  gulong keymap_keys_changed_cb_id;  // Signal connection ID.
+  gulong keymap_keys_changed_cb_id;  // Signal connection ID for
+                                     // keymap-keys-changed
+  gulong window_state_cb_id;  // Signal connection ID for window-state-changed
 };
 
 enum { kPropFlutterProject = 1, kPropLast };
@@ -235,6 +240,8 @@ static void on_pre_engine_restart_cb(FlEngine* engine, gpointer user_data) {
   g_clear_object(&self->scrolling_manager);
   init_keyboard(self);
   init_scrolling(self);
+  self->window_state =
+      gdk_window_get_state(gtk_widget_get_window(GTK_WIDGET(self)));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.
@@ -480,12 +487,42 @@ static void gesture_zoom_end_cb(GtkGestureZoom* gesture,
   fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
 }
 
+static gboolean window_state_event_cb(GtkWidget* widget,
+                                      GdkEvent* event,
+                                      gpointer user_data) {
+  g_return_val_if_fail(FL_IS_VIEW(user_data), FALSE);
+  g_return_val_if_fail(FL_IS_ENGINE(FL_VIEW(user_data)->engine), FALSE);
+  FlView* self = FL_VIEW(user_data);
+  GdkWindowState state = event->window_state.new_window_state;
+  GdkWindowState previous_state = self->window_state;
+  self->window_state = state;
+  bool was_visible = !((previous_state & GDK_WINDOW_STATE_WITHDRAWN) ||
+                       (previous_state & GDK_WINDOW_STATE_ICONIFIED));
+  bool is_visible = !((state & GDK_WINDOW_STATE_WITHDRAWN) ||
+                      (state & GDK_WINDOW_STATE_ICONIFIED));
+  bool was_focused = (previous_state & GDK_WINDOW_STATE_FOCUSED);
+  bool is_focused = (state & GDK_WINDOW_STATE_FOCUSED);
+  if (was_visible != is_visible || was_focused != is_focused) {
+    if (self->engine != nullptr) {
+      fl_engine_send_window_state_event(FL_ENGINE(self->engine), is_visible,
+                                        is_focused);
+    }
+  }
+  return FALSE;
+}
+
 static void realize_cb(GtkWidget* widget) {
   FlView* self = FL_VIEW(widget);
   g_autoptr(GError) error = nullptr;
 
   // Handle requests by the user to close the application.
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
+
+  // Listen to window state changes.
+  self->window_state_cb_id =
+      g_signal_connect(toplevel_window, "window-state-event",
+                       G_CALLBACK(window_state_event_cb), self);
+
   g_signal_connect(toplevel_window, "delete-event",
                    G_CALLBACK(window_delete_event_cb), self);
 
@@ -624,6 +661,12 @@ static void fl_view_dispose(GObject* object) {
                                                 nullptr);
   }
 
+  if (self->window_state_cb_id != 0) {
+    GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
+    g_signal_handler_disconnect(toplevel_window, self->window_state_cb_id);
+    self->window_state_cb_id = 0;
+  }
+
   g_clear_object(&self->project);
   g_clear_object(&self->renderer);
   g_clear_object(&self->engine);
@@ -683,6 +726,8 @@ static void fl_view_class_init(FlViewClass* klass) {
 
 static void fl_view_init(FlView* self) {
   gtk_widget_set_can_focus(GTK_WIDGET(self), TRUE);
+  self->window_state = gdk_window_get_state(
+      gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self))));
 }
 
 G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {

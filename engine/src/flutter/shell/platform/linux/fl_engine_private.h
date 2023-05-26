@@ -168,6 +168,18 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
                                          double pixel_ratio);
 
 /**
+ * fl_engine_send_window_state_event:
+ * @engine: an #FlEngine.
+ * @visible: whether the window is currently visible or not.
+ * @focused: whether the window is currently focused or not.
+ *
+ * Sends a window state event to the engine.
+ */
+void fl_engine_send_window_state_event(FlEngine* engine,
+                                       gboolean visible,
+                                       gboolean focused);
+
+/**
  * fl_engine_send_mouse_pointer_event:
  * @engine: an #FlEngine.
  * @phase: mouse phase.

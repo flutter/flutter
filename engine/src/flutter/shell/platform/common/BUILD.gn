@@ -58,7 +58,10 @@ source_set("common_cpp_input") {
 }
 
 source_set("common_cpp_enums") {
-  public = [ "platform_provided_menu.h" ]
+  public = [
+    "app_lifecycle_state.h",
+    "platform_provided_menu.h",
+  ]
 
   public_configs = [
     "//flutter:config",
