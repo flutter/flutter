@@ -385,10 +385,13 @@ static bool Bind(PassBindingsCache& pass,
   }
 
   if (texture.NeedsMipmapGeneration()) {
+    // TODO(127697): generate mips when the GPU is available on iOS.
+#if !FML_OS_IOS
     VALIDATION_LOG
         << "Texture at binding index " << bind_index
         << " has a mip count > 1, but the mipmap has not been generated.";
     return false;
+#endif  // !FML_OS_IOS
   }
 
   return pass.SetTexture(stage, bind_index,

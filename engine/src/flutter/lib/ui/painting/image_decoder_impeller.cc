@@ -80,9 +80,11 @@ ImageDecoderImpeller::ImageDecoderImpeller(
     const TaskRunners& runners,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     const fml::WeakPtr<IOManager>& io_manager,
-    bool supports_wide_gamut)
+    bool supports_wide_gamut,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)
     : ImageDecoder(runners, std::move(concurrent_task_runner), io_manager),
-      supports_wide_gamut_(supports_wide_gamut) {
+      supports_wide_gamut_(supports_wide_gamut),
+      gpu_disabled_switch_(gpu_disabled_switch) {
   std::promise<std::shared_ptr<impeller::Context>> context_promise;
   context_ = context_promise.get_future();
   runners_.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
@@ -246,18 +248,11 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
                           .image_info = scaled_bitmap->info()};
 }
 
-std::pair<sk_sp<DlImage>, std::string>
-ImageDecoderImpeller::UploadTextureToPrivate(
+/// Only call this method if the GPU is available.
+static std::pair<sk_sp<DlImage>, std::string> UnsafeUploadTextureToPrivate(
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info) {
-  TRACE_EVENT0("impeller", __FUNCTION__);
-  if (!context) {
-    return std::make_pair(nullptr, "No Impeller context is available");
-  }
-  if (!buffer) {
-    return std::make_pair(nullptr, "No Impeller device buffer is available");
-  }
   const auto pixel_format =
       impeller::skia_conversions::ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
@@ -319,9 +314,39 @@ ImageDecoderImpeller::UploadTextureToPrivate(
 }
 
 std::pair<sk_sp<DlImage>, std::string>
+ImageDecoderImpeller::UploadTextureToPrivate(
+    const std::shared_ptr<impeller::Context>& context,
+    const std::shared_ptr<impeller::DeviceBuffer>& buffer,
+    const SkImageInfo& image_info,
+    std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
+  if (!context) {
+    return std::make_pair(nullptr, "No Impeller context is available");
+  }
+  if (!buffer) {
+    return std::make_pair(nullptr, "No Impeller device buffer is available");
+  }
+
+  std::pair<sk_sp<DlImage>, std::string> result;
+  gpu_disabled_switch->Execute(
+      fml::SyncSwitch::Handlers()
+          .SetIfFalse([&result, context, buffer, image_info] {
+            result = UnsafeUploadTextureToPrivate(context, buffer, image_info);
+          })
+          .SetIfTrue([&result, context, bitmap, gpu_disabled_switch] {
+            // create_mips is false because we already know the GPU is disabled.
+            result = UploadTextureToShared(context, bitmap, gpu_disabled_switch,
+                                           /*create_mips=*/false);
+          }));
+  return result;
+}
+
+std::pair<sk_sp<DlImage>, std::string>
 ImageDecoderImpeller::UploadTextureToShared(
     const std::shared_ptr<impeller::Context>& context,
     std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
     bool create_mips) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
@@ -370,32 +395,40 @@ ImageDecoderImpeller::UploadTextureToShared(
   texture->SetLabel(impeller::SPrintF("ui.Image(%p)", texture.get()).c_str());
 
   if (texture_descriptor.mip_count > 1u && create_mips) {
-    auto command_buffer = context->CreateCommandBuffer();
-    if (!command_buffer) {
-      std::string decode_error(
-          "Could not create command buffer for mipmap generation.");
-      FML_DLOG(ERROR) << decode_error;
-      return std::make_pair(nullptr, decode_error);
-    }
-    command_buffer->SetLabel("Mipmap Command Buffer");
+    std::optional<std::string> decode_error;
 
-    auto blit_pass = command_buffer->CreateBlitPass();
-    if (!blit_pass) {
-      std::string decode_error(
-          "Could not create blit pass for mipmap generation.");
-      FML_DLOG(ERROR) << decode_error;
-      return std::make_pair(nullptr, decode_error);
-    }
-    blit_pass->SetLabel("Mipmap Blit Pass");
-    blit_pass->GenerateMipmap(texture);
+    // The only platform that needs mipmapping unconditionally is GL.
+    // GL based platforms never disable GPU access.
+    // This is only really needed for iOS.
+    gpu_disabled_switch->Execute(fml::SyncSwitch::Handlers().SetIfFalse(
+        [context, &texture, &decode_error] {
+          auto command_buffer = context->CreateCommandBuffer();
+          if (!command_buffer) {
+            decode_error =
+                "Could not create command buffer for mipmap generation.";
+            return;
+          }
+          command_buffer->SetLabel("Mipmap Command Buffer");
 
-    blit_pass->EncodeCommands(context->GetResourceAllocator());
-    if (!command_buffer->SubmitCommands()) {
-      std::string decode_error("Failed to submit blit pass command buffer.");
-      FML_DLOG(ERROR) << decode_error;
-      return std::make_pair(nullptr, decode_error);
+          auto blit_pass = command_buffer->CreateBlitPass();
+          if (!blit_pass) {
+            decode_error = "Could not create blit pass for mipmap generation.";
+            return;
+          }
+          blit_pass->SetLabel("Mipmap Blit Pass");
+          blit_pass->GenerateMipmap(texture);
+
+          blit_pass->EncodeCommands(context->GetResourceAllocator());
+          if (!command_buffer->SubmitCommands()) {
+            decode_error = "Failed to submit blit pass command buffer.";
+            return;
+          }
+          command_buffer->WaitUntilScheduled();
+        }));
+    if (decode_error.has_value()) {
+      FML_DLOG(ERROR) << decode_error.value();
+      return std::make_pair(nullptr, decode_error.value());
     }
-    command_buffer->WaitUntilScheduled();
   }
 
   return std::make_pair(impeller::DlImageImpeller::Make(std::move(texture)),
@@ -429,8 +462,8 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
        target_size = SkISize::Make(target_width, target_height),  //
        io_runner = runners_.GetIOTaskRunner(),                    //
        result,
-       supports_wide_gamut = supports_wide_gamut_  //
-  ]() {
+       supports_wide_gamut = supports_wide_gamut_,  //
+       gpu_disabled_switch = gpu_disabled_switch_]() {
         if (!context) {
           result(nullptr, "No Impeller context is available");
           return;
@@ -446,24 +479,28 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
           result(nullptr, bitmap_result.decode_error);
           return;
         }
-        auto upload_texture_and_invoke_result = [result, context,
-                                                 bitmap_result]() {
-          // TODO(jonahwilliams): remove ifdef once blit from buffer to
-          // texture is implemented on other platforms.
+        auto upload_texture_and_invoke_result = [result, context, bitmap_result,
+                                                 gpu_disabled_switch]() {
+          // TODO(jonahwilliams): remove ifdef once blit from buffer
+          // to texture is implemented on other platforms.
           sk_sp<DlImage> image;
           std::string decode_error;
+
 #ifdef FML_OS_IOS
           std::tie(image, decode_error) = UploadTextureToPrivate(
-              context, bitmap_result.device_buffer, bitmap_result.image_info);
+              context, bitmap_result.device_buffer, bitmap_result.image_info,
+              bitmap_result.sk_bitmap, gpu_disabled_switch);
 #else
           std::tie(image, decode_error) =
-              UploadTextureToShared(context, bitmap_result.sk_bitmap);
-#endif
+              UploadTextureToShared(context, bitmap_result.sk_bitmap,
+                                    gpu_disabled_switch, /*create_mips=*/true);
+#endif  // FML_OS_IOS
           result(image, decode_error);
         };
-        // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/123058
-        // Technically we don't need to post tasks to the io runner, but without
-        // this forced serialization we can end up overloading the GPU and/or
+        // TODO(jonahwilliams):
+        // https://github.com/flutter/flutter/issues/123058 Technically we
+        // don't need to post tasks to the io runner, but without this
+        // forced serialization we can end up overloading the GPU and/or
         // competing with raster workloads.
         io_runner->PostTask(upload_texture_and_invoke_result);
       });
