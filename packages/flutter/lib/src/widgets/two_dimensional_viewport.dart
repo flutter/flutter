@@ -126,7 +126,8 @@ typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext, Chil
 ///   * [Viewport], the equivalent of this widget that scrolls in only one
 ///     dimension.
 abstract class TwoDimensionalViewport extends RenderObjectWidget {
-  /// Creates a widget that is bigger on the inside.
+  /// Creates a viewport for [RenderBox] objects that extend and scroll in both
+  /// horizontal and vertical dimensions.
   ///
   /// The viewport listens to the [horizontalOffset] and [verticalOffset], which
   /// means this widget does not need to be rebuilt when the offsets change.
