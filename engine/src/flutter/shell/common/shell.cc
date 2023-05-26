@@ -33,6 +33,9 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/tonic/common/log.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 
 constexpr char kSkiaChannel[] = "flutter/skia";
@@ -2121,3 +2124,5 @@ Shell::GetConcurrentWorkerTaskRunner() const {
 }
 
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

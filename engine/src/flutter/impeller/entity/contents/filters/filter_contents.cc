@@ -28,6 +28,9 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
@@ -269,3 +272,5 @@ Matrix FilterContents::GetTransform(const Matrix& parent_transform) const {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

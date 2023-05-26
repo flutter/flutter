@@ -16,6 +16,9 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/tessellator/tessellator.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 void ContentContextOptions::ApplyToPipelineDescriptor(
@@ -409,3 +412,5 @@ void ContentContext::SetWireframe(bool wireframe) {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -14,6 +14,9 @@
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 namespace testing {
 
@@ -569,3 +572,5 @@ TEST_F(ClipPathLayerTest, EmptyClipDoesNotCullPlatformView) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

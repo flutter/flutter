@@ -4,6 +4,9 @@
 
 #include "impeller/renderer/capabilities.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 Capabilities::Capabilities() = default;
@@ -221,3 +224,5 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

@@ -39,6 +39,9 @@
 #include "impeller/tessellator/tessellator.h"
 #include "third_party/imgui/imgui.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 namespace testing {
 
@@ -1043,3 +1046,5 @@ TEST_P(RendererTest, VertexBufferBuilder) {
 
 }  // namespace testing
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

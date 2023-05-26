@@ -4,6 +4,9 @@
 
 #include "impeller/display_list/skia_conversions.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 namespace skia_conversions {
 
@@ -177,3 +180,5 @@ std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
 
 }  // namespace skia_conversions
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

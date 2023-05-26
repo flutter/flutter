@@ -7,6 +7,9 @@
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/raster_cache_util.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 
 LayerRasterCacheItem::LayerRasterCacheItem(Layer* layer,
@@ -190,3 +193,5 @@ bool LayerRasterCacheItem::Draw(const PaintContext& context,
 }
 
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)

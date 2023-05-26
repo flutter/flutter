@@ -15,6 +15,9 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 ContentContextOptions OptionsFromPass(const RenderPass& pass) {
@@ -148,3 +151,5 @@ void Contents::SetColorSourceSize(Size size) {
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

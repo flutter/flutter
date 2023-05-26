@@ -20,6 +20,9 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/path_builder.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 
 Canvas::Canvas() {
@@ -658,3 +661,5 @@ void Canvas::DrawAtlas(const std::shared_ptr<Image>& atlas,
 }
 
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

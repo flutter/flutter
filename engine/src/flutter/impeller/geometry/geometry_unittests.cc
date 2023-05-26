@@ -20,6 +20,9 @@
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/size.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 namespace testing {
 
@@ -2203,3 +2206,5 @@ TEST(GeometryTest, HalfConversions) {
 
 }  // namespace testing
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)

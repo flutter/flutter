@@ -18,6 +18,9 @@
 #include "flutter/testing/display_list_testing.h"
 #include "gtest/gtest.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace flutter {
 namespace testing {
 
@@ -742,3 +745,5 @@ TEST_F(OpacityLayerTest, FullyTransparentDoesNotCullPlatformView) {
 
 }  // namespace testing
 }  // namespace flutter
+
+// NOLINTEND(bugprone-unchecked-optional-access)
