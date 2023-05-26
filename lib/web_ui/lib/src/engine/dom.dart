@@ -440,7 +440,7 @@ extension DomProgressEventExtension on DomProgressEvent {
 class DomNode extends DomEventTarget {}
 
 extension DomNodeExtension on DomNode {
-  @JS('baseUri')
+  @JS('baseURI')
   external JSString? get _baseUri;
   String? get baseUri => _baseUri?.toDart;
 
