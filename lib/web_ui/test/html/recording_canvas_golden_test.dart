@@ -416,7 +416,7 @@ Future<void> testMain() async {
     expect(
       rc.pictureBounds,
       within(
-          distance: 0.05, from: const Rect.fromLTRB(17.9, 28.5, 103.5, 114.1)),
+          distance: 0.05, from: const Rect.fromLTRB(0.0, 8.5, 123.5, 134.1)),
     );
     await checkScreenshot(rc, 'path_with_shadow');
   });

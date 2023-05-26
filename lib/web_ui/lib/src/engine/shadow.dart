@@ -73,12 +73,19 @@ ui.Rect computePenumbraBounds(ui.Rect shape, double elevation) {
   final double dx = elevation * tx;
   final double dy = elevation * ty;
   final ui.Offset offset = computeShadowOffset(elevation);
-  return ui.Rect.fromLTRB(
+  final ui.Rect bounds = ui.Rect.fromLTRB(
     shape.left - dx,
     shape.top - dy,
     shape.right + dx,
     shape.bottom + dy,
   ).shift(offset);
+
+  // Expand the bounds rectangle to compensate for inaccuracy in the shadow
+  // calculation.  This is similar to a workaround that had previously been
+  // used in the Flutter framework to adjust the bounds for shadows drawn
+  // by Skia.
+  // (See https://github.com/flutter/flutter/pull/127052)
+  return bounds.inflate(20);
 }
 
 /// Information needed to render a shadow using CSS or canvas.
