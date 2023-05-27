@@ -1041,7 +1041,7 @@ void main() {
       ),
     );
 
-    // The tooltip overlay should be removed including the overlay.
+    // The tooltip should be removed, including the overlay child.
     expect(find.text(tooltipText), findsNothing);
     expect(find.byTooltip(tooltipText), findsNothing);
   });
