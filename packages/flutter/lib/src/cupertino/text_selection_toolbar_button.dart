@@ -16,15 +16,6 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontWeight: FontWeight.w400,
 );
 
-// Colors extracted from https://developer.apple.com/design/resources/.
-// TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
-  // This value was extracted from a screenshot of iOS 16.0.3, as light mode
-  // didn't appear in the Apple design resources assets linked above.
-  color: Color(0xEBF7F7F7),
-  darkColor: Color(0xEB202020),
-);
-
 const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
   color: CupertinoColors.black,
   darkColor: CupertinoColors.white,
@@ -127,8 +118,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
     return CupertinoButton(
       borderRadius: null,
-      color: _kToolbarBackgroundColor,
-      disabledColor: _kToolbarBackgroundColor,
       onPressed: onPressed,
       padding: _kToolbarButtonPadding,
       pressedOpacity: onPressed == null ? 1.0 : 0.7,
