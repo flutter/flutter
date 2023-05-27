@@ -1,4 +1,4 @@
-Signature: dd248cc2b80a505e0220c488e179fad6
+Signature: 066ae8ab6f52cda12954788bf73c2777
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8806,6 +8806,7 @@ ORIGIN: ../../../third_party/skia/gm/coordclampshader.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/gm/fontations.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/imagefiltersunpremul.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkFontMgr_data.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/ports/SkTypeface_fontations.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h + ../../../third_party/skia/LICENSE
@@ -8827,7 +8828,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/dawn/DawnUtils.cpp + ../../../third_pa
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/ports/SkTypeface_fontations_priv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExtension.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.cpp + ../../../third_party/skia/LICENSE
@@ -8836,6 +8837,7 @@ FILE: ../../../third_party/skia/gm/coordclampshader.cpp
 FILE: ../../../third_party/skia/gm/fontations.cpp
 FILE: ../../../third_party/skia/gm/imagefiltersunpremul.cpp
 FILE: ../../../third_party/skia/include/ports/SkFontMgr_data.h
+FILE: ../../../third_party/skia/include/ports/SkTypeface_fontations.h
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
 FILE: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h
@@ -8857,7 +8859,7 @@ FILE: ../../../third_party/skia/src/gpu/dawn/DawnUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanImageView.h
 FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations.cpp
-FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations.h
+FILE: ../../../third_party/skia/src/ports/SkTypeface_fontations_priv.h
 FILE: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExtension.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.cpp
