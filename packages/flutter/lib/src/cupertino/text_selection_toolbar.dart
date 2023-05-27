@@ -437,19 +437,36 @@ class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
 class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSelectionToolbarContent> with TickerProviderStateMixin {
   // Controls the fading of the buttons within the menu during page transitions.
   late AnimationController _controller;
+  final _CupertinoTextSelectionToolbarItemsController _toolbarItemsController = _CupertinoTextSelectionToolbarItemsController();
   int _page = 0;
   int? _nextPage;
 
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    final double? velocity = details.primaryVelocity;
+
+    if (velocity != null && velocity != 0) {
+      if (velocity > 0) {
+        _handlePreviousPage();
+      } else {
+        _handleNextPage();
+      }
+    }
+  }
+
   void _handleNextPage() {
-    _controller.reverse();
-    _controller.addStatusListener(_statusListener);
-    _nextPage = _page + 1;
+    if (_toolbarItemsController.hasNextPage) {
+      _controller.reverse();
+      _controller.addStatusListener(_statusListener);
+      _nextPage = _page + 1;
+    }
   }
 
   void _handlePreviousPage() {
-    _controller.reverse();
-    _controller.addStatusListener(_statusListener);
-    _nextPage = _page - 1;
+    if (_toolbarItemsController.hasPreviousPage) {
+      _controller.reverse();
+      _controller.addStatusListener(_statusListener);
+      _nextPage = _page - 1;
+    }
   }
 
   void _statusListener(AnimationStatus status) {
@@ -501,37 +518,51 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
       child: AnimatedSize(
         duration: _kToolbarTransitionDuration,
         curve: Curves.decelerate,
-        child: _CupertinoTextSelectionToolbarItems(
-          page: _page,
-          backButton: CupertinoTextSelectionToolbarButton(
-            onPressed: _handlePreviousPage,
-            child: SizedBox(
-              height: _kToolbarHeight,
-              child: Icon(
-                CupertinoIcons.left_chevron,
-                color: _kToolbarTextColor.resolveFrom(context),
-                size: _kToolbarChevronSize,
+        child: GestureDetector(
+          onHorizontalDragEnd: _onHorizontalDragEnd,
+          child: _CupertinoTextSelectionToolbarItems(
+            controller: _toolbarItemsController,
+            page: _page,
+            backButton: CupertinoTextSelectionToolbarButton(
+              onPressed: _handlePreviousPage,
+              child: SizedBox(
+                height: _kToolbarHeight,
+                child: Icon(
+                  CupertinoIcons.left_chevron,
+                  color: _kToolbarTextColor.resolveFrom(context),
+                  size: _kToolbarChevronSize,
+                ),
               ),
             ),
-          ),
-          dividerColor: _kToolbarDividerColor.resolveFrom(context),
-          dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
-          nextButton: CupertinoTextSelectionToolbarButton(
-            onPressed: _handleNextPage,
-            child: SizedBox(
-              height: _kToolbarHeight,
-              child: Icon(
-                CupertinoIcons.right_chevron,
-                color: _kToolbarTextColor.resolveFrom(context),
-                size: _kToolbarChevronSize,
+            dividerColor: _kToolbarDividerColor.resolveFrom(context),
+            dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
+            nextButton: CupertinoTextSelectionToolbarButton(
+              onPressed: _handleNextPage,
+              child: SizedBox(
+                height: _kToolbarHeight,
+                child: Icon(
+                  CupertinoIcons.right_chevron,
+                  color: _kToolbarTextColor.resolveFrom(context),
+                  size: _kToolbarChevronSize,
+                ),
               ),
             ),
+            children: widget.children,
           ),
-          children: widget.children,
         ),
       ),
     ));
   }
+}
+
+// This doesn't really control the toolbar, but has updated values to check if
+// there are previous/next pages. This wasn't needed before because the toolbar
+// correctly shows/hides the previous/next buttons automatically, but now the
+// horizontal drag gesture callback has to check whether it's possible to
+// navigate or not, making this necessary.
+class _CupertinoTextSelectionToolbarItemsController {
+  bool hasNextPage = false;
+  bool hasPreviousPage = false;
 }
 
 // The custom RenderObjectWidget that, together with
@@ -539,6 +570,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
 // _CupertinoTextSelectionToolbarItemsElement, paginates the menu items.
 class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   _CupertinoTextSelectionToolbarItems({
+    this.controller,
     required this.page,
     required this.children,
     required this.backButton,
@@ -547,6 +579,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
     required this.nextButton,
   }) : assert(children.isNotEmpty);
 
+  final _CupertinoTextSelectionToolbarItemsController? controller;
   final Widget backButton;
   final List<Widget> children;
   final Color dividerColor;
@@ -557,6 +590,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   @override
   _RenderCupertinoTextSelectionToolbarItems createRenderObject(BuildContext context) {
     return _RenderCupertinoTextSelectionToolbarItems(
+      controller: controller,
       dividerColor: dividerColor,
       dividerWidth: dividerWidth,
       page: page,
@@ -567,6 +601,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarItems renderObject) {
     renderObject
       ..page = page
+      ..controller = controller
       ..dividerColor = dividerColor
       ..dividerWidth = dividerWidth;
   }
@@ -731,6 +766,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 // The custom RenderBox that helps paginate the menu items.
 class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _RenderCupertinoTextSelectionToolbarItems({
+    required this.controller,
     required Color dividerColor,
     required double dividerWidth,
     required int page,
@@ -740,6 +776,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
        super();
 
   final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slottedChildren = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
+
+  _CupertinoTextSelectionToolbarItemsController? controller;
 
   RenderBox? _updateChild(RenderBox? oldChild, RenderBox? newChild, _CupertinoTextSelectionToolbarItemsSlot slot) {
     if (oldChild != null) {
@@ -903,6 +941,11 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         // already been taken care of when laying out the children to
         // accommodate the back button.
       }
+
+      // Update the controller values so that we can check in the horizontal
+      // drag gesture callback when it's possible to navigate.
+      controller?.hasNextPage = page != currentPage;
+      controller?.hasPreviousPage = page > 0;
     } else {
       // No divider for the next button when there's only one page.
       toolbarWidth -= dividerWidth;
