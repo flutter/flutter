@@ -4,14 +4,13 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'localizations.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
-  fontSize: 14.0,
+  fontSize: 15.0,
   letterSpacing: -0.15,
   fontWeight: FontWeight.w400,
 );
@@ -21,11 +20,16 @@ const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrigh
   darkColor: CupertinoColors.white,
 );
 
-// Eyeballed value.
-const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 16.0, horizontal: 18.0);
+const CupertinoDynamicColor _kToolbarPressedColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x10000000),
+  darkColor: Color(0x10FFFFFF),
+);
+
+// Value measured from screenshot of iOS 16.0.2
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 18.0, horizontal: 16.0);
 
 /// A button in the style of the iOS text selection toolbar buttons.
-class CupertinoTextSelectionToolbarButton extends StatelessWidget {
+class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// Create an instance of [CupertinoTextSelectionToolbarButton].
   ///
   /// [child] cannot be null.
@@ -105,23 +109,56 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final Widget child = this.child ?? Text(
-       text ?? getButtonLabel(context, buttonItem!),
-       overflow: TextOverflow.ellipsis,
-       style: _kToolbarButtonFontStyle.copyWith(
-         color: onPressed != null
-             ? _kToolbarTextColor.resolveFrom(context)
-             : CupertinoColors.inactiveGray,
-       ),
-     );
+  State<StatefulWidget> createState() => _CupertinoTextSelectionToolbarButtonState();
+}
 
-    return CupertinoButton(
-      borderRadius: null,
-      onPressed: onPressed,
+class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelectionToolbarButton> {
+  bool isPressed = false;
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() => isPressed = true);
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    setState(() => isPressed = false);
+    widget.onPressed?.call();
+  }
+
+  void _onTapCancel() {
+    setState(() => isPressed = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget child = Padding(
       padding: _kToolbarButtonPadding,
-      pressedOpacity: onPressed == null ? 1.0 : 0.7,
-      child: child,
+      child: widget.child ?? Text(
+         widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
+         overflow: TextOverflow.ellipsis,
+         style: _kToolbarButtonFontStyle.copyWith(
+           color: widget.onPressed != null
+               ? _kToolbarTextColor.resolveFrom(context)
+               : CupertinoColors.inactiveGray,
+         ),
+       ),
     );
+
+    if (widget.onPressed != null) {
+      // The toolbar buttons on iOS are different from the default CupertinoButton.
+      // When pressed, the background changes and the foreground remains the same.
+      return GestureDetector(
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
+        child: ColoredBox(
+          color: isPressed
+            ? _kToolbarPressedColor.resolveFrom(context)
+            : const Color(0x00000000),
+          child: child,
+        ),
+      );
+    } else {
+      return child;
+    }
   }
 }

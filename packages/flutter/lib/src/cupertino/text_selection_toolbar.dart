@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
-const double _kToolbarHeight = 43.0;
+const double _kToolbarHeight = 45.0;
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
@@ -24,20 +24,20 @@ const double _kArrowScreenPadding = 26.0;
 // Values extracted from https://developer.apple.com/design/resources/.
 const Radius _kToolbarBorderRadius = Radius.circular(8);
 
-// Color was eyeballed from a device with iOS 16.0.2.
+// Color was measured from a screenshot of iOS 16.0.2
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
 const CupertinoDynamicColor _kToolbarBackgroundColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFF7F7F7),
-  darkColor: Color(0xFF202020),
+  color: Color(0xFFF6F6F6),
+  darkColor: Color(0xFF222222),
 );
 
 const double _kToolbarChevronSize = 16;
 
-// Color was eyeballed from a device running iOS 16.0.2.
+// Color was measured from a screenshot of iOS 16.0.2.
 const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x50000000),
-  darkColor: Color(0x50FFFFFF),
+  color: Color(0xFFD6D6D6),
+  darkColor: Color(0xFF424242),
 );
 
 const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
