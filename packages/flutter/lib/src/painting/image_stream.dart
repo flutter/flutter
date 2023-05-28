@@ -468,7 +468,7 @@ class ImageStreamCompleterHandle {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
-  final List<ImageErrorListener> _errorListeners = <ImageErrorListener>[];
+  final List<ImageStreamListener> _peekListeners = <ImageStreamListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
 
@@ -520,6 +520,18 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _checkDisposed();
     _hadAtLeastOneListener = true;
     _listeners.add(listener);
+    _synchronouslyCallAddedListener(listener);
+  }
+
+  /// Add a listener for errors. It is similar to [addListener], but see
+  /// [removePeekListener] for a comparison of behaviors.
+  void addPeekListener(ImageStreamListener listener) {
+    _checkDisposed();
+    _peekListeners.add(listener);
+    _synchronouslyCallAddedListener(listener);
+  }
+
+  void _synchronouslyCallAddedListener(ImageStreamListener listener) {
     if (_currentImage != null) {
       try {
         listener.onImage(_currentImage!.clone(), !_addingInitialListeners);
@@ -588,38 +600,15 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// Add a listener for errors. It is similar to [addListener], but see
-  /// [removeErrorListener] for a comparison of behaviors.
-  void addErrorListener(ImageErrorListener listener) {
-    _checkDisposed();
-    _errorListeners.add(listener);
-    if (_currentError != null) {
-      try {
-        listener(_currentError!.exception, _currentError!.stack);
-      } catch (newException, newStack) {
-        if (newException != _currentError!.exception) {
-          FlutterError.reportError(
-            FlutterErrorDetails(
-              exception: newException,
-              library: 'image resource service',
-              context: ErrorDescription('by a synchronously-called image error listener'),
-              stack: newStack,
-            ),
-          );
-        }
-      }
-    }
-  }
-
   /// Remove a listener for errors.
   /// This is similar to [removeListener]. However, even if all listeners have
   /// been removed and all [keepAlive] handles have been disposed, this image
   /// stream will not be automatically disposed.
-  void removeErrorListener(ImageErrorListener listener) {
+  void removePeekListener(ImageStreamListener listener) {
     _checkDisposed();
-    for (int i = 0; i < _errorListeners.length; i += 1) {
-      if (_errorListeners[i] == listener) {
-        _errorListeners.removeAt(i);
+    for (int i = 0; i < _peekListeners.length; i += 1) {
+      if (_peekListeners[i] == listener) {
+        _peekListeners.removeAt(i);
         break;
       }
     }

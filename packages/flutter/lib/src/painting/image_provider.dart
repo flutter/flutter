@@ -1444,13 +1444,19 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   void _configureErrorListener(ImageStreamCompleter completer, ResizeImageKey key) {
-    void listener(Object exception, StackTrace? stackTrace) {
-      completer.removeErrorListener(listener);
-      scheduleMicrotask(() {
-        PaintingBinding.instance.imageCache.evict(key);
-      });
-    }
-    completer.addErrorListener(listener);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) {
+        completer.removePeekListener(listener);
+      },
+      onError: (Object exception, StackTrace? stackTrace) {
+        completer.removePeekListener(listener);
+        scheduleMicrotask(() {
+          PaintingBinding.instance.imageCache.evict(key);
+        });
+      }
+    );
+    completer.addPeekListener(listener);
   }
 
   @override
