@@ -491,12 +491,12 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
-const double _kOnSwitchLabelWidth = 2.0 / 2.0;
-const double _kOnSwitchLabelHeight = 20.0 / 2.0;
-const double _kOnSwitchLabelPaddingLeft = 22.0 / 2.0;
-const double _kOffSwitchLabelWidth = 2.0 / 2.0;
-const double _kOffSwitchLabelPaddingRight = 24.0 / 2.0;
-const double _kOffSwitchLabelRadius = 10.0 / 2.0;
+const double _kOnLabelWidth = 2.0 / 2.0;
+const double _kOnLabelHeight = 20.0 / 2.0;
+const double _kOnLabelPaddingHorizontal = 22.0 / 2.0;
+const double _kOffLabelWidth = 2.0 / 2.0;
+const double _kOffLabelPaddingHorizontal = 24.0 / 2.0;
+const double _kOffLabelRadius = 10.0 / 2.0;
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
@@ -527,8 +527,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _isFocused = isFocused,
        _state = state,
        _onOffSwitchLabels = onOffSwitchLabels,
-       _onSwitchLabelColor = onLabelColor,
-       _offSwitchLabelColor = offLabelColor,
+       _onLabelColor = onLabelColor,
+       _offLabelColor = offLabelColor,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
          state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
@@ -630,23 +630,23 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
-  Color get onSwitchLabelColor => _onSwitchLabelColor;
-  Color _onSwitchLabelColor;
-  set onSwitchLabelColor(Color value) {
-    if (value == _onSwitchLabelColor) {
+  Color get onLabelColor => _onLabelColor;
+  Color _onLabelColor;
+  set onLabelColor(Color value) {
+    if (value == _onLabelColor) {
       return;
     }
-    _onSwitchLabelColor = value;
+    _onLabelColor = value;
     markNeedsPaint();
   }
 
-  Color get offSwitchLabelColor => _offSwitchLabelColor;
-  Color _offSwitchLabelColor;
-  set offSwitchLabelColor(Color value) {
-    if (value == _offSwitchLabelColor) {
+  Color get offLabelColor => _offLabelColor;
+  Color _offLabelColor;
+  set offLabelColor(Color value) {
+    if (value == _offLabelColor) {
       return;
     }
-    _offSwitchLabelColor = value;
+    _offLabelColor = value;
     markNeedsPaint();
   }
 
@@ -716,47 +716,47 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     }
 
     if (_onOffSwitchLabels) {
-      late final Offset onSwitchLabelRectOffset;
-      late final Offset offSwitchLabelOffset;
+      late final Offset onLabelRectOffset;
+      late final Offset offLabelOffset;
 
       switch (textDirection) {
         case TextDirection.ltr:
-          onSwitchLabelRectOffset =
-              trackRect.centerLeft.translate(_kOnSwitchLabelPaddingLeft, 0);
-          offSwitchLabelOffset =
-              trackRect.centerRight.translate(-_kOffSwitchLabelPaddingRight, 0);
+          onLabelRectOffset =
+              trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0);
+          offLabelOffset =
+              trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0);
         case TextDirection.rtl:
-          onSwitchLabelRectOffset =
-              trackRect.centerRight.translate(-_kOnSwitchLabelPaddingLeft, 0);
-          offSwitchLabelOffset =
-              trackRect.centerLeft.translate(_kOffSwitchLabelPaddingRight, 0);
+          onLabelRectOffset =
+              trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0);
+          offLabelOffset =
+              trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0);
       }
 
-      final Rect onSwitchLabelRect = Rect.fromCenter(
-        center: onSwitchLabelRectOffset,
-        width: _kOnSwitchLabelWidth,
-        height: _kOnSwitchLabelHeight,
+      final Rect onLabelRect = Rect.fromCenter(
+        center: onLabelRectOffset,
+        width: _kOnLabelWidth,
+        height: _kOnLabelHeight,
       );
 
-      final Paint onSwitchLabelPaint = Paint()
-        ..color = onSwitchLabelColor
+      final Paint onLabelPaint = Paint()
+        ..color = onLabelColor
             .withOpacity(visualPosition)
             .withOpacity(1.0 - currentReactionValue)
         ..style = PaintingStyle.fill;
 
-      canvas.drawRect(onSwitchLabelRect, onSwitchLabelPaint);
+      canvas.drawRect(onLabelRect, onLabelPaint);
 
-      final Paint offSwitchLabelPaint = Paint()
-        ..color = offSwitchLabelColor
+      final Paint offLabelPaint = Paint()
+        ..color = offLabelColor
             .withOpacity(1.0 - visualPosition)
             .withOpacity(1.0 - currentReactionValue)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = _kOffSwitchLabelWidth;
+        ..strokeWidth = _kOffLabelWidth;
 
       canvas.drawCircle(
-        offSwitchLabelOffset,
-        _kOffSwitchLabelRadius,
-        offSwitchLabelPaint,
+        offLabelOffset,
+        _kOffLabelRadius,
+        offLabelPaint,
       );
     }
 
