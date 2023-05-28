@@ -92,6 +92,7 @@ void main() {
     }));
 
     final dynamic err = await caughtError.future;
+    await Future<void>.delayed(Duration.zero);
 
     expect(imageCache.pendingImageCount, 0);
     expect(imageCache.statusForKey(imageProvider).untracked, true);
