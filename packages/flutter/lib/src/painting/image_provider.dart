@@ -1346,6 +1346,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
+    _configureErrorListener(completer, key);
     return completer;
   }
 
@@ -1368,6 +1369,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
+    _configureErrorListener(completer, key);
     return completer;
   }
 
@@ -1437,7 +1439,18 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
+    _configureErrorListener(completer, key);
     return completer;
+  }
+
+  void _configureErrorListener(ImageStreamCompleter completer, ResizeImageKey key) {
+    void listener(Object exception, StackTrace? stackTrace) {
+      completer.removeErrorListener(listener);
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
+    }
+    completer.addErrorListener(listener);
   }
 
   @override

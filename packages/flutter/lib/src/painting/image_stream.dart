@@ -468,6 +468,7 @@ class ImageStreamCompleterHandle {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
+  final List<ImageErrorListener> _errorListeners = <ImageErrorListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
 
@@ -584,6 +585,41 @@ abstract class ImageStreamCompleter with Diagnosticable {
       }
       _onLastListenerRemovedCallbacks.clear();
       _maybeDispose();
+    }
+  }
+
+  /// Add a listener for errors.
+  /// This is similar to [addListener], but does not count for active listeners.
+  void addErrorListener(ImageErrorListener listener) {
+    _checkDisposed();
+    _errorListeners.add(listener);
+    if (_currentError != null) {
+      try {
+        listener(_currentError!.exception, _currentError!.stack);
+      } catch (newException, newStack) {
+        if (newException != _currentError!.exception) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: newException,
+              library: 'image resource service',
+              context: ErrorDescription('by a synchronously-called image error listener'),
+              stack: newStack,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// Remove a listener for errors.
+  /// This is similar to [removeListener], but does not count for active listeners.
+  void removeErrorListener(ImageErrorListener listener) {
+    _checkDisposed();
+    for (int i = 0; i < _errorListeners.length; i += 1) {
+      if (_errorListeners[i] == listener) {
+        _errorListeners.removeAt(i);
+        break;
+      }
     }
   }
 
