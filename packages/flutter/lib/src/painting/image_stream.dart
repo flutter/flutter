@@ -524,7 +524,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   }
 
   /// Add a listener for errors. It is similar to [addListener], but see
-  /// [removePeekListener] for a comparison of behaviors.
+  /// [removePeekListener] for a comparison of the behaviors.
   void addPeekListener(ImageStreamListener listener) {
     _checkDisposed();
     _peekListeners.add(listener);
