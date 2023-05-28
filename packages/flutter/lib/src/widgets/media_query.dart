@@ -1269,11 +1269,11 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// See also:
   ///
   ///  * [MediaQueryData.onOffSwitchLabels], which indicates the platform's
-  ///    desire to increase contrast.
+  ///    desire to show on/off labels inside switches.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
-  static bool onOffSwitchLabelsOf(BuildContext context) => maybeHighContrastOf(context) ?? false;
+  static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOff(context) ?? false;
 
   /// Returns onOffSwitchLabels for the nearest MediaQuery ancestor or
   /// null, if no such ancestor exists.
