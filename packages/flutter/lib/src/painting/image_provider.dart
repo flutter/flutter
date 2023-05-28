@@ -1447,9 +1447,11 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     late final ImageStreamListener listener;
     listener = ImageStreamListener(
       (ImageInfo image, bool synchronousCall) {
+        print('hi onimage');
         completer.removePeekListener(listener);
       },
       onError: (Object exception, StackTrace? stackTrace) {
+        print('hi onerror');
         completer.removePeekListener(listener);
         scheduleMicrotask(() {
           PaintingBinding.instance.imageCache.evict(key);

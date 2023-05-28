@@ -667,12 +667,18 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _currentImage?.dispose();
     _currentImage = image;
 
-    if (_listeners.isEmpty) {
+    _notifyListenersOnImage(image, _listeners);
+    _notifyListenersOnImage(image, _peekListeners);
+  }
+
+  void _notifyListenersOnImage(ImageInfo image, List<ImageStreamListener> listeners) {
+    if (listeners.isEmpty) {
       return;
     }
+
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
-        List<ImageStreamListener>.of(_listeners);
+        List<ImageStreamListener>.of(listeners);
     for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image.clone(), false);
@@ -733,13 +739,23 @@ abstract class ImageStreamCompleter with Diagnosticable {
       silent: silent,
     );
 
+    bool handled = false;
+    handled |= _notifyListenersOnError(exception, stack, _listeners);
+    handled |= _notifyListenersOnError(exception, stack, _peekListeners);
+    if (!handled) {
+      FlutterError.reportError(_currentError!);
+    }
+  }
+
+  bool _notifyListenersOnError(Object exception, StackTrace? stack, List<ImageStreamListener> listeners) {
+    bool handled = false;
+
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = _listeners
+    final List<ImageErrorListener> localErrorListeners = listeners
         .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
         .whereType<ImageErrorListener>()
         .toList();
 
-    bool handled = false;
     for (final ImageErrorListener errorListener in localErrorListeners) {
       try {
         errorListener(exception, stack);
@@ -757,9 +773,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
         }
       }
     }
-    if (!handled) {
-      FlutterError.reportError(_currentError!);
-    }
+
+    return handled;
   }
 
   /// Calls all the registered [ImageChunkListener]s (listeners with an
@@ -768,15 +783,22 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @protected
   void reportImageChunkEvent(ImageChunkEvent event) {
     _checkDisposed();
-    if (hasListeners) {
-      // Make a copy to allow for concurrent modification.
-      final List<ImageChunkListener> localListeners = _listeners
-          .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
-          .whereType<ImageChunkListener>()
-          .toList();
-      for (final ImageChunkListener listener in localListeners) {
-        listener(event);
-      }
+    _notifyListenersOnChunk(event, _listeners);
+    _notifyListenersOnChunk(event, _peekListeners);
+  }
+
+  void _notifyListenersOnChunk(ImageChunkEvent event, List<ImageStreamListener> listeners) {
+    if (listeners.isEmpty) {
+      return;
+    }
+
+    // Make a copy to allow for concurrent modification.
+    final List<ImageChunkListener> localListeners = listeners
+        .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
+        .whereType<ImageChunkListener>()
+        .toList();
+    for (final ImageChunkListener listener in localListeners) {
+      listener(event);
     }
   }
 
