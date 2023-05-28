@@ -741,7 +741,7 @@ class PageTransitionsTheme with Diagnosticable {
   Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders;
   final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the builder for the current [ThemeData.platform].
+  /// Delegates to the builder for the current [platform].
   /// If a builder for the current platform is not found, then the
   /// [ZoomPageTransitionsBuilder] is used.
   ///
@@ -752,9 +752,8 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
+    TargetPlatform platform,
   ) {
-    final TargetPlatform platform = Theme.of(context).platform;
-
     final PageTransitionsBuilder matchingBuilder =
       builders[platform] ?? const ZoomPageTransitionsBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);

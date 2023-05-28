@@ -118,75 +118,22 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    final ThemeData themeData = Theme.of(context);
     return ValueListenableBuilder<bool>(
-        valueListenable: navigator!.userGestureInProgressNotifier,
-        builder: (BuildContext context, bool useGestureInProgress, Widget? _) {
-          final bool usePrevTargetPlatform;
-          if (useGestureInProgress) {
-            // The platform should be kept unchanged during an user gesture.
-            usePrevTargetPlatform = _prevTargetPlatform != null && _prevTargetPlatform != themeData.platform;
-          } else {
-            _prevTargetPlatform = themeData.platform;
-            usePrevTargetPlatform = false;
+      valueListenable: navigator!.userGestureInProgressNotifier,
+      builder: (BuildContext context, bool useGestureInProgress, Widget? _) {
+        final ThemeData themeData = Theme.of(context);
+
+        TargetPlatform platform = themeData.platform;
+        if (useGestureInProgress) {
+          // The platform should be kept unchanged during an user gesture.
+          if (_prevTargetPlatform != null && _prevTargetPlatform != platform) {
+            platform = _prevTargetPlatform!;
           }
-          return _PlatformOfBuilder(
-            platform: usePrevTargetPlatform ? _prevTargetPlatform : null,
-            builder: (BuildContext context, Widget? child) {
-              assert(child != null);
-              return themeData.pageTransitionsTheme.buildTransitions<T>(this, context, animation, secondaryAnimation, child!);
-            },
-            child: child,
-          );
-        });
-  }
-}
-
-/// Modify only the [platform] of the [builder], not the [child]
-class _PlatformOfBuilder extends StatefulWidget {
-  const _PlatformOfBuilder({
-    required this.builder,
-    required this.child,
-    required this.platform,
-  });
-
-  final TargetPlatform? platform;
-  final TransitionBuilder builder;
-  final Widget child;
-
-  @override
-  State<_PlatformOfBuilder> createState() => _PlatformOfBuilderState();
-}
-
-class _PlatformOfBuilderState extends State<_PlatformOfBuilder> {
-  final GlobalKey _globalKey = GlobalKey();
-  @override
-  Widget build(BuildContext context) {
-    if (widget.platform == null) {
-      // No need to modify the platform, return early
-      // Use globalKey to prevent losing state after subtree changes.
-      return Builder(
-        key: _globalKey,
-        builder: (BuildContext context) => widget.builder(context, widget.child),
-      );
-    }
-    final ThemeData themeData = Theme.of(context);
-    return Theme(
-      // modify the platform of builder
-      data: themeData.copyWith(platform: widget.platform),
-      child: Builder(
-        key: _globalKey,
-        builder: (BuildContext context) => widget.builder(
-          context,
-          Builder(
-            builder: (BuildContext context) => Theme(
-              // Restore the platform of child
-              data: Theme.of(context).copyWith(platform: themeData.platform),
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
+        } else {
+          _prevTargetPlatform = platform;
+        }
+        return themeData.pageTransitionsTheme.buildTransitions<T>(this, context, animation, secondaryAnimation, child, platform);
+      },
     );
   }
 }
