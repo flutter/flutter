@@ -164,6 +164,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // have had a chance to track the key in the cache at all.
       // Schedule a microtask to give the cache a chance to add the key.
       scheduleMicrotask(() {
+        print('hi key=$key keys=${PaintingBinding.instance.imageCache.keys} '
+            'keystoevcit=${image_provider.ResizeImage.keysFor(PaintingBinding.instance.imageCache.keys, key)}');
         image_provider.ResizeImage.keysFor(PaintingBinding.instance.imageCache.keys, key)
             .forEach(PaintingBinding.instance.imageCache.evict);
       });
