@@ -482,7 +482,6 @@ const double _kSwitchHeight = 39.0;
 const double _kOnSwitchLabelWidth = 2.0 / 2.0;
 const double _kOnSwitchLabelHeight = 20.0 / 2.0;
 const double _kOnSwitchLabelPaddingLeft = 22.0 / 2.0;
-const double _kOnSwitchLabelPaddingTop = 20.0 / 2.0;
 const double _kOffSwitchLabelWidth = 2.0 / 2.0;
 const double _kOffSwitchLabelPaddingRight = 24.0 / 2.0;
 const double _kOffSwitchLabelRadius = 10.0 / 2.0;
@@ -705,15 +704,26 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     }
 
     if (_onOffSwitchLabels) {
-      final Rect onSwitchLabelRect = Rect.fromLTWH(
-        offset.dx +
-            (size.width - _kTrackWidth) / 2.0 +
-            _kOnSwitchLabelPaddingLeft,
-        offset.dy +
-            (size.height - _kTrackHeight) / 2.0 +
-            _kOnSwitchLabelPaddingTop,
-        _kOnSwitchLabelWidth,
-        _kOnSwitchLabelHeight,
+      late final Offset onSwitchLabelRectOffset;
+      late final Offset offSwitchLabelOffset;
+
+      switch (textDirection) {
+        case TextDirection.ltr:
+          onSwitchLabelRectOffset =
+              trackRect.centerLeft.translate(_kOnSwitchLabelPaddingLeft, 0);
+          offSwitchLabelOffset =
+              trackRect.centerRight.translate(-_kOffSwitchLabelPaddingRight, 0);
+        case TextDirection.rtl:
+          onSwitchLabelRectOffset =
+              trackRect.centerRight.translate(-_kOnSwitchLabelPaddingLeft, 0);
+          offSwitchLabelOffset =
+              trackRect.centerLeft.translate(_kOffSwitchLabelPaddingRight, 0);
+      }
+
+      final Rect onSwitchLabelRect = Rect.fromCenter(
+        center: onSwitchLabelRectOffset,
+        width: _kOnSwitchLabelWidth,
+        height: _kOnSwitchLabelHeight,
       );
 
       final Paint onSwitchLabelPaint = Paint()
@@ -721,14 +731,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         ..style = PaintingStyle.fill;
 
       canvas.drawRect(onSwitchLabelRect, onSwitchLabelPaint);
-
-      final Offset offSwitchLabelOffset = Offset(
-        offset.dx +
-            size.width -
-            _kOffSwitchLabelRadius / 2.0 -
-            _kOffSwitchLabelPaddingRight,
-        offset.dy + size.height / 2.0,
-      );
 
       final Paint offSwitchLabelPaint = Paint()
         ..color = offSwitchLabelColor
