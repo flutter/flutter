@@ -75,6 +75,8 @@ class CupertinoSwitch extends StatefulWidget {
     this.thumbColor,
     this.applyTheme,
     this.focusColor,
+    this.onLabelColor,
+    this.offLabelColor,
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
@@ -132,6 +134,16 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
+
+  /// The color to use for the accessibility label when the switch is on.
+  ///
+  /// Defaults to [CupertinoColors.white] when null.
+  final Color? onLabelColor;
+
+  /// The color to use for the accessibility label when the switch is off.
+  ///
+  /// Defaults to [CupertinoColors.systemGrey2] when null.
+  final Color? offLabelColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -390,8 +402,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             isFocused: isFocused,
             state: this,
             onOffSwitchLabels: MediaQuery.of(context).onOffSwitchLabels,
-            onSwitchLabelColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-            offSwitchLabelColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.systemGrey2, context),
+            onLabelColor: CupertinoDynamicColor.resolve(widget.onLabelColor ?? CupertinoColors.white, context),
+            offLabelColor: CupertinoDynamicColor.resolve(widget.offLabelColor ?? CupertinoColors.systemGrey2, context),
           ),
         ),
       ),
@@ -421,8 +433,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.isFocused,
     required this.state,
     required this.onOffSwitchLabels,
-    required this.onSwitchLabelColor,
-    required this.offSwitchLabelColor,
+    required this.onLabelColor,
+    required this.offLabelColor,
   });
 
   final bool value;
@@ -435,8 +447,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final TextDirection textDirection;
   final bool isFocused;
   final bool onOffSwitchLabels;
-  final Color onSwitchLabelColor;
-  final Color offSwitchLabelColor;
+  final Color onLabelColor;
+  final Color offLabelColor;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -451,8 +463,8 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       isFocused: isFocused,
       state: state,
       onOffSwitchLabels: onOffSwitchLabels,
-      onSwitchLabelColor: onSwitchLabelColor,
-      offSwitchLabelColor: offSwitchLabelColor,
+      onLabelColor: onLabelColor,
+      offLabelColor: offLabelColor,
     );
   }
 
@@ -503,8 +515,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required bool isFocused,
     required _CupertinoSwitchState state,
     required bool onOffSwitchLabels,
-    required Color onSwitchLabelColor,
-    required Color offSwitchLabelColor,
+    required Color onLabelColor,
+    required Color offLabelColor,
   }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
@@ -515,8 +527,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _isFocused = isFocused,
        _state = state,
        _onOffSwitchLabels = onOffSwitchLabels,
-       _onSwitchLabelColor = onSwitchLabelColor,
-       _offSwitchLabelColor = offSwitchLabelColor,
+       _onSwitchLabelColor = onLabelColor,
+       _offSwitchLabelColor = offLabelColor,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
          state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
