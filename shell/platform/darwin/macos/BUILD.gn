@@ -38,7 +38,6 @@ _framework_binary_subpath = "Versions/A/$_flutter_framework_name"
 # the Flutter engine source root.
 _flutter_framework_headers = [
   "framework/Headers/FlutterAppDelegate.h",
-  "framework/Headers/FlutterAppLifecycleDelegate.h",
   "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterMacOS.h",
   "framework/Headers/FlutterPlatformViews.h",
@@ -57,7 +56,6 @@ source_set("flutter_framework_source") {
     "framework/Source/AccessibilityBridgeMac.h",
     "framework/Source/AccessibilityBridgeMac.mm",
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterAppLifecycleDelegate.mm",
     "framework/Source/FlutterBackingStore.h",
     "framework/Source/FlutterBackingStore.mm",
     "framework/Source/FlutterChannelKeyResponder.h",
@@ -169,7 +167,6 @@ executable("flutter_desktop_darwin_unittests") {
 
   sources = [
     "framework/Source/AccessibilityBridgeMacTest.mm",
-    "framework/Source/FlutterAppLifecycleDelegateTest.mm",
     "framework/Source/FlutterChannelKeyResponderTest.mm",
     "framework/Source/FlutterCompositorTest.mm",
     "framework/Source/FlutterEmbedderExternalTextureTest.mm",

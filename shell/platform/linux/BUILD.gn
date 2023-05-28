@@ -158,7 +158,6 @@ source_set("flutter_linux_sources") {
   ]
 
   deps = [
-    "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",
     "//flutter/shell/platform/embedder:embedder_headers",
@@ -258,7 +257,6 @@ executable("flutter_linux_unittests") {
     ":flutter_linux_gschemas",
     ":flutter_linux_sources",
     "//flutter/runtime:libdart",
-    "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/shell/platform/embedder:embedder_test_utils",
     "//flutter/testing",

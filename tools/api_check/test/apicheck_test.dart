@@ -43,6 +43,10 @@ void checkApiConsistency(String flutterRoot) {
       sourcePath: path.join(flutterRoot, 'lib', 'ui', 'window.dart'),
       className: 'AccessibilityFeatures',
     );
+    final List<String> webuiFields = getDartClassFields(
+      sourcePath: path.join(flutterRoot, 'lib', 'ui', 'window.dart'),
+      className: 'AccessibilityFeatures',
+    );
     // C values: kFlutterAccessibilityFeatureFooBar = 1 << N,
     final List<String> embedderEnumValues = getCppEnumValues(
       sourcePath: path.join(flutterRoot, 'shell', 'platform', 'embedder', 'embedder.h'),
@@ -60,6 +64,7 @@ void checkApiConsistency(String flutterRoot) {
       enumName: 'AccessibilityFeature',
     ).map(allCapsToCamelCase).toList();
 
+    expect(webuiFields, uiFields);
     expect(embedderEnumValues, uiFields);
     expect(internalEnumValues, uiFields);
     expect(javaEnumValues, uiFields);
@@ -72,7 +77,7 @@ void checkApiConsistency(String flutterRoot) {
       className: 'SemanticsAction',
     );
     final List<String> webuiFields = getDartClassFields(
-      sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'semantics.dart'),
+      sourcePath: path.join(flutterRoot, 'lib', 'ui', 'semantics.dart'),
       className: 'SemanticsAction',
     );
     // C values: kFlutterSemanticsActionFooBar = 1 << N.
@@ -94,33 +99,6 @@ void checkApiConsistency(String flutterRoot) {
 
     expect(webuiFields, uiFields);
     expect(embedderEnumValues, uiFields);
-    expect(internalEnumValues, uiFields);
-    expect(javaEnumValues, uiFields);
-  });
-
-  test('AppLifecycleState enums match', () {
-    // Dart values: _kFooBarIndex = 1 << N.
-    final List<String> uiFields = getDartClassFields(
-      sourcePath: path.join(flutterRoot, 'lib', 'ui', 'platform_dispatcher.dart'),
-      className: 'AppLifecycleState',
-    );
-    final List<String> webuiFields = getDartClassFields(
-      sourcePath: path.join(flutterRoot, 'lib', 'web_ui', 'lib', 'platform_dispatcher.dart'),
-      className: 'AppLifecycleState',
-    );
-    // C++ values: kFooBar = 1 << N.
-    final List<String> internalEnumValues = getCppEnumClassValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'common', 'app_lifecycle_state.h'),
-      enumName: 'AppLifecycleState',
-    );
-    // Java values: FOO_BAR(1 << N).
-    final List<String> javaEnumValues = getJavaEnumValues(
-      sourcePath: path.join(flutterRoot, 'shell', 'platform', 'android', 'io',
-          'flutter', 'embedding', 'engine', 'systemchannels', 'LifecycleChannel.java'),
-      enumName: 'AppLifecycleState',
-    ).map(allCapsToCamelCase).toList();
-
-    expect(webuiFields, uiFields);
     expect(internalEnumValues, uiFields);
     expect(javaEnumValues, uiFields);
   });
