@@ -382,9 +382,9 @@ void main() {
 
   test('TextPainter requires textDirection', () {
     final TextPainter painter1 = TextPainter(text: const TextSpan(text: ''));
-    expect(() { painter1.layout(); }, throwsAssertionError);
+    expect(painter1.layout, throwsStateError);
     final TextPainter painter2 = TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
-    expect(() { painter2.layout(); }, isNot(throwsException));
+    expect(painter2.layout, isNot(throwsStateError));
   });
 
   test('TextPainter size test', () {
@@ -1457,8 +1457,88 @@ void main() {
 
     painter.dispose();
   });
+
+  test('TextPainter infinite width - centered', () {
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.center
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(text: 'A', style: TextStyle(fontSize: 10));
+    MockCanvasWithDrawParagraph mockCanvas = MockCanvasWithDrawParagraph();
+
+    painter.layout(minWidth: double.infinity);
+    expect(painter.width, double.infinity);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.centerX, isNull);
+
+    painter.layout();
+    expect(painter.width, 10);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.centerX, 5);
+
+    painter.layout(minWidth: 100);
+    expect(painter.width, 100);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.centerX, 50);
+
+    painter.dispose();
+  });
+
+  test('TextPainter infinite width - LTR justified', () {
+    final TextPainter painter = TextPainter()
+      ..textAlign = TextAlign.justify
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(text: 'A', style: TextStyle(fontSize: 10));
+    MockCanvasWithDrawParagraph mockCanvas = MockCanvasWithDrawParagraph();
+
+    painter.layout(minWidth: double.infinity);
+    expect(painter.width, double.infinity);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.offsetX, 0);
+
+    painter.layout();
+    expect(painter.width, 10);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.offsetX, 0);
+
+    painter.layout(minWidth: 100);
+    expect(painter.width, 100);
+    expect(() => painter.paint(mockCanvas = MockCanvasWithDrawParagraph(), Offset.zero), returnsNormally);
+    expect(mockCanvas.offsetX, 0);
+
+    painter.dispose();
+  });
+
+  test('TextPainter line breaking does not round to integers', () {
+    if (! const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')) {
+      return;
+    }
+    const double fontSize = 1.25;
+    const String text = '12345';
+    assert((fontSize * text.length).truncate() != fontSize * text.length);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+    )..layout(maxWidth: text.length * fontSize);
+
+    expect(painter.maxIntrinsicWidth, text.length * fontSize);
+    switch (painter.computeLineMetrics()) {
+      case [ui.LineMetrics(width: final double width)]:
+        expect(width, text.length * fontSize);
+      case final List<ui.LineMetrics> metrics:
+        expect(metrics, hasLength(1));
+    }
+  }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
 }
 
 class MockCanvas extends Fake implements Canvas {
+}
 
+class MockCanvasWithDrawParagraph extends Fake implements Canvas {
+  double? centerX;
+  double? offsetX;
+  @override
+  void drawParagraph(ui.Paragraph paragraph, Offset offset) {
+    offsetX = offset.dx;
+    centerX = offset.dx + paragraph.width / 2;
+  }
 }
