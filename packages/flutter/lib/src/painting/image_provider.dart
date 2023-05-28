@@ -1444,6 +1444,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   void _configureErrorListener(ImageStreamCompleter completer, ResizeImageKey key) {
+    print('hi _configureErrorListener');
     late final ImageStreamListener listener;
     listener = ImageStreamListener(
       (ImageInfo image, bool synchronousCall) {

@@ -813,6 +813,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
       _listeners,
       ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
     ));
+    description.add(ObjectFlagProperty<List<ImageStreamListener>>(
+      'peekListeners',
+      _peekListeners,
+      ifPresent: '${_peekListeners.length} peekListener${_peekListeners.length == 1 ? "" : "s" }',
+    ));
     description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }
 }
