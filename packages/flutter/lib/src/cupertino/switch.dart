@@ -389,6 +389,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             textDirection: Directionality.of(context),
             isFocused: isFocused,
             state: this,
+            onOffSwitchLabels: PlatformDispatcher.instance.accessibilityFeatures.onOffSwitchLabels,
+            onSwitchLabelColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
+            offSwitchLabelColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.systemGrey2, context),
           ),
         ),
       ),
@@ -417,6 +420,9 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     required this.textDirection,
     required this.isFocused,
     required this.state,
+    required this.onOffSwitchLabels,
+    required this.onSwitchLabelColor,
+    required this.offSwitchLabelColor,
   });
 
   final bool value;
@@ -428,6 +434,9 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final _CupertinoSwitchState state;
   final TextDirection textDirection;
   final bool isFocused;
+  final bool onOffSwitchLabels;
+  final Color onSwitchLabelColor;
+  final Color offSwitchLabelColor;
 
   @override
   _RenderCupertinoSwitch createRenderObject(BuildContext context) {
@@ -441,6 +450,9 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: textDirection,
       isFocused: isFocused,
       state: state,
+      onOffSwitchLabels: onOffSwitchLabels,
+      onSwitchLabelColor: onSwitchLabelColor,
+      offSwitchLabelColor: offSwitchLabelColor,
     );
   }
 
@@ -467,6 +479,13 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
+const double _kOnSwitchLabelWidth = 2.0 / 2.0;
+const double _kOnSwitchLabelHeight = 20.0 / 2.0;
+const double _kOnSwitchLabelPaddingLeft = 22.0 / 2.0;
+const double _kOnSwitchLabelPaddingTop = 20.0 / 2.0;
+const double _kOffSwitchLabelWidth = 2.0 / 2.0;
+const double _kOffSwitchLabelPaddingRight = 24.0 / 2.0;
+const double _kOffSwitchLabelRadius = 10.0 / 2.0;
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
@@ -484,6 +503,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required TextDirection textDirection,
     required bool isFocused,
     required _CupertinoSwitchState state,
+    required bool onOffSwitchLabels,
+    required Color onSwitchLabelColor,
+    required Color offSwitchLabelColor,
   }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
@@ -493,6 +515,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        _textDirection = textDirection,
        _isFocused = isFocused,
        _state = state,
+       _onOffSwitchLabels = onOffSwitchLabels,
+       _onSwitchLabelColor = onSwitchLabelColor,
+       _offSwitchLabelColor = offSwitchLabelColor,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
          state.position.addListener(markNeedsPaint);
          state._reaction.addListener(markNeedsPaint);
@@ -584,6 +609,36 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     markNeedsPaint();
   }
 
+  bool get onOffSwitchLabels => _onOffSwitchLabels;
+  bool _onOffSwitchLabels;
+  set onOffSwitchLabels(bool value) {
+    if (value == _onOffSwitchLabels) {
+      return;
+    }
+    _onOffSwitchLabels = value;
+    markNeedsPaint();
+  }
+
+  Color get onSwitchLabelColor => _onSwitchLabelColor;
+  Color _onSwitchLabelColor;
+  set onSwitchLabelColor(Color value) {
+    if (value == _onSwitchLabelColor) {
+      return;
+    }
+    _onSwitchLabelColor = value;
+    markNeedsPaint();
+  }
+
+  Color get offSwitchLabelColor => _offSwitchLabelColor;
+  Color _offSwitchLabelColor;
+  set offSwitchLabelColor(Color value) {
+    if (value == _offSwitchLabelColor) {
+      return;
+    }
+    _offSwitchLabelColor = value;
+    markNeedsPaint();
+  }
+
   bool get isInteractive => onChanged != null;
 
   @override
@@ -647,6 +702,44 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         ..strokeWidth = 3.5;
 
       canvas.drawRRect(borderTrackRRect, borderPaint);
+    }
+
+    if (_onOffSwitchLabels) {
+      final Rect onSwitchLabelRect = Rect.fromLTWH(
+        offset.dx +
+            (size.width - _kTrackWidth) / 2.0 +
+            _kOnSwitchLabelPaddingLeft,
+        offset.dy +
+            (size.height - _kTrackHeight) / 2.0 +
+            _kOnSwitchLabelPaddingTop,
+        _kOnSwitchLabelWidth,
+        _kOnSwitchLabelHeight,
+      );
+
+      final Paint onSwitchLabelPaint = Paint()
+        ..color = onSwitchLabelColor
+        ..style = PaintingStyle.fill;
+
+      canvas.drawRect(onSwitchLabelRect, onSwitchLabelPaint);
+
+      final Offset offSwitchLabelOffset = Offset(
+        offset.dx +
+            size.width -
+            _kOffSwitchLabelRadius / 2.0 -
+            _kOffSwitchLabelPaddingRight,
+        offset.dy + size.height / 2.0,
+      );
+
+      final Paint offSwitchLabelPaint = Paint()
+        ..color = offSwitchLabelColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _kOffSwitchLabelWidth;
+
+      canvas.drawCircle(
+        offSwitchLabelOffset,
+        _kOffSwitchLabelRadius,
+        offSwitchLabelPaint,
+      );
     }
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
