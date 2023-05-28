@@ -389,7 +389,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             textDirection: Directionality.of(context),
             isFocused: isFocused,
             state: this,
-            onOffSwitchLabels: PlatformDispatcher.instance.accessibilityFeatures.onOffSwitchLabels,
+            onOffSwitchLabels: MediaQuery.of(context).onOffSwitchLabels,
             onSwitchLabelColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
             offSwitchLabelColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.systemGrey2, context),
           ),
