@@ -728,12 +728,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
       final Paint onSwitchLabelPaint = Paint()
         ..color = onSwitchLabelColor
+            .withOpacity(visualPosition)
+            .withOpacity(1.0 - currentReactionValue)
         ..style = PaintingStyle.fill;
 
       canvas.drawRect(onSwitchLabelRect, onSwitchLabelPaint);
 
       final Paint offSwitchLabelPaint = Paint()
         ..color = offSwitchLabelColor
+            .withOpacity(1.0 - visualPosition)
+            .withOpacity(1.0 - currentReactionValue)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kOffSwitchLabelWidth;
 
