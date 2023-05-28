@@ -247,11 +247,12 @@ class SelectableRegion extends StatefulWidget {
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   /// {@template flutter.widgets.SelectableRegion.separator}
-  /// The separator to use when concatenating the selected text. Defaults to an
-  /// empty string, which means the selected text will be concatenated without
-  /// any separator. If the selectable text is arranged vertically, this
-  /// should be set to `\n` so that the selected text is copied with the
-  /// expected formatting.
+  /// The separator to use when concatenating the selected text.
+  ///
+  /// Defaults to an empty string, which means the selected text will be
+  /// concatenated without any separator. If the selectable text is arranged
+  /// vertically, consider setting this to `\n` so that the selected text is
+  /// copied with the expected formatting.
   /// {@endtemplate}
   final String separator;
 
