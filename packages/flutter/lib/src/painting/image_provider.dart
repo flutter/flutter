@@ -1328,14 +1328,6 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     return provider;
   }
 
-  /// Get keys for the iamge with [rawKey] inside [candidateKeys].
-  static Iterable<Object> keysFor(Iterable<Object> candidateKeys, Object rawKey) {
-    bool checkKey(Object key) =>
-        key == rawKey ||
-        (key is ResizeImageKey && checkKey(key._providerCacheKey));
-    return candidateKeys.where(checkKey);
-  }
-
   @override
   @Deprecated(
     'Implement loadImage for faster image loading. '

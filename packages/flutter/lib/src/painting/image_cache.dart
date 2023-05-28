@@ -200,13 +200,6 @@ class ImageCache {
     _currentSizeBytes = 0;
   }
 
-  /// All keys inside the current cache.
-  Set<Object> get keys => {
-    ..._liveImages.keys,
-    ..._pendingImages.keys,
-    ..._cache.keys,
-  };
-
   /// Evicts a single entry from the cache, returning true if successful.
   ///
   /// Pending images waiting for completion are removed as well, returning true
