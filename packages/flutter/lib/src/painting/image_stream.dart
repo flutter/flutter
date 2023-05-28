@@ -588,8 +588,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// Add a listener for errors.
-  /// This is similar to [addListener], but does not count for active listeners.
+  /// Add a listener for errors. It is similar to [addListener], but see
+  /// [removeErrorListener] for a comparison of behaviors.
   void addErrorListener(ImageErrorListener listener) {
     _checkDisposed();
     _errorListeners.add(listener);
@@ -612,7 +612,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   }
 
   /// Remove a listener for errors.
-  /// This is similar to [removeListener], but does not count for active listeners.
+  /// This is similar to [removeListener]. However, even if all listeners have
+  /// been removed and all [keepAlive] handles have been disposed, this image
+  /// stream will not be automatically disposed.
   void removeErrorListener(ImageErrorListener listener) {
     _checkDisposed();
     for (int i = 0; i < _errorListeners.length; i += 1) {
