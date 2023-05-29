@@ -777,6 +777,35 @@ void main() {
     expect(renderHeader.geometry!.paintExtent, equals(60.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
+
+  testWidgets('SliverFloatingPersistentHeader scroll direction is not affected by controller.jumpTo', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        SliverPersistentHeader(
+          delegate: TestDelegate(),
+          floating: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(600));
+
+    controller.jumpTo(600);
+    await tester.pumpAndSettle();
+    controller.jumpTo(570);
+    await tester.pumpAndSettle();
+
+    // If renderHeader._lastStartedScrollDirection is not ScrollDirection.forward, then we shouldn't see the header at all.
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+  });
 }
 
 Widget _buildSliverList({
