@@ -1273,14 +1273,14 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
-  static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOff(context) ?? false;
+  static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOf(context) ?? false;
 
   /// Returns onOffSwitchLabels for the nearest MediaQuery ancestor or
   /// null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
-  static bool? maybeOnOffSwitchLabelsOff(BuildContext context) => _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
+  static bool? maybeOnOffSwitchLabelsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
 
   /// Returns disableAnimations for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
