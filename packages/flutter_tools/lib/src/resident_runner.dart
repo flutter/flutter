@@ -1500,6 +1500,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (!residentDevtoolsHandler!.readyToAnnounce) {
       includeDevtools = false;
     }
+    print(StackTrace.current);
     assert(!includeDevtools || devToolsServerAddress != null);
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
