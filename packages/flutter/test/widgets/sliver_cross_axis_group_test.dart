@@ -725,10 +725,56 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
     await gesture.moveBy(const Offset(0.0, 10));
+    await tester.pump();
+
+    // The snap animation does not go through until the gesture is released.
+    expect(renderHeader.geometry!.paintExtent, equals(10));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+
+    // Once it is released, the header's paint extent becomes the maximum and the group sets an offset of -50.0.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(renderHeader.geometry!.paintExtent, equals(60));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
+
+  testWidgets('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        const SliverAppBar(
+          toolbarHeight: 30,
+          expandedHeight: 60,
+          floating: true,
+          pinned: true,
+          snap: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(600));
+
+    controller.jumpTo(600);
     await tester.pumpAndSettle();
 
-    // Since snap should cause an animation to fully expand, the paintOffset should be -50.0.
-    expect(renderHeader.geometry!.paintExtent, equals(10));
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 10));
+    await tester.pump();
+
+    expect(renderHeader.geometry!.paintExtent, equals(30.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+
+    // Once we lift the gesture up, the animation should finish.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(renderHeader.geometry!.paintExtent, equals(60.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
 }
