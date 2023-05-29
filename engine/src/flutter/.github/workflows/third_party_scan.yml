@@ -42,6 +42,6 @@ jobs:
           retention-days: 5
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to security tab"
-        uses: github/codeql-action/upload-sarif@29b1f65c5e92e24fe6b6647da1eaabe529cec70f
+        uses: github/codeql-action/upload-sarif@0225834cc549ee0ca93cb085b92954821a145866
         with:
           sarif_file: osvReport.sarif
