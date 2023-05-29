@@ -525,26 +525,20 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
             page: _page,
             backButton: CupertinoTextSelectionToolbarButton(
               onPressed: _handlePreviousPage,
-              child: SizedBox(
-                height: _kToolbarHeight,
-                child: Icon(
-                  CupertinoIcons.left_chevron,
-                  color: _kToolbarTextColor.resolveFrom(context),
-                  size: _kToolbarChevronSize,
-                ),
+              child: Icon(
+                CupertinoIcons.chevron_left,
+                color: _kToolbarTextColor.resolveFrom(context),
+                size: _kToolbarChevronSize,
               ),
             ),
             dividerColor: _kToolbarDividerColor.resolveFrom(context),
             dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
             nextButton: CupertinoTextSelectionToolbarButton(
               onPressed: _handleNextPage,
-              child: SizedBox(
-                height: _kToolbarHeight,
-                child: Icon(
-                  CupertinoIcons.right_chevron,
-                  color: _kToolbarTextColor.resolveFrom(context),
-                  size: _kToolbarChevronSize,
-                ),
+              child: Icon(
+                CupertinoIcons.chevron_right,
+                color: _kToolbarTextColor.resolveFrom(context),
+                size: _kToolbarChevronSize,
               ),
             ),
             children: widget.children,
@@ -873,7 +867,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         // If this is the last child, it's ok to fit without a forward button.
         // Note childCount doesn't include slotted children which come before the list ones.
         paginationButtonsWidth =
-            i == childCount + 2 ? 0.0 : _nextButton!.size.width;
+            i == childCount + 1 ? 0.0 : _nextButton!.size.width;
       } else {
         paginationButtonsWidth = subsequentPageButtonsWidth;
       }

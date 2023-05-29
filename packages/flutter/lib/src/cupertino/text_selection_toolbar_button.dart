@@ -83,6 +83,10 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// [CupertinoTextSelectionToolbarButton.text].
   /// {@endtemplate}
   final String? text;
+  
+  /// Whether the button is enabled or disabled. Buttons are disabled by default. To
+  /// enable a button, set its [onPressed] property to a non-null value.
+  bool get enabled => onPressed != null;
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
