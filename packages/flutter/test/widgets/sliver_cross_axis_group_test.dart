@@ -528,11 +528,13 @@ void main() {
       ],
     ));
     final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
-    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     expect(renderGroup.geometry!.scrollExtent, equals(600));
-    controller.jumpTo(570);
+    controller.jumpTo(560);
     await tester.pumpAndSettle();
-    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-30.0));
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    // Paint extent after header's layout is 60.0, so we must offset by -20.0 to fit within the 40.0 remaining extent.
+    expect(renderHeader.geometry!.paintExtent, equals(60.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
   });
 
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
@@ -552,18 +554,16 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
-    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     expect(renderGroup.geometry!.scrollExtent, equals(600));
-
-    controller.jumpTo(600);
+    controller.jumpTo(600.0);
     await tester.pumpAndSettle();
-
     final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, -30));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-30.0));
+    await gesture.moveBy(const Offset(0.0, 40));
+    await tester.pump();
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    // Paint extent after header's layout is 40.0, so no need to correct the paintOffset.
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
@@ -586,7 +586,14 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(600));
     controller.jumpTo(570);
     await tester.pumpAndSettle();
+    // Paint extent of the header is 40.0, so we must provide an offset of -10.0 to make it fit in the 30.0 remaining paint extent of the group.
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+    // Pinned headers should not expand to the maximum extent unless the scroll offset is at the top of the sliver group.
+    controller.jumpTo(550);
+    await tester.pumpAndSettle();
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
   testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
@@ -613,21 +620,27 @@ void main() {
     await tester.pumpAndSettle();
 
     final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
-    await gesture.moveBy(const Offset(0.0, -30));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+    await gesture.moveBy(const Offset(0.0, 30.0));
+    await tester.pump();
+    // Paint extent after header's layout is 30.0, so no need to correct the paintOffset.
+    expect(renderHeader.geometry!.paintExtent, equals(30.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    // Floating headers should expand to maximum extent as we continue scrolling.
+    await gesture.moveBy(const Offset(0.0, 20.0));
+    await tester.pump();
+    expect(renderHeader.geometry!.paintExtent, equals(50.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverFloatingPersistentHeader scroll direction is not affected by controller.jumpTo', (WidgetTester tester) async {
+  testWidgets('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
         const SliverToBoxAdapter(child: SizedBox(height: 600)),
         SliverPersistentHeader(
-          delegate: TestDelegate(),
+          delegate: TestDelegate(minExtent: 40.0),
+          pinned: true,
           floating: true,
         ),
       ],
@@ -642,10 +655,17 @@ void main() {
 
     controller.jumpTo(600);
     await tester.pumpAndSettle();
-    controller.jumpTo(570);
-    await tester.pumpAndSettle();
 
-    // If renderHeader._lastStartedScrollDirection is not ScrollDirection.forward, then we shouldn't see the header at all.
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 30.0));
+    await tester.pump();
+    // Paint extent after header's layout is 40.0, so we need to adjust by -10.0.
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+    // Pinned floating headers should expand to maximum extent as we continue scrolling.
+    await gesture.moveBy(const Offset(0.0, 20.0));
+    await tester.pump();
+    expect(renderHeader.geometry!.paintExtent, equals(50.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
@@ -666,13 +686,16 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final RenderSliverCrossAxisGroup renderGroup = tester.renderObject(find.byType(SliverCrossAxisGroup)) as RenderSliverCrossAxisGroup;
-    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
     expect(renderGroup.geometry!.scrollExtent, equals(600));
 
     controller.jumpTo(600);
     await tester.pumpAndSettle();
+    controller.jumpTo(570);
+    await tester.pumpAndSettle();
 
-    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    // At a scroll offset of 570, a normal scrolling header should be out of view.
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderHeader.geometry!.paintExtent, equals(0.0));
   });
 
   testWidgets('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
@@ -705,6 +728,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Since snap should cause an animation to fully expand, the paintOffset should be -50.0.
+    expect(renderHeader.geometry!.paintExtent, equals(10));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
 }

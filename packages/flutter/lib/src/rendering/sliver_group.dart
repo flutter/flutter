@@ -109,8 +109,6 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
       final SliverGeometry childLayoutGeometry = child.geometry!;
       final double remainingExtent = geometry!.scrollExtent - constraints.scrollOffset;
-      print(childLayoutGeometry.paintExtent);
-      print(remainingExtent);
       final double paintCorrection = childLayoutGeometry.paintExtent > remainingExtent
         ? childLayoutGeometry.paintExtent - remainingExtent
         : 0.0;

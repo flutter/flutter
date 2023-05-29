@@ -654,12 +654,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   @override
   void performLayout() {
-    print('paint extent');
-    print('constraints remaining paint extent');
-    print(this.constraints.remainingPaintExtent);
-    print(this.constraints.userScrollDirection);
     final SliverConstraints constraints = this.constraints;
     final double maxExtent = this.maxExtent;
+    print(_lastActualScrollOffset);
     if (_lastActualScrollOffset != null && // We've laid out at least once to get an initial position, and either
         ((constraints.scrollOffset < _lastActualScrollOffset!) || // we are scrolling back, so should reveal, or
          (_effectiveScrollOffset! < maxExtent))) { // some part of it is visible, so should shrink or reveal as appropriate.
