@@ -583,7 +583,7 @@ void main() {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 125.5 : 126.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -858,7 +858,7 @@ void main() {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 125.5 : 126.0;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.

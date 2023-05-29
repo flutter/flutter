@@ -300,9 +300,6 @@ CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>(
 
 PreRunValidator get preRunValidator => context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
 
-// TODO(fujino): Migrate to 'main' https://github.com/flutter/flutter/issues/95041
-const String kDefaultFrameworkChannel = 'master';
-
 // Used to build RegExp instances which can detect the VM service message.
 final RegExp kVMServiceMessageRegExp = RegExp(r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)');
 
