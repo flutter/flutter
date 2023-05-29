@@ -423,8 +423,10 @@ class MediaQueryData {
   /// Whether the user requested to show on/off labels inside switches on iOS,
   /// via Settings -> Accessibility -> Display & Text Size -> On/Off Labels.
   ///
-  /// This flag is currently only updated on iOS devices that are running iOS 13
-  /// or above.
+  /// See also:
+  ///
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
   final bool onOffSwitchLabels;
 
   /// Whether the platform is requesting that animations be disabled or reduced

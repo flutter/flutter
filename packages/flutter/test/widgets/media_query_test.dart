@@ -1073,14 +1073,14 @@ void main() {
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
-          outsideOnOffSwitchLabels = MediaQuery.highContrastOf(context);
+          outsideOnOffSwitchLabels = MediaQuery.onOffSwitchLabelsOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               onOffSwitchLabels: true,
             ),
             child: Builder(
               builder: (BuildContext context) {
-                insideOnOffSwitchLabels = MediaQuery.highContrastOf(context);
+                insideOnOffSwitchLabels = MediaQuery.onOffSwitchLabelsOf(context);
                 return Container();
               },
             ),
