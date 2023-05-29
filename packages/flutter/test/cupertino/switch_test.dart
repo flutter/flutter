@@ -753,6 +753,112 @@ void main() {
     );
   });
 
+  testWidgets('Switch renders correctly before, during, and after being tapped with onOffSwitchLabels', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+          data: const MediaQueryData(onOffSwitchLabels: true),
+          child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.off.labels.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.turningOn.labels.png'),
+    );
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.on.labels.png'),
+    );
+  });
+
+  testWidgets('Switch renders correctly before, during, and after being tapped with onOffSwitchLabels rtl', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(onOffSwitchLabels: true),
+          child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.off.labels.rtl.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.turningOn.labels.rtl.png'),
+    );
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.on.labels.rtl.png'),
+    );
+  });
+
   testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
@@ -795,6 +901,102 @@ void main() {
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile('switch.tap.on.dark.png'),
+    );
+  });
+
+  testWidgets('Switch renders correctly in dark mode with onOffSwitchLabels', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          platformBrightness: Brightness.dark,
+          onOffSwitchLabels: true,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.off.dark.labels.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.on.dark.labels.png'),
+    );
+  });
+
+  testWidgets('Switch renders correctly in dark mode with onOffSwitchLabels rtl', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          platformBrightness: Brightness.dark,
+          onOffSwitchLabels: true,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.off.dark.labels.rtl.png'),
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile('switch.tap.on.dark.labels.rtl.png'),
     );
   });
 

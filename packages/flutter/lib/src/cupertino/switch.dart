@@ -716,24 +716,24 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     }
 
     if (_onOffSwitchLabels) {
-      late final Offset onLabelRectOffset;
+      late final Offset onLabelOffset;
       late final Offset offLabelOffset;
 
       switch (textDirection) {
         case TextDirection.ltr:
-          onLabelRectOffset =
+          onLabelOffset =
               trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0);
           offLabelOffset =
               trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0);
         case TextDirection.rtl:
-          onLabelRectOffset =
+          onLabelOffset =
               trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0);
           offLabelOffset =
               trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0);
       }
 
       final Rect onLabelRect = Rect.fromCenter(
-        center: onLabelRectOffset,
+        center: onLabelOffset,
         width: _kOnLabelWidth,
         height: _kOnLabelHeight,
       );
