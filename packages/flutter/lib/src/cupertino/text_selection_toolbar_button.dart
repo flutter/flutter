@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-
-import 'colors.dart';
-import 'debug.dart';
-import 'localizations.dart';
+import 'package:flutter/cupertino.dart';
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -83,7 +79,7 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// [CupertinoTextSelectionToolbarButton.text].
   /// {@endtemplate}
   final String? text;
-  
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -134,8 +130,18 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
 
   @override
   Widget build(BuildContext context) {
-    final Widget child = Padding(
+    final Widget child = CupertinoButton(
+      color: isPressed
+        ? _kToolbarPressedColor.resolveFrom(context)
+        : const Color(0x00000000),
+      borderRadius: null,
+      disabledColor: const Color(0x00000000),
+      // The button itself is not the one that calls onPressed.
+      onPressed: widget.enabled ? widget.onPressed : null,
       padding: _kToolbarButtonPadding,
+      // There's no foreground fade on iOS toolbar anymore, it just darkens the
+      // background.
+      pressedOpacity: 1.0,
       child: widget.child ?? Text(
          widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
          overflow: TextOverflow.ellipsis,
@@ -154,12 +160,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
-        child: ColoredBox(
-          color: isPressed
-            ? _kToolbarPressedColor.resolveFrom(context)
-            : const Color(0x00000000),
-          child: child,
-        ),
+        child: child,
       );
     } else {
       return child;

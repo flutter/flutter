@@ -335,11 +335,11 @@ void main() {
           ),
         );
 
-        final Finder buttonFinder = find.byType(CupertinoTextSelectionToolbarButton);
+        final Finder buttonFinder = find.byType(CupertinoButton);
         expect(buttonFinder, findsOneWidget);
 
         final Finder textFinder = find.descendant(
-          of: find.byType(CupertinoTextSelectionToolbarButton),
+          of: find.byType(CupertinoButton),
           matching: find.byType(Text)
         );
         expect(textFinder, findsOneWidget);
