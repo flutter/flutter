@@ -80,7 +80,7 @@ class ImageDecoderImpeller final : public ImageDecoder {
       const std::shared_ptr<impeller::Context>& context,
       const std::shared_ptr<impeller::DeviceBuffer>& buffer,
       const SkImageInfo& image_info,
-      std::shared_ptr<SkBitmap> bitmap,
+      const std::shared_ptr<SkBitmap>& bitmap,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch);
 
   /// @brief Create a host visible texture from the provided bitmap.
