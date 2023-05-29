@@ -348,6 +348,12 @@ class IOSDeployDebugger {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
+
+        // TODO(vashworth): Revert after https://github.com/flutter/flutter/issues/121231 is resolved.
+        if (line.isNotEmpty) {
+          _logger.printTrace(line);
+        }
+
         _monitorIOSDeployFailure(line, _logger);
 
         // (lldb)    platform select remote-'ios' --sysroot
@@ -365,7 +371,6 @@ class IOSDeployDebugger {
           }
           final String prompt = line.substring(0, promptEndIndex);
           lldbRun = RegExp(RegExp.escape(prompt) + r'\s*run');
-          _logger.printTrace(line);
           return;
         }
 
@@ -384,7 +389,6 @@ class IOSDeployDebugger {
         // success
         // 2020-09-15 13:42:25.185474-0700 Runner[477:181141] flutter: The Dart VM service is listening on http://127.0.0.1:57782/
         if (lldbRun.hasMatch(line)) {
-          _logger.printTrace(line);
           _debuggerState = _IOSDeployDebuggerState.launching;
           // TODO(vashworth): Remove all debugger state comments when https://github.com/flutter/flutter/issues/126412 is resolved.
           _logger.printTrace('Debugger state set to launching.');
@@ -393,7 +397,6 @@ class IOSDeployDebugger {
         // Next line after "run" must be "success", or the attach failed.
         // Example: "error: process launch failed"
         if (_debuggerState == _IOSDeployDebuggerState.launching) {
-          _logger.printTrace(line);
           final bool attachSuccess = line == 'success';
           _debuggerState = attachSuccess ? _IOSDeployDebuggerState.attached : _IOSDeployDebuggerState.detached;
           _logger.printTrace('Debugger state set to ${attachSuccess ? 'attached' : 'detached'}.');
@@ -408,7 +411,6 @@ class IOSDeployDebugger {
         // process signal SIGSTOP
         if (line.contains(_signalStop)) {
           // The app is about to be stopped. Only show in verbose mode.
-          _logger.printTrace(line);
           return;
         }
 
@@ -421,7 +423,6 @@ class IOSDeployDebugger {
 
         if (line == _backTraceAll) {
           // The app is stopped and the backtrace for all threads will be printed.
-          _logger.printTrace(line);
           // Even though we're not "detached", just stopped, mark as detached so the backtrace
           // is only show in verbose.
           _debuggerState = _IOSDeployDebuggerState.detached;
@@ -438,7 +439,6 @@ class IOSDeployDebugger {
 
         if (line.contains('PROCESS_STOPPED') || _lldbProcessStopped.hasMatch(line)) {
           // The app has been stopped. Dump the backtrace, and detach.
-          _logger.printTrace(line);
           _iosDeployProcess?.stdin.writeln(_backTraceAll);
           if (_processResumeCompleter == null) {
             detach();
@@ -449,20 +449,17 @@ class IOSDeployDebugger {
         if (line.contains('PROCESS_EXITED') || _lldbProcessExit.hasMatch(line)) {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
-          _logger.printTrace(line);
           exit();
           return;
         }
         if (_lldbProcessDetached.hasMatch(line)) {
           // The debugger has detached from the app, and there will be no more debugging messages.
           // Kill the ios-deploy process.
-          _logger.printTrace(line);
           exit();
           return;
         }
 
         if (_lldbProcessResuming.hasMatch(line)) {
-          _logger.printTrace(line);
           // we marked this detached when we received [_backTraceAll]
           _debuggerState = _IOSDeployDebuggerState.attached;
           _logger.printTrace('Debugger state set to attached.');
@@ -470,7 +467,6 @@ class IOSDeployDebugger {
         }
 
         if (_debuggerState != _IOSDeployDebuggerState.attached) {
-          _logger.printTrace(line);
           return;
         }
         if (lastLineFromDebugger != null && lastLineFromDebugger!.isNotEmpty && line.isEmpty) {
@@ -488,7 +484,7 @@ class IOSDeployDebugger {
           .transform<String>(const LineSplitter())
           .listen((String line) {
         _monitorIOSDeployFailure(line, _logger);
-        _logger.printTrace(line);
+        _logger.printTrace('error: $line');
       });
       unawaited(_iosDeployProcess!.exitCode.then((int status) async {
         _logger.printTrace('ios-deploy exited with code $exitCode');

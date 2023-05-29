@@ -36,6 +36,7 @@ import 'devfs.dart';
 import 'device.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'ios/devices.dart';
 import 'project.dart';
 import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
@@ -228,8 +229,9 @@ class FlutterDevice {
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
+  @visibleForTesting
   // ignore: cancel_subscriptions
-  StreamSubscription<String>? _loggingSubscription;
+  StreamSubscription<String>? loggingSubscription;
   bool? _isListeningForVmServiceUri;
 
   /// Whether the stream [vmServiceUris] is still open.
@@ -392,23 +394,26 @@ class FlutterDevice {
   }
 
   Future<void> startEchoingDeviceLog() async {
-    if (_loggingSubscription != null) {
+    if (loggingSubscription != null) {
       return;
     }
-    final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
-    _loggingSubscription = logStream.listen((String line) {
-      if (!line.contains(globals.kVMServiceMessageRegExp)) {
+    final DeviceLogReader logReader = await device!.getLogReader(app: package);
+    final Stream<String> logStream = logReader.logLines;
+    // TODO(vashworth): Remove check for IOSDeviceLogReader after
+    // https://github.com/flutter/flutter/issues/121231 is resolved.
+    loggingSubscription = logStream.listen((String line) {
+      if (logReader is! IOSDeviceLogReader && !line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
       }
     });
   }
 
   Future<void> stopEchoingDeviceLog() async {
-    if (_loggingSubscription == null) {
+    if (loggingSubscription == null) {
       return;
     }
-    await _loggingSubscription!.cancel();
-    _loggingSubscription = null;
+    await loggingSubscription!.cancel();
+    loggingSubscription = null;
   }
 
   Future<void> initLogReader() async {

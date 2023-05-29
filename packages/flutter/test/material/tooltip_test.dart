@@ -502,10 +502,12 @@ void main() {
     RenderBox tip = tester.renderObject(_findTooltipContainer(tooltipText));
     Offset fabTopRight = tester.getTopRight(fabFinder);
     Offset tooltipTopRight = tip.localToGlobal(tip.size.topRight(Offset.zero));
-    expect(tooltipTopRight.dy < fabTopRight.dy, true);
+    expect(tooltipTopRight.dy, lessThan(fabTopRight.dy));
 
     // Simulate Keyboard opening (MediaQuery.viewInsets.bottom = 300))
     await tester.pumpWidget(materialAppWithViewInsets(300));
+    // Wait for the tooltip to dismiss.
+    await tester.pump(const Duration(days: 1));
     await tester.pumpAndSettle();
 
     // Show FAB tooltip
@@ -517,7 +519,7 @@ void main() {
     tip = tester.renderObject(_findTooltipContainer(tooltipText));
     fabTopRight = tester.getTopRight(fabFinder);
     tooltipTopRight = tip.localToGlobal(tip.size.topRight(Offset.zero));
-    expect(tooltipTopRight.dy < fabTopRight.dy, true);
+    expect(tooltipTopRight.dy, lessThan(fabTopRight.dy));
   });
 
   testWidgetsWithLeakTracking('Custom tooltip margin', (WidgetTester tester) async {
@@ -711,6 +713,10 @@ void main() {
     RenderParagraph tooltipRenderParagraph = tester.renderObject<RenderParagraph>(find.text(tooltipText));
     expect(tooltipRenderParagraph.textDirection, TextDirection.rtl);
 
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    await tester.pump();
+
     await tester.pumpWidget(buildApp(tooltipText, TextDirection.ltr));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
@@ -856,6 +862,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: Tooltip(
+            triggerMode: TooltipTriggerMode.longPress,
             message: tooltipText,
             child: Container(
               width: 100.0,
@@ -879,7 +886,8 @@ void main() {
     // tap (down, up) gesture hides tooltip, since its not
     // a long press
     await tester.tap(tooltip);
-    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text(tooltipText), findsNothing);
 
     // long press once more
@@ -896,6 +904,32 @@ void main() {
     await tester.pump(kLongPressTimeout);
     expect(find.text(tooltipText), findsOneWidget);
     await gesture.up();
+  });
+
+  testWidgets('Tooltip dismiss countdown begins on long press release', (WidgetTester tester) async {
+    // Specs: https://github.com/flutter/flutter/issues/4182
+    const Duration showDuration = Duration(seconds: 1);
+    const Duration eternity = Duration(days: 9999);
+    await setWidgetForTooltipMode(tester, TooltipTriggerMode.longPress, showDuration: showDuration);
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+
+    await tester.pump(kLongPressTimeout);
+    expect(find.text(tooltipText), findsOneWidget);
+    // Keep holding to prevent the tooltip from dismissing.
+    await tester.pump(eternity);
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.pump(showDuration);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text(tooltipText), findsNothing);
   });
 
   testWidgetsWithLeakTracking('Tooltip is dismissed after a long press and showDuration expired', (WidgetTester tester) async {
@@ -967,11 +1001,9 @@ void main() {
   testWidgetsWithLeakTracking('Dispatch the mouse events before tip overlay detached', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/96890
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1018,7 +1050,6 @@ void main() {
 
     // Go without crashes.
     await gesture.removePointer();
-    gesture = null;
   });
 
   testWidgetsWithLeakTracking('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
@@ -1054,11 +1085,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1101,15 +1130,14 @@ void main() {
     // Wait for it to disappear.
     await tester.pumpAndSettle();
     await gesture.removePointer();
-    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 
   testWidgetsWithLeakTracking('Tooltip text is also hoverable', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      gesture?.removePointer();
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -1155,7 +1183,6 @@ void main() {
     // Wait for it to disappear.
     await tester.pumpAndSettle();
     await gesture.removePointer();
-    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -1209,7 +1236,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(outer));
     await tester.pump();
     // Wait for it to switch.
-    await tester.pump(waitDuration);
+    await tester.pumpAndSettle();
     expect(find.text('Outer'), findsOneWidget);
     expect(find.text('Inner'), findsNothing);
 
@@ -1270,17 +1297,6 @@ void main() {
 
   testWidgetsWithLeakTracking('Multiple Tooltips are dismissed by escape key', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
-    });
-    await gesture.addPointer();
-    await gesture.moveTo(const Offset(1.0, 1.0));
-    await tester.pump();
-    await gesture.moveTo(Offset.zero);
-
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -1305,18 +1321,8 @@ void main() {
       ),
     );
 
-    final Finder tooltip = find.text('tooltip1');
-    await gesture.moveTo(Offset.zero);
-    await tester.pump();
-    await gesture.moveTo(tester.getCenter(tooltip));
-    await tester.pump();
-    await tester.pump(waitDuration);
-    expect(find.text('message1'), findsOneWidget);
-
-    final Finder secondTooltip = find.text('tooltip2');
-    await gesture.moveTo(Offset.zero);
-    await tester.pump();
-    await gesture.moveTo(tester.getCenter(secondTooltip));
+    tester.state<TooltipState>(find.byTooltip('message1')).ensureTooltipVisible();
+    tester.state<TooltipState>(find.byTooltip('message2')).ensureTooltipVisible();
     await tester.pump();
     await tester.pump(waitDuration);
     // Make sure both messages are on the screen.
@@ -1328,11 +1334,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('message1'), findsNothing);
     expect(find.text('message2'), findsNothing);
-
-    await gesture.moveTo(Offset.zero);
-    await tester.pumpAndSettle();
-    await gesture.removePointer();
-    gesture = null;
   });
 
   testWidgetsWithLeakTracking('Tooltip does not attempt to show after unmount', (WidgetTester tester) async {
@@ -1881,6 +1882,91 @@ void main() {
     expect(onTriggeredCalled, false);
   });
 
+  testWidgets('dismissAllToolTips dismisses hovered tooltips', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    expect(Tooltip.dismissAllToolTips(), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Hovered tooltips do not dismiss after showDuration', (WidgetTester tester) async {
+    const Duration waitDuration = Duration.zero;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            waitDuration: waitDuration,
+            triggerMode: TooltipTriggerMode.longPress,
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await tester.longPressAt(tester.getCenter(tooltip));
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    // Still visible.
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Still visible.
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+
+    // The tooltip is no longer hovered and becomes invisible.
+    await gesture.moveTo(Offset.zero);
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
   testWidgetsWithLeakTracking('Tooltip should not be shown with empty message (with child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -1905,6 +1991,84 @@ void main() {
     if (tooltipText.isEmpty) {
       expect(find.byType(SizedBox), findsOneWidget);
     }
+  });
+
+  testWidgets('Tooltip trigger mode ignores mouse events', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          triggerMode: TooltipTriggerMode.longPress,
+          child: SizedBox.expand(),
+        ),
+      ),
+    );
+
+    final TestGesture mouseGesture = await tester.startGesture(tester.getCenter(find.byTooltip(tooltipText)), kind: PointerDeviceKind.mouse);
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await mouseGesture.up();
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
+
+    final TestGesture touchGesture = await tester.startGesture(tester.getCenter(find.byTooltip(tooltipText)));
+    await tester.pump(kLongPressTimeout + kPressTimeout);
+    await touchGesture.up();
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+  });
+
+  testWidgets('Tooltip does not block other mouse regions', (WidgetTester tester) async {
+    bool entered = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MouseRegion(
+          onEnter: (PointerEnterEvent event) { entered = true; },
+          child: const Tooltip(
+            message: tooltipText,
+            child: SizedBox.expand(),
+          ),
+        ),
+      ),
+    );
+
+    expect(entered, isFalse);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Tooltip)));
+    await gesture.removePointer();
+
+    expect(entered, isTrue);
+  });
+
+  testWidgets('Does not rebuild on mouse connect/disconnect', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/117627
+    int buildCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          message: tooltipText,
+          child: Builder(builder: (BuildContext context) {
+            buildCount += 1;
+            return const SizedBox.expand();
+          }),
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await tester.pump();
+    await gesture.removePointer();
+    await tester.pump();
+
+    expect(buildCount, 1);
   });
 
   testWidgetsWithLeakTracking('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {
