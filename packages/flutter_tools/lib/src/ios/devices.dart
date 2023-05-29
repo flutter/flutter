@@ -261,6 +261,7 @@ class IOSDevice extends Device {
     required this.cpuArchitecture,
     required this.connectionInterface,
     required this.isConnected,
+    required this.devModeEnabled,
     String? sdkVersion,
     required Platform platform,
     required IOSDeploy iosDeploy,
@@ -322,6 +323,8 @@ class IOSDevice extends Device {
   final Map<IOSApp?, DeviceLogReader> _logReaders = <IOSApp?, DeviceLogReader>{};
 
   DevicePortForwarder? _portForwarder;
+
+  bool devModeEnabled = false;
 
   @visibleForTesting
   IOSDeployDebugger? iosDeployDebugger;

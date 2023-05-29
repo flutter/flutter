@@ -286,10 +286,7 @@ void main() {
     // is turned on by default, these tests can be removed.
 
     testWidgets('CircleAvatar default colors with light theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        primaryColor: Colors.grey.shade100,
-        primaryColorBrightness: Brightness.light,
-      );
+      final ThemeData theme = ThemeData(primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
         wrap(
           child: Theme(
@@ -311,10 +308,7 @@ void main() {
     });
 
     testWidgets('CircleAvatar default colors with dark theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        primaryColor: Colors.grey.shade800,
-        primaryColorBrightness: Brightness.dark,
-      );
+      final ThemeData theme = ThemeData(primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
         wrap(
           child: Theme(
