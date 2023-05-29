@@ -318,7 +318,7 @@ ImageDecoderImpeller::UploadTextureToPrivate(
     const std::shared_ptr<impeller::Context>& context,
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info,
-    std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<SkBitmap>& bitmap,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!context) {
