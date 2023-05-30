@@ -2459,7 +2459,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
 
     _textPainter.paint(context.canvas, effectiveOffset);
-    paintInlineChildren(context, offset);
+    paintInlineChildren(context, effectiveOffset);
 
     if (foregroundChild != null) {
       context.paintChild(foregroundChild, offset);
