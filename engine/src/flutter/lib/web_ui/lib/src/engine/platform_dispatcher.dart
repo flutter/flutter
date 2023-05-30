@@ -104,6 +104,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _addFontSizeObserver();
     _addLocaleChangedListener();
     registerHotRestartListener(dispose);
+    _setAppLifecycleState(ui.AppLifecycleState.resumed);
   }
 
   /// The [EnginePlatformDispatcher] singleton.
@@ -1003,6 +1004,14 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   void _disconnectFontSizeObserver() {
     _fontSizeObserver?.disconnect();
     _fontSizeObserver = null;
+  }
+
+  void _setAppLifecycleState(ui.AppLifecycleState state) {
+    sendPlatformMessage(
+      'flutter/lifecycle',
+      Uint8List.fromList(utf8.encode(state.toString())).buffer.asByteData(),
+      null,
+    );
   }
 
   /// A callback that is invoked whenever [textScaleFactor] changes value.
