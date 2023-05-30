@@ -1,4 +1,4 @@
-Signature: f9a6985942fbf70f270e88af97f8774a
+Signature: 8598c4d94eef739d595088f4b66abc87
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8810,6 +8810,8 @@ ORIGIN: ../../../third_party/skia/include/ports/SkTypeface_fontations.h + ../../
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkGainmapShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skottie/include/SlotManager.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegConstants.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../third_party/skia/LICENSE
@@ -8841,6 +8843,8 @@ FILE: ../../../third_party/skia/include/ports/SkTypeface_fontations.h
 FILE: ../../../third_party/skia/include/private/SkGainmapInfo.h
 FILE: ../../../third_party/skia/include/private/SkGainmapShader.h
 FILE: ../../../third_party/skia/include/private/SkJpegGainmapEncoder.h
+FILE: ../../../third_party/skia/modules/skottie/include/SlotManager.h
+FILE: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h
 FILE: ../../../third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
