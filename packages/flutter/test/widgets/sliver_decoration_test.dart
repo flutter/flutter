@@ -8,7 +8,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('SliverDecoration creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
@@ -196,6 +199,41 @@ void main() {
     ));
 
     await expectLater(find.byKey(foregroundKey), matchesGoldenFile('decorated_sliver.moon.foreground.png'));
+  });
+
+  testWidgets('SliverDecoration paints its border correctly', (WidgetTester tester) async {
+    const Key key = Key('SliverDecoration with border');
+    final ScrollController controller = ScrollController();
+    Widget buildDecoration(BoxDecoration decoration, Axis scrollDirection) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300,
+            width: 100,
+            child: CustomScrollView(
+              controller: controller,
+              scrollDirection: scrollDirection,
+              slivers: <Widget>[
+                SliverDecoration(
+                  key: key,
+                  decoration: decoration,
+                  sliver: const SliverToBoxAdapter(
+                    child: SizedBox(width: 100, height: 500),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    const Color black = Color(0xFF000000);
+    await tester.pumpWidget(buildDecoration(BoxDecoration(border: Border.all()), Axis.vertical));
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    expect(find.byKey(key), paints..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
   });
 }
 
