@@ -108,7 +108,6 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
 
     Future<void> callServiceExtensions() async {
-      assert(_devToolsLauncher!.activeDevToolsServer != null);
       final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
       await Future.wait(
         <Future<void>>[
@@ -127,6 +126,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
 
     _readyToAnnounce = true;
+    assert(_devToolsLauncher!.activeDevToolsServer != null);
     if (_residentRunner.reportedDebuggers) {
       // Since the DevTools only just became available, we haven't had a chance to
       // report their URLs yet. Do so now.
