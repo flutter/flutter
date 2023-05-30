@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
@@ -131,7 +132,7 @@ class Java {
 
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version could not be determined.
-  late final JavaVersion? version = (() {
+  late final Version? version = (() {
     final RunResult result = _processUtils.runSync(
       <String>[binaryPath, '--version'],
       environment: environment,
@@ -140,7 +141,37 @@ class Java {
       _logger.printTrace('java --version failed: exitCode: ${result.exitCode}'
         ' stdout: ${result.stdout} stderr: ${result.stderr}');
     }
-    return JavaVersion.tryParseFromJavaOutput(result.stdout, logger: _logger);
+    final List<String> versionLines = result.stdout.split('\n');
+    // Should look something like 'openjdk 19.0.2 2023-01-17'.
+    final String longVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+
+    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
+    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
+    final Iterable<RegExpMatch> matches =
+        jdkVersionRegex.allMatches(longVersionText);
+    if (matches.isEmpty) {
+      _logger.printWarning(_formatJavaVersionWarning(longVersionText));
+      return null;
+    }
+    final String? version = matches.first.group(0);
+    if (version == null || version.split('_').isEmpty) {
+      _logger.printWarning(_formatJavaVersionWarning(longVersionText));
+      return null;
+    }
+
+    // Trim away _d+ from versions 1.8 and below.
+    final String versionWithoutBuildInfo = version.split('_').first;
+
+    final Version? parsedVersion = Version.parse(versionWithoutBuildInfo);
+    if (parsedVersion == null) {
+      return null;
+    }
+    return Version.withText(
+      parsedVersion.major,
+      parsedVersion.minor,
+      parsedVersion.patch,
+      longVersionText,
+    );
   })();
 
   bool canRun() {
@@ -188,45 +219,4 @@ String _formatJavaVersionWarning(String javaVersionRaw) {
     'If there is a version please look for an existing bug '
     'https://github.com/flutter/flutter/issues/ '
     'and if one does not exist file a new issue.';
-}
-
-class JavaVersion {
-  JavaVersion({
-    required this.longText,
-    required this.number
-  });
-
-  /// Typically the first line of the output from `java --version`.
-  /// For example, `"openjdk 19.0.2 2023-01-17"`.
-  final String longText;
-
-  /// The version number. For example, `"19.0.2."`.
-  final String number;
-
-  /// Extracts JDK version from the output of java --version.
-  static JavaVersion? tryParseFromJavaOutput(String rawVersionOutput, {
-    required Logger logger,
-  }) {
-    final List<String> versionLines = rawVersionOutput.split('\n');
-    final String longText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-
-    // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
-    final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
-    final Iterable<RegExpMatch> matches =
-        jdkVersionRegex.allMatches(rawVersionOutput);
-    if (matches.isEmpty) {
-      logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
-      return null;
-    }
-    final String? rawShortText = matches.first.group(0);
-    if (rawShortText == null || rawShortText.split('_').isEmpty) {
-      logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
-      return null;
-    }
-
-    // Trim away _d+ from versions 1.8 and below.
-    final String shortText = rawShortText.split('_').first;
-
-    return JavaVersion(longText: longText, number: shortText);
-  }
 }

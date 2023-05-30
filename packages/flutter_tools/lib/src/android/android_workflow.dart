@@ -111,25 +111,22 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(_userMessages.androidCantRunJavaBinary(_java!.binaryPath)));
         return false;
       }
-      String? javaVersionText;
-      String? javaVersionNumber;
+      Version? javaVersion;
       try {
-        javaVersionText = _java!.version?.longText;
-        javaVersionNumber = _java!.version?.number;
+        javaVersion = _java!.version;
       } on Exception catch (error) {
         _logger.printTrace(error.toString());
       }
-      final Version? javaVersion = Version.parse(javaVersionNumber);
-      if (javaVersionText == null || javaVersionText.isEmpty || javaVersion == null) {
+      if (javaVersion == null) {
         // Could not determine the java version.
         messages.add(ValidationMessage.error(_userMessages.androidUnknownJavaVersion));
         return false;
       }
       if (javaVersion < kAndroidJavaMinVersion) {
-        messages.add(ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersionText)));
+        messages.add(ValidationMessage.error(_userMessages.androidJavaMinimumVersion(javaVersion.toString())));
         return false;
       }
-      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersionText)));
+      messages.add(ValidationMessage(_userMessages.androidJavaVersion(javaVersion.toString())));
       return true;
     } finally {
       _task = null;
