@@ -3137,7 +3137,10 @@ void main() {
   });
 
   group('Material 2', () {
-    // Original Material 2 tests. Remove this group after `useMaterial3` has been deprecated.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
     testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
