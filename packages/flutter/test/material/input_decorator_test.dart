@@ -5692,8 +5692,18 @@ void main() {
 
     expect(
       find.text(longStringB),
-      // 133.3 is approximately 100 / 0.75 (_kFinalLabelScale)
-      paints..clipRect(rect: const Rect.fromLTWH(0, 0, 133.0, 16.0)),
+      paints..something((Symbol methodName, List<dynamic> arguments) {
+        if (methodName != #clipRect) {
+          return false;
+        }
+        final Rect clipRect = arguments[0] as Rect;
+        // _kFinalLabelScale = 0.75
+        const double width = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+          ? 100 / 0.75
+          : 133.0;
+        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
+        return true;
+      }),
     );
   }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
@@ -6248,34 +6258,6 @@ void main() {
 
     // Verify that the styles were passed along
     expect(getLabelStyle(tester).color, labelStyle.color);
-  });
-
-  testWidgets("InputDecorator's floating label origin no longer depends on ThemeData.fixTextFieldOutlineLabel", (WidgetTester tester) async {
-    Widget buildFrame(bool fixTextFieldOutlineLabel) {
-      return buildInputDecorator(
-        useMaterial3: useMaterial3,
-        isEmpty: true,
-        theme: ThemeData.light().copyWith(
-          fixTextFieldOutlineLabel: fixTextFieldOutlineLabel,
-        ),
-        decoration: const InputDecoration(
-          labelText: 'label',
-          enabledBorder: OutlineInputBorder(),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(false));
-    await tester.pumpAndSettle();
-
-    // floatingLabelHeight = 12 (font size 16dps * 0.75 = 12)
-    // labelY = -floatingLabelHeight/2 + borderWidth/2
-    expect(tester.getTopLeft(find.text('label')).dy, -5.5);
-
-    await tester.pumpWidget(buildFrame(true));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, -5.5);
   });
 
   testWidgets('hint style overflow works', (WidgetTester tester) async {

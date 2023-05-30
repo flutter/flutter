@@ -34,7 +34,7 @@ void main() {
     'downloaded and exits with code 1', () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
       frameworkVersion: '1.0.0',
-      channel: 'beta',
+      branch: 'beta',
     );
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
@@ -78,7 +78,7 @@ void main() {
   testWithoutContext('FlutterValidator shows an error message if Rosetta is needed', () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
       frameworkVersion: '1.0.0',
-      channel: 'beta',
+      branch: 'beta',
     );
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final Artifacts artifacts = Artifacts.test();
@@ -121,7 +121,7 @@ void main() {
   testWithoutContext('FlutterValidator does not run gen_snapshot binary check if it is not already downloaded', () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
       frameworkVersion: '1.0.0',
-      channel: 'beta',
+      branch: 'beta',
     );
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(
@@ -174,7 +174,7 @@ void main() {
   testWithoutContext('FlutterValidator shows mirrors on pub and flutter cloud storage', () async {
     final FakeFlutterVersion flutterVersion = FakeFlutterVersion(
       frameworkVersion: '1.0.0',
-      channel: 'beta',
+      branch: 'beta',
     );
     final Platform platform = FakePlatform(
       operatingSystem: 'windows',
@@ -218,7 +218,7 @@ void main() {
       ),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -247,8 +247,8 @@ void main() {
     final FlutterValidator flutterValidator = FlutterValidator(
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
+        branch: 'unknown',
         frameworkVersion: '1.0.0',
-        // channel is unknown by default
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -261,10 +261,10 @@ void main() {
 
     expect(await flutterValidator.validate(), _matchDoctorValidation(
       validationType: ValidationType.partial,
-      statusInfo: 'Channel unknown, 1.0.0, on Linux, locale en_US.UTF-8',
+      statusInfo: 'Channel [user-branch], 1.0.0, on Linux, locale en_US.UTF-8',
       messages: containsAll(<ValidationMessage>[
         const ValidationMessage.hint(
-          'Flutter version 1.0.0 on channel unknown at /sdk/flutter\n'
+          'Flutter version 1.0.0 on channel [user-branch] at /sdk/flutter\n'
           'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
           "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/docs/get-started/install."
         ),
@@ -281,7 +281,7 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '0.0.0-unknown',
-        channel: 'beta',
+        branch: 'beta',
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -315,7 +315,7 @@ void main() {
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(
           frameworkVersion: '1.0.0',
-          channel: 'beta'
+          branch: 'beta'
         ),
         devToolsVersion: () => '2.8.0',
         userMessages: UserMessages(),
@@ -338,7 +338,7 @@ void main() {
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(
           frameworkVersion: '1.0.0',
-          channel: 'beta',
+          branch: 'beta',
           repositoryUrl: 'https://githubmirror.com/flutter.git'
         ),
         devToolsVersion: () => '2.8.0',
@@ -372,7 +372,7 @@ void main() {
         platform: FakePlatform(localeName: 'en_US.UTF-8'),
         flutterVersion: () => FakeFlutterVersion(
           frameworkVersion: '1.0.0',
-          channel: 'beta',
+          branch: 'beta',
           repositoryUrl: null,
         ),
         devToolsVersion: () => '2.8.0',
@@ -406,7 +406,7 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -435,7 +435,7 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -472,7 +472,7 @@ void main() {
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -513,7 +513,7 @@ void main() {
       platform: FakePlatform(operatingSystem: 'windows', localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -546,7 +546,7 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),
@@ -580,7 +580,7 @@ void main() {
       platform: FakePlatform(localeName: 'en_US.UTF-8'),
       flutterVersion: () => FakeFlutterVersion(
         frameworkVersion: '1.0.0',
-        channel: 'beta'
+        branch: 'beta'
       ),
       devToolsVersion: () => '2.8.0',
       userMessages: UserMessages(),

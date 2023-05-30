@@ -2569,7 +2569,7 @@ void main() {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pop(context, null);
+                                Navigator.pop(context);
                               },
                               child: const Text('Pop route'),
                             ),
