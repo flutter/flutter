@@ -220,7 +220,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// [VerticalDragGestureRecognizer] and [HorizontalDragGestureRecognizer] are
   /// calculated by [computeHitSlop], while [computePanSlop] is used for
   /// [PanGestureRecognizer].
-  /// 
   ///
   /// If true, the drag callbacks will only be dispatched when this recognizer has
   /// won the arena and the drag threshold has been met.
