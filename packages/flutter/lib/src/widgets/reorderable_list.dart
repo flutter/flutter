@@ -257,6 +257,8 @@ class ReorderableList extends StatefulWidget {
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  ///
+  /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
   final double? autoScrollerVelocityScalar;
 
   /// The state from the closest instance of this class that encloses the given
@@ -450,12 +452,16 @@ class SliverReorderableList extends StatefulWidget {
     this.itemExtent,
     this.prototypeItem,
     this.proxyDecorator,
-    this.autoScrollerVelocityScalar,
-  }) : assert(itemCount >= 0),
+    double? autoScrollerVelocityScalar,
+  }) : autoScrollerVelocityScalar = autoScrollerVelocityScalar ?? _kDefaultAutoScrollVelocityScalar,
+       assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
        );
+
+  // An eyeballed value for a smooth scrolling experience.
+  static const double _kDefaultAutoScrollVelocityScalar = 50;
 
   /// {@macro flutter.widgets.reorderable_list.itemBuilder}
   final IndexedWidgetBuilder itemBuilder;
@@ -485,7 +491,11 @@ class SliverReorderableList extends StatefulWidget {
   final Widget? prototypeItem;
 
   /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
-  final double? autoScrollerVelocityScalar;
+  ///
+  /// {@template flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
+  /// Defaults to 50 if not set or set to null.
+  /// {@endtemplate}
+  final double autoScrollerVelocityScalar;
 
   @override
   SliverReorderableListState createState() => SliverReorderableListState();
