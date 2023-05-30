@@ -703,7 +703,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
       // TODO(egarciad): Consider making this configurable.
       // https://github.com/flutter/flutter/issues/52510
       if (allocation_size > kMaxLayerAllocations) {
-        SkRect joined_rect;
+        SkRect joined_rect = SkRect::MakeEmpty();
         for (const SkRect& rect : intersection_rects) {
           joined_rect.join(rect);
         }
