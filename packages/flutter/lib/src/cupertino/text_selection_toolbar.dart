@@ -5,9 +5,14 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show Brightness, clampDouble;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
+import 'colors.dart';
+import 'icons.dart';
+import 'text_selection_toolbar_button.dart';
+import 'theme.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
 // The height of the toolbar, including the arrow.
