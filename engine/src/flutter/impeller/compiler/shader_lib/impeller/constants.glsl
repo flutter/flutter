@@ -24,4 +24,8 @@ const float kHalfSqrtTwo = 0.70710678118;
 // sqrt(3)
 const float kSqrtThree = 1.73205080757;
 
+const float kDefaultMipBias = -0.475;
+
+const float kDefaultMipBiasHalf = -0.475hf;
+
 #endif
