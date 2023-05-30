@@ -96,12 +96,12 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
           textColor = ${componentColor("$dayPeriodComponent.selected.pressed.label-text")};
         } else {
           // not pressed
-          if (states.contains(MaterialState.focused)) {
-            textColor = ${componentColor("$dayPeriodComponent.selected.focus.label-text")};
+          if (states.contains(MaterialState.hovered)) {
+            textColor = ${componentColor("$dayPeriodComponent.selected.hover.label-text")};
           } else {
-            // not focused
-            if (states.contains(MaterialState.hovered)) {
-              textColor = ${componentColor("$dayPeriodComponent.selected.hover.label-text")};
+            // not hovered
+            if (states.contains(MaterialState.focused)) {
+              textColor = ${componentColor("$dayPeriodComponent.selected.focus.label-text")};
             }
           }
         }
@@ -111,12 +111,12 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
           textColor = ${componentColor("$dayPeriodComponent.unselected.pressed.label-text")};
         } else {
           // not pressed
-          if (states.contains(MaterialState.focused)) {
-            textColor = ${componentColor("$dayPeriodComponent.unselected.focus.label-text")};
+          if (states.contains(MaterialState.hovered)) {
+            textColor = ${componentColor("$dayPeriodComponent.unselected.hover.label-text")};
           } else {
-            // not focused
-            if (states.contains(MaterialState.hovered)) {
-              textColor = ${componentColor("$dayPeriodComponent.unselected.hover.label-text")};
+            // not hovered
+            if (states.contains(MaterialState.focused)) {
+              textColor = ${componentColor("$dayPeriodComponent.unselected.focus.label-text")};
             }
           }
         }
@@ -205,24 +205,24 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         Color overlayColor = ${componentColor('$hourMinuteComponent.selected.container')};
         if (states.contains(MaterialState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.selected.pressed.state-layer')};
-        } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
-          overlayColor = ${componentColor('$hourMinuteComponent.selected.focus.state-layer')}.withOpacity(focusOpacity);
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.selected.hover.state-layer')}.withOpacity(hoverOpacity);
+        } else if (states.contains(MaterialState.focused)) {
+          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
+          overlayColor = ${componentColor('$hourMinuteComponent.selected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.selected.container')});
       } else {
         Color overlayColor = ${componentColor('$hourMinuteComponent.unselected.container')};
         if (states.contains(MaterialState.pressed)) {
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.pressed.state-layer')};
-        } else if (states.contains(MaterialState.focused)) {
-          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
-          overlayColor = ${componentColor('$hourMinuteComponent.unselected.focus.state-layer')}.withOpacity(focusOpacity);
         } else if (states.contains(MaterialState.hovered)) {
           const double hoverOpacity = ${opacity('$hourMinuteComponent.hover.state-layer.opacity')};
           overlayColor = ${componentColor('$hourMinuteComponent.unselected.hover.state-layer')}.withOpacity(hoverOpacity);
+        } else if (states.contains(MaterialState.focused)) {
+          const double focusOpacity = ${opacity('$hourMinuteComponent.focus.state-layer.opacity')};
+          overlayColor = ${componentColor('$hourMinuteComponent.unselected.focus.state-layer')}.withOpacity(focusOpacity);
         }
         return Color.alphaBlend(overlayColor, ${componentColor('$hourMinuteComponent.unselected.container')});
       }
@@ -271,11 +271,11 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor("$hourMinuteComponent.selected.pressed.label-text")};
         }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor("$hourMinuteComponent.selected.focus.label-text")};
-        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor("$hourMinuteComponent.selected.hover.label-text")};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor("$hourMinuteComponent.selected.focus.label-text")};
         }
         return ${componentColor("$hourMinuteComponent.selected.label-text")};
       } else {
@@ -283,11 +283,11 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
         if (states.contains(MaterialState.pressed)) {
           return ${componentColor("$hourMinuteComponent.unselected.pressed.label-text")};
         }
-        if (states.contains(MaterialState.focused)) {
-          return ${componentColor("$hourMinuteComponent.unselected.focus.label-text")};
-        }
         if (states.contains(MaterialState.hovered)) {
           return ${componentColor("$hourMinuteComponent.unselected.hover.label-text")};
+        }
+        if (states.contains(MaterialState.focused)) {
+          return ${componentColor("$hourMinuteComponent.unselected.focus.label-text")};
         }
         return ${componentColor("$hourMinuteComponent.unselected.label-text")};
       }
