@@ -77,7 +77,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-    this.requireDragThreshold = false,
+    this.onlyAcceptDragOnThreshold = false,
     super.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
   }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
@@ -220,7 +220,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// has won the arena.
   ///
   /// This value defaults to false.
-  bool requireDragThreshold;
+  bool onlyAcceptDragOnThreshold;
 
   /// Determines the type of velocity estimation method to use for a potential
   /// drag gesture, when a new pointer is added.
@@ -419,7 +419,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
-    if (requireDragThreshold ? _hasDragThresholdBeenMet : true) {
+    if (onlyAcceptDragOnThreshold ? _hasDragThresholdBeenMet : true) {
       _checkDrag(pointer);
     }
   }

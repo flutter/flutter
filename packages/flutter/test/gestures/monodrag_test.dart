@@ -74,11 +74,11 @@ void main() {
     GestureBinding.instance.handleEvent(up91, HitTestEntry(MockHitTestTarget()));
   });
 
-  testGesture('DragGestureRecognizer should not dispatch drag callbacks when it wins the arena if requireDragThreshold is true and the threshold has not been met', (GestureTester tester) {
+  testGesture('DragGestureRecognizer should not dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is true and the threshold has not been met', (GestureTester tester) {
     final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
     final List<String> dragCallbacks = <String>[];
     verticalDrag
-      ..requireDragThreshold = true
+      ..onlyAcceptDragOnThreshold = true
       ..onStart = (DragStartDetails details) {
         dragCallbacks.add('onStart');
       }
@@ -108,11 +108,11 @@ void main() {
     dragCallbacks.clear();
   });
 
-  testGesture('DragGestureRecognizer should dispatch drag callbacks when it wins the arena if requireDragThreshold is false and the threshold has not been met', (GestureTester tester) {
+  testGesture('DragGestureRecognizer should dispatch drag callbacks when it wins the arena if onlyAcceptDragOnThreshold is false and the threshold has not been met', (GestureTester tester) {
     final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer();
     final List<String> dragCallbacks = <String>[];
     verticalDrag
-      ..requireDragThreshold = false
+      ..onlyAcceptDragOnThreshold = false
       ..onStart = (DragStartDetails details) {
         dragCallbacks.add('onStart');
       }
