@@ -201,39 +201,77 @@ void main() {
     await expectLater(find.byKey(foregroundKey), matchesGoldenFile('decorated_sliver.moon.foreground.png'));
   });
 
-  testWidgets('SliverDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('SliverDecoration paints its border correctly vertically', (WidgetTester tester) async {
     const Key key = Key('SliverDecoration with border');
+    const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
-    Widget buildDecoration(BoxDecoration decoration, Axis scrollDirection) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300,
-            width: 100,
-            child: CustomScrollView(
-              controller: controller,
-              scrollDirection: scrollDirection,
-              slivers: <Widget>[
-                SliverDecoration(
-                  key: key,
-                  decoration: decoration,
-                  sliver: const SliverToBoxAdapter(
-                    child: SizedBox(width: 100, height: 500),
-                  ),
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 300,
+          width: 100,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverDecoration(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: const SliverToBoxAdapter(
+                  child: SizedBox(width: 100, height: 500),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
-    }
-    const Color black = Color(0xFF000000);
-    await tester.pumpWidget(buildDecoration(BoxDecoration(border: Border.all()), Axis.vertical));
+      ),
+    ));
     controller.jumpTo(200);
     await tester.pumpAndSettle();
-    expect(find.byKey(key), paints..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(0.5, -199.5) & const Size(99, 499),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+  });
+
+  testWidgets('SliverDecoration paints its border correctly horizontally', (WidgetTester tester) async {
+    const Key key = Key('SliverDecoration with border');
+    const Color black = Color(0xFF000000);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 100,
+          width: 300,
+          child: CustomScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            slivers: <Widget>[
+              SliverDecoration(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: const SliverToBoxAdapter(
+                  child: SizedBox(width: 500, height: 100),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(-199.5, 0.5) & const Size(499, 99),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
   });
 }
 
