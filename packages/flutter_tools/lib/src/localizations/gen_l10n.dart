@@ -81,7 +81,6 @@ Future<LocalizationsGenerator> generateLocalizations({
 
   // All other post processing.
   if (options.format) {
-    print(true);
     final List<String> formatFileList = outputFileList.toList();
     if (untranslatedMessagesFile != null) {
       // Don't format the messages file using `dart format`.
