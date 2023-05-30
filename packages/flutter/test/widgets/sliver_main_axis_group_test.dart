@@ -7,54 +7,392 @@ const double VIEWPORT_WIDTH = 300;
 
 void main() {
   testWidgets('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
-  final List<int> items = List<int>.generate(20, (int i) => i);
-  final ScrollController controller = ScrollController();
+    final List<int> items = List<int>.generate(20, (int i) => i);
+    final ScrollController controller = ScrollController();
 
-  await tester.pumpWidget(
-    _buildSliverMainAxisGroup(
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        slivers: <Widget>[
+          _buildSliverList(itemMainAxisExtent: 300, items: items, label: (int item) => Text('Group 0 Tile $item')),
+          _buildSliverList(itemMainAxisExtent: 200, items: items, label: (int item) => Text('Group 1 Tile $item')),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, 0);
+
+    expect(find.text('Group 0 Tile 0'), findsOneWidget);
+    expect(find.text('Group 0 Tile 1'), findsOneWidget);
+    expect(find.text('Group 0 Tile 2'), findsNothing);
+
+    expect(find.text('Group 1 Tile 0'), findsNothing);
+
+    const double scrollOffset = 19 * 300.0;
+    controller.jumpTo(scrollOffset);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, scrollOffset);
+    expect(find.text('Group 0 Tile 18'), findsNothing);
+    expect(find.text('Group 0 Tile 19'), findsOneWidget);
+    expect(find.text('Group 1 Tile 0'), findsOneWidget);
+
+    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final RenderSliverList first = renderSlivers[0];
+    final RenderSliverList second = renderSlivers[1];
+
+    expect(first.geometry!.layoutExtent, equals(300.0));
+    expect(second.geometry!.layoutExtent, equals(300.0));
+    expect(first.geometry!.scrollExtent, equals(20 * 300.0));
+    expect(second.geometry!.scrollExtent, equals(20 * 200.0));
+
+    expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    expect(first.constraints.scrollOffset, equals(19 * 300.0));
+    expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(1 * 300.0));
+
+    final RenderSliverMainAxisGroup renderGroup =
+        tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
+    expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+  });
+
+  testWidgets('SliverMainAxisGroup is laid out properly when reversed', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (int i) => i);
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        reverse: true,
+        slivers: <Widget>[
+          _buildSliverList(itemMainAxisExtent: 300, items: items, label: (int item) => Text('Group 0 Tile $item')),
+          _buildSliverList(itemMainAxisExtent: 200, items: items, label: (int item) => Text('Group 1 Tile $item')),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, 0);
+
+    expect(find.text('Group 0 Tile 0'), findsOneWidget);
+    expect(find.text('Group 0 Tile 1'), findsOneWidget);
+    expect(find.text('Group 0 Tile 2'), findsNothing);
+
+    expect(find.text('Group 1 Tile 0'), findsNothing);
+
+    const double scrollOffset = 19 * 300.0;
+    controller.jumpTo(scrollOffset);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, scrollOffset);
+    expect(find.text('Group 0 Tile 18'), findsNothing);
+    expect(find.text('Group 0 Tile 19'), findsOneWidget);
+    expect(find.text('Group 1 Tile 0'), findsOneWidget);
+
+    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final RenderSliverList first = renderSlivers[0];
+    final RenderSliverList second = renderSlivers[1];
+
+    expect(first.geometry!.layoutExtent, equals(300.0));
+    expect(second.geometry!.layoutExtent, equals(300.0));
+    expect(first.geometry!.scrollExtent, equals(20 * 300.0));
+    expect(second.geometry!.scrollExtent, equals(20 * 200.0));
+
+    expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    expect(first.constraints.scrollOffset, equals(19 * 300.0));
+    expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(1 * 300.0));
+
+    final RenderSliverMainAxisGroup renderGroup =
+        tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
+    expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+  });
+
+  testWidgets('SliverMainAxisGroup is laid out properly when horizontal', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (int i) => i);
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        scrollDirection: Axis.horizontal,
+        slivers: <Widget>[
+          _buildSliverList(itemMainAxisExtent: 300, items: items, label: (int item) => Text('Group 0 Tile $item'), scrollDirection: Axis.horizontal),
+          _buildSliverList(itemMainAxisExtent: 200, items: items, label: (int item) => Text('Group 1 Tile $item'), scrollDirection: Axis.horizontal),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, 0);
+
+    expect(find.text('Group 0 Tile 0'), findsOneWidget);
+    expect(find.text('Group 0 Tile 1'), findsNothing);
+
+    expect(find.text('Group 1 Tile 0'), findsNothing);
+
+    const double scrollOffset = 19 * 300.0;
+    controller.jumpTo(scrollOffset);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, scrollOffset);
+    expect(find.text('Group 0 Tile 18'), findsNothing);
+    expect(find.text('Group 0 Tile 19'), findsOneWidget);
+    expect(find.text('Group 1 Tile 0'), findsNothing);
+
+    const double scrollOffset2 = 20 * 300.0;
+    controller.jumpTo(scrollOffset2);
+    await tester.pumpAndSettle();
+    expect(find.text('Group 0 Tile 19'), findsNothing);
+    expect(find.text('Group 1 Tile 0'), findsOneWidget);
+
+    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final RenderSliverList first = renderSlivers[0];
+    final RenderSliverList second = renderSlivers[1];
+
+    expect(first.geometry!.layoutExtent, equals(0.0));
+    expect(second.geometry!.layoutExtent, equals(300.0));
+    expect(first.geometry!.scrollExtent, equals(20 * 300.0));
+    expect(second.geometry!.scrollExtent, equals(20 * 200.0));
+
+    expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    expect(first.constraints.scrollOffset, equals(20 * 300.0));
+    expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+
+    final RenderSliverMainAxisGroup renderGroup =
+        tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
+    expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+  });
+
+testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (int i) => i);
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        slivers: <Widget>[
+          _buildSliverList(itemMainAxisExtent: 300, items: items, label: (int item) => Text('Group 0 Tile $item'), scrollDirection: Axis.horizontal),
+          _buildSliverList(itemMainAxisExtent: 200, items: items, label: (int item) => Text('Group 1 Tile $item'), scrollDirection: Axis.horizontal),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, 0);
+
+    expect(find.text('Group 0 Tile 0'), findsOneWidget);
+    expect(find.text('Group 0 Tile 1'), findsNothing);
+
+    expect(find.text('Group 1 Tile 0'), findsNothing);
+
+    const double scrollOffset = 19 * 300.0;
+    controller.jumpTo(scrollOffset);
+    await tester.pumpAndSettle();
+
+    expect(controller.offset, scrollOffset);
+    expect(find.text('Group 0 Tile 18'), findsNothing);
+    expect(find.text('Group 0 Tile 19'), findsOneWidget);
+    expect(find.text('Group 1 Tile 0'), findsNothing);
+
+    const double scrollOffset2 = 20 * 300.0;
+    controller.jumpTo(scrollOffset2);
+    await tester.pumpAndSettle();
+    expect(find.text('Group 0 Tile 19'), findsNothing);
+    expect(find.text('Group 1 Tile 0'), findsOneWidget);
+
+    final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
+    final RenderSliverList first = renderSlivers[0];
+    final RenderSliverList second = renderSlivers[1];
+
+    expect(first.geometry!.layoutExtent, equals(0.0));
+    expect(second.geometry!.layoutExtent, equals(300.0));
+    expect(first.geometry!.scrollExtent, equals(20 * 300.0));
+    expect(second.geometry!.scrollExtent, equals(20 * 200.0));
+
+    expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    expect(first.constraints.scrollOffset, equals(20 * 300.0));
+    expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+
+    final RenderSliverMainAxisGroup renderGroup =
+        tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
+    expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+  });
+
+  testWidgets('Hit test works properly on various parts of SliverMainAxisGroup', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (int i) => i);
+    final ScrollController controller = ScrollController();
+
+    String? clickedTile;
+
+    int group = 0;
+    int tile = 0;
+
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
-        _buildSliverList(itemMainAxisExtent: 300, items: items, label: (int item) => Text('Group 0 Tile $item')),
-        _buildSliverList(itemMainAxisExtent: 200, items: items, label: (int item) => Text('Group 1 Tile $item')),
+        _buildSliverList(
+          itemMainAxisExtent: 300,
+          items: items,
+          label: (int item) => tile == item && group == 0
+            ? TextButton(
+              onPressed: () => clickedTile = 'Group 0 Tile $item',
+              child: Text('Group 0 Tile $item'),
+            )
+            : Text('Group 0 Tile $item'),
+        ),
+        _buildSliverList(
+          items: items,
+          label: (int item) => tile == item && group == 1
+            ? TextButton(
+              onPressed: () => clickedTile = 'Group 1 Tile $item',
+              child: Text('Group 1 Tile $item'),
+            )
+            : Text('Group 1 Tile $item'),
+        ),
+      ]),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(TextButton));
+    await tester.pumpAndSettle();
+    expect(clickedTile, equals('Group 0 Tile 0'));
+
+    clickedTile = null;
+    group = 1;
+    tile = 2;
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        _buildSliverList(
+          itemMainAxisExtent: 300,
+          items: items,
+          label: (int item) => tile == item && group == 0
+            ? TextButton(
+              onPressed: () => clickedTile = 'Group 0 Tile $item',
+              child: Text('Group 0 Tile $item'),
+            )
+            : Text('Group 0 Tile $item'),
+        ),
+        _buildSliverList(
+          items: items,
+          label: (int item) => tile == item && group == 1
+            ? TextButton(
+              onPressed: () => clickedTile = 'Group 1 Tile $item',
+              child: Text('Group 1 Tile $item'),
+            )
+            : Text('Group 1 Tile $item'),
+        ),
+      ]),
+    );
+    controller.jumpTo(300.0 * 20);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(TextButton));
+    await tester.pumpAndSettle();
+    expect(clickedTile, equals('Group 1 Tile 2'));
+  });
+
+  testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: Text('first box')),
+        const SliverToBoxAdapter(child: Text('second box')),
+      ]),
+    );
+    await tester.pumpAndSettle();
+
+    // localToGlobal calculates offset via applyPaintTransform
+    final RenderBox first = tester.renderObject(find.text('first box')) as RenderBox;
+    final RenderBox second = tester.renderObject(find.text('second box'));
+    expect(first.localToGlobal(Offset.zero), Offset.zero);
+    expect(second.localToGlobal(Offset.zero), Offset(0, first.size.height));
+  });
+
+  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        SliverPersistentHeader(
+          delegate: TestDelegate(),
+          pinned: true,
+        ),
       ],
-    ),
-  );
-  await tester.pumpAndSettle();
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    // Scroll extent is the total of the box sliver and the sliver persistent header.
+    expect(renderGroup.geometry!.scrollExtent, equals(600.0 + 60.0));
+    controller.jumpTo(620);
+    await tester.pumpAndSettle();
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    // Paint extent after header's layout is 60.0, so we must offset by -20.0 to fit within the 40.0 remaining extent.
+    expect(renderHeader.geometry!.paintExtent, equals(60.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+  });
 
-  expect(controller.offset, 0);
 
-  expect(find.text('Group 0 Tile 0'), findsOneWidget);
-  expect(find.text('Group 0 Tile 1'), findsOneWidget);
-  expect(find.text('Group 0 Tile 2'), findsNothing);
+  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        SliverPersistentHeader(
+          delegate: TestDelegate(),
+          floating: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+    controller.jumpTo(660.0);
+    await tester.pumpAndSettle();
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 40));
+    await tester.pump();
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    // Paint extent after header's layout is 40.0, so no need to correct the paintOffset.
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+  });
 
-  expect(find.text('Group 1 Tile 0'), findsNothing);
-
-  const double scrollOffset = 19 * 300.0;
-  controller.jumpTo(scrollOffset);
-  await tester.pumpAndSettle();
-
-  expect(controller.offset, scrollOffset);
-  expect(find.text('Group 0 Tile 18'), findsNothing);
-  expect(find.text('Group 0 Tile 19'), findsOneWidget);
-  expect(find.text('Group 1 Tile 0'), findsOneWidget);
-
-  final List<RenderSliverList> renderSlivers = tester.renderObjectList<RenderSliverList>(find.byType(SliverList)).toList();
-  final RenderSliverList first = renderSlivers[0];
-  final RenderSliverList second = renderSlivers[1];
-
-  expect(first.geometry!.layoutExtent, equals(300.0));
-  expect(second.geometry!.layoutExtent, equals(300.0));
-  expect(first.geometry!.scrollExtent, equals(20 * 300.0));
-  expect(second.geometry!.scrollExtent, equals(20 * 200.0));
-
-  expect((first.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
-  expect(first.constraints.scrollOffset, equals(19 * 300.0));
-  expect((second.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(1 * 300.0));
-
-  final RenderSliverMainAxisGroup renderGroup =
-      tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
-  expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
-});
+  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+        SliverPersistentHeader(
+          delegate: TestDelegate(minExtent: 40.0),
+          pinned: true,
+        ),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+    controller.jumpTo(630);
+    await tester.pumpAndSettle();
+    // Paint extent of the header is 40.0, so we must provide an offset of -10.0 to make it fit in the 30.0 remaining paint extent of the group.
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+    // Pinned headers should not expand to the maximum extent unless the scroll offset is at the top of the sliver group.
+    controller.jumpTo(610);
+    await tester.pumpAndSettle();
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+  });
 
 }
 
@@ -95,6 +433,7 @@ Widget _buildSliverMainAxisGroup({
   double viewportWidth = VIEWPORT_WIDTH,
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
+  List<Widget> otherSlivers = const <Widget>[],
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -107,9 +446,27 @@ Widget _buildSliverMainAxisGroup({
           scrollDirection: scrollDirection,
           reverse: reverse,
           controller: controller,
-          slivers: <Widget>[SliverMainAxisGroup(slivers: slivers)],
+          slivers: <Widget>[SliverMainAxisGroup(slivers: slivers), ...otherSlivers],
         ),
       ),
     ),
   );
+}
+
+class TestDelegate extends SliverPersistentHeaderDelegate {
+  TestDelegate({ this.maxExtent = 60.0, this.minExtent = 60.0 });
+
+  @override
+  final double maxExtent;
+
+  @override
+  final double minExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(height: maxExtent);
+  }
+
+  @override
+  bool shouldRebuild(TestDelegate oldDelegate) => true;
 }

@@ -255,13 +255,11 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
       child = childAfter(child);
     }
 
-    print('performing correction for sliver group');
     final double totalScrollExtent = offset;
     offset = 0.0;
     child = firstChild;
     // Second pass to correct out of bound paintOffsets.
     while (child != null) {
-      print('printing remainingExtent, and childs layoutextent');
       final double beforeOffsetPaintExtent = calculatePaintOffset(
         constraints,
         from: 0.0,
