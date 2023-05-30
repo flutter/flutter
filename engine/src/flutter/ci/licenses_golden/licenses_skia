@@ -1,4 +1,4 @@
-Signature: 8598c4d94eef739d595088f4b66abc87
+Signature: 959220be4b833bcdb24e336353826031
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3915,7 +3915,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkSpecialSurface.h + ../../../third_p
 ORIGIN: ../../../third_party/skia/src/core/SkSwizzle.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkSwizzlePriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkOverdrawColorFilter.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/effects/imagefilters/SkArithmeticImageFilter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/imagefilters/SkShaderImageFilter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkICC.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkICCPriv.h + ../../../third_party/skia/LICENSE
@@ -4226,7 +4225,6 @@ FILE: ../../../third_party/skia/src/core/SkSpecialSurface.h
 FILE: ../../../third_party/skia/src/core/SkSwizzle.cpp
 FILE: ../../../third_party/skia/src/core/SkSwizzlePriv.h
 FILE: ../../../third_party/skia/src/effects/SkOverdrawColorFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkArithmeticImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkShaderImageFilter.cpp
 FILE: ../../../third_party/skia/src/encode/SkICC.cpp
 FILE: ../../../third_party/skia/src/encode/SkICCPriv.h
