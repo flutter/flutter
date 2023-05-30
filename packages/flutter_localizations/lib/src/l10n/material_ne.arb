@@ -42,6 +42,12 @@
   "dialogLabel": "संवाद",
   "alertDialogLabel": "अलर्ट",
   "searchFieldLabel": "खोज्नुहोस्",
+  "reorderItemToStart": "सुरुमा सार्नुहोस्",
+  "reorderItemToEnd": "अन्त्यमा जानुहोस्",
+  "reorderItemUp": "माथि सार्नुहोस्",
+  "reorderItemDown": "तल सार्नुहोस्",
+  "reorderItemLeft": "बायाँ सार्नुहोस्",
+  "reorderItemRight": "दायाँ सार्नुहोस्",
   "expandedIconTapHint": "संक्षिप्त गर्नुहोस्",
   "collapsedIconTapHint": "विस्तार गर्नुहोस्",
   "remainingTextFieldCharacterCountOne": "१ वर्ण बाँकी",
@@ -127,5 +133,11 @@
   "scrimLabel": "स्क्रिम",
   "bottomSheetLabel": "पुछारको पाना",
   "scrimOnTapHint": "$modalRouteContentName बन्द गर्नुहोस्",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

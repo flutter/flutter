@@ -42,6 +42,12 @@
   "dialogLabel": "Ingxoxo",
   "alertDialogLabel": "Isexwayiso",
   "searchFieldLabel": "Sesha",
+  "reorderItemToStart": "Yisa ekuqaleni",
+  "reorderItemToEnd": "Yisa ekugcineni",
+  "reorderItemUp": "Iya phezulu",
+  "reorderItemDown": "Iya phansi",
+  "reorderItemLeft": "Hambisa kwesokunxele",
+  "reorderItemRight": "Yisa kwesokudla",
   "expandedIconTapHint": "Goqa",
   "collapsedIconTapHint": "Nweba",
   "remainingTextFieldCharacterCountOne": "1 uhlamvu olusele",
@@ -127,5 +133,11 @@
   "scrimLabel": "I-Scrim",
   "bottomSheetLabel": "Ishidi Eliphansi",
   "scrimOnTapHint": "Vala i-$modalRouteContentName",
-  "keyboardKeyShift": "U-Shift"
+  "keyboardKeyShift": "U-Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -422,11 +422,83 @@ abstract class MaterialLocalizations {
   /// shows the list of accounts.
   String get showAccountsLabel;
 
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
+  /// list to the start of the list.
+  @Deprecated(
+    'Use the reorderItemToStart from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
+  String get reorderItemToStart;
+
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
+  /// list to the end of the list.
+  @Deprecated(
+    'Use the reorderItemToEnd from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
+  String get reorderItemToEnd;
+
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
+  /// list one space up the list.
+  @Deprecated(
+    'Use the reorderItemUp from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
+  String get reorderItemUp;
+
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
+  /// list one space down the list.
+  @Deprecated(
+    'Use the reorderItemDown from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
+  String get reorderItemDown;
+
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
+  /// list one space left in the list.
+  @Deprecated(
+    'Use the reorderItemLeft from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
+  String get reorderItemLeft;
+
+  /// The semantics label used for [ReorderableListView] to reorder an item in the
+  /// list one space right in the list.
+  @Deprecated(
+    'Use the reorderItemRight from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
+  String get reorderItemRight;
+
   /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
   String get expandedIconTapHint => 'Collapse';
 
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
+
+  /// The semantics hint to describe the tap action on an expanded
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  /// The semantics hint to describe the tap action on an expanded [ExpansionTile].
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpansionTile].
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  /// The semantics hint to describe the [ExpansionTile] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [ExpansionTile] collapsed state.
+  String get collapsedHint => 'Expanded';
 
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
@@ -812,7 +884,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
-    return DateTime(year, month, day);
+
+    try {
+      return DateTime(year, month, day);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   @override
@@ -1129,10 +1206,46 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get showAccountsLabel => 'Show accounts';
 
   @override
+  String get reorderItemUp => 'Move up';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
+
+  @override
   String get expandedIconTapHint => 'Collapse';
 
   @override
   String get collapsedIconTapHint => 'Expand';
+
+  @override
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
 
   @override
   String get refreshIndicatorSemanticLabel => 'Refresh';

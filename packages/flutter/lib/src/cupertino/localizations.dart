@@ -236,6 +236,11 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get pasteButtonLabel;
 
+  /// Label that appears in the Cupertino toolbar when the spell checker
+  /// couldn't find any replacements for the current word.
+  // The global version uses the translated string from the arb file.
+  String get noSpellCheckReplacementsLabel;
+
   /// The term used for selecting everything.
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
@@ -439,6 +444,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get pasteButtonLabel => 'Paste';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get selectAllButtonLabel => 'Select All';

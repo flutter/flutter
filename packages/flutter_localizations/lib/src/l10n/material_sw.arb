@@ -43,6 +43,12 @@
   "dialogLabel": "Kidirisha",
   "alertDialogLabel": "Arifa",
   "searchFieldLabel": "Tafuta",
+  "reorderItemToStart": "Sogeza hadi mwanzo",
+  "reorderItemToEnd": "Sogeza hadi mwisho",
+  "reorderItemUp": "Sogeza juu",
+  "reorderItemDown": "Sogeza chini",
+  "reorderItemLeft": "Sogeza kushoto",
+  "reorderItemRight": "Sogeza kulia",
   "expandedIconTapHint": "Kunja",
   "collapsedIconTapHint": "Panua",
   "remainingTextFieldCharacterCountZero": "Hapana herufi zilizo baki",
@@ -129,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Safu ya Chini",
   "scrimOnTapHint": "Funga $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

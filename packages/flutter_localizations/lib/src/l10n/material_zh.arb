@@ -42,6 +42,12 @@
   "dialogLabel": "对话框",
   "alertDialogLabel": "提醒",
   "searchFieldLabel": "搜索",
+  "reorderItemToStart": "移到开头",
+  "reorderItemToEnd": "移到末尾",
+  "reorderItemUp": "上移",
+  "reorderItemDown": "下移",
+  "reorderItemLeft": "左移",
+  "reorderItemRight": "右移",
   "expandedIconTapHint": "收起",
   "collapsedIconTapHint": "展开",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "纱罩",
   "bottomSheetLabel": "底部动作条",
   "scrimOnTapHint": "关闭 $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

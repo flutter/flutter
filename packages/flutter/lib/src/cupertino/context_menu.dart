@@ -592,9 +592,11 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
     if (status != AnimationStatus.dismissed) {
       return;
     }
-    setState(() {
-      _childHidden = false;
-    });
+    if (mounted) {
+      setState(() {
+        _childHidden = false;
+      });
+    }
     _route!.animation!.removeStatusListener(_routeAnimationStatusListener);
     _route = null;
   }
@@ -1446,7 +1448,7 @@ class _ContextMenuSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               actions.first,
-              for (Widget action in actions.skip(1))
+              for (final Widget action in actions.skip(1))
                 DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(

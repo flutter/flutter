@@ -1760,7 +1760,7 @@ abstract class InheritedWidget extends ProxyWidget {
 ///
 ///  * [MultiChildRenderObjectWidget], which configures a [RenderObject] with
 ///    a single list of children.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
+///  * [SlottedMultiChildRenderObjectWidget], which configures a
 ///    [RenderObject] that organizes its children in different named slots.
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -1854,7 +1854,7 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 ///  * [Stack], which uses [MultiChildRenderObjectWidget].
 ///  * [RenderStack], for an example implementation of the associated render
 ///    object.
-///  * [SlottedMultiChildRenderObjectWidgetMixin], which configures a
+///  * [SlottedMultiChildRenderObjectWidget], which configures a
 ///    [RenderObject] that instead of having a single list of children organizes
 ///    its children in named slots.
 abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
@@ -2576,7 +2576,7 @@ class BuildOwner {
           ErrorHint(
             'If you did not attempt to call scheduleBuildFor() yourself, then this probably '
             'indicates a bug in the widgets framework. Please report it:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+            '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
           ),
         ]);
       }

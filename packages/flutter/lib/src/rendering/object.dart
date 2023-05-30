@@ -3434,6 +3434,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
     final _SemanticsFragment fragment = _getSemanticsForParent(
       mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false,
+      blockUserActions: _semantics?.areUserActionsBlocked ?? false,
     );
     assert(fragment is _InterestingSemanticsFragment);
     final _InterestingSemanticsFragment interestingFragment = fragment as _InterestingSemanticsFragment;
@@ -3453,13 +3454,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Returns the semantics that this node would like to add to its parent.
   _SemanticsFragment _getSemanticsForParent({
     required bool mergeIntoParent,
+    required bool blockUserActions,
   }) {
     assert(!_needsLayout, 'Updated layout information required for $this to calculate semantics.');
 
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
-
     bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
+    final bool blockChildInteractions = blockUserActions || config.isBlockingUserActions;
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
     final List<SemanticsConfiguration> childConfigurations = <SemanticsConfiguration>[];
     final bool explicitChildNode = config.explicitChildNodes || parent is! RenderObject;
@@ -3472,6 +3474,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(!_needsLayout);
       final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
         mergeIntoParent: childrenMergeIntoParent,
+        blockUserActions: blockChildInteractions,
       );
       if (parentFragment.dropsSemanticsOfPreviousSiblings) {
         childConfigurations.clear();
@@ -3562,6 +3565,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       siblingMergeFragmentGroups.forEach(_marksExplicitInMergeGroup);
       result = _SwitchableSemanticsFragment(
         config: config,
+        blockUserActions: blockUserActions,
         mergeIntoParent: mergeIntoParent,
         siblingMergeGroups: siblingMergeFragmentGroups,
         owner: this,
@@ -4571,13 +4575,19 @@ class _IncompleteSemanticsFragment extends _InterestingSemanticsFragment {
 class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
     required bool mergeIntoParent,
+    required bool blockUserActions,
     required SemanticsConfiguration config,
     required List<List<_InterestingSemanticsFragment>> siblingMergeGroups,
     required super.owner,
     required super.dropsSemanticsOfPreviousSiblings,
   }) : _siblingMergeGroups = siblingMergeGroups,
        _mergeIntoParent = mergeIntoParent,
-       _config = config;
+       _config = config {
+    if (blockUserActions && !_config.isBlockingUserActions) {
+      _ensureConfigIsWritable();
+      _config.isBlockingUserActions = true;
+    }
+  }
 
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;
@@ -4603,12 +4613,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
           final _SwitchableSemanticsFragment switchableFragment = fragment as _SwitchableSemanticsFragment;
           switchableFragment._mergesToSibling = true;
           node ??= fragment.owner._semantics;
-          if (configuration == null) {
-            switchableFragment._ensureConfigIsWritable();
-            configuration = switchableFragment.config;
-          } else {
-            configuration.absorb(switchableFragment.config!);
-          }
+          configuration ??= SemanticsConfiguration();
+          configuration.absorb(switchableFragment.config!);
           // It is a child fragment of a _SwitchableFragment, it must have a
           // geometry.
           final _SemanticsGeometry geometry = switchableFragment._computeSemanticsGeometry(

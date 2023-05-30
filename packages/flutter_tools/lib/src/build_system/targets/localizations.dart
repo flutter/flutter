@@ -45,13 +45,17 @@ class GenerateLocalizationsTarget extends Target {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     assert(configFile.existsSync());
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    // Keep in mind that this is also defined in the following locations:
+    // 1. flutter_tools/lib/src/commands/generate_localizations.dart
+    // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart
+    // Keep the value consistent in all three locations to ensure behavior is the
+    // same across "flutter gen-l10n" and "flutter run".
+    final String defaultArbDir = environment.fileSystem.path.join('lib', 'l10n');
+
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: environment.logger,
-    );
-    final DepfileService depfileService = DepfileService(
-      logger: environment.logger,
-      fileSystem: environment.fileSystem,
+      defaultArbDir: defaultArbDir,
     );
     generateLocalizations(
       logger: environment.logger,
@@ -70,16 +74,16 @@ class GenerateLocalizationsTarget extends Target {
       <File>[
         configFile,
         if (inputs != null)
-          for (Object inputFile in inputs.whereType<Object>())
+          for (final Object inputFile in inputs.whereType<Object>())
             environment.fileSystem.file(inputFile),
       ],
       <File>[
         if (outputs != null)
-          for (Object outputFile in outputs.whereType<Object>())
+          for (final Object outputFile in outputs.whereType<Object>())
             environment.fileSystem.file(outputFile),
       ],
     );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       depfile,
       environment.buildDir.childFile('gen_localizations.d'),
     );

@@ -42,6 +42,12 @@
   "dialogLabel": "Dialoogvenster",
   "alertDialogLabel": "Melding",
   "searchFieldLabel": "Zoeken",
+  "reorderItemToStart": "Naar het begin verplaatsen",
+  "reorderItemToEnd": "Naar het einde verplaatsen",
+  "reorderItemUp": "Omhoog verplaatsen",
+  "reorderItemDown": "Omlaag verplaatsen",
+  "reorderItemLeft": "Naar links verplaatsen",
+  "reorderItemRight": "Naar rechts verplaatsen",
   "expandedIconTapHint": "Samenvouwen",
   "collapsedIconTapHint": "Uitvouwen",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Blad onderaan",
   "scrimOnTapHint": "$modalRouteContentName sluiten",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

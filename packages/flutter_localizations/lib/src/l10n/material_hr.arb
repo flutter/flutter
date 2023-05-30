@@ -45,6 +45,12 @@
   "dialogLabel": "Dijalog",
   "alertDialogLabel": "Upozorenje",
   "searchFieldLabel": "Pretražite",
+  "reorderItemToStart": "Premjesti na početak",
+  "reorderItemToEnd": "Premjesti na kraj",
+  "reorderItemUp": "Pomakni prema gore",
+  "reorderItemDown": "Pomakni prema dolje",
+  "reorderItemLeft": "Pomakni ulijevo",
+  "reorderItemRight": "Pomakni udesno",
   "expandedIconTapHint": "Sažmi",
   "collapsedIconTapHint": "Proširi",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -131,5 +137,11 @@
   "scrimLabel": "Rubno",
   "bottomSheetLabel": "Donja tablica",
   "scrimOnTapHint": "Zatvori $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

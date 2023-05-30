@@ -43,6 +43,12 @@
   "dialogLabel": "डायलॉग",
   "alertDialogLabel": "सूचना",
   "searchFieldLabel": "शोध",
+  "reorderItemToStart": "सुरुवातीला हलवा",
+  "reorderItemToEnd": "शेवटाकडे हलवा",
+  "reorderItemUp": "वर हलवा",
+  "reorderItemDown": "खाली हलवा",
+  "reorderItemLeft": "डावीकडे हलवा",
+  "reorderItemRight": "उजवीकडे हलवा",
   "expandedIconTapHint": "कोलॅप्स करा",
   "collapsedIconTapHint": "विस्तार करा",
   "remainingTextFieldCharacterCountZero": "कोणतेही वर्ण शिल्लक नाहीत",
@@ -129,5 +135,11 @@
   "scrimLabel": "स्क्रिम",
   "bottomSheetLabel": "तळाशी असलेली शीट",
   "scrimOnTapHint": "$modalRouteContentName बंद करा",
-  "keyboardKeyShift": "शिफ्ट"
+  "keyboardKeyShift": "शिफ्ट",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

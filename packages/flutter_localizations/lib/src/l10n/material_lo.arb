@@ -42,6 +42,12 @@
   "dialogLabel": "ຂໍ້ຄວາມ",
   "alertDialogLabel": "ການເຕືອນ",
   "searchFieldLabel": "ຊອກຫາ",
+  "reorderItemToStart": "ຍ້າຍໄປເລີ່ມຕົ້ນ",
+  "reorderItemToEnd": "ຍ້າຍໄປສິ້ນສຸດ",
+  "reorderItemUp": "ຍ້າຍຂຶ້ນ",
+  "reorderItemDown": "ຍ້າຍລົງ",
+  "reorderItemLeft": "ຍ້າຍໄປຊ້າຍ",
+  "reorderItemRight": "ຍ້າຍໄປຂວາ",
   "expandedIconTapHint": "ຫຍໍ້ເຂົ້າ",
   "collapsedIconTapHint": "ຂະຫຍາຍ",
   "remainingTextFieldCharacterCountOne": "ຍັງອີກ 1 ຕົວອັກສອນ",
@@ -127,5 +133,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "ຊີດລຸ່ມສຸດ",
   "scrimOnTapHint": "ປິດ $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

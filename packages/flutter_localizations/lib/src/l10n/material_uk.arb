@@ -48,6 +48,12 @@
   "dialogLabel": "Вікно",
   "alertDialogLabel": "Сповіщення",
   "searchFieldLabel": "Пошук",
+  "reorderItemToStart": "Перемістити на початок",
+  "reorderItemToEnd": "Перемістити в кінець",
+  "reorderItemUp": "Перемістити вгору",
+  "reorderItemDown": "Перемістити вниз",
+  "reorderItemLeft": "Перемістити ліворуч",
+  "reorderItemRight": "Перемістити праворуч",
   "expandedIconTapHint": "Згорнути",
   "collapsedIconTapHint": "Розгорнути",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -134,5 +140,11 @@
   "scrimLabel": "Маскувальний фон",
   "bottomSheetLabel": "Нижній екран",
   "scrimOnTapHint": "Закрити: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

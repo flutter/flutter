@@ -42,6 +42,12 @@
   "dialogLabel": "Dialoog",
   "alertDialogLabel": "Märguanne",
   "searchFieldLabel": "Otsing",
+  "reorderItemToStart": "Teisalda algusesse",
+  "reorderItemToEnd": "Teisalda lõppu",
+  "reorderItemUp": "Teisalda üles",
+  "reorderItemDown": "Teisalda alla",
+  "reorderItemLeft": "Teisalda vasakule",
+  "reorderItemRight": "Teisalda paremale",
   "expandedIconTapHint": "Ahenda",
   "collapsedIconTapHint": "Laienda",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "Sirm",
   "bottomSheetLabel": "Alumine leht",
   "scrimOnTapHint": "Sule $modalRouteContentName",
-  "keyboardKeyShift": "Tõstuklahv"
+  "keyboardKeyShift": "Tõstuklahv",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

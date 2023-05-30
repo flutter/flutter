@@ -445,7 +445,6 @@ void main() {
     final ThemeData theme = ThemeData.light().copyWith(
       visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
-      primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
       primaryColorDark: Colors.black,
       canvasColor: Colors.black,
@@ -2081,7 +2080,7 @@ void main() {
     Widget buildApp() {
       final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          for(final TargetPlatform platform in TargetPlatform.values)
+          for (final TargetPlatform platform in TargetPlatform.values)
             platform: const CupertinoPageTransitionsBuilder(),
         },
       );
@@ -2856,6 +2855,50 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
       'description',
       contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
     );
+  });
+
+  testWidgets('SnackBar material applies SnackBar.clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Container(),
+        ),
+      ),
+    );
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(
+      const SnackBar(content: Text('I am a snack bar.')),
+    );
+
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    Material material = tester.widget<Material>(
+      find.descendant(of: find.byType(SnackBar),
+      matching: find.byType(Material))
+    );
+
+    expect(material.clipBehavior, Clip.hardEdge);
+
+    scaffoldMessengerState.hideCurrentSnackBar(); // Hide the SnackBar.
+
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    scaffoldMessengerState.showSnackBar(
+      const SnackBar(
+        content: Text('I am a snack bar.'),
+        clipBehavior: Clip.antiAlias,
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
+
+    material = tester.widget<Material>(
+      find.descendant(of: find.byType(SnackBar),
+      matching: find.byType(Material))
+    );
+
+    expect(material.clipBehavior, Clip.antiAlias);
   });
 }
 

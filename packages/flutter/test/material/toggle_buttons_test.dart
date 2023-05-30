@@ -808,12 +808,28 @@ void main() {
 
     final Offset center = tester.getCenter(find.text('First child'));
 
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await hoverGesture.moveTo(Offset.zero);
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
+    );
+
     // splashColor
     final TestGesture touchGesture = await tester.createGesture();
-    await touchGesture.down(center);
+    await touchGesture.down(center); // The button is on hovered and pressed
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
@@ -825,23 +841,8 @@ void main() {
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-
-    // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await hoverGesture.addPointer();
-    await hoverGesture.moveTo(center);
+    await hoverGesture.moveTo(const Offset(0, 50));
     await tester.pumpAndSettle();
-    await hoverGesture.moveTo(Offset.zero);
-
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(
-      inkFeatures,
-      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
-    );
 
     // focusColor
     focusNode.requestFocus();
@@ -874,12 +875,28 @@ void main() {
 
     final Offset center = tester.getCenter(find.text('First child'));
 
-    // splashColor
-    final TestGesture touchGesture = await tester.createGesture();
-    await touchGesture.down(center);
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
+    );
+    await hoverGesture.moveTo(Offset.zero);
+
+    // splashColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center); // The button is on hovered and pressed
+    await tester.pumpAndSettle();
+
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
@@ -891,23 +908,8 @@ void main() {
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-
-    // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await hoverGesture.addPointer();
-    await hoverGesture.moveTo(center);
+    await hoverGesture.moveTo(const Offset(0, 50));
     await tester.pumpAndSettle();
-
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(
-      inkFeatures,
-      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
-    );
-    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();

@@ -42,6 +42,12 @@
   "dialogLabel": "ଡାୟଲଗ୍",
   "alertDialogLabel": "ଆଲର୍ଟ",
   "searchFieldLabel": "ସନ୍ଧାନ କରନ୍ତୁ",
+  "reorderItemToStart": "ଆରମ୍ଭକୁ ଯାଆନ୍ତୁ",
+  "reorderItemToEnd": "ଶେଷକୁ ଯାଆନ୍ତୁ",
+  "reorderItemUp": "ଉପରକୁ ନିଅନ୍ତୁ",
+  "reorderItemDown": "ତଳକୁ ଯାଆନ୍ତୁ",
+  "reorderItemLeft": "ବାମକୁ ଯାଆନ୍ତୁ",
+  "reorderItemRight": "ଡାହାଣକୁ ଯାଆନ୍ତୁ",
   "expandedIconTapHint": "ସଙ୍କୁଚିତ କରନ୍ତୁ",
   "collapsedIconTapHint": "ପ୍ରସାରିତ କରନ୍ତୁ",
   "remainingTextFieldCharacterCountOne": "1ଟି ଅକ୍ଷର ବାକି ଅଛି",
@@ -127,5 +133,11 @@
   "scrimLabel": "ସ୍କ୍ରିମ",
   "bottomSheetLabel": "ବଟମ ସିଟ",
   "scrimOnTapHint": "$modalRouteContentNameକୁ ବନ୍ଦ କରନ୍ତୁ",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

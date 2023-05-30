@@ -42,6 +42,12 @@
   "dialogLabel": "Дијалог",
   "alertDialogLabel": "Предупредување",
   "searchFieldLabel": "Пребарувајте",
+  "reorderItemToStart": "Преместете на почеток",
+  "reorderItemToEnd": "Преместете на крајот",
+  "reorderItemUp": "Преместете нагоре",
+  "reorderItemDown": "Преместете надолу",
+  "reorderItemLeft": "Преместете налево",
+  "reorderItemRight": "Преместете надесно",
   "expandedIconTapHint": "Собери",
   "collapsedIconTapHint": "Прошири",
   "remainingTextFieldCharacterCountOne": "Преостанува уште 1 знак",
@@ -127,5 +133,11 @@
   "scrimLabel": "Скрим",
   "bottomSheetLabel": "Долен лист",
   "scrimOnTapHint": "Затворете ја $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

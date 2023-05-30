@@ -335,7 +335,7 @@ void main() {
         expect(uri.toString(), 'http://127.0.0.1:123/');
       });
 
-      testWithoutContext('Get network device IP (iPv4)', () async {
+      testWithoutContext('Get wireless device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -367,12 +367,12 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
 
-      testWithoutContext('Get network device IP (iPv6)', () async {
+      testWithoutContext('Get wireless device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -404,7 +404,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForAttach(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
       });
@@ -557,7 +557,7 @@ void main() {
         expect(uri.toString(), 'http://127.0.0.1:123/');
       });
 
-      testWithoutContext('Get network device IP (iPv4)', () async {
+      testWithoutContext('Get wireless device IP (iPv4)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -588,13 +588,13 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://111.111.111.111:1234/xyz/');
       });
 
-      testWithoutContext('Get network device IP (iPv6)', () async {
+      testWithoutContext('Get wireless device IP (iPv6)', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[
             PtrResourceRecord('foo', future, domainName: 'bar'),
@@ -625,7 +625,7 @@ void main() {
         final Uri? uri = await portDiscovery.getVMServiceUriForLaunch(
           'bar',
           device,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
           deviceVmservicePort: 1234,
         );
         expect(uri.toString(), 'http://[1111:1111:1111:1111:1111:1111:1111:1111]:1234/xyz/');
@@ -755,7 +755,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -792,7 +792,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);
@@ -829,7 +829,7 @@ void main() {
       final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
         client,
         applicationId: 'srv-foo',
-        isNetworkDevice: true,
+        useDeviceIPAsHost: true,
       );
       expect(result?.domainName, 'srv-foo');
       expect(result?.port, 111);

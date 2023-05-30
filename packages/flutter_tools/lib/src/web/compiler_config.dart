@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/utils.dart';
+
 abstract class WebCompilerConfig {
   const WebCompilerConfig();
 
@@ -11,6 +13,10 @@ abstract class WebCompilerConfig {
   bool get isWasm;
 
   Map<String, String> toBuildSystemEnvironment();
+
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+        'wasm-compile': isWasm,
+      };
 }
 
 /// Configuration for the Dart-to-Javascript compiler (dart2js).
@@ -128,11 +134,69 @@ class JsCompilerConfig extends WebCompilerConfig {
 
 /// Configuration for the Wasm compiler.
 class WasmCompilerConfig extends WebCompilerConfig {
-  const WasmCompilerConfig();
+  const WasmCompilerConfig({
+    required this.omitTypeChecks,
+    required this.wasmOpt,
+  });
+
+  /// Creates a new [WasmCompilerConfig] from build system environment values.
+  ///
+  /// Should correspond exactly with [toBuildSystemEnvironment].
+  factory WasmCompilerConfig.fromBuildSystemEnvironment(
+          Map<String, String> defines) =>
+      WasmCompilerConfig(
+        omitTypeChecks: defines[kOmitTypeChecks] == 'true',
+        wasmOpt: WasmOptLevel.values.byName(defines[kRunWasmOpt]!),
+      );
+
+  /// Build environment for [omitTypeChecks].
+  static const String kOmitTypeChecks = 'WasmOmitTypeChecks';
+
+  /// Build environment for [wasmOpt].
+  static const String kRunWasmOpt = 'RunWasmOpt';
+
+  /// If `omit-type-checks` should be passed to `dart2wasm`.
+  final bool omitTypeChecks;
+
+  /// Run wasm-opt on the resulting module.
+  final WasmOptLevel wasmOpt;
 
   @override
   bool get isWasm => true;
 
+  bool get runWasmOpt => wasmOpt == WasmOptLevel.full || wasmOpt == WasmOptLevel.debug;
+
   @override
-  Map<String, String> toBuildSystemEnvironment() => const <String, String>{};
+  Map<String, String> toBuildSystemEnvironment() => <String, String>{
+    kOmitTypeChecks: omitTypeChecks.toString(),
+    kRunWasmOpt: wasmOpt.name,
+  };
+
+  List<String> toCommandOptions() => <String>[
+    if (omitTypeChecks) '--omit-type-checks',
+  ];
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    ...toBuildSystemEnvironment(),
+  };
+}
+
+enum WasmOptLevel implements CliEnum {
+  full,
+  debug,
+  none;
+
+  static const WasmOptLevel defaultValue = WasmOptLevel.full;
+
+  @override
+  String get cliName => name;
+
+  @override
+  String get helpText => switch (this) {
+    WasmOptLevel.none => 'wasm-opt is not run. Fastest build; bigger, slower output.',
+    WasmOptLevel.debug => 'Similar to `${WasmOptLevel.full.name}`, but member names are preserved. Debugging is easier, but size is a bit bigger.',
+    WasmOptLevel.full => 'wasm-opt is run. Build time is slower, but output is smaller and faster.',
+  };
 }

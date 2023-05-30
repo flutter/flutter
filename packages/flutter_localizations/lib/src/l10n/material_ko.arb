@@ -42,6 +42,12 @@
   "dialogLabel": "대화상자",
   "alertDialogLabel": "알림",
   "searchFieldLabel": "검색",
+  "reorderItemToStart": "시작으로 이동",
+  "reorderItemToEnd": "끝으로 이동",
+  "reorderItemUp": "위로 이동",
+  "reorderItemDown": "아래로 이동",
+  "reorderItemLeft": "왼쪽으로 이동",
+  "reorderItemRight": "오른쪽으로 이동",
   "expandedIconTapHint": "접기",
   "collapsedIconTapHint": "펼치기",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "스크림",
   "bottomSheetLabel": "하단 시트",
   "scrimOnTapHint": "$modalRouteContentName 닫기",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

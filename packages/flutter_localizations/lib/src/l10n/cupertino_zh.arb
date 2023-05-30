@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "全选",
   "tabSemanticsLabel": "第 $tabIndex 个标签，共 $tabCount 个",
   "modalBarrierDismissLabel": "关闭",
-  "searchTextFieldPlaceholderLabel": "搜索"
+  "searchTextFieldPlaceholderLabel": "搜索",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

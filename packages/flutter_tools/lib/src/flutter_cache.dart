@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
+import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
@@ -38,6 +39,7 @@ class FlutterCache extends Cache {
     registerArtifact(AndroidInternalBuildArtifacts(this));
     registerArtifact(IOSEngineArtifacts(this, platform: platform));
     registerArtifact(FlutterWebSdk(this));
+    registerArtifact(LegacyCanvasKitRemover(this));
     registerArtifact(FlutterSdk(this, platform: platform));
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
@@ -182,6 +184,38 @@ class FlutterWebSdk extends CachedArtifact {
     ErrorHandlingFileSystem.deleteIfExists(location, recursive: true);
     await artifactUpdater.downloadZipArchive('Downloading Web SDK...', url, location);
   }
+}
+
+// In previous builds, CanvasKit artifacts were stored in a different location
+// than they are now. Leaving those old artifacts in the cache confuses the
+// in-memory filesystem that the web runner uses, so this artifact will evict
+// them from our cache if they are there.
+class LegacyCanvasKitRemover extends ArtifactSet {
+  LegacyCanvasKitRemover(this.cache) : super(DevelopmentArtifact.web);
+
+  final Cache cache;
+
+  @override
+  String get name => 'legacy_canvaskit_remover';
+
+  Directory _getLegacyCanvasKitDirectory(FileSystem fileSystem) =>
+    fileSystem.directory(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+    ));
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async =>
+    !(await _getLegacyCanvasKitDirectory(fileSystem).exists());
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils,
+    {bool offline = false}
+  ) => _getLegacyCanvasKitDirectory(fileSystem).delete(recursive: true);
 }
 
 /// A cached artifact containing the dart:ui source code.
@@ -392,7 +426,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
         ],
         environment: <String, String>{
           if (javaPath != null)
-            'JAVA_HOME': javaPath!,
+            AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
         },
       );
       if (processResult.exitCode != 0) {

@@ -52,6 +52,7 @@ class ChoiceChip extends StatelessWidget
     implements
         ChipAttributes,
         SelectableChipAttributes,
+        CheckmarkableChipAttributes,
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
@@ -84,6 +85,8 @@ class ChoiceChip extends StatelessWidget
     this.surfaceTintColor,
     this.iconTheme,
     this.selectedShadowColor,
+    this.showCheckmark,
+    this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
@@ -135,6 +138,10 @@ class ChoiceChip extends StatelessWidget
   @override
   final Color? selectedShadowColor;
   @override
+  final bool? showCheckmark;
+  @override
+  final Color? checkmarkColor;
+  @override
   final ShapeBorder avatarBorder;
   @override
   final IconThemeData? iconTheme;
@@ -158,7 +165,8 @@ class ChoiceChip extends StatelessWidget
       onSelected: onSelected,
       pressElevation: pressElevation,
       selected: selected,
-      showCheckmark: Theme.of(context).useMaterial3,
+      showCheckmark: showCheckmark ?? chipTheme.showCheckmark ?? Theme.of(context).useMaterial3,
+      checkmarkColor: checkmarkColor,
       tooltip: tooltip,
       side: side,
       shape: shape,

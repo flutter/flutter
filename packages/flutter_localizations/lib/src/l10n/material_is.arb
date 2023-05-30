@@ -42,6 +42,12 @@
   "dialogLabel": "Gluggi",
   "alertDialogLabel": "Tilkynning",
   "searchFieldLabel": "Leit",
+  "reorderItemToStart": "Færa fremst",
+  "reorderItemToEnd": "Færa aftast",
+  "reorderItemUp": "Færa upp",
+  "reorderItemDown": "Færa niður",
+  "reorderItemLeft": "Færa til vinstri",
+  "reorderItemRight": "Færa til hægri",
   "expandedIconTapHint": "Draga saman",
   "collapsedIconTapHint": "Stækka",
   "remainingTextFieldCharacterCountOne": "1 stafur eftir",
@@ -127,5 +133,11 @@
   "scrimLabel": "Möskvi",
   "bottomSheetLabel": "Blað neðst",
   "scrimOnTapHint": "Loka $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

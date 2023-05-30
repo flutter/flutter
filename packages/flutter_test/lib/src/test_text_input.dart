@@ -357,9 +357,6 @@ class TestTextInput {
   /// Simulates iOS removing a UITextPlaceholder after a long press with the pencil is released.
   Future<void> scribbleRemovePlaceholder() async {
     assert(isRegistered);
-    await TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
-      SystemChannels.scribble.name,
-      SystemChannels.scribble.codec.encodeMethodCall(
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.scribble.name,
       SystemChannels.scribble.codec.encodeMethodCall(

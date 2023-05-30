@@ -42,6 +42,12 @@
   "dialogLabel": "Dialogu",
   "alertDialogLabel": "Sinjalizim",
   "searchFieldLabel": "Kërko",
+  "reorderItemToStart": "Lëvize në fillim",
+  "reorderItemToEnd": "Lëvize në fund",
+  "reorderItemUp": "Lëvize lart",
+  "reorderItemDown": "Lëvize poshtë",
+  "reorderItemLeft": "Lëvize majtas",
+  "reorderItemRight": "Lëvize djathtas",
   "expandedIconTapHint": "Palos",
   "collapsedIconTapHint": "Zgjero",
   "remainingTextFieldCharacterCountOne": "1 karakter i mbetur",
@@ -127,5 +133,11 @@
   "scrimLabel": "Kanavacë",
   "bottomSheetLabel": "Fleta e poshtme",
   "scrimOnTapHint": "Mbyll $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

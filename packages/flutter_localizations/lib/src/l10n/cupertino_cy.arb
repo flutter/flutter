@@ -41,5 +41,6 @@
   "pasteButtonLabel": "Gludo",
   "selectAllButtonLabel": "Dewis y Cyfan",
   "searchTextFieldPlaceholderLabel": "Chwilio",
-  "modalBarrierDismissLabel": "Diystyru"
+  "modalBarrierDismissLabel": "Diystyru",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

@@ -34,17 +34,28 @@ import 'theme.dart';
 ///
 /// All list items must have a key.
 ///
-/// This example demonstrates using the [proxyDecorator] callback to customize
-/// the appearance of a list item while it's being dragged.
-/// {@tool dartpad}
+/// This example demonstrates using the [ReorderableListView.proxyDecorator] callback
+/// to customize the appearance of a list item while it's being dragged.
 ///
-/// While a drag is underway, the widget returned by the [proxyDecorator]
-/// serves as a "proxy" (a substitute) for the item in the list. The proxy is
-/// created with the original list item as its child. The [proxyDecorator]
-/// in this example is similar to the default one except that it changes the
+/// {@tool dartpad}
+/// While a drag is underway, the widget returned by the [ReorderableListView.proxyDecorator]
+/// callback serves as a "proxy" (a substitute) for the item in the list. The proxy is
+/// created with the original list item as its child. The [ReorderableListView.proxyDecorator]
+/// callback in this example is similar to the default one except that it changes the
 /// proxy item's background color.
 ///
 /// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.1.dart **
+/// {@end-tool}
+///
+/// This example demonstrates using the [ReorderableListView.proxyDecorator] callback to
+/// customize the appearance of a [Card] while it's being dragged.
+///
+/// {@tool dartpad}
+/// The default [proxyDecorator] wraps the dragged item in a [Material] widget and animates
+/// its elevation. This example demonstrates how to use the [ReorderableListView.proxyDecorator]
+/// callback to update the dragged card elevation without inserted a new [Material] widget.
+///
+/// ** See code in examples/api/lib/material/reorderable_list/reorderable_list_view.2.dart **
 /// {@end-tool}
 class ReorderableListView extends StatefulWidget {
   /// Creates a reorderable list from a pre-built list of widgets.
@@ -83,6 +94,7 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.autoScrollerVelocityScalar,
   }) : assert(
          itemExtent == null || prototypeItem == null,
          'You can only pass itemExtent or prototypeItem, not both',
@@ -148,6 +160,7 @@ class ReorderableListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
+    this.autoScrollerVelocityScalar,
   }) : assert(itemCount >= 0),
        assert(
          itemExtent == null || prototypeItem == null,
@@ -258,6 +271,11 @@ class ReorderableListView extends StatefulWidget {
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
+
+  /// {@macro flutter.widgets.EdgeDraggingAutoScroller.velocityScalar}
+  ///
+  /// {@macro flutter.widgets.SliverReorderableList.autoScrollerVelocityScalar.default}
+  final double? autoScrollerVelocityScalar;
 
   @override
   State<ReorderableListView> createState() => _ReorderableListViewState();
@@ -428,6 +446,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
             onReorderStart: widget.onReorderStart,
             onReorderEnd: widget.onReorderEnd,
             proxyDecorator: widget.proxyDecorator ?? _proxyDecorator,
+            autoScrollerVelocityScalar: widget.autoScrollerVelocityScalar,
           ),
         ),
         if (widget.footer != null)

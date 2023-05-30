@@ -46,6 +46,12 @@
   "dialogLabel": "Casetă de dialog",
   "alertDialogLabel": "Alertă",
   "searchFieldLabel": "Căutați",
+  "reorderItemToStart": "Mutați la început",
+  "reorderItemToEnd": "Mutați la sfârșit",
+  "reorderItemUp": "Mutați în sus",
+  "reorderItemDown": "Mutați în jos",
+  "reorderItemLeft": "Mutați la stânga",
+  "reorderItemRight": "Mutați la dreapta",
   "expandedIconTapHint": "Restrângeți",
   "collapsedIconTapHint": "Extindeți",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -132,5 +138,11 @@
   "scrimLabel": "Material",
   "bottomSheetLabel": "Foaie din partea de jos",
   "scrimOnTapHint": "Închideți $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

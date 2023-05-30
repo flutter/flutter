@@ -214,6 +214,9 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+
+    expect(0, moreOrLessEquals(0.0));
+    expect(0.0, moreOrLessEquals(0));
   });
 
   test('matrixMoreOrLessEquals', () {
@@ -613,13 +616,11 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
-        actions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        actions |= action.index;
       }
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
-        flags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        flags |= flag.index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -897,13 +898,11 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
-        actions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        actions |= action.index;
       }
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
-        flags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        flags |= flag.index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -1085,13 +1084,11 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsAction.doNotUseWillBeDeletedWithoutWarningKeys) {
-        allActions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        allActions |= action.index;
       }
-      // ignore: deprecated_member_use
-      for (final int index in SemanticsFlag.doNotUseWillBeDeletedWithoutWarningKeys) {
-        allFlags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        allFlags |= flag.index;
       }
       final SemanticsData emptyData = SemanticsData(
         flags: 0,

@@ -48,6 +48,12 @@
   "dialogLabel": "Dialogové okno",
   "alertDialogLabel": "Upozornění",
   "searchFieldLabel": "Hledat",
+  "reorderItemToStart": "Přesunout na začátek",
+  "reorderItemToEnd": "Přesunout na konec",
+  "reorderItemUp": "Přesunout nahoru",
+  "reorderItemDown": "Přesunout dolů",
+  "reorderItemLeft": "Přesunout doleva",
+  "reorderItemRight": "Přesunout doprava",
   "expandedIconTapHint": "Sbalit",
   "collapsedIconTapHint": "Rozbalit",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -134,5 +140,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Spodní tabulka",
   "scrimOnTapHint": "Zavřít $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

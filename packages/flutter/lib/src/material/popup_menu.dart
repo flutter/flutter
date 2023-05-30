@@ -789,6 +789,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     required this.capturedThemes,
     this.constraints,
     required this.clipBehavior,
+    super.settings,
   }) : itemSizes = List<Size?>.filled(items.length, null),
        // Menus always cycle focus through their items irrespective of the
        // focus traversal edge behavior set in the Navigator.
@@ -949,6 +950,7 @@ Future<T?> showMenu<T>({
   bool useRootNavigator = false,
   BoxConstraints? constraints,
   Clip clipBehavior = Clip.none,
+  RouteSettings? routeSettings,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -979,6 +981,7 @@ Future<T?> showMenu<T>({
     capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
     constraints: constraints,
     clipBehavior: clipBehavior,
+    settings: routeSettings,
   ));
 }
 
@@ -1238,12 +1241,16 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final PopupMenuPosition popupMenuPosition = widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
-    final Offset offset;
+    late Offset offset;
     switch (popupMenuPosition) {
       case PopupMenuPosition.over:
         offset = widget.offset;
       case PopupMenuPosition.under:
-        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+        offset = Offset(0.0, button.size.height) + widget.offset;
+        if (widget.child == null) {
+          // Remove the padding of the icon button.
+          offset -= Offset(0.0, widget.padding.vertical / 2);
+        }
     }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
