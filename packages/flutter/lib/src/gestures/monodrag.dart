@@ -213,6 +213,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// Whether the drag threshold should be met before dispatching any drag callbacks.
   ///
+  /// The drag threshold is met when the global distance traveled by a pointer has
+  /// exceeded the defined threshold on the relevant axis, i.e. y-axis for the
+  /// [VerticalDragGestureRecognizer], x-axis for the [HorizontalDragGestureRecognizer],
+  /// and the entire plane for [PanGestureRecognizer]. The threshold for both
+  /// [VerticalDragGestureRecognizer] and [HorizontalDragGestureRecognizer] are
+  /// calculated by [computeHitSlop], while [computePanSlop] is used for
+  /// [PanGestureRecognizer].
+  /// 
+  ///
   /// If true, the drag callbacks will only be dispatched when this recognizer has
   /// won the arena and the drag threshold has been met.
   ///
