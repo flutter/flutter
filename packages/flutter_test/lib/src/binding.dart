@@ -566,11 +566,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Convert the given point from the global coordinate space to the local
   /// one.
   ///
+  /// It translates the point from the global coordinate space of the device (in
+  /// logical pixels) to the local coordinate space of the test (also in logical
+  /// pixels). It does not apply the device pixel ratio (used to translate
+  /// to/from physical pixels).
+  ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset globalToLocal(Offset point) => point;
 
   /// Convert the given point from the local coordinate space to the global
   /// one.
+  ///
+  /// It translates the point from the local coordinate space of the test (in
+  /// logical pixels) to the global coordinate space of the device (also in
+  /// logical pixels). It does not apply the device pixel ratio to translate
+  /// to physical pixels.
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
   Offset localToGlobal(Offset point) => point;
@@ -1994,9 +2004,11 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 }
 
-/// A [ViewConfiguration] that pretends the display is of a particular size. The
-/// size is in logical pixels. The resulting ViewConfiguration maps the given
-/// size onto the actual display using the [BoxFit.contain] algorithm.
+/// A [ViewConfiguration] that pretends the display is of a particular size (in
+/// logical pixels).
+///
+/// The resulting ViewConfiguration maps the given size onto the actual display
+/// using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Deprecated. Will be removed in a future version of Flutter.
   ///

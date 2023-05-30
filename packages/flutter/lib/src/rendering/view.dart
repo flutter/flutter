@@ -33,6 +33,10 @@ class ViewConfiguration {
   final double devicePixelRatio;
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
+  ///
+  /// The matrix translates points from the local coordinate system of the
+  /// app (in logical pixels) to the global coordinate system of the
+  /// physical view (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
