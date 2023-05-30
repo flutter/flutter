@@ -7,6 +7,7 @@ import android.annotation.TargetApi;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
+import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -29,5 +30,20 @@ public class AccessibilityChannelTest {
     BasicMessageChannel.Reply reply = mock(BasicMessageChannel.Reply.class);
     accessibilityChannel.parsingMessageHandler.onMessage(arguments, reply);
     verify(reply).reply(null);
+  }
+
+  @Test
+  public void handleFocus() throws JSONException {
+    AccessibilityChannel accessibilityChannel =
+        new AccessibilityChannel(mock(DartExecutor.class), mock(FlutterJNI.class));
+    HashMap<String, Object> arguments = new HashMap<>();
+    arguments.put("type", "focus");
+    arguments.put("nodeId", 123);
+    AccessibilityChannel.AccessibilityMessageHandler handler =
+        mock(AccessibilityChannel.AccessibilityMessageHandler.class);
+    accessibilityChannel.setAccessibilityMessageHandler(handler);
+    BasicMessageChannel.Reply reply = mock(BasicMessageChannel.Reply.class);
+    accessibilityChannel.parsingMessageHandler.onMessage(arguments, reply);
+    verify(handler).onFocus(123);
   }
 }
