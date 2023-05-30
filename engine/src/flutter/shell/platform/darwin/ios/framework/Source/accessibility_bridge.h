@@ -57,6 +57,7 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
+  void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
   void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action) override;
   void DispatchSemanticsAction(int32_t id,
                                flutter::SemanticsAction action,
@@ -88,7 +89,6 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   SemanticsObject* FindFirstFocusable(SemanticsObject* parent);
   void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                         NSMutableArray<NSNumber*>* doomed_uids);
-  void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
 
   FlutterViewController* view_controller_;
   PlatformViewIOS* platform_view_;

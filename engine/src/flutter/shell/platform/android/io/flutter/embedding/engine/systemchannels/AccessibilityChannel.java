@@ -2,7 +2,6 @@ package io.flutter.embedding.engine.systemchannels;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -24,8 +23,7 @@ public class AccessibilityChannel {
   @NonNull public final FlutterJNI flutterJNI;
   @Nullable private AccessibilityMessageHandler handler;
 
-  @VisibleForTesting
-  final BasicMessageChannel.MessageHandler<Object> parsingMessageHandler =
+  public final BasicMessageChannel.MessageHandler<Object> parsingMessageHandler =
       new BasicMessageChannel.MessageHandler<Object>() {
         @Override
         public void onMessage(
@@ -64,6 +62,14 @@ public class AccessibilityChannel {
                 Integer nodeId = (Integer) annotatedEvent.get("nodeId");
                 if (nodeId != null) {
                   handler.onLongPress(nodeId);
+                }
+                break;
+              }
+            case "focus":
+              {
+                Integer nodeId = (Integer) annotatedEvent.get("nodeId");
+                if (nodeId != null) {
+                  handler.onFocus(nodeId);
                 }
                 break;
               }
@@ -170,11 +176,14 @@ public class AccessibilityChannel {
     /** The Dart application would like the given {@code message} to be announced. */
     void announce(@NonNull String message);
 
-    /** The user has tapped on the widget with the given {@code nodeId}. */
+    /** The user has tapped on the semantics node with the given {@code nodeId}. */
     void onTap(int nodeId);
 
-    /** The user has long pressed on the widget with the given {@code nodeId}. */
+    /** The user has long pressed on the semantics node with the given {@code nodeId}. */
     void onLongPress(int nodeId);
+
+    /** The framework has requested focus on the semantics node with the given {@code nodeId}. */
+    void onFocus(int nodeId);
 
     /** The user has opened a tooltip. */
     void onTooltip(@NonNull String message);

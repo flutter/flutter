@@ -362,6 +362,10 @@ void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEven
     NSString* message = annotatedEvent[@"data"][@"message"];
     ios_delegate_->PostAccessibilityNotification(UIAccessibilityAnnouncementNotification, message);
   }
+  if ([type isEqualToString:@"focus"]) {
+    SemanticsObject* node = objects_.get()[annotatedEvent[@"nodeId"]];
+    ios_delegate_->PostAccessibilityNotification(UIAccessibilityLayoutChangedNotification, node);
+  }
 }
 
 fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
