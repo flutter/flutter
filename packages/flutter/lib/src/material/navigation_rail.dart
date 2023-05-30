@@ -467,6 +467,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                               tabIndex: i + 1,
                               tabCount: widget.destinations.length,
                             ),
+                            disabled: widget.destinations[i].disabled,
                           ),
                         if (widget.trailing != null)
                           widget.trailing!,
@@ -545,6 +546,7 @@ class _RailDestination extends StatelessWidget {
     required this.useIndicator,
     this.indicatorColor,
     this.indicatorShape,
+    this.disabled = false,
   }) : _positionAnimation = CurvedAnimation(
           parent: ReverseAnimation(destinationAnimation),
           curve: Curves.easeInOut,
@@ -567,6 +569,7 @@ class _RailDestination extends StatelessWidget {
   final bool useIndicator;
   final Color? indicatorColor;
   final ShapeBorder? indicatorShape;
+  final bool disabled;
 
   final Animation<double> _positionAnimation;
 
@@ -577,12 +580,16 @@ class _RailDestination extends StatelessWidget {
       '[NavigationRail.indicatorColor] does not have an effect when [NavigationRail.useIndicator] is false',
     );
 
-    final bool material3 = Theme.of(context).useMaterial3;
+    final ThemeData theme = Theme.of(context);
+
+    final bool material3 = theme.useMaterial3;
     final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
     Offset indicatorOffset;
 
     final Widget themedIcon = IconTheme(
-      data: iconTheme,
+      data: disabled
+        ? iconTheme.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        : iconTheme,
       child: icon,
     );
     final Widget styledLabel = DefaultTextStyle(
@@ -761,7 +768,7 @@ class _RailDestination extends StatelessWidget {
           Material(
             type: MaterialType.transparency,
             child: _IndicatorInkWell(
-              onTap: onTap,
+              onTap: disabled ? null : onTap,
               borderRadius: BorderRadius.all(Radius.circular(minWidth / 2.0)),
               customBorder: indicatorShape,
               splashColor: colors.primary.withOpacity(0.12),
@@ -909,6 +916,7 @@ class NavigationRailDestination {
     this.indicatorShape,
     required this.label,
     this.padding,
+    this.disabled = false,
   }) : selectedIcon = selectedIcon ?? icon;
 
   /// The icon of the destination.
@@ -954,6 +962,9 @@ class NavigationRailDestination {
 
   /// The amount of space to inset the destination item.
   final EdgeInsetsGeometry? padding;
+
+  /// Indicates that this destination is inaccessible.
+  final bool disabled;
 }
 
 class _ExtendedNavigationRailAnimation extends InheritedWidget {
