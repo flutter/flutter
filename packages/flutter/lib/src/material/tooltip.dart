@@ -510,21 +510,25 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
+  // PointerDeviceKinds that don't support hovering.
+  //
+  // Mouse PointerEvents shouldn't be recognized as "trigger" gestures, since if
+  // they hover over the Tooltip widget the tooltip will show anyways.
+  static const Set<PointerDeviceKind> _triggerModeDeviceKinds = <PointerDeviceKind>{
+    PointerDeviceKind.invertedStylus,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.touch,
+    PointerDeviceKind.unknown,
+    // MouseRegion only tracks PointerDeviceKind == mouse.
+    PointerDeviceKind.trackpad,
+  };
+
   void _handlePointerDown(PointerDownEvent event) {
     assert(mounted);
-    // PointerDeviceKinds that don't support hovering.
-    const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind> {
-      PointerDeviceKind.invertedStylus,
-      PointerDeviceKind.stylus,
-      PointerDeviceKind.touch,
-      PointerDeviceKind.unknown,
-      // MouseRegion only tracks PointerDeviceKind == mouse.
-      PointerDeviceKind.trackpad,
-    };
     switch (_triggerMode) {
       case TooltipTriggerMode.longPress:
         final LongPressGestureRecognizer recognizer = _longPressRecognizer ??= LongPressGestureRecognizer(
-          debugOwner: this, supportedDevices: triggerModeDeviceKinds,
+          debugOwner: this, supportedDevices: _triggerModeDeviceKinds,
         );
         recognizer
           ..onLongPressCancel = _handleTapToDismiss
@@ -533,7 +537,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
           ..addPointer(event);
       case TooltipTriggerMode.tap:
         final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
-          debugOwner: this, supportedDevices: triggerModeDeviceKinds
+          debugOwner: this, supportedDevices: _triggerModeDeviceKinds
         );
         recognizer
           ..onTapCancel = _handleTapToDismiss
