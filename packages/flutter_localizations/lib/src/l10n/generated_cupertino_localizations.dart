@@ -9572,7 +9572,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Pesquisar';
 
   @override
-  String get selectAllButtonLabel => 'Selecionar Tudo';
+  String get selectAllButtonLabel => 'Selecionar tudo';
 
   @override
   String get tabSemanticsLabelRaw => r'Guia $tabIndex de $tabCount';
@@ -9666,9 +9666,6 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 
   @override
   String get timerPickerSecondLabelOther => 'seg';
-
-  @override
-  String get selectAllButtonLabel => 'Selecionar tudo';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';
