@@ -1200,12 +1200,8 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
           build_dir,
           'impeller_unittests',
           engine_filter,
-          # TODO(https://github.com/flutter/flutter/issues/127714): Remove test exemption.
-          shuffle_flags + [
-              '--gtest_filter=-'
-              '*/OpenGLES:'
-              'Play/TypographerTest.MaybeHasOverlapping/Vulkan:'
-          ],
+          shuffle_flags + ['--gtest_filter=-'
+                           '*/OpenGLES:'],
           coverage=args.coverage
       )
     finally:
