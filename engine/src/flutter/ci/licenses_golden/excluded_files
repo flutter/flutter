@@ -2811,7 +2811,6 @@
 ../../../third_party/skia/src/gpu/ganesh/tessellate/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/text/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/vk/BUILD.bazel
-../../../third_party/skia/src/gpu/gl/BUILD.bazel
 ../../../third_party/skia/src/gpu/mtl/BUILD.bazel
 ../../../third_party/skia/src/gpu/tessellate/BUILD.bazel
 ../../../third_party/skia/src/gpu/vk/BUILD.bazel
