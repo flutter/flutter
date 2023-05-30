@@ -313,11 +313,11 @@ testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed'
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
-        const SliverToBoxAdapter(child: SizedBox(height: 600)),
         SliverPersistentHeader(
           delegate: TestDelegate(),
           pinned: true,
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
       ],
       otherSlivers: <Widget>[
         const SliverToBoxAdapter(child: SizedBox(height: 2400)),
@@ -340,11 +340,11 @@ testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed'
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
-        const SliverToBoxAdapter(child: SizedBox(height: 600)),
         SliverPersistentHeader(
           delegate: TestDelegate(),
           floating: true,
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
       ],
       otherSlivers: <Widget>[
         const SliverToBoxAdapter(child: SizedBox(height: 2400)),
@@ -369,11 +369,11 @@ testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed'
     await tester.pumpWidget(_buildSliverMainAxisGroup(
       controller: controller,
       slivers: <Widget>[
-        const SliverToBoxAdapter(child: SizedBox(height: 600)),
         SliverPersistentHeader(
           delegate: TestDelegate(minExtent: 40.0),
           pinned: true,
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
       ],
       otherSlivers: <Widget>[
         const SliverToBoxAdapter(child: SizedBox(height: 2400)),
@@ -387,13 +387,194 @@ testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed'
     // Paint extent of the header is 40.0, so we must provide an offset of -10.0 to make it fit in the 30.0 remaining paint extent of the group.
     expect(renderHeader.geometry!.paintExtent, equals(40.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
-    // Pinned headers should not expand to the maximum extent unless the scroll offset is at the top of the sliver group.
     controller.jumpTo(610);
     await tester.pumpAndSettle();
     expect(renderHeader.geometry!.paintExtent, equals(40.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
+  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        SliverPersistentHeader(
+          delegate: TestDelegate(minExtent: 40.0),
+          floating: true,
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+    controller.jumpTo(660);
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 30.0));
+    await tester.pump();
+    // Paint extent after header's layout is 30.0, so no need to correct the paintOffset.
+    expect(renderHeader.geometry!.paintExtent, equals(30.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+    // Floating headers should expand to maximum extent as we continue scrolling.
+    await gesture.moveBy(const Offset(0.0, 20.0));
+    await tester.pump();
+    expect(renderHeader.geometry!.paintExtent, equals(50.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+  });
+
+  testWidgets('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverMainAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        SliverPersistentHeader(
+          delegate: TestDelegate(minExtent: 40.0),
+          pinned: true,
+          floating: true,
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+    controller.jumpTo(660);
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 30.0));
+    await tester.pump();
+    // Paint extent after header's layout is 40.0, so we need to adjust by -10.0.
+    expect(renderHeader.geometry!.paintExtent, equals(40.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-10.0));
+    // Pinned floating headers should expand to maximum extent as we continue scrolling.
+    await gesture.moveBy(const Offset(0.0, 20.0));
+    await tester.pump();
+    expect(renderHeader.geometry!.paintExtent, equals(50.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+  });
+
+  testWidgets('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverAppBar(
+          toolbarHeight: 30,
+          expandedHeight: 60,
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+    controller.jumpTo(660);
+    await tester.pumpAndSettle();
+    controller.jumpTo(630);
+    await tester.pumpAndSettle();
+
+    // At a scroll offset of 630, a normal scrolling header should be out of view.
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderHeader.constraints.scrollOffset, equals(630));
+    expect(renderHeader.geometry!.layoutExtent, equals(0.0));
+  });
+
+    testWidgets('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverAppBar(
+          toolbarHeight: 30,
+          expandedHeight: 60,
+          floating: true,
+          snap: true,
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+    controller.jumpTo(660);
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 10));
+    await tester.pump();
+
+    // The snap animation does not go through until the gesture is released.
+    expect(renderHeader.geometry!.paintExtent, equals(10));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+
+    // Once it is released, the header's paint extent becomes the maximum and the group sets an offset of -50.0.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(renderHeader.geometry!.paintExtent, equals(60));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
+
+  testWidgets('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: <Widget>[
+        const SliverAppBar(
+          toolbarHeight: 30,
+          expandedHeight: 60,
+          floating: true,
+          pinned: true,
+          snap: true,
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 600)),
+      ],
+      otherSlivers: <Widget>[
+        const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+      ],
+    ));
+    await tester.pumpAndSettle();
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+    final RenderSliverPersistentHeader renderHeader = tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+    expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+    controller.jumpTo(660);
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, 10));
+    await tester.pump();
+
+    expect(renderHeader.geometry!.paintExtent, equals(30.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+
+    // Once we lift the gesture up, the animation should finish.
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(renderHeader.geometry!.paintExtent, equals(60.0));
+    expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
 }
 
 Widget _buildSliverList({
@@ -435,21 +616,23 @@ Widget _buildSliverMainAxisGroup({
   bool reverse = false,
   List<Widget> otherSlivers = const <Widget>[],
 }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Align(
-      alignment: Alignment.topLeft,
-      child: SizedBox(
-        height: viewportHeight,
-        width: viewportWidth,
-        child: CustomScrollView(
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          controller: controller,
-          slivers: <Widget>[SliverMainAxisGroup(slivers: slivers), ...otherSlivers],
+  return MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: viewportHeight,
+          width: viewportWidth,
+          child: CustomScrollView(
+            scrollDirection: scrollDirection,
+            reverse: reverse,
+            controller: controller,
+            slivers: <Widget>[SliverMainAxisGroup(slivers: slivers), ...otherSlivers],
+          ),
         ),
       ),
-    ),
+      ),
   );
 }
 
