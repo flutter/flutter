@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:process/process.dart';
 
 import '../base/file_system.dart';
@@ -10,6 +9,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import 'android_studio.dart';
 
 const String _javaExecutable = 'java';
