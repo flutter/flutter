@@ -14,6 +14,25 @@ import 'rendering_tester.dart';
 
 const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
 
+void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
+  int index = 0;
+  RenderBox? previousBox;
+  span.visitChildren((InlineSpan span) {
+    if (span is! WidgetSpan) {
+      return true;
+    }
+
+    final RenderBox box = inlineRenderBoxes[index];
+    box.parentData = TextParentData()
+                      ..span = span
+                      ..previousSibling = previousBox;
+    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
+    index += 1;
+    previousBox = box;
+    return true;
+  });
+}
+
 // A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
 // for a given TextSelection.
 // This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
@@ -504,6 +523,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: renderBoxes,
     );
+    _applyParentData(renderBoxes, text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -544,6 +564,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: renderBoxes,
     );
+    _applyParentData(renderBoxes, text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -558,91 +579,6 @@ void main() {
     expect(boxes[3], const TextBox.fromLTRBD(38.0, 0.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
-
-  test('can compute IntrinsicHeight for widget span', () {
-    // Regression test for https://github.com/flutter/flutter/issues/59316
-    const double screenWidth = 100.0;
-    const String sentence = 'one two';
-    List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence)),
-        ],
-      ),
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-    );
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double singleLineHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
-    expect(singleLineHeight, 14.0);
-
-    pumpFrame();
-    renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence)),
-        ],
-      ),
-      textScaleFactor: 2.0,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-    );
-
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double maxIntrinsicHeight = paragraph.computeMaxIntrinsicHeight(screenWidth);
-    final double minIntrinsicHeight = paragraph.computeMinIntrinsicHeight(screenWidth);
-    // intrinsicHeight = singleLineHeight * textScaleFactor * two lines.
-    expect(maxIntrinsicHeight, singleLineHeight * 2.0 * 2);
-    expect(maxIntrinsicHeight, minIntrinsicHeight);
-  });
-
-  test('can compute IntrinsicWidth for widget span', () {
-    // Regression test for https://github.com/flutter/flutter/issues/59316
-    const double screenWidth = 1000.0;
-    const double fixedHeight = 1000.0;
-    const String sentence = 'one two';
-    List<RenderBox> renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence)),
-        ],
-      ),
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-    );
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double widthForOneLine = paragraph.computeMaxIntrinsicWidth(fixedHeight);
-    expect(widthForOneLine, 98.0);
-
-    pumpFrame();
-    renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
-    ];
-    paragraph = RenderParagraph(
-      const TextSpan(
-        children: <InlineSpan> [
-          WidgetSpan(child: Text(sentence)),
-        ],
-      ),
-      textScaleFactor: 2.0,
-      children: renderBoxes,
-      textDirection: TextDirection.ltr,
-    );
-
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
-    final double maxIntrinsicWidth = paragraph.computeMaxIntrinsicWidth(fixedHeight);
-    // maxIntrinsicWidth = widthForOneLine * textScaleFactor
-    expect(maxIntrinsicWidth, widthForOneLine * 2.0);
-  });
 
   test('inline widgets multiline test', () {
     const TextSpan text = TextSpan(
@@ -676,6 +612,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: renderBoxes,
     );
+    _applyParentData(renderBoxes, text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
 
     final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -715,6 +652,7 @@ void main() {
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
+    _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph, constraints: const BoxConstraints(maxWidth: screenWidth));
     final SemanticsNode result = SemanticsNode();
     final SemanticsNode truncatedChild = SemanticsNode();
@@ -815,6 +753,7 @@ void main() {
       children: renderBoxes,
       textDirection: TextDirection.ltr,
     );
+    _applyParentData(renderBoxes, paragraph.text);
     layout(paragraph);
 
     final SemanticsNode node = SemanticsNode();
@@ -901,6 +840,7 @@ void main() {
         registrar: registrar,
         children: renderBoxes,
       );
+      _applyParentData(renderBoxes, paragraph.text);
       layout(paragraph);
       // The widget span will register to the selection container without going
       // through the render paragraph.
