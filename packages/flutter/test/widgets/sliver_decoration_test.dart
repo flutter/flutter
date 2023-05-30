@@ -8,7 +8,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -47,11 +46,11 @@ void main() {
     final TestDecoration decorationB = TestDecoration();
 
     Decoration activateDecoration = decorationA;
-    late void Function(void Function()) localSetState;
+    late StateSetter localSetState;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: StatefulBuilder(
-          builder:(BuildContext context, void Function(void Function()) setState) {
+          builder: (BuildContext context, StateSetter setState) {
             localSetState = setState;
             return CustomScrollView(
               slivers: <Widget>[
@@ -86,11 +85,11 @@ void main() {
     final TestDecoration decoration = TestDecoration();
 
     DecorationPosition activePosition = DecorationPosition.foreground;
-    late void Function(void Function()) localSetState;
+    late StateSetter localSetState;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: StatefulBuilder(
-          builder:(BuildContext context, void Function(void Function()) setState) {
+          builder: (BuildContext context, StateSetter setState) {
             localSetState = setState;
             return CustomScrollView(
               slivers: <Widget>[
