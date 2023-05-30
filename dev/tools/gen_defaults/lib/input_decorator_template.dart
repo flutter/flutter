@@ -24,7 +24,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
+      return TextStyle(color: _colors.onSurface.withOpacity(0.38));
     }
     return TextStyle(color: ${componentColor('md.comp.filled-text-field.input-text.placeholder')});
   });
