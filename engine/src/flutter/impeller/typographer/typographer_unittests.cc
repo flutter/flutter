@@ -9,6 +9,7 @@
 #include "impeller/typographer/lazy_glyph_atlas.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkData.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -292,7 +293,11 @@ TEST_P(TypographerTest, FontGlyphPairTypeChangesHashAndEquals) {
 }
 
 TEST_P(TypographerTest, MaybeHasOverlapping) {
-  SkFont sk_font;
+  sk_sp<SkFontMgr> font_mgr = SkFontMgr::RefDefault();
+  sk_sp<SkTypeface> typeface =
+      font_mgr->matchFamilyStyle("Arial", SkFontStyle::Normal());
+  SkFont sk_font(typeface, 0.5f);
+
   auto frame = TextFrameFromTextBlob(SkTextBlob::MakeFromString("1", sk_font));
   // Single character has no overlapping
   ASSERT_FALSE(frame.MaybeHasOverlapping());
