@@ -1,4 +1,4 @@
-Signature: 959220be4b833bcdb24e336353826031
+Signature: 44f177487c4bef5a7703368e035b9c9e
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
+FILE: ../../../third_party/skia/relnotes/sksamplingoptions_implicit.md
 FILE: ../../../third_party/skia/relnotes/sksurface_methods.md
 FILE: ../../../third_party/skia/relnotes/sktablecolorfilter.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
@@ -1480,7 +1481,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/geometry/GrPathUtils.cpp + ../.
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/geometry/GrPathUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLAttachment.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLAttachment.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLDefines_impl.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLDefines.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLGLSL.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLGLSL.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLGpu.cpp + ../../../third_party/skia/LICENSE
@@ -1501,7 +1502,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/ops/AAHairLinePathRenderer.cpp 
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/ops/AAHairLinePathRenderer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/ops/DefaultPathRenderer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/ops/DefaultPathRenderer.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/gl/GrGLDefines.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFDevice.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pdf/SkPDFDocument.cpp + ../../../third_party/skia/LICENSE
@@ -1663,7 +1663,7 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/geometry/GrPathUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/geometry/GrPathUtils.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLAttachment.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLDefines_impl.h
+FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLDefines.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLGLSL.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLGLSL.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLGpu.cpp
@@ -1684,7 +1684,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/AAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/DefaultPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/ops/DefaultPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLDefines.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFDocument.cpp
