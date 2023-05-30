@@ -1990,17 +1990,33 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Offset globalToLocal(Offset point) {
-    final Matrix4 transform = _liveTestRenderView.configuration.toHitTestMatrix();
+    // The method is expected to translate the given point expressed in logical
+    // pixels in the global coordinate space to the local coordinate space (also
+    // expressed in logical pixels).
+    // The inverted transform translates from the global coordinate space in
+    // physical pixels to the local coordinate space in logical pixels.
+    final Matrix4 transform = _liveTestRenderView.configuration.toMatrix();
     final double det = transform.invert();
     assert(det != 0.0);
-    final Offset result = MatrixUtils.transformPoint(transform, point);
-    return result;
+    // In order to use the transform, we need to translate the point first into
+    // the physical coordinate space by applying the device pixel ratio.
+    return MatrixUtils.transformPoint(
+      transform,
+      point * _liveTestRenderView.configuration.devicePixelRatio,
+    );
   }
 
   @override
   Offset localToGlobal(Offset point) {
-    final Matrix4 transform = _liveTestRenderView.configuration.toHitTestMatrix();
-    return MatrixUtils.transformPoint(transform, point);
+    // The method is expected to translate the given point expressed in logical
+    // pixels in the local coordinate space to the global coordinate space (also
+    // expressed in logical pixels).
+    // The transform translates from the local coordinate space in logical
+    // pixels to the global coordinate space in physical pixels.
+    final Matrix4 transform = _liveTestRenderView.configuration.toMatrix();
+    final Offset pointInPhysicalPixels = MatrixUtils.transformPoint(transform, point);
+    // We need to apply the device pixel ratio to get back to logical pixels.
+    return pointInPhysicalPixels / _liveTestRenderView.configuration.devicePixelRatio;
   }
 }
 
@@ -2033,7 +2049,6 @@ class TestViewConfiguration extends ViewConfiguration {
   /// The [size] defaults to 800x600.
   TestViewConfiguration.fromView({required ui.FlutterView view, super.size = _kDefaultTestViewportSize})
       : _paintMatrix = _getMatrix(size, view.devicePixelRatio, view),
-        _hitTestMatrix = _getMatrix(size, 1.0, view),
         super(devicePixelRatio: view.devicePixelRatio);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio, ui.FlutterView window) {
@@ -2061,20 +2076,9 @@ class TestViewConfiguration extends ViewConfiguration {
   }
 
   final Matrix4 _paintMatrix;
-  final Matrix4 _hitTestMatrix;
 
   @override
   Matrix4 toMatrix() => _paintMatrix.clone();
-
-  /// Provides the transformation matrix that converts coordinates in the test
-  /// coordinate space to coordinates in logical pixels on the real display.
-  ///
-  /// This is essentially the same as [toMatrix] but ignoring the device pixel
-  /// ratio.
-  ///
-  /// This is useful because pointers are described in logical pixels, as
-  /// opposed to graphics which are expressed in physical pixels.
-  Matrix4 toHitTestMatrix() => _hitTestMatrix.clone();
 
   @override
   String toString() => 'TestViewConfiguration';
