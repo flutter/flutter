@@ -20,9 +20,6 @@
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/path_builder.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 Canvas::Canvas() {
@@ -187,17 +184,17 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Scalar corner_radius,
                                      const Paint& paint) {
-  if (paint.color_source.GetType() != ColorSource::Type::kColor ||
-      paint.style != Paint::Style::kFill) {
-    return false;
-  }
-
-  if (!paint.mask_blur_descriptor.has_value() ||
-      paint.mask_blur_descriptor->style != FilterContents::BlurStyle::kNormal) {
-    return false;
-  }
-
   Paint new_paint = paint;
+  if (new_paint.color_source.GetType() != ColorSource::Type::kColor ||
+      new_paint.style != Paint::Style::kFill) {
+    return false;
+  }
+
+  if (!new_paint.mask_blur_descriptor.has_value() ||
+      new_paint.mask_blur_descriptor->style !=
+          FilterContents::BlurStyle::kNormal) {
+    return false;
+  }
 
   // For symmetrically mask blurred solid RRects, absorb the mask blur and use
   // a faster SDF approximation.
@@ -530,7 +527,11 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
     entity.SetTransformation(GetCurrentTransformation());
 
     Entity test;
-    auto cvg = text_contents->GetCoverage(test).value();
+    auto maybe_cvg = text_contents->GetCoverage(test);
+    FML_CHECK(maybe_cvg.has_value());
+    // Covered by FML_CHECK.
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+    auto cvg = maybe_cvg.value();
     color_text_contents->SetTextPosition(cvg.origin + position);
 
     text_contents->SetOffset(-cvg.origin);
@@ -612,8 +613,12 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
     if (size.has_value()) {
       src_coverage = Rect::MakeXYWH(0, 0, size->width, size->height);
     } else {
-      src_coverage = vertices->GetTextureCoordinateCoverge().value_or(
-          vertices->GetCoverage(Matrix{}).value());
+      auto cvg = vertices->GetCoverage(Matrix{});
+      FML_CHECK(cvg.has_value());
+      src_coverage =
+          // Covered by FML_CHECK.
+          // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+          vertices->GetTextureCoordinateCoverge().value_or(cvg.value());
     }
     src_contents =
         src_paint.CreateContentsForGeometry(Geometry::MakeRect(src_coverage));
@@ -661,5 +666,3 @@ void Canvas::DrawAtlas(const std::shared_ptr<Image>& atlas,
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)

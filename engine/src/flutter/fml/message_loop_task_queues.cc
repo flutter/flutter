@@ -15,9 +15,6 @@
 #include "flutter/fml/task_source.h"
 #include "flutter/fml/thread_local.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace fml {
 
 const size_t TaskQueueId::kUnmerged = ULONG_MAX;
@@ -396,9 +393,9 @@ TaskSource::TopTask MessageLoopTaskQueues::PeekNextTaskUnlocked(
   // At least one task at the top because PeekNextTaskUnlocked() is called after
   // HasPendingTasksUnlocked()
   FML_CHECK(top_task.has_value());
+  // Covered by FML_CHECK.
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   return top_task.value();
 }
 
 }  // namespace fml
-
-// NOLINTEND(bugprone-unchecked-optional-access)
