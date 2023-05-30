@@ -423,6 +423,9 @@ deps = {
   'src/third_party/dart/third_party/pkg/mockito':
    Var('dart_git') + '/mockito.git@153c145604db47798ee2ff21d2a07aa543fca168',
 
+  'src/third_party/dart/third_party/pkg/native':
+   Var('dart_git') + '/native.git@45e16dcf59212bda42e753152d3c3cece8f1b10e',
+
   'src/third_party/dart/third_party/pkg/package_config':
    Var('dart_git') + '/package_config.git@203de2022af26b3ab2bcec18cc49614d9e502897',
 
