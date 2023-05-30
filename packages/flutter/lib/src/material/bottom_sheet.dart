@@ -1323,7 +1323,7 @@ class _BottomSheetGestureDetector extends StatelessWidget {
               ..onStart = onVerticalDragStart
               ..onUpdate = onVerticalDragUpdate
               ..onEnd = onVerticalDragEnd
-              ..onlyDispatchDragCallbacksWhenThresholdMet = true;
+              ..onlyAcceptDragOnThreshold = true;
           },
         ),
       },
