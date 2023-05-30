@@ -31,8 +31,8 @@ class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
             }
             def pluginDirectory = new File(androidPlugin.path, 'android')
             assert pluginDirectory.exists()
-            include ":${androidPlugin.name}"
-            project(":${androidPlugin.name}").projectDir = pluginDirectory
+            settings.include(":${androidPlugin.name}")
+            settings.project(":${androidPlugin.name}").projectDir = pluginDirectory
         }
     }
 }
