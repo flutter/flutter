@@ -4,9 +4,6 @@
 
 #include "impeller/renderer/capabilities.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 Capabilities::Capabilities() = default;
@@ -218,11 +215,9 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_read_from_onscreen_texture_,                               //
       supports_read_from_resolve_,                                        //
       supports_decal_tile_mode_,                                          //
-      *default_color_format_,                                             //
-      *default_stencil_format_                                            //
+      default_color_format_.value_or(PixelFormat::kUnknown),              //
+      default_stencil_format_.value_or(PixelFormat::kUnknown)             //
       ));
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)

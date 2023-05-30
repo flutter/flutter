@@ -14,9 +14,6 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 static std::optional<SamplerAddressMode> TileModeToAddressMode(
@@ -66,6 +63,9 @@ void TiledTextureContents::SetColorFilter(
 std::optional<std::shared_ptr<Texture>>
 TiledTextureContents::CreateFilterTexture(
     const ContentContext& renderer) const {
+  if (!color_filter_.has_value()) {
+    return std::nullopt;
+  }
   const ColorFilterProc& filter = color_filter_.value();
   auto color_filter_contents = filter(FilterInput::Make(texture_));
   auto snapshot = color_filter_contents->RenderToSnapshot(
@@ -198,5 +198,3 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)
