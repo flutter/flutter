@@ -78,7 +78,6 @@ platform_properties:
         ]
       os: Mac-12
       device_type: none
-      xcode: 14e222b
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
@@ -92,7 +91,6 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: arm64
-      xcode: 14e222b
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
@@ -106,7 +104,6 @@ platform_properties:
       device_type: none
       mac_model: "Macmini8,1"
       os: Mac-12
-      xcode: 14e222b
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
@@ -122,7 +119,6 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 14e222b
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
@@ -131,14 +127,12 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 14e222b
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
@@ -168,14 +162,12 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
       os: Mac-12
       cpu: x86
       device_os: iOS-16
-      xcode: 14e222b
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
@@ -184,14 +176,12 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "none"}
         ]
       os: Mac-12
       cpu: arm64
       device_os: iOS-16
-      xcode: 14e222b
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e222b"
@@ -2567,29 +2557,16 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: animated_complex_opacity_perf_macos__e2e_summary
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac_benchmark basic_material_app_macos__compile
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       task_name: basic_material_app_macos__compile
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac build_ios_framework_module_test
     recipe: devicelab/devicelab_drone
@@ -2597,16 +2574,11 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: build_ios_framework_module_test
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2637,7 +2609,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -2656,7 +2627,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -2675,7 +2645,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -2694,7 +2663,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -2710,14 +2678,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_macos__start_up
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac_benchmark complex_layout_scroll_perf_macos__timeline_summary
     presubmit: false
@@ -2726,14 +2689,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: complex_layout_scroll_perf_macos__timeline_summary
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac customer_testing
     enabled_branches:
@@ -2752,7 +2710,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -2771,14 +2728,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__compile
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac_benchmark flutter_gallery_macos__start_up
     presubmit: false
@@ -2787,14 +2739,9 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       task_name: flutter_gallery_macos__start_up
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
@@ -2825,15 +2772,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       task_name: flutter_view_macos__start_up
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac framework_tests_libraries
     recipe: flutter/flutter_drone
@@ -2868,7 +2807,6 @@ targets:
       dependencies: >-
         [
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "open_jdk", "version": "version:11"},
           {"dependency": "android_sdk", "version": "version:33v6"}
@@ -2938,15 +2876,7 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       task_name: hello_world_macos__compile
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac integration_ui_test_test_macos
     recipe: devicelab/devicelab_drone
@@ -2955,7 +2885,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3023,7 +2952,6 @@ targets:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3054,25 +2982,13 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       task_name: platform_view_macos__start_up
-      $flutter/osx_sdk : >-
-        {
-          "sdk_version": "14e222b"
-        }
 
   - name: Mac platform_channel_sample_test_macos
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: platform_channel_sample_test_macos
@@ -3085,7 +3001,6 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3103,7 +3018,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3155,7 +3069,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3173,7 +3086,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -3191,7 +3103,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -3210,7 +3121,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       shard: tool_host_cross_arch_tests
@@ -3233,7 +3143,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -3258,7 +3167,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -3283,7 +3191,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -3308,7 +3215,6 @@ targets:
           {"dependency": "android_sdk", "version": "version:33v6"},
           {"dependency": "chrome_and_driver", "version": "version:110.0"},
           {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
@@ -3365,10 +3271,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       validation: verify_binaries_codesigned
@@ -3381,10 +3283,6 @@ targets:
     presubmit: false
     timeout: 60
     properties:
-      dependencies: >-
-        [
-          {"dependency": "xcode", "version": "14e222b"}
-        ]
       tags: >
         ["framework", "hostonly", "shard", "mac"]
       validation: verify_binaries_codesigned
@@ -4049,7 +3947,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -4067,7 +3964,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -4085,7 +3981,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
@@ -4118,7 +4013,6 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "xcode", "version": "14e222b"},
           {"dependency": "gems", "version": "v3.3.14"}
         ]
       tags: >
