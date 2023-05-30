@@ -118,6 +118,48 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
 
+  // Regression test for https://github.com/flutter/flutter/issues/126312.
+  testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
+    final Key key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          readOnly: true,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Reparent the EditableText, so that the parent has not yet been laid
+    // out when didUpdateWidget is called.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: FractionalTranslation(
+          translation: const Offset(0.1, 0.1),
+          child: EditableText(
+            key: key,
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(text: 'blah blah'),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      ),
+    );
+  });
+
   testWidgets('Text with selection can be shown on the screen when the keyboard shown', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119628
     addTearDown(tester.view.reset);
