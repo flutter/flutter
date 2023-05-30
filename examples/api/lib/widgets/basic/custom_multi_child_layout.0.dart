@@ -102,7 +102,7 @@ class CustomMultiChildLayoutExample extends StatelessWidget {
       ),
       children: <Widget>[
         // Create all of the colored boxes in the colors map.
-        for (MapEntry<String, Color> entry in _colors.entries)
+        for (final MapEntry<String, Color> entry in _colors.entries)
           // The "id" can be any Object, not just a String.
           LayoutId(
             id: entry.key,

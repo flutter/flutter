@@ -1045,7 +1045,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
+            data: const MediaQueryData(textScaleFactor: 1.25),
             child: Center(
               child: OutlinedButton(
                 style: const ButtonStyle(
@@ -1064,7 +1064,10 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(OutlinedButton)), equals(const Size(88.0, 48.0)));
-    expect(tester.getSize(find.byType(Text)), const Size(55.0, 18.0));
+    expect(tester.getSize(find.byType(Text)), const Size(
+      bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? 52.5 : 53.0,
+      18.0,
+    ));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
