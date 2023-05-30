@@ -192,16 +192,23 @@ class RenderSliverDecoration extends RenderProxySliver {
   void paint(PaintingContext context, Offset offset) {
     if (child != null && child!.geometry!.visible) {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
-      final Size childSize = Size(constraints.crossAxisExtent, child!.geometry!.paintExtent);
-      final Offset childOffset = offset + childParentData.paintOffset;
-
-      if (position == DecorationPosition.background) {
-        _painter!.paint(context.canvas, childOffset, configuration.copyWith(size: childSize));
+      final Size childSize;
+      final Offset scrollOffset;
+      switch (constraints.axis) {
+        case Axis.vertical:
+          childSize = Size(constraints.crossAxisExtent, child!.geometry!.scrollExtent);
+          scrollOffset = Offset(0.0, -constraints.scrollOffset);
+        case Axis.horizontal:
+          childSize = Size(child!.geometry!.scrollExtent, constraints.crossAxisExtent);
+          scrollOffset = Offset(-constraints.scrollOffset, 0.0);
       }
-      context.paintChild(child!, offset + childParentData.paintOffset);
-
+      final Offset childOffset = offset + childParentData.paintOffset;
+      if (position == DecorationPosition.background) {
+        _painter!.paint(context.canvas, childOffset + scrollOffset, configuration.copyWith(size: childSize));
+      }
+      context.paintChild(child!, childOffset);
       if (position == DecorationPosition.foreground) {
-        _painter!.paint(context.canvas, childOffset, configuration.copyWith(size: childSize));
+        _painter!.paint(context.canvas, childOffset + scrollOffset, configuration.copyWith(size: childSize));
       }
     }
   }
