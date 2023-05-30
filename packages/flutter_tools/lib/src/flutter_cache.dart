@@ -408,6 +408,8 @@ class AndroidMavenArtifacts extends ArtifactSet {
     OperatingSystemUtils operatingSystemUtils,
     {bool offline = false}
   ) async {
+    // TODO(andrewkolos): Should this really be no-op if the Android SDK
+    // is unavailable? https://github.com/flutter/flutter/issues/127848
     if (globals.androidSdk == null) {
       return;
     }
