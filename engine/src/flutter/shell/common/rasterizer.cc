@@ -25,9 +25,6 @@
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace flutter {
 
 // The rasterizer will tell Skia to purge cached resources that have not been
@@ -589,9 +586,10 @@ RasterStatus Rasterizer::DrawToSurfaceUnsafe(
           (!raster_thread_merger_ || raster_thread_merger_->IsMerged());
 
       damage = std::make_unique<FrameDamage>();
-      if (frame->framebuffer_info().existing_damage && !force_full_repaint) {
+      auto existing_damage = frame->framebuffer_info().existing_damage;
+      if (existing_damage.has_value() && !force_full_repaint) {
         damage->SetPreviousLayerTree(last_layer_tree_.get());
-        damage->AddAdditionalDamage(*frame->framebuffer_info().existing_damage);
+        damage->AddAdditionalDamage(existing_damage.value());
         damage->SetClipAlignment(
             frame->framebuffer_info().horizontal_clip_alignment,
             frame->framebuffer_info().vertical_clip_alignment);
@@ -870,5 +868,3 @@ Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
 Rasterizer::Screenshot::~Screenshot() = default;
 
 }  // namespace flutter
-
-// NOLINTEND(bugprone-unchecked-optional-access)

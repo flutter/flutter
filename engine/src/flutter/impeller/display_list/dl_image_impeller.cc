@@ -7,9 +7,6 @@
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 sk_sp<DlImageImpeller> DlImageImpeller::Make(std::shared_ptr<Texture> texture,
@@ -40,6 +37,9 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
       std::nullopt,                       // sampler_descriptor
       true,                               // msaa_enabled
       "MakeYUVToRGBFilter Snapshot");     // label
+  if (!snapshot.has_value()) {
+    return nullptr;
+  }
   return impeller::DlImageImpeller::Make(snapshot->texture);
 }
 
@@ -94,5 +94,3 @@ size_t DlImageImpeller::GetApproximateByteSize() const {
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)

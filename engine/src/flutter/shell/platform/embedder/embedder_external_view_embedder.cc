@@ -11,9 +11,6 @@
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace flutter {
 
 EmbedderExternalViewEmbedder::EmbedderExternalViewEmbedder(
@@ -227,6 +224,8 @@ void EmbedderExternalViewEmbedder::SubmitFrame(
       const auto& external_view = pending_views_.at(view_id);
       if (external_view->HasPlatformView()) {
         presented_layers.PushPlatformViewLayer(
+            // Covered by HasPlatformView().
+            // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
             external_view->GetViewIdentifier()
                 .platform_view_id.value(),           // view id
             *external_view->GetEmbeddedViewParams()  // view params
@@ -267,5 +266,3 @@ void EmbedderExternalViewEmbedder::SubmitFrame(
 }
 
 }  // namespace flutter
-
-// NOLINTEND(bugprone-unchecked-optional-access)

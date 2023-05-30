@@ -34,9 +34,6 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 struct ImGui_ImplImpeller_Data {
   std::shared_ptr<impeller::Context> context;
   std::shared_ptr<impeller::Texture> font_texture;
@@ -97,8 +94,12 @@ bool ImGui_ImplImpeller_Init(
     auto desc = impeller::PipelineBuilder<impeller::ImguiRasterVertexShader,
                                           impeller::ImguiRasterFragmentShader>::
         MakeDefaultPipelineDescriptor(*context);
-    desc->ClearStencilAttachments();
-    desc->ClearDepthAttachment();
+    IM_ASSERT(desc.has_value() && "Could not create Impeller pipeline");
+    if (desc.has_value()) {  // Needed to silence clang-tidy check
+                             // bugprone-unchecked-optional-access.
+      desc->ClearStencilAttachments();
+      desc->ClearDepthAttachment();
+    }
 
     bd->pipeline =
         context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
@@ -272,5 +273,3 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
     index_buffer_offset += draw_list_idx_bytes;
   }
 }
-
-// NOLINTEND(bugprone-unchecked-optional-access)

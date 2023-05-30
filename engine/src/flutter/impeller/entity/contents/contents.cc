@@ -15,9 +15,6 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 ContentContextOptions OptionsFromPass(const RenderPass& pass) {
@@ -79,6 +76,9 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
 
   if (coverage_limit.has_value()) {
     coverage = coverage->Intersection(*coverage_limit);
+    if (!coverage.has_value()) {
+      return std::nullopt;
+    }
   }
 
   auto texture = renderer.MakeSubpass(
@@ -151,5 +151,3 @@ void Contents::SetColorSourceSize(Size size) {
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)
