@@ -77,7 +77,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     super.debugOwner,
     this.dragStartBehavior = DragStartBehavior.start,
     this.velocityTrackerBuilder = _defaultBuilder,
-    this.onlyDispatchDragCallbacksWhenThresholdMet = false,
+    this.requireDragThreshold = false,
     super.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
   }) : super(allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior);
@@ -211,17 +211,16 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// If null then [kMaxFlingVelocity] is used.
   double? maxFlingVelocity;
 
-  /// Whether the drag callbacks should only be dispatched when the drag threshold
-  /// has been met.
+  /// Whether the drag threshold should be met before dispatching any drag callbacks.
   ///
   /// If true, the drag callbacks will only be dispatched when this recognizer has
   /// won the arena and the drag threshold has been met.
   ///
-  /// If false, the drag callbacks will be dispatched when this recognizer has won
-  /// the arena.
+  /// If false, the drag callbacks will be dispatched immediately when this recognizer
+  /// has won the arena.
   ///
   /// This value defaults to false.
-  bool onlyDispatchDragCallbacksWhenThresholdMet;
+  bool requireDragThreshold;
 
   /// Determines the type of velocity estimation method to use for a potential
   /// drag gesture, when a new pointer is added.
@@ -420,7 +419,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     assert(!_acceptedActivePointers.contains(pointer));
     _acceptedActivePointers.add(pointer);
-    if (onlyDispatchDragCallbacksWhenThresholdMet ? _hasDragThresholdBeenMet : !onlyDispatchDragCallbacksWhenThresholdMet) {
+    if (requireDragThreshold ? _hasDragThresholdBeenMet : true) {
       _checkDrag(pointer);
     }
   }
