@@ -8,8 +8,8 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/texture_fill.frag.h"
+#include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
-#include "impeller/entity/tiled_texture_fill.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
@@ -119,7 +119,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  using VS = TiledTextureFillVertexShader;
+  using VS = TextureFillVertexShader;
   using FS = TiledTextureFillFragmentShader;
 
   const auto texture_size = texture_->GetSize();

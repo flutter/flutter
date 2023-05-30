@@ -52,7 +52,6 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
-#include "impeller/entity/tiled_texture_fill.vert.h"
 #include "impeller/entity/uv.comp.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
@@ -144,8 +143,8 @@ using TexturePipeline =
     RenderPipelineT<TextureFillVertexShader, TextureFillFragmentShader>;
 using PositionUVPipeline =
     RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
-using TiledTexturePipeline = RenderPipelineT<TiledTextureFillVertexShader,
-                                             TiledTextureFillFragmentShader>;
+using TiledTexturePipeline =
+    RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
 using GaussianBlurAlphaDecalPipeline =
     RenderPipelineT<GaussianBlurVertexShader,
                     GaussianBlurAlphaDecalFragmentShader>;
