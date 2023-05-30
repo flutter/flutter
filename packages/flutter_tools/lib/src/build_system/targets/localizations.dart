@@ -58,7 +58,6 @@ class GenerateLocalizationsTarget extends Target {
       defaultArbDir: defaultArbDir,
     );
     await generateLocalizations(
-    generateLocalizations(
       logger: environment.logger,
       options: options,
       projectDir: environment.projectDir,
