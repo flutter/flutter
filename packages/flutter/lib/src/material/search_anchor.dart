@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_style.dart';
@@ -996,6 +997,7 @@ class SearchBar extends StatefulWidget {
     this.trailing,
     this.onTap,
     this.onChanged,
+    this.onSubmitted,
     this.constraints,
     this.elevation,
     this.backgroundColor,
@@ -1043,6 +1045,15 @@ class SearchBar extends StatefulWidget {
 
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
+
+  /// {@macro flutter.widgets.editableText.onSubmitted}
+  ///
+  /// See also:
+  ///
+  ///  * [TextInputAction.next] and [TextInputAction.previous], which
+  ///    automatically shift the focus to the next/previous focusable item when
+  ///    the user is done editing.
+  final ValueChanged<String>? onSubmitted;
 
   /// Optional size constraints for the search bar.
   ///
@@ -1236,6 +1247,7 @@ class _SearchBarState extends State<SearchBar> {
                       child: TextField(
                         focusNode: _focusNode,
                         onChanged: widget.onChanged,
+                        onSubmitted: widget.onSubmitted,
                         controller: widget.controller,
                         style: effectiveTextStyle,
                         decoration: InputDecoration(
