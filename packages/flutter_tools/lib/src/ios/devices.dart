@@ -635,6 +635,7 @@ class IOSDevice extends Device {
       device: this,
       app: app,
       iMobileDevice: _iMobileDevice,
+      platform: _platform,
     ));
   }
 
@@ -749,17 +750,20 @@ class IOSDeviceLogReader extends DeviceLogReader {
     this._deviceId,
     this.name,
     String appName,
+    Platform platform,
   ) : // Match for lines for the runner in syslog.
       //
       // iOS 9 format:  Runner[297] <Notice>:
       // iOS 10 format: Runner(Flutter)[297] <Notice>:
-      _runnerLineRegex = RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
+      _runnerLineRegex = RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: '),
+      _platform = platform;
 
   /// Create a new [IOSDeviceLogReader].
   factory IOSDeviceLogReader.create({
     required IOSDevice device,
     IOSApp? app,
     required IMobileDevice iMobileDevice,
+    required Platform platform,
   }) {
     final String appName = app?.name?.replaceAll('.app', '') ?? '';
     return IOSDeviceLogReader._(
@@ -768,6 +772,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       device.id,
       device.name,
       appName,
+      platform
     );
   }
 
@@ -775,9 +780,17 @@ class IOSDeviceLogReader extends DeviceLogReader {
   factory IOSDeviceLogReader.test({
     required IMobileDevice iMobileDevice,
     bool useSyslog = true,
+    required Platform platform,
+    int? majorSdkVersion,
   }) {
+    final int sdkVersion;
+    if (majorSdkVersion != null) {
+      sdkVersion = majorSdkVersion;
+    } else {
+      sdkVersion = useSyslog ? 12 : 13;
+    }
     return IOSDeviceLogReader._(
-      iMobileDevice, useSyslog ? 12 : 13, '1234', 'test', 'Runner');
+      iMobileDevice, sdkVersion, '1234', 'test', 'Runner', platform);
   }
 
   @override
@@ -785,6 +798,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   final int _majorSdkVersion;
   final String _deviceId;
   final IMobileDevice _iMobileDevice;
+  final Platform _platform;
 
   // Matches a syslog line from the runner.
   RegExp _runnerLineRegex;
@@ -893,16 +907,27 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Strip off the logging metadata (leave the category), or just echo the line.
   String _debuggerLineHandler(String line) => _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
+  /// Use both logs from `idevicesyslog` and `ios-deploy` when debugging from a CI bot
+  /// since sometimes `ios-deploy` does not return the Dart VM url:
+  /// https://github.com/flutter/flutter/issues/121231
+  bool get useBothLogDeviceReaders {
+    final String? user = _platform.environment['USER'];
+    if (user != null && user == 'swarming' && _majorSdkVersion >= 16) {
+      return true;
+    }
+    return false;
+  }
+
   void _listenToSysLog() {
     // syslog is not written on iOS 13+.
-    if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
+    if (!useBothLogDeviceReaders && _majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
       return;
     }
     _iMobileDevice.startLogger(_deviceId).then<void>((Process process) {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
-        if (linesController.hasListener) {
+        if (!(useBothLogDeviceReaders && debuggerStream != null) && linesController.hasListener) {
           linesController.close();
         }
       });
@@ -926,7 +951,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return (String line) {
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
-          _addToLinesController(decodeSyslog(line));
+          if (!excludeEchoingDeviceLogs(line)) {
+            _addToLinesController(decodeSyslog(line));
+          }
           return;
         }
 
@@ -938,11 +965,22 @@ class IOSDeviceLogReader extends DeviceLogReader {
       if (match != null) {
         final String logLine = line.substring(match.end);
         // Only display the log line after the initial device and executable information.
-        _addToLinesController(decodeSyslog(logLine));
-
+        if (!excludeEchoingDeviceLogs(logLine)) {
+          _addToLinesController(decodeSyslog(logLine));
+        }
         printing = true;
       }
     };
+  }
+
+  /// When using both `idevicesyslog` and `ios-deploy`, exclude `idevicesyslog`
+  /// logs from being added to the stream, expect for the Dart VM Service log
+  /// message, to prevent duplicate logs being printed by [FlutterDevice.startEchoingDeviceLog].
+  bool excludeEchoingDeviceLogs(String line) {
+    if (useBothLogDeviceReaders && !line.contains(globals.kVMServiceMessageRegExp)) {
+      return true;
+    }
+    return false;
   }
 
   @override

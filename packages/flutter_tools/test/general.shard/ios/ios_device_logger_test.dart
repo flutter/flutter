@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -27,6 +28,7 @@ void main() {
   late Cache fakeCache;
   late BufferLogger logger;
   late String ideviceSyslogPath;
+  final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -73,6 +75,7 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
           cache: fakeCache,
           logger: logger,
         ),
+        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -101,6 +104,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -135,6 +139,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -180,6 +185,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        platform: macPlatform,
       );
       logReader.connectedVMService = vmService;
 
@@ -222,6 +228,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        platform: macPlatform,
       );
       logReader.connectedVMService = vmService;
 
@@ -258,6 +265,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
+        platform: macPlatform,
       );
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
@@ -282,6 +290,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
+        platform: macPlatform,
       );
       final Completer<void> streamComplete = Completer<void>();
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
@@ -301,6 +310,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
+        platform: macPlatform,
       );
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       logReader.debuggerStream = iosDeployDebugger;
@@ -325,6 +335,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
+        platform: macPlatform,
       );
       Object? exception;
       StackTrace? trace;
@@ -345,6 +356,197 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
         exception,
         isNull,
         reason: trace.toString(),
+      );
+    });
+  });
+
+  group('both syslog and debugger stream', () {
+
+    testWithoutContext('useBothLogDeviceReaders is true when user is swarming and sdk is at least 16', () {
+      final FakePlatform macPlatform = FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{
+          'USER': 'swarming',
+        },
+      );
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+        platform: macPlatform,
+      );
+
+      expect(logReader.useBothLogDeviceReaders, isTrue);
+    });
+
+    testWithoutContext('useBothLogDeviceReaders is false when sdk is less than 16', () {
+      final FakePlatform macPlatform = FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{
+          'USER': 'swarming',
+        },
+      );
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 15,
+        platform: macPlatform,
+      );
+
+      expect(logReader.useBothLogDeviceReaders, isFalse);
+    });
+
+    testWithoutContext('useBothLogDeviceReaders is false when user is not swarming', () {
+      final FakePlatform macPlatform = FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{
+          'USER': 'no',
+        },
+      );
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+        platform: macPlatform,
+      );
+
+      expect(logReader.useBothLogDeviceReaders, isFalse);
+    });
+
+    testWithoutContext('syslog only sends Dart VM message to stream when useBothLogDeviceReaders is true', () async {
+      final FakePlatform macPlatform = FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{
+          'USER': 'swarming',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
+Runner(Flutter)[297] <Notice>: A is for ari
+Runner(Flutter)[297] <Notice>: I is for ichigo
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
+'''
+        ),
+      );
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+        platform: macPlatform,
+      );
+      final List<String> lines = await logReader.logLines.toList();
+
+      expect(logReader.useBothLogDeviceReaders, isTrue);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(lines, <String>['flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/']);
+    });
+
+    testWithoutContext('IOSDeviceLogReader uses both syslog and ios-deploy debugger', () async {
+      final FakePlatform macPlatform = FakePlatform(
+        operatingSystem: 'macos',
+        environment: <String, String>{
+          'USER': 'swarming',
+        },
+      );
+
+      processManager.addCommand(
+        FakeCommand(
+            command: <String>[
+              ideviceSyslogPath, '-u', '1234',
+            ],
+            stdout: '''
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
+'''
+        ),
+      );
+
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        '',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+        platform: macPlatform,
+      );
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
+      logReader.debuggerStream = iosDeployDebugger;
+      final Future<List<String>> logLines = logReader.logLines.toList();
+      final List<String> lines = await logLines;
+
+      expect(logReader.useBothLogDeviceReaders, isTrue);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(
+        lines.contains(
+          '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        ),
+        isTrue,
+      );
+      expect(
+        lines.contains(
+          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+        ),
+        isTrue,
+      );
+    });
+
+    testWithoutContext('IOSDeviceLogReader only uses ios-deploy debugger when useBothLogDeviceReaders is false', () async {
+      final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        '',
+      ]);
+
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 16,
+        platform: macPlatform,
+      );
+      final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
+      iosDeployDebugger.logLines = debuggingLogs;
+      logReader.debuggerStream = iosDeployDebugger;
+      final Future<List<String>> logLines = logReader.logLines.toList();
+      final List<String> lines = await logLines;
+
+      expect(logReader.useBothLogDeviceReaders, isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(
+        lines.contains(
+          '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        ),
+        isTrue,
       );
     });
   });
