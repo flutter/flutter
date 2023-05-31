@@ -92,7 +92,7 @@ class Java {
     );
   }
 
-  /// The path of the runtime's home directory.
+  /// The path of the runtime environments' home directory.
   ///
   /// This should only be used for logging and validation purposes.
   /// If you need to set JAVA_HOME when starting a process, consider
@@ -101,7 +101,7 @@ class Java {
   /// a new method to this class instead.
   final String? javaHome;
 
-  /// The path of the runtime's java binary.
+  /// The path of the runtime environments' java binary.
   ///
   /// This should be only used for logging and validation purposes.
   /// If you need to invoke the binary directly, consider adding a new method
