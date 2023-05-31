@@ -11,6 +11,7 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
 #include "third_party/skia/include/core/SkColorType.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/zlib/zlib.h"  // For crc32
 
@@ -54,7 +55,10 @@ const ImageGenerator::FrameInfo APNGImageGenerator::GetFrameInfo(
     return {};
   }
 
-  return images_[image_index].frame_info.value();
+  if (images_[image_index].frame_info.has_value()) {
+    return images_[image_index].frame_info.value();
+  }
+  return {};
 }
 
 SkISize APNGImageGenerator::GetScaledDimensions(float desired_scale) {
@@ -85,7 +89,7 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
   ///
 
   APNGImage& frame = images_[image_index];
-  auto frame_info = frame.codec->getInfo();
+  SkImageInfo frame_info = frame.codec->getInfo();
   auto frame_row_bytes = frame_info.bytesPerPixel() * frame_info.width();
 
   if (frame.pixels.empty()) {
@@ -98,6 +102,12 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
                       << ") of APNG. SkCodec::Result: " << result;
       return RenderDefaultImage(info, pixels, row_bytes);
     }
+  }
+  if (!frame.frame_info.has_value()) {
+    FML_DLOG(ERROR) << "Failed to decode image at index " << image_index
+                    << " (frame index: " << frame_index
+                    << ") of APNG due to the frame missing data (frame_info).";
+    return false;
   }
 
   //----------------------------------------------------------------------------
@@ -519,11 +529,15 @@ bool APNGImageGenerator::DemuxNextImageInternal() {
   const void* data_p = const_cast<void*>(data_.get()->data());
   std::tie(image, next_chunk_p_) =
       DemuxNextImage(data_p, data_->size(), header_, next_chunk_p_);
-  if (!image.has_value()) {
+  if (!image.has_value() || !image->frame_info.has_value()) {
     return false;
   }
 
-  if (images_.back().frame_info->disposal_method ==
+  auto last_frame_info = images_.back().frame_info;
+  if (!last_frame_info.has_value()) {
+    return false;
+  }
+  if (last_frame_info->disposal_method ==
       SkCodecAnimation::DisposalMethod::kRestorePrevious) {
     FML_DLOG(INFO)
         << "DisposalMethod::kRestorePrevious is not supported by the "
@@ -532,7 +546,7 @@ bool APNGImageGenerator::DemuxNextImageInternal() {
   }
 
   if (images_.size() > first_frame_index_ &&
-      images_.back().frame_info->disposal_method ==
+      last_frame_info->disposal_method ==
           SkCodecAnimation::DisposalMethod::kKeep) {
     // Mark the required frame as the previous frame in all cases.
     image->frame_info->required_frame = images_.size() - 1;
