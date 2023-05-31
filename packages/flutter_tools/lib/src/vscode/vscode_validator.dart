@@ -27,7 +27,7 @@ class VsCodeValidator extends DoctorValidator {
       List<ValidationMessage>.from(_vsCode.validationMessages);
 
     final String vsCodeVersionText = _vsCode.version == null
-        ? 'unknown version'
+        ? userMessages.vsCodeVersion('unknown')
         : userMessages.vsCodeVersion(_vsCode.version.toString());
 
     if (_vsCode.version == null) {
