@@ -5,9 +5,7 @@
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
@@ -247,35 +245,14 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     }
 
     // Run the localizations generator.
-    final LocalizationsGenerator generator = generateLocalizations(
+    await generateLocalizations(
       logger: _logger,
       options: options,
       projectDir: _fileSystem.currentDirectory,
       fileSystem: _fileSystem,
+      artifacts: _artifacts,
+      processManager: _processManager,
     );
-    final List<String> outputFileList = generator.outputFileList;
-    final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
-
-    // All other post processing.
-    if (options.format) {
-      if (outputFileList.isEmpty) {
-        return FlutterCommandResult.success();
-      }
-      final List<String> formatFileList = outputFileList.toList();
-      if (untranslatedMessagesFile != null) {
-        // Don't format the messages file using `dart format`.
-        formatFileList.remove(untranslatedMessagesFile.absolute.path);
-      }
-      if (formatFileList.isEmpty) {
-        return FlutterCommandResult.success();
-      }
-      final String dartBinary = _artifacts.getArtifactPath(Artifact.engineDartBinary);
-      final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
-      final ProcessResult result = await _processManager.run(command);
-      if (result.exitCode != 0) {
-        throwToolExit('Formatting failed: $result', exitCode: result.exitCode);
-      }
-    }
 
     return FlutterCommandResult.success();
   }
