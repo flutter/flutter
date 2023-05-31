@@ -4,7 +4,8 @@
 
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+
+import 'binding.dart';
 
 /// A callback type that is used by [AppLifecycleListener.onExitRequested] to
 /// ask the application if it wants to cancel application termination or not.
@@ -21,9 +22,8 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// `FlutterApplication`, or a subclass of `FlutterApplication`.
 ///
 /// To listen for changes in the application lifecycle state, define an
-/// [onStateChange] callback. The most recent state seen by this
-/// [AppLifecycleListener] can be retrieved with the [lifecycleState] accessor.
-/// See the [AppLifecycleState] enum for details on the various states.
+/// [onStateChange] callback. See the [AppLifecycleState] enum for details on
+/// the various states.
 ///
 /// {@tool dartpad}
 /// This example shows how an application can listen to changes in the
@@ -72,6 +72,8 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   ///
   /// Typically, this is set to [WidgetsBinding.instance], but may be
   /// substituted for testing or other specialized bindings.
+  ///
+  /// Defaults to [WidgetsBinding.instance].
   final WidgetsBinding binding;
 
   /// Called anytime the state changes, passing the new state.
