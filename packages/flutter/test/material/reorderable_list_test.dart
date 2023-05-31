@@ -474,6 +474,45 @@ void main() {
         expect(customController.offset, 120.0);
       });
 
+      testWidgets('ReorderableList auto scrolling is fast enough', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/121603.
+        final ScrollController controller = ScrollController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ReorderableListView.builder(
+                scrollController: controller,
+                itemCount: 100,
+                itemBuilder: (BuildContext context, int index) {
+                  return Text('data', key: ValueKey<int>(index));
+                },
+                onReorder: (int oldIndex, int newIndex) {},
+              ),
+            ),
+          ),
+        );
+
+        // Start gesture on first item.
+        final TestGesture drag = await tester.startGesture(tester.getCenter(find.byKey(const ValueKey<int>(0))));
+        await tester.pump(kLongPressTimeout + kPressTimeout);
+        final Offset bottomRight = tester.getBottomRight(find.byType(ReorderableListView));
+        // Drag enough for move to start.
+        await drag.moveTo(Offset(bottomRight.dx / 2, bottomRight.dy));
+        await tester.pump();
+        // Use a fixed value to make sure the default velocity scalar is bigger
+        // than a certain amount.
+        const double kMinimumAllowedAutoScrollDistancePer5ms = 1.7;
+
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 2));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 3));
+        await tester.pump(const Duration(milliseconds: 5));
+        expect(controller.offset, greaterThan(kMinimumAllowedAutoScrollDistancePer5ms * 4));
+      });
+
       testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
