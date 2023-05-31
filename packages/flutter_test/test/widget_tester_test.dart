@@ -50,10 +50,20 @@ void main() {
       matcher.expect(completed, isTrue);
     });
   });
-  
+
   {
     bool retried = false;
-    testWidgets('retry allows test to run multiple times', (WidgetTester tester) async {
+    group('group retry flag allows test to run multiple times', () {
+      testWidgets('primary', (WidgetTester tester) async {
+        addTearDown(() => retried = true);
+        expect(retried, isTrue);
+      });
+    }, retry: 1);
+  }
+
+  {
+    bool retried = false;
+    testWidgets('testWidget retry flag allows test to run multiple times', (WidgetTester tester) async {
       addTearDown(() => retried = true);
       expect(retried, isTrue);
     }, retry: 1);
