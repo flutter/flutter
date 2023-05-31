@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
+import '../src/fake_process_manager.dart';
 
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
@@ -62,6 +64,8 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
+  late Artifacts artifacts;
+  late ProcessManager processManager;
   late String defaultL10nPathString;
   late String syntheticPackagePath;
   late String syntheticL10nPackagePath;
@@ -69,6 +73,8 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
+    artifacts = Artifacts.test();
+    processManager = FakeProcessManager.empty();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
@@ -793,7 +799,7 @@ void main() {
       logger.printError('An error output from a different tool in flutter_tools');
 
       // Should run without error.
-      generateLocalizations(
+      await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
           arbDir: Uri.directory(defaultL10nPathString).path,
@@ -804,6 +810,8 @@ void main() {
         logger: logger,
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
       );
     });
 
@@ -825,12 +833,14 @@ void main() {
       );
 
       // Verify that values are correctly passed through the localizations target.
-      final LocalizationsGenerator generator = generateLocalizations(
+      final LocalizationsGenerator generator = await generateLocalizations(
         fileSystem: fs,
         options: options,
         logger: logger,
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
       );
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
@@ -894,6 +904,8 @@ flutter:
           logger: BufferLogger.test(),
           projectDir: fs.currentDirectory,
           dependenciesDir: fs.currentDirectory,
+          artifacts: artifacts,
+          processManager: processManager,
         ),
         throwsToolExit(
           message: 'Attempted to generate localizations code without having the '
@@ -906,7 +918,7 @@ flutter:
       _standardFlutterDirectoryL10nSetup(fs);
 
       // Test without headers.
-      generateLocalizations(
+      await generateLocalizations(
         fileSystem: fs,
         options: LocalizationOptions(
           arbDir: Uri.directory(defaultL10nPathString).path,
@@ -917,6 +929,8 @@ flutter:
         logger: BufferLogger.test(),
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
+        artifacts: artifacts,
+        processManager: processManager,
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -932,7 +946,7 @@ class AppLocalizationsEn extends AppLocalizations {
 ''');
 
     // Test with headers.
-    generateLocalizations(
+    await generateLocalizations(
       fileSystem: fs,
       options: LocalizationOptions(
         header: 'HEADER',
@@ -944,6 +958,8 @@ class AppLocalizationsEn extends AppLocalizations {
       logger: logger,
       projectDir: fs.currentDirectory,
       dependenciesDir: fs.currentDirectory,
+      artifacts: artifacts,
+      processManager: processManager,
     );
 
     expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
