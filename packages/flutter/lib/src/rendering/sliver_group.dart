@@ -126,12 +126,12 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    RenderSliver? child = lastChild;
+    RenderSliver? child = firstChild;
 
     while (child != null) {
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
       context.paintChild(child, offset + childParentData.paintOffset);
-      child = childBefore(child);
+      child = childAfter(child);
     }
   }
 
