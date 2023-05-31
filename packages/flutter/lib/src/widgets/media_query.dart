@@ -756,7 +756,9 @@ class MediaQueryData {
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
 /// For example, to learn the size of the current media (e.g., the window
-/// containing your app), you can read the [MediaQueryData.size] property from
+/// containing your app), you can use [MediaQuery.sizeOf]: 
+/// `MediaQuery.sizeOf(context)`. Alternatively, with less performance,
+/// you can read the [MediaQueryData.size] property from
 /// the [MediaQueryData] returned by [MediaQuery.of]:
 /// `MediaQuery.of(context).size`.
 ///
