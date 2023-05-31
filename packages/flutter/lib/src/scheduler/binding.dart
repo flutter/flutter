@@ -376,6 +376,13 @@ mixin SchedulerBinding on BindingBase {
   AppLifecycleState? get lifecycleState => _lifecycleState;
   AppLifecycleState? _lifecycleState;
 
+  /// Allows the test framework to reset the lifecycle state back to its
+  /// initial value.
+  @visibleForTesting
+  void resetLifecycleState() {
+    _lifecycleState = null;
+  }
+
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
