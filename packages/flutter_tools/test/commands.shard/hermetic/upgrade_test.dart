@@ -114,7 +114,7 @@ void main() {
     expect(logger.statusText, contains("Transitioning from 'dev' to 'beta'..."));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    FlutterVersion: () => FakeFlutterVersion(channel: 'dev'),
+    FlutterVersion: () => FakeFlutterVersion(branch: 'dev'),
     Logger: () => logger,
     ProcessManager: () => processManager,
   });
@@ -197,7 +197,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    FlutterVersion: () => FakeFlutterVersion(channel: 'master', frameworkVersion: startingTag, engineRevision: 'engine'),
+    FlutterVersion: () => FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
     Logger: () => logger,
     ProcessManager: () => processManager,
   });
@@ -264,7 +264,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
-    FlutterVersion: () => FakeFlutterVersion(channel: 'beta', frameworkVersion: startingTag, engineRevision: 'engine'),
+    FlutterVersion: () => FakeFlutterVersion(branch: 'beta', frameworkVersion: startingTag, engineRevision: 'engine'),
     Logger: () => logger,
     ProcessManager: () => processManager,
   });
