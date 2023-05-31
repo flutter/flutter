@@ -16,7 +16,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
 import 'dom.dart';
 import 'navigation/history.dart';
-import 'navigation/js_url_strategy.dart';
 import 'platform_dispatcher.dart';
 import 'services.dart';
 import 'util.dart';
@@ -323,16 +322,6 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   /// Overrides the value of [physicalSize] in tests.
   ui.Size? webOnlyDebugPhysicalSizeOverride;
 }
-
-typedef _JsSetUrlStrategy = void Function(JsUrlStrategy?);
-
-/// A JavaScript hook to customize the URL strategy of a Flutter app.
-//
-// DO NOT CHANGE THE JS NAME, IT IS PUBLIC API AT THIS POINT.
-//
-// TODO(mdebbar): Add integration test https://github.com/flutter/flutter/issues/66852
-@JS('_flutter_web_set_location_strategy')
-external set jsSetUrlStrategy(_JsSetUrlStrategy? newJsSetUrlStrategy);
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
 class EngineSingletonFlutterWindow extends EngineFlutterWindow {
