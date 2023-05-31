@@ -12,9 +12,8 @@ pluginManagement {
 
     plugins {
         id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+        id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     }
 }
 
 include ":app"
-
-apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"

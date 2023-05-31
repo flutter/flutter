@@ -24,7 +24,7 @@ pluginManagement {
         // We set `apply false`, because we don't want to apply the plugin to
         // the `android` root project, but only to the `app` subproject.
         id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
-        id "dev.flutter.flutter-plugin-loader" version "1.0.0" apply false
+        id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     }
 }
 
