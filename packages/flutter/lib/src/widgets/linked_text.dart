@@ -472,9 +472,14 @@ class InlineLinkedText extends TextSpan {
       return a.textRange.start.compareTo(b.textRange.start);
     });
 
-    // Remove overlapping ranges.
     int lastEnd = 0;
     nextTextLinkerSingles.removeWhere((_TextLinkerSingle textLinkerSingle) {
+      // Return empty ranges.
+      if (textLinkerSingle.textRange.start == textLinkerSingle.textRange.end) {
+        return true;
+      }
+
+      // Remove overlapping ranges.
       final bool overlaps = textLinkerSingle.textRange.start < lastEnd;
       if (!overlaps) {
         lastEnd = textLinkerSingle.textRange.end;
