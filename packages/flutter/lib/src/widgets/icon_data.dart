@@ -58,7 +58,8 @@ class IconData {
   final bool matchTextDirection;
 
   /// The ordered list of font families to fall back on when a glyph cannot be found in a higher priority font family.
-  /// For more details refer to the documentation of [TextStyle]
+  ///
+  /// For more details, refer to the documentation of [TextStyle]
   final List<String>? fontFamilyFallback;
 
   @override
