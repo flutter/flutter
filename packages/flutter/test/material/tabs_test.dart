@@ -473,19 +473,31 @@ void main() {
 
     const double indicatorWeight = 3.0;
 
+
+    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? RRect.fromLTRBAndCorners(
+          64.75,
+          tabBarBox.size.height - indicatorWeight,
+          135.25,
+          tabBarBox.size.height,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        )
+      : RRect.fromLTRBAndCorners(
+          64.5,
+          tabBarBox.size.height - indicatorWeight,
+          135.5,
+          tabBarBox.size.height,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        );
+
     expect(
       tabBarBox,
       paints
         ..rrect(
           color: theme.colorScheme.primary,
-          rrect: RRect.fromLTRBAndCorners(
-            64.5,
-            tabBarBox.size.height - indicatorWeight,
-            135.5,
-            tabBarBox.size.height,
-            topLeft: const Radius.circular(3.0),
-            topRight: const Radius.circular(3.0),
-          ),
+          rrect: rrect,
     ));
   });
 
@@ -553,16 +565,31 @@ void main() {
       ),
     );
 
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.08)));
+
+    await gesture.down(tester.getCenter(find.text(selectedValue)));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    await gesture.up();
+    await tester.pumpAndSettle();
 
     await gesture.moveTo(tester.getCenter(find.text(unselectedValue)));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+
+    await gesture.down(tester.getCenter(find.text(selectedValue)));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('TabBar default overlay (secondary)', (WidgetTester tester) async {
@@ -578,16 +605,29 @@ void main() {
       ),
     );
 
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(tester.getCenter(find.text(selectedValue)));
     await tester.pumpAndSettle();
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+
+    await gesture.down(tester.getCenter(find.text(selectedValue)));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    await gesture.up();
+    await tester.pumpAndSettle();
 
     await gesture.moveTo(tester.getCenter(find.text(unselectedValue)));
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+
+    await gesture.down(tester.getCenter(find.text(selectedValue)));
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
   });
 
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
@@ -3790,6 +3830,68 @@ void main() {
     ));
   });
 
+  testWidgets('TabController changes while flinging', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/34744
+
+    Widget buildFrame(TabController controller) {
+
+      return MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('tabs'),
+            bottom: TabBar(
+              controller: controller,
+              tabs: <Tab>[
+                const Tab(text: 'A'),
+                const Tab(text: 'B'),
+                if (controller.length == 3)
+                  const Tab(text: 'C'),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: <Widget>[
+              const Center(child: Text('CHILD A')),
+              const Center(child: Text('CHILD B')),
+              if (controller.length == 3)
+                const Center(child: Text('CHILD C')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final TabController controller1 = TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    final TabController controller2 = TabController(
+      vsync: const TestVSync(),
+      length: 3,
+    );
+
+    expect(controller1.index, 0);
+    expect(controller2.index, 0);
+
+    await tester.pumpWidget(buildFrame(controller1));
+    final Offset flingStart = tester.getCenter(find.text('CHILD A'));
+    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
+    await tester.pump(const Duration(milliseconds: 10)); // start the fling animation
+
+    controller1.dispose();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    await tester.pumpWidget(buildFrame(controller2)); // replace controller
+    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
+    await tester.pumpAndSettle(); // finish the fling animation
+
+    expect(controller1.index, 0);
+    expect(controller2.index, 1);
+  });
+
   testWidgets('TabController changes with different initialIndex', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/115917
     const Key lastTabKey = Key('Last Tab');
@@ -5913,8 +6015,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('TabBar default selected/unselected text style', (WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: false);

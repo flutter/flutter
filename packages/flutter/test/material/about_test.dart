@@ -427,7 +427,7 @@ void main() {
     final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
     licenseCompleter.complete(licenseEntry);
     expect(licenseEntry.packagesCalled, false);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -452,7 +452,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(licenseEntry.packagesCalled, true);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('LicensePage logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1128,7 +1128,7 @@ void main() {
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
@@ -1191,7 +1191,7 @@ void main() {
 
     // Configure to show the default layout.
     await tester.binding.setSurfaceSize(defaultSize);
-  }, leakTrackingConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String>{'ValueNotifier<_OverlayEntryWidgetState?>'})); // TODO(goderbauer): Fix leak, https://github.com/flutter/flutter/issues/126100.
+  });
 
   testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
@@ -1270,8 +1270,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/108991

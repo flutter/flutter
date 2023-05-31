@@ -1129,6 +1129,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _updateLabelPainter(Thumb thumb) {
+    final RangeLabels? labels = this.labels;
     if (labels == null) {
       return;
     }
@@ -1137,25 +1138,21 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final TextPainter labelPainter;
     switch (thumb) {
       case Thumb.start:
-        text = labels!.start;
+        text = labels.start;
         labelPainter = _startLabelPainter;
       case Thumb.end:
-        text = labels!.end;
+        text = labels.end;
         labelPainter = _endLabelPainter;
     }
 
-    if (labels != null) {
-      labelPainter
-        ..text = TextSpan(
-          style: _sliderTheme.valueIndicatorTextStyle,
-          text: text,
-        )
-        ..textDirection = textDirection
-        ..textScaleFactor = textScaleFactor
-        ..layout();
-    } else {
-      labelPainter.text = null;
-    }
+    labelPainter
+      ..text = TextSpan(
+        style: _sliderTheme.valueIndicatorTextStyle,
+        text: text,
+      )
+      ..textDirection = textDirection
+      ..textScaleFactor = textScaleFactor
+      ..layout();
     // Changing the textDirection can result in the layout changing, because the
     // bidi algorithm might line up the glyphs differently which can result in
     // different ligatures, different shapes, etc. So we always markNeedsLayout.

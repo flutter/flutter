@@ -21,7 +21,7 @@ import 'protocol_discovery.dart';
 /// A partial implementation of Device for desktop-class devices to inherit
 /// from, containing implementations that are common to all desktop devices.
 abstract class DesktopDevice extends Device {
-  DesktopDevice(super.identifier, {
+  DesktopDevice(super.id, {
       required PlatformType super.platformType,
       required super.ephemeral,
       required Logger logger,
@@ -149,7 +149,7 @@ abstract class DesktopDevice extends Device {
     unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
 
     _deviceLogReader.initializeProcess(process);
-    if (debuggingOptions.buildInfo.isRelease == true) {
+    if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
     final ProtocolDiscovery vmServiceDiscovery = ProtocolDiscovery.vmService(_deviceLogReader,
