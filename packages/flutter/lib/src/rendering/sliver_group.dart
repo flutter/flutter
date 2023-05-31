@@ -76,7 +76,6 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
     final double extentPerFlexValue = remainingExtent / totalFlex;
 
     child = firstChild;
-    double offset = 0.0;
 
     // At this point, all slivers with constrained cross axis should already be laid out.
     // Layout the rest and keep track of the child geometry with greatest scrollExtent.
@@ -94,22 +93,35 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
       } else {
         childExtent = child.geometry!.crossAxisExtent!;
       }
-      // Set child parent data.
-      switch (constraints.axis) {
-        case Axis.vertical:
-          childParentData.paintOffset = Offset(offset, 0.0);
-        case Axis.horizontal:
-          childParentData.paintOffset = Offset(0.0, offset);
-      }
-      offset += childExtent;
-      if (geometry!.scrollExtent < child.geometry!.scrollExtent) {
-        geometry = child.geometry;
+      final SliverGeometry childLayoutGeometry = child.geometry!;
+      if (geometry!.scrollExtent < childLayoutGeometry.scrollExtent) {
+        geometry = childLayoutGeometry;
       }
       child = childAfter(child);
     }
 
-    // Set the geometry with the proper crossAxisExtent.
-    geometry = geometry!.copyWith(crossAxisExtent: constraints.crossAxisExtent);
+    // Go back and correct any slivers using a negative paint offset if it tries
+    // to paint outside the bounds of the sliver group.
+    child = firstChild;
+    double offset = 0.0;
+    while (child != null) {
+      final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
+      final SliverGeometry childLayoutGeometry = child.geometry!;
+      final double remainingExtent = geometry!.scrollExtent - constraints.scrollOffset;
+      final double paintCorrection = childLayoutGeometry.paintExtent > remainingExtent
+        ? childLayoutGeometry.paintExtent - remainingExtent
+        : 0.0;
+      final double childExtent = child.geometry!.crossAxisExtent ?? extentPerFlexValue * (childParentData.crossAxisFlex ?? 0);
+      // Set child parent data.
+      switch (constraints.axis) {
+        case Axis.vertical:
+          childParentData.paintOffset = Offset(offset, -paintCorrection);
+        case Axis.horizontal:
+          childParentData.paintOffset = Offset(-paintCorrection, offset);
+      }
+      offset += childExtent;
+      child = childAfter(child);
+    }
   }
 
   @override
