@@ -1895,7 +1895,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         final SelectionResult result = dispatchSelectionEventToChild(selectables[index], event);
-        if (result == SelectionResult.next) {
+        if (result == SelectionResult.previous || result == SelectionResult.next) {
           continue;
         }
         if (selectables[index].value != existingGeometry) {
