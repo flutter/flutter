@@ -1677,6 +1677,8 @@ ORIGIN: ../../../flutter/impeller/typographer/glyph_atlas.cc + ../../../flutter/
 ORIGIN: ../../../flutter/impeller/typographer/glyph_atlas.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/lazy_glyph_atlas.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/lazy_glyph_atlas.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/rectangle_packer.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/rectangle_packer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_frame.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_frame.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_render_context.cc + ../../../flutter/LICENSE
@@ -4338,6 +4340,8 @@ FILE: ../../../flutter/impeller/typographer/glyph_atlas.cc
 FILE: ../../../flutter/impeller/typographer/glyph_atlas.h
 FILE: ../../../flutter/impeller/typographer/lazy_glyph_atlas.cc
 FILE: ../../../flutter/impeller/typographer/lazy_glyph_atlas.h
+FILE: ../../../flutter/impeller/typographer/rectangle_packer.cc
+FILE: ../../../flutter/impeller/typographer/rectangle_packer.h
 FILE: ../../../flutter/impeller/typographer/text_frame.cc
 FILE: ../../../flutter/impeller/typographer/text_frame.h
 FILE: ../../../flutter/impeller/typographer/text_render_context.cc

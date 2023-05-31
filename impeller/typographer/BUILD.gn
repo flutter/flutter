@@ -22,6 +22,8 @@ impeller_component("typographer") {
     "glyph_atlas.h",
     "lazy_glyph_atlas.cc",
     "lazy_glyph_atlas.h",
+    "rectangle_packer.cc",
+    "rectangle_packer.h",
     "text_frame.cc",
     "text_frame.h",
     "text_render_context.cc",
