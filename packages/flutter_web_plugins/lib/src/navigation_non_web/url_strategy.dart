@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import '../navigation_common/platform_location.dart';
+import 'platform_location.dart';
+
+export 'platform_location.dart';
 
 /// Callback that receives the new state of the browser history entry.
 typedef PopStateListener = void Function(Object? state);
@@ -123,5 +125,5 @@ class PathUrlStrategy extends HashUrlStrategy {
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// integrations.
-  PathUrlStrategy([PlatformLocation? _]);
+  const PathUrlStrategy([PlatformLocation? _]);
 }

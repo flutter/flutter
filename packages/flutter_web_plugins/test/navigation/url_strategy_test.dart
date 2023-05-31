@@ -11,60 +11,6 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'common.dart';
 
 void main() {
-  group('$HashUrlStrategy', () {
-    late TestPlatformLocation location;
-
-    setUp(() {
-      location = TestPlatformLocation();
-    });
-
-    test('allows null state', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-      expect(() => strategy.pushState(null, '', '/'), returnsNormally);
-      expect(() => strategy.replaceState(null, '', '/'), returnsNormally);
-    });
-
-    test('leading slash is optional', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-      location.hash = '#/';
-      expect(strategy.getPath(), '/');
-
-      location.hash = '#/foo';
-      expect(strategy.getPath(), '/foo');
-
-      location.hash = '#foo';
-      expect(strategy.getPath(), 'foo');
-    });
-
-    test('path should not be empty', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-      location.hash = '';
-      expect(strategy.getPath(), '/');
-
-      location.hash = '#';
-      expect(strategy.getPath(), '/');
-    });
-
-    test('allows location path/search before fragment', () {
-      const String internalUrl = '/menu?foo=bar';
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-
-      location.pathname = '/';
-      expect(strategy.prepareExternalUrl(internalUrl), '/#/menu?foo=bar');
-
-      location.pathname = '/main';
-      expect(strategy.prepareExternalUrl(internalUrl), '/main#/menu?foo=bar');
-
-      location.search = '?foo=bar';
-      expect(
-        strategy.prepareExternalUrl(internalUrl),
-        '/main?foo=bar#/menu?foo=bar',
-      );
-    });
-  });
-
   group('$PathUrlStrategy', () {
     late TestPlatformLocation location;
 
