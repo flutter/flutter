@@ -1894,7 +1894,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
       if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
-        SelectionResult result = dispatchSelectionEventToChild(selectables[index], event);
+        final SelectionResult result = dispatchSelectionEventToChild(selectables[index], event);
         if (result == SelectionResult.next) {
           continue;
         }
