@@ -845,20 +845,18 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     if (!_outerPosition!.haveDimensions) {
       return;
     }
-    double maxInnerExtent = 0.0;
+    bool innerCanDrag = false;
     for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.haveDimensions) {
         return;
       }
-      maxInnerExtent = math.max(
-        maxInnerExtent,
-        position.maxScrollExtent - position.minScrollExtent,
-      );
+      innerCanDrag = innerCanDrag
+        // This refers to the physics of the actual inner scroll position, not
+        // the whole NestedScrollView, since it is possible to have different
+        // ScrollPhysics for the inner and outer positions.
+        || position.physics.shouldAcceptUserOffset(position);
     }
-    _outerPosition!.updateCanDrag(
-      totalInnerExtent: maxInnerExtent,
-      overlapExtent: _state._absorberHandle.scrollExtent ?? 0.0,
-    );
+    _outerPosition!.updateCanDrag(innerCanDrag);
   }
 
   Future<void> animateTo(
@@ -1441,36 +1439,15 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     coordinator.updateCanDrag();
   }
 
-  void updateCanDrag({
-    required double totalInnerExtent,
-    required double overlapExtent
-  }) {
-    // This is only called for the outer position.
-    // Any overlap extent is already deducted from the SliverGeometry of any
-    // SliverOverlapAbsorber wrapped slivers, so the maxExtent of the outer
-    // position does not reflect the extent that has been absorbed. This is as
-    // expected since the inner and outer scroll views' extents are manipulated
-    // in this way for them to behave as one, but the extent must be accounted
-    // for when considering the full extent available to drag.
-    // For example, a pinned SliverAppBar in the outer position with a minExtent
-    // and maxExtent of 56.0 will have a ScrollPosition.maxExtent of 0.0 after
-    // the SliverOverlap is applied. This is correct because the pinned sliver
-    // app bar should not have to consume scrolling before the inner body of the
-    // NestedScrollView scrolls. However, when calculating the drag here, 0
-    // could result in scrolling being disabled unexpectedly if the inner scroll
-    // view by itself were not long enough to allow scrolling on its own.
-    final double maxScrollExtent = this.maxScrollExtent + overlapExtent;
-    final bool extentAllows =
-      // There is already room to scroll in the outer scroll view.
-      minScrollExtent != maxScrollExtent
-      // The inner extent exceeds the bounds of the viewport, accounting for the
-      // outer extent.
-      || totalInnerExtent > (viewportDimension - maxScrollExtent)
-      // There is no outer extent. The inner extent was computed based on the
-      // full viewport dimension and is accurate for the whole NestedScrollView.
-      || (maxScrollExtent == 0 && totalInnerExtent > 0);
-    
-    context.setCanDrag(physics.allowUserScrolling && extentAllows);
+  void updateCanDrag(bool innerCanDrag) {
+    // This is only called for the outer position, with consideration for the
+    // inner position passed in.
+    context.setCanDrag(
+      // This refers to the physics of the actual outer scroll position, not the
+      // whole NestedScrollView, since it is possible to have different
+      // ScrollPhysics for the inner and outer positions.
+      physics.shouldAcceptUserOffset(this) || innerCanDrag
+    );
   }
 
   @override
