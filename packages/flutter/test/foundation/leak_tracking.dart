@@ -5,9 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker/testing.dart';
 import 'package:meta/meta.dart';
 
-export 'package:leak_tracker/leak_tracker.dart' show LeakTrackingTestConfig, StackTraceCollectionConfig;
+export 'package:leak_tracker/leak_tracker.dart' show LeakTrackingTestConfig;
 
 /// Set of objects, that does not hold the objects from garbage collection.
 ///
@@ -19,7 +20,8 @@ class WeakSet {
   String _toCode(int hashCode, String type) => '$type-$hashCode';
 
   void add(Object object) {
-    _objectCodes.add(_toCode(identityHashCode(object), object.runtimeType.toString()));
+    _objectCodes
+        .add(_toCode(identityHashCode(object), object.runtimeType.toString()));
   }
 
   void addByCode(int hashCode, String type) {
@@ -96,10 +98,12 @@ Future<void> _withFlutterLeakTracking(
 ) async {
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
-    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackingTestConfig.warnForNonSupportedPlatforms;
+    final bool shouldPrintWarning = !_webWarningPrinted &&
+        LeakTrackingTestConfig.warnForNonSupportedPlatforms;
     if (shouldPrintWarning) {
       _webWarningPrinted = true;
-      debugPrint('Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
+      debugPrint(
+          'Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
     }
     await callback();
     return;
@@ -111,13 +115,14 @@ Future<void> _withFlutterLeakTracking(
 
   return TestAsyncUtils.guard<void>(() async {
     MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
-    Future<void> asyncCodeRunner(DartAsyncCallback action) async => tester.runAsync(action);
+    Future<void> asyncCodeRunner(DartAsyncCallback action) async =>
+        tester.runAsync(action);
 
     try {
       Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: config.stackTraceCollectionConfig,
+        leakDiagnosticConfig: config.leakDiagnosticConfig,
         shouldThrowOnLeaks: false,
       );
 
@@ -143,9 +148,11 @@ class LeakCleaner {
   final LeakTrackingTestConfig config;
 
   Leaks clean(Leaks leaks) {
-    final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
+    final Leaks result = Leaks(<LeakType, List<LeakReport>>{
       for (final LeakType leakType in leaks.byType.keys)
-        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
+        leakType: leaks.byType[leakType]!
+            .where((LeakReport leak) => _shouldReportLeak(leakType, leak))
+            .toList()
     });
     return result;
   }
