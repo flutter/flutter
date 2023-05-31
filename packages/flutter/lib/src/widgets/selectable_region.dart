@@ -1884,37 +1884,6 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
-  // Determines if the rects of a list of selectables are contained within the rect
-  // of a given selectable.
-  List<Rect> _selectableContains(Selectable containerSelectable, List<Selectable> selectables) {
-    bool rectIsCompletelyInside(Rect r1, Rect r2) {
-      return r1.left <= r2.left &&
-            r1.right >= r2.right &&
-            r1.top <= r2.top &&
-            r1.bottom >= r2.bottom;
-    }
-
-    final List<Rect> rectsInside = <Rect>[];
-
-    final Rect containerLocalRect = Rect.fromLTWH(0, 0, containerSelectable.size.width, containerSelectable.size.height);
-    final Matrix4 containerTransform = containerSelectable.getTransformTo(null);
-    final Rect containerGlobalRect = MatrixUtils.transformRect(containerTransform, containerLocalRect);
-
-    for (final Selectable selectable in selectables) {
-      if (selectable == containerSelectable) {
-        continue;
-      }
-      final Rect localRect = Rect.fromLTWH(0, 0, selectable.size.width, selectable.size.height);
-      final Matrix4 transform = selectable.getTransformTo(null);
-      final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (rectIsCompletelyInside(containerGlobalRect, globalRect)) {
-        rectsInside.add(globalRect);
-      }
-    }
-
-    return rectsInside;
-  }
-
   /// Selects a word in a selectable at the location
   /// [SelectWordSelectionEvent.globalPosition].
   @protected
@@ -1923,17 +1892,12 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      final List<Rect> rectsInside = _selectableContains(selectables[index], selectables);
-      bool positionInsideInnerRects = false;
-      for (final Rect rect in rectsInside) {
-        if (rect.contains(event.globalPosition)) {
-          positionInsideInnerRects = true;
-          break;
-        }
-      }
-      if (globalRect.contains(event.globalPosition) && !positionInsideInnerRects) {
+      if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
-        dispatchSelectionEventToChild(selectables[index], event);
+        SelectionResult result = dispatchSelectionEventToChild(selectables[index], event);
+        if (result == SelectionResult.next) {
+          continue;
+        }
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.

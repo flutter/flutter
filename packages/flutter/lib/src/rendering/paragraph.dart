@@ -1478,7 +1478,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(word.isNormalized);
     // Fragments are separated by placeholder span, the word boundary shouldn't
     // expand across fragments.
-    assert(word.start >= range.start && word.end <= range.end);
+    final bool wordInsideSelectableBounds = word.start >= range.start && word.end <= range.end;
+    if (!wordInsideSelectableBounds) {
+      return SelectionResult.next;
+    }
     late TextPosition start;
     late TextPosition end;
     if (position.offset >= word.end) {
