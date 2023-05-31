@@ -100,15 +100,35 @@ enum BottomNavigationBarLandscapeLayout {
 ///
 /// ## Updating to [NavigationBar]
 ///
-/// There is an updated version of this component, [NavigationBar],
-/// that's preferred for new applications and applications that are
-/// configured for Material 3 (see [ThemeData.useMaterial3]). The
-/// [NavigationBar] widget's visuals are a little bit different, see
-/// the Material 3 spec at
+/// The [NavigationBar] widget's visuals
+/// are a little bit different, see the Material 3 spec at
 /// <https://m3.material.io/components/navigation-bar/overview> for
-/// more details. The API is similar, destinations are defined with
-/// [NavigationDestination]s and [NavigationBar.onDestinationSelected]
-/// is called when a destination is tapped.
+/// more details.
+///
+/// The [NavigationBar] widget's API is also slightly different.
+/// To update from [BottomNavigationBar] to [NavigationBar], you will
+/// need to make the following changes.
+///
+/// 1. Instead of using [BottomNavigationBar.items], which
+/// takes a list of [BottomNavigationBarItem]s, use
+/// [NavigationBar.destinations], which takes a list of widgets.
+/// Usually, you use a list of [NavigationDestination] widgets.
+/// Just like [BottomNavigationItem]s, [NavigationDestination]s
+/// have a [label] and [icon] field.
+///
+/// 2. Instead of using [BottomNavigationBar.onTap],
+/// use [NavigationBar.onDestinationSelected], which is also
+/// a callback that is called when the user taps on a
+/// navigation bar item.
+///
+/// 3. Instead of using [BottomNavigationBar.currentIndex],
+/// use [NavigationBar.selectedIndex], which is also an integer
+/// that represents the index of the selected destination.
+///
+/// 4. You may also need to make changes to the styling of the
+/// [NavigationBar], see the properties in the [NavigationBar]
+/// constructor for more details.
+///
 ///
 /// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
