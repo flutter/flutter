@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'url_strategy.dart';
+
 /// Function type that handles pop state events.
 typedef EventListener = dynamic Function(Object event);
 
@@ -10,11 +12,7 @@ typedef EventListener = dynamic Function(Object event);
 ///
 /// For convenience, the [PlatformLocation] class can be used by implementations
 /// of [UrlStrategy] to interact with DOM apis like pushState, popState, etc.
-abstract class PlatformLocation {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const PlatformLocation();
-
+abstract interface class PlatformLocation {
   /// Registers an event listener for the `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
@@ -73,4 +71,47 @@ abstract class PlatformLocation {
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
   String? getBaseHref();
+}
+
+/// Delegates to real browser APIs to provide platform location functionality.
+class BrowserPlatformLocation implements PlatformLocation {
+  @override
+  void addPopStateListener(EventListener fn) {
+    // No-op.
+  }
+
+  @override
+  void removePopStateListener(EventListener fn) {
+    // No-op.
+  }
+
+  @override
+  String get pathname => '';
+
+  @override
+  String get search => '';
+
+  @override
+  String get hash => '';
+
+  @override
+  Object? get state => null;
+
+  @override
+  void pushState(Object? state, String title, String url) {
+    // No-op.
+  }
+
+  @override
+  void replaceState(Object? state, String title, String url) {
+    // No-op.
+  }
+
+  @override
+  void go(int count) {
+    // No-op.
+  }
+
+  @override
+  String? getBaseHref() => null;
 }

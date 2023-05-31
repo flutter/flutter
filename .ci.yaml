@@ -262,7 +262,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "android_virtual_device", "version": "31"}
+          {"dependency": "android_virtual_device", "version": "33"}
         ]
       tags: >
         ["framework","hostonly","linux"]
@@ -1512,7 +1512,7 @@ targets:
       task_name: android_defines_test
       dependencies: >-
         [
-          {"dependency": "android_virtual_device", "version": "31"}
+          {"dependency": "android_virtual_device", "version": "33"}
         ]
       use_emulator: "true"
 
