@@ -14,11 +14,9 @@
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/typographer/font_glyph_pair.h"
+#include "impeller/typographer/rectangle_packer.h"
 
 class SkBitmap;
-namespace skgpu {
-class Rectanizer;
-}
 
 namespace impeller {
 
@@ -150,7 +148,7 @@ class GlyphAtlasContext {
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieve the previous (if any) rect packer.
-  std::shared_ptr<skgpu::Rectanizer> GetRectPacker() const;
+  std::shared_ptr<RectanglePacker> GetRectPacker() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Update the context with a newly constructed glyph atlas.
@@ -158,13 +156,13 @@ class GlyphAtlasContext {
 
   void UpdateBitmap(std::shared_ptr<SkBitmap> bitmap);
 
-  void UpdateRectPacker(std::shared_ptr<skgpu::Rectanizer> rect_packer);
+  void UpdateRectPacker(std::shared_ptr<RectanglePacker> rect_packer);
 
  private:
   std::shared_ptr<GlyphAtlas> atlas_;
   ISize atlas_size_;
   std::shared_ptr<SkBitmap> bitmap_;
-  std::shared_ptr<skgpu::Rectanizer> rect_packer_;
+  std::shared_ptr<RectanglePacker> rect_packer_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContext);
 };

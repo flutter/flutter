@@ -7,9 +7,11 @@
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/text_render_context_skia.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
+#include "impeller/typographer/rectangle_packer.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkFontMgr.h"
+#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -307,6 +309,50 @@ TEST_P(TypographerTest, MaybeHasOverlapping) {
   // Characters probably have overlap due to low fidelity text metrics, but this
   // could be fixed.
   ASSERT_TRUE(frame_2.MaybeHasOverlapping());
+}
+
+TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
+  auto packer = RectanglePacker::Factory(200, 100);
+  ASSERT_NE(packer, nullptr);
+  ASSERT_EQ(packer->percentFull(), 0);
+
+  const SkIRect packer_area = SkIRect::MakeXYWH(0, 0, 200, 100);
+
+  IPoint16 first_output = {-1, -1};  // Fill with sentinel values
+  ASSERT_TRUE(packer->addRect(20, 20, &first_output));
+  // Make sure the rectangle is placed such that it is inside the bounds of
+  // the packer's area.
+  const SkIRect first_rect =
+      SkIRect::MakeXYWH(first_output.x(), first_output.y(), 20, 20);
+  ASSERT_TRUE(SkIRect::Intersects(packer_area, first_rect));
+
+  // Initial area was 200 x 100 = 20_000
+  // We added 20x20 = 400. 400 / 20_000 == 0.02 == 2%
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->percentFull(), 0.02));
+
+  IPoint16 second_output = {-1, -1};
+  ASSERT_TRUE(packer->addRect(140, 90, &second_output));
+  const SkIRect second_rect =
+      SkIRect::MakeXYWH(second_output.x(), second_output.y(), 140, 90);
+  // Make sure the rectangle is placed such that it is inside the bounds of
+  // the packer's area but not in the are of the first rectangle.
+  ASSERT_TRUE(SkIRect::Intersects(packer_area, second_rect));
+  ASSERT_FALSE(SkIRect::Intersects(first_rect, second_rect));
+
+  // We added another 90 x 140 = 12_600 units, now taking us to 13_000
+  // 13_000 / 20_000 == 0.65 == 65%
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->percentFull(), 0.65));
+
+  // There's enough area to add this rectangle, but no space big enough for
+  // the 50 units of width.
+  IPoint16 output;
+  ASSERT_FALSE(packer->addRect(50, 50, &output));
+  // Should be unchanged.
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->percentFull(), 0.65));
+
+  packer->reset();
+  // Should be empty now.
+  ASSERT_EQ(packer->percentFull(), 0);
 }
 
 }  // namespace testing
