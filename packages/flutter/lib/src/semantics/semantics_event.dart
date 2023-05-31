@@ -162,8 +162,8 @@ class TapSemanticEvent extends SemanticsEvent {
 
 /// An event to move the accessibility focus.
 ///
-/// Using this API is generally not recommended, as it may break the consistency of the
-/// accessibiliy focus of the platform.
+/// Using this API is generally not recommended, as it may break a users' expectation of
+/// how a11y focus works and therefore should be just very carefully.
 ///
 /// One possibile use case:
 /// For example, the currently focused rendering object is replaced by another rendering
@@ -194,6 +194,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///   @override
 ///   void initState() {
 ///     super.initState();
+///     // Using addPostFrameCallback because changing focus need to wait for the widget to finish rendering.
 ///     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
 ///       mykey.currentContext?.findRenderObject()?.sendSemanticsEvent(const FocusSemanticEvent());
 ///     });
