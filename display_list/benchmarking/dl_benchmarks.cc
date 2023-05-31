@@ -12,6 +12,8 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrRecordingContext.h"
 
 namespace flutter {
 namespace testing {
@@ -37,6 +39,16 @@ DlPaint GetPaintForRun(unsigned attributes) {
 
   paint.setAntiAlias(attributes & kAntiAliasing_Flag);
   return paint;
+}
+
+static void FlushSubmitCpuSync(const sk_sp<SkSurface>& surface) {
+  if (!surface) {
+    return;
+  }
+  if (GrDirectContext* dContext =
+          GrAsDirectContext(surface->recordingContext())) {
+    dContext->flushAndSubmit(surface, /*syncCpu=*/true);
+  }
 }
 
 void AnnotateAttributes(unsigned attributes,
@@ -100,7 +112,7 @@ void BM_DrawLine(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawLine-" +
@@ -149,7 +161,7 @@ void BM_DrawRect(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawRect-" +
@@ -195,7 +207,7 @@ void BM_DrawOval(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawOval-" +
@@ -243,7 +255,7 @@ void BM_DrawCircle(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawCircle-" +
@@ -321,7 +333,7 @@ void BM_DrawRRect(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawRRect-" +
@@ -403,7 +415,7 @@ void BM_DrawDRRect(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawDRRect-" +
@@ -456,7 +468,7 @@ void BM_DrawArc(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawArc-" +
@@ -659,7 +671,7 @@ void BM_DrawPath(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawPath-" + label +
@@ -805,7 +817,7 @@ void BM_DrawVertices(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawVertices-" +
@@ -901,7 +913,7 @@ void BM_DrawPoints(benchmark::State& state,
 
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawPoints-" +
@@ -979,7 +991,7 @@ void BM_DrawImage(benchmark::State& state,
 
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawImage-" +
@@ -1065,7 +1077,7 @@ void BM_DrawImageRect(benchmark::State& state,
 
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawImageRect-" +
@@ -1152,7 +1164,7 @@ void BM_DrawImageNine(benchmark::State& state,
 
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawImageNine-" +
@@ -1198,7 +1210,7 @@ void BM_DrawTextBlob(benchmark::State& state,
 
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawTextBlob-" +
@@ -1263,7 +1275,7 @@ void BM_DrawShadow(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-DrawShadow-" +
@@ -1317,7 +1329,7 @@ void BM_SaveLayer(benchmark::State& state,
   // We only want to time the actual rasterization.
   for ([[maybe_unused]] auto _ : state) {
     canvas.DrawDisplayList(display_list);
-    surface->flushAndSubmit(true);
+    FlushSubmitCpuSync(surface);
   }
 
   auto filename = surface_provider->backend_name() + "-SaveLayer-" +

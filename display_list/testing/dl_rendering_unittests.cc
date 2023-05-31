@@ -21,6 +21,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrRecordingContext.h"
 
 namespace flutter {
 namespace testing {
@@ -490,7 +492,10 @@ class RenderEnvironment {
     canvas->restoreToCount(restore_count);
 
     canvas->flush();
-    surface->flushAndSubmit(true);
+    if (GrDirectContext* dContext =
+            GrAsDirectContext(surface->recordingContext())) {
+      dContext->flushAndSubmit(surface, /*syncCpu=*/true);
+    }
     return std::make_unique<RenderResult>(surface);
   }
 
