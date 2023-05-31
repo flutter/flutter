@@ -159,12 +159,6 @@ class LeakCleaner {
 
   /// Returns true if [leak] should be reported as failure.
   bool _shouldReportLeak(LeakType leakType, LeakReport leak) {
-    // Tracking for non-GCed is temporarily disabled.
-    // TODO(polina-c): turn on tracking for non-GCed after investigating existing leaks.
-    if (leakType != LeakType.notDisposed) {
-      return false;
-    }
-
     switch (leakType) {
       case LeakType.notDisposed:
         return !config.notDisposedAllowList.containsKey(leak.type);
