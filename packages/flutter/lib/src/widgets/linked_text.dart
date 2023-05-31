@@ -156,6 +156,10 @@ class LinkedText extends StatelessWidget {
 
   final List<InlineSpan> children;
 
+  /// Defines what parts of the text to match and how to link them.
+  ///
+  /// [TextLinker]s are applied in the order given. Overlapping matches are not
+  /// supported.
   final List<TextLinker> textLinkers;
 
   final TextStyle? style;
