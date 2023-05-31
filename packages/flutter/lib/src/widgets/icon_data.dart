@@ -59,7 +59,6 @@ class IconData {
 
   /// The ordered list of font families to fall back on when a glyph cannot be found in a higher priority font family.
   /// For more details refer to the documentation of [TextStyle]
-  /// https://api.flutter.dev/flutter/painting/TextStyle/fontFamilyFallback.html
   final List<String>? fontFamilyFallback;
 
   @override
