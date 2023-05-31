@@ -31,7 +31,7 @@ void main() {
       final VsCodeValidator validator = VsCodeValidator(_FakeVsCode());
       final ValidationResult result = await validator.validate();
       expect(result.messages, contains(const ValidationMessage.error('Unable to determine VS Code version.')));
-      expect(result.statusInfo, 'unknown version');
+      expect(result.statusInfo, 'version unknown');
     }, overrides: <Type, Generator>{
       UserMessages: () => UserMessages(),
     });
