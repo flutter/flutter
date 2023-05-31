@@ -32,21 +32,27 @@ final List<String> integrationTestExtraArgs = <String>['-d', 'flutter-tester'];
 
 void main() {
   setUpAll(() async {
-    await processManager.run(
-      <String>[
-        flutterBin,
-        'pub',
-        'get',
-      ],
-      workingDirectory: flutterTestDirectory
+    expect(
+      await processManager.run(
+        <String>[
+          flutterBin,
+          'pub',
+          'get',
+        ],
+        workingDirectory: flutterTestDirectory
+      ),
+      const ProcessResultMatcher(),
     );
-    await processManager.run(
-      <String>[
-        flutterBin,
-        'pub',
-        'get',
-      ],
-      workingDirectory: missingDependencyDirectory
+    expect(
+      await processManager.run(
+        <String>[
+          flutterBin,
+          'pub',
+          'get',
+        ],
+        workingDirectory: missingDependencyDirectory
+      ),
+      const ProcessResultMatcher(),
     );
   });
 
@@ -112,10 +118,16 @@ void main() {
   });
 
   testWithoutContext('flutter test should run a test when its name matches a regexp', () async {
-    final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
-      extraArguments: const <String>['--name', 'inc.*de']);
-    expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed!')));
-    expect(result.exitCode, 0);
+    final ProcessResult result = await _runFlutterTest(
+      'filtering',
+      automatedTestsDirectory,
+      flutterTestDirectory,
+      extraArguments: const <String>['--name', 'inc.*de'],
+    );
+    expect(
+      result,
+      ProcessResultMatcher(stdoutPattern: RegExp(r'\+\d+: All tests passed!')),
+    );
   });
 
   testWithoutContext('flutter test should run a test when its name contains a string', () async {
@@ -285,7 +297,12 @@ Future<void> _testFile(
     extraArguments: extraArguments,
   );
 
-  expect(exec.exitCode, exitCode);
+  expect(
+    exec.exitCode,
+    exitCode,
+    reason: '"$testName" returned code ${exec.exitCode}\n\nstdout:\n'
+            '${exec.stdout}\nstderr:\n${exec.stderr}',
+  );
   final List<String> output = (exec.stdout as String).split('\n');
   if (output.first.startsWith('Waiting for another flutter command to release the startup lock...')) {
     output.removeAt(0);
