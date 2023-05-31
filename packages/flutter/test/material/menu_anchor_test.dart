@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   late MenuController controller;
@@ -3038,6 +3039,86 @@ void main() {
       await tester.tap(find.byType(RadioMenuButton<int>).last);
       await tester.pumpAndSettle();
       expect(radioValue, 1);
+    });
+  });
+
+  group('Semantics', () {
+    testWidgets('MenuItemButton is not a semantic button', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MenuItemButton(
+              style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              onPressed: () { },
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      // The flags should not have SemanticsFlag.isButton
+      expect(semantics, hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+              label: 'ABC',
+              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+              transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+                SemanticsFlag.isFocusable,
+              ],
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+        ignoreId: true,
+      ));
+
+      semantics.dispose();
+    });
+
+    testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SubmenuButton(
+              onHover: (bool value) {},
+              style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              menuChildren: const <Widget>[],
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      // The flags should not have SemanticsFlag.isButton
+      expect(semantics, hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              label: 'ABC',
+              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+              transform: Matrix4.translationValues(356.0, 276.0, 0.0),
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasEnabledState,
+              ],
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+        ignoreId: true,
+      ));
+
+      semantics.dispose();
     });
   });
 }

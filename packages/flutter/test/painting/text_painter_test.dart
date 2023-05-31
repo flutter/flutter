@@ -1253,34 +1253,34 @@ void main() {
       ..text = const TextSpan(text: 'TEXT')
       ..textDirection = TextDirection.ltr;
 
-    FlutterError? exception;
-    try {
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
-    expect(exception?.message, contains('The TextPainter has never been laid out.'));
-    exception = null;
+    expect(
+      () => painter.getPositionForOffset(Offset.zero),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('The TextPainter has never been laid out.'),
+      )),
+    );
 
-    try {
-      painter.layout();
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
+    expect(
+      () {
+        painter.layout();
+        painter.getPositionForOffset(Offset.zero);
+      },
+      returnsNormally,
+    );
 
-    expect(exception, isNull);
-    exception = null;
-
-    try {
-      painter.markNeedsLayout();
-      painter.getPositionForOffset(Offset.zero);
-    } on FlutterError catch (e) {
-      exception = e;
-    }
-
-    expect(exception?.message, contains('The calls that first invalidated the text layout were:'));
-    exception = null;
+    expect(
+      () {
+        painter.markNeedsLayout();
+        painter.getPositionForOffset(Offset.zero);
+      },
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.message,
+        'message',
+        contains('The calls that first invalidated the text layout were:'),
+      )),
+    );
     painter.dispose();
   });
 
@@ -1507,6 +1507,27 @@ void main() {
 
     painter.dispose();
   });
+
+  test('TextPainter line breaking does not round to integers', () {
+    if (! const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')) {
+      return;
+    }
+    const double fontSize = 1.25;
+    const String text = '12345';
+    assert((fontSize * text.length).truncate() != fontSize * text.length);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+    )..layout(maxWidth: text.length * fontSize);
+
+    expect(painter.maxIntrinsicWidth, text.length * fontSize);
+    switch (painter.computeLineMetrics()) {
+      case [ui.LineMetrics(width: final double width)]:
+        expect(width, text.length * fontSize);
+      case final List<ui.LineMetrics> metrics:
+        expect(metrics, hasLength(1));
+    }
+  }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
 }
 
 class MockCanvas extends Fake implements Canvas {
