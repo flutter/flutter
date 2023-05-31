@@ -1975,10 +1975,7 @@ ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_typed_data.dart
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/key_map.g.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/navigation/url_strategy.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/noto_font.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart + ../../../flutter/LICENSE
@@ -4639,10 +4636,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/js_interop/js_typed_data.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/key_map.g.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/keyboard_binding.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/mouse_cursor.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/history.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/js_url_strategy.dart
-FILE: ../../../flutter/lib/web_ui/lib/src/engine/navigation/url_strategy.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/noto_font.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/onscreen_logging.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart
