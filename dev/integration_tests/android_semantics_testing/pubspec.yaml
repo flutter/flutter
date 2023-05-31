@@ -6,7 +6,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_driver:
+  integration_test:
     sdk: flutter
   flutter_test:
     sdk: flutter

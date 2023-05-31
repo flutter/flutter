@@ -49,7 +49,6 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 
   @override
   void performLayout() {
-    print('performing layout again');
     // Iterate through each sliver.
     // Get the parent's dimensions.
     final double crossAxisExtent = constraints.crossAxisExtent;
