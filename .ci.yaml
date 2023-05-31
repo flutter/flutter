@@ -3593,6 +3593,7 @@ targets:
       task_name: hello_world_ios__compile
 
   - name: Mac_ios hot_mode_dev_cycle_macos_target__benchmark
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/127938
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
