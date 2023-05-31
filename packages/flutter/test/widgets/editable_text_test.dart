@@ -5479,8 +5479,9 @@ void main() {
 
   testWidgets('scribble client is set based on most recent focus', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) {
       log.add(methodCall);
+      return;
     });
 
     final TextEditingController controller = TextEditingController();

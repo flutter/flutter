@@ -176,7 +176,7 @@ void main() {
   test('Scribble.setSelectionRects', () async {
     Scribble.ensureInitialized();
     final List<MethodCall> log = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribble, (MethodCall methodCall) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribble, (MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -203,6 +203,6 @@ void main() {
     expect(arguments[0][4], 1); // position
     expect(arguments[0][5], TextDirection.rtl.index); // direction
 
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribble, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.scribble, null);
   });
 }
