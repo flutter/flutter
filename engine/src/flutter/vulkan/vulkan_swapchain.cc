@@ -504,7 +504,7 @@ bool VulkanSwapchain::Submit() {
   // Step 0:
   // Make sure Skia has flushed all work for the surface to the gpu.
   // ---------------------------------------------------------------------------
-  surface->flushAndSubmit();
+  skgpu::ganesh::FlushAndSubmit(surface);
 
   // ---------------------------------------------------------------------------
   // Step 1:
