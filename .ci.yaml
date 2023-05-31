@@ -3813,6 +3813,7 @@ targets:
       task_name: platform_interaction_test_ios
 
   - name: Mac_ios platform_view_ios__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/127930
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
