@@ -7,6 +7,7 @@ apply plugin: FlutterAppPluginLoaderPlugin
 class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
     @Override
     void apply(Settings settings) {
+        println "FlutterAppPluginLoaderPlugin: apply"
         def flutterProjectRoot = settings.settingsDir.parentFile
 
         // If this logic is changed, also change the logic in module_plugin_loader.gradle.
@@ -33,6 +34,7 @@ class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
             assert pluginDirectory.exists()
             settings.include(":${androidPlugin.name}")
             settings.project(":${androidPlugin.name}").projectDir = pluginDirectory
+            println("FlutterAppPluginLoaderPlugin: included project ${androidPlugin.name}")
         }
     }
 }
