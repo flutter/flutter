@@ -50,6 +50,14 @@ void main() {
       matcher.expect(completed, isTrue);
     });
   });
+  
+  {
+    bool retried = false;
+    testWidgets('retry allows test to run multiple times', (WidgetTester tester) async {
+      addTearDown(() => retried = true);
+      expect(retried, isTrue);
+    }, retry: 1);
+  }
 
   group('respects the group skip flag', () {
     testWidgets('should be skipped', (WidgetTester tester) async {
