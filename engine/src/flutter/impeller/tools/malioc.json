@@ -7552,22 +7552,22 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/glyph_atlas.vert.gles",
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "type": "Vertex",
       "variants": {
         "Position": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 96,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.265625,
-              0.265625,
+              0.34375,
+              0.34375,
+              0.171875,
               0.0,
-              0.0,
-              2.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -7582,43 +7582,43 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.265625,
-              0.265625,
+              0.25,
+              0.25,
+              0.078125,
               0.0,
-              0.0,
-              2.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
               "load_store"
             ],
             "total_cycles": [
-              0.265625,
-              0.265625,
+              0.453125,
+              0.453125,
+              0.1875,
               0.0,
-              0.0,
-              2.0,
+              4.0,
               0.0
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
+          "uniform_registers_used": 26,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": null,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
+              0.078125,
+              0.078125,
               0.0,
               0.0,
-              0.0,
-              0.0,
-              3.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -7633,36 +7633,36 @@
               "load_store"
             ],
             "shortest_path_cycles": [
+              0.078125,
+              0.078125,
               0.0,
               0.0,
-              0.0,
-              0.0,
-              3.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
               "load_store"
             ],
             "total_cycles": [
+              0.078125,
+              0.078125,
               0.0,
               0.0,
-              0.0,
-              0.0,
-              3.0,
+              4.0,
               0.0
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 8,
-          "work_registers_used": 6
+          "uniform_registers_used": 12,
+          "work_registers_used": 9
         }
       }
     },
     "Mali-T880": {
       "core": "Mali-T880",
       "filename": "flutter/impeller/entity/gles/glyph_atlas.vert.gles",
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "type": "Vertex",
       "variants": {
         "Main": {
@@ -7672,8 +7672,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
-              5.0,
+              6.929999828338623,
+              7.0,
               0.0
             ],
             "pipelines": [
@@ -7685,21 +7685,21 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
-              5.0,
+              5.940000057220459,
+              7.0,
               0.0
             ],
             "total_bound_pipelines": [
-              "load_store"
+              "arithmetic"
             ],
             "total_cycles": [
-              3.0,
-              5.0,
+              9.0,
+              7.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 4,
+          "uniform_registers_used": 7,
           "work_registers_used": 2
         }
       }
@@ -10963,18 +10963,18 @@
       "type": "Vertex",
       "variants": {
         "Position": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.25,
-              0.25,
+              0.3125,
+              0.3125,
+              0.15625,
               0.0,
-              0.0,
-              2.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -10991,41 +10991,41 @@
             "shortest_path_cycles": [
               0.25,
               0.25,
+              0.09375,
               0.0,
-              0.0,
-              2.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
               "load_store"
             ],
             "total_cycles": [
-              0.25,
-              0.25,
+              0.4375,
+              0.4375,
+              0.171875,
               0.0,
-              0.0,
-              2.0,
+              4.0,
               0.0
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 24,
+          "uniform_registers_used": 34,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": null,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
+              0.09375,
+              0.09375,
               0.0,
               0.0,
-              0.0,
-              0.0,
-              3.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -11040,29 +11040,29 @@
               "load_store"
             ],
             "shortest_path_cycles": [
+              0.09375,
+              0.09375,
               0.0,
               0.0,
-              0.0,
-              0.0,
-              3.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
               "load_store"
             ],
             "total_cycles": [
+              0.09375,
+              0.09375,
               0.0,
               0.0,
-              0.0,
-              0.0,
-              3.0,
+              4.0,
               0.0
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 24,
-          "work_registers_used": 6
+          "uniform_registers_used": 30,
+          "work_registers_used": 9
         }
       }
     }
