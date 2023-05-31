@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,9 +11,12 @@ void main() {
   testWidgets('localToGlobal and globalToLocal calculate correct results', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(2400, 1800);
     tester.view.devicePixelRatio = 3.0;
-    tester.binding.renderView.configuration = TestViewConfiguration.fromView(
+    final RenderView renderView = RenderView(
       view: tester.view,
-      size: const Size(400, 200),
+      configuration: TestViewConfiguration.fromView(
+        view: tester.view,
+        size: const Size(400, 200),
+      )
     );
 
     // The configuration above defines a view with a resolution of 2400x1800
@@ -50,18 +53,18 @@ void main() {
     // the y coordinate. This is what the localToGlobal/globalToLocal methods
     // do:
 
-    expect(binding.localToGlobal(const Offset(0, -50)), Offset.zero);
-    expect(binding.localToGlobal(Offset.zero), const Offset(0, 100));
-    expect(binding.localToGlobal(const Offset(200, 100)), const Offset(400, 300));
-    expect(binding.localToGlobal(const Offset(150, 75)), const Offset(300, 250));
-    expect(binding.localToGlobal(const Offset(400, 200)), const Offset(800, 500));
-    expect(binding.localToGlobal(const Offset(400, 400)), const Offset(800, 900));
+    expect(binding.localToGlobal(const Offset(0, -50), renderView), Offset.zero);
+    expect(binding.localToGlobal(Offset.zero, renderView), const Offset(0, 100));
+    expect(binding.localToGlobal(const Offset(200, 100), renderView), const Offset(400, 300));
+    expect(binding.localToGlobal(const Offset(150, 75), renderView), const Offset(300, 250));
+    expect(binding.localToGlobal(const Offset(400, 200), renderView), const Offset(800, 500));
+    expect(binding.localToGlobal(const Offset(400, 400), renderView), const Offset(800, 900));
 
-    expect(binding.globalToLocal(Offset.zero), const Offset(0, -50));
-    expect(binding.globalToLocal(const Offset(0, 100)), Offset.zero);
-    expect(binding.globalToLocal(const Offset(400, 300)), const Offset(200, 100));
-    expect(binding.globalToLocal(const Offset(300, 250)), const Offset(150, 75));
-    expect(binding.globalToLocal(const Offset(800, 500)), const Offset(400, 200));
-    expect(binding.globalToLocal(const Offset(800, 900)), const Offset(400, 400));
+    expect(binding.globalToLocal(Offset.zero, renderView), const Offset(0, -50));
+    expect(binding.globalToLocal(const Offset(0, 100), renderView), Offset.zero);
+    expect(binding.globalToLocal(const Offset(400, 300), renderView), const Offset(200, 100));
+    expect(binding.globalToLocal(const Offset(300, 250), renderView), const Offset(150, 75));
+    expect(binding.globalToLocal(const Offset(800, 500), renderView), const Offset(400, 200));
+    expect(binding.globalToLocal(const Offset(800, 900), renderView), const Offset(400, 400));
   });
 }

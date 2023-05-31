@@ -563,27 +563,24 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coordinate space to the local
-  /// one.
+  /// Convert the given point from the global coordinate space of the provided
+  /// [RenderView] to its local one (both expressed in logical pixels).
   ///
-  /// It translates the point from the global coordinate space of the device (in
-  /// logical pixels) to the local coordinate space of the test (also in logical
-  /// pixels). It does not apply the device pixel ratio (used to translate
-  /// to/from physical pixels).
+  /// This method operates in logical pixels for both coordinate spaces. It does
+  /// not apply the device pixel ratio (used to translate to/from physical
+  /// pixels).
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
-  Offset globalToLocal(Offset point) => point;
+  Offset globalToLocal(Offset point, RenderView view) => point;
 
   /// Convert the given point from the local coordinate space to the global
-  /// one.
+  /// coordinate space of the [RenderView].
   ///
-  /// It translates the point from the local coordinate space of the test (in
-  /// logical pixels) to the global coordinate space of the device (also in
-  /// logical pixels). It does not apply the device pixel ratio to translate
-  /// to physical pixels.
+  /// This method operates in logical pixels for both coordinate spaces. It does
+  /// not apply the device pixel ratio to translate to physical pixels.
   ///
   /// For definitions for coordinate spaces, see [TestWidgetsFlutterBinding].
-  Offset localToGlobal(Offset point) => point;
+  Offset localToGlobal(Offset point, RenderView view) => point;
 
   /// The source of the current pointer event.
   ///
@@ -1854,7 +1851,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           // The pointer events received with this source has a global position
           // (see [handlePointerEventForSource]). Transform it to the local
           // coordinate space used by the testing widgets.
-          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position));
+          final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position, renderView));
           withPointerEventSource(TestBindingEventSource.device,
             () => super.handlePointerEvent(localEvent)
           );
@@ -1989,34 +1986,34 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Offset globalToLocal(Offset point) {
+  Offset globalToLocal(Offset point, RenderView view) {
     // The method is expected to translate the given point expressed in logical
     // pixels in the global coordinate space to the local coordinate space (also
     // expressed in logical pixels).
     // The inverted transform translates from the global coordinate space in
     // physical pixels to the local coordinate space in logical pixels.
-    final Matrix4 transform = _liveTestRenderView.configuration.toMatrix();
+    final Matrix4 transform = view.configuration.toMatrix();
     final double det = transform.invert();
     assert(det != 0.0);
     // In order to use the transform, we need to translate the point first into
     // the physical coordinate space by applying the device pixel ratio.
     return MatrixUtils.transformPoint(
       transform,
-      point * _liveTestRenderView.configuration.devicePixelRatio,
+      point * view.configuration.devicePixelRatio,
     );
   }
 
   @override
-  Offset localToGlobal(Offset point) {
+  Offset localToGlobal(Offset point, RenderView view) {
     // The method is expected to translate the given point expressed in logical
     // pixels in the local coordinate space to the global coordinate space (also
     // expressed in logical pixels).
     // The transform translates from the local coordinate space in logical
     // pixels to the global coordinate space in physical pixels.
-    final Matrix4 transform = _liveTestRenderView.configuration.toMatrix();
+    final Matrix4 transform = view.configuration.toMatrix();
     final Offset pointInPhysicalPixels = MatrixUtils.transformPoint(transform, point);
     // We need to apply the device pixel ratio to get back to logical pixels.
-    return pointInPhysicalPixels / _liveTestRenderView.configuration.devicePixelRatio;
+    return pointInPhysicalPixels / view.configuration.devicePixelRatio;
   }
 }
 
