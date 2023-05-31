@@ -170,7 +170,7 @@ class TapSemanticEvent extends SemanticsEvent {
 /// object. In general, such design should be avoided if possible. If not, one may want
 /// to refocus the newly added rendering object.
 ///
-/// One example that are not recommended:
+/// One example that is not recommended:
 /// When a new popup or dropdown opens, moving the focus in these cases may confuse users
 /// and make it less accessible.
 ///
@@ -195,7 +195,7 @@ class TapSemanticEvent extends SemanticsEvent {
 ///   void initState() {
 ///     super.initState();
 ///     // Using addPostFrameCallback because changing focus need to wait for the widget to finish rendering.
-///     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+///     WidgetsBinding.instance.addPostFrameCallback((_) {
 ///       mykey.currentContext?.findRenderObject()?.sendSemanticsEvent(const FocusSemanticEvent());
 ///     });
 ///   }
@@ -206,11 +206,11 @@ class TapSemanticEvent extends SemanticsEvent {
 ///       appBar: AppBar(
 ///         title: const Text('example'),
 ///       ),
-///       body:Column(
-///         children:[
-///           Text('Hello World'),
+///       body: Column(
+///         children: <Widget>[
+///           const Text('Hello World'),
 ///           const SizedBox(height: 50),
-///           Text("set focus here", key: mykey),
+///           Text('set focus here', key: mykey),
 ///         ],
 ///       ),
 ///     );
