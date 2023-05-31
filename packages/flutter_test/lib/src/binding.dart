@@ -564,7 +564,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Convert the given point from the global coordinate space of the provided
-  /// [RenderView] to its local one (both expressed in logical pixels).
+  /// [RenderView] to its local one.
   ///
   /// This method operates in logical pixels for both coordinate spaces. It does
   /// not apply the device pixel ratio (used to translate to/from physical
