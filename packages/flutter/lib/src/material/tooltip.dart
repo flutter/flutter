@@ -19,6 +19,70 @@ import 'tooltip_visibility.dart';
 /// Signature for when a tooltip is triggered.
 typedef TooltipTriggeredCallback = void Function();
 
+/// A special [MouseRegion] that when nested, only the first [_ExclusiveMouseRegion]
+/// to be hit in hit-testing order will be added to the BoxHitTestResult (i.e.,
+/// child over parent, last sibling over first sibling).
+///
+/// The [onEnter] method will be called when a mouse pointer enters this
+/// [MouseRegion], and there is no other [_ExclusiveMouseRegion]s obstructing
+/// this [_ExclusiveMouseRegion] from receiving the events. This includes the
+/// case where the mouse cursor stays within the paint bounds of an outer
+/// [_ExclusiveMouseRegion], but moves outside of the bounds of the inner
+/// [_ExclusiveMouseRegion] that was initially blocking the outer widget.
+///
+/// Likewise, [onExit] is called when the a mouse pointer moves out of the paint
+/// bounds of this widget, or moves into another [_ExclusiveMouseRegion] that
+/// overlaps this widget in hit-testing order.
+///
+/// This widget doesn't affect [MouseRegion]s that aren't [_ExclusiveMouseRegion]s,
+/// or other [HitTestTarget]s in the tree.
+class _ExclusiveMouseRegion extends MouseRegion {
+  const _ExclusiveMouseRegion({
+    super.onEnter,
+    super.onExit,
+    super.child,
+  });
+
+  @override
+  _RenderExclusiveMouseRegion createRenderObject(BuildContext context) {
+    return _RenderExclusiveMouseRegion(
+      onEnter: onEnter,
+      onExit: onExit,
+    );
+  }
+}
+
+class _RenderExclusiveMouseRegion extends RenderMouseRegion {
+  _RenderExclusiveMouseRegion({
+    super.onEnter,
+    super.onExit,
+  });
+
+  static bool isOutermostMouseRegion = true;
+  static bool foundInnermostMouseRegion = false;
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    bool isHit = false;
+    final bool outermost = isOutermostMouseRegion;
+    isOutermostMouseRegion = false;
+    if (size.contains(position)) {
+      isHit = hitTestChildren(result, position: position) || hitTestSelf(position);
+      if ((isHit || behavior == HitTestBehavior.translucent) && !foundInnermostMouseRegion) {
+        foundInnermostMouseRegion = true;
+        result.add(BoxHitTestEntry(this, position));
+      }
+    }
+
+    if (outermost) {
+      // The outermost region resets the global states.
+      isOutermostMouseRegion = true;
+      foundInnermostMouseRegion = false;
+    }
+    return isHit;
+  }
+}
+
 /// A Material Design tooltip.
 ///
 /// Tooltips provide text labels which help explain the function of a button or
@@ -230,6 +294,10 @@ class Tooltip extends StatefulWidget {
   /// If this property is null, then [TooltipThemeData.triggerMode] is used.
   /// If [TooltipThemeData.triggerMode] is also null, the default mode is
   /// [TooltipTriggerMode.longPress].
+  ///
+  /// This property does not affect mouse devices. Setting [triggerMode] to
+  /// [TooltipTriggerMode.manual] will not prevent the tooltip from showing when
+  /// the mouse cursor hovers over it.
   final TooltipTriggerMode? triggerMode;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
@@ -252,30 +320,8 @@ class Tooltip extends StatefulWidget {
 
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
-  // Causes any current tooltips to be concealed. Only called for mouse hover enter
-  // detections. Won't conceal the supplied tooltip.
-  static void _concealOtherTooltips(TooltipState current) {
-    if (_openedTooltips.isNotEmpty) {
-      // Avoid concurrent modification.
-      final List<TooltipState> openedTooltips = _openedTooltips.toList();
-      for (final TooltipState state in openedTooltips) {
-        if (state == current) {
-          continue;
-        }
-        state._concealTooltip();
-      }
-    }
-  }
-
-  // Causes the most recently concealed tooltip to be revealed. Only called for mouse
-  // hover exit detections.
-  static void _revealLastTooltip() {
-    if (_openedTooltips.isNotEmpty) {
-      _openedTooltips.last._revealTooltip();
-    }
-  }
-
-  /// Dismiss all of the tooltips that are currently shown on the screen.
+  /// Dismiss all of the tooltips that are currently shown on the screen,
+  /// including those with mouse cursors currently hovering over them.
   ///
   /// This method returns true if it successfully dismisses the tooltips. It
   /// returns false if there is no tooltip shown on the screen.
@@ -284,7 +330,8 @@ class Tooltip extends StatefulWidget {
       // Avoid concurrent modification.
       final List<TooltipState> openedTooltips = _openedTooltips.toList();
       for (final TooltipState state in openedTooltips) {
-        state._dismissTooltip(immediately: true);
+        assert(state.mounted);
+        state._scheduleDismissTooltip(withDelay: Duration.zero);
       }
       return true;
     }
@@ -350,19 +397,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   late double _verticalOffset;
   late bool _preferBelow;
   late bool _excludeFromSemantics;
-  late AnimationController _controller;
   OverlayEntry? _entry;
-  Timer? _dismissTimer;
-  Timer? _showTimer;
+
   late Duration _showDuration;
   late Duration _hoverShowDuration;
   late Duration _waitDuration;
-  late bool _mouseIsConnected;
-  bool _pressActivated = false;
   late TooltipTriggerMode _triggerMode;
   late bool _enableFeedback;
-  late bool _isConcealed;
-  late bool _forceRemoval;
   late bool _visible;
 
   /// The plain text message for this tooltip.
@@ -370,23 +411,283 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   /// This value will either come from [widget.message] or [widget.richMessage].
   String get _tooltipMessage => widget.message ?? widget.richMessage!.toPlainText();
 
-  @override
-  void initState() {
-    super.initState();
-    _isConcealed = false;
-    _forceRemoval = false;
-    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    _controller = AnimationController(
+  Timer? _timer;
+  AnimationController? _backingController;
+  AnimationController get _controller {
+    return _backingController ??= AnimationController(
       duration: _fadeInDuration,
       reverseDuration: _fadeOutDuration,
       vsync: this,
-    )
-      ..addStatusListener(_handleStatusChanged);
-    // Listen to see when a mouse is added.
-    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
+    )..addStatusListener(_handleStatusChanged);
+  }
+
+  LongPressGestureRecognizer? _longPressRecognizer;
+  TapGestureRecognizer? _tapRecognizer;
+
+  // The ids of mouse devices that are keeping the tooltip from being dismissed.
+  //
+  // Device ids are added to this set in _handleMouseEnter, and removed in
+  // _handleMouseExit. The set is cleared in _handleTapToDismiss, typically when
+  // a PointerDown event interacts with some other UI component.
+  final Set<int> _activeHoveringPointerDevices = <int>{};
+  AnimationStatus _animationStatus = AnimationStatus.dismissed;
+  void _handleStatusChanged(AnimationStatus status) {
+    assert(mounted);
+    final bool entryNeedsUpdating;
+    switch (status) {
+      case AnimationStatus.dismissed:
+        entryNeedsUpdating = _animationStatus != AnimationStatus.dismissed;
+        if (entryNeedsUpdating) {
+          _removeEntry();
+        }
+      case AnimationStatus.completed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        entryNeedsUpdating = _animationStatus == AnimationStatus.dismissed;
+        if (entryNeedsUpdating) {
+          _createNewEntry();
+          SemanticsService.tooltip(_tooltipMessage);
+        }
+    }
+
+    if (entryNeedsUpdating) {
+      setState(() { /* Rebuild to update the OverlayEntry */ });
+    }
+    _animationStatus = status;
+  }
+
+  void _scheduleShowTooltip({ required Duration withDelay, Duration? showDuration }) {
+    assert(mounted);
+    void show() {
+      assert(mounted);
+      if (!_visible) {
+        return;
+      }
+      _controller.forward();
+      _timer?.cancel();
+      _timer = showDuration == null ? null : Timer(showDuration, _controller.reverse);
+    }
+
+    assert(
+      !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
+      'timer must not be active when the tooltip is fading out',
+    );
+    switch (_controller.status) {
+      case AnimationStatus.dismissed when withDelay.inMicroseconds > 0:
+        _timer ??= Timer(withDelay, show);
+      // If the tooltip is already fading in or fully visible, skip the
+      // animation and show the tooltip immediately.
+      case AnimationStatus.dismissed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+      case AnimationStatus.completed:
+        show();
+    }
+  }
+
+  void _scheduleDismissTooltip({ required Duration withDelay }) {
+    assert(mounted);
+    assert(
+      !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
+      'timer must not be active when the tooltip is fading out',
+    );
+
+    _timer?.cancel();
+    _timer = null;
+    switch (_controller.status) {
+      case AnimationStatus.reverse:
+      case AnimationStatus.dismissed:
+        break;
+      // Dismiss when the tooltip is fading in: if there's a dismiss delay we'll
+      // allow the fade in animation to continue until the delay timer fires.
+      case AnimationStatus.forward:
+      case AnimationStatus.completed:
+        if (withDelay.inMicroseconds > 0) {
+          _timer = Timer(withDelay, _controller.reverse);
+        } else {
+          _controller.reverse();
+        }
+    }
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    assert(mounted);
+    // PointerDeviceKinds that don't support hovering.
+    const Set<PointerDeviceKind> triggerModeDeviceKinds = <PointerDeviceKind> {
+      PointerDeviceKind.invertedStylus,
+      PointerDeviceKind.stylus,
+      PointerDeviceKind.touch,
+      PointerDeviceKind.unknown,
+      // MouseRegion only tracks PointerDeviceKind == mouse.
+      PointerDeviceKind.trackpad,
+    };
+    switch (_triggerMode) {
+      case TooltipTriggerMode.longPress:
+        final LongPressGestureRecognizer recognizer = _longPressRecognizer ??= LongPressGestureRecognizer(
+          debugOwner: this, supportedDevices: triggerModeDeviceKinds,
+        );
+        recognizer
+          ..onLongPressCancel = _handleTapToDismiss
+          ..onLongPress = _handleLongPress
+          ..onLongPressUp = _handlePressUp
+          ..addPointer(event);
+      case TooltipTriggerMode.tap:
+        final TapGestureRecognizer recognizer = _tapRecognizer ??= TapGestureRecognizer(
+          debugOwner: this, supportedDevices: triggerModeDeviceKinds
+        );
+        recognizer
+          ..onTapCancel = _handleTapToDismiss
+          ..onTap = _handleTap
+          ..addPointer(event);
+      case TooltipTriggerMode.manual:
+        break;
+    }
+  }
+
+  // For PointerDownEvents, this method will be called after _handlePointerDown.
+  void _handleGlobalPointerEvent(PointerEvent event) {
+    assert(mounted);
+    if (_tapRecognizer?.primaryPointer == event.pointer || _longPressRecognizer?.primaryPointer == event.pointer) {
+      // This is a pointer of interest specified by the trigger mode, since it's
+      // picked up by the recognizer.
+      //
+      // The recognizer will later determine if this is indeed a "trigger"
+      // gesture and dismiss the tooltip if that's not the case. However there's
+      // still a chance that the PointerEvent was cancelled before the gesture
+      // recognizer gets to emit a tap/longPress down, in which case the onCancel
+      // callback (_handleTapToDismiss) will not be called.
+      return;
+    }
+    if ((_timer == null && _controller.status == AnimationStatus.dismissed) || event is! PointerDownEvent) {
+      return;
+    }
+    _handleTapToDismiss();
+  }
+
+  // The primary pointer is not part of a "trigger" gesture so the tooltip
+  // should be dismissed.
+  void _handleTapToDismiss() {
+    _scheduleDismissTooltip(withDelay: Duration.zero);
+    _activeHoveringPointerDevices.clear();
+  }
+
+  void _handleTap() {
+    if (!_visible) {
+      return;
+    }
+    final bool tooltipCreated = _controller.status == AnimationStatus.dismissed;
+    if (tooltipCreated && _enableFeedback) {
+      assert(_triggerMode == TooltipTriggerMode.tap);
+      Feedback.forTap(context);
+    }
+    widget.onTriggered?.call();
+    _scheduleShowTooltip(
+      withDelay: Duration.zero,
+      // _activeHoveringPointerDevices keep the tooltip visible.
+      showDuration: _activeHoveringPointerDevices.isEmpty ? _showDuration : null,
+    );
+  }
+
+  // When a "trigger" gesture is recognized and the pointer down even is a part
+  // of it.
+  void _handleLongPress() {
+    if (!_visible) {
+      return;
+    }
+    final bool tooltipCreated = _visible && _controller.status == AnimationStatus.dismissed;
+    if (tooltipCreated && _enableFeedback) {
+      assert(_triggerMode == TooltipTriggerMode.longPress);
+      Feedback.forLongPress(context);
+    }
+    widget.onTriggered?.call();
+    _scheduleShowTooltip(withDelay: Duration.zero);
+  }
+
+  void _handlePressUp() {
+    if (_activeHoveringPointerDevices.isNotEmpty) {
+      return;
+    }
+    _scheduleDismissTooltip(withDelay: _showDuration);
+  }
+
+  // # Current Hovering Behavior:
+  // 1. Hovered tooltips don't show more than one at a time, for each mouse
+  //    device. For example, a chip with a delete icon typically shouldn't show
+  //    both the delete icon tooltip and the chip tooltip at the same time.
+  // 2. Hovered tooltips are dismissed when:
+  //    i. [dismissAllToolTips] is called, even these tooltips are still hovered
+  //    ii. a unrecognized PointerDownEvent occured withint the application
+  //    (even these tooltips are still hovered),
+  //    iii. The last hovering device leaves the tooltip.
+  void _handleMouseEnter(PointerEnterEvent event) {
+    // The callback is also used in an OverlayEntry, so there's a chance that
+    // this widget is already unmounted.
+    if (!mounted) {
+      return;
+    }
+    // _handleMouseEnter is only called when the mouse starts to hover over this
+    // tooltip (including the actual tooltip it shows on the overlay), and this
+    // tooltip is the first to be hit in the widget tree's hit testing order.
+    // See also _ExclusiveMouseRegion for the exact behavior.
+    _activeHoveringPointerDevices.add(event.device);
+    final List<TooltipState> openedTooltips = Tooltip._openedTooltips.toList();
+    bool otherTooltipsDismissed = false;
+    for (final TooltipState tooltip in openedTooltips) {
+      assert(tooltip.mounted);
+      final Set<int> hoveringDevices = tooltip._activeHoveringPointerDevices;
+      final bool shouldDismiss = tooltip != this
+                              && (hoveringDevices.length == 1 && hoveringDevices.single == event.device);
+      if (shouldDismiss) {
+        otherTooltipsDismissed = true;
+        tooltip._scheduleDismissTooltip(withDelay: Duration.zero);
+      }
+    }
+    _scheduleShowTooltip(withDelay: otherTooltipsDismissed ? Duration.zero : _waitDuration);
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    if (!mounted || _activeHoveringPointerDevices.isEmpty) {
+      return;
+    }
+    _activeHoveringPointerDevices.remove(event.device);
+    if (_activeHoveringPointerDevices.isEmpty) {
+      _scheduleDismissTooltip(withDelay: _hoverShowDuration);
+    }
+  }
+
+  /// Shows the tooltip if it is not already visible.
+  ///
+  /// After made visible by this method, The tooltip does not automatically
+  /// dismiss after `waitDuration`, until the user dismisses/re-triggers it, or
+  /// [Tooltip.dismissAllToolTips] is called.
+  ///
+  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
+  /// was already visible.
+  bool ensureTooltipVisible() {
+    if (!_visible) {
+      return false;
+    }
+
+    _timer?.cancel();
+    _timer = null;
+    switch (_controller.status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.reverse:
+        _scheduleShowTooltip(withDelay: Duration.zero);
+        return true;
+      case AnimationStatus.forward:
+      case AnimationStatus.completed:
+        return false;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
     // Listen to global pointer events so that we can hide a tooltip immediately
-    // if some other control is clicked on.
-    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    // if some other control is clicked on. Pointer events are dispatched to
+    // global routes **after** other routes.
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
   }
 
   @override
@@ -397,176 +698,36 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   // https://material.io/components/tooltips#specs
   double _getDefaultTooltipHeight() {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return 24.0;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return 32.0;
-    }
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => 24.0,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS     => 32.0,
+    };
   }
 
   EdgeInsets _getDefaultPadding() {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0);
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
-    }
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS     => const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+    };
   }
 
   double _getDefaultFontSize() {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return 12.0;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        return 14.0;
-    }
-  }
-
-  // Forces a rebuild if a mouse has been added or removed.
-  void _handleMouseTrackerChange() {
-    if (!mounted) {
-      return;
-    }
-    final bool mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (mouseIsConnected != _mouseIsConnected) {
-      setState(() {
-        _mouseIsConnected = mouseIsConnected;
-      });
-    }
-  }
-
-  void _handleStatusChanged(AnimationStatus status) {
-    // If this tip is concealed, don't remove it, even if it is dismissed, so that we can
-    // reveal it later, unless it has explicitly been hidden with _dismissTooltip.
-    if (status == AnimationStatus.dismissed && (_forceRemoval || !_isConcealed)) {
-      _removeEntry();
-    }
-  }
-
-  void _dismissTooltip({ bool immediately = false }) {
-    _showTimer?.cancel();
-    _showTimer = null;
-    if (immediately) {
-      _removeEntry();
-      return;
-    }
-    // So it will be removed when it's done reversing, regardless of whether it is
-    // still concealed or not.
-    _forceRemoval = true;
-    if (_pressActivated) {
-      _dismissTimer ??= Timer(_showDuration, _controller.reverse);
-    } else {
-      _dismissTimer ??= Timer(_hoverShowDuration, _controller.reverse);
-    }
-    _pressActivated = false;
-  }
-
-  void _showTooltip({ bool immediately = false }) {
-    _dismissTimer?.cancel();
-    _dismissTimer = null;
-    if (immediately) {
-      ensureTooltipVisible();
-      return;
-    }
-    _showTimer ??= Timer(_waitDuration, ensureTooltipVisible);
-  }
-
-  void _concealTooltip() {
-    if (_isConcealed || _forceRemoval) {
-      // Already concealed, or it's being removed.
-      return;
-    }
-    _isConcealed = true;
-    _dismissTimer?.cancel();
-    _dismissTimer = null;
-    _showTimer?.cancel();
-    _showTimer = null;
-    if (_entry != null) {
-      _entry!.remove();
-    }
-    _controller.reverse();
-  }
-
-  void _revealTooltip() {
-    if (!_isConcealed) {
-      // Already uncovered.
-      return;
-    }
-    _isConcealed = false;
-    _dismissTimer?.cancel();
-    _dismissTimer = null;
-    _showTimer?.cancel();
-    _showTimer = null;
-    if (!_entry!.mounted) {
-      final OverlayState overlayState = Overlay.of(
-        context,
-        debugRequiredFor: widget,
-      );
-      overlayState.insert(_entry!);
-    }
-    SemanticsService.tooltip(_tooltipMessage);
-    _controller.forward();
-  }
-
-  /// Shows the tooltip if it is not already visible.
-  ///
-  /// Returns `false` when the tooltip shouldn't be shown or when the tooltip
-  /// was already visible.
-  bool ensureTooltipVisible() {
-    if (!_visible || !mounted) {
-      return false;
-    }
-    _showTimer?.cancel();
-    _showTimer = null;
-    _forceRemoval = false;
-    if (_isConcealed) {
-      if (_mouseIsConnected) {
-        Tooltip._concealOtherTooltips(this);
-      }
-      _revealTooltip();
-      return true;
-    }
-    if (_entry != null) {
-      // Stop trying to hide, if we were.
-      _dismissTimer?.cancel();
-      _dismissTimer = null;
-      _controller.forward();
-      return false; // Already visible.
-    }
-    _createNewEntry();
-    _controller.forward();
-    return true;
-  }
-
-  static final Set<TooltipState> _mouseIn = <TooltipState>{};
-
-  void _handleMouseEnter() {
-    if (mounted) {
-      _showTooltip();
-    }
-  }
-
-  void _handleMouseExit({bool immediately = false}) {
-    if (mounted) {
-      // If the tip is currently covered, we can just remove it without waiting.
-      _dismissTooltip(immediately: _isConcealed || immediately);
-    }
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.macOS ||
+      TargetPlatform.linux ||
+      TargetPlatform.windows => 12.0,
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia ||
+      TargetPlatform.iOS     => 14.0,
+    };
   }
 
   void _createNewEntry() {
@@ -591,8 +752,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         height: _height,
         padding: _padding,
         margin: _margin,
-        onEnter: _mouseIsConnected ? (_) => _handleMouseEnter() : null,
-        onExit: _mouseIsConnected ? (_) => _handleMouseExit() : null,
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
         decoration: _decoration,
         textStyle: _textStyle,
         textAlign: _textAlign,
@@ -605,90 +766,27 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         preferBelow: _preferBelow,
       ),
     );
-    _entry = OverlayEntry(builder: (BuildContext context) => overlay);
-    _isConcealed = false;
-    overlayState.insert(_entry!);
-    SemanticsService.tooltip(_tooltipMessage);
-    if (_mouseIsConnected) {
-      // Hovered tooltips shouldn't show more than one at once. For example, a chip with
-      // a delete icon shouldn't show both the delete icon tooltip and the chip tooltip
-      // at the same time.
-      Tooltip._concealOtherTooltips(this);
-    }
-    assert(!Tooltip._openedTooltips.contains(this));
+    final OverlayEntry entry = _entry = OverlayEntry(builder: (BuildContext context) => overlay);
+    overlayState.insert(entry);
     Tooltip._openedTooltips.add(this);
   }
 
   void _removeEntry() {
     Tooltip._openedTooltips.remove(this);
-    _mouseIn.remove(this);
-    _dismissTimer?.cancel();
-    _dismissTimer = null;
-    _showTimer?.cancel();
-    _showTimer = null;
-    if (!_isConcealed) {
-      _entry?.remove();
-    }
-    _isConcealed = false;
+    _entry?.remove();
     _entry?.dispose();
     _entry = null;
-    if (_mouseIsConnected) {
-      Tooltip._revealLastTooltip();
-    }
-  }
-
-  void _handlePointerEvent(PointerEvent event) {
-    if (_entry == null) {
-      return;
-    }
-    if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _handleMouseExit();
-    } else if (event is PointerDownEvent) {
-      _handleMouseExit(immediately: true);
-    }
-  }
-
-  @override
-  void deactivate() {
-    if (_entry != null) {
-      _dismissTooltip(immediately: true);
-    }
-    _showTimer?.cancel();
-    super.deactivate();
   }
 
   @override
   void dispose() {
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
-    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     _removeEntry();
-    _controller.dispose();
+    _longPressRecognizer?.dispose();
+    _tapRecognizer?.dispose();
+    _timer?.cancel();
+    _backingController?.dispose();
     super.dispose();
-  }
-
-  void _handlePress() {
-    _pressActivated = true;
-    final bool tooltipCreated = ensureTooltipVisible();
-    if (tooltipCreated && _enableFeedback) {
-      if (_triggerMode == TooltipTriggerMode.longPress) {
-        Feedback.forLongPress(context);
-      } else {
-        Feedback.forTap(context);
-      }
-    }
-    widget.onTriggered?.call();
-  }
-
-  void _handleTap() {
-    _handlePress();
-    // When triggerMode is not [TooltipTriggerMode.tap] the tooltip is dismissed
-    // by _handlePointerEvent, which listens to the global pointer events.
-    // When triggerMode is [TooltipTriggerMode.tap] and the Tooltip GestureDetector
-    // competes with other GestureDetectors, the disambiguation process will complete
-    // after the global pointer event is received. As we can't rely on the global
-    // pointer events to dismiss the Tooltip, we have to call _handleMouseExit
-    // to dismiss the tooltip after _showDuration expired.
-    _handleMouseExit();
   }
 
   @override
@@ -740,29 +838,21 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _enableFeedback = widget.enableFeedback ?? tooltipTheme.enableFeedback ?? _defaultEnableFeedback;
 
     Widget result = Semantics(
-      tooltip: _excludeFromSemantics
-          ? null
-          : _tooltipMessage,
+      tooltip: _excludeFromSemantics ? null : _tooltipMessage,
       child: widget.child,
     );
 
     // Only check for gestures if tooltip should be visible.
     if (_visible) {
-      result = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onLongPress: (_triggerMode == TooltipTriggerMode.longPress) ? _handlePress : null,
-        onTap: (_triggerMode == TooltipTriggerMode.tap) ? _handleTap : null,
-        excludeFromSemantics: true,
-        child: result,
-      );
-      // Only check for hovering if there is a mouse connected.
-      if (_mouseIsConnected) {
-        result = MouseRegion(
-          onEnter: (_) => _handleMouseEnter(),
-          onExit: (_) => _handleMouseExit(),
+      result = _ExclusiveMouseRegion(
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
+        child: Listener(
+          onPointerDown: _handlePointerDown,
+          behavior: HitTestBehavior.opaque,
           child: result,
-        );
-      }
+        ),
+      );
     }
 
     return result;
@@ -850,33 +940,31 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = IgnorePointer(
-      child: FadeTransition(
-        opacity: animation,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: height),
-          child: DefaultTextStyle(
-            style: Theme.of(context).textTheme.bodyMedium!,
-            child: Container(
-              decoration: decoration,
-              padding: padding,
-              margin: margin,
-              child: Center(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: Text.rich(
-                  richMessage,
-                  style: textStyle,
-                  textAlign: textAlign,
-                ),
+    Widget result = FadeTransition(
+      opacity: animation,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height),
+        child: DefaultTextStyle(
+          style: Theme.of(context).textTheme.bodyMedium!,
+          child: Container(
+            decoration: decoration,
+            padding: padding,
+            margin: margin,
+            child: Center(
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: Text.rich(
+                richMessage,
+                style: textStyle,
+                textAlign: textAlign,
               ),
             ),
           ),
         ),
-      )
+      ),
     );
     if (onEnter != null || onExit != null) {
-      result = MouseRegion(
+      result = _ExclusiveMouseRegion(
         onEnter: onEnter,
         onExit: onExit,
         child: result,

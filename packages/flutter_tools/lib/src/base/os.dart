@@ -340,7 +340,7 @@ class _LinuxUtils extends _PosixUtils {
     for (String entry in osReleaseSplit) {
       entry = entry.trim();
       final List<String> entryKeyValuePair = entry.split('=');
-      if(entryKeyValuePair[0] == key) {
+      if (entryKeyValuePair[0] == key) {
         final String value =  entryKeyValuePair[1];
         // Remove quotes from either end of the value if they exist
         final String quote = value[0];
@@ -607,7 +607,17 @@ enum HostPlatform {
   darwin_arm64,
   linux_x64,
   linux_arm64,
-  windows_x64,
+  windows_x64;
+
+  String get platformName {
+    return switch (this) {
+      HostPlatform.darwin_x64 => 'x64',
+      HostPlatform.darwin_arm64 => 'arm64',
+      HostPlatform.linux_x64 => 'x64',
+      HostPlatform.linux_arm64 => 'arm64',
+      HostPlatform.windows_x64 => 'x64'
+    };
+  }
 }
 
 String getNameForHostPlatform(HostPlatform platform) {

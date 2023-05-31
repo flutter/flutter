@@ -150,9 +150,7 @@ void main() {
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
@@ -203,9 +201,7 @@ void main() {
     expect(find.text('Another license'), findsOneWidget);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage control test with all properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     LicenseRegistry.addLicense(() {
@@ -408,9 +404,7 @@ void main() {
     );
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -435,9 +429,7 @@ void main() {
     expect(licenseEntry.packagesCalled, false);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage returns late if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
@@ -1075,9 +1067,7 @@ void main() {
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1140,9 +1130,7 @@ void main() {
     await tester.binding.setSurfaceSize(defaultSize);
   });
 
-  // TODO(polina-c): fix SnapshotController not disposed and switch to testWidgetsWithLeakTracking.
-  // https://github.com/flutter/devtools/issues/3951
-  testWidgets('LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1282,8 +1270,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgetsWithLeakTracking('License page default title text color in the nested UI', (WidgetTester tester) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/108991

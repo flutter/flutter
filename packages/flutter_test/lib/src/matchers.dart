@@ -1624,10 +1624,10 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
     final RenderObject renderObject = nodes.single.renderObject!;
 
     switch (renderObject.runtimeType) {
-      case RenderClipPath:
-      case RenderClipOval:
-      case RenderClipRect:
-      case RenderClipRRect:
+      case const (RenderClipPath):
+      case const (RenderClipOval):
+      case const (RenderClipRect):
+      case const (RenderClipRRect):
         return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
       default:
         return true;
@@ -2445,7 +2445,7 @@ class _MatchesSemanticsData extends Matcher {
         final bool actionExpected = actionEntry.value;
         final bool actionPresent = (action.index & data.actions) == action.index;
         if (actionPresent != actionExpected) {
-          if(actionExpected) {
+          if (actionExpected) {
             missingActions.add(action);
           } else {
             unexpectedActions.add(action);
@@ -2490,7 +2490,7 @@ class _MatchesSemanticsData extends Matcher {
         final bool flagExpected = flagEntry.value;
         final bool flagPresent = flag.index & data.flags == flag.index;
         if (flagPresent != flagExpected) {
-          if(flagExpected) {
+          if (flagExpected) {
             missingFlags.add(flag);
           } else {
             unexpectedFlags.add(flag);
