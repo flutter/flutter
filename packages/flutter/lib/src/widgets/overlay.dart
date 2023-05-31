@@ -1980,7 +1980,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
 
   @override
   _RenderTheater get theater {
-    final AbstractNode? parent = this.parent;
+    final RenderObject? parent = this.parent;
     return parent is _RenderTheater
       ? parent
       : throw FlutterError('$parent of $this is not a _RenderTheater');

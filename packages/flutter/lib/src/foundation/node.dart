@@ -39,7 +39,18 @@ import 'package:meta/meta.dart';
 /// moved to be a child of A, sibling of B, then the numbers won't change. C's
 /// [depth] will still be 2. The [depth] is automatically maintained by the
 /// [adoptChild] and [dropChild] methods.
-class AbstractNode {
+class AbstractNode<T extends AbstractNode<T>> {
+  /// Initializes an abstract node.
+  AbstractNode() {
+    assert(
+      this is T,
+      'Invalid node type argument. \n'
+      'Classes extending AbstractNode must pass their own class type as the T type argument. '
+      'For example: class RenderObject extends AbstractNode<RenderObject> {}\n'
+      'An example of an invalid declaration: class RenderObject extends AbstractNode<Layer> {}'
+    );
+  }
+
   /// The depth of this node in the tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
@@ -52,7 +63,7 @@ class AbstractNode {
   ///
   /// Only call this method from overrides of [redepthChildren].
   @protected
-  void redepthChild(AbstractNode child) {
+  void redepthChild(AbstractNode<T> child) {
     assert(child.owner == owner);
     if (child._depth <= _depth) {
       child._depth = _depth + 1;
@@ -114,25 +125,25 @@ class AbstractNode {
   }
 
   /// The parent of this node in the tree.
-  AbstractNode? get parent => _parent;
-  AbstractNode? _parent;
+  T? get parent => _parent;
+  T? _parent;
 
   /// Mark the given node as being a child of this node.
   ///
   /// Subclasses should call this function when they acquire a new child.
   @protected
   @mustCallSuper
-  void adoptChild(covariant AbstractNode child) {
+  void adoptChild(covariant T child) {
     assert(child._parent == null);
     assert(() {
-      AbstractNode node = this;
+      AbstractNode<T> node = this;
       while (node.parent != null) {
         node = node.parent!;
       }
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
-    child._parent = this;
+    child._parent = this as T;
     if (attached) {
       child.attach(_owner!);
     }
@@ -144,7 +155,7 @@ class AbstractNode {
   /// Subclasses should call this function when they lose a child.
   @protected
   @mustCallSuper
-  void dropChild(covariant AbstractNode child) {
+  void dropChild(covariant T child) {
     assert(child._parent == this);
     assert(child.attached == attached);
     child._parent = null;

@@ -1556,10 +1556,7 @@ class _ActionButtonParentDataWidget
       parentData.isPressed = isPressed;
 
       // Force a repaint.
-      final AbstractNode? targetParent = renderObject.parent;
-      if (targetParent is RenderObject) {
-        targetParent.markNeedsPaint();
-      }
+      renderObject.parent?.markNeedsPaint();
     }
   }
 

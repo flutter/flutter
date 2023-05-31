@@ -2297,5 +2297,5 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }
-  return _findDebugSemantics(object.parent! as RenderObject);
+  return _findDebugSemantics(object.parent!);
 }
