@@ -327,7 +327,7 @@ untranslated-messages-file: lib/l10n/untranslated.json
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/120530.
-  testUsingContext('dart format is run when generateLocalizations is called through build target', () async {
+  testWithoutContext('dart format is run when generateLocalizations is called through build target', () async {
     final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
@@ -368,9 +368,6 @@ format: true
     expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
     expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
     expect(processManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('nullable-getter defaults to true', () async {
