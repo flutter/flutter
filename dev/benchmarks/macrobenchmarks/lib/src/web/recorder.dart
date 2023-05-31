@@ -655,7 +655,8 @@ class Timeseries {
     final double dirtyStandardDeviation = _computeStandardDeviationForPopulation(name, candidateValues);
 
     // Any value that's higher than this is considered an outlier.
-    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation;
+    // Two standard deviations captures 95% of a normal distribution.
+    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation * 2;
 
     // Candidates with outliers removed.
     final Iterable<double> cleanValues = candidateValues.where((double value) => value <= outlierCutOff);
