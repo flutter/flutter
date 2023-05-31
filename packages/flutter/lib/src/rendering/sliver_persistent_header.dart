@@ -364,6 +364,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
+
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
