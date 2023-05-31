@@ -131,7 +131,7 @@ abstract final class AppleTestUtils {
 /// The default for [expectedExitCode] will be 0 while
 /// [stdoutSubstring] and [stderrSubstring] are both optional
 class ProcessResultMatcher extends Matcher {
-  ProcessResultMatcher({
+  const ProcessResultMatcher({
     this.expectedExitCode = 0,
     this.stdoutSubstring,
     this.stderrSubstring,
@@ -141,13 +141,10 @@ class ProcessResultMatcher extends Matcher {
   final int expectedExitCode;
 
   /// Substring to find in the process's stdout
-  final String? stdoutSubstring;
+  final Pattern? stdoutSubstring;
 
   /// Substring to find in the process's stderr
-  final String? stderrSubstring;
-
-  bool _foundStdout = true;
-  bool _foundStderr = true;
+  final Pattern? stderrSubstring;
 
   @override
   Description describe(Description description) {
@@ -165,18 +162,27 @@ class ProcessResultMatcher extends Matcher {
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
     final ProcessResult result = item as ProcessResult;
+    bool foundStdout = true;
+    bool foundStderr = true;
 
+    final String stdout = result.stdout as String;
+    final String stderr = result.stderr as String;
     if (stdoutSubstring != null) {
-      _foundStdout = (result.stdout as String).contains(stdoutSubstring!);
-      matchState['stdout'] = result.stdout;
+      foundStdout = stdout.contains(stdoutSubstring!);
+      matchState['stdout'] = stdout;
+    } else if (stdout.isNotEmpty) {
+      // even if we were not asserting on stdout, show stdout for debug purposes
+      matchState['stdout'] = stdout;
     }
 
     if (stderrSubstring != null) {
-      _foundStderr = (result.stderr as String).contains(stderrSubstring!);
-      matchState['stderr'] = result.stderr;
+      foundStderr = stderr.contains(stderrSubstring!);
+      matchState['stderr'] = stderr;
+    } else if (stderr.isNotEmpty) {
+      matchState['stderr'] = stderr;
     }
 
-    return result.exitCode == expectedExitCode && _foundStdout && _foundStderr;
+    return result.exitCode == expectedExitCode && foundStdout && foundStderr;
   }
 
   @override
@@ -189,15 +195,15 @@ class ProcessResultMatcher extends Matcher {
     final ProcessResult result = item! as ProcessResult;
 
     if (result.exitCode != expectedExitCode) {
-      mismatchDescription.add('Actual exitCode was ${result.exitCode}');
+      mismatchDescription.add('Actual exitCode was ${result.exitCode}\n');
     }
 
     if (matchState.containsKey('stdout')) {
-      mismatchDescription.add('Actual stdout:\n${matchState["stdout"]}');
+      mismatchDescription.add('Actual stdout:\n${matchState["stdout"]}\n');
     }
 
     if (matchState.containsKey('stderr')) {
-      mismatchDescription.add('Actual stderr:\n${matchState["stderr"]}');
+      mismatchDescription.add('Actual stderr:\n${matchState["stderr"]}\n');
     }
 
     return mismatchDescription;
