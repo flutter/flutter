@@ -97,9 +97,10 @@ Future<LocalizationsGenerator> generateLocalizations({
         dartBinary,
         command,
         '''
-Dart format failed to run.
-${result.stdout}
-${result.stderr}''',
+`dart format` failed with exit code ${result.exitCode}
+
+stdout:\n${result.stdout}\n
+stderr:\n${result.stderr}''',
         result.exitCode,
       );
     }
