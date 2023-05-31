@@ -3427,8 +3427,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Value indicator disappears after some time when the slider is '
-      'clicked, not dragged, on desktop', (WidgetTester tester) async {
+  testWidgets('Value indicator disappears after a bit when the slider is clicked, not dragged, on desktop', (WidgetTester tester) async {
     double currentValue = 0.5;
     final FocusNode focusNode = FocusNode();
 
@@ -3463,7 +3462,7 @@ void main() {
 
     await tester.pumpWidget(buildApp());
 
-    // Slider does not show value indicator without focus.
+    // Slider does not show value indicator before being clicked
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, false);
     RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
@@ -3475,24 +3474,25 @@ void main() {
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
 
-    // Tap somewhere to bring value indicator.
+    // Click somewhere to bring up the value indicator
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.down(tapLocation);
     await gesture.up();
     focusNode.requestFocus();
     await tester.pumpAndSettle();
+
+    // Slider shows value indicator after being clicked
     expect(focusNode.hasFocus, true);
     valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
       paints..path(color: const Color(0xff000000))..paragraph(),
     );
-
-
     await tester.pumpAndSettle();
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
+    // Slider value indicator is no longer visible after 2 seconds
     expect(
       valueIndicatorBox,
       isNot(paints..path(color: const Color(0xff000000))..paragraph()),
