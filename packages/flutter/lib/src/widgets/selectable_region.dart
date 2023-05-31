@@ -1888,14 +1888,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// [SelectWordSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+    SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
       if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
-        final SelectionResult result = dispatchSelectionEventToChild(selectables[index], event);
-        if (result == SelectionResult.previous || result == SelectionResult.next) {
+        lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+        if (lastSelectionResult == SelectionResult.previous || lastSelectionResult == SelectionResult.next) {
           continue;
         }
         if (selectables[index].value != existingGeometry) {
@@ -1908,6 +1909,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         }
         return SelectionResult.end;
       }
+    }
+    if (lastSelectionResult == SelectionResult.next) {
+      return SelectionResult.next;
+    } else if (lastSelectionResult == SelectionResult.previous) {
+      return SelectionResult.previous;
     }
     return SelectionResult.none;
   }
