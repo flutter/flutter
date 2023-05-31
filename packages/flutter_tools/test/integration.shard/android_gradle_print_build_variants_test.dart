@@ -61,6 +61,9 @@ void main() {
       'BuildVariant: profile',
     ];
     final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();
+
+    print('expectedLines: $expectedLines');
+    print('actualLines: $actualLines');
     expect(const ListEquality<String>().equals(actualLines, expectedLines), isTrue);
   });
 }
