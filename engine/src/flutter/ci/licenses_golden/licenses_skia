@@ -1,4 +1,4 @@
-Signature: 2ba130c0207064fd823692a5efda019d
+Signature: fdb06fdc9805d13d62224c0836211209
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/skblenders_arithmetic_saturate.md
 FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
+FILE: ../../../third_party/skia/relnotes/skimagefilters_image_remove.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
 FILE: ../../../third_party/skia/relnotes/sksamplingoptions_implicit.md
 FILE: ../../../third_party/skia/relnotes/sksurface_methods.md
