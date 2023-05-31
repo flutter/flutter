@@ -3925,7 +3925,6 @@ targets:
   - name: Mac_ios draw_points_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
