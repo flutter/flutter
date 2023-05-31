@@ -55,8 +55,9 @@ const ImageGenerator::FrameInfo APNGImageGenerator::GetFrameInfo(
     return {};
   }
 
-  if (images_[image_index].frame_info.has_value()) {
-    return images_[image_index].frame_info.value();
+  auto frame_info = images_[image_index].frame_info;
+  if (frame_info.has_value()) {
+    return frame_info.value();
   }
   return {};
 }

@@ -11,14 +11,13 @@
 #include "impeller/base/allocation.h"
 #include "impeller/core/allocator.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
+#include "impeller/typographer/rectangle_packer.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/src/core/SkIPoint16.h"   // nogncheck
-#include "third_party/skia/src/gpu/GrRectanizer.h"  // nogncheck
 
 namespace impeller {
 
@@ -62,7 +61,7 @@ static size_t PairsFitInAtlasOfSize(
     const FontGlyphPair::Set& pairs,
     const ISize& atlas_size,
     std::vector<Rect>& glyph_positions,
-    const std::shared_ptr<GrRectanizer>& rect_packer) {
+    const std::shared_ptr<RectanglePacker>& rect_packer) {
   if (atlas_size.IsEmpty()) {
     return false;
   }
@@ -76,7 +75,7 @@ static size_t PairsFitInAtlasOfSize(
 
     const auto glyph_size =
         ISize::Ceil((pair.glyph.bounds * pair.font.GetMetrics().scale).size);
-    SkIPoint16 location_in_atlas;
+    IPoint16 location_in_atlas;
     if (!rect_packer->addRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
                               &location_in_atlas             //
@@ -98,7 +97,7 @@ static bool CanAppendToExistingAtlas(
     const FontGlyphPairRefVector& extra_pairs,
     std::vector<Rect>& glyph_positions,
     ISize atlas_size,
-    const std::shared_ptr<GrRectanizer>& rect_packer) {
+    const std::shared_ptr<RectanglePacker>& rect_packer) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!rect_packer || atlas_size.IsEmpty()) {
     return false;
@@ -114,7 +113,7 @@ static bool CanAppendToExistingAtlas(
 
     const auto glyph_size =
         ISize::Ceil((pair.glyph.bounds * pair.font.GetMetrics().scale).size);
-    SkIPoint16 location_in_atlas;
+    IPoint16 location_in_atlas;
     if (!rect_packer->addRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
                               &location_in_atlas             //
@@ -148,8 +147,8 @@ ISize OptimumAtlasSizeForFontGlyphPairs(
                            : ISize(kMinAtlasSize, kMinAtlasSize);
   size_t total_pairs = pairs.size() + 1;
   do {
-    auto rect_packer = std::shared_ptr<GrRectanizer>(
-        GrRectanizer::Factory(current_size.width, current_size.height));
+    auto rect_packer = std::shared_ptr<RectanglePacker>(
+        RectanglePacker::Factory(current_size.width, current_size.height));
 
     auto remaining_pairs = PairsFitInAtlasOfSize(pairs, current_size,
                                                  glyph_positions, rect_packer);
