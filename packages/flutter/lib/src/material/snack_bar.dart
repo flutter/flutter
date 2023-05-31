@@ -283,6 +283,7 @@ class SnackBar extends StatefulWidget {
     this.padding,
     this.width,
     this.shape,
+    this.hitTestBehavior,
     this.behavior,
     this.action,
     this.actionOverflowThreshold,
@@ -383,6 +384,11 @@ class SnackBar extends StatefulWidget {
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder? shape;
+
+  /// Defines how the snack bar area, including margin, will behave during hit testing.
+  ///
+  /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
+  final HitTestBehavior? hitTestBehavior;
 
   /// This defines the behavior and location of the snack bar.
   ///
@@ -489,6 +495,7 @@ class SnackBar extends StatefulWidget {
       padding: padding,
       width: width,
       shape: shape,
+      hitTestBehavior: hitTestBehavior,
       behavior: behavior,
       action: action,
       actionOverflowThreshold: actionOverflowThreshold,
@@ -776,6 +783,7 @@ class _SnackBarState extends State<SnackBar> {
         key: const Key('dismissible'),
         direction: widget.dismissDirection,
         resizeDuration: null,
+        behavior: widget.hitTestBehavior ?? (widget.margin != null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque),
         onDismissed: (DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
