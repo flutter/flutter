@@ -243,26 +243,108 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// Once the [lifecycleState] is populated through any means (including this
   /// method), this method will do nothing. This is because the
-  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be
-  /// stale and it no longer makes sense to use the initial state at dart vm
-  /// startup as the current state anymore.
+  /// [dart:ui.PlatformDispatcher.initialLifecycleState] may already be stale
+  /// and it no longer makes sense to use the initial state at dart vm startup
+  /// as the current state anymore.
   ///
   /// The latest state should be obtained by subscribing to
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   @protected
   void readInitialLifecycleStateFromNativeWindow() {
-    if (lifecycleState != null) {
+    if (lifecycleState != null || platformDispatcher.initialLifecycleState.isEmpty) {
       return;
     }
-    final AppLifecycleState? state = _parseAppLifecycleMessage(platformDispatcher.initialLifecycleState);
-    if (state != null) {
-      handleAppLifecycleStateChanged(state);
-    }
+    _handleLifecycleMessage(platformDispatcher.initialLifecycleState);
   }
 
   Future<String?> _handleLifecycleMessage(String? message) async {
-    handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
+    final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
+    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState ?? AppLifecycleState.detached, state!);
+    generated.forEach(handleAppLifecycleStateChanged);
     return null;
+  }
+
+  List<AppLifecycleState> _generateStateTransitions(AppLifecycleState previousState, AppLifecycleState state) {
+    if (previousState == state) {
+      return const <AppLifecycleState>[];
+    }
+    if (previousState == AppLifecycleState.paused && state == AppLifecycleState.detached) {
+      // Handle the wrap-around from paused to detached
+      return const <AppLifecycleState>[AppLifecycleState.detached];
+    }
+    if (previousState == AppLifecycleState.detached && state == AppLifecycleState.paused) {
+      // Handle the wrap-around from detached to paused.
+      return const <AppLifecycleState>[AppLifecycleState.paused];
+    }
+    const List<AppLifecycleState> stateOrder = <AppLifecycleState>[
+      AppLifecycleState.detached,
+      AppLifecycleState.resumed,
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ];
+    assert(AppLifecycleState.values.toSet().difference(stateOrder.toSet()).isEmpty,
+      'Missing representation of state(s) ${AppLifecycleState.values.toSet().difference(stateOrder.toSet())} in stateOrder.');
+    final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
+    final int previousStateIndex = stateOrder.indexOf(previousState);
+    final int stateIndex = stateOrder.indexOf(state);
+    assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
+    assert(stateIndex != -1, 'State $state missing in stateOrder array');
+    if (previousStateIndex > stateIndex) {
+      for (int i = stateIndex; i < previousStateIndex; ++i) {
+        stateChanges.insert(0, stateOrder[i]);
+      }
+    } else {
+      for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
+        stateChanges.add(stateOrder[i]);
+      }
+    }
+    assert((){
+      bool debugVerifyLifecycleChange(AppLifecycleState? previous, AppLifecycleState state) {
+        if (previous == null) {
+          // Any transition from null is fine, since it is initializing the state.
+          return true;
+        }
+        if (previous == state) {
+          // Any transition to itself is OK.
+          return true;
+        }
+        switch (previous) {
+          case AppLifecycleState.detached:
+            if (state == AppLifecycleState.resumed || state == AppLifecycleState.paused) {
+              return true;
+            }
+          case AppLifecycleState.resumed:
+            // Can't go from resumed to detached directly (must go through paused).
+            if (state == AppLifecycleState.inactive) {
+              return true;
+            }
+          case AppLifecycleState.inactive:
+            if (state == AppLifecycleState.resumed || state == AppLifecycleState.hidden) {
+              return true;
+            }
+          case AppLifecycleState.hidden:
+            if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+              return true;
+            }
+          case AppLifecycleState.paused:
+            if (state == AppLifecycleState.hidden || state == AppLifecycleState.detached) {
+              return true;
+            }
+        }
+        return false;
+      }
+
+      AppLifecycleState previous = previousState;
+      for (final AppLifecycleState newState in stateChanges) {
+        if (!debugVerifyLifecycleChange(previous, newState)) {
+          return false;
+        }
+        previous = newState;
+      }
+      return true;
+    }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
+    return stateChanges;
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
@@ -359,7 +441,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///
   /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
   ///   override on a [WidgetsBindingObserver] to receive exit requests.
-  @mustCallSuper
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
     final Map<String, Object?>? result = await SystemChannels.platform.invokeMethod<Map<String, Object?>>(
       'System.exitApplication',

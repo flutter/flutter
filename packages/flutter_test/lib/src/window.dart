@@ -222,7 +222,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   String get initialLifecycleState => _initialLifecycleStateTestValue;
-  String _initialLifecycleStateTestValue = '';
+  String _initialLifecycleStateTestValue = 'AppLifecycleState.detached';
   /// Sets a faked initialLifecycleState for testing.
   set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
     _initialLifecycleStateTestValue = state;
@@ -230,7 +230,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// Resets [initialLifecycleState] to the default value for the platform.
   void resetInitialLifecycleState() {
-    _initialLifecycleStateTestValue = '';
+    _initialLifecycleStateTestValue = 'AppLifecycleState.detached';
   }
 
   @override
