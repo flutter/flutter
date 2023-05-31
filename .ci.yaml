@@ -4200,6 +4200,7 @@ targets:
       - .ci.yaml
 
   - name: Windows gradle_plugin_bundle_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/127928
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
