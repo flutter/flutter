@@ -356,6 +356,7 @@ std::shared_ptr<DeviceBuffer> AllocatorVK::OnCreateBuffer(
   buffer_info.usage = vk::BufferUsageFlagBits::eVertexBuffer |
                       vk::BufferUsageFlagBits::eIndexBuffer |
                       vk::BufferUsageFlagBits::eUniformBuffer |
+                      vk::BufferUsageFlagBits::eStorageBuffer |
                       vk::BufferUsageFlagBits::eTransferSrc |
                       vk::BufferUsageFlagBits::eTransferDst;
   buffer_info.size = desc.size;

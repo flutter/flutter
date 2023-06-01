@@ -63,4 +63,19 @@ const std::string& ComputePipelineDescriptor::GetLabel() const {
   return label_;
 }
 
+bool ComputePipelineDescriptor::RegisterDescriptorSetLayouts(
+    const DescriptorSetLayout desc_set_layout[],
+    size_t count) {
+  descriptor_set_layouts_.reserve(descriptor_set_layouts_.size() + count);
+  for (size_t i = 0; i < count; i++) {
+    descriptor_set_layouts_.emplace_back(desc_set_layout[i]);
+  }
+  return true;
+}
+
+const std::vector<DescriptorSetLayout>&
+ComputePipelineDescriptor::GetDescriptorSetLayouts() const {
+  return descriptor_set_layouts_;
+}
+
 }  // namespace impeller

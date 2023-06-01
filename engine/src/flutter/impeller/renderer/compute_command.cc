@@ -8,7 +8,6 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
-#include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
 
@@ -24,6 +23,7 @@ bool ComputeCommand::BindResource(ShaderStage stage,
     return false;
   }
 
+  bindings.uniforms[slot.ext_res_0] = slot;
   bindings.buffers[slot.ext_res_0] = {&metadata, view};
   return true;
 }

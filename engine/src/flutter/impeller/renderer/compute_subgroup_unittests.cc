@@ -39,6 +39,12 @@ namespace testing {
 using ComputeSubgroupTest = ComputePlaygroundTest;
 INSTANTIATE_COMPUTE_SUITE(ComputeSubgroupTest);
 
+TEST_P(ComputeSubgroupTest, CapabilitiesSuportSubgroups) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsComputeSubgroups());
+}
+
 TEST_P(ComputeSubgroupTest, PathPlayground) {
   // Renders stroked SVG paths in an interactive playground.
   using SS = StrokeComputeShader;

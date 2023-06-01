@@ -69,6 +69,14 @@ struct ComputePipelineBuilder {
         return false;
       }
 
+      if (!desc.RegisterDescriptorSetLayouts(
+              ComputeShader::kDescriptorSetLayouts)) {
+        VALIDATION_LOG << "Could not configure compute descriptor set layout "
+                          "for pipeline named '"
+                       << ComputeShader::kLabel << "'.";
+        return false;
+      }
+
       desc.SetStageEntrypoint(std::move(compute_function));
     }
     return true;

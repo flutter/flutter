@@ -29,6 +29,8 @@ class PipelineCacheVK {
 
   vk::UniquePipeline CreatePipeline(const vk::GraphicsPipelineCreateInfo& info);
 
+  vk::UniquePipeline CreatePipeline(const vk::ComputePipelineCreateInfo& info);
+
   void PersistCacheToDisk() const;
 
  private:

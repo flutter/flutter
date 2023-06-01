@@ -3,11 +3,7 @@
 // found in the LICENSE file.
 #extension GL_KHR_shader_subgroup_arithmetic : enable
 
-#define N_ROWS 8
-#define LG_WG_SIZE 9
-#define WG_SIZE (1 << LG_WG_SIZE)
-
-layout(local_size_x = WG_SIZE, local_size_y = 1) in;
+layout(local_size_x = 256, local_size_y = 1) in;
 layout(std430) buffer;
 
 layout(binding = 0) buffer Polyline {

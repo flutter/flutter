@@ -57,7 +57,9 @@ class ComputePlaygroundTest
 
 #define INSTANTIATE_COMPUTE_SUITE(playground)                              \
   INSTANTIATE_TEST_SUITE_P(                                                \
-      Compute, playground, ::testing::Values(PlaygroundBackend::kMetal),   \
+      Compute, playground,                                                 \
+      ::testing::Values(PlaygroundBackend::kMetal,                         \
+                        PlaygroundBackend::kVulkan),                       \
       [](const ::testing::TestParamInfo<ComputePlaygroundTest::ParamType>& \
              info) { return PlaygroundBackendToString(info.param); });
 

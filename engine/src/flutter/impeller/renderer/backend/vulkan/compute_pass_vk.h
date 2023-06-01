@@ -4,27 +4,26 @@
 
 #pragma once
 
-#include <Metal/Metal.h>
-
 #include "flutter/fml/macros.h"
+#include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/compute_pass.h"
 
 namespace impeller {
 
-class ComputePassMTL final : public ComputePass {
+class ComputePassVK final : public ComputePass {
  public:
-  // |RenderPass|
-  ~ComputePassMTL() override;
+  // |ComputePass|
+  ~ComputePassVK() override;
 
  private:
-  friend class CommandBufferMTL;
+  friend class CommandBufferVK;
 
-  id<MTLCommandBuffer> buffer_ = nil;
+  std::weak_ptr<CommandEncoderVK> encoder_;
   std::string label_;
   bool is_valid_ = false;
 
-  ComputePassMTL(std::weak_ptr<const Context> context,
-                 id<MTLCommandBuffer> buffer);
+  ComputePassVK(std::weak_ptr<const Context> context,
+                std::weak_ptr<CommandEncoderVK> encoder);
 
   // |ComputePass|
   bool IsValid() const override;
@@ -36,13 +35,6 @@ class ComputePassMTL final : public ComputePass {
   bool OnEncodeCommands(const Context& context,
                         const ISize& grid_size,
                         const ISize& thread_group_size) const override;
-
-  bool EncodeCommands(const std::shared_ptr<Allocator>& allocator,
-                      id<MTLComputeCommandEncoder> pass,
-                      const ISize& grid_size,
-                      const ISize& thread_group_size) const;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(ComputePassMTL);
 };
 
 }  // namespace impeller
