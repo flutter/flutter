@@ -15,7 +15,7 @@ import 'material.dart';
 /// relative to the [referenceBox].
 ///
 /// This effect relies on a shader and therefore is unsupported on the Flutter
-/// web HTML backend.
+/// Web HTML backend.
 ///
 /// To use this effect, pass an instance of [splashFactory] to the
 /// `splashFactory` parameter of either the Material [ThemeData] or any
