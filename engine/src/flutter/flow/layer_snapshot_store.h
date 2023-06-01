@@ -11,13 +11,8 @@
 #include "flutter/fml/time/time_delta.h"
 
 #include "third_party/skia/include/core/SkData.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
-#include "third_party/skia/include/core/SkSerialProcs.h"
-#include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/core/SkSurfaceCharacterization.h"
-#include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
 

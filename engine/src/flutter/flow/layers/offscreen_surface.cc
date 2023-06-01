@@ -5,15 +5,13 @@
 #include "flutter/flow/layers/offscreen_surface.h"
 
 #include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
-#include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkPixmap.h"
-#include "third_party/skia/include/core/SkSerialProcs.h"
-#include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
+#include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "third_party/skia/include/utils/SkBase64.h"
 
 namespace flutter {
 
@@ -24,9 +22,8 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrDirectContext* surface_context,
   if (surface_context) {
     // There is a rendering surface that may contain textures that are going to
     // be referenced in the layer tree about to be drawn.
-    return SkSurfaces::RenderTarget(
-        reinterpret_cast<GrRecordingContext*>(surface_context),
-        skgpu::Budgeted::kNo, image_info);
+    return SkSurfaces::RenderTarget(surface_context, skgpu::Budgeted::kNo,
+                                    image_info);
   }
 
   // There is no rendering surface, assume no GPU textures are present and
