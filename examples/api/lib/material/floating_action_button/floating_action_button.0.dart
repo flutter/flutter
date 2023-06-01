@@ -32,7 +32,7 @@ class FloatingActionButtonExample extends StatefulWidget {
 class _FloatingActionButtonExampleState extends State<FloatingActionButtonExample> {
   // The FAB's foregroundColor, backgroundColor, and shape
   static const List<(Color?, Color? background, ShapeBorder?)> customizations = <(Color?, Color?, ShapeBorder?)>[
-    (null, null, null), // The FAB uses its default for null parameter.
+    (null, null, null), // The FAB uses its default for null parameters.
     (null, Colors.green, null),
     (Colors.white, Colors.green, null),
     (Colors.white, Colors.green, CircleBorder()),

@@ -62,7 +62,7 @@ enum _FloatingActionButtonType {
 ///
 /// {@tool dartpad}
 /// This sample shows all the variants of [FloatingActionButton] widget as
-/// described in: https://m3.material.io/components/floating-action-button/overview
+/// described in: https://m3.material.io/components/floating-action-button/overview.
 ///
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
