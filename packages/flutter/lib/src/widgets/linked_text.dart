@@ -4,9 +4,7 @@ import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'gesture_detector.dart';
 import 'text.dart';
-import 'widget_span.dart';
 
 // TODO(justinmc): Add SelectableArea to the examples.
 
@@ -309,7 +307,7 @@ class TextLinker {
   ///
   ///   * URLs with any protocol other than http or https.
   ///   * Email addresses.
-  static final RegExp _urlRegExp = RegExp(r'(?<!@.*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?!.*@)');
+  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
   // Turns all matches from the regExp into a list of TextRanges.
   static Iterable<TextRange> _rangesFromText({
