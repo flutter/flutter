@@ -77,13 +77,12 @@ class IconData {
 
   @override
   int get hashCode {
-    final List<String>? fontFamilyFallback = this.fontFamilyFallback;
     return Object.hash(
       codePoint,
       fontFamily,
       fontPackage,
       matchTextDirection,
-      fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
+      Object.hashAll(fontFamilyFallback ?? const <String?>[]),
     );
   }
 
