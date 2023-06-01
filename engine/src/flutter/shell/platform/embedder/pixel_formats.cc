@@ -5,6 +5,10 @@
 #include "flutter/shell/platform/embedder/pixel_formats.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkColorType.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
+
 std::optional<SkColorType> getSkColorType(FlutterSoftwarePixelFormat pixfmt) {
   switch (pixfmt) {
     case kFlutterSoftwarePixelFormatGray8:
