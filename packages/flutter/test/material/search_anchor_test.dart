@@ -1812,7 +1812,7 @@ void main() {
       expect(decoration?.fillColor, null);
       expect(decoration?.focusColor, null);
       expect(decoration?.hoverColor, null);
-      expect(decoration?.contentPadding, const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+      expect(decoration?.contentPadding, EdgeInsets.zero);
       expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
     }
 
