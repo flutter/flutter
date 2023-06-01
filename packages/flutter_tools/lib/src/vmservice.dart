@@ -108,9 +108,13 @@ typedef CompileExpression = Future<String> Function(
   String isolateId,
   String expression,
   List<String> definitions,
+  List<String> definitionTypes,
   List<String> typeDefinitions,
+  List<String> typeBounds,
+  List<String> typeDefaults,
   String libraryUri,
   String? klass,
+  String? method,
   bool isStatic,
 );
 
@@ -256,14 +260,18 @@ Future<vm_service.VmService> setUpVmService({
       final String isolateId = _validateRpcStringParam('compileExpression', params, 'isolateId');
       final String expression = _validateRpcStringParam('compileExpression', params, 'expression');
       final List<String> definitions = List<String>.from(params['definitions']! as List<Object?>);
+      final List<String> definitionTypes = List<String>.from(params['definitionTypes']! as List<Object?>);
       final List<String> typeDefinitions = List<String>.from(params['typeDefinitions']! as List<Object?>);
+      final List<String> typeBounds = List<String>.from(params['typeBounds']! as List<Object?>);
+      final List<String> typeDefaults = List<String>.from(params['typeDefaults']! as List<Object?>);
       final String libraryUri = params['libraryUri']! as String;
       final String? klass = params['klass'] as String?;
+      final String? method = params['method'] as String?;
       final bool isStatic = _validateRpcBoolParam('compileExpression', params, 'isStatic');
 
       final String kernelBytesBase64 = await compileExpression(isolateId,
-          expression, definitions, typeDefinitions, libraryUri, klass,
-          isStatic);
+          expression, definitions, definitionTypes, typeDefinitions, typeBounds, typeDefaults,
+          libraryUri, klass, method, isStatic);
       return <String, Object>{
         kResultType: kResultTypeSuccess,
         'result': <String, String>{'kernelBytes': kernelBytesBase64},
