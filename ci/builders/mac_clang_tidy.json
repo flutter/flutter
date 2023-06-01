@@ -70,6 +70,7 @@
                         "--shard-id=1",
                         "--shard-variants=ios_debug_sim"
                     ],
+		    "max_attempts": 1,
                     "script": "flutter/ci/lint.sh"
                 }
             ]
@@ -99,6 +100,7 @@
                         "--shard-id=0",
                         "--shard-variants=host_debug"
                     ],
+		    "max_attempts": 1,
                     "script": "flutter/ci/lint.sh"
                 }
             ]
