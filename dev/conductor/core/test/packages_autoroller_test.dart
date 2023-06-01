@@ -204,8 +204,8 @@ void main() {
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Non empty array means there are open PRs by the bot with the tool label
@@ -244,8 +244,8 @@ void main() {
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Returns empty array, as there are no other open roll PRs from the bot
@@ -340,8 +340,8 @@ void main() {
         'flutter/flutter',
         '--state',
         'open',
-        '--label',
-        'tool',
+        '--search',
+        'Roll pub packages',
         '--json',
         'number',
       // Returns empty array, as there are no other open roll PRs from the bot
