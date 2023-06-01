@@ -22,7 +22,7 @@ class SkylineRectanglePacker final : public RectanglePacker {
   ~SkylineRectanglePacker() final {}
 
   void reset() final {
-    areaSoFar_ = 0;
+    area_so_far_ = 0;
     skyline_.clear();
     skyline_.push_back(SkylineSegment{0, 0, this->width()});
   }
@@ -30,7 +30,7 @@ class SkylineRectanglePacker final : public RectanglePacker {
   bool addRect(int w, int h, IPoint16* loc) final;
 
   float percentFull() const final {
-    return areaSoFar_ / ((float)this->width() * this->height());
+    return area_so_far_ / ((float)this->width() * this->height());
   }
 
  private:
@@ -42,7 +42,7 @@ class SkylineRectanglePacker final : public RectanglePacker {
 
   std::vector<SkylineSegment> skyline_;
 
-  int32_t areaSoFar_;
+  int32_t area_so_far_;
 
   // Can a width x height rectangle fit in the free space represented by
   // the skyline segments >= 'skylineIndex'? If so, return true and fill in
@@ -84,7 +84,7 @@ bool SkylineRectanglePacker::addRect(int width, int height, IPoint16* loc) {
     loc->x_ = bestX;
     loc->y_ = bestY;
 
-    areaSoFar_ += width * height;
+    area_so_far_ += width * height;
     return true;
   }
 
