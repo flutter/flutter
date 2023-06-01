@@ -915,10 +915,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// since sometimes `ios-deploy` does not return the Dart VM url:
   /// https://github.com/flutter/flutter/issues/121231
   bool get useBothLogDeviceReaders {
-    if (_usingCISystem && _majorSdkVersion >= 16) {
-      return true;
-    }
-    return false;
+    return _usingCISystem && _majorSdkVersion >= 16;
   }
 
   void _listenToSysLog() {

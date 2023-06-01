@@ -471,6 +471,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
+    '--ci',
   ];
 }
 
