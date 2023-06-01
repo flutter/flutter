@@ -42,8 +42,10 @@ bool DisplayListEmbedderViewSlice::recording_ended() {
   return builder_ == nullptr;
 }
 
-void ExternalViewEmbedder::SubmitFrame(GrDirectContext* context,
-                                       std::unique_ptr<SurfaceFrame> frame) {
+void ExternalViewEmbedder::SubmitFrame(
+    GrDirectContext* context,
+    const std::shared_ptr<impeller::AiksContext>& aiks_context,
+    std::unique_ptr<SurfaceFrame> frame) {
   frame->Submit();
 };
 

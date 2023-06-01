@@ -121,7 +121,7 @@ std::unique_ptr<Surface> PlaygroundImplMTL::AcquireSurfaceFrame(
 
   auto drawable =
       SurfaceMTL::GetMetalDrawableAndValidate(context, data_->metal_layer);
-  return SurfaceMTL::WrapCurrentMetalLayerDrawable(context, drawable);
+  return SurfaceMTL::MakeFromMetalLayerDrawable(context, drawable);
 }
 
 }  // namespace impeller
