@@ -135,60 +135,58 @@ static bool CommonRender(const ContentContext& renderer,
   // interpolated vertex information is also used in the fragment shader to
   // sample from the glyph atlas.
 
-  constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
+  constexpr std::array<Point, 6> unit_points = {Point{0, 0}, Point{1, 0},
+                                                Point{0, 1}, Point{1, 0},
                                                 Point{0, 1}, Point{1, 1}};
-  constexpr std::array<uint32_t, 6> indices = {0, 1, 2, 1, 2, 3};
 
-  VertexBufferBuilder<typename VS::PerVertexData> vertex_builder;
-
-  size_t count = 0;
+  auto& host_buffer = pass.GetTransientsBuffer();
+  size_t vertex_count = 0;
   for (const auto& run : frame.GetRuns()) {
-    count += run.GetGlyphPositions().size();
+    vertex_count += run.GetGlyphPositions().size();
   }
+  vertex_count *= 6;
 
-  vertex_builder.Reserve(count * 4);
-  vertex_builder.ReserveIndices(count * 6);
+  auto buffer_view = host_buffer.Emplace(
+      vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
+      [&](uint8_t* contents) {
+        VS::PerVertexData vtx;
+        size_t vertex_offset = 0;
+        for (const auto& run : frame.GetRuns()) {
+          const Font& font = run.GetFont();
+          for (const auto& glyph_position : run.GetGlyphPositions()) {
+            FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
+            auto maybe_atlas_glyph_bounds =
+                atlas->FindFontGlyphBounds(font_glyph_pair);
+            if (!maybe_atlas_glyph_bounds.has_value()) {
+              VALIDATION_LOG << "Could not find glyph position in the atlas.";
+              continue;
+            }
+            auto atlas_glyph_bounds = maybe_atlas_glyph_bounds.value();
+            vtx.atlas_glyph_bounds = Vector4(
+                atlas_glyph_bounds.origin.x, atlas_glyph_bounds.origin.y,
+                atlas_glyph_bounds.size.width, atlas_glyph_bounds.size.height);
+            vtx.glyph_bounds = Vector4(glyph_position.glyph.bounds.origin.x,
+                                       glyph_position.glyph.bounds.origin.y,
+                                       glyph_position.glyph.bounds.size.width,
+                                       glyph_position.glyph.bounds.size.height);
+            vtx.glyph_position = glyph_position.position;
 
-  uint32_t index_offset = 0u;
-  for (auto i = 0u; i < count; i++) {
-    for (const auto& index : indices) {
-      vertex_builder.AppendIndex(index + index_offset);
-    }
-    index_offset += 4;
-  }
+            for (const auto& point : unit_points) {
+              vtx.unit_position = point;
+              ::memcpy(contents + vertex_offset, &vtx,
+                       sizeof(VS::PerVertexData));
+              vertex_offset += sizeof(VS::PerVertexData);
+            }
+          }
+        }
+      });
 
-  for (const auto& run : frame.GetRuns()) {
-    const Font& font = run.GetFont();
-
-    for (const auto& glyph_position : run.GetGlyphPositions()) {
-      FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
-      auto atlas_glyph_bounds = atlas->FindFontGlyphBounds(font_glyph_pair);
-      if (!atlas_glyph_bounds.has_value()) {
-        VALIDATION_LOG << "Could not find glyph position in the atlas.";
-        return false;
-      }
-      Vector4 atlas_glyph_bounds_vec = Vector4(
-          atlas_glyph_bounds->origin.x, atlas_glyph_bounds->origin.y,
-          atlas_glyph_bounds->size.width, atlas_glyph_bounds->size.height);
-      Vector4 glyph_bounds_vec =
-          Vector4(glyph_position.glyph.bounds.origin.x,
-                  glyph_position.glyph.bounds.origin.y,
-                  glyph_position.glyph.bounds.size.width,
-                  glyph_position.glyph.bounds.size.height);
-
-      for (const auto& point : unit_points) {
-        vertex_builder.AppendVertex(VS::PerVertexData{
-            .atlas_glyph_bounds = atlas_glyph_bounds_vec,
-            .glyph_bounds = glyph_bounds_vec,
-            .unit_position = point,
-            .glyph_position = glyph_position.position,
-        });
-      }
-    }
-  }
-  auto vertex_buffer =
-      vertex_builder.CreateVertexBuffer(pass.GetTransientsBuffer());
-  cmd.BindVertices(vertex_buffer);
+  cmd.BindVertices({
+      .vertex_buffer = buffer_view,
+      .index_buffer = {},
+      .vertex_count = vertex_count,
+      .index_type = IndexType::kNone,
+  });
 
   return pass.AddCommand(cmd);
 }
