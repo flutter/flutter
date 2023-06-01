@@ -127,6 +127,20 @@ void main() {
     expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
+  testWidgets('Icon with custom fontFamilyFallback', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Icon(IconData(0x41, fontFamilyFallback: <String>['FallbackFont'])),
+        ),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style!.fontFamilyFallback, equals(<String>['FallbackFont']));
+  });
+
   testWidgets('Icon with semantic label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
