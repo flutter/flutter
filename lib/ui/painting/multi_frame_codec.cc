@@ -116,9 +116,9 @@ MultiFrameCodec::State::GetNextFrameImage(
   std::optional<unsigned int> prior_frame_index = std::nullopt;
 
   if (requiredFrameIndex != SkCodec::kNoFrame) {
-    // We currently assume that frames can only ever depend on the immediately
-    // previous frame, if any. This means that
-    // `DisposalMethod::kRestorePrevious` is not supported.
+    // We are here when the frame said |disposal_method| is
+    // `DisposalMethod::kKeep` or `DisposalMethod::kRestorePrevious` and
+    // |requiredFrameIndex| is set to ex-frame or ex-ex-frame.
     if (lastRequiredFrame_ == nullptr) {
       FML_DLOG(INFO)
           << "Frame " << nextFrameIndex_ << " depends on frame "
@@ -146,9 +146,27 @@ MultiFrameCodec::State::GetNextFrameImage(
     return std::make_pair(nullptr, decode_error);
   }
 
-  // Hold onto this if we need it to decode future frames.
-  if (frameInfo.disposal_method == SkCodecAnimation::DisposalMethod::kKeep ||
-      lastRequiredFrame_) {
+  const bool keep_current_frame =
+      frameInfo.disposal_method == SkCodecAnimation::DisposalMethod::kKeep;
+  const bool restore_previous_frame =
+      frameInfo.disposal_method ==
+      SkCodecAnimation::DisposalMethod::kRestorePrevious;
+  const bool previous_frame_available = !!lastRequiredFrame_;
+
+  // Store the current frame in `lastRequiredFrame_` if the frame's disposal
+  // method indicates we should do so.
+  // * When the disposal method is "Keep", the stored frame should always be
+  //   overwritten with the new frame we just crafted.
+  // * When the disposal method is "RestorePrevious", the previously stored
+  //   frame should be retained and used as the backdrop for the next frame
+  //   again. If there isn't already a stored frame, that means we haven't
+  //   rendered any frames yet! When this happens, we just fall back to "Keep"
+  //   behavior and store the current frame as the backdrop of the next frame.
+
+  if (keep_current_frame ||
+      (previous_frame_available && !restore_previous_frame)) {
+    // Replace the stored frame. The `lastRequiredFrame_` will get used as the
+    // starting backdrop for the next frame.
     lastRequiredFrame_ = std::make_unique<SkBitmap>(bitmap);
     lastRequiredFrameIndex_ = nextFrameIndex_;
   }

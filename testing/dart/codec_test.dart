@@ -177,6 +177,31 @@ void main() {
     expect(imageData.buffer.asUint8List(), goldenData);
 
   });
+
+  test('Animated apng can reuse pre-pre-frame', () async {
+    // https://github.com/flutter/engine/pull/42153
+
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', '2_dispose_op_restore_previous.apng'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // Capture the 67,68,69 frames of animation and then compare the pixels.
+    late ui.FrameInfo frameInfo;
+    for (int i = 0; i < 70; i++) {
+      frameInfo = await codec.getNextFrame();
+      if (i >= 67) {
+        final ui.Image image = frameInfo.image;
+        final ByteData imageData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+
+        final Uint8List goldenData = File(
+          path.join('flutter', 'lib', 'ui', 'fixtures', '2_dispose_op_restore_previous.apng.$i.png'),
+        ).readAsBytesSync();
+
+        expect(imageData.buffer.asUint8List(), goldenData);
+      }
+    }
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
