@@ -132,6 +132,11 @@ public class SpellCheckPlugin
     ArrayList<HashMap<String, Object>> spellCheckerSuggestionSpans =
         new ArrayList<HashMap<String, Object>>();
     SentenceSuggestionsInfo spellCheckResults = results[0];
+    if (spellCheckResults == null) {
+      pendingResult.success(new ArrayList<HashMap<String, Object>>());
+      pendingResult = null;
+      return;
+    }
 
     for (int i = 0; i < spellCheckResults.getSuggestionsCount(); i++) {
       SuggestionsInfo suggestionsInfo = spellCheckResults.getSuggestionsInfoAt(i);
