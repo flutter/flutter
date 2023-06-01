@@ -30,10 +30,10 @@ void main() {
       '--target-platform=android-arm64',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build apk:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.stdout.toString(), contains('app-release.apk (total compressed)'));
+    expect(
+      result,
+      const ProcessResultMatcher(stdoutPattern: 'app-release.apk (total compressed)'),
+    );
 
     final String line = result.stdout.toString()
       .split('\n')
@@ -49,8 +49,6 @@ void main() {
     final String commandArguments = devToolsCommand.split(runDevToolsMessage).last.trim();
     final String relativeAppSizePath = outputFilePath.split('.flutter-devtools/').last.trim();
     expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
-
-    expect(result.exitCode, 0);
   });
 
   testWithoutContext('--analyze-size flag produces expected output on hello_world for iOS', () async {
@@ -68,10 +66,10 @@ void main() {
       '--no-codesign',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build ios:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
+    expect(
+      result,
+      const ProcessResultMatcher(stdoutPattern: 'Dart AOT symbols accounted decompressed size'),
+    );
 
     final String line = result.stdout.toString()
       .split('\n')
@@ -88,7 +86,6 @@ void main() {
 
     expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
     expect(codeSizeDir.existsSync(), true);
-    expect(result.exitCode, 0);
     tempDir.deleteSync(recursive: true);
   }, skip: !platform.isMacOS); // [intended] iOS can only be built on macos.
 
@@ -105,6 +102,11 @@ void main() {
       '--enable-macos-desktop',
     ], workingDirectory: workingDirectory);
 
+    expect(
+      configResult,
+      const ProcessResultMatcher(),
+    );
+
     printOnFailure('Output of flutter config:');
     printOnFailure(configResult.stdout.toString());
     printOnFailure(configResult.stderr.toString());
@@ -117,10 +119,10 @@ void main() {
       '--code-size-directory=${codeSizeDir.path}',
     ], workingDirectory: workingDirectory);
 
-    printOnFailure('Output of flutter build macos:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.stdout.toString(), contains('Dart AOT symbols accounted decompressed size'));
+    expect(
+      result,
+      const ProcessResultMatcher(stdoutPattern: 'Dart AOT symbols accounted decompressed size'),
+    );
 
     final String line = result.stdout.toString()
       .split('\n')
@@ -137,7 +139,6 @@ void main() {
 
     expect(commandArguments.contains('--appSizeBase=$relativeAppSizePath'), isTrue);
     expect(codeSizeDir.existsSync(), true);
-    expect(result.exitCode, 0);
     tempDir.deleteSync(recursive: true);
   }, skip: !platform.isMacOS); // [intended] this is a macos only test.
 
@@ -152,13 +153,13 @@ void main() {
       '--target-platform=android-arm64',
       '--debug',
     ], workingDirectory: fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world'));
-
-    printOnFailure('Output of flutter build apk:');
-    printOnFailure(result.stdout.toString());
-    printOnFailure(result.stderr.toString());
-    expect(result.stderr.toString(), contains('"--analyze-size" can only be used on release builds'));
-
-    expect(result.exitCode, 1);
+    expect(
+      result,
+      const ProcessResultMatcher(
+        exitCode: 1,
+        stderrPattern: '"--analyze-size" can only be used on release builds',
+      ),
+    );
   });
 
   testWithoutContext('--analyze-size is not supported in combination with --split-debug-info', () async {
@@ -177,14 +178,13 @@ void main() {
     final ProcessResult result =
         await processManager.run(command, workingDirectory: workingDirectory);
 
-    printOnFailure('workingDirectory: $workingDirectory');
-    printOnFailure('command:\n${command.join(" ")}');
-    printOnFailure('stdout:\n${result.stdout}');
-    printOnFailure('stderr:\n${result.stderr}');
-
-    expect(result.stderr.toString(), contains('"--analyze-size" cannot be combined with "--split-debug-info"'));
-
-    expect(result.exitCode, 1);
+    expect(
+      result,
+      const ProcessResultMatcher(
+        exitCode: 1,
+        stderrPattern: '"--analyze-size" cannot be combined with "--split-debug-info"',
+      ),
+    );
   });
 
   testWithoutContext('--analyze-size allows overriding the directory for code size files', () async {
@@ -211,15 +211,14 @@ void main() {
       workingDirectory: workingDirectory,
     );
 
-    printOnFailure('workingDirectory: $workingDirectory');
-    printOnFailure('command:\n${command.join(" ")}');
-    printOnFailure('stdout:\n${result.stdout}');
-    printOnFailure('stderr:\n${result.stderr}');
+    expect(
+      result,
+      const ProcessResultMatcher(),
+    );
 
-    expect(result.exitCode, 0);
-    expect(tempDir.existsSync(), true);
-    expect(tempDir.childFile('snapshot.arm64-v8a.json').existsSync(), true);
-    expect(tempDir.childFile('trace.arm64-v8a.json').existsSync(), true);
+    expect(tempDir, exists);
+    expect(tempDir.childFile('snapshot.arm64-v8a.json'), exists);
+    expect(tempDir.childFile('trace.arm64-v8a.json'), exists);
 
     tempDir.deleteSync(recursive: true);
   });
