@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
 
 #include <map>
+#include <memory>
 #include <unordered_map>
 
 #include "flutter/flow/embedded_views.h"
@@ -31,6 +32,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   using CreateRenderTargetCallback =
       std::function<std::unique_ptr<EmbedderRenderTarget>(
           GrDirectContext* context,
+          const std::shared_ptr<impeller::AiksContext>& aiks_context,
           const FlutterBackingStoreConfig& config)>;
   using PresentCallback =
       std::function<bool(const std::vector<const FlutterLayer*>& layers)>;
@@ -95,6 +97,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
+                   const std::shared_ptr<impeller::AiksContext>& aiks_context,
                    std::unique_ptr<SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|

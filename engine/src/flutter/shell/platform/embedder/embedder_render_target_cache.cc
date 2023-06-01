@@ -56,9 +56,8 @@ void EmbedderRenderTargetCache::CacheRenderTarget(
   if (target == nullptr) {
     return;
   }
-  auto surface = target->GetRenderSurface();
   auto desc = EmbedderExternalView::RenderTargetDescriptor{
-      view_identifier, SkISize::Make(surface->width(), surface->height())};
+      view_identifier, target->GetRenderTargetSize()};
   cached_render_targets_[desc].push(std::move(target));
 }
 
