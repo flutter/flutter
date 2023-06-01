@@ -63,7 +63,7 @@ class MyHomePage extends StatelessWidget {
                 children: <Widget>[
                   LinkedText.spans(
                     onTap: (String urlString) => _onTapUrl(context, urlString),
-                    children: <InlineSpan>[
+                    spans: <InlineSpan>[
                       TextSpan(
                         text: 'Check out https://www.',
                         style: DefaultTextStyle.of(context).style,

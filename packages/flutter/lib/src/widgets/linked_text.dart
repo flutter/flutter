@@ -24,7 +24,6 @@ typedef LinkBuilder = InlineSpan Function(
 );
 
 // TODO(justinmc): Change name to something link-agnostic?
-// TODO(justinmc): Add regexp parameter. No, builder? Both?
 /// A widget that displays some text with parts of it made interactive.
 ///
 /// By default, any URLs in the text are made interactive.
@@ -70,7 +69,7 @@ class LinkedText extends StatelessWidget {
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
        ],
-       children = <InlineSpan>[
+       spans = <InlineSpan>[
          TextSpan(
            text: text,
          ),
@@ -99,7 +98,7 @@ class LinkedText extends StatelessWidget {
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
          ),
        ],
-       children = <InlineSpan>[
+       spans = <InlineSpan>[
          TextSpan(
            text: text,
          ),
@@ -127,7 +126,7 @@ class LinkedText extends StatelessWidget {
     required String text,
     required this.textLinkers,
     this.style,
-  }) : children = <InlineSpan>[
+  }) : spans = <InlineSpan>[
          TextSpan(
            text: text,
          ),
@@ -140,7 +139,7 @@ class LinkedText extends StatelessWidget {
   LinkedText.spans({
     super.key,
     // TODO(justinmc): This is a bad name since it seems like it would take widgets. RichText uses `text` for one. Maybe `spans`?
-    required this.children,
+    required this.spans,
     UriStringCallback? onTap,
     this.style,
   }) : textLinkers = <TextLinker>[
@@ -150,7 +149,7 @@ class LinkedText extends StatelessWidget {
          ),
        ];
 
-  final List<InlineSpan> children;
+  final List<InlineSpan> spans;
 
   /// Defines what parts of the text to match and how to link them.
   ///
@@ -171,14 +170,14 @@ class LinkedText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (children.isEmpty) {
+    if (spans.isEmpty) {
       return const SizedBox.shrink();
     }
     /*
     return Text.rich(
       TextSpan(
         style: style,
-        children: linkSpans(TextLinker.urlRangesFinder, children, onTap).toList(),
+        children: linkSpans(TextLinker.urlRangesFinder, spans, onTap).toList(),
       ),
     );
     */
@@ -186,7 +185,7 @@ class LinkedText extends StatelessWidget {
       InlineLinkedText.spans(
         style: style ?? DefaultTextStyle.of(context).style,
         textLinkers: textLinkers,
-        children: children,
+        spans: spans,
       ),
     );
     /*
@@ -452,12 +451,13 @@ class InlineLinkedText extends TextSpan {
          children: TextLinker.getSpansForMany(textLinkers, text),
        );
 
+  // TODO(justinmc): Docs.
   InlineLinkedText.spans({
     super.style,
-    required List<InlineSpan> children,
+    required List<InlineSpan> spans,
     required Iterable<TextLinker> textLinkers,
   }) : super(
-         children: linkSpans(children, textLinkers).toList(),
+         children: linkSpans(spans, textLinkers).toList(),
        );
 
   /// Returns a [LinkBuilder] that simply highlights the given text and provides
