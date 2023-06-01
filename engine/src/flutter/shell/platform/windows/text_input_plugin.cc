@@ -59,6 +59,8 @@ static constexpr char kBadArgumentError[] = "Bad Arguments";
 static constexpr char kInternalConsistencyError[] =
     "Internal Consistency Error";
 
+static constexpr char kInputActionNewline[] = "TextInputAction.newline";
+
 namespace flutter {
 
 void TextInputPlugin::TextHook(const std::u16string& text) {
@@ -446,7 +448,8 @@ void TextInputPlugin::SendStateUpdateWithDelta(const TextInputModel& model,
 }
 
 void TextInputPlugin::EnterPressed(TextInputModel* model) {
-  if (input_type_ == kMultilineInputType) {
+  if (input_type_ == kMultilineInputType &&
+      input_action_ == kInputActionNewline) {
     std::u16string text_before_change = fml::Utf8ToUtf16(model->GetText());
     TextRange selection_before_change = model->selection();
     model->AddText(u"\n");
