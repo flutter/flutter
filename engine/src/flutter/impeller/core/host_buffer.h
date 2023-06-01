@@ -95,6 +95,22 @@ class HostBuffer final : public std::enable_shared_from_this<HostBuffer>,
                                    size_t length,
                                    size_t align);
 
+  using EmplaceProc = std::function<void(uint8_t* buffer)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Emplaces undefined data onto the managed buffer and gives the
+  ///             caller a chance to update it using the specified callback. The
+  ///             buffer is guaranteed to have enough space for length bytes. It
+  ///             is the responsibility of the caller to not exceed the bounds
+  ///             of the buffer returned in the EmplaceProc.
+  ///
+  /// @param[in]  cb            A callback that will be passed a ptr to the
+  ///                           underlying host buffer.
+  ///
+  /// @return     The buffer view.
+  ///
+  BufferView Emplace(size_t length, size_t align, const EmplaceProc& cb);
+
  private:
   mutable std::shared_ptr<DeviceBuffer> device_buffer_;
   mutable size_t device_buffer_generation_ = 0u;
