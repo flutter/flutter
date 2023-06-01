@@ -136,6 +136,23 @@ vk::UniquePipeline PipelineCacheVK::CreatePipeline(
   return std::move(pipeline);
 }
 
+vk::UniquePipeline PipelineCacheVK::CreatePipeline(
+    const vk::ComputePipelineCreateInfo& info) {
+  std::shared_ptr<DeviceHolder> strong_device = device_holder_.lock();
+  if (!strong_device) {
+    return {};
+  }
+
+  Lock lock(cache_mutex_);
+  auto [result, pipeline] =
+      strong_device->GetDevice().createComputePipelineUnique(*cache_, info);
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create compute pipeline: "
+                   << vk::to_string(result);
+  }
+  return std::move(pipeline);
+}
+
 std::shared_ptr<fml::Mapping> PipelineCacheVK::CopyPipelineCacheData() const {
   std::shared_ptr<DeviceHolder> strong_device = device_holder_.lock();
   if (!strong_device) {

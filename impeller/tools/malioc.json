@@ -13569,9 +13569,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.549999952316284,
+              2.65625,
               0.0,
-              2.549999952316284,
+              2.65625,
               1.0,
               72.0,
               0.0
@@ -13585,23 +13585,24 @@
               "texture"
             ],
             "shortest_path_bound_pipelines": [
-              "load_store"
+              "arith_total",
+              "arith_cvt"
             ],
             "shortest_path_cycles": [
-              0.949999988079071,
+              0.9375,
               0.0,
-              0.949999988079071,
+              0.9375,
               0.0,
-              1.0,
+              0.0,
               0.0
             ],
             "total_bound_pipelines": [
               "load_store"
             ],
             "total_cycles": [
-              2.549999952316284,
+              2.65625,
               0.0,
-              2.549999952316284,
+              2.65625,
               1.0,
               72.0,
               0.0
@@ -13611,7 +13612,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 8,
-          "work_registers_used": 21
+          "work_registers_used": 17
         }
       }
     }

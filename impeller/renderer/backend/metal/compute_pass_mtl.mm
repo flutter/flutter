@@ -40,11 +40,11 @@ bool ComputePassMTL::IsValid() const {
   return is_valid_;
 }
 
-void ComputePassMTL::OnSetLabel(std::string label) {
+void ComputePassMTL::OnSetLabel(const std::string& label) {
   if (label.empty()) {
     return;
   }
-  label_ = std::move(label);
+  label_ = label;
 }
 
 bool ComputePassMTL::OnEncodeCommands(const Context& context,
@@ -55,7 +55,7 @@ bool ComputePassMTL::OnEncodeCommands(const Context& context,
     return false;
   }
 
-  FML_DCHECK(!grid_size_.IsEmpty() && !thread_group_size_.IsEmpty());
+  FML_DCHECK(!grid_size.IsEmpty() && !thread_group_size.IsEmpty());
 
   // TODO(dnfield): Support non-serial dispatch type on higher iOS versions.
   auto compute_command_encoder = [buffer_ computeCommandEncoder];

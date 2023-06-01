@@ -295,6 +295,19 @@ bool CapabilitiesVK::SetDevice(const vk::PhysicalDevice& device) {
 
   device_properties_ = device.getProperties();
 
+  auto physical_properties_2 =
+      device.getProperties2<vk::PhysicalDeviceProperties2,
+                            vk::PhysicalDeviceSubgroupProperties>();
+
+  // Currently shaders only want access to arithmetic subgroup features.
+  // If that changes this needs to get updated, and so does Metal (which right
+  // now assumes it from compile time flags based on the MSL target version).
+
+  supports_compute_subgroups_ =
+      !!(physical_properties_2.get<vk::PhysicalDeviceSubgroupProperties>()
+             .supportedOperations &
+         vk::SubgroupFeatureFlagBits::eArithmetic);
+
   return true;
 }
 
@@ -330,12 +343,14 @@ bool CapabilitiesVK::SupportsFramebufferFetch() const {
 
 // |Capabilities|
 bool CapabilitiesVK::SupportsCompute() const {
-  return false;
+  // Vulkan 1.1 requires support for compute.
+  return true;
 }
 
 // |Capabilities|
 bool CapabilitiesVK::SupportsComputeSubgroups() const {
-  return false;
+  // Set by |SetDevice|.
+  return supports_compute_subgroups_;
 }
 
 // |Capabilities|
