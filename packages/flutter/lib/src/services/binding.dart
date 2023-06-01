@@ -285,6 +285,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
+      case 'AppLifecycleState.hidden':
+        return AppLifecycleState.hidden;
       case 'AppLifecycleState.paused':
         return AppLifecycleState.paused;
       case 'AppLifecycleState.detached':
