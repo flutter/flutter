@@ -1914,6 +1914,15 @@ class RenderSliverOverlapInjector extends RenderSliver {
   void performLayout() {
     _currentLayoutExtent = handle.layoutExtent;
     _currentMaxExtent = handle.layoutExtent;
+    assert(
+      _currentLayoutExtent != null && _currentMaxExtent != null,
+      'SliverOverlapInjector has found no absorbed extent to inject.\n '
+      'The SliverOverlapAbsorber must be an earlier descendant of a common '
+      'ancestor Viewport, so that it will always be laid out before the '
+      'SliverOverlapInjector during a particular frame.\n '
+      'The SliverOverlapAbsorber is typically contained in the list of slivers '
+      'provided by NestedScrollView.headerSliverBuilder.\n'
+    );
     final double clampedLayoutExtent = math.min(
       _currentLayoutExtent! - constraints.scrollOffset,
       constraints.remainingPaintExtent,
