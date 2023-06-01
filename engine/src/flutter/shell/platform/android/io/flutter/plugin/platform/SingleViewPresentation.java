@@ -218,8 +218,8 @@ class SingleViewPresentation extends Presentation {
     return state;
   }
 
+  @Nullable
   public PlatformView getView() {
-    if (state.platformView == null) return null;
     return state.platformView;
   }
 
