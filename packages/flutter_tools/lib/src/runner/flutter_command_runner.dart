@@ -342,7 +342,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   List<String> getRepoRoots() {
     final String root = globals.fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
-    return <String>['dev', 'examples', FlutterGlobalOptions.kPackagesOption].map<String>((String item) {
+    return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return globals.fs.path.join(root, item);
     }).toList();
   }
