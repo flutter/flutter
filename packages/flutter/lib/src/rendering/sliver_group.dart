@@ -184,17 +184,18 @@ bool _assertOutOfExtent(double extent) {
 /// A sliver that places multiple sliver children in a linear array along the
 /// main axis.
 ///
-/// Typically, the slivers will be laid out one at a time. Slivers that have been
-/// scrolled past partially or entirely will be provided a nonzero scrollOffset that
-/// informs them at which point along the main axis should the sliver children
-/// start painting themselves.
-///
-/// For other slivers, we lay them out with a [SliverConstraints.remainingPaintExtent]
-/// that represents how much space in the viewport the sliver has.
+/// The layout algorithm lays out slivers one by one. If the sliver is visible
+/// on the [Viewport] due to a sufficiently high [SliverConstraints.scrollOffset],
+/// then we compute a valid [SliverConstraints.scrollOffset] and
+/// [SliverConstraints.remainingPaintExtent] based on the total [SliverConstraints.scrollOffset]
+/// of all the sliver children laid out so far.
 ///
 /// Finally, this sliver will also ensure that all slivers are painted within
-/// the total layout extent of the sliver by painting slivers that are "out of
-/// bounds" with a negative [SliverPhysicalParentData.paintOffset].
+/// the total scroll extent of the sliver by adjusting the children's
+/// [SliverPhysicalParentData.paintOffset] as necessary. This can happen for
+/// slivers such as [SliverPersistentHeader] which, when pinned, positions itself
+/// at the top of the [Viewport] regardless of whether the visible painted extent
+/// doesn't have enough space for the [SliverPersistentHeader]
 class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectMixin<RenderSliver, SliverPhysicalContainerParentData> {
   @override
   void setupParentData(RenderObject child) {
