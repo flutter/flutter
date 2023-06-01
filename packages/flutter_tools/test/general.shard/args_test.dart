@@ -46,6 +46,32 @@ void main() {
     expect(command.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
   });
 
+  testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
+
+    final DummyFlutterCommand subcommand = DummyFlutterCommand(
+      name: 'sub',
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
+
+    command.addSubcommand(subcommand);
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    runner.addCommand(subcommand);
+    await runner.run(<String>['dummy', 'sub', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(subcommand.globalResults, isNotNull);
+    expect(subcommand.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
   testUsingContext('bool? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
         commandFunction: () async {
