@@ -23,10 +23,19 @@ static constexpr char kScanCodeKey[] = "scanCode";
 static constexpr int kHandledScanCode = 20;
 static constexpr int kUnhandledScanCode = 21;
 static constexpr char kTextPlainFormat[] = "text/plain";
+static constexpr int kDefaultClientId = 42;
 // Should be identical to constants in text_input_plugin.cc.
 static constexpr char kChannelName[] = "flutter/textinput";
 static constexpr char kEnableDeltaModel[] = "enableDeltaModel";
 static constexpr char kSetClientMethod[] = "TextInput.setClient";
+static constexpr char kAffinityDownstream[] = "TextAffinity.downstream";
+static constexpr char kTextKey[] = "text";
+static constexpr char kSelectionBaseKey[] = "selectionBase";
+static constexpr char kSelectionExtentKey[] = "selectionExtent";
+static constexpr char kSelectionAffinityKey[] = "selectionAffinity";
+static constexpr char kSelectionIsDirectionalKey[] = "selectionIsDirectional";
+static constexpr char kComposingBaseKey[] = "composingBase";
+static constexpr char kComposingExtentKey[] = "composingExtent";
 
 static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   auto response_doc =
@@ -34,6 +43,56 @@ static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   auto& allocator = response_doc->GetAllocator();
   response_doc->AddMember("handled", handled, allocator);
   return JsonMessageCodec::GetInstance().EncodeMessage(*response_doc);
+}
+
+static std::unique_ptr<rapidjson::Document> EncodedClientConfig(
+    std::string type_name,
+    std::string input_action) {
+  auto arguments = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = arguments->GetAllocator();
+  arguments->PushBack(kDefaultClientId, allocator);
+
+  rapidjson::Value config(rapidjson::kObjectType);
+  config.AddMember("inputAction", input_action, allocator);
+  config.AddMember(kEnableDeltaModel, false, allocator);
+  rapidjson::Value type_info(rapidjson::kObjectType);
+  type_info.AddMember("name", type_name, allocator);
+  config.AddMember("inputType", type_info, allocator);
+  arguments->PushBack(config, allocator);
+
+  return arguments;
+}
+
+static std::unique_ptr<rapidjson::Document> EncodedEditingState(
+    std::string text,
+    TextRange selection) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText(text);
+  model->SetSelection(selection);
+
+  auto arguments = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = arguments->GetAllocator();
+  arguments->PushBack(kDefaultClientId, allocator);
+
+  rapidjson::Value editing_state(rapidjson::kObjectType);
+  editing_state.AddMember(kSelectionAffinityKey, kAffinityDownstream,
+                          allocator);
+  editing_state.AddMember(kSelectionBaseKey, selection.base(), allocator);
+  editing_state.AddMember(kSelectionExtentKey, selection.extent(), allocator);
+  editing_state.AddMember(kSelectionIsDirectionalKey, false, allocator);
+
+  int composing_base =
+      model->composing() ? model->composing_range().base() : -1;
+  int composing_extent =
+      model->composing() ? model->composing_range().extent() : -1;
+  editing_state.AddMember(kComposingBaseKey, composing_base, allocator);
+  editing_state.AddMember(kComposingExtentKey, composing_extent, allocator);
+  editing_state.AddMember(kTextKey,
+                          rapidjson::Value(model->GetText(), allocator).Move(),
+                          allocator);
+  arguments->PushBack(editing_state, allocator);
+
+  return arguments;
 }
 
 class MockTextInputPluginDelegate : public TextInputPluginDelegate {
@@ -109,7 +168,7 @@ TEST(TextInputPluginTest, VerifyComposingSendStateUpdate) {
   // Call TextInput.setClient to initialize the TextInputModel.
   auto arguments = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
   auto& allocator = arguments->GetAllocator();
-  arguments->PushBack(42, allocator);
+  arguments->PushBack(kDefaultClientId, allocator);
   rapidjson::Value config(rapidjson::kObjectType);
   config.AddMember("inputAction", "done", allocator);
   config.AddMember("inputType", "text", allocator);
@@ -146,6 +205,109 @@ TEST(TextInputPluginTest, VerifyComposingSendStateUpdate) {
   sent_message = false;
   handler.ComposeEndHook();
   EXPECT_TRUE(sent_message);
+}
+
+TEST(TextInputPluginTest, VerifyInputActionNewlineInsertNewLine) {
+  // Store messages as std::string for convenience.
+  std::vector<std::string> messages;
+
+  TestBinaryMessenger messenger(
+      [&messages](const std::string& channel, const uint8_t* message,
+                  size_t message_size, BinaryReply reply) {
+        std::string last_message(reinterpret_cast<const char*>(message),
+                                 message_size);
+        messages.push_back(last_message);
+      });
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  MockTextInputPluginDelegate delegate;
+  TextInputPlugin handler(&messenger, &delegate);
+
+  auto& codec = JsonMethodCodec::GetInstance();
+
+  // Call TextInput.setClient to initialize the TextInputModel.
+  auto set_client_arguments =
+      EncodedClientConfig("TextInputType.multiline", "TextInputAction.newline");
+  auto message = codec.EncodeMethodCall(
+      {"TextInput.setClient", std::move(set_client_arguments)});
+  messenger.SimulateEngineMessage("flutter/textinput", message->data(),
+                                  message->size(), reply_handler);
+
+  // Simulate a key down event for '\n'.
+  handler.KeyboardHook(VK_RETURN, 100, WM_KEYDOWN, '\n', false, false);
+
+  // Two messages are expected, the first is TextInput.updateEditingState and
+  // the second is TextInputClient.performAction.
+  EXPECT_EQ(messages.size(), 2);
+
+  // Editing state should have been updated.
+  auto encoded_arguments = EncodedEditingState("\n", TextRange(1));
+  auto update_state_message = codec.EncodeMethodCall(
+      {"TextInputClient.updateEditingState", std::move(encoded_arguments)});
+
+  EXPECT_TRUE(std::equal(update_state_message->begin(),
+                         update_state_message->end(),
+                         messages.front().begin()));
+
+  // TextInputClient.performAction should have been called.
+  auto arguments = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = arguments->GetAllocator();
+  arguments->PushBack(kDefaultClientId, allocator);
+  arguments->PushBack(
+      rapidjson::Value("TextInputAction.newline", allocator).Move(), allocator);
+  auto invoke_action_message = codec.EncodeMethodCall(
+      {"TextInputClient.performAction", std::move(arguments)});
+
+  EXPECT_TRUE(std::equal(invoke_action_message->begin(),
+                         invoke_action_message->end(),
+                         messages.back().begin()));
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/125879.
+TEST(TextInputPluginTest, VerifyInputActionSendDoesNotInsertNewLine) {
+  std::vector<std::vector<uint8_t>> messages;
+
+  TestBinaryMessenger messenger(
+      [&messages](const std::string& channel, const uint8_t* message,
+                  size_t message_size, BinaryReply reply) {
+        int length = static_cast<int>(message_size);
+        std::vector<uint8_t> last_message(length);
+        memcpy(&last_message[0], &message[0], length * sizeof(uint8_t));
+        messages.push_back(last_message);
+      });
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  MockTextInputPluginDelegate delegate;
+  TextInputPlugin handler(&messenger, &delegate);
+
+  auto& codec = JsonMethodCodec::GetInstance();
+
+  // Call TextInput.setClient to initialize the TextInputModel.
+  auto set_client_arguments =
+      EncodedClientConfig("TextInputType.multiline", "TextInputAction.send");
+  auto message = codec.EncodeMethodCall(
+      {"TextInput.setClient", std::move(set_client_arguments)});
+  messenger.SimulateEngineMessage("flutter/textinput", message->data(),
+                                  message->size(), reply_handler);
+
+  // Simulate a key down event for '\n'.
+  handler.KeyboardHook(VK_RETURN, 100, WM_KEYDOWN, '\n', false, false);
+
+  // Only a call to TextInputClient.performAction is expected.
+  EXPECT_EQ(messages.size(), 1);
+
+  // TextInputClient.performAction should have been called.
+  auto arguments = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = arguments->GetAllocator();
+  arguments->PushBack(kDefaultClientId, allocator);
+  arguments->PushBack(
+      rapidjson::Value("TextInputAction.send", allocator).Move(), allocator);
+  auto invoke_action_message = codec.EncodeMethodCall(
+      {"TextInputClient.performAction", std::move(arguments)});
+
+  EXPECT_TRUE(std::equal(invoke_action_message->begin(),
+                         invoke_action_message->end(),
+                         messages.front().begin()));
 }
 
 TEST(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
