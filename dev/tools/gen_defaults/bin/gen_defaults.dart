@@ -26,6 +26,7 @@ import 'package:gen_defaults/bottom_sheet_template.dart';
 import 'package:gen_defaults/button_template.dart';
 import 'package:gen_defaults/card_template.dart';
 import 'package:gen_defaults/checkbox_template.dart';
+import 'package:gen_defaults/chip_template.dart';
 import 'package:gen_defaults/color_scheme_template.dart';
 import 'package:gen_defaults/date_picker_template.dart';
 import 'package:gen_defaults/dialog_template.dart';
@@ -138,7 +139,7 @@ Future<void> main(List<String> args) async {
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
 
-  ActionChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
+  ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
   BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
