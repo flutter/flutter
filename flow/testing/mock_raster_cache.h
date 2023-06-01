@@ -11,7 +11,9 @@
 #include "flutter/flow/raster_cache_item.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/testing/mock_canvas.h"
-#include "third_party/skia/include/core/SkImage.h"
+#include "third_party/skia/include/core/SkColorSpace.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 namespace testing {
