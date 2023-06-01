@@ -871,7 +871,11 @@ void main() {
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   const SliverPersistentHeader(
-                    delegate: TestHeader(key: key1),
+                    delegate: TestHeader(
+                      key: key1,
+                      minExtent: 100.0,
+                      maxExtent: 100.0,
+                    ),
                   ),
                 ];
               },
@@ -2908,17 +2912,841 @@ void main() {
     // Restructuring inner scrollable while scroll is in progress shouldn't crash.
     await tester.pumpWidget(buildApp(nested: true));
   });
+
+  group('NestedScrollView properly sets drag', () {
+    Future<bool> canDrag(WidgetTester tester) async {
+      await tester.drag(
+        find.byType(CustomScrollView),
+        const Offset(0.0, -20.0),
+      );
+      await tester.pumpAndSettle();
+      final NestedScrollViewState nestedScrollView = tester.state<NestedScrollViewState>(
+        find.byType(NestedScrollView)
+      );
+      return nestedScrollView.outerController.position.pixels > 0.0
+        || nestedScrollView.innerController.position.pixels > 0.0;
+    }
+
+    Widget buildTest({
+      required _bodyLength bodyLength,
+      Widget? header,
+      bool applyOverlap = false,
+    }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, _) {
+              if (applyOverlap) {
+                return <Widget>[
+                  SliverOverlapAbsorber(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    sliver: header,
+                  ),
+                ];
+              }
+              return header != null ? <Widget>[ header ] : <Widget>[];
+            },
+            body: Builder(
+              builder: (BuildContext context) {
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverList.builder(
+                      itemCount: bodyLength == _bodyLength.short ? 10 : 100,
+                      itemBuilder: (_, int index) => Text('Item $index'),
+                    ),
+                  ],
+                );
+              }
+            ),
+          ),
+        )
+      );
+    }
+    testWidgets('when headerSliverBuilder is empty', (WidgetTester tester) async {
+      // Short body / long body
+      for (final _bodyLength bodyLength in _bodyLength.values) {
+        await tester.pumpWidget(
+          buildTest(bodyLength: bodyLength),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+      }
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('when headerSliverBuilder extent is 0', (WidgetTester tester) async {
+      // Short body / long body
+      for (final _bodyLength bodyLength in _bodyLength.values) {
+        // SliverPersistentHeader
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              floating: true,
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned+floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              floating: true,
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              floating: true,
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned+floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              floating: true,
+              pinned: true,
+              delegate: TestHeader(minExtent: 0.0, maxExtent: 0.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+      }
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('when headerSliverBuilder contains header with equal min and max extent', (WidgetTester tester) async {
+      // Short body / long body
+      for (final _bodyLength bodyLength in _bodyLength.values) {
+        // SliverPersistentHeader
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              floating: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned+floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              floating: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              floating: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned+floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              floating: true,
+              pinned: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 60.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              pinned: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              floating: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned+floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              pinned: true,
+              floating: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              pinned: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              floating: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned+floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              floating: true,
+              pinned: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+      }
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('when headerSliverBuilder contains header with min < max extent', (WidgetTester tester) async {
+      // Short body / long body
+      for (final _bodyLength bodyLength in _bodyLength.values) {
+        // SliverPersistentHeader
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              floating: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned+floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              floating: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              pinned: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              floating: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverPersistentHeader pinned+floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverPersistentHeader(
+              floating: true,
+              pinned: true,
+              delegate: TestHeader(minExtent: 60.0, maxExtent: 120.0),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+              pinned: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+              floating: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned+floating
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+              pinned: true,
+              floating: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+              pinned: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+              floating: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+
+        // SliverAppBar pinned+floating w/ overlap
+        await tester.pumpWidget(
+          buildTest(
+            bodyLength: bodyLength,
+            applyOverlap: true,
+            header: const SliverAppBar(
+              expandedHeight: 120.0,
+              floating: true,
+              pinned: true,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        switch (bodyLength) {
+          case _bodyLength.short:
+            expect(await canDrag(tester), isFalse);
+          case _bodyLength.long:
+            expect(await canDrag(tester), isTrue);
+        }
+      }
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('when headerSliverBuilder contains header and extent consumes full viewport extent', (WidgetTester tester) async {
+
+    }, variant: TargetPlatformVariant.all());
+  });
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 
+enum _bodyLength {
+  short,
+  long,
+}
+
 class TestHeader extends SliverPersistentHeaderDelegate {
-  const TestHeader({ this.key });
+  const TestHeader({
+    this.key,
+    required this.minExtent,
+    required this.maxExtent,
+  });
   final Key? key;
   @override
-  double get minExtent => 100.0;
+  final double minExtent;
   @override
-  double get maxExtent => 100.0;
+  final double maxExtent;
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Placeholder(key: key);

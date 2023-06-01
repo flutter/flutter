@@ -197,6 +197,13 @@ class NestedScrollView extends StatefulWidget {
   final ScrollController? controller;
 
   /// {@macro flutter.widgets.scroll_view.scrollDirection}
+  ///
+  /// This property only applies to the [Axis] of the outer scroll view,
+  /// composed of the slivers returned from [headerSliverBuilder]. Since the
+  /// inner scroll view is not directly configured by the [NestedScrollView],
+  /// for the axes to match, configure the scroll view of the [body] the same
+  /// way if they are expected to scroll in the same orientation. This allows
+  /// for flexible configurations of the NestedScrollView.
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -209,6 +216,13 @@ class NestedScrollView extends StatefulWidget {
   /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
   /// scrolls from top to bottom when [reverse] is false and from bottom to top
   /// when [reverse] is true.
+  ///
+  /// This property only applies to the outer scroll view, composed of the
+  /// slivers returned from [headerSliverBuilder]. Since the inner scroll view
+  /// is not directly configured by the [NestedScrollView]. For both to scroll
+  /// in reverse, configure the scroll view of the [body] the same way if they
+  /// are expected to match. This allows for flexible configurations of the
+  /// NestedScrollView.
   ///
   /// Defaults to false.
   final bool reverse;
@@ -232,6 +246,22 @@ class NestedScrollView extends StatefulWidget {
   /// [ScrollMetrics.maxScrollExtent] properties passed to that method. If that
   /// invariant is not maintained, the nested scroll view may respond to user
   /// scrolling erratically.
+  ///
+  /// This property only applies to the outer scroll view, composed of the
+  /// slivers returned from [headerSliverBuilder]. Since the inner scroll view
+  /// is not directly configured by the [NestedScrollView]. For both to scroll
+  /// with the same [ScrollPhysics], configure the scroll view of the [body]
+  /// the same way if they are expected to match, or use a [ScrollBehavior] as
+  /// an ancestor so both the inner and outer scroll views inherit the same
+  /// [ScrollPhysics]. This allows for flexible configurations of the
+  /// NestedScrollView.
+  ///
+  /// The [ScrollPhysics] also determine whether or not the [NestedScrollView]
+  /// can accept input from the user to change the scroll offset. For example,
+  /// [NeverScrollableScrollPhysics] typically will not allow the user to drag a
+  /// scroll view, but in this case, if one of the two scroll views can be
+  /// dragged, then dragging will be allowed. Configuring both scroll views with
+  /// [NeverScrollableScrollPhysics] will disallow dragging in this case.
   final ScrollPhysics? physics;
 
   /// A builder for any widgets that are to precede the inner scroll views (as
@@ -749,7 +779,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       pixels = clampDouble(_outerPosition!.pixels,
         _outerPosition!.minScrollExtent,
         _outerPosition!.maxScrollExtent,
-      ); // TODO(ianh): gracefully handle out-of-range outer positions
+      );
       minRange = _outerPosition!.minScrollExtent;
       maxRange = _outerPosition!.maxScrollExtent;
       assert(minRange <= maxRange);
@@ -846,17 +876,23 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       return;
     }
     bool innerCanDrag = false;
+    double maxInnerExtent = 0.0;
     for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.haveDimensions) {
         return;
       }
+      maxInnerExtent = math.max(maxInnerExtent, position.maxScrollExtent);
       innerCanDrag = innerCanDrag
         // This refers to the physics of the actual inner scroll position, not
         // the whole NestedScrollView, since it is possible to have different
         // ScrollPhysics for the inner and outer positions.
         || position.physics.shouldAcceptUserOffset(position);
     }
-    _outerPosition!.updateCanDrag(innerCanDrag);
+    _outerPosition!.updateCanDrag(
+      innerCanDrag,
+      maxInnerExtent,
+      _state._absorberHandle.layoutExtent ?? 0.0,
+    );
   }
 
   Future<void> animateTo(
@@ -1439,15 +1475,23 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     coordinator.updateCanDrag();
   }
 
-  void updateCanDrag(bool innerCanDrag) {
+  void updateCanDrag(
+    bool innerCanDrag,
+    double innerExtent,
+    double absorbedExtent,
+  ) {
     // This is only called for the outer position, with consideration for the
     // inner position passed in.
-    context.setCanDrag(
+    print(innerExtent);
+    print(this);
+    assert(coordinator._outerPosition == this);
+    final bool canDrag =
       // This refers to the physics of the actual outer scroll position, not the
       // whole NestedScrollView, since it is possible to have different
       // ScrollPhysics for the inner and outer positions.
-      physics.shouldAcceptUserOffset(this) || innerCanDrag
-    );
+      (physics.shouldAcceptUserOffset(this) || innerCanDrag)
+      && (minScrollExtent != maxScrollExtent || innerExtent > 0);
+    context.setCanDrag(canDrag);
   }
 
   @override
