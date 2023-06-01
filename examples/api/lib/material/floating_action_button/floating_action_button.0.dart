@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [FloatingActionButton].
 
 void main() {
-  runApp(FloatingActionButtonExample());
+  runApp(const FloatingActionButtonExample());
 }
 
 class FloatingActionButtonExampleApp extends StatelessWidget {

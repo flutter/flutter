@@ -40,6 +40,6 @@ void main() {
     await tester.pumpAndSettle(); // Wait for the animation to finish.
     expect(getRawMaterialButtonWidget().fillColor, Colors.green);
     expect(getIconColor(), Colors.white);
-    expect(getRawMaterialButtonWidget().shape, CircleBorder());
+    expect(getRawMaterialButtonWidget().shape, const CircleBorder());
   });
 }
