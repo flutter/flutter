@@ -247,4 +247,22 @@ public class SpellCheckPluginTest {
 
     verify(mockResult).success(new ArrayList<HashMap<String, Object>>());
   }
+
+  @Test
+  public void onGetSentenceSuggestionsResultsWithSuccessAndNoResultsWhenSuggestionsAreInvalid2() {
+    TextServicesManager fakeTextServicesManager = mock(TextServicesManager.class);
+    SpellCheckChannel fakeSpellCheckChannel = mock(SpellCheckChannel.class);
+    SpellCheckPlugin spellCheckPlugin =
+        spy(new SpellCheckPlugin(fakeTextServicesManager, fakeSpellCheckChannel));
+    MethodChannel.Result mockResult = mock(MethodChannel.Result.class);
+    spellCheckPlugin.pendingResult = mockResult;
+
+    spellCheckPlugin.onGetSentenceSuggestions(
+        new SentenceSuggestionsInfo[] {
+          // This "suggestion" may be provided by the Samsung spell checker:
+          null
+        });
+
+    verify(mockResult).success(new ArrayList<HashMap<String, Object>>());
+  }
 }
