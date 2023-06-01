@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:url_launcher/url_launcher.dart';
-
 // This example demonstrates highlighting and linking Twitter handles.
 
 void main() {
@@ -9,7 +7,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +24,30 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({
+    super.key,
+    required this.title
+  });
 
   final String title;
   static const String text = 'Check out @FlutterDev on Twitter for the latest.';
 
-  void _onTapTwitterHandle (String linkText) async {
+  void _onTapTwitterHandle(BuildContext context, String linkText) {
     final String handleWithoutAt = linkText.substring(1);
-    Uri uri = Uri.parse('https://www.twitter.com/$handleWithoutAt');
-    if (!await launchUrl(uri)) {
-      throw 'Could not launch $uri.';
+    final String twitterUriString = 'https://www.twitter.com/$handleWithoutAt';
+    final Uri? uri = Uri.tryParse(twitterUriString);
+    if (uri == null) {
+      throw Exception('Failed to parse $twitterUriString.');
     }
+
+    // A package like url_launcher would be useful for actually opening the URL
+    // here instead of just showing a dialog.
+    Navigator.of(context).push(
+      DialogRoute<void>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(title: Text('You tapped: $uri')),
+      ),
+    );
   }
 
   final RegExp _twitterHandleRegExp = RegExp(r'@[a-zA-Z0-9]{4,15}');
@@ -48,15 +61,17 @@ class MyHomePage extends StatelessWidget {
       body: Center(
         child: Builder(
           builder: (BuildContext context) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                LinkedText.regExp(
-                  text: text,
-                  regExp: _twitterHandleRegExp,
-                  onTap: _onTapTwitterHandle,
-                ),
-              ],
+            return SelectionArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  LinkedText.regExp(
+                    text: text,
+                    regExp: _twitterHandleRegExp,
+                    onTap: (String urlString) => _onTapTwitterHandle(context, urlString),
+                  ),
+                ],
+              ),
             );
           },
         ),

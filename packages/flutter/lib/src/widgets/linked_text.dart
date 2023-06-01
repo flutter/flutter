@@ -6,8 +6,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'text.dart';
 
-// TODO(justinmc): Add SelectableArea to the examples.
-
 // TODO(justinmc): On some platforms, may want to underline link?
 
 /// A callback that passes a [String] representing a URL.

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:url_launcher/url_launcher.dart';
-
 // This example demonstrates using LinkedText to make URLs open on tap.
 
 void main() {
@@ -9,7 +7,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +24,28 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({
+    super.key,
+    required this.title,
+  });
 
   final String title;
   static const String text = 'Check out https://www.flutter.dev, or maybe just flutter.dev or www.flutter.dev. Or if not, just google it: https://www.google.com!';
 
-  void _onTapUrl (String urlString) async {
-    Uri uri = Uri.parse(urlString);
-    if (uri.host.isEmpty) {
-      uri = Uri.parse('https://$urlString');
+  void _onTapUrl(BuildContext context, String urlString) {
+    final Uri? uri = Uri.tryParse(urlString);
+    if (uri == null) {
+      throw Exception('Failed to parse $urlString.');
     }
-    if (!await launchUrl(uri)) {
-      throw 'Could not launch $urlString.';
-    }
+
+    // A package like url_launcher would be useful for actually opening the URL
+    // here instead of just showing a dialog.
+    Navigator.of(context).push(
+      DialogRoute<void>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(title: Text('You tapped: $uri')),
+      ),
+    );
   }
 
   @override
@@ -48,14 +57,16 @@ class MyHomePage extends StatelessWidget {
       body: Center(
         child: Builder(
           builder: (BuildContext context) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                LinkedText(
-                  text: text,
-                  onTap: _onTapUrl,
-                ),
-              ],
+            return SelectionArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  LinkedText(
+                    text: text,
+                    onTap: (String urlString) => _onTapUrl(context, urlString),
+                  ),
+                ],
+              ),
             );
           },
         ),

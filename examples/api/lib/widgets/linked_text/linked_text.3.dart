@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+// This example demonstrates highlighting URLs in a TextSpan tree instead of a
+// flat String.
+
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +32,20 @@ class MyHomePage extends StatelessWidget {
 
   final String title;
 
-  void _onTapUrl (String urlString) {
-    debugPrint('Tapped the URl $urlString.');
-    // Use a package like url_launcher here to open the link.
+  void _onTapUrl (BuildContext context, String urlString) {
+    final Uri? uri = Uri.tryParse(urlString);
+    if (uri == null) {
+      throw Exception('Failed to parse $urlString.');
+    }
+
+    // A package like url_launcher would be useful for actually opening the URL
+    // here instead of just showing a dialog.
+    Navigator.of(context).push(
+      DialogRoute<void>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(title: Text('You tapped: $uri')),
+      ),
+    );
   }
 
   @override
@@ -38,38 +54,39 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: Builder(
-        builder: (BuildContext context) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                LinkedText.spans(
-                  onTap: _onTapUrl,
-                  children: <InlineSpan>[
-                    TextSpan(
-                      text: 'https://www.',
-                      style: DefaultTextStyle.of(context).style,
-                      children: const <InlineSpan>[
-                        TextSpan(
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
+      body: Center(
+        child: Builder(
+          builder: (BuildContext context) {
+            return SelectionArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  LinkedText.spans(
+                    onTap: (String urlString) => _onTapUrl(context, urlString),
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text: 'Check out https://www.',
+                        style: DefaultTextStyle.of(context).style,
+                        children: const <InlineSpan>[
+                          TextSpan(
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                            ),
+                            text: 'flutter',
                           ),
-                          text: 'example',
-                        ),
-                      ],
-                    ),
-                    TextSpan(
-                      text: '.com',
-                      style: DefaultTextStyle.of(context).style,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
+                        ],
+                      ),
+                      TextSpan(
+                        text: '.dev!',
+                        style: DefaultTextStyle.of(context).style,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
