@@ -9,6 +9,7 @@
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
+#include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 #include "flutter/display_list/utils/dl_comparable.h"
@@ -282,20 +283,26 @@ using BackendType = DlSurfaceProvider::BackendType;
 
 class RenderResult {
  public:
-  explicit RenderResult(const sk_sp<SkSurface>& surface) {
+  explicit RenderResult(const sk_sp<SkSurface>& surface,
+                        bool take_snapshot = false) {
     SkImageInfo info = surface->imageInfo();
     info = SkImageInfo::MakeN32Premul(info.dimensions());
     addr_ = malloc(info.computeMinByteSize() * info.height());
     pixmap_.reset(info, addr_, info.minRowBytes());
-    EXPECT_TRUE(surface->readPixels(pixmap_, 0, 0));
+    surface->readPixels(pixmap_, 0, 0);
+    if (take_snapshot) {
+      image_ = surface->makeImageSnapshot();
+    }
   }
   ~RenderResult() { free(addr_); }
 
+  sk_sp<SkImage> image() const { return image_; }
   int width() const { return pixmap_.width(); }
   int height() const { return pixmap_.height(); }
   const uint32_t* addr32(int x, int y) const { return pixmap_.addr32(x, y); }
 
  private:
+  sk_sp<SkImage> image_;
   SkPixmap pixmap_;
   void* addr_ = nullptr;
 };
@@ -912,7 +919,14 @@ class CanvasCompareTester {
     };
     DlRenderer dl_safe_restore = [=](DlCanvas* cv, const DlPaint& p) {
       // Draw another primitive to disable peephole optimizations
-      cv->DrawRect(kRenderBounds.makeOffset(500, 500), DlPaint());
+      // As the rendering op rejection in the DisplayList Builder
+      // gets smarter and smarter, this operation has had to get
+      // sneakier and sneakier about specifying an operation that
+      // won't practically show up in the output, but technically
+      // can't be culled.
+      cv->DrawRect(
+          SkRect::MakeXYWH(kRenderCenterX, kRenderCenterY, 0.0001, 0.0001),
+          DlPaint());
       cv->Restore();
     };
     SkRenderer sk_opt_restore = [=](SkCanvas* cv, const SkPaint& p) {
@@ -3785,7 +3799,6 @@ TEST_F(DisplayListCanvas, MatrixColorFilterOpacityCommuteCheck) {
 }
 
 #define FOR_EACH_BLEND_MODE_ENUM(FUNC) \
-  FUNC(kSrc)                           \
   FUNC(kClear)                         \
   FUNC(kSrc)                           \
   FUNC(kDst)                           \
@@ -3816,6 +3829,18 @@ TEST_F(DisplayListCanvas, MatrixColorFilterOpacityCommuteCheck) {
   FUNC(kColor)                         \
   FUNC(kLuminosity)
 
+// This function serves both to enhance error output below and to double
+// check that the macro supplies all modes (otherwise it won't compile)
+static std::string BlendModeToString(DlBlendMode mode) {
+  switch (mode) {
+#define MODE_CASE(m)   \
+  case DlBlendMode::m: \
+    return #m;
+    FOR_EACH_BLEND_MODE_ENUM(MODE_CASE)
+#undef MODE_CASE
+  }
+}
+
 TEST_F(DisplayListCanvas, BlendColorFilterModifyTransparencyCheck) {
   std::vector<std::unique_ptr<RenderEnvironment>> environments;
   for (auto& provider : CanvasCompareTester::kTestProviders) {
@@ -3826,7 +3851,8 @@ TEST_F(DisplayListCanvas, BlendColorFilterModifyTransparencyCheck) {
 
   auto test_mode_color = [&environments](DlBlendMode mode, DlColor color) {
     std::stringstream desc_str;
-    desc_str << "blend[" << mode << ", " << color << "]";
+    std::string mode_string = BlendModeToString(mode);
+    desc_str << "blend[" << mode_string << ", " << color << "]";
     std::string desc = desc_str.str();
     DlBlendColorFilter filter(color, mode);
     if (filter.modifies_transparent_black()) {
@@ -3887,7 +3913,8 @@ TEST_F(DisplayListCanvas, BlendColorFilterOpacityCommuteCheck) {
 
   auto test_mode_color = [&environments](DlBlendMode mode, DlColor color) {
     std::stringstream desc_str;
-    desc_str << "blend[" << mode << ", " << color << "]";
+    std::string mode_string = BlendModeToString(mode);
+    desc_str << "blend[" << mode_string << ", " << color << "]";
     std::string desc = desc_str.str();
     DlBlendColorFilter filter(color, mode);
     if (filter.can_commute_with_opacity()) {
@@ -3946,7 +3973,359 @@ TEST_F(DisplayListCanvas, BlendColorFilterOpacityCommuteCheck) {
 #undef TEST_MODE
 }
 
-#undef FOR_EACH_ENUM
+class DisplayListNopTest : public DisplayListCanvas {
+  // The following code uses the acronym MTB for "modifies_transparent_black"
+
+ protected:
+  DisplayListNopTest() : DisplayListCanvas() {
+    test_src_colors = {
+        DlColor::kBlack().withAlpha(0),     // transparent black
+        DlColor::kBlack().withAlpha(0x7f),  // half transparent black
+        DlColor::kWhite().withAlpha(0x7f),  // half transparent white
+        DlColor::kBlack(),                  // opaque black
+        DlColor::kWhite(),                  // opaque white
+        DlColor::kRed(),                    // opaque red
+        DlColor::kGreen(),                  // opaque green
+        DlColor::kBlue(),                   // opaque blue
+        DlColor::kDarkGrey(),               // dark grey
+        DlColor::kLightGrey(),              // light grey
+    };
+
+    // We test against a color cube of 3x3x3 colors [55,aa,ff]
+    // plus transparency as the first color/pixel
+    test_dst_colors.push_back(DlColor::kTransparent());
+    const int step = 0x55;
+    static_assert(step * 3 == 255);
+    for (int a = step; a < 256; a += step) {
+      for (int r = step; r < 256; r += step) {
+        for (int g = step; g < 256; g += step) {
+          for (int b = step; b < 256; b += step) {
+            test_dst_colors.push_back(DlColor(a << 24 | r << 16 | g << 8 | b));
+          }
+        }
+      }
+    }
+
+    static constexpr float color_filter_matrix_nomtb[] = {
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+    };
+    static constexpr float color_filter_matrix_mtb[] = {
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+        0.0001, 0.0001, 0.0001, 0.9997, 0.0,  //
+        0.0001, 0.0001, 0.0001, 0.9997, 0.1,  //
+    };
+    color_filter_nomtb = DlMatrixColorFilter::Make(color_filter_matrix_nomtb);
+    color_filter_mtb = DlMatrixColorFilter::Make(color_filter_matrix_mtb);
+    EXPECT_FALSE(color_filter_nomtb->modifies_transparent_black());
+    EXPECT_TRUE(color_filter_mtb->modifies_transparent_black());
+
+    test_data =
+        get_output(test_dst_colors.size(), 1, true, [this](SkCanvas* canvas) {
+          int x = 0;
+          for (DlColor color : test_dst_colors) {
+            SkPaint paint;
+            paint.setColor(color);
+            paint.setBlendMode(SkBlendMode::kSrc);
+            canvas->drawRect(SkRect::MakeXYWH(x, 0, 1, 1), paint);
+            x++;
+          }
+        });
+
+    // For image-on-image tests, the src and dest images will have repeated
+    // rows/columns that have every color, but laid out at right angles to
+    // each other so we see an interaction with every test color against
+    // every other test color.
+    int data_count = test_data->image()->width();
+    test_image_dst_data = get_output(
+        data_count, data_count, true, [this, data_count](SkCanvas* canvas) {
+          ASSERT_EQ(test_data->width(), data_count);
+          ASSERT_EQ(test_data->height(), 1);
+          for (int y = 0; y < data_count; y++) {
+            canvas->drawImage(test_data->image().get(), 0, y);
+          }
+        });
+    test_image_src_data = get_output(
+        data_count, data_count, true, [this, data_count](SkCanvas* canvas) {
+          ASSERT_EQ(test_data->width(), data_count);
+          ASSERT_EQ(test_data->height(), 1);
+          canvas->translate(data_count, 0);
+          canvas->rotate(90);
+          for (int y = 0; y < data_count; y++) {
+            canvas->drawImage(test_data->image().get(), 0, y);
+          }
+        });
+    // Double check that the pixel data is laid out in orthogonal stripes
+    for (int y = 0; y < data_count; y++) {
+      for (int x = 0; x < data_count; x++) {
+        EXPECT_EQ(*test_image_dst_data->addr32(x, y), *test_data->addr32(x, 0));
+        EXPECT_EQ(*test_image_src_data->addr32(x, y), *test_data->addr32(y, 0));
+      }
+    }
+  }
+
+  // These flags are 0 by default until they encounter a counter-example
+  // result and get set.
+  static constexpr int kWasNotNop = 0x1;  // Some tested pixel was modified
+  static constexpr int kWasMTB = 0x2;     // A transparent pixel was modified
+
+  std::vector<DlColor> test_src_colors;
+  std::vector<DlColor> test_dst_colors;
+
+  std::shared_ptr<DlColorFilter> color_filter_nomtb;
+  std::shared_ptr<DlColorFilter> color_filter_mtb;
+
+  // A 1-row image containing every color in test_dst_colors
+  std::unique_ptr<RenderResult> test_data;
+
+  // A square image containing test_data duplicated in each row
+  std::unique_ptr<RenderResult> test_image_dst_data;
+
+  // A square image containing test_data duplicated in each column
+  std::unique_ptr<RenderResult> test_image_src_data;
+
+  std::unique_ptr<RenderResult> get_output(
+      int w,
+      int h,
+      bool snapshot,
+      const std::function<void(SkCanvas*)>& renderer) {
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(w, h));
+    SkCanvas* canvas = surface->getCanvas();
+    renderer(canvas);
+    canvas->flush();
+    surface->flushAndSubmit(true);
+    return std::make_unique<RenderResult>(surface, snapshot);
+  }
+
+  int check_color_result(DlColor dst_color,
+                         DlColor result_color,
+                         const sk_sp<DisplayList>& dl,
+                         const std::string& desc) {
+    int ret = 0;
+    bool is_error = false;
+    if (dst_color.isTransparent() && !result_color.isTransparent()) {
+      ret |= kWasMTB;
+      is_error = !dl->modifies_transparent_black();
+    }
+    if (result_color != dst_color) {
+      ret |= kWasNotNop;
+      is_error = (dl->op_count() == 0u);
+    }
+    if (is_error) {
+      FML_LOG(ERROR) << std::hex << dst_color << " filters to " << result_color
+                     << desc;
+    }
+    return ret;
+  }
+
+  int check_image_result(const std::unique_ptr<RenderResult>& dst_data,
+                         const std::unique_ptr<RenderResult>& result_data,
+                         const sk_sp<DisplayList>& dl,
+                         const std::string& desc) {
+    EXPECT_EQ(dst_data->width(), result_data->width());
+    EXPECT_EQ(dst_data->height(), result_data->height());
+    int all_flags = 0;
+    for (int y = 0; y < dst_data->height(); y++) {
+      const uint32_t* dst_pixels = dst_data->addr32(0, y);
+      const uint32_t* result_pixels = result_data->addr32(0, y);
+      for (int x = 0; x < dst_data->width(); x++) {
+        all_flags |=
+            check_color_result(dst_pixels[x], result_pixels[x], dl, desc);
+      }
+    }
+    return all_flags;
+  }
+
+  void report_results(int all_flags,
+                      const sk_sp<DisplayList>& dl,
+                      const std::string& desc) {
+    if (!dl->modifies_transparent_black()) {
+      EXPECT_TRUE((all_flags & kWasMTB) == 0);
+    } else if ((all_flags & kWasMTB) == 0) {
+      FML_LOG(INFO) << "combination does not affect transparency: " << desc;
+    }
+    if (dl->op_count() == 0u) {
+      EXPECT_TRUE((all_flags & kWasNotNop) == 0);
+    } else if ((all_flags & kWasNotNop) == 0) {
+      FML_LOG(INFO) << "combination could be classified as a nop: " << desc;
+    }
+  };
+
+  void test_mode_color_via_filter(DlBlendMode mode, DlColor color) {
+    std::stringstream desc_stream;
+    desc_stream << " using SkColorFilter::filterColor() with: ";
+    desc_stream << BlendModeToString(mode);
+    desc_stream << "/" << color;
+    std::string desc = desc_stream.str();
+    DisplayListBuilder builder({0.0f, 0.0f, 100.0f, 100.0f});
+    DlPaint paint = DlPaint(color).setBlendMode(mode);
+    builder.DrawRect({0.0f, 0.0f, 10.0f, 10.0f}, paint);
+    auto dl = builder.Build();
+    if (dl->modifies_transparent_black()) {
+      ASSERT_TRUE(dl->op_count() != 0u);
+    }
+
+    auto sk_mode = static_cast<SkBlendMode>(mode);
+    auto sk_color_filter = SkColorFilters::Blend(color, sk_mode);
+    int all_flags = 0;
+    if (sk_color_filter) {
+      for (DlColor dst_color : test_dst_colors) {
+        DlColor result = sk_color_filter->filterColor(dst_color);
+        all_flags |= check_color_result(dst_color, result, dl, desc);
+      }
+      if ((all_flags & kWasMTB) != 0) {
+        EXPECT_FALSE(sk_color_filter->isAlphaUnchanged());
+      }
+    }
+    report_results(all_flags, dl, desc);
+  };
+
+  void test_mode_color_via_rendering(DlBlendMode mode, DlColor color) {
+    std::stringstream desc_stream;
+    desc_stream << " rendering with: ";
+    desc_stream << BlendModeToString(mode);
+    desc_stream << "/" << color;
+    std::string desc = desc_stream.str();
+    auto test_image = test_data->image();
+    SkRect test_bounds =
+        SkRect::MakeWH(test_image->width(), test_image->height());
+    DisplayListBuilder builder(test_bounds);
+    DlPaint dl_paint = DlPaint(color).setBlendMode(mode);
+    builder.DrawRect(test_bounds, dl_paint);
+    auto dl = builder.Build();
+    bool dl_is_elided = dl->op_count() == 0u;
+    bool dl_affects_transparent_pixels = dl->modifies_transparent_black();
+    ASSERT_TRUE(!dl_is_elided || !dl_affects_transparent_pixels);
+
+    auto sk_mode = static_cast<SkBlendMode>(mode);
+    SkPaint sk_paint;
+    sk_paint.setBlendMode(sk_mode);
+    sk_paint.setColor(color);
+    for (auto& provider : CanvasCompareTester::kTestProviders) {
+      auto result_surface = provider->MakeOffscreenSurface(
+          test_image->width(), test_image->height(),
+          DlSurfaceProvider::kN32Premul_PixelFormat);
+      SkCanvas* result_canvas = result_surface->sk_surface()->getCanvas();
+      result_canvas->clear(SK_ColorTRANSPARENT);
+      result_canvas->drawImage(test_image.get(), 0, 0);
+      result_canvas->drawRect(test_bounds, sk_paint);
+      result_canvas->flush();
+      result_surface->sk_surface()->flushAndSubmit(true);
+      auto result_pixels =
+          std::make_unique<RenderResult>(result_surface->sk_surface());
+
+      int all_flags = check_image_result(test_data, result_pixels, dl, desc);
+      report_results(all_flags, dl, desc);
+    }
+  };
+
+  void test_attributes_image(DlBlendMode mode,
+                             DlColor color,
+                             DlColorFilter* color_filter,
+                             DlImageFilter* image_filter) {
+    // if (true) { return; }
+    std::stringstream desc_stream;
+    desc_stream << " rendering with: ";
+    desc_stream << BlendModeToString(mode);
+    desc_stream << "/" << color;
+    std::string cf_mtb = color_filter
+                             ? color_filter->modifies_transparent_black()
+                                   ? "modifies transparency"
+                                   : "preserves transparency"
+                             : "no filter";
+    desc_stream << ", CF: " << cf_mtb;
+    std::string if_mtb = image_filter
+                             ? image_filter->modifies_transparent_black()
+                                   ? "modifies transparency"
+                                   : "preserves transparency"
+                             : "no filter";
+    desc_stream << ", IF: " << if_mtb;
+    std::string desc = desc_stream.str();
+
+    DisplayListBuilder builder({0.0f, 0.0f, 100.0f, 100.0f});
+    DlPaint paint = DlPaint(color)                     //
+                        .setBlendMode(mode)            //
+                        .setColorFilter(color_filter)  //
+                        .setImageFilter(image_filter);
+    builder.DrawImage(DlImage::Make(test_image_src_data->image()), {0, 0},
+                      DlImageSampling::kNearestNeighbor, &paint);
+    auto dl = builder.Build();
+
+    int w = test_image_src_data->width();
+    int h = test_image_src_data->height();
+    auto sk_mode = static_cast<SkBlendMode>(mode);
+    SkPaint sk_paint;
+    sk_paint.setBlendMode(sk_mode);
+    sk_paint.setColor(color);
+    sk_paint.setColorFilter(ToSk(color_filter));
+    sk_paint.setImageFilter(ToSk(image_filter));
+    for (auto& provider : CanvasCompareTester::kTestProviders) {
+      auto result_surface = provider->MakeOffscreenSurface(
+          w, h, DlSurfaceProvider::kN32Premul_PixelFormat);
+      SkCanvas* result_canvas = result_surface->sk_surface()->getCanvas();
+      result_canvas->clear(SK_ColorTRANSPARENT);
+      result_canvas->drawImage(test_image_dst_data->image(), 0, 0);
+      result_canvas->drawImage(test_image_src_data->image(), 0, 0,
+                               SkSamplingOptions(), &sk_paint);
+      result_canvas->flush();
+      result_surface->sk_surface()->flushAndSubmit(true);
+      auto result_pixels =
+          std::make_unique<RenderResult>(result_surface->sk_surface());
+
+      int all_flags =
+          check_image_result(test_image_dst_data, result_pixels, dl, desc);
+      report_results(all_flags, dl, desc);
+    }
+  };
+};
+
+TEST_F(DisplayListNopTest, BlendModeAndColorViaColorFilter) {
+  auto test_mode_filter = [this](DlBlendMode mode) {
+    for (DlColor color : test_src_colors) {
+      test_mode_color_via_filter(mode, color);
+    }
+  };
+
+#define TEST_MODE(V) test_mode_filter(DlBlendMode::V);
+  FOR_EACH_BLEND_MODE_ENUM(TEST_MODE)
+#undef TEST_MODE
+}
+
+TEST_F(DisplayListNopTest, BlendModeAndColorByRendering) {
+  auto test_mode_render = [this](DlBlendMode mode) {
+    // First check rendering a variety of colors onto image
+    for (DlColor color : test_src_colors) {
+      test_mode_color_via_rendering(mode, color);
+    }
+  };
+
+#define TEST_MODE(V) test_mode_render(DlBlendMode::V);
+  FOR_EACH_BLEND_MODE_ENUM(TEST_MODE)
+#undef TEST_MODE
+}
+
+TEST_F(DisplayListNopTest, BlendModeAndColorAndFiltersByRendering) {
+  auto test_mode_render = [this](DlBlendMode mode) {
+    auto image_filter_nomtb = DlColorFilterImageFilter(color_filter_nomtb);
+    auto image_filter_mtb = DlColorFilterImageFilter(color_filter_mtb);
+    for (DlColor color : test_src_colors) {
+      test_attributes_image(mode, color, nullptr, nullptr);
+      test_attributes_image(mode, color, color_filter_nomtb.get(), nullptr);
+      test_attributes_image(mode, color, color_filter_mtb.get(), nullptr);
+      test_attributes_image(mode, color, nullptr, &image_filter_nomtb);
+      test_attributes_image(mode, color, nullptr, &image_filter_mtb);
+    }
+  };
+
+#define TEST_MODE(V) test_mode_render(DlBlendMode::V);
+  FOR_EACH_BLEND_MODE_ENUM(TEST_MODE)
+#undef TEST_MODE
+}
+
+#undef FOR_EACH_BLEND_MODE_ENUM
 
 }  // namespace testing
 }  // namespace flutter
