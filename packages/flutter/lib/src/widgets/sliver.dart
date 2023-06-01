@@ -1578,8 +1578,20 @@ class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
 /// A sliver that places multiple sliver children in a linear array along
 /// the main axis, one after another.
 ///
-/// For pinned sliver children, the behavior is that the pinned sliver should
-/// scroll up after all of the main content has been scrolled through.
+/// ## Layout algorithm
+///
+/// _This section describes how the framework causes [RenderSliverMainAxisGroup]
+/// to position its children._
+///
+/// Layout for a [RenderSliverMainAxisGroup] has four steps:
+///
+/// 1. Keep track of an offset variable which is the total [SliverGeometry.scrollExtent]
+///    of the slivers laid out so far.
+/// 2. To determine the constraints for the next sliver child to layout, calculate the
+///    amount of paint extent occupied from 0.0 to the offset variable and use
+///    [SliverConstraints.remainingPaintExtent] minus this value as the child's
+///    [SliverConstraints.remainingPaintExtent]. For the [SliverConstraints.scrollOffset],
+///    take the provided value and take the []
 class SliverMainAxisGroup extends MultiChildRenderObjectWidget {
   /// Creates a sliver that places sliver children in a linear array along
   /// the main axis.

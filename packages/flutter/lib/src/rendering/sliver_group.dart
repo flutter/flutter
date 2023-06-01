@@ -240,7 +240,8 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
           remainingPaintExtent: constraints.remainingPaintExtent - beforeOffsetPaintExtent,
           remainingCacheExtent: constraints.remainingCacheExtent - calculateCacheOffset(constraints, from: 0.0, to: offset),
           precedingScrollExtent: offset + constraints.precedingScrollExtent,
-        ), parentUsesSize: true
+        ),
+        parentUsesSize: true,
       );
       final SliverGeometry childLayoutGeometry = child.geometry!;
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
