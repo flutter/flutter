@@ -708,7 +708,7 @@ void main() {
     expect(helperText.style?.color, focusedColor);
   });
 
-  // regression test for https://github.com/flutter/flutter/issues/127092.
+  // Regression test for https://github.com/flutter/flutter/issues/127092.
   testWidgets('The text is still centered when SearchBar text field is smaller than 48', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -1693,7 +1693,7 @@ void main() {
   });
 
   testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
-    // regression test for https://github.com/flutter/flutter/issues/126590.
+    // Regression test for https://github.com/flutter/flutter/issues/126590.
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -1770,7 +1770,7 @@ void main() {
   });
 
 
-  // regression tests for https://github.com/flutter/flutter/issues/126623
+  // Regression tests for https://github.com/flutter/flutter/issues/126623
   group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
 
     const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(

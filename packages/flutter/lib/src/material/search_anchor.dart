@@ -1249,7 +1249,6 @@ class _SearchBarState extends State<SearchBar> {
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
-
                           // Setting `isDense` to true to allow the text field height to be
                           // smaller than 48.0
                           isDense: true,
