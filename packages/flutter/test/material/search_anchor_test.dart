@@ -708,6 +708,29 @@ void main() {
     expect(helperText.style?.color, focusedColor);
   });
 
+  // regression test for https://github.com/flutter/flutter/issues/127092.
+  testWidgets('The text is still centered when SearchBar text field is smaller than 48', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Center(
+          child: Material(
+            child: SearchBar(
+              constraints: BoxConstraints.tightFor(height: 35.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'input text');
+    final Finder textContent = find.text('input text');
+    final double textCenterY = tester.getCenter(textContent).dy;
+    final Finder searchBar = find.byType(SearchBar);
+    final double searchBarCenterY = tester.getCenter(searchBar).dy;
+    expect(textCenterY, searchBarCenterY);
+  });
+
   testWidgets('The search view defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
