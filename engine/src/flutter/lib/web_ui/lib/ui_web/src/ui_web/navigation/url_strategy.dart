@@ -82,7 +82,11 @@ typedef PopStateListener = void Function(Object? state);
 ///
 /// By default, the [HashUrlStrategy] subclass is used if the app doesn't
 /// specify one.
-abstract interface class UrlStrategy {
+abstract class UrlStrategy {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const UrlStrategy();
+
   /// Adds a listener to the `popstate` event and returns a function that, when
   /// invoked, removes the listener.
   ui.VoidCallback addPopStateListener(PopStateListener fn);
@@ -135,7 +139,7 @@ abstract interface class UrlStrategy {
 /// // Somewhere before calling `runApp()` do:
 /// setUrlStrategy(const HashUrlStrategy());
 /// ```
-class HashUrlStrategy implements UrlStrategy {
+class HashUrlStrategy extends UrlStrategy {
   /// Creates an instance of [HashUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser

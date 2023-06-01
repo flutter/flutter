@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_util' as js_util;
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 import 'history_test.dart';
@@ -48,15 +48,27 @@ void testMain() {
     expect(window.viewId, 0);
   });
 
-  test('window.defaultRouteName should work with a custom url strategy', () async {
-    const String path = '/initial';
-    const Object state = <dynamic, dynamic>{'origin': true};
-
-    final _SampleUrlStrategy customStrategy = _SampleUrlStrategy(path, state);
-    await window.debugInitializeHistory(customStrategy, useSingle: true);
+  test('window.defaultRouteName should work with JsUrlStrategy', () async {
+    dynamic state = <dynamic, dynamic>{};
+    final JsUrlStrategy jsUrlStrategy = JsUrlStrategy(
+        getPath: allowInterop(() => '/initial'),
+        getState: allowInterop(() => state),
+        addPopStateListener: allowInterop((DartDomEventListener listener) => allowInterop(() {})),
+        prepareExternalUrl: allowInterop((String value) => ''),
+        pushState: allowInterop((Object? newState, String title, String url) {
+          expect(newState is Map, true);
+        }),
+        replaceState: allowInterop((Object? newState, String title, String url) {
+          expect(newState is Map, true);
+          state = newState;
+        }),
+        go: allowInterop(([double? delta]) async {
+          expect(delta, -1);
+        }));
+    final CustomUrlStrategy strategy =
+        CustomUrlStrategy.fromJs(jsUrlStrategy);
+    await window.debugInitializeHistory(strategy, useSingle: true);
     expect(window.defaultRouteName, '/initial');
-    // Also make sure that the custom url strategy was actually used.
-    expect(customStrategy.wasUsed, isTrue);
   });
 
   test('window.defaultRouteName should not change', () async {
@@ -429,12 +441,7 @@ void testMain() {
 
   test('can disable location strategy', () async {
     // Disable URL strategy.
-    expect(
-      () {
-        ui_web.urlStrategy = null;
-      },
-      returnsNormally,
-    );
+    expect(() => jsSetUrlStrategy(null), returnsNormally);
     // History should be initialized.
     expect(window.browserHistory, isNotNull);
     // But without a URL strategy.
@@ -448,35 +455,27 @@ void testMain() {
     expect(window.browserHistory.currentPath, '/');
   });
 
-  test('cannot set url strategy after it was initialized', () async {
+  test('js interop throws on wrong type', () {
+    expect(() => jsSetUrlStrategy(123), throwsA(anything));
+    expect(() => jsSetUrlStrategy('foo'), throwsA(anything));
+    expect(() => jsSetUrlStrategy(false), throwsA(anything));
+    expect(() => jsSetUrlStrategy(<Object?>[]), throwsA(anything));
+  });
+
+  test('cannot set url strategy after it is initialized', () async {
     final TestUrlStrategy testStrategy = TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/'),
     );
     await window.debugInitializeHistory(testStrategy, useSingle: true);
 
-    expect(
-      () {
-        ui_web.urlStrategy = null;
-      },
-      throwsA(isAssertionError),
-    );
+    expect(() => jsSetUrlStrategy(null), throwsA(isAssertionError));
   });
 
   test('cannot set url strategy more than once', () async {
     // First time is okay.
-    expect(
-      () {
-        ui_web.urlStrategy = null;
-      },
-      returnsNormally,
-    );
+    expect(() => jsSetUrlStrategy(null), returnsNormally);
     // Second time is not allowed.
-    expect(
-      () {
-        ui_web.urlStrategy = null;
-      },
-      throwsA(isAssertionError),
-    );
+    expect(() => jsSetUrlStrategy(null), throwsA(isAssertionError));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/77817
@@ -487,41 +486,10 @@ void testMain() {
   });
 }
 
-class _SampleUrlStrategy implements ui_web.UrlStrategy {
-  _SampleUrlStrategy(this._path, this._state);
-
-  final String _path;
-  final Object? _state;
-
-  bool wasUsed = false;
-
-  @override
-  String getPath() => _path;
-
-  @override
-  Object? getState() => _state;
-
-  @override
-  ui.VoidCallback addPopStateListener(DartDomEventListener listener) {
-    wasUsed = true;
-    return () {};
-  }
-
-  @override
-  String prepareExternalUrl(String value) => '';
-
-  @override
-  void pushState(Object? newState, String title, String url) {
-    wasUsed = true;
-  }
-
-  @override
-  void replaceState(Object? newState, String title, String url) {
-    wasUsed = true;
-  }
-
-  @override
-  Future<void> go(int delta) async {
-    wasUsed = true;
-  }
+void jsSetUrlStrategy(dynamic strategy) {
+  js_util.callMethod<void>(
+    domWindow,
+    '_flutter_web_set_location_strategy',
+    <dynamic>[strategy],
+  );
 }

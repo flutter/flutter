@@ -113,6 +113,8 @@ export 'engine/key_map.g.dart';
 export 'engine/keyboard_binding.dart';
 export 'engine/mouse_cursor.dart';
 export 'engine/navigation/history.dart';
+export 'engine/navigation/js_url_strategy.dart';
+export 'engine/navigation/url_strategy.dart';
 export 'engine/noto_font.dart';
 export 'engine/onscreen_logging.dart';
 export 'engine/picture.dart';
