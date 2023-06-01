@@ -30,10 +30,10 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
-import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
@@ -132,6 +132,7 @@ const Duration kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
+    required Java? java,
     required Logger logger,
     required ProcessManager processManager,
     required FileSystem fileSystem,
@@ -140,7 +141,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required GradleUtils gradleUtils,
     required Platform platform,
     required AndroidStudio? androidStudio,
-  }) : _logger = logger,
+  }) : _java = java,
+       _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _usage = usage,
@@ -149,6 +151,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
+  final Java? _java;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
@@ -422,15 +425,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     int exitCode = 1;
     try {
-      final String? javaHome = globals.java?.javaHome;
       exitCode = await _processUtils.stream(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: <String, String>{
-          if (javaHome != null)
-            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
-        },
+        environment: _java?.environment,
         mapFunction: consumeLog,
       );
     } on ProcessException catch (exception) {
@@ -692,15 +691,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.java?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: <String, String>{
-          if (javaHome != null)
-            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
-        },
+        environment: _java?.environment,
       );
     } finally {
       status.stop();
@@ -745,15 +740,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
       ..start();
     RunResult result;
     try {
-      final String? javaHome = globals.java?.javaHome;
       result = await _processUtils.run(
         command,
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
-        environment: <String, String>{
-          if (javaHome != null)
-            AndroidSdk.javaHomeEnvironmentVariable: javaHome,
-        },
+        environment: _java?.environment,
       );
     } finally {
       status.stop();

@@ -28,18 +28,6 @@ import 'android_studio_validator.dart';
 final RegExp _dotHomeStudioVersionMatcher =
     RegExp(r'^\.?(AndroidStudio[^\d]*)([\d.]+)');
 
-// TODO(andrewkolos): this global variable is used in several places to provide
-// a java binary to multiple Java-dependent tools, including the Android SDK
-// and Gradle. If this is null, these tools will implicitly fall back to current
-// JAVA_HOME env variable and then to any java found on PATH.
-//
-// This logic is consistent with that used by flutter doctor to find a valid JDK,
-// but this consistency is fragile--the implementations of this logic
-// exist independently of each other.
-//
-// See https://github.com/flutter/flutter/issues/124252.
-String? get javaPath => globals.androidStudio?.javaPath;
-
 class AndroidStudio {
   /// A [version] value of null represents an unknown version.
   AndroidStudio(
@@ -173,6 +161,9 @@ class AndroidStudio {
   /// The path of the JDK bundled with Android Studio.
   ///
   /// This will be null if the bundled JDK could not be found or run.
+  ///
+  /// If you looking to invoke the java binary or add it to the system
+  /// environment variables, consider using the [Java] class instead.
   String? get javaPath => _javaPath;
 
   bool get isValid => _isValid;
