@@ -828,10 +828,40 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Sometimes (race condition?) we try to send a log after the controller has
   // been closed. See https://github.com/flutter/flutter/issues/99021 for more
   // context.
-  void _addToLinesController(String message) {
+  void _addToLinesController(String message, IOSDeviceLogSource source) {
     if (!linesController.isClosed) {
+      if (_excludeLog(message, source)) {
+        return;
+      }
       linesController.add(message);
     }
+  }
+
+  /// Used to track messages prefixed with "flutter:" when [useBothLogDeviceReaders]
+  /// is true.
+  final List<String> _streamFlutterMessages = <String>[];
+
+  /// When using both `idevicesyslog` and `ios-deploy`, exclude logs with the
+  /// "flutter:" prefix if they have already been added to the stream. This is
+  /// to prevent duplicates from being printed.
+  ///
+  /// If a message does not have the prefix, exclude it if the message's
+  /// source is `idevicesyslog`. This is done because `ios-deploy` and
+  /// `idevicesyslog` often have different prefixes on non-flutter messages
+  /// and are often not critical for CI tests.
+  bool _excludeLog(String message, IOSDeviceLogSource source) {
+    if (!useBothLogDeviceReaders) {
+      return false;
+    }
+    if (message.startsWith('flutter:')) {
+      if (_streamFlutterMessages.contains(message)) {
+        return true;
+      }
+      _streamFlutterMessages.add(message);
+    } else if (source == IOSDeviceLogSource.idevicesyslog) {
+      return true;
+    }
+    return false;
   }
 
   final List<StreamSubscription<void>> _loggingSubscriptions = <StreamSubscription<void>>[];
@@ -877,7 +907,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
-        _addToLinesController(message);
+        _addToLinesController(message, IOSDeviceLogSource.unifiedLogging);
       }
     }
 
@@ -900,7 +930,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
     // Add the debugger logs to the controller created on initialization.
     _loggingSubscriptions.add(debugger.logLines.listen(
-      (String line) => _addToLinesController(_debuggerLineHandler(line)),
+      (String line) => _addToLinesController(
+        _debuggerLineHandler(line),
+        IOSDeviceLogSource.iosDeploy,
+      ),
       onError: linesController.addError,
       onDone: linesController.close,
       cancelOnError: true,
@@ -912,8 +945,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
   String _debuggerLineHandler(String line) => _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
   /// Use both logs from `idevicesyslog` and `ios-deploy` when debugging from CI system
-  /// since sometimes `ios-deploy` does not return the Dart VM url:
+  /// since sometimes `ios-deploy` does not return the device logs:
   /// https://github.com/flutter/flutter/issues/121231
+  @visibleForTesting
   bool get useBothLogDeviceReaders {
     return _usingCISystem && _majorSdkVersion >= 16;
   }
@@ -951,9 +985,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return (String line) {
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
-          if (!excludeEchoingDeviceLogs(line)) {
-            _addToLinesController(decodeSyslog(line));
-          }
+          _addToLinesController(decodeSyslog(line), IOSDeviceLogSource.idevicesyslog);
           return;
         }
 
@@ -965,22 +997,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
       if (match != null) {
         final String logLine = line.substring(match.end);
         // Only display the log line after the initial device and executable information.
-        if (!excludeEchoingDeviceLogs(logLine)) {
-          _addToLinesController(decodeSyslog(logLine));
-        }
+        _addToLinesController(decodeSyslog(logLine), IOSDeviceLogSource.idevicesyslog);
         printing = true;
       }
     };
-  }
-
-  /// When using both `idevicesyslog` and `ios-deploy`, exclude `idevicesyslog`
-  /// logs from being added to the stream, expect for the Dart VM Service log
-  /// message, to prevent duplicate logs being printed by [FlutterDevice.startEchoingDeviceLog].
-  bool excludeEchoingDeviceLogs(String line) {
-    if (useBothLogDeviceReaders && !line.contains(globals.kVMServiceMessageRegExp)) {
-      return true;
-    }
-    return false;
   }
 
   @override
@@ -991,6 +1011,12 @@ class IOSDeviceLogReader extends DeviceLogReader {
     idevicesyslogProcess?.kill();
     _iosDeployDebugger?.detach();
   }
+}
+
+enum IOSDeviceLogSource {
+  iosDeploy,
+  idevicesyslog,
+  unifiedLogging,
 }
 
 /// A [DevicePortForwarder] specialized for iOS usage with iproxy.

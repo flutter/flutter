@@ -395,7 +395,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useBothLogDeviceReaders, isFalse);
     });
 
-    testWithoutContext('syslog only sends Dart VM message to stream when useBothLogDeviceReaders is true', () async {
+    testWithoutContext('syslog only sends flutter messages to stream when useBothLogDeviceReaders is true', () async {
       processManager.addCommand(
         FakeCommand(
             command: <String>[
@@ -405,6 +405,8 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 Runner(Flutter)[297] <Notice>: A is for ari
 Runner(Flutter)[297] <Notice>: I is for ichigo
 May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: This is a test
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.
 '''
         ),
       );
@@ -422,7 +424,10 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
 
       expect(logReader.useBothLogDeviceReaders, isTrue);
       expect(processManager, hasNoRemainingExpectations);
-      expect(lines, <String>['flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/']);
+      expect(lines, <String>[
+        'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+        'flutter: This is a test'
+      ]);
     });
 
     testWithoutContext('IOSDeviceLogReader uses both syslog and ios-deploy debugger', () async {
@@ -433,13 +438,15 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
             ],
             stdout: '''
 May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: Check for duplicate
+May 30 13:56:28 Runner(Flutter)[2037] <Notice>: [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.
 '''
         ),
       );
 
       final Stream<String> debuggingLogs = Stream<String>.fromIterable(<String>[
+        '2023-06-01 12:49:01.445093-0500 Runner[2225:533240] flutter: Check for duplicate',
         '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
-        '',
       ]);
 
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
@@ -460,18 +467,13 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
 
       expect(logReader.useBothLogDeviceReaders, isTrue);
       expect(processManager, hasNoRemainingExpectations);
-      expect(
-        lines.contains(
-          '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
-        ),
-        isTrue,
-      );
-      expect(
-        lines.contains(
-          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
-        ),
-        isTrue,
-      );
+      expect(lines.length, 3);
+      expect(lines, containsAll(<String>[
+        '(lldb) 2023-05-30 13:48:52.461894-0500 Runner[2019:1101495] [VERBOSE-2:FlutterDarwinContextMetalImpeller.mm(39)] Using the Impeller rendering backend.',
+        'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+        'flutter: Check for duplicate',
+      ]));
+
     });
 
     testWithoutContext('IOSDeviceLogReader only uses ios-deploy debugger when useBothLogDeviceReaders is false', () async {
