@@ -32,9 +32,9 @@ void main() {
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
 
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
@@ -48,16 +48,16 @@ void main() {
 
   testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
 
     final DummyFlutterCommand subcommand = DummyFlutterCommand(
       name: 'sub',
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
 
     command.addSubcommand(subcommand);
@@ -74,9 +74,9 @@ void main() {
 
   testUsingContext('bool? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
@@ -100,9 +100,9 @@ void main() {
 
   testUsingContext('String? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
@@ -122,9 +122,9 @@ void main() {
 
   testUsingContext('List<String> safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addMultiOption(

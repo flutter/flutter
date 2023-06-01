@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -28,7 +27,6 @@ void main() {
   late Cache fakeCache;
   late BufferLogger logger;
   late String ideviceSyslogPath;
-  final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
 
   setUp(() {
     processManager = FakeProcessManager.empty();
