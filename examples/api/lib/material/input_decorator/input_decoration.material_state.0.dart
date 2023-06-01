@@ -14,8 +14,8 @@ class MaterialStateExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        theme: ThemeData(useMaterial3: true),
         appBar: AppBar(title: const Text('InputDecoration Sample')),
         body: const MaterialStateExample(),
       ),
