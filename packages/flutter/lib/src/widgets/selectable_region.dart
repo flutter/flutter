@@ -1669,12 +1669,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   ///
   /// Returns positive if a is lower, negative if a is higher.
   static int _compareHorizontally(Rect a, Rect b) {
+    // a encloses b.
     if (a.left - b.left < precisionErrorTolerance && a.right - b.right > - precisionErrorTolerance) {
-      // a encloses b.
+      // b ends before a.
+      if (a.right - b.right > precisionErrorTolerance) {
+        return 1;
+      }
       return -1;
     }
+
+    // b encloses a.
     if (b.left - a.left < precisionErrorTolerance && b.right - a.right > - precisionErrorTolerance) {
-      // b encloses a.
+      // a ends before b.
+      if (b.right - a.right > precisionErrorTolerance) {
+        return -1;
+      }
       return 1;
     }
     if ((a.left - b.left).abs() > precisionErrorTolerance) {
@@ -1896,7 +1905,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
-        if (lastSelectionResult == SelectionResult.previous || lastSelectionResult == SelectionResult.next) {
+        if (lastSelectionResult == SelectionResult.next) {
           continue;
         }
         if (selectables[index].value != existingGeometry) {
@@ -1907,13 +1916,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
-        return SelectionResult.end;
+        return lastSelectionResult;
       }
     }
     if (lastSelectionResult == SelectionResult.next) {
       return SelectionResult.next;
-    } else if (lastSelectionResult == SelectionResult.previous) {
-      return SelectionResult.previous;
     }
     return SelectionResult.none;
   }
