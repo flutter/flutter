@@ -15,6 +15,7 @@ class MaterialStateExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        theme: ThemeData(useMaterial3: true),
         appBar: AppBar(title: const Text('InputDecoration Sample')),
         body: const MaterialStateExample(),
       ),
