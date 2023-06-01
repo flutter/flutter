@@ -678,7 +678,7 @@ void main() {
       expansionCallback: (int index, bool isExpanded)
       {
         lastExpanded = index;
-        if(index == 0)
+        if (index == 0)
         {
           topElementExpanded = isExpanded;
           bottomElementExpanded = false;
@@ -744,7 +744,6 @@ void main() {
     expect(find.text('D'), findsNothing);
 
   });
-
 
   testWidgets(
     'didUpdateWidget accounts for toggling between ExpansionPanelList '
