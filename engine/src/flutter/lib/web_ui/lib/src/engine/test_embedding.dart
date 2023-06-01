@@ -30,7 +30,7 @@ class TestHistoryEntry {
 ///
 /// It keeps a list of history entries and event listeners in memory and
 /// manipulates them in order to achieve the desired functionality.
-class TestUrlStrategy extends ui_web.UrlStrategy {
+class TestUrlStrategy implements ui_web.UrlStrategy {
   /// Creates a instance of [TestUrlStrategy] with an empty string as the
   /// path.
   factory TestUrlStrategy() => TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, ''));
