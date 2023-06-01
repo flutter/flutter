@@ -4019,10 +4019,14 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
   auto context = surface.GetGrContext();
 
   typedef void (*glGenTexturesProc)(uint32_t n, uint32_t* textures);
+  typedef void (*glFinishProc)();
+
   glGenTexturesProc glGenTextures;
+  glFinishProc glFinish;
 
   glGenTextures = reinterpret_cast<glGenTexturesProc>(
       surface.GetProcAddress("glGenTextures"));
+  glFinish = reinterpret_cast<glFinishProc>(surface.GetProcAddress("glFinish"));
 
   uint32_t name;
   glGenTextures(1, &name);
@@ -4067,6 +4071,8 @@ TEST_F(EmbedderTest, ExternalTextureGLRefreshedTooOften) {
                   DlImageSampling::kLinear);
 
   EXPECT_TRUE(resolve_called);
+
+  glFinish();
 }
 
 TEST_F(EmbedderTest,
