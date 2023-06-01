@@ -2781,6 +2781,7 @@
 ../../../third_party/skia/src/codec/BUILD.bazel
 ../../../third_party/skia/src/core/BUILD.bazel
 ../../../third_party/skia/src/effects/BUILD.bazel
+../../../third_party/skia/src/effects/colorfilters/BUILD.bazel
 ../../../third_party/skia/src/effects/imagefilters/BUILD.bazel
 ../../../third_party/skia/src/encode/BUILD.bazel
 ../../../third_party/skia/src/fonts/BUILD.bazel
