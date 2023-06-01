@@ -471,7 +471,10 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
-    '--ci',
+    // Use CI flag when running devicelab tests, except for `packages` commands.
+    // `packages` commands effectively runs the `pub` tool, which does not have
+    // the same allowed args.
+    if (!command.startsWith('packages')) '--ci',
   ];
 }
 
