@@ -30,6 +30,22 @@ void main() {
     }
   }));
 
+  testUsingContext('Global arg results are available in FlutterCommands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+    );
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(command.globalResults, isNotNull);
+    expect(command.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
   testUsingContext('bool? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
         commandFunction: () async {

@@ -289,7 +289,6 @@ void main() {
           device: device,
           app: appPackage,
           iMobileDevice: IMobileDevice.test(processManager: FakeProcessManager.any()),
-          platform: macPlatform,
         );
         logReader.idevicesyslogProcess = process;
         return logReader;

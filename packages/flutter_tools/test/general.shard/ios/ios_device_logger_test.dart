@@ -75,7 +75,6 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
           cache: fakeCache,
           logger: logger,
         ),
-        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -104,7 +103,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
-        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -139,7 +137,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
-        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -185,7 +182,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
-        platform: macPlatform,
       );
       logReader.connectedVMService = vmService;
 
@@ -228,7 +224,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
-        platform: macPlatform,
       );
       logReader.connectedVMService = vmService;
 
@@ -265,7 +260,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
-        platform: macPlatform,
       );
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
@@ -290,7 +284,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
-        platform: macPlatform,
       );
       final Completer<void> streamComplete = Completer<void>();
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
@@ -310,7 +303,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
-        platform: macPlatform,
       );
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       logReader.debuggerStream = iosDeployDebugger;
@@ -335,7 +327,6 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         useSyslog: false,
-        platform: macPlatform,
       );
       Object? exception;
       StackTrace? trace;
@@ -362,13 +353,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 
   group('both syslog and debugger stream', () {
 
-    testWithoutContext('useBothLogDeviceReaders is true when user is swarming and sdk is at least 16', () {
-      final FakePlatform macPlatform = FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{
-          'USER': 'swarming',
-        },
-      );
+    testWithoutContext('useBothLogDeviceReaders is true when CI option is true and sdk is at least 16', () {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -376,20 +361,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        usingCISystem: true,
         majorSdkVersion: 16,
-        platform: macPlatform,
       );
 
       expect(logReader.useBothLogDeviceReaders, isTrue);
     });
 
     testWithoutContext('useBothLogDeviceReaders is false when sdk is less than 16', () {
-      final FakePlatform macPlatform = FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{
-          'USER': 'swarming',
-        },
-      );
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -397,20 +376,14 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           cache: fakeCache,
           logger: logger,
         ),
+        usingCISystem: true,
         majorSdkVersion: 15,
-        platform: macPlatform,
       );
 
       expect(logReader.useBothLogDeviceReaders, isFalse);
     });
 
-    testWithoutContext('useBothLogDeviceReaders is false when user is not swarming', () {
-      final FakePlatform macPlatform = FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{
-          'USER': 'no',
-        },
-      );
+    testWithoutContext('useBothLogDeviceReaders is false when CI option is false', () {
       final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
         iMobileDevice: IMobileDevice(
           artifacts: artifacts,
@@ -419,20 +392,12 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           logger: logger,
         ),
         majorSdkVersion: 16,
-        platform: macPlatform,
       );
 
       expect(logReader.useBothLogDeviceReaders, isFalse);
     });
 
     testWithoutContext('syslog only sends Dart VM message to stream when useBothLogDeviceReaders is true', () async {
-      final FakePlatform macPlatform = FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{
-          'USER': 'swarming',
-        },
-      );
-
       processManager.addCommand(
         FakeCommand(
             command: <String>[
@@ -452,8 +417,8 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
           cache: fakeCache,
           logger: logger,
         ),
+        usingCISystem: true,
         majorSdkVersion: 16,
-        platform: macPlatform,
       );
       final List<String> lines = await logReader.logLines.toList();
 
@@ -463,13 +428,6 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
     });
 
     testWithoutContext('IOSDeviceLogReader uses both syslog and ios-deploy debugger', () async {
-      final FakePlatform macPlatform = FakePlatform(
-        operatingSystem: 'macos',
-        environment: <String, String>{
-          'USER': 'swarming',
-        },
-      );
-
       processManager.addCommand(
         FakeCommand(
             command: <String>[
@@ -493,8 +451,8 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
           cache: fakeCache,
           logger: logger,
         ),
+        usingCISystem: true,
         majorSdkVersion: 16,
-        platform: macPlatform,
       );
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
@@ -532,7 +490,6 @@ May 30 13:56:28 Runner(Flutter)[2037] <Notice>: flutter: The Dart VM service is 
           logger: logger,
         ),
         majorSdkVersion: 16,
-        platform: macPlatform,
       );
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;

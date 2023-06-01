@@ -482,7 +482,10 @@ class IOSDevice extends Device {
       int installationResult = 1;
       if (debuggingOptions.debuggingEnabled) {
         _logger.printTrace('Debugging is enabled, connecting to vmService');
-        final DeviceLogReader deviceLogReader = getLogReader(app: package);
+        final DeviceLogReader deviceLogReader = getLogReader(
+          app: package,
+          usingCISystem: debuggingOptions.usingCISystem,
+        );
 
         // If the device supports syslog reading, prefer launching the app without
         // attaching the debugger to avoid the overhead of the unnecessary extra running process.
@@ -629,13 +632,14 @@ class IOSDevice extends Device {
   DeviceLogReader getLogReader({
     covariant IOSApp? app,
     bool includePastLogs = false,
+    bool usingCISystem = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS devices.');
     return _logReaders.putIfAbsent(app, () => IOSDeviceLogReader.create(
       device: this,
       app: app,
       iMobileDevice: _iMobileDevice,
-      platform: _platform,
+      usingCISystem: usingCISystem,
     ));
   }
 
@@ -750,20 +754,20 @@ class IOSDeviceLogReader extends DeviceLogReader {
     this._deviceId,
     this.name,
     String appName,
-    Platform platform,
+    bool usingCISystem,
   ) : // Match for lines for the runner in syslog.
       //
       // iOS 9 format:  Runner[297] <Notice>:
       // iOS 10 format: Runner(Flutter)[297] <Notice>:
       _runnerLineRegex = RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: '),
-      _platform = platform;
+      _usingCISystem = usingCISystem;
 
   /// Create a new [IOSDeviceLogReader].
   factory IOSDeviceLogReader.create({
     required IOSDevice device,
     IOSApp? app,
     required IMobileDevice iMobileDevice,
-    required Platform platform,
+    bool usingCISystem = false,
   }) {
     final String appName = app?.name?.replaceAll('.app', '') ?? '';
     return IOSDeviceLogReader._(
@@ -772,7 +776,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       device.id,
       device.name,
       appName,
-      platform
+      usingCISystem,
     );
   }
 
@@ -780,7 +784,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   factory IOSDeviceLogReader.test({
     required IMobileDevice iMobileDevice,
     bool useSyslog = true,
-    required Platform platform,
+    bool usingCISystem = false,
     int? majorSdkVersion,
   }) {
     final int sdkVersion;
@@ -790,7 +794,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       sdkVersion = useSyslog ? 12 : 13;
     }
     return IOSDeviceLogReader._(
-      iMobileDevice, sdkVersion, '1234', 'test', 'Runner', platform);
+      iMobileDevice, sdkVersion, '1234', 'test', 'Runner', usingCISystem);
   }
 
   @override
@@ -798,7 +802,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   final int _majorSdkVersion;
   final String _deviceId;
   final IMobileDevice _iMobileDevice;
-  final Platform _platform;
+  final bool _usingCISystem;
 
   // Matches a syslog line from the runner.
   RegExp _runnerLineRegex;
@@ -907,12 +911,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Strip off the logging metadata (leave the category), or just echo the line.
   String _debuggerLineHandler(String line) => _debuggerLoggingRegex.firstMatch(line)?.group(1) ?? line;
 
-  /// Use both logs from `idevicesyslog` and `ios-deploy` when debugging from a CI bot
+  /// Use both logs from `idevicesyslog` and `ios-deploy` when debugging from CI system
   /// since sometimes `ios-deploy` does not return the Dart VM url:
   /// https://github.com/flutter/flutter/issues/121231
   bool get useBothLogDeviceReaders {
-    final String? user = _platform.environment['USER'];
-    if (user != null && user == 'swarming' && _majorSdkVersion >= 16) {
+    if (_usingCISystem && _majorSdkVersion >= 16) {
       return true;
     }
     return false;
