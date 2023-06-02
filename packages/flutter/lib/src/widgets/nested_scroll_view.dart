@@ -1469,7 +1469,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     coordinator.updateCanDrag();
   }
 
-  void updateCanDrag(bool innerCanDrag,) {
+  void updateCanDrag(bool innerCanDrag) {
     // This is only called for the outer position
     assert(coordinator._outerPosition == this);
     context.setCanDrag(
@@ -1477,7 +1477,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       // the whole NestedScrollView, since it is possible to have different
       // ScrollPhysics for the inner and outer positions.
       physics.shouldAcceptUserOffset(this)
-      || innerCanDrag,
+        || innerCanDrag,
     );
   }
 

@@ -2993,7 +2993,10 @@ void main() {
                 return CustomScrollView(
                   slivers: <Widget>[
                     SliverList.builder(
-                      itemCount: bodyLength == _BodyLength.short ? 10 : 100,
+                      itemCount: switch (bodyLength) {
+                        _BodyLength.short => 10,
+                        _BodyLength.long => 100,
+                      },
                       itemBuilder: (_, int index) => Text('Item $index'),
                     ),
                   ],
