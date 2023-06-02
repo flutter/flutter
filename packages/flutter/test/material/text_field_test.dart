@@ -15677,7 +15677,7 @@ void main() {
 
       expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
 
-      // set contextMenuBuilder be null
+      // Set contextMenuBuilder to null.
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -15690,7 +15690,7 @@ void main() {
         ),
       );
 
-      // trigger build one more time...
+      // Trigger build one more time...
       await tester.pumpWidget(MaterialApp(
           home: Material(
           child: Padding(
