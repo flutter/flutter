@@ -788,14 +788,14 @@ void main() {
   });
 
   testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const SubCategoryScreenView(),
+    await tester.pumpWidget(const MaterialApp(
+      home: SubCategoryScreenView(),
     ));
 
     expect(RebuildTracker.count, 1);
 
     // We drag up to fully collapse the space bar.
-    for (var i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
       await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
       await tester.pumpAndSettle();
     }
@@ -835,19 +835,19 @@ class RebuildTracker extends StatelessWidget {
   @override
   Widget build(BuildContext context)  {
     count++;
-    return Container(width: 100, height: 100);
+    return const SizedBox(width: 100, height: 100);
   }
 }
 
 class SubCategoryScreenView extends StatefulWidget {
   const SubCategoryScreenView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static const Key scrollKey = Key('orange box');
 
   @override
-  _SubCategoryScreenViewState createState() => _SubCategoryScreenViewState();
+  State<SubCategoryScreenView> createState() => _SubCategoryScreenViewState();
 }
 
 class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
@@ -857,25 +857,22 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Test"),
+        title: const Text('Test'),
       ),
       body: CustomScrollView(
         key: SubCategoryScreenView.scrollKey,
         slivers: <Widget>[
           SliverAppBar(
-            pinned: false,
-            snap: false,
             leading: const SizedBox(),
-            floating: false,
             expandedHeight: MediaQuery.of(context).size.width / 1.7,
             collapsedHeight: 0,
             toolbarHeight: 0,
             titleSpacing: 0,
             leadingWidth: 0,
-            flexibleSpace: FlexibleSpaceBar(
+            flexibleSpace: const FlexibleSpaceBar(
               background: AspectRatio(
                 aspectRatio: 1.7,
-                child: const RebuildTracker(),
+                child: RebuildTracker(),
               ),
             ),
           ),
