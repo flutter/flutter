@@ -110,7 +110,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_virtual_device", "version": "31"},
+          {"dependency": "android_virtual_device", "version": "33"},
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"}
         ]
       upload_packages: "true"
