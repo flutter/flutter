@@ -1463,7 +1463,7 @@ abstract class DiagnosticsNode {
     DiagnosticLevel level = DiagnosticLevel.info,
     bool allowWrap = true,
   }) {
-    return DiagnosticsProperty<void>(
+    return DiagnosticsProperty<Object>(
       '',
       null,
       description: message,
@@ -1526,7 +1526,7 @@ abstract class DiagnosticsNode {
   String? get emptyBodyDescription => null;
 
   /// The actual object this is diagnostics data for.
-  Object? get value;
+  WeakReference<Object>? get value;
 
   /// Hint for how the node should be displayed.
   final DiagnosticsTreeStyle? style;
@@ -1824,7 +1824,7 @@ abstract class DiagnosticsNode {
 ///  * [DiagnosticsNode.message], which serves the same role for messages
 ///    without a clear property name.
 ///  * [StringProperty], which is a better fit for properties with string values.
-class MessageProperty extends DiagnosticsProperty<void> {
+class MessageProperty extends DiagnosticsProperty<Object> {
   /// Create a diagnostics property that displays a message.
   ///
   /// Messages have no concrete [value] (so [value] will return null). The
@@ -1874,7 +1874,7 @@ class StringProperty extends DiagnosticsProperty<String> {
 
   @override
   String valueToString({ TextTreeConfiguration? parentConfiguration }) {
-    String? text = _description ?? value;
+    String? text = _description ?? value?.target;
     if (parentConfiguration != null &&
         !parentConfiguration.lineBreakProperties &&
         text != null) {
@@ -1988,7 +1988,7 @@ class DoubleProperty extends _NumProperty<double> {
   }) : super.lazy();
 
   @override
-  String numberToString() => debugFormatDouble(value);
+  String numberToString() => debugFormatDouble(value?.target);
 }
 
 /// An int valued property with an optional unit the value is measured in.
@@ -2044,7 +2044,7 @@ class PercentProperty extends DoubleProperty {
 
   @override
   String numberToString() {
-    final double? v = value;
+    final double? v = value?.target;
     if (v == null) {
       return value.toString();
     }
@@ -2514,7 +2514,7 @@ typedef ComputePropertyValueCallback<T> = T? Function();
 ///
 /// The [showSeparator] property indicates whether a separator should be placed
 /// between the property [name] and its [value].
-class DiagnosticsProperty<T> extends DiagnosticsNode {
+class DiagnosticsProperty<T extends Object> extends DiagnosticsNode {
   /// Create a diagnostics property.
   ///
   /// The [showName], [showSeparator], [style], [missingIfNull], and [level]
@@ -2604,7 +2604,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
   @override
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
-    final T? v = value;
+    final T? v = value?.target;
     List<Map<String, Object?>>? properties;
     if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
@@ -2744,7 +2744,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   ///
   ///  * [valueToString], which converts the property value to a string.
   @override
-  T? get value {
+  WeakReference<T>? get value {
     _maybeCacheValue();
     return _value;
   }
