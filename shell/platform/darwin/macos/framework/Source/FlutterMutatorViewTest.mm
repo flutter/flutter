@@ -301,6 +301,45 @@ TEST(FlutterMutatorViewTest, RoundRectClipsToSimpleRectangle) {
   EXPECT_EQ(mutatorView.pathClipViews.count, 0ul);
 }
 
+// Ensure that the mutator view, clip views, and container all use a flipped y axis. The transforms
+// sent from the framework assume this, and so aside from the consistency with every other embedder,
+// we can avoid a lot of extra math.
+TEST(FlutterMutatorViewTest, ViewsSetIsFlipped) {
+  NSView* platformView = [[NSView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+
+  std::vector<FlutterPlatformViewMutation> mutations{
+      {
+          .type = kFlutterPlatformViewMutationTypeClipRoundedRect,
+          .clip_rounded_rect =
+              FlutterRoundedRect{
+                  .rect = FlutterRect{110, 60, 150, 150},
+                  .upper_left_corner_radius = FlutterSize{10, 10},
+                  .upper_right_corner_radius = FlutterSize{10, 10},
+                  .lower_right_corner_radius = FlutterSize{10, 10},
+                  .lower_left_corner_radius = FlutterSize{10, 10},
+              },
+      },
+      {
+          .type = kFlutterPlatformViewMutationTypeTransformation,
+          .transformation =
+              FlutterTransformation{
+                  .scaleX = 1,
+                  .transX = 100,
+                  .scaleY = 1,
+                  .transY = 50,
+              },
+      },
+  };
+
+  ApplyFlutterLayer(mutatorView, FlutterSize{30, 20}, mutations);
+
+  EXPECT_TRUE(mutatorView.isFlipped);
+  ASSERT_EQ(mutatorView.pathClipViews.count, 1ul);
+  EXPECT_TRUE(mutatorView.pathClipViews.firstObject.isFlipped);
+  EXPECT_TRUE(mutatorView.platformViewContainer.isFlipped);
+}
+
 TEST(FlutterMutatorViewTest, RoundRectClipsToPath) {
   NSView* platformView = [[NSView alloc] init];
   FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
