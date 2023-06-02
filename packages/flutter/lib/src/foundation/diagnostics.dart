@@ -2543,7 +2543,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : _description = description,
        _valueComputed = true,
-       _value = value,
+       _value = WeakValue<T>(value),
        _computeValue = null,
        ifNull = ifNull ?? (missingIfNull ? 'MISSING' : null),
        _defaultLevel = level,
@@ -2582,7 +2582,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   }) : assert(defaultValue == kNoDefaultValue || defaultValue is T?),
        _description = description,
        _valueComputed = false,
-       _value = null,
+       _value = WeakValue<T>(null),
        _computeValue = computeValue,
        _defaultLevel = level,
        ifNull = ifNull ?? (missingIfNull ? 'MISSING' : null),
@@ -2746,10 +2746,10 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   T? get value {
     _maybeCacheValue();
-    return _value;
+    return _value.value;
   }
 
-  T? _value;
+  WeakValue<T> _value;
 
   bool _valueComputed;
 
@@ -2771,12 +2771,12 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     _valueComputed = true;
     assert(_computeValue != null);
     try {
-      _value = _computeValue!();
+      _value = WeakValue<T>(_computeValue!(), keepAlive: true);
     } catch (exception) {
       // The error is reported to inspector; rethrowing would destroy the
       // debugging experience.
       _exception = exception;
-      _value = null;
+      _value = WeakValue<T>(null);
     }
   }
 
@@ -2869,12 +2869,14 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   /// The [value] argument must not be null.
   DiagnosticableNode({
     super.name,
-    required this.value,
+    required T value,
     required super.style,
-  });
+  }): _value = WeakValue<T>(value, keepAlive: true);
 
   @override
-  final T value;
+  T get value => _value.value!;
+
+  final WeakValue<T> _value;
 
   DiagnosticPropertiesBuilder? _cachedBuilder;
 
@@ -3485,7 +3487,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
     bool showName = true,
     super.showSeparator,
     super.linePrefix,
-    this.value,
+    Object? objectValue,
     String? description,
     this.level = DiagnosticLevel.info,
     this.allowTruncate = false,
@@ -3494,6 +3496,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
   }) : _description = description ?? '',
        _children = children,
        _properties = properties,
+       _value = WeakValue<Object>(objectValue),
     super(
     showName: showName && name != null,
   );
@@ -3506,8 +3509,10 @@ class DiagnosticsBlock extends DiagnosticsNode {
 
   final String _description;
 
+  final WeakValue<Object> _value;
+
   @override
-  final Object? value;
+  Object? get value => _value.value;
 
   @override
   final bool allowTruncate;
@@ -3675,5 +3680,40 @@ class _DefaultDiagnosticsSerializationDelegate implements DiagnosticsSerializati
       subtreeDepth: subtreeDepth ?? this.subtreeDepth,
       includeProperties: includeProperties ?? this.includeProperties,
     );
+  }
+}
+
+/// A value that can be weakly held.
+@visibleForTesting
+class WeakValue<T> {
+
+  /// Creates a weak value.
+  ///
+  /// If [keepAlive] is true, then the value will be strongly held.
+  WeakValue(T? value, {bool keepAlive = false}) {
+    if (value == null) {
+      return;
+    }
+
+    // If weak reference does not support T, then use strong reference.
+    // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
+    if (keepAlive || value is String || value is num || value is bool || value is Record) {
+      _value = value;
+      return;
+    }
+
+    _ref = WeakReference<Object>(value);
+  }
+
+  WeakReference<Object>? _ref;
+
+  T? _value;
+
+  /// The value.
+  T? get value {
+    if (_ref != null) {
+      return _ref!.target as T?;
+    }
+    return _value;
   }
 }
