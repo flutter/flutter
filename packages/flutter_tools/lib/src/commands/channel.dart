@@ -6,6 +6,7 @@ import '../base/common.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../version.dart';
 
 class ChannelCommand extends FlutterCommand {
@@ -40,7 +41,7 @@ class ChannelCommand extends FlutterCommand {
       case 0:
         await _listChannels(
           showAll: boolArg('all'),
-          verbose: globalResults?['verbose'] == true,
+          verbose: globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
         );
         return FlutterCommandResult.success();
       case 1:

@@ -304,7 +304,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get packagesPath => globalResults?['packages'] as String?;
+  String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
+
+  /// Whether flutter is being run from our CI.
+  bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
@@ -1634,17 +1637,30 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   ///
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  bool boolArg(String name) => argResults![name] as bool;
+  bool boolArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as bool;
+    }
+    return argResults![name] as bool;
+  }
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  String? stringArg(String name) => argResults![name] as String?;
+  String? stringArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as String?;
+    }
+    return argResults![name] as String?;
+  }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) {
-    return argResults![name]! as List<String>? ?? <String>[];
+  List<String> stringsArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as List<String>;
+    }
+    return argResults![name] as List<String>;
   }
 }
 

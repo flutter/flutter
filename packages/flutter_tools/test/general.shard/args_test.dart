@@ -30,11 +30,53 @@ void main() {
     }
   }));
 
+  testUsingContext('Global arg results are available in FlutterCommands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(command.globalResults, isNotNull);
+    expect(command.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
+  testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    final DummyFlutterCommand subcommand = DummyFlutterCommand(
+      name: 'sub',
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    command.addSubcommand(subcommand);
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    runner.addCommand(subcommand);
+    await runner.run(<String>['dummy', 'sub', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(subcommand.globalResults, isNotNull);
+    expect(subcommand.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
   testUsingContext('bool? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
@@ -58,9 +100,9 @@ void main() {
 
   testUsingContext('String? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
@@ -80,9 +122,9 @@ void main() {
 
   testUsingContext('List<String> safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addMultiOption(

@@ -25,6 +25,7 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 /// just the function signature of the [print] function.
 /// The Object arg may be null.
@@ -811,7 +812,7 @@ Delete a device from the config file.
   Future<FlutterCommandResult> runCommand() async {
     checkFeatureEnabled();
 
-    final String? id = globalResults!['device-id'] as String?;
+    final String? id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
     if (id == null || !customDevicesConfig.contains(id)) {
       throwToolExit('Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"');
     }
