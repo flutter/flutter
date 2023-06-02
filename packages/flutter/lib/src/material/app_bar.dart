@@ -31,6 +31,8 @@ import 'theme.dart';
 // late String _logoAsset;
 // double _myToolbarHeight = 250.0;
 
+typedef _FlexibleConfigBuilder = _ScrollUnderFlexibleConfig Function(BuildContext);
+
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 const double _kMaxTitleTextScaleFactor = 1.34; // TODO(perc): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
 
@@ -1259,17 +1261,15 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
-    final Widget? effectiveTitle;
-    if (variant == _SliverAppVariant.small) {
-      effectiveTitle = title;
-    } else {
-      effectiveTitle = AnimatedOpacity(
+    final Widget? effectiveTitle = switch (variant) {
+      _SliverAppVariant.small                             => title,
+      _SliverAppVariant.medium || _SliverAppVariant.large => AnimatedOpacity(
         opacity: isScrolledUnder ? 1 : 0,
         duration: const Duration(milliseconds: 500),
         curve: const Cubic(0.2, 0.0, 0.0, 1.0),
         child: title,
-      );
-    }
+      ),
+    };
 
     final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
@@ -1971,7 +1971,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         effectiveFlexibleSpace = widget.flexibleSpace ?? _ScrollUnderFlexibleSpace(
           title: widget.title,
           foregroundColor: widget.foregroundColor,
-          variant: _ScrollUnderFlexibleVariant.medium,
+          configBuilder: _MediumScrollUnderFlexibleConfig.new,
           primary: widget.primary,
           titleTextStyle: widget.titleTextStyle,
           bottomHeight: bottomHeight,
@@ -1984,7 +1984,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         effectiveFlexibleSpace = widget.flexibleSpace ?? _ScrollUnderFlexibleSpace(
           title: widget.title,
           foregroundColor: widget.foregroundColor,
-          variant: _ScrollUnderFlexibleVariant.large,
+          configBuilder: _LargeScrollUnderFlexibleConfig.new,
           primary: widget.primary,
           titleTextStyle: widget.titleTextStyle,
           bottomHeight: bottomHeight,
@@ -2081,13 +2081,11 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   }
 }
 
-enum _ScrollUnderFlexibleVariant { medium, large }
-
 class _ScrollUnderFlexibleSpace extends StatelessWidget {
   const _ScrollUnderFlexibleSpace({
     this.title,
     this.foregroundColor,
-    required this.variant,
+    required this.configBuilder,
     this.primary = true,
     this.titleTextStyle,
     required this.bottomHeight,
@@ -2095,65 +2093,37 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
 
   final Widget? title;
   final Color? foregroundColor;
-  final _ScrollUnderFlexibleVariant variant;
+  final _FlexibleConfigBuilder configBuilder;
   final bool primary;
   final TextStyle? titleTextStyle;
   final double bottomHeight;
 
   @override
   Widget build(BuildContext context) {
-    late final ThemeData theme = Theme.of(context);
     late final AppBarTheme appBarTheme = AppBarTheme.of(context);
-    final AppBarTheme defaults = theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
+    late final AppBarTheme defaults = Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), _kMaxTitleTextScaleFactor); // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
     final double collapsedHeight = settings.minExtent - topPadding - bottomHeight;
-    final double scrollUnderHeight = settings.maxExtent - (settings.minExtent / textScaleFactor) + bottomHeight;
-    final _ScrollUnderFlexibleConfig config;
-    switch (variant) {
-      case _ScrollUnderFlexibleVariant.medium:
-        config = _MediumScrollUnderFlexibleConfig(context);
-      case _ScrollUnderFlexibleVariant.large:
-        config = _LargeScrollUnderFlexibleConfig(context);
-    }
+    final _ScrollUnderFlexibleConfig config = configBuilder(context);
 
-    late final Widget? expandedTitle;
-    if (title != null) {
-      final TextStyle? expandedTextStyle = titleTextStyle
-        ?? appBarTheme.titleTextStyle
-        ?? config.expandedTextStyle?.copyWith(
-             color: foregroundColor ?? appBarTheme.foregroundColor ?? defaults.foregroundColor,
-           );
-      expandedTitle = config.expandedTextStyle != null
-        ? DefaultTextStyle(
-            style: expandedTextStyle!,
-            child: title!,
-          )
-        : title;
-    }
+    final TextStyle? expandedTextStyle = titleTextStyle
+      ?? appBarTheme.titleTextStyle
+      ?? config.expandedTextStyle?.copyWith(color: foregroundColor ?? appBarTheme.foregroundColor ?? defaults.foregroundColor);
 
-    EdgeInsetsGeometry expandedTitlePadding() {
-      final EdgeInsets padding = config.expandedTitlePadding!.resolve(Directionality.of(context));
-      if (bottomHeight > 0) {
-        return EdgeInsets.fromLTRB(padding.left, 0, padding.right, bottomHeight);
-      }
-      if (theme.useMaterial3) {
-        final TextStyle textStyle = config.expandedTextStyle!;
-        // Substract the bottom line height from the bottom padding.
-        // TODO(tahatesser): Figure out why this is done.
-        // https://github.com/flutter/flutter/issues/120672
-        final double adjustBottomPadding = padding.bottom
-          - (textStyle.fontSize! * textStyle.height! - textStyle.fontSize!) / 2;
-        return EdgeInsets.fromLTRB(
-          padding.left,
-          0,
-          padding.right,
-          adjustBottomPadding / textScaleFactor,
-        );
-      }
-      return padding;
-    }
+    final Widget? expandedTitle = switch ((title, expandedTextStyle)) {
+      (null,               _)                         => null,
+      (final Widget title, null)                      => title,
+      (final Widget title, final TextStyle textStyle) => DefaultTextStyle(style: textStyle, child: title),
+    };
+
+    final EdgeInsets resolvedTitlePadding = config.expandedTitlePadding.resolve(Directionality.of(context));
+    final EdgeInsetsGeometry expandedTitlePadding = bottomHeight > 0
+      // Reserve space for the bottom toolbar (AppBar.bottom),which is a sibling
+      // of this widget, on the parent Stack.
+      ? resolvedTitlePadding.copyWith(bottom: bottomHeight)
+      : resolvedTitlePadding;
 
     // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
     // title to keep the visual hierarchy the same even with larger font
@@ -2162,20 +2132,17 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     // `MediaQuery.textScaleFactorOf(context)`.
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+      // This column will assume the full height of the parent Stack.
       child: Column(
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: collapsedHeight + topPadding),
-          ),
+          Padding(padding: EdgeInsets.only(top: collapsedHeight + topPadding)),
           Flexible(
             child: ClipRect(
               child: OverflowBox(
-                minHeight: scrollUnderHeight,
-                maxHeight: scrollUnderHeight,
-                alignment: Alignment.bottomLeft,
-                child: Container(
-                  alignment: AlignmentDirectional.bottomStart,
-                  padding: expandedTitlePadding(),
+                maxHeight: double.infinity,
+                alignment: AlignmentDirectional.bottomStart,
+                child: Padding(
+                  padding: expandedTitlePadding,
                   child: expandedTitle,
                 ),
               ),
@@ -2190,7 +2157,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
 mixin _ScrollUnderFlexibleConfig {
   TextStyle? get collapsedTextStyle;
   TextStyle? get expandedTextStyle;
-  EdgeInsetsGeometry? get expandedTitlePadding;
+  EdgeInsetsGeometry get expandedTitlePadding;
 }
 
 // Hand coded defaults based on Material Design 2.
@@ -2298,7 +2265,7 @@ class _MediumScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     _textTheme.headlineSmall?.apply(color: _colors.onSurface);
 
   @override
-  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
+  EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
 }
 
 class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
@@ -2321,7 +2288,7 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     _textTheme.headlineMedium?.apply(color: _colors.onSurface);
 
   @override
-  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
+  EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
 }
 
 // END GENERATED TOKEN PROPERTIES - AppBar

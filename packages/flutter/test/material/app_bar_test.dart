@@ -1138,7 +1138,12 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, closeTo(96.0, 0.1));
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    expect(
+      titleOffset.dy,
+      renderSliverAppBar.geometry!.scrollExtent - 20.0,
+      reason: 'bottom padding of a medium expanded title should be 20.',
+    );
 
     // Test the expanded title default color.
     expect(
@@ -1223,8 +1228,12 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, closeTo(128.0, 0.1));
-
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    expect(
+      titleOffset.dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
 
     // Test the expanded title default color.
     expect(
@@ -4704,13 +4713,13 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    expect(tester.getRect(expandedTitle).height, closeTo(31.9, 0.1));
+    expect(tester.getRect(expandedTitle).height, 32.0);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+    expect(tester.getRect(expandedTitle).height, 43.0);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+    expect(tester.getRect(expandedTitle).height, 43.0);
   });
 
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
@@ -4758,7 +4767,7 @@ void main() {
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
   });
 
-  testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium expanded title bottom position is fixed when textScaleFactor changes', (WidgetTester tester) async {
     const String title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -4787,27 +4796,29 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, 64.0);
-    Offset titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(96.0, 0.1));
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 20.0,
+      reason: 'bottom padding of a medium expanded title should be 20.',
+    );
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(57.0, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(100.0, 0.1));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 20.0,
+      reason: 'bottom padding of a medium expanded title should be 20.',
+    );
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(57.0, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(100.0, 0.1));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 20.0,
+      reason: 'bottom padding of a medium expanded title should be 20.',
+    );
   });
 
-  testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium expanded title bottom position is fixed when textScaleFactor changes', (WidgetTester tester) async {
     const String title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -4834,29 +4845,27 @@ void main() {
     }
 
     await tester.pumpWidget(buildAppBar());
-    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    // A bug in the HTML renderer and/or Chrome 96+ causes a
-    // discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
-    Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(hasIssue99933 ? 91.0 : 92.0, 0.1));
-    Offset titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(128.0, 0.1));
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(86.1, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(134.1, 0.1));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(86.1, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(134.1, 0.1));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
   });
 
   group('AppBar.forceMaterialTransparency', () {
