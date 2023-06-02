@@ -33,6 +33,10 @@ class ViewConfiguration {
   final double devicePixelRatio;
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
+  ///
+  /// The matrix translates points from the local coordinate system of the
+  /// app (in logical pixels) to the global coordinate system of the
+  /// [FlutterView] (in physical pixels).
   Matrix4 toMatrix() {
     return Matrix4.diagonal3Values(devicePixelRatio, devicePixelRatio, 1.0);
   }
@@ -212,6 +216,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (child != null) {
       context.paintChild(child!, offset);
     }
+    assert(() {
+      final List<DebugPaintCallback> localCallbacks = _debugPaintCallbacks.toList();
+      for (final DebugPaintCallback paintCallback in localCallbacks) {
+        if (_debugPaintCallbacks.contains(paintCallback)) {
+          paintCallback(context, offset, this);
+        }
+      }
+      return true;
+    }());
   }
 
   @override
@@ -381,4 +394,47 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('semantics enabled'));
     }
   }
+
+  static final List<DebugPaintCallback> _debugPaintCallbacks = <DebugPaintCallback>[];
+
+  /// Registers a [DebugPaintCallback] that is called every time a [RenderView]
+  /// repaints in debug mode.
+  ///
+  /// The callback may paint a debug overlay on top of the content of the
+  /// [RenderView] provided to the callback. Callbacks are invoked in the
+  /// order they were registered in.
+  ///
+  /// Neither registering a callback nor the continued presence of a callback
+  /// changes how often [RenderView]s are repainted. It is up to the owner of
+  /// the callback to call [markNeedsPaint] on any [RenderView] for which it
+  /// wants to update the painted overlay.
+  ///
+  /// Does nothing in release mode.
+  static void debugAddPaintCallback(DebugPaintCallback callback) {
+    assert(() {
+      _debugPaintCallbacks.add(callback);
+      return true;
+    }());
+  }
+
+  /// Removes a callback registered with [debugAddPaintCallback].
+  ///
+  /// It does not schedule a frame to repaint the [RenderView]s without the
+  /// overlay painted by the removed callback. It is up to the owner of the
+  /// callback to call [markNeedsPaint] on the relevant [RenderView]s to
+  /// repaint them without the overlay.
+  ///
+  /// Does nothing in release mode.
+  static void debugRemovePaintCallback(DebugPaintCallback callback) {
+    assert(() {
+      _debugPaintCallbacks.remove(callback);
+      return true;
+    }());
+  }
 }
+
+/// A callback for painting a debug overlay on top of the provided [RenderView].
+///
+/// Used by [RenderView.debugAddPaintCallback] and
+/// [RenderView.debugRemovePaintCallback].
+typedef DebugPaintCallback = void Function(PaintingContext context, Offset offset, RenderView renderView);
