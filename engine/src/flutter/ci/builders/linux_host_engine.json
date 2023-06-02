@@ -224,6 +224,19 @@
                         "--engine-capture-core-dump"
                     ],
                     "script": "flutter/testing/run_tests.py"
+                },
+                {
+                    "language": "bash",
+                    "name": "Generate metrics test",
+                    "script": "flutter/testing/benchmark/generate_metrics.sh"
+                },
+                {
+                    "language": "bash",
+                    "name": "Upload metrics dry-run",
+		    "parameters": [
+                        "--no-upload"
+                    ],
+                    "script": "flutter/testing/benchmark/upload_metrics.sh"
                 }
             ]
         }

@@ -5,7 +5,7 @@
 # found in the LICENSE file.
 
 # This script is currently used only by automation to collect and upload
-# metrics.
+# metrics and expects $ENGINE_PATH to be set.
 
 set -ex
 
@@ -37,14 +37,14 @@ DART="${DART_SDK_DIR}/bin/dart"
 
 cd "$SCRIPT_DIR"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  --json ../../../out/host_release/txt_benchmarks.json "$@"
+  --json $ENGINE_PATH/src/out/host_release/txt_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  --json ../../../out/host_release/fml_benchmarks.json "$@"
+  --json $ENGINE_PATH/src/out/host_release/fml_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  --json ../../../out/host_release/shell_benchmarks.json "$@"
+  --json $ENGINE_PATH/src/out/host_release/shell_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  --json ../../../out/host_release/ui_benchmarks.json "$@"
+  --json $ENGINE_PATH/src/out/host_release/ui_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  --json ../../../out/host_release/display_list_builder_benchmarks.json "$@"
+  --json $ENGINE_PATH/src/out/host_release/display_list_builder_benchmarks.json "$@"
 "$DART" --disable-dart-dev bin/parse_and_send.dart \
-  --json ../../../out/host_release/geometry_benchmarks.json "$@"
+  --json $ENGINE_PATH/src/out/host_release/geometry_benchmarks.json "$@"
