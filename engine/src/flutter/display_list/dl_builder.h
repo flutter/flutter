@@ -506,13 +506,15 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
   class LayerInfo {
    public:
-    explicit LayerInfo(
-        size_t save_offset = 0,
-        bool has_layer = false,
-        const std::shared_ptr<const DlImageFilter>& filter = nullptr)
+    explicit LayerInfo(size_t save_offset = 0,
+                       bool has_layer = false,
+                       std::shared_ptr<const DlImageFilter> filter = nullptr)
         : save_offset_(save_offset),
           has_layer_(has_layer),
-          filter_(filter) {}
+          cannot_inherit_opacity_(false),
+          has_compatible_op_(false),
+          filter_(filter),
+          is_unbounded_(false) {}
 
     // The offset into the memory buffer where the saveLayer DLOp record
     // for this saveLayer() call is placed. This may be needed if the
@@ -525,9 +527,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
     bool has_layer() const { return has_layer_; }
     bool cannot_inherit_opacity() const { return cannot_inherit_opacity_; }
     bool has_compatible_op() const { return has_compatible_op_; }
-    bool affects_transparent_layer() const {
-      return affects_transparent_layer_;
-    }
 
     bool is_group_opacity_compatible() const {
       return !cannot_inherit_opacity_;
@@ -548,12 +547,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
           has_compatible_op_ = true;
         }
       }
-    }
-
-    // Records that the current layer contains an op that produces visible
-    // output on a transparent surface.
-    void add_visible_op() {
-      affects_transparent_layer_ = true;
     }
 
     // The filter to apply to the layer bounds when it is restored
@@ -590,13 +583,11 @@ class DisplayListBuilder final : public virtual DlCanvas,
    private:
     size_t save_offset_;
     bool has_layer_;
-    bool cannot_inherit_opacity_ = false;
-    bool has_compatible_op_ = false;
+    bool cannot_inherit_opacity_;
+    bool has_compatible_op_;
     std::shared_ptr<const DlImageFilter> filter_;
-    bool is_unbounded_ = false;
+    bool is_unbounded_;
     bool has_deferred_save_op_ = false;
-    bool is_nop_ = false;
-    bool affects_transparent_layer_ = false;
 
     friend class DisplayListBuilder;
   };
@@ -710,40 +701,9 @@ class DisplayListBuilder final : public virtual DlCanvas,
     return accumulator_->rtree();
   }
 
-  static DisplayListAttributeFlags FlagsForPointMode(PointMode mode);
-
-  enum class OpResult {
-    kNoEffect,
-    kPreservesTransparency,
-    kAffectsAll,
-  };
-
   bool paint_nops_on_transparency();
-  OpResult PaintResult(const DlPaint& paint,
-                       DisplayListAttributeFlags flags = kDrawPaintFlags);
-
-  void UpdateLayerResult(OpResult result) {
-    switch (result) {
-      case OpResult::kNoEffect:
-      case OpResult::kPreservesTransparency:
-        break;
-      case OpResult::kAffectsAll:
-        current_layer_->add_visible_op();
-        break;
-    }
-  }
-
-  // kAnyColor is a non-opaque and non-transparent color that will not
-  // trigger any short-circuit tests about the results of a blend.
-  static constexpr DlColor kAnyColor = DlColor::kMidGrey().withAlpha(0x80);
-  static_assert(!kAnyColor.isOpaque());
-  static_assert(!kAnyColor.isTransparent());
-  static DlColor GetEffectiveColor(const DlPaint& paint,
-                                   DisplayListAttributeFlags flags);
 
   // Computes the bounds of an operation adjusted for a given ImageFilter
-  // and returns whether the computation was possible. If the method
-  // returns false then the caller should assume the worst about the bounds.
   static bool ComputeFilteredBounds(SkRect& bounds,
                                     const DlImageFilter* filter);
 
@@ -753,24 +713,24 @@ class DisplayListBuilder final : public virtual DlCanvas,
 
   // Records the fact that we encountered an op that either could not
   // estimate its bounds or that fills all of the destination space.
-  bool AccumulateUnbounded();
+  void AccumulateUnbounded();
 
   // Records the bounds for an op after modifying them according to the
   // supplied attribute flags and transforming by the current matrix.
-  bool AccumulateOpBounds(const SkRect& bounds,
+  void AccumulateOpBounds(const SkRect& bounds,
                           DisplayListAttributeFlags flags) {
     SkRect safe_bounds = bounds;
-    return AccumulateOpBounds(safe_bounds, flags);
+    AccumulateOpBounds(safe_bounds, flags);
   }
 
   // Records the bounds for an op after modifying them according to the
   // supplied attribute flags and transforming by the current matrix
   // and clipping against the current clip.
-  bool AccumulateOpBounds(SkRect& bounds, DisplayListAttributeFlags flags);
+  void AccumulateOpBounds(SkRect& bounds, DisplayListAttributeFlags flags);
 
   // Records the given bounds after transforming by the current matrix
   // and clipping against the current clip.
-  bool AccumulateBounds(SkRect& bounds);
+  void AccumulateBounds(SkRect& bounds);
 
   DlPaint current_;
 };

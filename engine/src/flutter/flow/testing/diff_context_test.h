@@ -47,8 +47,7 @@ class DiffContextTest : public LayerTest {
 
   // Create display list consisting of filled rect with given color; Being able
   // to specify different color is useful to test deep comparison of pictures
-  sk_sp<DisplayList> CreateDisplayList(const SkRect& bounds,
-                                       DlColor color = DlColor::kBlack());
+  sk_sp<DisplayList> CreateDisplayList(const SkRect& bounds, uint32_t color);
 
   std::shared_ptr<DisplayListLayer> CreateDisplayListLayer(
       const sk_sp<DisplayList>& display_list,
