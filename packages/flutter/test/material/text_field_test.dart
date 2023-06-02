@@ -15661,6 +15661,39 @@ void main() {
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );
+
+    testWidgets('contextMenuBuilder changes from default to null', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(MaterialApp(home: Material(child: TextField(key: key, controller: controller))));
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pump();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+      // set contextMenuBuilder be null
+      await tester.pumpWidget(MaterialApp(
+          home: Material(
+            child: TextField(key: key, controller: controller, contextMenuBuilder: null),
+          )));
+
+      // trigger build one more time...
+      await tester.pumpWidget(MaterialApp(
+          home: Material(
+          child: Padding(
+            padding: EdgeInsets.zero,
+            child: TextField(key: key, controller: controller, contextMenuBuilder: null),
+          ),
+        )));
+    },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
   });
 
   group('magnifier builder', () {
