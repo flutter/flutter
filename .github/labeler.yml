@@ -13,7 +13,7 @@
 'a: internationalization':
   - packages/flutter_localizations/**/*
 
-'a: test':
+'a: tests':
   - packages/flutter_driver/**/*
   - packages/flutter_goldens/**/*
   - packages/flutter_goldens_client/**/*
@@ -43,7 +43,7 @@ engine:
 'f: gestures':
   - '**/*gestures*'
 
-'f: material':
+'f: material design':
   - '**/*material*'
 
 'f: routes':
@@ -80,7 +80,7 @@ team:
   - packages/flutter_goldens/**/*
   - packages/flutter_goldens_client/**/*
 
-'team: gallery':
+'gallery':
   - examples/flutter_gallery/**/*
 
 tech-debt:
