@@ -1248,7 +1248,10 @@ class _SearchBarState extends State<SearchBar> {
                           enabledBorder: InputBorder.none,
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                          contentPadding: EdgeInsets.zero,
+                          // Setting `isDense` to true to allow the text field height to be
+                          // smaller than 48.0
+                          isDense: true,
                         )),
                       ),
                     ),
