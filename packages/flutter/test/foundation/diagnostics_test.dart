@@ -188,16 +188,7 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, Di
   validateNodeJsonSerializationHelper(json, property);
 }
 
-final List<Object?> _weakValueTests = <Object?>[null, 1, 1.0, 'hello', true, false, Object(), (1, 2), <int>[3, 4], DateTime(2023)];
-
 void main() {
-  for (final Object? item in _weakValueTests) {
-    test('$WeakValue can be created for any type, $item', () async {
-      final WeakValue<Object> weakValue = WeakValue<Object>(item);
-      expect(weakValue.value, item);
-    });
-  }
-
   test('TreeDiagnosticsMixin control test', () async {
     void goldenStyleTest(
       String description, {
