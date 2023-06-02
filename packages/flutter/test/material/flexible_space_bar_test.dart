@@ -786,6 +786,22 @@ void main() {
     await tester.pumpWidget(buildFrame(TargetPlatform.linux, true));
     expect(getTitleBottomLeft(), const Offset(390.0, 0.0));
   });
+
+  testWidgets('FlexibleSpaceBar rebuilds when scrolling.', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: const SubCategoryScreenView(),
+    ));
+
+    expect(RebuildTracker.count, 1);
+
+    // We drag up to fully collapse the space bar.
+    for (var i = 0; i < 20; i++) {
+      await tester.drag(find.byKey(SubCategoryScreenView.scrollKey), const Offset(0, -50.0));
+      await tester.pumpAndSettle();
+    }
+
+    expect(RebuildTracker.count, greaterThan(1));
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
@@ -809,4 +825,80 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => false;
+}
+
+class RebuildTracker extends StatelessWidget {
+  const RebuildTracker({super.key});
+
+  static int count = 0;
+
+  @override
+  Widget build(BuildContext context)  {
+    count++;
+    return Container(width: 100, height: 100);
+  }
+}
+
+class SubCategoryScreenView extends StatefulWidget {
+  const SubCategoryScreenView({
+    Key? key,
+  }) : super(key: key);
+
+  static const Key scrollKey = Key('orange box');
+
+  @override
+  _SubCategoryScreenViewState createState() => _SubCategoryScreenViewState();
+}
+
+class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
+    with TickerProviderStateMixin {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Test"),
+      ),
+      body: CustomScrollView(
+        key: SubCategoryScreenView.scrollKey,
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: false,
+            snap: false,
+            leading: const SizedBox(),
+            floating: false,
+            expandedHeight: MediaQuery.of(context).size.width / 1.7,
+            collapsedHeight: 0,
+            toolbarHeight: 0,
+            titleSpacing: 0,
+            leadingWidth: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              background: AspectRatio(
+                aspectRatio: 1.7,
+                child: const RebuildTracker(),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          SliverToBoxAdapter(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+              ),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 300,
+              itemBuilder: (BuildContext context, int index) {
+                return Card(
+                  color: Colors.amber,
+                  child: Center(child: Text('$index')),
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        ],
+      ),
+    );
+  }
 }

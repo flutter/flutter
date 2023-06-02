@@ -256,7 +256,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               // and potentially `widget.background` can be constant which won't
               // lead to repainting.
               // see: https://github.com/flutter/flutter/issues/127836
-              key: ValueKey(topPadding),
+              key: ValueKey<double>(topPadding),
               // IOS is relying on this semantics node to correctly traverse
               // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
