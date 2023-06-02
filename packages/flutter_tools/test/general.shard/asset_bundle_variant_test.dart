@@ -96,7 +96,7 @@ flutter:
       expect(manifest[imageNonVariant], equals(<String>[imageNonVariant]));
     });
 
-    testWithoutContext('Asset directories are recursively searched for assets', () async {
+    testWithoutContext('Asset directories have their subdirectories searched for asset variants', () async {
       const String topLevelImage = 'assets/image.jpg';
       const String secondLevelImage = 'assets/folder/secondLevel.jpg';
       const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
