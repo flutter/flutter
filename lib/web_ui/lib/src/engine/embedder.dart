@@ -135,6 +135,9 @@ class FlutterViewEmbedder {
   DomElement get textEditingHostNode => _textEditingHostNode;
   late DomElement _textEditingHostNode;
 
+  AccessibilityAnnouncements get accessibilityAnnouncements => _accessibilityAnnouncements;
+  late AccessibilityAnnouncements _accessibilityAnnouncements;
+
   static const String defaultFontStyle = 'normal';
   static const String defaultFontWeight = 'normal';
   static const double defaultFontSize = 14;
@@ -162,7 +165,6 @@ class FlutterViewEmbedder {
     // Create and inject the [_glassPaneElement].
     _flutterViewElement = domDocument.createElement(flutterViewTagName);
     _glassPaneElement = domDocument.createElement(glassPaneTagName);
-
 
     // This must be attached to the DOM now, so the engine can create a host
     // node (ShadowDOM or a fallback) next.
@@ -216,8 +218,12 @@ class FlutterViewEmbedder {
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
+    final DomElement announcementsElement = createDomElement('flt-announcement-host');
+    _accessibilityAnnouncements = AccessibilityAnnouncements(hostElement: announcementsElement);
+
     shadowRoot.append(accessibilityPlaceholder);
     shadowRoot.append(_sceneHostElement!);
+    shadowRoot.append(announcementsElement);
 
     // The semantic host goes last because hit-test order-wise it must be
     // first. If semantics goes under the scene host, platform views will
@@ -244,6 +250,11 @@ class FlutterViewEmbedder {
     );
 
     window.onResize.listen(_metricsDidChange);
+  }
+
+  /// For tests only.
+  void debugOverrideAccessibilityAnnouncements(AccessibilityAnnouncements override) {
+    _accessibilityAnnouncements = override;
   }
 
   /// The framework specifies semantics in physical pixels, but CSS uses

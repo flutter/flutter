@@ -11,10 +11,9 @@ import 'package:ui/src/engine/canvaskit/renderer.dart';
 import 'package:ui/src/engine/renderer.dart';
 import 'package:ui/ui.dart' as ui;
 
-import '../engine.dart'  show platformViewManager, registerHotRestartListener;
+import '../engine.dart'  show flutterViewEmbedder, platformViewManager, registerHotRestartListener;
 import 'clipboard.dart';
 import 'dom.dart';
-import 'embedder.dart';
 import 'mouse_cursor.dart';
 import 'platform_views/message_handler.dart';
 import 'plugins.dart';
@@ -645,7 +644,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       case 'flutter/accessibility':
         // In widget tests we want to bypass processing of platform messages.
         const StandardMessageCodec codec = StandardMessageCodec();
-        accessibilityAnnouncements.handleMessage(codec, data);
+        flutterViewEmbedder.accessibilityAnnouncements.handleMessage(codec, data);
         replyToPlatformMessage(callback, codec.encodeMessage(true));
         return;
 
