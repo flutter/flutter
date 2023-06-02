@@ -24,7 +24,7 @@ class ConcurrentMessageLoop
   static std::shared_ptr<ConcurrentMessageLoop> Create(
       size_t worker_count = std::thread::hardware_concurrency());
 
-  ~ConcurrentMessageLoop();
+  virtual ~ConcurrentMessageLoop();
 
   size_t GetWorkerCount() const;
 
@@ -35,6 +35,10 @@ class ConcurrentMessageLoop
   void PostTaskToAllWorkers(const fml::closure& task);
 
   bool RunsTasksOnCurrentThread();
+
+ protected:
+  explicit ConcurrentMessageLoop(size_t worker_count);
+  virtual void ExecuteTask(const fml::closure& task);
 
  private:
   friend ConcurrentTaskRunner;
@@ -47,8 +51,6 @@ class ConcurrentMessageLoop
   std::vector<std::thread::id> worker_thread_ids_;
   std::map<std::thread::id, std::vector<fml::closure>> thread_tasks_;
   bool shutdown_ = false;
-
-  explicit ConcurrentMessageLoop(size_t worker_count);
 
   void WorkerMain();
 
