@@ -190,12 +190,11 @@ bool _assertOutOfExtent(double extent) {
 /// [SliverConstraints.remainingPaintExtent] based on the total [SliverConstraints.scrollOffset]
 /// of all the sliver children laid out so far.
 ///
-/// Finally, this sliver will also ensure that all slivers are painted within
-/// the total scroll extent of the sliver by adjusting the children's
+/// Finally, this sliver will also ensure that all child slivers are painted within
+/// the total scroll extent of the group by adjusting the child's
 /// [SliverPhysicalParentData.paintOffset] as necessary. This can happen for
 /// slivers such as [SliverPersistentHeader] which, when pinned, positions itself
-/// at the top of the [Viewport] regardless of whether the visible painted extent
-/// doesn't have enough space for the [SliverPersistentHeader]
+/// at the top of the [Viewport] regardless of the scroll offset.
 class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectMixin<RenderSliver, SliverPhysicalContainerParentData> {
   @override
   void setupParentData(RenderObject child) {
