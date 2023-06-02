@@ -1615,6 +1615,7 @@ class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
 /// {@end-tool}
 ///
 /// See also:
+///
 ///  * [SliverPersistentHeader], which is a [RenderObjectWidget] which may require
 ///    adjustment to its [SliverPhysicalParentData.paintOffset] to make it fit
 ///    within the computed [SliverGeometry.scrollExtent] of the [SliverMainAxisGroup].
