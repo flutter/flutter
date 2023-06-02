@@ -1658,9 +1658,9 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// Gets the parsed command-line option named [name] as `List<String>`.
   List<String> stringsArg(String name, {bool global = false}) {
     if (global) {
-      return globalResults![name]! as List<String>? ?? <String>[];
+      return globalResults![name] as List<String>;
     }
-    return argResults![name]! as List<String>? ?? <String>[];
+    return argResults![name] as List<String>;
   }
 }
 

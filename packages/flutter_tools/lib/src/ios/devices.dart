@@ -883,6 +883,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   static const int minimumUniversalLoggingSdkVersion = 13;
 
+  /// Listen to Dart VM for logs on iOS 13 or greater.
+  ///
+  /// Only send logs to stream if [_iosDeployDebugger] is null or
+  /// the [_iosDeployDebugger] debugger is not attached.
   Future<void> _listenToUnifiedLoggingEvents(FlutterVmService connectedVmService) async {
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
@@ -919,8 +923,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   /// Log reader will listen to [debugger.logLines] and will detach debugger on dispose.
   IOSDeployDebugger? get debuggerStream => _iosDeployDebugger;
+
+  /// Send messages from ios-deploy debugger stream to device log reader stream.
   set debuggerStream(IOSDeployDebugger? debugger) {
-    // Logging is gathered from syslog on iOS 13 and earlier.
+    // Logging is gathered from syslog on iOS earlier than 13.
     if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
       return;
     }
@@ -952,8 +958,13 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return _usingCISystem && _majorSdkVersion >= 16;
   }
 
+  /// Start and listen to idevicesyslog to get device logs for iOS versions
+  /// prior to 13 or if [useBothLogDeviceReaders] is true.
   void _listenToSysLog() {
-    // syslog is not written on iOS 13+.
+    // Syslog stopped working on iOS 13 (https://github.com/flutter/flutter/issues/41133).
+    // However, from at least iOS 16, it has began working again. It's unclear
+    // why it started working again so only use syslogs for iOS versions prior
+    // to 13 unless [useBothLogDeviceReaders] is true.
     if (!useBothLogDeviceReaders && _majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
       return;
     }
@@ -961,9 +972,16 @@ class IOSDeviceLogReader extends DeviceLogReader {
       process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newSyslogLineHandler());
       process.exitCode.whenComplete(() {
-        if (!(useBothLogDeviceReaders && debuggerStream != null) && linesController.hasListener) {
-          linesController.close();
+        if (!linesController.hasListener) {
+          return;
         }
+        // When using both log readers, do not close the stream on exit.
+        // This is to allow ios-deploy to be the source of authority to close
+        // the stream.
+        if (useBothLogDeviceReaders && debuggerStream != null) {
+          return;
+        }
+        linesController.close();
       });
       assert(idevicesyslogProcess == null);
       idevicesyslogProcess = process;
@@ -1014,8 +1032,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
 }
 
 enum IOSDeviceLogSource {
+  /// Gets logs from ios-deploy debugger.
   iosDeploy,
+  /// Gets logs from idevicesyslog.
   idevicesyslog,
+  /// Gets logs from the Dart VM Service.
   unifiedLogging,
 }
 
