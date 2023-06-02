@@ -309,30 +309,30 @@ class MemoryAllocations {
   }
 
   void _imageOnCreate(ui.Image image) {
-    dispatchObjectEvent(ObjectCreated(
+    dispatchObjectCreated(
       library: _dartUiLibrary,
       className: '${ui.Image}',
       object: image,
-    ));
+    );
   }
 
   void _pictureOnCreate(ui.Picture picture) {
-    dispatchObjectEvent(ObjectCreated(
+    dispatchObjectCreated(
       library: _dartUiLibrary,
       className: '${ui.Picture}',
       object: picture,
-    ));
+    );
   }
 
   void _imageOnDispose(ui.Image image) {
-    dispatchObjectEvent(ObjectDisposed(
+    dispatchObjectDisposed(
       object: image,
-    ));
+    );
   }
 
   void _pictureOnDispose(ui.Picture picture) {
-    dispatchObjectEvent(ObjectDisposed(
+    dispatchObjectDisposed(
       object: picture,
-    ));
+    );
   }
 }
