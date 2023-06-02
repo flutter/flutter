@@ -816,8 +816,7 @@ public class PlatformViewsControllerTest {
     PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
     PlatformView platformView = mock(PlatformView.class);
 
-    Context context = ApplicationProvider.getApplicationContext();
-    View androidView = new View(context);
+    View androidView = mock(View.class);
     when(platformView.getView()).thenReturn(androidView);
     when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);

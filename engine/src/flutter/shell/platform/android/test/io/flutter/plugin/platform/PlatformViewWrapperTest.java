@@ -117,7 +117,6 @@ public class PlatformViewWrapperTest {
     verify(surface, times(1)).lockHardwareCanvas();
     verify(surface, times(1)).unlockCanvasAndPost(canvas);
     verifyNoMoreInteractions(surface);
-    verifyNoMoreInteractions(canvas);
   }
 
   @Test

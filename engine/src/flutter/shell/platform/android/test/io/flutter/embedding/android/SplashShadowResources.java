@@ -9,9 +9,10 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.RealObject;
 import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowResources;
 
 @Implements(Resources.class)
-public class SplashShadowResources {
+public class SplashShadowResources extends ShadowResources {
   @RealObject private Resources resources;
 
   public static final int SPLASH_DRAWABLE_ID = 191919;
