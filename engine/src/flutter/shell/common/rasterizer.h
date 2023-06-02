@@ -500,19 +500,6 @@ class Rasterizer final : public SnapshotDelegate,
   void DisableThreadMergerIfNeeded();
 
  private:
-  // The result of `DoDraw`.
-  //
-  // Normally `DoDraw` returns simply a raster status. However, sometimes we
-  // need to attempt to rasterize the layer tree again. This happens when
-  // layer_tree has not successfully rasterized due to changes in the thread
-  // configuration, in which case the resubmitted task will be inserted to the
-  // front of the pipeline.
-  struct DoDrawResult {
-    RasterStatus raster_status = RasterStatus::kFailed;
-
-    std::unique_ptr<LayerTreeItem> resubmitted_layer_tree_item;
-  };
-
   // |SnapshotDelegate|
   std::unique_ptr<GpuImageResult> MakeSkiaGpuImage(
       sk_sp<DisplayList> display_list,
@@ -567,7 +554,7 @@ class Rasterizer final : public SnapshotDelegate,
       GrDirectContext* surface_context,
       bool compressed);
 
-  DoDrawResult DoDraw(
+  RasterStatus DoDraw(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder,
       std::unique_ptr<flutter::LayerTree> layer_tree,
       float device_pixel_ratio);
@@ -594,6 +581,12 @@ class Rasterizer final : public SnapshotDelegate,
   // This is the last successfully rasterized layer tree.
   std::unique_ptr<flutter::LayerTree> last_layer_tree_;
   float last_device_pixel_ratio_;
+  // Set when we need attempt to rasterize the layer tree again. This layer_tree
+  // has not successfully rasterized. This can happen due to the change in the
+  // thread configuration. This will be inserted to the front of the pipeline.
+  std::unique_ptr<flutter::LayerTree> resubmitted_layer_tree_;
+  std::unique_ptr<FrameTimingsRecorder> resubmitted_recorder_;
+  float resubmitted_pixel_ratio_;
   fml::closure next_frame_callback_;
   bool user_override_resource_cache_bytes_;
   std::optional<size_t> max_cache_bytes_;
