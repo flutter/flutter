@@ -2105,8 +2105,12 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), _kMaxTitleTextScaleFactor); // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
-    final double collapsedHeight = settings.minExtent - topPadding - bottomHeight;
     final _ScrollUnderFlexibleConfig config = configBuilder(context);
+    assert(
+      config.expandedTitlePadding.isNonNegative,
+      'The _ExpandedTitleWithPadding widget assumes that the expanded title padding is non-negative. '
+      'Update its implementation to handle negative padding.',
+    );
 
     final TextStyle? expandedTextStyle = titleTextStyle
       ?? appBarTheme.titleTextStyle
@@ -2122,7 +2126,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     final EdgeInsetsGeometry expandedTitlePadding = bottomHeight > 0
       // Reserve space for the bottom toolbar (AppBar.bottom),which is a sibling
       // of this widget, on the parent Stack.
-      ? resolvedTitlePadding.copyWith(bottom: bottomHeight)
+      ? resolvedTitlePadding.copyWith(bottom: 0)
       : resolvedTitlePadding;
 
     // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
@@ -2135,22 +2139,147 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
       // This column will assume the full height of the parent Stack.
       child: Column(
         children: <Widget>[
-          Padding(padding: EdgeInsets.only(top: collapsedHeight + topPadding)),
+          Padding(padding: EdgeInsets.only(top: settings.minExtent - bottomHeight)),
+          //Padding(padding: EdgeInsets.only(top: settings.minExtent)),
           Flexible(
             child: ClipRect(
-              child: OverflowBox(
-                maxHeight: double.infinity,
-                alignment: AlignmentDirectional.bottomStart,
-                child: Padding(
-                  padding: expandedTitlePadding,
-                  child: expandedTitle,
-                ),
+              child: _ExpandedTitleWithPadding(
+                padding: expandedTitlePadding,
+                maxExtent: settings.maxExtent - settings.minExtent,
+                child: expandedTitle,
               ),
             ),
           ),
+          if (bottomHeight > 0) Padding(padding: EdgeInsets.only(bottom: bottomHeight)),
         ],
       ),
     );
+  }
+}
+
+class _ExpandedTitleWithPadding extends SingleChildRenderObjectWidget {
+  const _ExpandedTitleWithPadding({
+    required this.padding,
+    required this.maxExtent,
+    super.child,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final double maxExtent;
+
+  @override
+  _RenderBox createRenderObject(BuildContext context) {
+    final TextDirection textDirection = Directionality.of(context);
+    return _RenderBox(
+      padding.resolve(textDirection),
+      AlignmentDirectional.bottomStart.resolve(textDirection),
+      maxExtent,
+      null,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBox renderObject) {
+    final TextDirection textDirection = Directionality.of(context);
+    renderObject
+      ..padding = padding.resolve(textDirection)
+      ..titleAlignment = AlignmentDirectional.bottomStart.resolve(textDirection)
+      ..maxExtent = maxExtent;
+  }
+}
+
+class _RenderBox extends RenderShiftedBox {
+  _RenderBox(this._padding, this._titleAlignment, this._maxExtent, super.child);
+
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    if (_padding == value) {
+      return;
+    }
+    assert(value.isNonNegative);
+    _padding = value;
+    markNeedsLayout();
+  }
+
+  Alignment get titleAlignment => _titleAlignment;
+  Alignment _titleAlignment;
+  set titleAlignment(Alignment value) {
+    if (_titleAlignment == value) {
+      return;
+    }
+    _titleAlignment = value;
+    markNeedsLayout();
+  }
+
+  double get maxExtent => _maxExtent;
+  double _maxExtent;
+  set maxExtent(double value) {
+    if (_maxExtent == value) {
+      return;
+    }
+    _maxExtent = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    final RenderBox? child = this.child;
+    return child == null ? 0.0 : child.getMaxIntrinsicHeight(math.max(0, width - padding.horizontal)) + padding.vertical;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    final RenderBox? child = this.child;
+    return child == null ? 0.0 : child.getMaxIntrinsicWidth(double.infinity) + padding.horizontal;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    final RenderBox? child = this.child;
+    return child == null ? 0.0 : child.getMinIntrinsicHeight(math.max(0, width - padding.horizontal)) + padding.vertical;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    final RenderBox? child = this.child;
+    return child == null ? 0.0 : child.getMinIntrinsicWidth(double.infinity) + padding.horizontal;
+  }
+
+  Size _computeSize(BoxConstraints constraints, ChildLayouter layoutChild) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return Size.zero;
+    }
+    layoutChild(child, constraints.widthConstraints().deflate(padding));
+    return constraints.biggest;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => _computeSize(constraints, ChildLayoutHelper.dryLayoutChild);
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      this.size = constraints.smallest;
+      return;
+    }
+    final Size size = this.size = _computeSize(constraints, ChildLayoutHelper.layoutChild);
+    final Size childSize = child.size;
+    final Size paddedChildSize = padding.inflateSize(childSize);
+
+    assert(padding.isNonNegative);
+    assert(titleAlignment.y == 1.0);
+    // Special handling when the child isn't completely in the vertical space.
+    // Reduce the bottom padding if possible, since child + padding is bottom
+    // aligned within the parent RenderBox.
+    final double yAdjustement = clampDouble(childSize.height + padding.bottom - maxExtent, 0, padding.bottom);
+    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustement;
+    final double offsetX = (titleAlignment.x + 1) / 2 * (size.width - paddedChildSize.width) + padding.left;
+
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = Offset(offsetX, offsetY);
   }
 }
 

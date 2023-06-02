@@ -1138,12 +1138,7 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
-    expect(
-      titleOffset.dy,
-      renderSliverAppBar.geometry!.scrollExtent - 20.0,
-      reason: 'bottom padding of a medium expanded title should be 20.',
-    );
+    expect(titleOffset.dy, 96.0);
 
     // Test the expanded title default color.
     expect(
@@ -4767,7 +4762,7 @@ void main() {
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
   });
 
-  testWidgets('SliverAppBar.medium expanded title bottom position is fixed when textScaleFactor changes', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -4796,29 +4791,16 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
-    expect(
-      tester.getBottomLeft(expandedTitle).dy,
-      renderSliverAppBar.geometry!.scrollExtent - 20.0,
-      reason: 'bottom padding of a medium expanded title should be 20.',
-    );
+    expect(tester.getBottomLeft(expandedTitle).dy, 96.0);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-    expect(
-      tester.getBottomLeft(expandedTitle).dy,
-      renderSliverAppBar.geometry!.scrollExtent - 20.0,
-      reason: 'bottom padding of a medium expanded title should be 20.',
-    );
+    expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-    expect(
-      tester.getBottomLeft(expandedTitle).dy,
-      renderSliverAppBar.geometry!.scrollExtent - 20.0,
-      reason: 'bottom padding of a medium expanded title should be 20.',
-    );
+    expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
   });
 
-  testWidgets('SliverAppBar.medium expanded title bottom position is fixed when textScaleFactor changes', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
@@ -4860,12 +4842,10 @@ void main() {
       reason: 'bottom padding of a large expanded title should be 28.',
     );
 
+    // The bottom padding of the expanded title needs to be reduced for it to be
+    // fully visible.
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-    expect(
-      tester.getBottomLeft(expandedTitle).dy,
-      renderSliverAppBar.geometry!.scrollExtent - 28.0,
-      reason: 'bottom padding of a large expanded title should be 28.',
-    );
+    expect(tester.getBottomLeft(expandedTitle).dy, 124.0);
   });
 
   group('AppBar.forceMaterialTransparency', () {
