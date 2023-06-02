@@ -51,6 +51,24 @@ void main() {
     });
   });
 
+  group('group retry flag allows test to run multiple times', () {
+    bool retried = false;
+    group('the group with retry flag', () {
+      testWidgets('the test inside it', (WidgetTester tester) async {
+        addTearDown(() => retried = true);
+        expect(retried, isTrue);
+      });
+    }, retry: 1);
+  });
+
+  group('testWidget retry flag allows test to run multiple times', () {
+    bool retried = false;
+    testWidgets('the test with retry flag', (WidgetTester tester) async {
+      addTearDown(() => retried = true);
+      expect(retried, isTrue);
+    }, retry: 1);
+  });
+
   group('respects the group skip flag', () {
     testWidgets('should be skipped', (WidgetTester tester) async {
       expect(false, true);

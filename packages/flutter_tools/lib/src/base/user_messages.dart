@@ -21,7 +21,7 @@ class UserMessages {
 
   // Messages used in FlutterValidator
   String flutterStatusInfo(String? channel, String? version, String os, String locale) =>
-      'Channel ${channel ?? 'unknown'}, ${version ?? 'Unknown'}, on $os, locale $locale';
+      'Channel ${channel ?? 'unknown'}, ${version ?? 'unknown version'}, on $os, locale $locale';
   String flutterVersion(String version, String channel, String flutterRoot) =>
       'Flutter version $version on channel $channel at $flutterRoot';
   String get flutterUnknownChannel =>
@@ -228,7 +228,7 @@ class UserMessages {
   String get windows10SdkNotFound =>
       'Unable to locate a Windows 10 SDK. If building fails, install the Windows 10 SDK in Visual Studio.';
   String visualStudioMissing(String workload) =>
-      'Visual Studio not installed; this is necessary for Windows development.\n'
+      'Visual Studio not installed; this is necessary to develop Windows apps.\n'
       'Download at https://visualstudio.microsoft.com/downloads/.\n'
       'Please install the "$workload" workload, including all of its default components';
   String visualStudioTooOld(String minimumVersion, String workload) =>

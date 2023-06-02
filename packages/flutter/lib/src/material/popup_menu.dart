@@ -1241,12 +1241,16 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
     final PopupMenuPosition popupMenuPosition = widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
-    final Offset offset;
+    late Offset offset;
     switch (popupMenuPosition) {
       case PopupMenuPosition.over:
         offset = widget.offset;
       case PopupMenuPosition.under:
-        offset = Offset(0.0, button.size.height - (widget.padding.vertical / 2)) + widget.offset;
+        offset = Offset(0.0, button.size.height) + widget.offset;
+        if (widget.child == null) {
+          // Remove the padding of the icon button.
+          offset -= Offset(0.0, widget.padding.vertical / 2);
+        }
     }
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(

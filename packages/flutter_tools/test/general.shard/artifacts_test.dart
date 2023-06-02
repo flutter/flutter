@@ -418,6 +418,13 @@ void main() {
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
             'bin', 'snapshots', 'dart2js.dart.snapshot'),
       );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.wasmOptBinary,
+          platform: TargetPlatform.web_javascript),
+        fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk',
+            'bin', 'utils', 'wasm-opt'),
+      );
     });
 
     testWithoutContext('getEngineType', () {

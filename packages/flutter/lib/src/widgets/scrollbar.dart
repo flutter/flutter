@@ -261,7 +261,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   OutlinedBorder? _shape;
   set shape(OutlinedBorder? value){
     assert(radius == null || value == null);
-    if(shape == value) {
+    if (shape == value) {
       return;
     }
 
@@ -384,7 +384,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // The track is offset by only padding.
   double get _totalTrackMainAxisOffsets => _isVertical ? padding.vertical : padding.horizontal;
   double get _leadingTrackMainAxisOffset {
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
         return padding.top;
@@ -402,7 +402,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Thumb Offsets
   // The thumb is offset by padding and margins.
   double get _leadingThumbMainAxisOffset {
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
       case ScrollbarOrientation.right:
         return padding.top + mainAxisMargin;
@@ -558,7 +558,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final Size thumbSize, trackSize;
     final Offset trackOffset, borderStart, borderEnd;
     _debugAssertIsValidOrientation(_resolvedOrientation);
-    switch(_resolvedOrientation) {
+    switch (_resolvedOrientation) {
       case ScrollbarOrientation.left:
         thumbSize = Size(thickness, _thumbExtent);
         trackSize = Size(thickness + 2 * crossAxisMargin, _trackExtent);
@@ -1711,7 +1711,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       // The physics may allow overscroll when actually *scrolling*, but
       // dragging on the scrollbar does not always allow us to enter overscroll.
-      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+      switch (ScrollConfiguration.of(context).getPlatform(context)) {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -1886,17 +1886,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
-    if (!widget.notificationPredicate(ScrollUpdateNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ))) {
+    if (!widget.notificationPredicate(notification.asScrollUpdate())) {
       return false;
     }
 
     if (showScrollbar) {
-      if (_fadeoutAnimationController.status != AnimationStatus.forward
-          && _fadeoutAnimationController.status != AnimationStatus.completed) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward &&
+          _fadeoutAnimationController.status != AnimationStatus.completed) {
         _fadeoutAnimationController.forward();
       }
     }
@@ -1916,8 +1912,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       // Hide the bar when the Scrollable widget has no space to scroll.
-      if (_fadeoutAnimationController.status != AnimationStatus.dismissed
-          && _fadeoutAnimationController.status != AnimationStatus.reverse) {
+      if (_fadeoutAnimationController.status != AnimationStatus.dismissed &&
+          _fadeoutAnimationController.status != AnimationStatus.reverse) {
         _fadeoutAnimationController.reverse();
       }
 
@@ -1930,8 +1926,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
-      if (_fadeoutAnimationController.status != AnimationStatus.forward
-          && _fadeoutAnimationController.status != AnimationStatus.completed) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward &&
+          _fadeoutAnimationController.status != AnimationStatus.completed) {
         _fadeoutAnimationController.forward();
       }
 
@@ -1993,7 +1989,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestInteractive(localOffset, kind)
-      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
+       && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].
@@ -2137,7 +2133,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               gestures: _gestures,
               child: MouseRegion(
                 onExit: (PointerExitEvent event) {
-                  switch(event.kind) {
+                  switch (event.kind) {
                     case PointerDeviceKind.mouse:
                     case PointerDeviceKind.trackpad:
                       if (enableGestures) {
@@ -2151,7 +2147,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
                   }
                 },
                 onHover: (PointerHoverEvent event) {
-                  switch(event.kind) {
+                  switch (event.kind) {
                     case PointerDeviceKind.mouse:
                     case PointerDeviceKind.trackpad:
                       if (enableGestures) {

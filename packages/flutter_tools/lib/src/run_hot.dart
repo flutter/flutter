@@ -79,7 +79,7 @@ class DeviceReloadReport {
 
 class HotRunner extends ResidentRunner {
   HotRunner(
-    super.devices, {
+    super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
     this.benchmarkMode = false,
@@ -246,6 +246,7 @@ class HotRunner extends ResidentRunner {
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
         flutterDevices: flutterDevices,
+        isStartPaused: debuggingOptions.startPaused,
       ));
     }
 

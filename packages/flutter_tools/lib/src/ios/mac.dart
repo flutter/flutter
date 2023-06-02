@@ -38,6 +38,9 @@ import 'xcode_build_settings.dart';
 import 'xcodeproj.dart';
 import 'xcresult.dart';
 
+const String kConcurrentRunFailureMessage1 = 'database is locked';
+const String kConcurrentRunFailureMessage2 = 'there are two concurrent builds running';
+
 class IMobileDevice {
   IMobileDevice({
     required Artifacts artifacts,
@@ -296,7 +299,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (activeArch != null) {
-    final String activeArchName = getNameForDarwinArch(activeArch);
+    final String activeArchName = activeArch.name;
     buildCommands.add('ONLY_ACTIVE_ARCH=YES');
     // Setting ARCHS to $activeArchName will break the build if a watchOS companion app exists,
     // as it cannot be build for the architecture of the Flutter app.
@@ -354,9 +357,10 @@ Future<XcodeBuildResult> buildXcodeProject({
       buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
     }
 
+    final File resultBundleFile = tempDir.childFile(_kResultBundlePath);
     buildCommands.addAll(<String>[
       '-resultBundlePath',
-      tempDir.childFile(_kResultBundlePath).absolute.path,
+      resultBundleFile.absolute.path,
       '-resultBundleVersion',
       _kResultBundleVersion,
     ]);
@@ -378,7 +382,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     final Stopwatch sw = Stopwatch()..start();
     initialBuildStatus = globals.logger.startProgress('Running Xcode build...');
 
-    buildResult = await _runBuildWithRetries(buildCommands, app);
+    buildResult = await _runBuildWithRetries(buildCommands, app, resultBundleFile);
 
     // Notifies listener that no more output is coming.
     scriptOutputPipeFile?.writeAsStringSync('all done');
@@ -508,12 +512,15 @@ Future<void> removeFinderExtendedAttributes(FileSystemEntity projectDirectory, P
   }
 }
 
-Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app) async {
+Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app, File resultBundleFile) async {
   int buildRetryDelaySeconds = 1;
   int remainingTries = 8;
 
   RunResult? buildResult;
   while (remainingTries > 0) {
+    if (resultBundleFile.existsSync()) {
+      resultBundleFile.deleteSync(recursive: true);
+    }
     remainingTries--;
     buildRetryDelaySeconds *= 2;
 
@@ -546,8 +553,8 @@ Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOS
 
 bool _isXcodeConcurrentBuildFailure(RunResult result) {
 return result.exitCode != 0 &&
-    result.stdout.contains('database is locked') &&
-    result.stdout.contains('there are two concurrent builds running');
+    result.stdout.contains(kConcurrentRunFailureMessage1) &&
+    result.stdout.contains(kConcurrentRunFailureMessage2);
 }
 
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
@@ -578,12 +585,10 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 enum XcodeBuildAction { build, archive }
 
 String xcodeBuildActionToString(XcodeBuildAction action) {
-    switch (action) {
-      case XcodeBuildAction.build:
-        return 'build';
-      case XcodeBuildAction.archive:
-        return 'archive';
-    }
+    return switch (action) {
+      XcodeBuildAction.build => 'build',
+      XcodeBuildAction.archive => 'archive'
+    };
 }
 
 class XcodeBuildResult {
