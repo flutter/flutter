@@ -12,8 +12,8 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 
 @interface FlutterMutatorView () {
-  /// Each of these views clips to a CGPathRef. These views, if present,
-  /// are nested (first is child of FlutterMutatorView and last is parent of
+  // Each of these views clips to a CGPathRef. These views, if present,
+  // are nested (first is child of FlutterMutatorView and last is parent of
   // _platformView).
   NSMutableArray* _pathClipViews;
 
@@ -22,6 +22,21 @@
   NSView* _platformViewContainer;
 
   NSView* _platformView;
+}
+
+@end
+
+/// Superview container for platform views, to which sublayer transforms are applied.
+@interface FlutterPlatformViewContainer : NSView
+@end
+
+@implementation FlutterPlatformViewContainer
+
+- (BOOL)isFlipped {
+  // Flutter transforms assume a coordinate system with an upper-left corner origin, with y
+  // coordinate values increasing downwards. This affects the view, view transforms, and
+  // sublayerTransforms.
+  return YES;
 }
 
 @end
@@ -43,6 +58,9 @@
 }
 
 - (BOOL)isFlipped {
+  // Flutter transforms assume a coordinate system with an upper-left corner origin, with y
+  // coordinate values increasing downwards. This affects the view, view transforms, and
+  // sublayerTransforms.
   return YES;
 }
 
@@ -400,7 +418,7 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
                             clipRect:(CGRect)clipRect {
   // Create the PlatformViewContainer view if necessary.
   if (_platformViewContainer == nil) {
-    _platformViewContainer = [[NSView alloc] initWithFrame:self.bounds];
+    _platformViewContainer = [[FlutterPlatformViewContainer alloc] initWithFrame:self.bounds];
     _platformViewContainer.wantsLayer = YES;
   }
 
@@ -409,14 +427,15 @@ NSMutableArray* RoundedRectClipsFromMutations(CGRect master_clip, const Mutation
   [containerSuperview addSubview:_platformViewContainer];
   _platformViewContainer.frame = self.bounds;
 
-  // Add the
+  // Nest the platform view in the PlatformViewContainer.
   [_platformViewContainer addSubview:_platformView];
   _platformView.frame = untransformedBounds;
 
   // Transform for the platform view is finalTransform adjusted for bounding rect origin.
-  _platformViewContainer.layer.sublayerTransform =
-      CATransform3DTranslate(transform, -transformedBounds.origin.x / transform.m11 /* scaleX */,
-                             -transformedBounds.origin.y / transform.m22 /* scaleY */, 0);
+  CATransform3D translation =
+      CATransform3DMakeTranslation(-transformedBounds.origin.x, -transformedBounds.origin.y, 0);
+  transform = CATransform3DConcat(transform, translation);
+  _platformViewContainer.layer.sublayerTransform = transform;
 
   // By default NSView clips children to frame. If masterClip is tighter than mutator view frame,
   // the frame is set to masterClip and child offset adjusted to compensate for the difference.
