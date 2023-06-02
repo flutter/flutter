@@ -379,7 +379,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   void initInstances() {
-    // This is intialized here because it's needed for the `super.initInstances`
+    // This is initialized here because it's needed for the `super.initInstances`
     // call. It can't be handled as a ctor initializer because it's dependent
     // on `platformDispatcher`. It can't be handled in the ctor itself because
     // the base class ctor is called first and calls `initInstances`.
@@ -502,7 +502,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
     // The test framework shouldn't actually exit when requested.
-    return ui.AppExitResponse.cancel;
+    throw FlutterError('Unexpected application exit request while running test');
   }
 
   /// Re-attempts the initialization of the lifecycle state after providing
@@ -942,8 +942,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       try {
         treeDump = rootElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
         // We try to stringify the tree dump here (though we immediately discard the result) because
-        // we want to make sure that if it can't be serialised, we replace it with a message that
-        // says the tree could not be serialised. Otherwise, the real exception might get obscured
+        // we want to make sure that if it can't be serialized, we replace it with a message that
+        // says the tree could not be serialized. Otherwise, the real exception might get obscured
         // by side-effects of the underlying issues causing the tree dumping code to flail.
         treeDump.toStringDeep();
       } catch (exception) {

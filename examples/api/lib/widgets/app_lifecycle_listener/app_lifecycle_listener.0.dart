@@ -30,9 +30,8 @@ class AppLifecycleDisplay extends StatefulWidget {
 }
 
 class _AppLifecycleDisplayState extends State<AppLifecycleDisplay> {
-  late final AppLifecycleListener listener;
-  final ScrollController scrollController = ScrollController();
-
+  late final AppLifecycleListener _listener;
+  final ScrollController _scrollController = ScrollController();
   final List<String> _states = <String>[];
   late AppLifecycleState? _state;
 
@@ -40,7 +39,7 @@ class _AppLifecycleDisplayState extends State<AppLifecycleDisplay> {
   void initState() {
     super.initState();
     _state = SchedulerBinding.instance.lifecycleState;
-    listener = AppLifecycleListener(
+    _listener = AppLifecycleListener(
       onShow: () => _handleTransition('show'),
       onResume: () => _handleTransition('resume'),
       onHide: () => _handleTransition('hide'),
@@ -48,28 +47,30 @@ class _AppLifecycleDisplayState extends State<AppLifecycleDisplay> {
       onPause: () => _handleTransition('pause'),
       onDetach: () => _handleTransition('detach'),
       onRestart: () => _handleTransition('restart'),
+      // This fires for each state change. Callbacks above fire only for
+      // specific state transitions.
       onStateChange: _handleStateChange,
     );
-    if (SchedulerBinding.instance.lifecycleState != null) {
+    if (_state != null && SchedulerBinding.instance.lifecycleState != null) {
       _states.add(_state!.name);
     }
   }
 
   @override
   void dispose() {
-    listener.dispose();
+    _listener.dispose();
     super.dispose();
   }
 
   void _handleTransition(String name) {
     setState(() {
       _states.add(name);
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      );
     });
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
   }
 
   void _handleStateChange(AppLifecycleState state) {
@@ -84,7 +85,7 @@ class _AppLifecycleDisplayState extends State<AppLifecycleDisplay> {
       child: SizedBox(
         width: 300,
         child: SingleChildScrollView(
-          controller: scrollController,
+          controller: _scrollController,
           child: Column(
             children: <Widget>[
               Text('Current State: ${_state ?? 'Not initialized yet'}'),

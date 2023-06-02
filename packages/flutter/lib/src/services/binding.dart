@@ -276,80 +276,72 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // Handle the wrap-around from detached to paused.
       return const <AppLifecycleState>[AppLifecycleState.paused];
     }
-    const List<AppLifecycleState> stateOrder = <AppLifecycleState>[
-      AppLifecycleState.detached,
-      AppLifecycleState.resumed,
-      AppLifecycleState.inactive,
-      AppLifecycleState.hidden,
-      AppLifecycleState.paused,
-    ];
-    assert(AppLifecycleState.values.toSet().difference(stateOrder.toSet()).isEmpty,
-      'Missing representation of state(s) ${AppLifecycleState.values.toSet().difference(stateOrder.toSet())} in stateOrder.');
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
     if (previousState == null) {
       // If there was no previous state, then just transition to the new state.
       stateChanges.add(state);
     } else {
-      final int previousStateIndex = stateOrder.indexOf(previousState);
-      final int stateIndex = stateOrder.indexOf(state);
+      final int previousStateIndex = AppLifecycleState.values.indexOf(previousState);
+      final int stateIndex = AppLifecycleState.values.indexOf(state);
       assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
       assert(stateIndex != -1, 'State $state missing in stateOrder array');
       if (previousStateIndex > stateIndex) {
         for (int i = stateIndex; i < previousStateIndex; ++i) {
-          stateChanges.insert(0, stateOrder[i]);
+          stateChanges.insert(0, AppLifecycleState.values[i]);
         }
       } else {
         for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
-          stateChanges.add(stateOrder[i]);
+          stateChanges.add(AppLifecycleState.values[i]);
         }
       }
     }
     assert((){
-      bool debugVerifyLifecycleChange(AppLifecycleState? starting, AppLifecycleState ending) {
-        if (starting == null) {
-          // Any transition from null is fine, since it is initializing the state.
-          return true;
-        }
-        if (starting == ending) {
-          // Any transition to itself is OK.
-          return true;
-        }
-        switch (starting) {
-          case AppLifecycleState.detached:
-            if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
-              return true;
-            }
-          case AppLifecycleState.resumed:
-            // Can't go from resumed to detached directly (must go through paused).
-            if (ending == AppLifecycleState.inactive) {
-              return true;
-            }
-          case AppLifecycleState.inactive:
-            if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
-              return true;
-            }
-          case AppLifecycleState.hidden:
-            if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
-              return true;
-            }
-          case AppLifecycleState.paused:
-            if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
-              return true;
-            }
-        }
-        return false;
-      }
-
       AppLifecycleState? starting = previousState;
       for (final AppLifecycleState ending in stateChanges) {
-        if (!debugVerifyLifecycleChange(starting, ending)) {
+        if (!_debugVerifyLifecycleChange(starting, ending)) {
           return false;
         }
         starting = ending;
       }
       return true;
     }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
+
     return stateChanges;
+  }
+
+  static bool _debugVerifyLifecycleChange(AppLifecycleState? starting, AppLifecycleState ending) {
+    if (starting == null) {
+      // Any transition from null is fine, since it is initializing the state.
+      return true;
+    }
+    if (starting == ending) {
+      // Any transition to itself shouldn't happen.
+      return false;
+    }
+    switch (starting) {
+      case AppLifecycleState.detached:
+        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
+          return true;
+        }
+      case AppLifecycleState.resumed:
+        // Can't go from resumed to detached directly (must go through paused).
+        if (ending == AppLifecycleState.inactive) {
+          return true;
+        }
+      case AppLifecycleState.inactive:
+        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
+          return true;
+        }
+      case AppLifecycleState.hidden:
+        if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
+          return true;
+        }
+      case AppLifecycleState.paused:
+        if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
+          return true;
+        }
+    }
+    return false;
   }
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {

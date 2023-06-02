@@ -32,21 +32,21 @@ class ApplicationExitControl extends StatefulWidget {
 }
 
 class _ApplicationExitControlState extends State<ApplicationExitControl> {
-  late final AppLifecycleListener listener;
+  late final AppLifecycleListener _listener;
   bool _shouldExit = false;
-  String lastExitResponse = 'No exit requested yet';
+  String _lastExitResponse = 'No exit requested yet';
 
   @override
   void initState() {
     super.initState();
-    listener = AppLifecycleListener(
+    _listener = AppLifecycleListener(
       onExitRequested: _handleExitRequest,
     );
   }
 
   @override
   void dispose() {
-    listener.dispose();
+    _listener.dispose();
     super.dispose();
   }
 
@@ -58,7 +58,7 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
   Future<AppExitResponse> _handleExitRequest() async {
     final AppExitResponse response = _shouldExit ? AppExitResponse.exit : AppExitResponse.cancel;
     setState(() {
-      lastExitResponse = 'App responded ${response.name} to exit request';
+      _lastExitResponse = 'App responded ${response.name} to exit request';
     });
     return response;
   }
@@ -99,7 +99,7 @@ class _ApplicationExitControlState extends State<ApplicationExitControl> {
                 child: const Text('Quit'),
               ),
               const SizedBox(height: 30),
-              Text('Exit Request: $lastExitResponse'),
+              Text('Exit Request: $_lastExitResponse'),
             ],
           ),
         ),

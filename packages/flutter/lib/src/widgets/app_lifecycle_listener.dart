@@ -16,28 +16,31 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 ///
 /// To listen for requests for the application to exit, and to decide whether or
 /// not the application should exit when requested, create an
-/// [AppLifecycleListener] and set the [onExitRequested] callback. On macOS, in
-/// order to receive application exit requests originating from the OS, the
-/// `NSPrincipalClass` in your `Info.plist` file must be set to
-/// `FlutterApplication`, or a subclass of `FlutterApplication`.
+/// [AppLifecycleListener] and set the [onExitRequested] callback.
 ///
 /// To listen for changes in the application lifecycle state, define an
 /// [onStateChange] callback. See the [AppLifecycleState] enum for details on
 /// the various states.
 ///
-/// {@tool dartpad}
-/// This example shows how an application can listen to changes in the
-/// application state.
+/// The [onStateChange] callback is called for each state change, and the
+/// individual state transitions ([onResume], [onInactive], etc.) are also
+/// called if the state transition they represent occurs. Both [onStateChange]
+/// and the specific state transition callback will be called when the state
+/// changes.
 ///
-/// ** See code in examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.0.dart **
-/// {@end-tool}
+/// {@tool dartpad} This example shows how an application can listen to changes
+/// in the application state.
 ///
-/// {@tool dartpad}
-/// This example shows how an application can optionally decide to abort a
-/// request for exiting instead of obeying the request.
+/// ** See code in
+/// examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.0.dart
+/// ** {@end-tool}
 ///
-/// ** See code in examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.1.dart **
-/// {@end-tool}
+/// {@tool dartpad} This example shows how an application can optionally decide
+/// to abort a request for exiting instead of obeying the request.
+///
+/// ** See code in
+/// examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.1.dart
+/// ** {@end-tool}
 ///
 /// See also:
 ///
@@ -61,12 +64,11 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
     this.onExitRequested,
     this.onStateChange,
   })  : binding = binding ?? WidgetsBinding.instance,
-        _lifecycleState = (binding ?? WidgetsBinding.instance).lifecycleState ?? AppLifecycleState.detached {
+        _lifecycleState = (binding ?? WidgetsBinding.instance).lifecycleState {
     this.binding.addObserver(this);
-    onStateChange?.call(_lifecycleState);
   }
 
-  AppLifecycleState _lifecycleState;
+  AppLifecycleState? _lifecycleState;
 
   /// The [WidgetsBinding] to listen to for application lifecycle events.
   ///
@@ -165,7 +167,10 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   void dispose() {
     assert(_debugAssertNotDisposed());
     binding.removeObserver(this);
-    _debugDisposed = true;
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
   }
 
   bool _debugAssertNotDisposed() {
@@ -194,10 +199,10 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     assert(_debugAssertNotDisposed());
-    final AppLifecycleState previousState = _lifecycleState;
+    final AppLifecycleState? previousState = _lifecycleState;
     if (state == previousState) {
       // Transitioning to the same state twice doesn't produce any
-      // notifications.
+      // notifications (but also won't actually occur).
       return;
     }
     _lifecycleState = state;
@@ -228,7 +233,8 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
         assert(previousState == AppLifecycleState.paused, 'Invalid state transition to $state from $previousState');
         onDetach?.call();
     }
-    onStateChange?.call(_lifecycleState);
+    // At this point, it can't be null anymore.
+    onStateChange?.call(_lifecycleState!);
   }
 
   @override
