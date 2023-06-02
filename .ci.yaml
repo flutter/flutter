@@ -574,6 +574,7 @@ targets:
         ]
     drone_dimensions:
       - os=Mac-12
+      - cpu=x86
 
   - name: Mac impeller-cmake-example
     bringup: true
