@@ -3080,11 +3080,6 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   // The down handler is force-run on success of a single tap and optimistically
   // run before a long press success.
   void _handleTapDown(TapDragDownDetails details) {
