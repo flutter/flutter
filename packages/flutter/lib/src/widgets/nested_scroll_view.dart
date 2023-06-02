@@ -876,23 +876,17 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       return;
     }
     bool innerCanDrag = false;
-    double maxInnerExtent = 0.0;
     for (final _NestedScrollPosition position in _innerPositions) {
       if (!position.haveDimensions) {
         return;
       }
-      maxInnerExtent = math.max(maxInnerExtent, position.maxScrollExtent);
       innerCanDrag = innerCanDrag
         // This refers to the physics of the actual inner scroll position, not
         // the whole NestedScrollView, since it is possible to have different
         // ScrollPhysics for the inner and outer positions.
         || position.physics.shouldAcceptUserOffset(position);
     }
-    _outerPosition!.updateCanDrag(
-      innerCanDrag,
-      maxInnerExtent,
-      _state._absorberHandle.layoutExtent ?? 0.0,
-    );
+    _outerPosition!.updateCanDrag(innerCanDrag);
   }
 
   Future<void> animateTo(
@@ -1475,23 +1469,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     coordinator.updateCanDrag();
   }
 
-  void updateCanDrag(
-    bool innerCanDrag,
-    double innerExtent,
-    double absorbedExtent,
-  ) {
-    // This is only called for the outer position, with consideration for the
-    // inner position passed in.
-    print(innerExtent);
-    print(this);
+  void updateCanDrag(bool innerCanDrag,) {
+    // This is only called for the outer position
     assert(coordinator._outerPosition == this);
-    final bool canDrag =
-      // This refers to the physics of the actual outer scroll position, not the
-      // whole NestedScrollView, since it is possible to have different
-      // ScrollPhysics for the inner and outer positions.
-      (physics.shouldAcceptUserOffset(this) || innerCanDrag)
-      && (minScrollExtent != maxScrollExtent || innerExtent > 0);
-    context.setCanDrag(canDrag);
+    context.setCanDrag(physics.shouldAcceptUserOffset(this) || innerCanDrag);
   }
 
   @override
