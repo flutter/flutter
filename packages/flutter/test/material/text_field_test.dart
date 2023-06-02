@@ -15691,14 +15691,17 @@ void main() {
       );
 
       // Trigger build one more time...
-      await tester.pumpWidget(MaterialApp(
-          home: Material(
-          child: Padding(
-            padding: EdgeInsets.zero,
-            child: TextField(key: key, controller: controller, contextMenuBuilder: null),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Padding(
+                padding: EdgeInsets.zero,
+                child: TextField(key: key, controller: controller, contextMenuBuilder: null),
+              ),
+            ),
           ),
-        )));
-    },
+        );
+      },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );
   });
