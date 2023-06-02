@@ -14,7 +14,7 @@ PipelineVK::PipelineVK(std::weak_ptr<DeviceHolder> device_holder,
                        vk::UniquePipelineLayout layout,
                        vk::UniqueDescriptorSetLayout descriptor_set_layout)
     : Pipeline(std::move(library), desc),
-      device_holder_(device_holder),
+      device_holder_(std::move(device_holder)),
       pipeline_(std::move(pipeline)),
       render_pass_(std::move(render_pass)),
       layout_(std::move(layout)),

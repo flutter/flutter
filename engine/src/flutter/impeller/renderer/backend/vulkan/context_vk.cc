@@ -227,7 +227,7 @@ void ContextVK::Setup(Settings settings) {
       VALIDATION_LOG << "No valid Vulkan device found.";
       return;
     }
-    device_holder->physical_device = std::move(physical_device.value());
+    device_holder->physical_device = physical_device.value();
   }
 
   //----------------------------------------------------------------------------

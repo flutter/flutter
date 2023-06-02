@@ -55,7 +55,7 @@ static std::string VKShaderNameToShaderKeyName(const std::string& name,
 ShaderLibraryVK::ShaderLibraryVK(
     std::weak_ptr<DeviceHolder> device_holder,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data)
-    : device_holder_(device_holder) {
+    : device_holder_(std::move(device_holder)) {
   TRACE_EVENT0("impeller", "CreateShaderLibrary");
   bool success = true;
   auto iterator = [&](auto type,         //

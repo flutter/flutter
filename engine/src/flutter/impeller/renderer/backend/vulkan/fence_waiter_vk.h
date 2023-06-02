@@ -47,7 +47,7 @@ class FenceWaiterVK {
   void Main();
 
   std::optional<std::vector<vk::Fence>> TrimAndCreateWaitSetLocked(
-      std::shared_ptr<DeviceHolder> device_holder);
+      const std::shared_ptr<DeviceHolder>& device_holder);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FenceWaiterVK);
 };

@@ -100,7 +100,7 @@ void ConfigureStencil(const ProcTableGLES& gl,
   gl.Enable(GL_STENCIL_TEST);
   const auto& front = pipeline.GetFrontStencilAttachmentDescriptor();
   const auto& back = pipeline.GetBackStencilAttachmentDescriptor();
-  if (front == back) {
+  if (front.has_value() && front == back) {
     ConfigureStencil(GL_FRONT_AND_BACK, gl, *front, stencil_reference);
   } else if (front.has_value()) {
     ConfigureStencil(GL_FRONT, gl, *front, stencil_reference);
