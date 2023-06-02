@@ -16,3 +16,26 @@ String objectRuntimeType(Object? object, String optimizedValue) {
   }());
   return optimizedValue;
 }
+
+
+abstract class WeakValue<T> {
+  WeakValue._();
+
+  factory WeakValue(T value){
+    throw UnimplementedError();
+    //return WeakObjectValue<T>(value);
+  }
+
+  /// Returns the value if it is still accessible, otherwise returns null.
+  T? get value;
+}
+
+class _WeakObjectValue<T extends Object> extends WeakValue<T>{
+
+  final WeakReference<T> _ref;
+
+  _WeakObjectValue(T value) : _ref = WeakReference(value), super._();
+
+  @override
+  T? get value => _ref.target;
+}
