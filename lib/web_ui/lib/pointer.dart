@@ -36,6 +36,7 @@ enum PointerSignalKind {
 
 class PointerData {
   const PointerData({
+    this.viewId = 0,
     this.embedderId = 0,
     this.timeStamp = Duration.zero,
     this.change = PointerChange.cancel,
@@ -72,6 +73,7 @@ class PointerData {
     this.scale = 0.0,
     this.rotation = 0.0,
   });
+  final int viewId;
   final int embedderId;
   final Duration timeStamp;
   final PointerChange change;

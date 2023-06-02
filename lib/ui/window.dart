@@ -89,7 +89,7 @@ class FlutterView {
   FlutterView._(this.viewId, this.platformDispatcher);
 
   /// The opaque ID for this view.
-  final Object viewId;
+  final int viewId;
 
   /// The platform dispatcher that this view is registered with, and gets its
   /// information from.
