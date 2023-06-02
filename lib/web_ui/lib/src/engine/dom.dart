@@ -520,6 +520,8 @@ extension DomElementExtension on DomElement {
   Iterable<DomElement> get children =>
       createDomListWrapper<DomElement>(_children);
 
+  external DomElement? get firstElementChild;
+
   @JS('clientHeight')
   external JSNumber get _clientHeight;
   double get clientHeight => _clientHeight.toDart;

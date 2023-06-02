@@ -60,6 +60,17 @@ class PlatformViewManager {
     return _contents.containsKey(viewId);
   }
 
+  /// Returns the HTML element created by a registered factory for [viewId].
+  ///
+  /// Throws an [AssertionError] if [viewId] hasn't been rendered before.
+  DomElement getViewById(int viewId) {
+    assert(knowsViewId(viewId), 'No view has been rendered for viewId: $viewId');
+    // `_contents[viewId]` is the <flt-platform-view> element created by us. The
+    // first (and only) child of that is the element created by the user-supplied
+    // factory function.
+    return _contents[viewId]!.firstElementChild!;
+  }
+
   /// Registers a `factoryFunction` that knows how to render a Platform View of `viewType`.
   ///
   /// `viewType` is selected by the programmer, but it can't be overridden once
@@ -119,12 +130,13 @@ class PlatformViewManager {
             ..setAttribute('slot', slotName);
 
       final Function factoryFunction = _factories[viewType]!;
-      late DomElement content;
+      final DomElement content;
 
       if (factoryFunction is ParameterizedPlatformViewFactory) {
         content = factoryFunction(viewId, params: params);
       } else {
-        content = (factoryFunction as PlatformViewFactory).call(viewId);
+        factoryFunction as PlatformViewFactory;
+        content = factoryFunction(viewId);
       }
 
       _ensureContentCorrectlySized(content, viewType);
