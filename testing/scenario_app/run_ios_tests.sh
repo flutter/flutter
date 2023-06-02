@@ -45,7 +45,7 @@ SCENARIO_PATH=$SRC_DIR/out/$FLUTTER_ENGINE/scenario_app/Scenarios
 pushd .
 cd $SCENARIO_PATH
 
-RESULT_BUNDLE_FOLDER="ios_scenario_xcresult"
+RESULT_BUNDLE_FOLDER=$(mktemp -d ios_scenario_xcresult_XXX)
 RESULT_BUNDLE_PATH="${SCENARIO_PATH}/${RESULT_BUNDLE_FOLDER}"
 
 # Zip and upload xcresult to luci.
@@ -60,8 +60,6 @@ zip_and_upload_xcresult_to_luci () {
 
 echo "Running simulator tests with Skia"
 echo ""
-
-mktemp -d $RESULT_BUNDLE_PATH
 
 if set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme Scenarios \
