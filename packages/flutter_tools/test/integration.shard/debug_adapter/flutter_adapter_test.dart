@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dds/dap.dart';
-import 'package:dds/src/dap/protocol_generated.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
