@@ -27,7 +27,8 @@ namespace impeller {
 ///
 class DescriptorPoolVK {
  public:
-  explicit DescriptorPoolVK(std::weak_ptr<const DeviceHolder> device_holder);
+  explicit DescriptorPoolVK(
+      const std::weak_ptr<const DeviceHolder>& device_holder);
 
   ~DescriptorPoolVK();
 

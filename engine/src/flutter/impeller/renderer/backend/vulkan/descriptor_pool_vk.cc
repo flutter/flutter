@@ -10,7 +10,7 @@
 namespace impeller {
 
 DescriptorPoolVK::DescriptorPoolVK(
-    std::weak_ptr<const DeviceHolder> device_holder)
+    const std::weak_ptr<const DeviceHolder>& device_holder)
     : device_holder_(device_holder) {
   FML_DCHECK(device_holder.lock());
 }

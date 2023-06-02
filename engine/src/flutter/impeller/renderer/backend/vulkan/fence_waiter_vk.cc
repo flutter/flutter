@@ -12,7 +12,7 @@
 namespace impeller {
 
 FenceWaiterVK::FenceWaiterVK(std::weak_ptr<DeviceHolder> device_holder)
-    : device_holder_(device_holder) {
+    : device_holder_(std::move(device_holder)) {
   waiter_thread_ = std::make_unique<std::thread>([&]() { Main(); });
   is_valid_ = true;
 }
@@ -81,7 +81,7 @@ void FenceWaiterVK::Main() {
 }
 
 std::optional<std::vector<vk::Fence>> FenceWaiterVK::TrimAndCreateWaitSetLocked(
-    std::shared_ptr<DeviceHolder> device_holder) {
+    const std::shared_ptr<DeviceHolder>& device_holder) {
   if (terminate_) {
     return std::nullopt;
   }
