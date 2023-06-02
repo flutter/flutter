@@ -8,7 +8,7 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/initialization.dart';
+import 'package:ui/src/engine/embedder.dart';
 import 'package:ui/src/engine/semantics.dart';
 import 'package:ui/src/engine/services.dart';
 
@@ -19,42 +19,29 @@ void main() {
 }
 
 void testMain() {
-  setUpAll(() async {
-    await initializeEngine();
+  late FlutterViewEmbedder embedder;
+  late AccessibilityAnnouncements accessibilityAnnouncements;
+
+  setUp(() {
+    embedder = FlutterViewEmbedder();
+    accessibilityAnnouncements = embedder.accessibilityAnnouncements;
     setLiveMessageDurationForTest(const Duration(milliseconds: 10));
+    expect(
+      embedder.glassPaneShadow.querySelector('flt-announcement-polite'),
+      accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite),
+    );
+    expect(
+      embedder.glassPaneShadow.querySelector('flt-announcement-assertive'),
+      accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive),
+    );
   });
 
-  void expectAnnouncementElements({required bool present}) {
-    expect(
-      domDocument.getElementById('ftl-announcement-polite'),
-      present ? isNotNull : isNull,
-    );
-    expect(
-      domDocument.getElementById('ftl-announcement-assertive'),
-      present ? isNotNull : isNull,
-    );
-  }
-
   tearDown(() async {
-    // Completely reset accessibility announcements for subsequent tests.
-    accessibilityAnnouncements.dispose();
     await Future<void>.delayed(liveMessageDuration * 2);
-    initializeAccessibilityAnnouncements();
-    expectAnnouncementElements(present: true);
+    embedder.glassPaneElement.remove();
   });
 
   group('$AccessibilityAnnouncements', () {
-    test('Initialization and disposal', () {
-      // Elements should be there right after engine initialization.
-      expectAnnouncementElements(present: true);
-
-      accessibilityAnnouncements.dispose();
-      expectAnnouncementElements(present: false);
-
-      initializeAccessibilityAnnouncements();
-      expectAnnouncementElements(present: true);
-    });
-
     ByteData? encodeMessageOnly({required String message}) {
       return codec.encodeMessage(<dynamic, dynamic>{
         'data': <dynamic, dynamic>{'message': message},
