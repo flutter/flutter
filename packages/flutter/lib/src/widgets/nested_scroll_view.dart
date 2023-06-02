@@ -779,7 +779,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
       pixels = clampDouble(_outerPosition!.pixels,
         _outerPosition!.minScrollExtent,
         _outerPosition!.maxScrollExtent,
-      );
+      ); // TODO(ianh): gracefully handle out-of-range outer positions
       minRange = _outerPosition!.minScrollExtent;
       maxRange = _outerPosition!.maxScrollExtent;
       assert(minRange <= maxRange);
@@ -1472,7 +1472,13 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   void updateCanDrag(bool innerCanDrag,) {
     // This is only called for the outer position
     assert(coordinator._outerPosition == this);
-    context.setCanDrag(physics.shouldAcceptUserOffset(this) || innerCanDrag);
+    context.setCanDrag(
+      // This refers to the physics of the actual outer scroll position, not
+      // the whole NestedScrollView, since it is possible to have different
+      // ScrollPhysics for the inner and outer positions.
+      physics.shouldAcceptUserOffset(this)
+      || innerCanDrag,
+    );
   }
 
   @override
