@@ -50,6 +50,10 @@ static std::optional<RenderTarget> WrapTextureWithRenderTarget(
   // rendering but also creates smaller intermediate passes.
   ISize root_size;
   if (requires_blit) {
+    if (!clip_rect.has_value()) {
+      VALIDATION_LOG << "Missing clip rectangle.";
+      return std::nullopt;
+    }
     root_size = ISize(clip_rect->size.width, clip_rect->size.height);
   } else {
     root_size = {static_cast<ISize::Type>(texture.width),
@@ -243,6 +247,10 @@ bool SurfaceMTL::Present() const {
       return false;
     }
     auto blit_pass = blit_command_buffer->CreateBlitPass();
+    if (!clip_rect_.has_value()) {
+      VALIDATION_LOG << "Missing clip rectangle.";
+      return false;
+    }
     blit_pass->AddCopy(source_texture_, destination_texture_, std::nullopt,
                        clip_rect_->origin);
     blit_pass->EncodeCommands(context->GetResourceAllocator());
