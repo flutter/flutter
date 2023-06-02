@@ -131,9 +131,15 @@ source_set("fml") {
   libs = []
 
   if (is_ios || is_mac) {
-    sources += [ "platform/posix/shared_mutex_posix.cc" ]
+    sources += [
+      "platform/darwin/concurrent_message_loop_factory.mm",
+      "platform/posix/shared_mutex_posix.cc",
+    ]
   } else {
-    sources += [ "synchronization/shared_mutex_std.cc" ]
+    sources += [
+      "concurrent_message_loop_factory.cc",
+      "synchronization/shared_mutex_std.cc",
+    ]
   }
 
   if (is_ios || is_mac) {

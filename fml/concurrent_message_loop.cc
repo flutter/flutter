@@ -11,12 +11,6 @@
 
 namespace fml {
 
-std::shared_ptr<ConcurrentMessageLoop> ConcurrentMessageLoop::Create(
-    size_t worker_count) {
-  return std::shared_ptr<ConcurrentMessageLoop>{
-      new ConcurrentMessageLoop(worker_count)};
-}
-
 ConcurrentMessageLoop::ConcurrentMessageLoop(size_t worker_count)
     : worker_count_(std::max<size_t>(worker_count, 1ul)) {
   for (size_t i = 0; i < worker_count_; ++i) {
@@ -60,7 +54,7 @@ void ConcurrentMessageLoop::PostTask(const fml::closure& task) {
         << "Tried to post a task to shutdown concurrent message "
            "loop. The task will be executed on the callers thread.";
     lock.unlock();
-    task();
+    ExecuteTask(task);
     return;
   }
 
@@ -103,18 +97,22 @@ void ConcurrentMessageLoop::WorkerMain() {
     TRACE_EVENT0("flutter", "ConcurrentWorkerWake");
     // Execute the primary task we woke up for.
     if (task) {
-      task();
+      ExecuteTask(task);
     }
 
     // Execute any thread tasks.
     for (const auto& thread_task : thread_tasks) {
-      thread_task();
+      ExecuteTask(thread_task);
     }
 
     if (shutdown_now) {
       break;
     }
   }
+}
+
+void ConcurrentMessageLoop::ExecuteTask(const fml::closure& task) {
+  task();
 }
 
 void ConcurrentMessageLoop::Terminate() {
