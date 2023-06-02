@@ -259,12 +259,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   Future<String?> _handleLifecycleMessage(String? message) async {
     final AppLifecycleState? state = _parseAppLifecycleMessage(message!);
-    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState ?? AppLifecycleState.detached, state!);
+    final List<AppLifecycleState> generated = _generateStateTransitions(lifecycleState, state!);
     generated.forEach(handleAppLifecycleStateChanged);
     return null;
   }
 
-  List<AppLifecycleState> _generateStateTransitions(AppLifecycleState previousState, AppLifecycleState state) {
+  List<AppLifecycleState> _generateStateTransitions(AppLifecycleState? previousState, AppLifecycleState state) {
     if (previousState == state) {
       return const <AppLifecycleState>[];
     }
@@ -286,61 +286,66 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     assert(AppLifecycleState.values.toSet().difference(stateOrder.toSet()).isEmpty,
       'Missing representation of state(s) ${AppLifecycleState.values.toSet().difference(stateOrder.toSet())} in stateOrder.');
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
-    final int previousStateIndex = stateOrder.indexOf(previousState);
-    final int stateIndex = stateOrder.indexOf(state);
-    assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
-    assert(stateIndex != -1, 'State $state missing in stateOrder array');
-    if (previousStateIndex > stateIndex) {
-      for (int i = stateIndex; i < previousStateIndex; ++i) {
-        stateChanges.insert(0, stateOrder[i]);
-      }
+    if (previousState == null) {
+      // If there was no previous state, then just transition to the new state.
+      stateChanges.add(state);
     } else {
-      for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
-        stateChanges.add(stateOrder[i]);
+      final int previousStateIndex = stateOrder.indexOf(previousState);
+      final int stateIndex = stateOrder.indexOf(state);
+      assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
+      assert(stateIndex != -1, 'State $state missing in stateOrder array');
+      if (previousStateIndex > stateIndex) {
+        for (int i = stateIndex; i < previousStateIndex; ++i) {
+          stateChanges.insert(0, stateOrder[i]);
+        }
+      } else {
+        for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
+          stateChanges.add(stateOrder[i]);
+        }
       }
     }
     assert((){
-      bool debugVerifyLifecycleChange(AppLifecycleState? previous, AppLifecycleState state) {
-        if (previous == null) {
+      bool debugVerifyLifecycleChange(AppLifecycleState? starting, AppLifecycleState ending) {
+        if (starting == null) {
           // Any transition from null is fine, since it is initializing the state.
           return true;
         }
-        if (previous == state) {
+        if (starting == ending) {
           // Any transition to itself is OK.
           return true;
         }
-        switch (previous) {
+        switch (starting) {
           case AppLifecycleState.detached:
-            if (state == AppLifecycleState.resumed || state == AppLifecycleState.paused) {
+            if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
               return true;
             }
           case AppLifecycleState.resumed:
             // Can't go from resumed to detached directly (must go through paused).
-            if (state == AppLifecycleState.inactive) {
+            if (ending == AppLifecycleState.inactive) {
               return true;
             }
           case AppLifecycleState.inactive:
-            if (state == AppLifecycleState.resumed || state == AppLifecycleState.hidden) {
+            if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
               return true;
             }
           case AppLifecycleState.hidden:
-            if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+            if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
               return true;
             }
           case AppLifecycleState.paused:
-            if (state == AppLifecycleState.hidden || state == AppLifecycleState.detached) {
+            if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
               return true;
             }
         }
         return false;
       }
 
-      AppLifecycleState previous = previousState;
-      for (final AppLifecycleState newState in stateChanges) {
-        if (!debugVerifyLifecycleChange(previous, newState)) {
+      AppLifecycleState? starting = previousState;
+      for (final AppLifecycleState ending in stateChanges) {
+        if (!debugVerifyLifecycleChange(starting, ending)) {
           return false;
         }
-        previous = newState;
+        starting = ending;
       }
       return true;
     }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
