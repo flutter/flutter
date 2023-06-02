@@ -684,11 +684,7 @@ typedef InspectorSelectionChangedCallback = void Function();
 class InspectorReferenceData {
   /// Creates an instance of [InspectorReferenceData].
   InspectorReferenceData(Object object) {
-    if (value is Record) {
-      throw StateError('Cannot wrap Record, because it is not supported by $WeakReference.');
-    }
-
-    // If weak reference does not support T, then use strong reference.
+    // These types are not supported by [WeakReference].
     // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
     if (value is String || value is num || value is bool) {
       _value = value;
