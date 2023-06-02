@@ -63,9 +63,15 @@ class PathUrlStrategy extends ui_web.HashUrlStrategy {
 
   @override
   String prepareExternalUrl(String internalUrl) {
-    if (internalUrl.isNotEmpty && !internalUrl.startsWith('/')) {
-      internalUrl = '/$internalUrl';
+    if (internalUrl.isEmpty) {
+      internalUrl = '/';
     }
+    assert(
+      internalUrl.startsWith('/'),
+      "When using PathUrlStrategy, all route names must start with '/' because "
+      "the browser's pathname always starts with '/'. "
+      "Found route name: '$internalUrl'",
+    );
     return '$_basePath$internalUrl';
   }
 }
