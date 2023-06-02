@@ -62,6 +62,15 @@ TextStyle? iconStyle(WidgetTester tester, IconData icon) {
   return iconRichText.text.style;
 }
 
+void _verifyTextNotClipped(Finder textFinder, WidgetTester tester) {
+  final Rect clipRect = tester.getRect(find.ancestor(of: textFinder, matching: find.byType(ClipRect)).first);
+  final Rect textRect = tester.getRect(textFinder);
+  expect(textRect.top, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.bottom, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.left, inInclusiveRange(clipRect.left, clipRect.right));
+  expect(textRect.right, inInclusiveRange(clipRect.left, clipRect.right));
+}
+
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
 double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
@@ -1140,6 +1149,8 @@ void main() {
     expect(titleOffset.dx, 16.0);
     expect(titleOffset.dy, 96.0);
 
+    _verifyTextNotClipped(expandedTitle, tester);
+
     // Test the expanded title default color.
     expect(
       tester.renderObject<RenderParagraph>(expandedTitle).text.style!.color,
@@ -1230,6 +1241,7 @@ void main() {
       renderSliverAppBar.geometry!.scrollExtent - 28.0,
       reason: 'bottom padding of a large expanded title should be 28.',
     );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     // Test the expanded title default color.
     expect(
@@ -4710,12 +4722,15 @@ void main() {
 
     final Finder expandedTitle = find.text(title).first;
     expect(tester.getRect(expandedTitle).height, 32.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
     expect(tester.getRect(expandedTitle).height, 43.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getRect(expandedTitle).height, 43.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
@@ -4793,12 +4808,15 @@ void main() {
 
     final Finder expandedTitle = find.text(title).first;
     expect(tester.getBottomLeft(expandedTitle).dy, 96.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
     expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
@@ -4835,6 +4853,7 @@ void main() {
       renderSliverAppBar.geometry!.scrollExtent - 28.0,
       reason: 'bottom padding of a large expanded title should be 28.',
     );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
     expect(
@@ -4842,11 +4861,13 @@ void main() {
       renderSliverAppBar.geometry!.scrollExtent - 28.0,
       reason: 'bottom padding of a large expanded title should be 28.',
     );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     // The bottom padding of the expanded title needs to be reduced for it to be
     // fully visible.
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getBottomLeft(expandedTitle).dy, 124.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   group('AppBar.forceMaterialTransparency', () {

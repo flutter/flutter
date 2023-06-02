@@ -2271,7 +2271,7 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
 
     assert(padding.isNonNegative);
     assert(titleAlignment.y == 1.0);
-    // yAdjustement is the minimum additional y offset to position the child in
+    // yAdjustement is the minimum additional y offset to shift the child in
     // the visible vertical space when AppBar is fully expanded. The goal is to
     // prevent the expanded title from being clipped when the expanded title
     // widget + the bottom padding is too tall to fit in the flexible space (the
