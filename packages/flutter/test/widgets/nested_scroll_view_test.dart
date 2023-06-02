@@ -2913,6 +2913,46 @@ void main() {
     await tester.pumpWidget(buildApp(nested: true));
   });
 
+  testWidgets('SliverOverlapInjector asserts when there is no SliverOverlapAbsorber', (WidgetTester tester) async {
+    Widget buildApp() {
+      return MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(),
+              ];
+            },
+            body: Builder(
+              builder: (BuildContext context) {
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverOverlapInjector(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    ),
+                  ],
+                );
+              }
+            ),
+          ),
+        ),
+      );
+    }
+    final List<Object> exceptions = <Object>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+    await tester.pumpWidget(buildApp());
+    FlutterError.onError = oldHandler;
+    expect(exceptions.length, 4);
+    expect(exceptions[0], isAssertionError);
+    expect(
+      (exceptions[0] as AssertionError).message,
+      contains('SliverOverlapInjector has found no absorbed extent to inject.'),
+    );
+  });
+
   group('NestedScrollView properly sets drag', () {
     Future<bool> canDrag(WidgetTester tester) async {
       await tester.drag(
