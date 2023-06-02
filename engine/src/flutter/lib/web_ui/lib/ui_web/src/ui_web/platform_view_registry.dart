@@ -23,4 +23,11 @@ class PlatformViewRegistry {
       isVisible: isVisible,
     );
   }
+
+  /// Returns the view previously created for [viewId].
+  ///
+  /// Throws if no view has been created for [viewId].
+  Object getViewById(int viewId) {
+    return platformViewManager.getViewById(viewId);
+  }
 }
