@@ -589,6 +589,17 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], TextInputAction.done.toString());
   });
 
+  testWidgets('Custom flexibleSpace value', (WidgetTester tester) async {
+    const Widget flexibleSpace = Text('custom flexibleSpace');
+    final _TestSearchDelegate delegate = _TestSearchDelegate(flexibleSpace: flexibleSpace);
+
+    await tester.pumpWidget(TestHomePage(delegate: delegate));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.byWidget(flexibleSpace), findsOneWidget);
+  });
+
   group('contributes semantics', () {
     TestSemantics buildExpected({ required String routeName }) {
       return TestSemantics.root(
@@ -995,6 +1006,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    this.flexibleSpace = const Text('FlexibleSpace'),
     this.defaultAppBarTheme = false,
     super.searchFieldDecorationTheme,
     super.searchFieldStyle,
@@ -1008,6 +1020,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   final String suggestions;
   final String result;
   final List<Widget> actions;
+  final Widget? flexibleSpace;
   static const Color hintTextColor = Colors.green;
 
   @override
@@ -1065,7 +1078,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget? buildFlexibleSpace(BuildContext context) {
-    return const Text('FlexibleSpace');
+    return flexibleSpace;
   }
 
   @override
