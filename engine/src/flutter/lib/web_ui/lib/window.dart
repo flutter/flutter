@@ -13,7 +13,7 @@ abstract class Display {
 
 abstract class FlutterView {
   PlatformDispatcher get platformDispatcher;
-  Object get viewId;
+  int get viewId;
   double get devicePixelRatio;
   Rect get physicalGeometry;
   Size get physicalSize;

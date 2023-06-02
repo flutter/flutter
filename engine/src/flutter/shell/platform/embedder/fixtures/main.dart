@@ -105,19 +105,12 @@ Future<void> get accessibilityFeaturesChanged {
   return featuresChanged.future;
 }
 
-class SemanticsActionData {
-  const SemanticsActionData(this.id, this.action, this.args);
-  final int id;
-  final SemanticsAction action;
-  final ByteData? args;
-}
-
-Future<SemanticsActionData> get semanticsAction {
-  final Completer<SemanticsActionData> actionReceived =
-      Completer<SemanticsActionData>();
-  PlatformDispatcher.instance.onSemanticsAction =
-      (int id, SemanticsAction action, ByteData? args) {
-    actionReceived.complete(SemanticsActionData(id, action, args));
+Future<SemanticsActionEvent> get semanticsActionEvent {
+  final Completer<SemanticsActionEvent> actionReceived =
+      Completer<SemanticsActionEvent>();
+  PlatformDispatcher.instance.onSemanticsActionEvent =
+      (SemanticsActionEvent action) {
+    actionReceived.complete(action);
   };
   return actionReceived.future;
 }
@@ -285,12 +278,12 @@ void a11y_main() async {
   signalNativeTest();
 
   // 6: Await semantics action from embedder.
-  final SemanticsActionData data = await semanticsAction;
+  final SemanticsActionEvent data = await semanticsActionEvent;
   final List<int> actionArgs = <int>[
-    data.args!.getInt8(0),
-    data.args!.getInt8(1)
+    (data.arguments! as ByteData).getInt8(0),
+    (data.arguments! as ByteData).getInt8(1)
   ];
-  notifySemanticsAction(data.id, data.action.index, actionArgs);
+  notifySemanticsAction(data.nodeId, data.type.index, actionArgs);
 
   // 7: Await semantics disabled from embedder.
   await semanticsChanged;

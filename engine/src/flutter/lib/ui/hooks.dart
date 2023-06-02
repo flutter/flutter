@@ -32,7 +32,7 @@ void _updateDisplays(
 
 @pragma('vm:entry-point')
 void _updateWindowMetrics(
-  Object id,
+  int id,
   double devicePixelRatio,
   double width,
   double height,
