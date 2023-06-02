@@ -145,5 +145,63 @@ void testMain() {
         expect(firstRender, same(anotherRender));
       });
     });
+
+    group('getViewById', () {
+      test('finds created views', () async {
+        final Map<int, DomElement> views1 = <int, DomElement>{
+          1: createDomHTMLDivElement(),
+          2: createDomHTMLDivElement(),
+          5: createDomHTMLDivElement(),
+        };
+        final Map<int, DomElement> views2 = <int, DomElement>{
+          3: createDomHTMLDivElement(),
+          4: createDomHTMLDivElement(),
+        };
+
+        contentManager.registerFactory('forTest1', (int id) => views1[id]!);
+        contentManager.registerFactory('forTest2', (int id) => views2[id]!);
+
+        // Render all 5 views.
+        for (final int id in views1.keys) {
+          contentManager.renderContent('forTest1', id, null);
+        }
+        for (final int id in views2.keys) {
+          contentManager.renderContent('forTest2', id, null);
+        }
+
+        // Check all 5 views.
+        for (final int id in views1.keys) {
+          expect(contentManager.getViewById(id), views1[id]);
+        }
+        for (final int id in views2.keys) {
+          expect(contentManager.getViewById(id), views2[id]);
+        }
+
+        // Throws for unknown viewId.
+        expect(() {
+          contentManager.getViewById(99);
+        }, throwsA(isA<AssertionError>()));
+      });
+
+      test('throws if view has been cleared', () {
+        final DomHTMLDivElement view = createDomHTMLDivElement();
+        contentManager.registerFactory(viewType, (int id) => view);
+
+        // Throws before viewId is rendered.
+        expect(() {
+          contentManager.getViewById(viewId);
+        }, throwsA(isA<AssertionError>()));
+
+        contentManager.renderContent(viewType, viewId, null);
+        // Succeeds after viewId is rendered.
+        expect(contentManager.getViewById(viewId), view);
+
+        contentManager.clearPlatformView(viewId);
+        // Throws after viewId is cleared.
+        expect(() {
+          contentManager.getViewById(viewId);
+        }, throwsA(isA<AssertionError>()));
+      });
+    });
   });
 }
