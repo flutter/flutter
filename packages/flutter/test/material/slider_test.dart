@@ -3507,7 +3507,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Value indicator disappears after a bit when the slider is clicked, not dragged, on desktop', (WidgetTester tester) async {
+  testWidgets('Value indicator disappears after a bit when clicked', (WidgetTester tester) async {
     double currentValue = 0.5;
     final FocusNode focusNode = FocusNode();
 
@@ -3569,7 +3569,7 @@ void main() {
       valueIndicatorBox,
       paints..path(color: const Color(0xff000000))..paragraph(),
     );
-    await tester.pumpAndSettle();
+
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
     // Slider value indicator is no longer visible after 2 seconds
