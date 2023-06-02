@@ -1302,9 +1302,11 @@ mixin WidgetInspectorService {
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData = _InspectorReferenceData(object);
-      _idToReferenceData[id] = referenceData;
-      group.add(referenceData);
+      if (object is DiagnosticsNode) {
+        referenceData = _InspectorReferenceData(object);
+        _idToReferenceData[id] = referenceData;
+        group.add(referenceData);
+      }
     } else {
       referenceData = _idToReferenceData[id]!;
       if (group.add(referenceData)) {
