@@ -2,24 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
 import '../browser_detection.dart';
 import '../dom.dart';
 import '../embedder.dart';
 import '../util.dart';
 import 'slots.dart';
-
-/// A function which takes a unique `id` and some `params` and creates an HTML element.
-///
-/// This is made available to end-users through dart:ui in web.
-typedef ParameterizedPlatformViewFactory = DomElement Function(
-  int viewId, {
-  Object? params,
-});
-
-/// A function which takes a unique `id` and creates an HTML element.
-///
-/// This is made available to end-users through dart:ui in web.
-typedef PlatformViewFactory = DomElement Function(int viewId);
 
 /// This class handles the lifecycle of Platform Views in the DOM of a Flutter Web App.
 ///
@@ -79,8 +68,13 @@ class PlatformViewManager {
   /// `factoryFunction` needs to be a [PlatformViewFactory].
   bool registerFactory(String viewType, Function factoryFunction,
       {bool isVisible = true}) {
-    assert(factoryFunction is PlatformViewFactory ||
-        factoryFunction is ParameterizedPlatformViewFactory);
+    assert(
+      factoryFunction is ui_web.PlatformViewFactory ||
+          factoryFunction is ui_web.ParameterizedPlatformViewFactory,
+      'Factory signature is invalid. Expected either '
+      '{${ui_web.PlatformViewFactory}} or {${ui_web.ParameterizedPlatformViewFactory}} '
+      'but got: {${factoryFunction.runtimeType}}',
+    );
 
     if (_factories.containsKey(viewType)) {
       return false;
@@ -132,11 +126,11 @@ class PlatformViewManager {
       final Function factoryFunction = _factories[viewType]!;
       final DomElement content;
 
-      if (factoryFunction is ParameterizedPlatformViewFactory) {
-        content = factoryFunction(viewId, params: params);
+      if (factoryFunction is ui_web.ParameterizedPlatformViewFactory) {
+        content = factoryFunction(viewId, params: params) as DomElement;
       } else {
-        factoryFunction as PlatformViewFactory;
-        content = factoryFunction(viewId);
+        factoryFunction as ui_web.PlatformViewFactory;
+        content = factoryFunction(viewId) as DomElement;
       }
 
       _ensureContentCorrectlySized(content, viewType);

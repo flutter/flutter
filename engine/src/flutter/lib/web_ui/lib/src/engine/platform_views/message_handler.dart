@@ -68,6 +68,7 @@ class PlatformViewMessageHandler {
     final Map<dynamic, dynamic> args = methodCall.arguments as Map<dynamic, dynamic>;
     final int viewId = args.readInt('id');
     final String viewType = args.readString('viewType');
+    final Object? params = args['params'];
 
     if (!_contentManager.knowsViewType(viewType)) {
       callback(_codec.encodeErrorEnvelope(
@@ -89,11 +90,10 @@ class PlatformViewMessageHandler {
       return;
     }
 
-    // TODO(hterkelsen): How can users add extra `args` from the HtmlElementView widget?
     final DomElement content = _contentManager.renderContent(
       viewType,
       viewId,
-      args,
+      params,
     );
 
     // For now, we don't need anything fancier. If needed, this can be converted
