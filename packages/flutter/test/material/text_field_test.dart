@@ -15678,10 +15678,17 @@ void main() {
       expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
 
       // set contextMenuBuilder be null
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(
+        MaterialApp(
           home: Material(
-            child: TextField(key: key, controller: controller, contextMenuBuilder: null),
-          )));
+            child: TextField(
+              key: key,
+              controller: controller,
+              contextMenuBuilder: null,
+            ),
+          ),
+        ),
+      );
 
       // trigger build one more time...
       await tester.pumpWidget(MaterialApp(
