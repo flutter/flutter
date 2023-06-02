@@ -766,9 +766,8 @@ mixin WidgetInspectorService {
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
   final Map<String, Set<InspectorReferenceData>> _groups = <String, Set<InspectorReferenceData>>{};
-  final Map<String, InspectorReferenceData> _idToReferenceData = <String, InspectorReferenceData>{};
-  final Map<Object, String> _objectToId = Map<Object, String>.identity();
-  int _nextId = 0;
+
+  final WeakMap<Object, InspectorReferenceData> _objectToReferenceData = WeakMap<Object, InspectorReferenceData>();
 
   /// The pubRootDirectories that are currently configured for the widget inspector.
   List<String>? _pubRootDirectories;
@@ -1269,9 +1268,7 @@ mixin WidgetInspectorService {
   @protected
   void disposeAllGroups() {
     _groups.clear();
-    _idToReferenceData.clear();
-    _objectToId.clear();
-    _nextId = 0;
+    _objectToReferenceData.clear();
   }
 
   /// Reset all InspectorService state.
@@ -1306,9 +1303,7 @@ mixin WidgetInspectorService {
     if (reference.count == 0) {
       final Object? value = reference.value;
       if (value != null) {
-        final String? id = _objectToId.remove(value);
-        assert(id != null);
-        _idToReferenceData.remove(id);
+        _objectToReferenceData.remove(value);
       }
     }
   }
@@ -3739,3 +3734,62 @@ class _WidgetFactory {
 // recognize the annotation.
 // ignore: library_private_types_in_public_api
 const _WidgetFactory widgetFactory = _WidgetFactory();
+
+/// Does not hold keys from garbage collection.
+@visibleForTesting
+class WeakMap<K, V> {
+
+  Expando<Object> _objects = Expando<Object>();
+
+  /// Strings, numbers, booleans.
+  final Map<K, V> _primitives = <K, V>{};
+
+  bool _isPrimitive(Object? key) {
+    return key == null || key is String || key is num || key is bool;
+  }
+
+  /// Returns true if the map contains the given [key].
+  bool containsKey(K key) {
+    if (_isPrimitive(key)) {
+      return _primitives.containsKey(key);
+    } else {
+      return _objects[key!] != null;
+    }
+  }
+
+  /// Returns the value for the given [key] or null if [key] is not in the map
+  /// or garbage collected.
+  ///
+  /// Does not support records to act as keys.
+  V? operator [](K key){
+    if (_isPrimitive(key)) {
+      return _primitives[key];
+    } else {
+      return _objects[key!] as V?;
+    }
+  }
+
+  /// Associates the [key] with the given [value].
+  void operator []=(K key, V value){
+    if (_isPrimitive(key)) {
+      _primitives[key] = value;
+    } else {
+      _objects[key!] = value;
+    }
+  }
+
+  /// Removes the value for the given [key] from the map.
+  void remove(K key) {
+    if (_isPrimitive(key)) {
+      _primitives.remove(key);
+    } else {
+      _objects[key!] = null;
+    }
+  }
+
+  /// Removes all pairs from the map.
+  void clear() {
+    _objects = Expando<Object>();
+    _primitives.clear();
+  }
+}

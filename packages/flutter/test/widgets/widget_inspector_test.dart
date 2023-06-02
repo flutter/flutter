@@ -254,6 +254,13 @@ void main() {
     expect(()=> InspectorReferenceData((1, 2)), throwsA(isA<StateError>()));
   });
 
+  group('$WeakMap', (){
+    test('assigned value', () async {
+      final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+      weakMap[1] = 2;
+    });
+  });
+
   _TestWidgetInspectorService.runTests();
 }
 
