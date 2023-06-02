@@ -894,6 +894,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           stack: stack,
           context: ErrorDescription('running a test (but after the test had completed)'),
           library: 'Flutter test framework',
+          informationCollector: [
+            ErrorHint("This does not cause test failures, but may indicate your code has bugs."),
+          ],
         ), forceReport: true);
         return;
       }
