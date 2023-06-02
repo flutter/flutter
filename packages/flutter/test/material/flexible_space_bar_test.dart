@@ -348,7 +348,7 @@ void main() {
                               rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  id: 11,
+                                  id: 18,
                                   rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
                                   label: 'Expanded title',
                                   textDirection: TextDirection.ltr,
@@ -409,8 +409,6 @@ void main() {
                               label: 'Item 6',
                               textDirection: TextDirection.ltr,
                             ),
-
-
                           ],
                         ),
                       ],
