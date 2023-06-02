@@ -601,7 +601,7 @@ void main() {
                 id: 2,
                 children: <TestSemantics>[
                   TestSemantics(
-                    id: 7,
+                    id: 3,
                     flags: <SemanticsFlag>[
                       SemanticsFlag.scopesRoute,
                       SemanticsFlag.namesRoute,
@@ -610,51 +610,66 @@ void main() {
                     textDirection: TextDirection.ltr,
                     children: <TestSemantics>[
                       TestSemantics(
-                        id: 9,
+                        id: 4,
                         children: <TestSemantics>[
                           TestSemantics(
-                            id: 10,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isButton,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
+                            id: 6,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 8,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.hasEnabledState,
+                                  SemanticsFlag.isButton,
+                                  SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable,
+                                ],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                tooltip: 'Back',
+                                textDirection: TextDirection.ltr,
+                              ),
+                              TestSemantics(
+                                id: 9,
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.isTextField,
+                                  SemanticsFlag.isFocused,
+                                  SemanticsFlag.isHeader,
+                                  if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
+                                    debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                                ],
+                                actions: <SemanticsAction>[
+                                  if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                                    debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                                    SemanticsAction.didGainAccessibilityFocus,
+                                  SemanticsAction.tap,
+                                  SemanticsAction.setSelection,
+                                  SemanticsAction.setText,
+                                  SemanticsAction.paste,
+                                ],
+                                label: 'Search',
+                                textDirection: TextDirection.ltr,
+                                textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                              ),
+                              TestSemantics(
+                                id: 10,
+                                label: 'Bottom',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[SemanticsAction.tap],
-                            tooltip: 'Back',
-                            textDirection: TextDirection.ltr,
                           ),
                           TestSemantics(
-                            id: 11,
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isTextField,
-                              SemanticsFlag.isFocused,
-                              SemanticsFlag.isHeader,
-                              if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS &&
-                                debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
+                            id: 7,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                id: 11,
+                                label: 'FlexibleSpace',
+                                textDirection: TextDirection.ltr,
+                              ),
                             ],
-                            actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
-                                SemanticsAction.didGainAccessibilityFocus,
-                              SemanticsAction.tap,
-                              SemanticsAction.setSelection,
-                              SemanticsAction.setText,
-                              SemanticsAction.paste,
-                            ],
-                            label: 'Search',
-                            textDirection: TextDirection.ltr,
-                            textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
-                          ),
-                          TestSemantics(
-                            id: 14,
-                            label: 'Bottom',
-                            textDirection: TextDirection.ltr,
                           ),
                         ],
                       ),
                       TestSemantics(
-                        id: 8,
+                        id: 5,
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isButton,
@@ -749,10 +764,10 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground = tester.widget<Material>(find.descendant(
+    final Material appBarBackground = tester.widgetList<Material>(find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
-    ));
+    )).first;
     expect(appBarBackground.color, Colors.white);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -777,10 +792,10 @@ void main() {
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
-    final Material appBarBackground = tester.widget<Material>(find.descendant(
+    final Material appBarBackground = tester.widgetList<Material>(find.descendant(
       of: find.byType(AppBar),
       matching: find.byType(Material),
-    ));
+    )).first;
     expect(appBarBackground.color, themeData.primaryColor);
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
@@ -789,9 +804,9 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/78144
-  testWidgets('`Leading` and `Actions` nullable test', (WidgetTester tester) async {
+  testWidgets('`Leading`, `Actions` and `FlexibleSpace` nullable test', (WidgetTester tester) async {
     // The search delegate page is displayed with no issues
-    // even with a null return values for [buildLeading] and [buildActions].
+    // even with a null return values for [buildLeading], [buildActions] and [flexibleSpace].
     final _TestEmptySearchDelegate delegate = _TestEmptySearchDelegate();
     final List<String> selectedResults = <String>[];
 
@@ -1049,6 +1064,11 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   }
 
   @override
+  Widget? buildFlexibleSpace(BuildContext context) {
+    return const Text('FlexibleSpace');
+  }
+
+  @override
   PreferredSizeWidget buildBottom(BuildContext context) {
     return const PreferredSize(
       preferredSize: Size.fromHeight(56.0),
@@ -1078,6 +1098,9 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
   Widget buildResults(BuildContext context) {
     return const Text('Results');
   }
+
+  // @override
+  // Widget? buildFlexibleSpace(BuildContext context) => null;
 
   @override
   PreferredSizeWidget buildBottom(BuildContext context) {
