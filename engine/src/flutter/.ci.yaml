@@ -196,6 +196,7 @@ targets:
 
   - name: Linux Benchmarks (no-upload)
     recipe: engine/engine_metrics
+    bringup: true
     properties:
       build_host: "true"
       upload_metrics: "false"
