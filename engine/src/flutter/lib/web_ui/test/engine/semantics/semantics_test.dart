@@ -2123,12 +2123,6 @@ class MockAccessibilityAnnouncements implements AccessibilityAnnouncements {
   }
 
   @override
-  void dispose() {
-    throw UnsupportedError(
-        'dispose is not supported in MockAccessibilityAnnouncements!');
-  }
-
-  @override
   void handleMessage(StandardMessageCodec codec, ByteData? data) {
     throw UnsupportedError(
         'handleMessage is not supported in MockAccessibilityAnnouncements!');
@@ -2143,7 +2137,7 @@ void _testLiveRegion() {
 
     final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
-    debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
+    flutterViewEmbedder.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
@@ -2166,7 +2160,7 @@ void _testLiveRegion() {
 
     final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
-    debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
+    flutterViewEmbedder.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
@@ -2188,7 +2182,7 @@ void _testLiveRegion() {
 
     final MockAccessibilityAnnouncements mockAccessibilityAnnouncements =
         MockAccessibilityAnnouncements();
-    debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
+    flutterViewEmbedder.debugOverrideAccessibilityAnnouncements(mockAccessibilityAnnouncements);
 
     ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(

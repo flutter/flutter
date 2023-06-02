@@ -223,7 +223,6 @@ Future<void> initializeEngineUi() async {
   }
   _initializationState = DebugEngineInitializationState.initializingUi;
 
-  initializeAccessibilityAnnouncements();
   RawKeyboard.initialize(onMacOs: operatingSystem == OperatingSystem.macOs);
   MouseCursor.initialize();
   ensureFlutterViewEmbedderInitialized();
