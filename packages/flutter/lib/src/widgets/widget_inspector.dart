@@ -683,7 +683,7 @@ typedef InspectorSelectionChangedCallback = void Function();
 class _InspectorReferenceData {
   _InspectorReferenceData(this.object);
 
-  final Object object;
+  final DiagnosticsNode object;
   int count = 1;
 }
 
