@@ -3487,7 +3487,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
     bool showName = true,
     super.showSeparator,
     super.linePrefix,
-    Object? objectValue,
+    Object? value,
     String? description,
     this.level = DiagnosticLevel.info,
     this.allowTruncate = false,
@@ -3496,7 +3496,7 @@ class DiagnosticsBlock extends DiagnosticsNode {
   }) : _description = description ?? '',
        _children = children,
        _properties = properties,
-       _value = WeakValue<Object>(objectValue),
+       _value = WeakValue<Object>(value),
     super(
     showName: showName && name != null,
   );

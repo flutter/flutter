@@ -1241,7 +1241,7 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
     super.showSeparator,
   }) : super(
     name: name,
-    objectValue: stack,
+    value: stack,
     properties: _applyStackFilter(stack, stackFilter),
     style: DiagnosticsTreeStyle.flat,
     allowTruncate: true,

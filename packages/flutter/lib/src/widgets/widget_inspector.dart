@@ -681,10 +681,34 @@ typedef InspectorSelectionChangedCallback = void Function();
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
 class _InspectorReferenceData {
-  _InspectorReferenceData(this.object);
+  _InspectorReferenceData(Object object) {
+    if (value == null) {
+      return;
+    }
 
-  final DiagnosticsNode object;
+    // If weak reference does not support T, then use strong reference.
+    // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
+    if (value is String || value is num || value is bool || value is Record) {
+      _value = value;
+      return;
+    }
+
+    _ref = WeakReference<Object>(object);
+  }
+
+  WeakReference<Object>? _ref;
+
+  Object? _value;
+
   int count = 1;
+
+  /// The value.
+  Object? get value {
+    if (_ref != null) {
+      return _ref!.target;
+    }
+    return _value;
+  }
 }
 
 // Production implementation of [WidgetInspectorService].
@@ -1302,11 +1326,9 @@ mixin WidgetInspectorService {
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      if (object is DiagnosticsNode) {
-        referenceData = _InspectorReferenceData(object);
-        _idToReferenceData[id] = referenceData;
-        group.add(referenceData);
-      }
+      referenceData = _InspectorReferenceData(object);
+      _idToReferenceData[id] = referenceData;
+      group.add(referenceData);
     } else {
       referenceData = _idToReferenceData[id]!;
       if (group.add(referenceData)) {
