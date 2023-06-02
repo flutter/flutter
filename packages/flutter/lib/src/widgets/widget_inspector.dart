@@ -680,15 +680,17 @@ typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
-class _InspectorReferenceData {
-  _InspectorReferenceData(Object object) {
-    if (value == null) {
-      return;
+@visibleForTesting
+class InspectorReferenceData {
+  /// Creates an instance of [InspectorReferenceData].
+  InspectorReferenceData(Object object) {
+    if (value is Record) {
+      throw StateError('Cannot wrap Record, because it is not supported by $WeakReference.');
     }
 
     // If weak reference does not support T, then use strong reference.
     // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
-    if (value is String || value is num || value is bool || value is Record) {
+    if (value is String || value is num || value is bool) {
       _value = value;
       return;
     }
@@ -700,6 +702,7 @@ class _InspectorReferenceData {
 
   Object? _value;
 
+  /// The number of times the object has been referenced.
   int count = 1;
 
   /// The value.
@@ -766,8 +769,8 @@ mixin WidgetInspectorService {
   /// The VM service protocol does not keep alive object references so this
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
-  final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
-  final Map<String, _InspectorReferenceData> _idToReferenceData = <String, _InspectorReferenceData>{};
+  final Map<String, Set<InspectorReferenceData>> _groups = <String, Set<InspectorReferenceData>>{};
+  final Map<String, InspectorReferenceData> _idToReferenceData = <String, InspectorReferenceData>{};
   final Map<Object, String> _objectToId = Map<Object, String>.identity();
   int _nextId = 0;
 
@@ -1294,20 +1297,23 @@ mixin WidgetInspectorService {
   /// references from a different group.
   @protected
   void disposeGroup(String name) {
-    final Set<_InspectorReferenceData>? references = _groups.remove(name);
+    final Set<InspectorReferenceData>? references = _groups.remove(name);
     if (references == null) {
       return;
     }
     references.forEach(_decrementReferenceCount);
   }
 
-  void _decrementReferenceCount(_InspectorReferenceData reference) {
+  void _decrementReferenceCount(InspectorReferenceData reference) {
     reference.count -= 1;
     assert(reference.count >= 0);
     if (reference.count == 0) {
-      final String? id = _objectToId.remove(reference.object);
-      assert(id != null);
-      _idToReferenceData.remove(id);
+      final Object? value = reference.value;
+      if (value != null) {
+        final String? id = _objectToId.remove(value);
+        assert(id != null);
+        _idToReferenceData.remove(id);
+      }
     }
   }
 
@@ -1319,14 +1325,14 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<_InspectorReferenceData>.identity());
+    final Set<InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => Set<InspectorReferenceData>.identity());
     String? id = _objectToId[object];
-    _InspectorReferenceData referenceData;
+    InspectorReferenceData referenceData;
     if (id == null) {
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData = _InspectorReferenceData(object);
+      referenceData = InspectorReferenceData(object);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -1356,11 +1362,11 @@ mixin WidgetInspectorService {
       return null;
     }
 
-    final _InspectorReferenceData? data = _idToReferenceData[id];
+    final InspectorReferenceData? data = _idToReferenceData[id];
     if (data == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
-    return data.object;
+    return data.value;
   }
 
   /// Returns the object to introspect to determine the source location of an
@@ -1392,7 +1398,7 @@ mixin WidgetInspectorService {
       return;
     }
 
-    final _InspectorReferenceData? referenceData = _idToReferenceData[id];
+    final InspectorReferenceData? referenceData = _idToReferenceData[id];
     if (referenceData == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
     }

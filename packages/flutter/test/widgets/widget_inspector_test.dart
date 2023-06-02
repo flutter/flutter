@@ -240,7 +240,20 @@ extension TextFromString on String {
   }
 }
 
+final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];
+
 void main() {
+  for (final Object item in _weakValueTests) {
+    test('$InspectorReferenceData can be created for any type, $item', () async {
+      final InspectorReferenceData weakValue = InspectorReferenceData(item);
+      expect(weakValue.value, item);
+    });
+  }
+
+  test('$InspectorReferenceData throws for $Record', () async {
+    expect(()=> InspectorReferenceData((1, 2)), throwsA(isA<StateError>()));
+  });
+
   _TestWidgetInspectorService.runTests();
 }
 
