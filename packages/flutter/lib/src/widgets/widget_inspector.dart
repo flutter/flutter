@@ -680,6 +680,8 @@ typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
+///
+/// Does not hold the object from garbage collection.
 @visibleForTesting
 class InspectorReferenceData {
   /// Creates an instance of [InspectorReferenceData].
@@ -709,7 +711,6 @@ class InspectorReferenceData {
     return _value;
   }
 }
-
 // Production implementation of [WidgetInspectorService].
 class _WidgetInspectorService = Object with WidgetInspectorService;
 
@@ -766,8 +767,9 @@ mixin WidgetInspectorService {
   /// class needs to manually manage groups of objects that should be kept
   /// alive.
   final Map<String, Set<InspectorReferenceData>> _groups = <String, Set<InspectorReferenceData>>{};
-
-  final WeakMap<Object, InspectorReferenceData> _objectToReferenceData = WeakMap<Object, InspectorReferenceData>();
+  final Map<String, InspectorReferenceData> _idToReferenceData = <String, InspectorReferenceData>{};
+  final Map<Object, String> _objectToId = Map<Object, String>.identity();
+  int _nextId = 0;
 
   /// The pubRootDirectories that are currently configured for the widget inspector.
   List<String>? _pubRootDirectories;
@@ -1268,7 +1270,9 @@ mixin WidgetInspectorService {
   @protected
   void disposeAllGroups() {
     _groups.clear();
-    _objectToReferenceData.clear();
+    _idToReferenceData.clear();
+    _objectToId.clear();
+    _nextId = 0;
   }
 
   /// Reset all InspectorService state.
@@ -1301,10 +1305,9 @@ mixin WidgetInspectorService {
     reference.count -= 1;
     assert(reference.count >= 0);
     if (reference.count == 0) {
-      final Object? value = reference.value;
-      if (value != null) {
-        _objectToReferenceData.remove(value);
-      }
+      final String? id = _objectToId.remove(reference.object);
+      assert(id != null);
+      _idToReferenceData.remove(id);
     }
   }
 
@@ -1357,7 +1360,7 @@ mixin WidgetInspectorService {
     if (data == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
-    return data.value;
+    return data.object;
   }
 
   /// Returns the object to introspect to determine the source location of an
@@ -3738,7 +3741,6 @@ const _WidgetFactory widgetFactory = _WidgetFactory();
 /// Does not hold keys from garbage collection.
 @visibleForTesting
 class WeakMap<K, V> {
-
   Expando<Object> _objects = Expando<Object>();
 
   /// Strings, numbers, booleans.
@@ -3746,15 +3748,6 @@ class WeakMap<K, V> {
 
   bool _isPrimitive(Object? key) {
     return key == null || key is String || key is num || key is bool;
-  }
-
-  /// Returns true if the map contains the given [key].
-  bool containsKey(K key) {
-    if (_isPrimitive(key)) {
-      return _primitives.containsKey(key);
-    } else {
-      return _objects[key!] != null;
-    }
   }
 
   /// Returns the value for the given [key] or null if [key] is not in the map
