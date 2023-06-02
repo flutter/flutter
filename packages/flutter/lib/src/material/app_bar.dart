@@ -1972,7 +1972,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           title: widget.title,
           foregroundColor: widget.foregroundColor,
           configBuilder: _MediumScrollUnderFlexibleConfig.new,
-          primary: widget.primary,
           titleTextStyle: widget.titleTextStyle,
           bottomHeight: bottomHeight,
         );
@@ -1985,7 +1984,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           title: widget.title,
           foregroundColor: widget.foregroundColor,
           configBuilder: _LargeScrollUnderFlexibleConfig.new,
-          primary: widget.primary,
           titleTextStyle: widget.titleTextStyle,
           bottomHeight: bottomHeight,
         );
@@ -2086,7 +2084,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     this.title,
     this.foregroundColor,
     required this.configBuilder,
-    this.primary = true,
     this.titleTextStyle,
     required this.bottomHeight,
   });
@@ -2094,7 +2091,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   final Widget? title;
   final Color? foregroundColor;
   final _FlexibleConfigBuilder configBuilder;
-  final bool primary;
   final TextStyle? titleTextStyle;
   final double bottomHeight;
 
@@ -2104,7 +2100,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     late final AppBarTheme defaults = Theme.of(context).useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
     final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), _kMaxTitleTextScaleFactor); // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
-    final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
     final _ScrollUnderFlexibleConfig config = configBuilder(context);
     assert(
       config.expandedTitlePadding.isNonNegative,
@@ -2124,8 +2119,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
 
     final EdgeInsets resolvedTitlePadding = config.expandedTitlePadding.resolve(Directionality.of(context));
     final EdgeInsetsGeometry expandedTitlePadding = bottomHeight > 0
-      // Reserve space for the bottom toolbar (AppBar.bottom),which is a sibling
-      // of this widget, on the parent Stack.
       ? resolvedTitlePadding.copyWith(bottom: 0)
       : resolvedTitlePadding;
 
@@ -2140,7 +2133,6 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Padding(padding: EdgeInsets.only(top: settings.minExtent - bottomHeight)),
-          //Padding(padding: EdgeInsets.only(top: settings.minExtent)),
           Flexible(
             child: ClipRect(
               child: _ExpandedTitleWithPadding(
@@ -2150,6 +2142,8 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
               ),
             ),
           ),
+          // Reserve space for AppBar.bottom, which is a sibling of this widget,
+          // on the parent Stack.
           if (bottomHeight > 0) Padding(padding: EdgeInsets.only(bottom: bottomHeight)),
         ],
       ),
@@ -2157,6 +2151,13 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   }
 }
 
+// A widget that bottom-start aligns its child (the expanded title widget), and
+// insets the child according to the specified padding.
+//
+// This widget gives the child an infinite max height constraint, and will also
+// attempt to vertically limit the child's bounding box (not including the
+// padding) to within the y range [0, maxExtent], to make sure the child is
+// visible when the AppBar is fully expanded.
 class _ExpandedTitleWithPadding extends SingleChildRenderObjectWidget {
   const _ExpandedTitleWithPadding({
     required this.padding,
@@ -2168,9 +2169,9 @@ class _ExpandedTitleWithPadding extends SingleChildRenderObjectWidget {
   final double maxExtent;
 
   @override
-  _RenderBox createRenderObject(BuildContext context) {
+  _RenderExpandedTitleBox createRenderObject(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    return _RenderBox(
+    return _RenderExpandedTitleBox(
       padding.resolve(textDirection),
       AlignmentDirectional.bottomStart.resolve(textDirection),
       maxExtent,
@@ -2179,7 +2180,7 @@ class _ExpandedTitleWithPadding extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderBox renderObject) {
+  void updateRenderObject(BuildContext context, _RenderExpandedTitleBox renderObject) {
     final TextDirection textDirection = Directionality.of(context);
     renderObject
       ..padding = padding.resolve(textDirection)
@@ -2188,8 +2189,8 @@ class _ExpandedTitleWithPadding extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderBox extends RenderShiftedBox {
-  _RenderBox(this._padding, this._titleAlignment, this._maxExtent, super.child);
+class _RenderExpandedTitleBox extends RenderShiftedBox {
+  _RenderExpandedTitleBox(this._padding, this._titleAlignment, this._maxExtent, super.child);
 
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
@@ -2267,16 +2268,18 @@ class _RenderBox extends RenderShiftedBox {
     }
     final Size size = this.size = _computeSize(constraints, ChildLayoutHelper.layoutChild);
     final Size childSize = child.size;
-    final Size paddedChildSize = padding.inflateSize(childSize);
 
     assert(padding.isNonNegative);
     assert(titleAlignment.y == 1.0);
-    // Special handling when the child isn't completely in the vertical space.
-    // Reduce the bottom padding if possible, since child + padding is bottom
-    // aligned within the parent RenderBox.
+    // yAdjustement is the minimum additional y offset to position the child in
+    // the visible vertical space when AppBar is fully expanded. The goal is to
+    // prevent the expanded title from being clipped when the expanded title
+    // widget + the bottom padding is too tall to fit in the flexible space (the
+    // top padding is basically ignored since the expanded title is
+    // bottom-aligned).
     final double yAdjustement = clampDouble(childSize.height + padding.bottom - maxExtent, 0, padding.bottom);
     final double offsetY = size.height - childSize.height - padding.bottom + yAdjustement;
-    final double offsetX = (titleAlignment.x + 1) / 2 * (size.width - paddedChildSize.width) + padding.left;
+    final double offsetX = (titleAlignment.x + 1) / 2 * (size.width - padding.horizontal - childSize.width) + padding.left;
 
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     childParentData.offset = Offset(offsetX, offsetY);

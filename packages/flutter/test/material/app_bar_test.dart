@@ -1224,6 +1224,7 @@ void main() {
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
     final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    // The expanded title and the bottom padding fits in the flexible space.
     expect(
       titleOffset.dy,
       renderSliverAppBar.geometry!.scrollExtent - 28.0,
