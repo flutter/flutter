@@ -3197,8 +3197,8 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
 /// A continuous, selectable piece of paragraph.
 ///
 /// Since the selections in [PlaceHolderSpan] are handled independently in its
-/// subtree, a selection in [RenderParagraph] can't continue across a
-/// [PlaceHolderSpan]. The [RenderParagraph] splits itself on [PlaceHolderSpan]
+/// subtree, a selection in [RenderEditable] can't continue across a
+/// [PlaceHolderSpan]. The [RenderEditable] splits itself on [PlaceHolderSpan]
 /// to create multiple `_SelectableFragment`s so that they can be selected
 /// separately.
 class _EditableSelectableFragment with Selectable, ChangeNotifier {
