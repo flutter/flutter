@@ -314,9 +314,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
  void _handlePressed(bool isExpanded, int index) {
-
     if (widget._allowOnlyOnePanelOpen) {
-
       final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
 
       // If another ExpansionPanelRadio was already open, apply its
@@ -329,17 +327,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           widget.expansionCallback!(childIndex, false);
         }
       }
-        //Because when _handlePressed the state is not yet expanded
-      widget.expansionCallback?.call(index, !isExpanded);
 
-       setState(() {
+      setState(() {
         _currentOpenPanel = isExpanded ? null : pressedChild;
       });
     }
-    else
-    {
-       widget.expansionCallback?.call(index, !isExpanded);
-    }
+      // !isExpanded is returned because, when _handlePressed, the state of the panel to expand is not yet expanded.
+
+      widget.expansionCallback?.call(index, !isExpanded);
   }
 
   ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
