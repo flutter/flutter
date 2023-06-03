@@ -1819,10 +1819,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // the text may position outside the visible region even when the text fits.
   bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
-  Offset _getOffsetForPosition(TextPosition position) {
-    return _textPainter.getOffsetForCaret(position, Rect.zero) + Offset(0, _textPainter.getFullHeightForCaret(position, _caretPrototype) ?? 0.0);
-  }
-
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
   /// If the selection is collapsed (and therefore occupies a single point), the
@@ -1901,6 +1897,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     assert(!debugNeedsLayout);
     _computeTextMetricsIfNeeded();
     return _textPainter.getPositionForOffset(offset);
+  }
+
+  Offset _getOffsetForPosition(TextPosition position) {
+    return _textPainter.getOffsetForCaret(position, Rect.zero) + Offset(0, _textPainter.getFullHeightForCaret(position, _caretPrototype) ?? 0.0);
   }
 
   /// Returns the [Rect] in local coordinates for the caret at the given text
