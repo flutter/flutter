@@ -54,7 +54,6 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
-#include "flutter/shell/platform/embedder/embedder_render_target_skia.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/shell/platform/embedder/embedder_task_runner.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
@@ -69,14 +68,7 @@ extern const intptr_t kPlatformStrongDillSize;
 
 #ifdef SHELL_ENABLE_METAL
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
-#ifdef IMPELLER_SUPPORTS_RENDERING
-#include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
-#include "flutter/shell/platform/embedder/embedder_surface_metal_impeller.h"  // nogncheck
-#include "impeller/core/texture.h"                                // nogncheck
-#include "impeller/renderer/backend/metal/texture_wrapper_mtl.h"  // nogncheck
-#include "impeller/renderer/render_target.h"                      // nogncheck
-#endif  // IMPELLER_SUPPORTS_RENDERING
-#endif  // SHELL_ENABLE_METAL
+#endif
 
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
 const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
@@ -460,8 +452,7 @@ InferMetalPlatformViewCreationCallback(
     const flutter::PlatformViewEmbedder::PlatformDispatchTable&
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
-        external_view_embedder,
-    bool enable_impeller) {
+        external_view_embedder) {
   if (config->type != kMetal) {
     return nullptr;
   }
@@ -495,33 +486,20 @@ InferMetalPlatformViewCreationCallback(
     return texture_info;
   };
 
+  flutter::EmbedderSurfaceMetal::MetalDispatchTable metal_dispatch_table = {
+      .present = metal_present,
+      .get_texture = metal_get_texture,
+  };
+
   std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
       std::move(external_view_embedder);
 
-  std::unique_ptr<flutter::EmbedderSurface> embedder_surface;
-
-  if (enable_impeller) {
-    flutter::EmbedderSurfaceMetalImpeller::MetalDispatchTable
-        metal_dispatch_table = {
-            .present = metal_present,
-            .get_texture = metal_get_texture,
-        };
-    embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetalImpeller>(
-        const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
-        const_cast<flutter::GPUMTLCommandQueueHandle>(
-            config->metal.present_command_queue),
-        metal_dispatch_table, view_embedder);
-  } else {
-    flutter::EmbedderSurfaceMetal::MetalDispatchTable metal_dispatch_table = {
-        .present = metal_present,
-        .get_texture = metal_get_texture,
-    };
-    embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetal>(
-        const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
-        const_cast<flutter::GPUMTLCommandQueueHandle>(
-            config->metal.present_command_queue),
-        metal_dispatch_table, view_embedder);
-  }
+  std::unique_ptr<flutter::EmbedderSurfaceMetal> embedder_surface =
+      std::make_unique<flutter::EmbedderSurfaceMetal>(
+          const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
+          const_cast<flutter::GPUMTLCommandQueueHandle>(
+              config->metal.present_command_queue),
+          metal_dispatch_table, view_embedder);
 
   // The static leak checker gets confused by the use of fml::MakeCopyable.
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
@@ -672,8 +650,7 @@ InferPlatformViewCreationCallback(
     const flutter::PlatformViewEmbedder::PlatformDispatchTable&
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
-        external_view_embedder,
-    bool enable_impeller) {
+        external_view_embedder) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -690,7 +667,7 @@ InferPlatformViewCreationCallback(
     case kMetal:
       return InferMetalPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller);
+          std::move(external_view_embedder));
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
@@ -920,76 +897,6 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 #endif
 }
 
-static std::unique_ptr<flutter::EmbedderRenderTarget>
-MakeRenderTargetFromBackingStoreImpeller(
-    FlutterBackingStore backing_store,
-    const fml::closure& on_release,
-    const std::shared_ptr<impeller::AiksContext>& aiks_context,
-    const FlutterBackingStoreConfig& config,
-    const FlutterMetalBackingStore* metal) {
-#if defined(SHELL_ENABLE_METAL) && defined(IMPELLER_SUPPORTS_RENDERING)
-  if (!metal->texture.texture) {
-    FML_LOG(ERROR) << "Embedder supplied null Metal texture.";
-    return nullptr;
-  }
-
-  const auto size = impeller::ISize(config.size.width, config.size.height);
-
-  impeller::TextureDescriptor resolve_tex_desc;
-  resolve_tex_desc.size = size;
-  resolve_tex_desc.sample_count = impeller::SampleCount::kCount1;
-  resolve_tex_desc.storage_mode = impeller::StorageMode::kDevicePrivate;
-  resolve_tex_desc.usage =
-      static_cast<uint64_t>(impeller::TextureUsage::kRenderTarget) |
-      static_cast<uint64_t>(impeller::TextureUsage::kShaderRead);
-
-  auto resolve_tex = impeller::WrapTextureMTL(
-      resolve_tex_desc, metal->texture.texture,
-      [callback = metal->texture.destruction_callback,
-       user_data = metal->texture.user_data]() { callback(user_data); });
-  if (!resolve_tex) {
-    FML_LOG(ERROR) << "Could not wrap embedder supplied Metal render texture.";
-    return nullptr;
-  }
-  resolve_tex->SetLabel("ImpellerBackingStoreResolve");
-
-  impeller::TextureDescriptor msaa_tex_desc;
-  msaa_tex_desc.storage_mode = impeller::StorageMode::kDeviceTransient;
-  msaa_tex_desc.type = impeller::TextureType::kTexture2DMultisample;
-  msaa_tex_desc.sample_count = impeller::SampleCount::kCount4;
-  msaa_tex_desc.format = resolve_tex->GetTextureDescriptor().format;
-  msaa_tex_desc.size = size;
-  msaa_tex_desc.usage =
-      static_cast<uint64_t>(impeller::TextureUsage::kRenderTarget);
-
-  auto msaa_tex =
-      aiks_context->GetContext()->GetResourceAllocator()->CreateTexture(
-          msaa_tex_desc);
-  if (!msaa_tex) {
-    FML_LOG(ERROR) << "Could not allocate MSAA color texture.";
-    return nullptr;
-  }
-  msaa_tex->SetLabel("ImpellerBackingStoreColorMSAA");
-
-  impeller::ColorAttachment color0;
-  color0.texture = msaa_tex;
-  color0.clear_color = impeller::Color::DarkSlateGray();
-  color0.load_action = impeller::LoadAction::kClear;
-  color0.store_action = impeller::StoreAction::kMultisampleResolve;
-  color0.resolve_texture = resolve_tex;
-
-  impeller::RenderTarget render_target_desc;
-  render_target_desc.SetColorAttachment(color0, 0u);
-
-  return std::make_unique<flutter::EmbedderRenderTargetImpeller>(
-      backing_store, aiks_context,
-      std::make_unique<impeller::RenderTarget>(std::move(render_target_desc)),
-      on_release);
-#else
-  return nullptr;
-#endif
-}
-
 static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
     GrDirectContext* context,
     const FlutterBackingStoreConfig& config,
@@ -1044,23 +951,9 @@ static sk_sp<SkSurface> MakeSkSurfaceFromBackingStore(
 }
 
 static std::unique_ptr<flutter::EmbedderRenderTarget>
-MakeRenderTargetFromSkSurface(FlutterBackingStore backing_store,
-                              sk_sp<SkSurface> skia_surface,
-                              fml::closure on_release) {
-  if (!skia_surface) {
-    return nullptr;
-  }
-  return std::make_unique<flutter::EmbedderRenderTargetSkia>(
-      backing_store, std::move(skia_surface), std::move(on_release));
-}
-
-static std::unique_ptr<flutter::EmbedderRenderTarget>
-CreateEmbedderRenderTarget(
-    const FlutterCompositor* compositor,
-    const FlutterBackingStoreConfig& config,
-    GrDirectContext* context,
-    const std::shared_ptr<impeller::AiksContext>& aiks_context,
-    bool enable_impeller) {
+CreateEmbedderRenderTarget(const FlutterCompositor* compositor,
+                           const FlutterBackingStoreConfig& config,
+                           GrDirectContext* context) {
   FlutterBackingStore backing_store = {};
   backing_store.struct_size = sizeof(backing_store);
 
@@ -1095,77 +988,53 @@ CreateEmbedderRenderTarget(
   // No safe access checks on the renderer are necessary since we allocated
   // the struct.
 
-  std::unique_ptr<flutter::EmbedderRenderTarget> render_target;
+  sk_sp<SkSurface> render_surface;
 
   switch (backing_store.type) {
-    case kFlutterBackingStoreTypeOpenGL: {
+    case kFlutterBackingStoreTypeOpenGL:
       switch (backing_store.open_gl.type) {
-        case kFlutterOpenGLTargetTypeTexture: {
-          auto skia_surface = MakeSkSurfaceFromBackingStore(
+        case kFlutterOpenGLTargetTypeTexture:
+          render_surface = MakeSkSurfaceFromBackingStore(
               context, config, &backing_store.open_gl.texture);
-          render_target = MakeRenderTargetFromSkSurface(
-              backing_store, std::move(skia_surface),
-              collect_callback.Release());
           break;
-        }
-        case kFlutterOpenGLTargetTypeFramebuffer: {
-          auto skia_surface = MakeSkSurfaceFromBackingStore(
+        case kFlutterOpenGLTargetTypeFramebuffer:
+          render_surface = MakeSkSurfaceFromBackingStore(
               context, config, &backing_store.open_gl.framebuffer);
-          render_target = MakeRenderTargetFromSkSurface(
-              backing_store, std::move(skia_surface),
-              collect_callback.Release());
           break;
-        }
       }
       break;
-    }
-    case kFlutterBackingStoreTypeSoftware: {
-      auto skia_surface = MakeSkSurfaceFromBackingStore(
-          context, config, &backing_store.software);
-      render_target = MakeRenderTargetFromSkSurface(
-          backing_store, std::move(skia_surface), collect_callback.Release());
+    case kFlutterBackingStoreTypeSoftware:
+      render_surface = MakeSkSurfaceFromBackingStore(context, config,
+                                                     &backing_store.software);
       break;
-    }
-    case kFlutterBackingStoreTypeSoftware2: {
-      auto skia_surface = MakeSkSurfaceFromBackingStore(
-          context, config, &backing_store.software2);
-      render_target = MakeRenderTargetFromSkSurface(
-          backing_store, std::move(skia_surface), collect_callback.Release());
+    case kFlutterBackingStoreTypeSoftware2:
+      render_surface = MakeSkSurfaceFromBackingStore(context, config,
+                                                     &backing_store.software2);
       break;
-    }
-    case kFlutterBackingStoreTypeMetal: {
-      if (enable_impeller) {
-        auto impeller_target = MakeRenderTargetFromBackingStoreImpeller(
-            backing_store, collect_callback.Release(), aiks_context, config,
-            &backing_store.metal);
-      } else {
-        auto skia_surface = MakeSkSurfaceFromBackingStore(context, config,
-                                                          &backing_store.metal);
-        render_target = MakeRenderTargetFromSkSurface(
-            backing_store, std::move(skia_surface), collect_callback.Release());
-      }
+    case kFlutterBackingStoreTypeMetal:
+      render_surface =
+          MakeSkSurfaceFromBackingStore(context, config, &backing_store.metal);
       break;
-    }
-    case kFlutterBackingStoreTypeVulkan: {
-      auto skia_surface =
+
+    case kFlutterBackingStoreTypeVulkan:
+      render_surface =
           MakeSkSurfaceFromBackingStore(context, config, &backing_store.vulkan);
-      render_target = MakeRenderTargetFromSkSurface(
-          backing_store, std::move(skia_surface), collect_callback.Release());
       break;
-    }
   };
 
-  if (!render_target) {
+  if (!render_surface) {
     FML_LOG(ERROR) << "Could not create a surface from an embedder provided "
                       "render target.";
+    return nullptr;
   }
-  return render_target;
+
+  return std::make_unique<flutter::EmbedderRenderTarget>(
+      backing_store, std::move(render_surface), collect_callback.Release());
 }
 
 static std::pair<std::unique_ptr<flutter::EmbedderExternalViewEmbedder>,
                  bool /* halt engine launch if true */>
-InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
-                                  bool enable_impeller) {
+InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor) {
   if (compositor == nullptr) {
     return {nullptr, false};
   }
@@ -1189,13 +1058,9 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
 
   flutter::EmbedderExternalViewEmbedder::CreateRenderTargetCallback
       create_render_target_callback =
-          [captured_compositor, enable_impeller](
-              GrDirectContext* context,
-              const std::shared_ptr<impeller::AiksContext>& aiks_context,
-              const auto& config) {
+          [captured_compositor](GrDirectContext* context, const auto& config) {
             return CreateEmbedderRenderTarget(&captured_compositor, config,
-                                              context, aiks_context,
-                                              enable_impeller);
+                                              context);
           };
 
   flutter::EmbedderExternalViewEmbedder::PresentCallback present_callback =
@@ -1947,8 +1812,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                                       user_data]() { return ptr(user_data); };
   }
 
-  auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
-      SAFE_ACCESS(args, compositor, nullptr), settings.enable_impeller);
+  auto external_view_embedder_result =
+      InferExternalViewEmbedderFromArgs(SAFE_ACCESS(args, compositor, nullptr));
   if (external_view_embedder_result.second) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Compositor arguments were invalid.");
@@ -1965,7 +1830,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
-      std::move(external_view_embedder_result.first), settings.enable_impeller);
+      std::move(external_view_embedder_result.first));
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(

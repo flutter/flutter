@@ -29,14 +29,11 @@ static std::shared_ptr<impeller::Renderer> CreateImpellerRenderer(
 }
 
 GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delegate,
-                                                 const std::shared_ptr<impeller::Context>& context,
-                                                 bool render_to_surface)
+                                                 const std::shared_ptr<impeller::Context>& context)
     : delegate_(delegate),
-      render_target_type_(delegate->GetRenderTargetType()),
       impeller_renderer_(CreateImpellerRenderer(context)),
       aiks_context_(
-          std::make_shared<impeller::AiksContext>(impeller_renderer_ ? context : nullptr)),
-      render_to_surface_(render_to_surface) {
+          std::make_shared<impeller::AiksContext>(impeller_renderer_ ? context : nullptr)) {
   // If this preference is explicitly set, we allow for disabling partial repaint.
   NSNumber* disablePartialRepaint =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisablePartialRepaint"];
@@ -53,7 +50,7 @@ bool GPUSurfaceMetalImpeller::IsValid() {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISize& frame_size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISize& frame_info) {
   TRACE_EVENT0("impeller", "GPUSurfaceMetalImpeller::AcquireFrame");
 
   if (!IsValid()) {
@@ -61,33 +58,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
     return nullptr;
   }
 
-  if (frame_size.isEmpty()) {
-    FML_LOG(ERROR) << "Metal surface was asked for an empty frame.";
-    return nullptr;
-  }
-
-  if (!render_to_surface_) {
-    return std::make_unique<SurfaceFrame>(
-        nullptr, SurfaceFrame::FramebufferInfo(),
-        [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; }, frame_size);
-  }
-
-  switch (render_target_type_) {
-    case MTLRenderTargetType::kCAMetalLayer:
-      return AcquireFrameFromCAMetalLayer(frame_size);
-    case MTLRenderTargetType::kMTLTexture:
-      return AcquireFrameFromMTLTexture(frame_size);
-    default:
-      FML_CHECK(false) << "Unknown MTLRenderTargetType type.";
-  }
-
-  return nullptr;
-}
-
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLayer(
-    const SkISize& frame_size) {
-  auto layer = delegate_->GetCAMetalLayer(frame_size);
-
+  auto layer = delegate_->GetCAMetalLayer(frame_info);
   if (!layer) {
     FML_LOG(ERROR) << "Invalid CAMetalLayer given by the embedder.";
     return nullptr;
@@ -98,16 +69,15 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   auto drawable = impeller::SurfaceMTL::GetMetalDrawableAndValidate(
       impeller_renderer_->GetContext(), mtl_layer);
   if (Settings::kSurfaceDataAccessible) {
-    last_texture_.reset([drawable.texture retain]);
+    last_drawable_.reset([drawable retain]);
   }
 
-  id<MTLTexture> last_texture = static_cast<id<MTLTexture>>(last_texture_);
+  id<CAMetalDrawable> metal_drawable = static_cast<id<CAMetalDrawable>>(last_drawable_);
   SurfaceFrame::SubmitCallback submit_callback =
       fml::MakeCopyable([this,                           //
                          renderer = impeller_renderer_,  //
                          aiks_context = aiks_context_,   //
-                         drawable,                       //
-                         last_texture                    //
+                         metal_drawable                  //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
@@ -120,7 +90,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         }
 
         if (!disable_partial_repaint_) {
-          uintptr_t texture = reinterpret_cast<uintptr_t>(last_texture);
+          uintptr_t texture = reinterpret_cast<uintptr_t>(metal_drawable.texture);
 
           for (auto& entry : damage_) {
             if (entry.first != texture) {
@@ -141,8 +111,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
                                                 buffer_damage->width(), buffer_damage->height());
         }
 
-        auto surface = impeller::SurfaceMTL::MakeFromMetalLayerDrawable(
-            impeller_renderer_->GetContext(), drawable, clip_rect);
+        auto surface = impeller::SurfaceMTL::WrapCurrentMetalLayerDrawable(
+            impeller_renderer_->GetContext(), metal_drawable, clip_rect);
 
         if (clip_rect && (clip_rect->size.width == 0 || clip_rect->size.height == 0)) {
           return surface->Present();
@@ -168,7 +138,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   if (!disable_partial_repaint_) {
     // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
     // front buffer)
-    uintptr_t texture = reinterpret_cast<uintptr_t>(drawable.texture);
+    uintptr_t texture = reinterpret_cast<uintptr_t>(metal_drawable.texture);
     auto i = damage_.find(texture);
     if (i != damage_.end()) {
       framebuffer_info.existing_damage = i->second;
@@ -179,107 +149,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
   return std::make_unique<SurfaceFrame>(nullptr,           // surface
                                         framebuffer_info,  // framebuffer info
                                         submit_callback,   // submit callback
-                                        frame_size,        // frame size
-                                        nullptr,           // context result
-                                        true               // display list fallback
-  );
-}
-
-std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTexture(
-    const SkISize& frame_size) {
-  GPUMTLTextureInfo texture_info = delegate_->GetMTLTexture(frame_size);
-  id<MTLTexture> mtl_texture = (id<MTLTexture>)(texture_info.texture);
-
-  if (!mtl_texture) {
-    FML_LOG(ERROR) << "Invalid MTLTexture given by the embedder.";
-    return nullptr;
-  }
-
-  if (Settings::kSurfaceDataAccessible) {
-    last_texture_.reset([mtl_texture retain]);
-  }
-
-  SurfaceFrame::SubmitCallback submit_callback =
-      fml::MakeCopyable([this,                           //
-                         renderer = impeller_renderer_,  //
-                         aiks_context = aiks_context_,   //
-                         texture_info,                   //
-                         mtl_texture,                    //
-                         delegate = delegate_            //
-  ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
-        if (!aiks_context) {
-          return false;
-        }
-
-        auto display_list = surface_frame.BuildDisplayList();
-        if (!display_list) {
-          FML_LOG(ERROR) << "Could not build display list for surface frame.";
-          return false;
-        }
-
-        if (!disable_partial_repaint_) {
-          uintptr_t texture_ptr = reinterpret_cast<uintptr_t>(mtl_texture);
-
-          for (auto& entry : damage_) {
-            if (entry.first != texture_ptr) {
-              // Accumulate damage for other framebuffers
-              if (surface_frame.submit_info().frame_damage) {
-                entry.second.join(*surface_frame.submit_info().frame_damage);
-              }
-            }
-          }
-          // Reset accumulated damage for current framebuffer
-          damage_[texture_ptr] = SkIRect::MakeEmpty();
-        }
-
-        std::optional<impeller::IRect> clip_rect;
-        if (surface_frame.submit_info().buffer_damage.has_value()) {
-          auto buffer_damage = surface_frame.submit_info().buffer_damage;
-          clip_rect = impeller::IRect::MakeXYWH(buffer_damage->x(), buffer_damage->y(),
-                                                buffer_damage->width(), buffer_damage->height());
-        }
-
-        auto surface =
-            impeller::SurfaceMTL::MakeFromTexture(renderer->GetContext(), mtl_texture, clip_rect);
-
-        if (clip_rect && (clip_rect->size.width == 0 || clip_rect->size.height == 0)) {
-          return surface->Present();
-        }
-
-        impeller::IRect cull_rect = surface->coverage();
-        SkIRect sk_cull_rect = SkIRect::MakeWH(cull_rect.size.width, cull_rect.size.height);
-        impeller::DlDispatcher impeller_dispatcher(cull_rect);
-        display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-        auto picture = impeller_dispatcher.EndRecordingAsPicture();
-
-        return renderer->Render(
-            std::move(surface),
-            fml::MakeCopyable([aiks_context, picture = std::move(picture)](
-                                  impeller::RenderTarget& render_target) -> bool {
-              return aiks_context->Render(picture, render_target);
-            }));
-
-        delegate->PresentTexture(texture_info);
-      });
-
-  SurfaceFrame::FramebufferInfo framebuffer_info;
-  framebuffer_info.supports_readback = true;
-
-  if (!disable_partial_repaint_) {
-    // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
-    // front buffer)
-    uintptr_t texture = reinterpret_cast<uintptr_t>(mtl_texture);
-    auto i = damage_.find(texture);
-    if (i != damage_.end()) {
-      framebuffer_info.existing_damage = i->second;
-    }
-    framebuffer_info.supports_partial_repaint = true;
-  }
-
-  return std::make_unique<SurfaceFrame>(nullptr,           // surface
-                                        framebuffer_info,  // framebuffer info
-                                        submit_callback,   // submit callback
-                                        frame_size,        // frame size
+                                        frame_info,        // frame size
                                         nullptr,           // context result
                                         true               // display list fallback
   );
@@ -318,10 +188,11 @@ std::shared_ptr<impeller::AiksContext> GPUSurfaceMetalImpeller::GetAiksContext()
 }
 
 Surface::SurfaceData GPUSurfaceMetalImpeller::GetSurfaceData() const {
-  if (!(last_texture_ && [last_texture_ conformsToProtocol:@protocol(MTLTexture)])) {
+  if (!(last_drawable_ && [last_drawable_ conformsToProtocol:@protocol(CAMetalDrawable)])) {
     return {};
   }
-  id<MTLTexture> texture = last_texture_.get();
+  id<CAMetalDrawable> metal_drawable = static_cast<id<CAMetalDrawable>>(last_drawable_);
+  id<MTLTexture> texture = metal_drawable.texture;
   int bytesPerPixel = 0;
   std::string pixel_format;
   switch (texture.pixelFormat) {

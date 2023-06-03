@@ -6,11 +6,9 @@
 
 #include <Foundation/Foundation.h>
 
-#include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
-#include "flutter/fml/synchronization/sync_switch.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/metal/sampler_library_mtl.h"
 #include "impeller/renderer/capabilities.h"
@@ -69,12 +67,10 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
 
 ContextMTL::ContextMTL(
     id<MTLDevice> device,
-    id<MTLCommandQueue> command_queue,
     NSArray<id<MTLLibrary>>* shader_libraries,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch)
     : device_(device),
-      command_queue_(command_queue),
       worker_task_runner_(std::move(worker_task_runner)),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)) {
   // Validate device.
@@ -98,6 +94,16 @@ ContextMTL::ContextMTL(
       return;
     }
     shader_library_ = std::move(library);
+  }
+
+  // Setup command queue.
+  {
+    command_queue_ = device_.newCommandQueue;
+    if (!command_queue_) {
+      VALIDATION_LOG << "Could not setup the command queue.";
+      return;
+    }
+    command_queue_.label = @"Impeller Command Queue";
   }
 
   // Setup the pipeline library.
@@ -198,28 +204,13 @@ static id<MTLDevice> CreateMetalDevice() {
   return ::MTLCreateSystemDefaultDevice();
 }
 
-static id<MTLCommandQueue> CreateMetalCommandQueue(id<MTLDevice> device) {
-  auto command_queue = device.newCommandQueue;
-  if (!command_queue) {
-    VALIDATION_LOG << "Could not setup the command queue.";
-    return nullptr;
-  }
-  command_queue.label = @"Impeller Command Queue";
-  return command_queue;
-}
-
 std::shared_ptr<ContextMTL> ContextMTL::Create(
     const std::vector<std::string>& shader_library_paths,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch) {
   auto device = CreateMetalDevice();
-  auto command_queue = CreateMetalCommandQueue(device);
-  if (!command_queue) {
-    return nullptr;
-  }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
-      MTLShaderLibraryFromFilePaths(device, shader_library_paths),
+      device, MTLShaderLibraryFromFilePaths(device, shader_library_paths),
       std::move(worker_task_runner), std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
@@ -232,36 +223,12 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-    const std::string& library_label) {
+    const std::string& label) {
   auto device = CreateMetalDevice();
-  auto command_queue = CreateMetalCommandQueue(device);
-  if (!command_queue) {
-    return nullptr;
-  }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
-      MTLShaderLibraryFromFileData(device, shader_libraries_data,
-                                   library_label),
-      std::move(worker_task_runner), std::move(is_gpu_disabled_sync_switch)));
-  if (!context->IsValid()) {
-    FML_LOG(ERROR) << "Could not create Metal context.";
-    return nullptr;
-  }
-  return context;
-}
-
-std::shared_ptr<ContextMTL> ContextMTL::Create(
-    id<MTLDevice> device,
-    id<MTLCommandQueue> command_queue,
-    const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
-    std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
-    std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-    const std::string& library_label) {
-  auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
-      MTLShaderLibraryFromFileData(device, shader_libraries_data,
-                                   library_label),
-      std::move(worker_task_runner), std::move(is_gpu_disabled_sync_switch)));
+      device,
+      MTLShaderLibraryFromFileData(device, shader_libraries_data, label),
+      worker_task_runner, std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;

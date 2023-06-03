@@ -21,12 +21,6 @@
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/context.h"
 
-#if TARGET_OS_SIMULATOR
-#define IMPELLER_CA_METAL_LAYER_AVAILABLE API_AVAILABLE(macos(10.11), ios(13.0))
-#else  // TARGET_OS_SIMULATOR
-#define IMPELLER_CA_METAL_LAYER_AVAILABLE API_AVAILABLE(macos(10.11), ios(8.0))
-#endif  // TARGET_OS_SIMULATOR
-
 namespace impeller {
 
 class ContextMTL final : public Context,
@@ -39,14 +33,6 @@ class ContextMTL final : public Context,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
 
   static std::shared_ptr<ContextMTL> Create(
-      const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
-      std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
-      std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-      const std::string& label);
-
-  static std::shared_ptr<ContextMTL> Create(
-      id<MTLDevice> device,
-      id<MTLCommandQueue> command_queue,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
       std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
@@ -104,7 +90,6 @@ class ContextMTL final : public Context,
 
   ContextMTL(
       id<MTLDevice> device,
-      id<MTLCommandQueue> command_queue,
       NSArray<id<MTLLibrary>>* shader_libraries,
       std::shared_ptr<fml::ConcurrentTaskRunner> worker_task_runner,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
