@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(dnfield): This should not need to be so small,
-// https://github.com/flutter/flutter/issues/119357
-layout(local_size_x = 256, local_size_y = 1) in;
+layout(local_size_x_id = 0) in;
 layout(std430) buffer;
 
 #include <impeller/prefix_sum.glsl>

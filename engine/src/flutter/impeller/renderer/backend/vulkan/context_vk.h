@@ -136,6 +136,11 @@ class ContextVK final : public Context,
   struct DeviceHolderImpl : public DeviceHolder {
     // |DeviceHolder|
     const vk::Device& GetDevice() const override { return device.get(); }
+    // |DeviceHolder|
+    const vk::PhysicalDevice& GetPhysicalDevice() const override {
+      return physical_device;
+    }
+
     vk::UniqueInstance instance;
     vk::PhysicalDevice physical_device;
     vk::UniqueDevice device;

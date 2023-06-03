@@ -23,6 +23,7 @@ if (impeller_enable_compute) {
       "stroke.comp",
       "path_polyline.comp",
       "prefix_sum_test.comp",
+      "threadgroup_sizing_test.comp",
     ]
   }
 

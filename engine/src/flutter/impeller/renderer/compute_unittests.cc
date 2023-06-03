@@ -19,6 +19,7 @@
 #include "impeller/renderer/compute_pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/prefix_sum_test.comp.h"
+#include "impeller/renderer/threadgroup_sizing_test.comp.h"
 
 namespace impeller {
 namespace testing {
@@ -170,6 +171,59 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
           auto computed_sum = output->data[i];
           EXPECT_EQ(computed_sum, expected[i]);
         }
+        latch.Signal();
+      }));
+
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
+  using CS = ThreadgroupSizingTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  using SamplePipelineBuilder = ComputePipelineBuilder<CS>;
+  auto pipeline_desc =
+      SamplePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto pass = cmd_buffer->CreateComputePass();
+  ASSERT_TRUE(pass && pass->IsValid());
+
+  static constexpr size_t kCount = 2048;
+
+  pass->SetGridSize(ISize(kCount, 1));
+  pass->SetThreadGroupSize(ISize(kCount, 1));
+
+  ComputeCommand cmd;
+  cmd.label = "Compute";
+  cmd.pipeline = compute_pipeline;
+
+  auto output_buffer = CreateHostVisibleDeviceBuffer<CS::OutputData<kCount>>(
+      context, "Output Buffer");
+
+  CS::BindOutputData(cmd, output_buffer->AsBufferView());
+
+  ASSERT_TRUE(pass->AddCommand(std::move(cmd)));
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(cmd_buffer->SubmitCommands(
+      [&latch, output_buffer](CommandBuffer::Status status) {
+        EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+
+        auto view = output_buffer->AsBufferView();
+        EXPECT_EQ(view.range.length, sizeof(CS::OutputData<kCount>));
+
+        CS::OutputData<kCount>* output =
+            reinterpret_cast<CS::OutputData<kCount>*>(view.contents);
+        EXPECT_TRUE(output);
+        EXPECT_EQ(output->data[kCount - 1], kCount - 1);
         latch.Signal();
       }));
 

@@ -1603,6 +1603,7 @@ ORIGIN: ../../../flutter/impeller/renderer/snapshot.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/stroke.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/surface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/surface.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/threadgroup_sizing_test.comp + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/vertex_buffer_builder.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/vertex_buffer_builder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/vertex_descriptor.cc + ../../../flutter/LICENSE
@@ -4276,6 +4277,7 @@ FILE: ../../../flutter/impeller/renderer/snapshot.h
 FILE: ../../../flutter/impeller/renderer/stroke.comp
 FILE: ../../../flutter/impeller/renderer/surface.cc
 FILE: ../../../flutter/impeller/renderer/surface.h
+FILE: ../../../flutter/impeller/renderer/threadgroup_sizing_test.comp
 FILE: ../../../flutter/impeller/renderer/vertex_buffer_builder.cc
 FILE: ../../../flutter/impeller/renderer/vertex_buffer_builder.h
 FILE: ../../../flutter/impeller/renderer/vertex_descriptor.cc
