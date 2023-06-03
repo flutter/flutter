@@ -1824,7 +1824,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
   Offset _getOffsetForPosition(TextPosition position) {
-    return _textPainter.getOffsetForCaret(position, Rect.zero) + Offset(0, _textPainter.getFullHeightForCaret(position, Rect.zero) ?? 0.0);
+    return _textPainter.getOffsetForCaret(position, Rect.zero) + Offset(0, _textPainter.getFullHeightForCaret(position, _caretPrototype) ?? 0.0);
   }
 
   /// Returns the local coordinates of the endpoints of the given selection.
