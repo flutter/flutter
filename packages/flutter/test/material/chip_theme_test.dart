@@ -124,28 +124,30 @@ void main() {
         .map((DiagnosticsNode node) => node.toString())
         .toList();
 
-    expect(description, <String>[
-      'backgroundColor: Color(0xfffffff0)',
-      'deleteIconColor: Color(0xfffffff1)',
-      'disabledColor: Color(0xfffffff2)',
-      'selectedColor: Color(0xfffffff3)',
-      'secondarySelectedColor: Color(0xfffffff4)',
-      'shadowColor: Color(0xfffffff5)',
-      'surfaceTintColor: Color(0xfffffff8)',
-      'selectedShadowColor: Color(0xfffffff6)',
-      'showCheckmark: true',
-      'checkMarkColor: Color(0xfffffff7)',
-      'labelPadding: EdgeInsets.all(1.0)',
-      'padding: EdgeInsets.all(2.0)',
-      'side: BorderSide(width: 10.0)',
-      'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
-      'labelStyle: TextStyle(inherit: true, size: 10.0)',
-      'secondaryLabelStyle: TextStyle(inherit: true, size: 20.0)',
-      'brightness: dark',
-      'elevation: 5.0',
-      'pressElevation: 6.0',
-      'iconTheme: IconThemeData#00000(color: Color(0xfffffff8))',
-    ]);
+    expect(description,
+      equalsIgnoringHashCodes(<String>[
+        'backgroundColor: Color(0xfffffff0)',
+        'deleteIconColor: Color(0xfffffff1)',
+        'disabledColor: Color(0xfffffff2)',
+        'selectedColor: Color(0xfffffff3)',
+        'secondarySelectedColor: Color(0xfffffff4)',
+        'shadowColor: Color(0xfffffff5)',
+        'surfaceTintColor: Color(0xfffffff8)',
+        'selectedShadowColor: Color(0xfffffff6)',
+        'showCheckmark: true',
+        'checkMarkColor: Color(0xfffffff7)',
+        'labelPadding: EdgeInsets.all(1.0)',
+        'padding: EdgeInsets.all(2.0)',
+        'side: BorderSide(width: 10.0)',
+        'shape: RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero)',
+        'labelStyle: TextStyle(inherit: true, size: 10.0)',
+        'secondaryLabelStyle: TextStyle(inherit: true, size: 20.0)',
+        'brightness: dark',
+        'elevation: 5.0',
+        'pressElevation: 6.0',
+        'iconTheme: IconThemeData#00000(color: Color(0xfffffff8))',
+      ])
+    );
   });
 
   testWidgets('Chip uses ThemeData chip theme', (WidgetTester tester) async {
