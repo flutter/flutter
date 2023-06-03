@@ -252,14 +252,22 @@ bool ComputePassVK::OnEncodeCommands(const Context& context,
       int64_t width = grid_size.width;
       int64_t height = grid_size.height;
 
-      while (width > max_wg_size[0]) {
-        width = std::max(static_cast<int64_t>(1), width / 2);
+      // Special case for linear processing.
+      if (height == 1) {
+        int64_t minimum = 1;
+        int64_t threadGroups = std::max(
+            static_cast<int64_t>(std::ceil(width * 1.0 / max_wg_size[0] * 1.0)),
+            minimum);
+        cmd_buffer.dispatch(threadGroups, 1, 1);
+      } else {
+        while (width > max_wg_size[0]) {
+          width = std::max(static_cast<int64_t>(1), width / 2);
+        }
+        while (height > max_wg_size[1]) {
+          height = std::max(static_cast<int64_t>(1), height / 2);
+        }
+        cmd_buffer.dispatch(width, height, 1);
       }
-      while (height > max_wg_size[1]) {
-        height = std::max(static_cast<int64_t>(1), height / 2);
-      }
-
-      cmd_buffer.dispatch(width, height, 1);
     }
   }
 
