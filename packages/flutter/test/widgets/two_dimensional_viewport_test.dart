@@ -161,10 +161,18 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
+        // In the tests below the number of RepaintBoundary depends on:
+        // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
+        // ModalRoute - builds 2
+        // GlowingOverscrollIndicator - builds 2
+        // RawScrollbar - builds 2
+
         switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
           case TargetPlatform.fuchsia:
+            // Includes a scrollbar and an overscroll glow
             expect(find.byType(RepaintBoundary), findsNWidgets(7));
+
+          case TargetPlatform.android:
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
@@ -183,9 +191,11 @@ void main() {
         await tester.pumpAndSettle();
 
         switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
           case TargetPlatform.fuchsia:
+            // Includes a scrollbar and and overscroll indicator
             expect(find.byType(RepaintBoundary), findsNWidgets(6));
+
+          case TargetPlatform.android:
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
