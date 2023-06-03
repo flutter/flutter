@@ -192,7 +192,7 @@ void main() {
 
         switch (defaultTargetPlatform) {
           case TargetPlatform.fuchsia:
-            // Includes a scrollbar and and overscroll indicator
+            // Includes a scrollbar and and overscroll glow
             expect(find.byType(RepaintBoundary), findsNWidgets(6));
 
           case TargetPlatform.android:
