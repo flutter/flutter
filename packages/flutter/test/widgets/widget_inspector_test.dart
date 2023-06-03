@@ -245,7 +245,7 @@ extension TextFromString on String {
 /// Forces garbage collection by aggressive memory allocation.
 Future<void> _forceGC() async {
   const Duration timeout = Duration(seconds: 5);
-  const int gcCycles = 3;
+  const int gcCycles = 3; // 1 should be enough, but we do 3 to make sure test is not flaky.
   final Stopwatch stopwatch = Stopwatch()..start();
   final int barrier = reachabilityBarrier;
 
