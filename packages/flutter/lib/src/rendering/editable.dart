@@ -799,12 +799,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _updateSelectionRegistrarSubscription() {
     if (_registrar == null) {
-      debugPrint('registar null');
       return;
     }
-    debugPrint('updating registrar');
     _lastSelectableFragments ??= _getSelectableFragments();
-    debugPrint('$_lastSelectableFragments');
     _lastSelectableFragments!.forEach(_registrar!.add);
   }
 
@@ -892,7 +889,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_textPainter.text == value) {
       return;
     }
-    debugPrint('set text');
     _cachedLineBreakCount = null;
     _textPainter.text = value;
     _cachedAttributedValue = null;
@@ -1899,6 +1895,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _computeTextMetricsIfNeeded();
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+  }
+
+  TextPosition _getPositionForOffset(Offset offset) {
+    assert(!debugNeedsLayout);
+    _computeTextMetricsIfNeeded();
+    return _textPainter.getPositionForOffset(offset);
   }
 
   /// Returns the [Rect] in local coordinates for the caret at the given text
@@ -3224,7 +3226,7 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
 
   @override
   SelectionResult dispatchSelectionEvent(SelectionEvent event) {
-    debugPrint('dispatchSelectionEvent $fullText $event');
+    debugPrint('dispatchSelectionEvent ${range.textInside(fullText)} separator $fullText $event');
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
@@ -3310,7 +3312,7 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
       direction: editable.textDirection,
     );
 
-    final TextPosition position = _clampTextPosition(editable.getPositionForPoint(adjustedOffset));
+    final TextPosition position = _clampTextPosition(editable._getPositionForOffset(adjustedOffset));
     _setSelectionPosition(position, isEnd: isEnd);
     if (position.offset == range.end) {
       return SelectionResult.next;
@@ -3346,7 +3348,7 @@ class _EditableSelectableFragment with Selectable, ChangeNotifier {
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
-    final TextPosition position = editable.getPositionForPoint(editable.globalToLocal(globalPosition));
+    final TextPosition position = editable._getPositionForOffset(editable.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position)) {
       return SelectionResult.end;
     }
