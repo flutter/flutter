@@ -20,6 +20,7 @@ import 'input_decorator.dart';
 import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
+import 'selection_area.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
@@ -1333,6 +1334,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
@@ -1488,7 +1490,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           minLines: widget.minLines,
           expands: widget.expands,
           // Only show the selection highlight when the text field is focused.
-          selectionColor: focusNode.hasFocus ? selectionColor : null,
+          selectionRegistrar: registrar,
+          selectionColor: selectionColor,
+          // selectionColor: focusNode.hasFocus ? selectionColor,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
@@ -1588,10 +1592,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 child: child,
               );
             },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: child,
-            ),
+            child: child,
+            // child: SelectionArea(
+            //   child: child,
+            // ),
           ),
         ),
       ),

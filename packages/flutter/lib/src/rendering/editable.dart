@@ -18,6 +18,7 @@ import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
 import 'paragraph.dart';
+import 'selection.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -287,6 +288,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     int? minLines,
     bool expands = false,
     StrutStyle? strutStyle,
+    SelectionRegistrar? registrar,
     Color? selectionColor,
     @Deprecated(
       'Use textScaler instead. '
@@ -388,6 +390,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _updateForegroundPainter(foregroundPainter);
     _updatePainter(painter);
     addAll(children);
+    this.registrar = registrar;
   }
 
   /// Child render objects
@@ -410,11 +413,19 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _selectionPainter.dispose();
     _caretPainter.dispose();
     _textPainter.dispose();
+<<<<<<< HEAD
     _textIntrinsicsCache?.dispose();
     if (_disposeShowCursor) {
       _showCursor.dispose();
       _disposeShowCursor = false;
     }
+=======
+
+    _removeSelectionRegistrarSubscription();
+    // _lastSelectableFragments may hold references to this RenderParagraph.
+    // Release them manually to avoid retain cycles.
+    _lastSelectableFragments = null;
+>>>>>>> 083c3ae702 (Initial migration of TextField and EditableText to SelectionArea)
     super.dispose();
   }
 
@@ -741,6 +752,100 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
+  // Start Selectable.
+
+  /// The ongoing selections in this paragraph.
+  ///
+  /// The selection does not include selections in [PlaceholderSpan] if there
+  /// are any.
+  @visibleForTesting
+  List<TextSelection> get selections {
+    if (_lastSelectableFragments == null) {
+      return const <TextSelection>[];
+    }
+    final List<TextSelection> results = <TextSelection>[];
+    for (final _EditableSelectableFragment fragment in _lastSelectableFragments!) {
+      if (fragment._textSelectionStart != null &&
+          fragment._textSelectionEnd != null &&
+          fragment._textSelectionStart!.offset != fragment._textSelectionEnd!.offset) {
+        results.add(
+          TextSelection(
+            baseOffset: fragment._textSelectionStart!.offset,
+            extentOffset: fragment._textSelectionEnd!.offset
+          )
+        );
+      }
+    }
+    return results;
+  }
+
+  // Should be null if selection is not enabled, i.e. _registrar = null. The
+  // paragraph splits on [PlaceholderSpan.placeholderCodeUnit], and stores each
+  // fragment in this list.
+  List<_EditableSelectableFragment>? _lastSelectableFragments;
+
+  /// The [SelectionRegistrar] this paragraph will be, or is, registered to.
+  SelectionRegistrar? get registrar => _registrar;
+  SelectionRegistrar? _registrar;
+  set registrar(SelectionRegistrar? value) {
+    if (value == _registrar) {
+      return;
+    }
+    _removeSelectionRegistrarSubscription();
+    _disposeSelectableFragments();
+    _registrar = value;
+    _updateSelectionRegistrarSubscription();
+  }
+
+  void _updateSelectionRegistrarSubscription() {
+    if (_registrar == null) {
+      debugPrint('registar null');
+      return;
+    }
+    debugPrint('updating registrar');
+    _lastSelectableFragments ??= _getSelectableFragments();
+    debugPrint('$_lastSelectableFragments');
+    _lastSelectableFragments!.forEach(_registrar!.add);
+  }
+
+  void _removeSelectionRegistrarSubscription() {
+    if (_registrar == null || _lastSelectableFragments == null) {
+      return;
+    }
+    _lastSelectableFragments!.forEach(_registrar!.remove);
+  }
+
+  static final String _placeholderCharacter = String.fromCharCode(PlaceholderSpan.placeholderCodeUnit);
+  List<_EditableSelectableFragment> _getSelectableFragments() {
+    final String plainText = text!.toPlainText(includeSemanticsLabels: false);
+    final List<_EditableSelectableFragment> result = <_EditableSelectableFragment>[];
+    int start = 0;
+    while (start < plainText.length) {
+      int end = plainText.indexOf(_placeholderCharacter, start);
+      if (start != end) {
+        if (end == -1) {
+          end = plainText.length;
+        }
+        result.add(_EditableSelectableFragment(editable: this, range: TextRange(start: start, end: end), fullText: plainText));
+        start = end;
+      }
+      start += 1;
+    }
+    return result;
+  }
+
+  void _disposeSelectableFragments() {
+    if (_lastSelectableFragments == null) {
+      return;
+    }
+    for (final _EditableSelectableFragment fragment in _lastSelectableFragments!) {
+      fragment.dispose();
+    }
+    _lastSelectableFragments = null;
+  }
+
+  // End Selectable.
+
   @override
   void markNeedsPaint() {
     super.markNeedsPaint();
@@ -749,6 +854,20 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _backgroundRenderObject?.markNeedsPaint();
   }
 
+<<<<<<< HEAD
+=======
+  /// Marks the render object as needing to be laid out again and have its text
+  /// metrics recomputed.
+  ///
+  /// Implies [markNeedsLayout].
+  @protected
+  void markNeedsTextLayout() {
+    _textLayoutLastMaxWidth = null;
+    _textLayoutLastMinWidth = null;
+    super.markNeedsLayout();
+  }
+
+>>>>>>> 083c3ae702 (Initial migration of TextField and EditableText to SelectionArea)
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
@@ -773,6 +892,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     if (_textPainter.text == value) {
       return;
     }
+    debugPrint('set text');
     _cachedLineBreakCount = null;
     _textPainter.text = value;
     _cachedAttributedValue = null;
@@ -780,6 +900,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _canComputeIntrinsicsCached = null;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
+
+    _removeSelectionRegistrarSubscription();
+    _disposeSelectableFragments();
+    _updateSelectionRegistrarSubscription();
   }
 
   TextPainter? _textIntrinsicsCache;
@@ -1699,6 +1823,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // the text may position outside the visible region even when the text fits.
   bool get _hasVisualOverflow => _maxScrollExtent > 0 || _paintOffset != Offset.zero;
 
+  Offset _getOffsetForPosition(TextPosition position) {
+    return _textPainter.getOffsetForCaret(position, Rect.zero) + Offset(0, _textPainter.getFullHeightForCaret(position, Rect.zero) ?? 0.0);
+  }
+
   /// Returns the local coordinates of the endpoints of the given selection.
   ///
   /// If the selection is collapsed (and therefore occupies a single point), the
@@ -2604,9 +2732,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _clipRectLayer.layer = null;
       _paintContents(context, offset);
     }
-    final TextSelection? selection = this.selection;
-    if (selection != null && selection.isValid) {
-      _paintHandleLayers(context, getEndpointsForSelection(selection), offset);
+    // final TextSelection? selection = this.selection;
+    // if (selection != null && selection.isValid) {
+    //   _paintHandleLayers(context, getEndpointsForSelection(selection), offset);
+    // }
+    if (_lastSelectableFragments != null) {
+      for (final _EditableSelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paint(context, offset);
+      }
     }
   }
 
@@ -3056,5 +3189,347 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
     }
 
     return false;
+  }
+}
+
+/// A continuous, selectable piece of paragraph.
+///
+/// Since the selections in [PlaceHolderSpan] are handled independently in its
+/// subtree, a selection in [RenderParagraph] can't continue across a
+/// [PlaceHolderSpan]. The [RenderParagraph] splits itself on [PlaceHolderSpan]
+/// to create multiple `_SelectableFragment`s so that they can be selected
+/// separately.
+class _EditableSelectableFragment with Selectable, ChangeNotifier {
+  _EditableSelectableFragment({
+    required this.editable,
+    required this.fullText,
+    required this.range,
+  }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
+    _selectionGeometry = _getSelectionGeometry();
+  }
+
+  final TextRange range;
+  final RenderEditable editable;
+  final String fullText;
+
+  TextPosition? _textSelectionStart;
+  TextPosition? _textSelectionEnd;
+
+  LayerLink? _startHandleLayerLink;
+  LayerLink? _endHandleLayerLink;
+
+  late SelectionGeometry _selectionGeometry;
+  
+  // Start Selectable.
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    debugPrint('dispatchSelectionEvent $fullText $event');
+    late final SelectionResult result;
+    final TextPosition? existingSelectionStart = _textSelectionStart;
+    final TextPosition? existingSelectionEnd = _textSelectionEnd;
+    switch (event.type) {
+      case SelectionEventType.startEdgeUpdate:
+      case SelectionEventType.endEdgeUpdate:
+        final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
+        result = _handleUpdateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+      case SelectionEventType.clear:
+        result = _handleClearSelection();
+      case SelectionEventType.selectAll:
+        result = _handleSelectAll();
+      case SelectionEventType.selectWord:
+        final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
+        result = _handleSelectWord(selectWord.globalPosition);
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        break;
+    }
+
+    if (existingSelectionStart != _textSelectionStart ||
+        existingSelectionEnd != _textSelectionEnd) {
+      _didChangeSelection();
+    }
+    return result;
+  }
+  
+  @override
+  SelectedContent? getSelectedContent() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return null;
+    }
+    final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+    final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+    return SelectedContent(
+      plainText: fullText.substring(start, end),
+    );
+  }
+
+  @override
+  Matrix4 getTransformTo(RenderObject? ancestor) {
+    return _getTransformToEditable()..multiply(editable.getTransformTo(ancestor));
+  }
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+    if (!editable.attached) {
+      assert(startHandle == null && endHandle == null, 'Only clean up can be called.');
+      return;
+    }
+    if (_startHandleLayerLink != startHandle) {
+      _startHandleLayerLink = startHandle;
+      editable.markNeedsPaint();
+    }
+    if (_endHandleLayerLink != endHandle) {
+      _endHandleLayerLink = endHandle;
+      editable.markNeedsPaint();
+    }
+  }
+  
+  @override
+  Size get size {
+    return _rect.size;
+  }
+  
+  @override
+  SelectionGeometry get value => _selectionGeometry;
+
+  // End Selectable.
+
+  // Start handle selection events.
+  SelectionResult _handleUpdateSelectionEdge(Offset globalPosition, {required bool isEnd}) {
+    _setSelectionPosition(null, isEnd: isEnd);
+    final Matrix4 transform = editable.getTransformTo(null);
+    transform.invert();
+    final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
+    if (_rect.isEmpty) {
+      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+    }
+    final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
+      _rect,
+      localPosition,
+      direction: editable.textDirection,
+    );
+
+    final TextPosition position = _clampTextPosition(editable.getPositionForPoint(adjustedOffset));
+    _setSelectionPosition(position, isEnd: isEnd);
+    if (position.offset == range.end) {
+      return SelectionResult.next;
+    }
+    if (position.offset == range.start) {
+      return SelectionResult.previous;
+    }
+    // TODO(chunhtai): The geometry information should not be used to determine
+    // selection result. This is a workaround to RenderParagraph, where it does
+    // not have a way to get accurate text length if its text is truncated due to
+    // layout constraint.
+    return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+  }
+
+  TextPosition _clampTextPosition(TextPosition position) {
+    // Affinity of range.end is upstream.
+    if (position.offset > range.end ||
+        (position.offset == range.end && position.affinity == TextAffinity.downstream)) {
+      return TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    }
+    if (position.offset < range.start) {
+      return TextPosition(offset: range.start);
+    }
+    return position;
+  }
+
+  void _setSelectionPosition(TextPosition? position, {required bool isEnd}) {
+    if (isEnd) {
+      _textSelectionEnd = position;
+    } else {
+      _textSelectionStart = position;
+    }
+  }
+
+  SelectionResult _handleSelectWord(Offset globalPosition) {
+    final TextPosition position = editable.getPositionForPoint(editable.globalToLocal(globalPosition));
+    if (_positionIsWithinCurrentSelection(position)) {
+      return SelectionResult.end;
+    }
+    final TextRange word = editable.getWordBoundary(position);
+    assert(word.isNormalized);
+    // Fragments are separated by placeholder span, the word boundary shouldn't
+    // expand across fragments.
+    assert(word.start >= range.start && word.end <= range.end);
+    late TextPosition start;
+    late TextPosition end;
+    if (position.offset >= word.end) {
+      start = end = TextPosition(offset: position.offset);
+    } else {
+      start = TextPosition(offset: word.start);
+      end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
+    }
+    _textSelectionStart = start;
+    _textSelectionEnd = end;
+    return SelectionResult.end;
+  }
+
+  /// Whether the given text position is contained in current selection
+  /// range.
+  ///
+  /// The parameter `start` must be smaller than `end`.
+  bool _positionIsWithinCurrentSelection(TextPosition position) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return false;
+    }
+    // Normalize current selection.
+    late TextPosition currentStart;
+    late TextPosition currentEnd;
+    if (_compareTextPositions(_textSelectionStart!, _textSelectionEnd!) > 0) {
+      currentStart = _textSelectionStart!;
+      currentEnd = _textSelectionEnd!;
+    } else {
+      currentStart = _textSelectionEnd!;
+      currentEnd = _textSelectionStart!;
+    }
+    return _compareTextPositions(currentStart, position) >= 0 && _compareTextPositions(currentEnd, position) <= 0;
+  }
+
+  /// Compares two text positions.
+  ///
+  /// Returns 1 if `position` < `otherPosition`, -1 if `position` > `otherPosition`,
+  /// or 0 if they are equal.
+  static int _compareTextPositions(TextPosition position, TextPosition otherPosition) {
+    if (position.offset < otherPosition.offset) {
+      return 1;
+    } else if (position.offset > otherPosition.offset) {
+      return -1;
+    } else if (position.affinity == otherPosition.affinity){
+      return 0;
+    } else {
+      return position.affinity == TextAffinity.upstream ? 1 : -1;
+    }
+  }
+
+  SelectionResult _handleClearSelection() {
+    _textSelectionStart = null;
+    _textSelectionEnd = null;
+    return SelectionResult.none;
+  }
+
+  SelectionResult _handleSelectAll() {
+    _textSelectionStart = TextPosition(offset: range.start);
+    _textSelectionEnd = TextPosition(offset: range.end, affinity: TextAffinity.upstream);
+    return SelectionResult.none;
+  }
+
+  // End handle selection events.
+
+  // Misc.
+  void paint(PaintingContext context, Offset offset) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return;
+    }
+    if (editable.selectionColor != null) {
+      final TextSelection selection = TextSelection(
+        baseOffset: _textSelectionStart!.offset,
+        extentOffset: _textSelectionEnd!.offset,
+      );
+      final Paint selectionPaint = Paint()
+        ..style = PaintingStyle.fill
+        ..color = editable.selectionColor!;
+      for (final TextBox textBox in editable.getBoxesForSelection(selection)) {
+        context.canvas.drawRect(
+            textBox.toRect().shift(offset), selectionPaint);
+      }
+    }
+    final Matrix4 transform = _getTransformToEditable();
+    if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
+      context.pushLayer(
+        LeaderLayer(
+          link: _startHandleLayerLink!,
+          offset: offset + MatrixUtils.transformPoint(transform, value.startSelectionPoint!.localPosition),
+        ),
+        (PaintingContext context, Offset offset) { },
+        Offset.zero,
+      );
+    }
+    if (_endHandleLayerLink != null && value.endSelectionPoint != null) {
+      context.pushLayer(
+        LeaderLayer(
+          link: _endHandleLayerLink!,
+          offset: offset + MatrixUtils.transformPoint(transform, value.endSelectionPoint!.localPosition),
+        ),
+        (PaintingContext context, Offset offset) { },
+        Offset.zero,
+      );
+    }
+  }
+
+  SelectionGeometry _getSelectionGeometry() {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return const SelectionGeometry(
+        status: SelectionStatus.none,
+        hasContent: true,
+      );
+    }
+
+    final int selectionStart = _textSelectionStart!.offset;
+    final int selectionEnd = _textSelectionEnd!.offset;
+    final bool isReversed = selectionStart > selectionEnd;
+    final Offset startOffsetInParagraphCoordinates = editable._getOffsetForPosition(TextPosition(offset: selectionStart));
+    final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
+      ? startOffsetInParagraphCoordinates
+      : editable._getOffsetForPosition(TextPosition(offset: selectionEnd));
+    final bool flipHandles = isReversed != (TextDirection.rtl == editable.textDirection);
+    final Matrix4 paragraphToFragmentTransform = _getTransformToEditable()..invert();
+    return SelectionGeometry(
+      startSelectionPoint: SelectionPoint(
+        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, startOffsetInParagraphCoordinates),
+        lineHeight: editable._textPainter.preferredLineHeight,
+        handleType: flipHandles ? TextSelectionHandleType.right : TextSelectionHandleType.left
+      ),
+      endSelectionPoint: SelectionPoint(
+        localPosition: MatrixUtils.transformPoint(paragraphToFragmentTransform, endOffsetInParagraphCoordinates),
+        lineHeight: editable._textPainter.preferredLineHeight,
+        handleType: flipHandles ? TextSelectionHandleType.left : TextSelectionHandleType.right,
+      ),
+      status: _textSelectionStart!.offset == _textSelectionEnd!.offset
+        ? SelectionStatus.collapsed
+        : SelectionStatus.uncollapsed,
+      hasContent: true,
+    );
+  }
+
+  void _updateSelectionGeometry() {
+    final SelectionGeometry newValue = _getSelectionGeometry();
+    if (_selectionGeometry == newValue) {
+      return;
+    }
+    _selectionGeometry = newValue;
+    notifyListeners();
+  }
+
+  Rect? _cachedRect;
+  Rect get _rect {
+    if (_cachedRect == null) {
+      final List<TextBox> boxes = editable.getBoxesForSelection(
+        TextSelection(baseOffset: range.start, extentOffset: range.end),
+      );
+      if (boxes.isNotEmpty) {
+        Rect result = boxes.first.toRect();
+        for (int index = 1; index < boxes.length; index += 1) {
+          result = result.expandToInclude(boxes[index].toRect());
+        }
+        _cachedRect = result;
+      } else {
+        final Offset offset = editable._getOffsetForPosition(TextPosition(offset: range.start));
+        _cachedRect = Rect.fromPoints(offset, offset.translate(0, - editable._textPainter.preferredLineHeight));
+      }
+    }
+    return _cachedRect!;
+  }
+
+  Matrix4 _getTransformToEditable() {
+    return Matrix4.translationValues(_rect.left, _rect.top, 0.0);
+  }
+
+  void _didChangeSelection() {
+    editable.markNeedsPaint();
+    _updateSelectionGeometry();
   }
 }
