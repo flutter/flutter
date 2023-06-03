@@ -286,7 +286,7 @@ class _FakeFlutterView extends Fake implements FlutterView {
   final Display? _display;
 
   @override
-  final Object viewId = 1;
+  final int viewId = 1;
 }
 
 class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
