@@ -161,7 +161,7 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
-        // In the tests below the number of RepaintBoundary depends on:
+        // In the tests below the number of RepaintBoundary widgets depends on:
         // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
         // ModalRoute - builds 2
         // GlowingOverscrollIndicator - builds 2
