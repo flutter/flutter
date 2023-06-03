@@ -458,12 +458,11 @@ void DrawSimpleFrame(GfxExternalViewEmbedder& external_view_embedder,
   external_view_embedder.EndFrame(false, nullptr);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   external_view_embedder.SubmitFrame(
-      nullptr, nullptr,
-      std::make_unique<flutter::SurfaceFrame>(
-          nullptr, framebuffer_info,
-          [](const flutter::SurfaceFrame& surface_frame,
-             flutter::DlCanvas* canvas) { return true; },
-          frame_size));
+      nullptr, std::make_unique<flutter::SurfaceFrame>(
+                   nullptr, framebuffer_info,
+                   [](const flutter::SurfaceFrame& surface_frame,
+                      flutter::DlCanvas* canvas) { return true; },
+                   frame_size));
 }
 
 void DrawFrameWithView(
@@ -488,12 +487,11 @@ void DrawFrameWithView(
   external_view_embedder.EndFrame(false, nullptr);
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   external_view_embedder.SubmitFrame(
-      nullptr, nullptr,
-      std::make_unique<flutter::SurfaceFrame>(
-          nullptr, framebuffer_info,
-          [](const flutter::SurfaceFrame& surface_frame,
-             flutter::DlCanvas* canvas) { return true; },
-          frame_size));
+      nullptr, std::make_unique<flutter::SurfaceFrame>(
+                   nullptr, framebuffer_info,
+                   [](const flutter::SurfaceFrame& surface_frame,
+                      flutter::DlCanvas* canvas) { return true; },
+                   frame_size));
 }
 
 FramePresentedInfo MakeFramePresentedInfoForOnePresent(
