@@ -142,7 +142,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the accessibility label when the switch is off.
   ///
-  /// Defaults to [CupertinoColors.systemGrey2] when null.
+  /// Defaults to [Color(0xFFB3B3B3)] when null.
   final Color? offLabelColor;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -403,7 +403,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             state: this,
             onOffSwitchLabels: MediaQuery.onOffSwitchLabelsOf(context),
             onLabelColor: CupertinoDynamicColor.resolve(widget.onLabelColor ?? CupertinoColors.white, context),
-            offLabelColor: CupertinoDynamicColor.resolve(widget.offLabelColor ?? CupertinoColors.systemGrey2, context),
+            offLabelColor: CupertinoDynamicColor.resolve(widget.offLabelColor ?? const Color(0xFFB3B3B3), context),
           ),
         ),
       ),
@@ -716,20 +716,29 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     }
 
     if (_onOffSwitchLabels) {
+      final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
+      final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
+
       late final Offset onLabelOffset;
+      late final double onLabelOpacity;
       late final Offset offLabelOffset;
+      late final double offLabelOpacity;
 
       switch (textDirection) {
         case TextDirection.ltr:
           onLabelOffset =
               trackRect.centerLeft.translate(_kOnLabelPaddingHorizontal, 0);
+          onLabelOpacity = leftLabelOpacity;
           offLabelOffset =
               trackRect.centerRight.translate(-_kOffLabelPaddingHorizontal, 0);
+          offLabelOpacity = rightLabelOpacity;
         case TextDirection.rtl:
           onLabelOffset =
               trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0);
+          onLabelOpacity = rightLabelOpacity;
           offLabelOffset =
               trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0);
+          offLabelOpacity = leftLabelOpacity;
       }
 
       final Rect onLabelRect = Rect.fromCenter(
@@ -739,17 +748,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       );
 
       final Paint onLabelPaint = Paint()
-        ..color = onLabelColor
-            .withOpacity(visualPosition)
-            .withOpacity(1.0 - currentReactionValue)
+        ..color = onLabelColor.withOpacity(onLabelOpacity)
         ..style = PaintingStyle.fill;
 
       canvas.drawRect(onLabelRect, onLabelPaint);
 
       final Paint offLabelPaint = Paint()
-        ..color = offLabelColor
-            .withOpacity(1.0 - visualPosition)
-            .withOpacity(1.0 - currentReactionValue)
+        ..color = offLabelColor.withOpacity(offLabelOpacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kOffLabelWidth;
 
