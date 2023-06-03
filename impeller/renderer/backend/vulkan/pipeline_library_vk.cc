@@ -357,16 +357,34 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
     return nullptr;
   }
 
-  vk::PipelineShaderStageCreateInfo info;
-  info.setStage(vk::ShaderStageFlagBits::eCompute);
-  info.setPName("main");
-  info.setModule(ShaderFunctionVK::Cast(entrypoint.get())->GetModule());
-  pipeline_info.setStage(info);
-
   std::shared_ptr<DeviceHolder> strong_device = device_holder_.lock();
   if (!strong_device) {
     return nullptr;
   }
+  auto device_properties = strong_device->GetPhysicalDevice().getProperties();
+  auto max_wg_size = device_properties.limits.maxComputeWorkGroupSize;
+
+  // Give all compute shaders a specialization constant entry for the
+  // workgroup/threadgroup size.
+  vk::SpecializationMapEntry specialization_map_entry[1];
+
+  uint32_t workgroup_size_x = max_wg_size[0];
+  specialization_map_entry[0].constantID = 0;
+  specialization_map_entry[0].offset = 0;
+  specialization_map_entry[0].size = sizeof(uint32_t);
+
+  vk::SpecializationInfo specialization_info;
+  specialization_info.mapEntryCount = 1;
+  specialization_info.pMapEntries = &specialization_map_entry[0];
+  specialization_info.dataSize = sizeof(uint32_t);
+  specialization_info.pData = &workgroup_size_x;
+
+  vk::PipelineShaderStageCreateInfo info;
+  info.setStage(vk::ShaderStageFlagBits::eCompute);
+  info.setPName("main");
+  info.setModule(ShaderFunctionVK::Cast(entrypoint.get())->GetModule());
+  info.setPSpecializationInfo(&specialization_info);
+  pipeline_info.setStage(info);
 
   //----------------------------------------------------------------------------
   /// Pipeline Layout a.k.a the descriptor sets and uniforms.

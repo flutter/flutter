@@ -13569,9 +13569,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.65625,
+              2.450000047683716,
               0.0,
-              2.65625,
+              2.450000047683716,
               1.0,
               72.0,
               0.0
@@ -13589,9 +13589,9 @@
               "arith_cvt"
             ],
             "shortest_path_cycles": [
-              0.9375,
+              0.762499988079071,
               0.0,
-              0.9375,
+              0.762499988079071,
               0.0,
               0.0,
               0.0
@@ -13600,9 +13600,9 @@
               "load_store"
             ],
             "total_cycles": [
-              2.65625,
+              2.46875,
               0.0,
-              2.65625,
+              2.46875,
               1.0,
               72.0,
               0.0
@@ -13612,7 +13612,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 8,
-          "work_registers_used": 17
+          "work_registers_used": 18
         }
       }
     }
@@ -13676,6 +13676,68 @@
           "thread_occupancy": 100,
           "uniform_registers_used": 10,
           "work_registers_used": 24
+        }
+      }
+    }
+  },
+  "flutter/impeller/renderer/threadgroup_sizing_test.comp.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/renderer/threadgroup_sizing_test.comp.vkspv",
+      "has_uniform_computation": true,
+      "type": "Compute",
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": null,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.03125,
+              0.0,
+              0.03125,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.03125,
+              0.0,
+              0.03125,
+              0.0,
+              1.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.03125,
+              0.0,
+              0.03125,
+              0.0,
+              1.0,
+              0.0
+            ]
+          },
+          "shared_storage_used": 0,
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 2,
+          "work_registers_used": 4
         }
       }
     }

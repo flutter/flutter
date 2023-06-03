@@ -258,8 +258,10 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 
     // Special case for linear processing.
     if (height == 1) {
-      int64_t threadGroups =
-          std::max(width / maxTotalThreadsPerThreadgroup, 1LL);
+      int64_t threadGroups = std::max(
+          static_cast<int64_t>(
+              std::ceil(width * 1.0 / maxTotalThreadsPerThreadgroup * 1.0)),
+          1LL);
       [encoder dispatchThreadgroups:MTLSizeMake(threadGroups, 1, 1)
               threadsPerThreadgroup:MTLSizeMake(maxTotalThreadsPerThreadgroup,
                                                 1, 1)];
