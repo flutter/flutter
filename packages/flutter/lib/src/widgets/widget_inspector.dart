@@ -685,11 +685,11 @@ typedef InspectorSelectionChangedCallback = void Function();
 @visibleForTesting
 class InspectorReferenceData {
   /// Creates an instance of [InspectorReferenceData].
-  InspectorReferenceData(Object object) {
+  InspectorReferenceData(Object object, this.id) {
     // These types are not supported by [WeakReference].
     // See https://api.dart.dev/stable/3.0.2/dart-core/WeakReference-class.html
-    if (value is String || value is num || value is bool) {
-      _value = value;
+    if (object is String || object is num || object is bool) {
+      _value = object;
       return;
     }
 
@@ -699,6 +699,9 @@ class InspectorReferenceData {
   WeakReference<Object>? _ref;
 
   Object? _value;
+
+  /// The id of the object in the widget inspector records.
+  final String id;
 
   /// The number of times the object has been referenced.
   int count = 1;
@@ -711,6 +714,7 @@ class InspectorReferenceData {
     return _value;
   }
 }
+
 // Production implementation of [WidgetInspectorService].
 class _WidgetInspectorService = Object with WidgetInspectorService;
 
@@ -768,7 +772,7 @@ mixin WidgetInspectorService {
   /// alive.
   final Map<String, Set<InspectorReferenceData>> _groups = <String, Set<InspectorReferenceData>>{};
   final Map<String, InspectorReferenceData> _idToReferenceData = <String, InspectorReferenceData>{};
-  final Map<Object, String> _objectToId = Map<Object, String>.identity();
+  final WeakMap<Object, String> _objectToId = WeakMap<Object, String>();
   int _nextId = 0;
 
   /// The pubRootDirectories that are currently configured for the widget inspector.
@@ -1305,9 +1309,11 @@ mixin WidgetInspectorService {
     reference.count -= 1;
     assert(reference.count >= 0);
     if (reference.count == 0) {
-      final String? id = _objectToId.remove(reference.object);
-      assert(id != null);
-      _idToReferenceData.remove(id);
+      final Object? value = reference.value;
+      if (value != null) {
+          _objectToId.remove(value);
+      }
+      _idToReferenceData.remove(reference.id);
     }
   }
 
@@ -1323,10 +1329,11 @@ mixin WidgetInspectorService {
     String? id = _objectToId[object];
     InspectorReferenceData referenceData;
     if (id == null) {
+      // TODO(polina-c): comment here why we increase memory footprint by the prefix 'inspector-'.
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData = InspectorReferenceData(object);
+      referenceData = InspectorReferenceData(object, id);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -1360,7 +1367,7 @@ mixin WidgetInspectorService {
     if (data == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
-    return data.object;
+    return data.value;
   }
 
   /// Returns the object to introspect to determine the source location of an
@@ -3772,11 +3779,13 @@ class WeakMap<K, V> {
   }
 
   /// Removes the value for the given [key] from the map.
-  void remove(K key) {
+  V? remove(K key) {
     if (_isPrimitive(key)) {
-      _primitives.remove(key);
+      return _primitives.remove(key);
     } else {
-      _objects[key!] = null;
+      final V? result = _objects[key!]  as V?;
+      _objects[key] = null;
+      return result;
     }
   }
 
