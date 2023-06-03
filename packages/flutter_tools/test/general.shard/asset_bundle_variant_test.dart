@@ -44,7 +44,11 @@ void main() {
       );
 
       fs.file('.packages').createSync();
+    });
 
+    void createPubspec({
+      required List<String> assets,
+    }) {
       fs.file('pubspec.yaml').writeAsStringSync(
 '''
 name: test
@@ -53,15 +57,14 @@ dependencies:
     sdk: flutter
 flutter:
   assets:
-    - assets/
-    - assets/notAVariant/
-    - assets/folder/
-    - assets/normalFolder/
+${assets.map((String entry) => '    - $entry').join('\n')}
 '''
       );
-    });
+    }
 
     testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
+      createPubspec(assets: <String>['assets/', 'assets/notAVariant/']);
+
       const String image = 'assets/image.jpg';
       const String image2xVariant = 'assets/2x/image.jpg';
       const String imageNonVariant = 'assets/notAVariant/image.jpg';
@@ -97,6 +100,8 @@ flutter:
     });
 
     testWithoutContext('Asset directories have their subdirectories searched for asset variants', () async {
+      createPubspec(assets: <String>['assets', 'assets/folder']);
+
       const String topLevelImage = 'assets/image.jpg';
       const String secondLevelImage = 'assets/folder/secondLevel.jpg';
       const String secondLevel2xVariant = 'assets/folder/2x/secondLevel.jpg';
@@ -131,6 +136,8 @@ flutter:
     });
 
     testWithoutContext('Asset paths should never be URI-encoded', () async {
+      createPubspec(assets: <String>['assets/normalFolder']);
+
       const String image = 'assets/normalFolder/i have URI-reserved_characters.jpg';
       const String imageVariant = 'assets/normalFolder/3x/i have URI-reserved_characters.jpg';
 
@@ -159,6 +166,37 @@ flutter:
       final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
       expect(manifest, hasLength(1));
       expect(manifest[image], equals(<String>[image, imageVariant]));
+    });
+
+    testWithoutContext('Main assets are not included if the file does not exist', () async {
+      createPubspec(assets: <String>['assets/image.png']);
+
+      // We intentionally do not add a 'assets/image.png'.
+      const String imageVariant = 'assets/2x/image.png';
+      final List<String> assets = <String>[
+        imageVariant,
+      ];
+
+      for (final String asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
+
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
+      );
+
+      final Map<String, List<String>> manifest = await extractAssetManifestFromBundle(bundle);
+      expect(manifest, hasLength(1));
+      expect(manifest['assets/image.png'], equals(<String>[imageVariant]));
     });
   });
 

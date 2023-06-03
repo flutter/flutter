@@ -12,11 +12,18 @@ class TestAssetBundle extends AssetBundle {
       final Map<String, List<Object>> binManifestData = <String, List<Object>>{
         'assets/foo.png': <Object>[
           <String, Object>{
+            'asset': 'assets/foo.png',
+          },
+          <String, Object>{
             'asset': 'assets/2x/foo.png',
             'dpr': 2.0
-          }
+          },
         ],
-        'assets/bar.png': <Object>[],
+        'assets/bar.png': <Object>[
+          <String, Object>{
+            'asset': 'assets/bar.png',
+          },
+        ],
       };
 
       final ByteData data = const StandardMessageCodec().encodeMessage(binManifestData)!;
