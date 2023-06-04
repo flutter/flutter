@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -223,6 +224,7 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
+    required Config config,
     required Java? java,
     required AndroidSdk? androidSdk,
     required Platform platform,
@@ -232,7 +234,8 @@ class AndroidLicenseValidator extends DoctorValidator {
     required AndroidStudio? androidStudio,
     required Stdio stdio,
     required UserMessages userMessages,
-  }) : _java = java,
+  }) : _config = config,
+       _java = java,
        _androidSdk = androidSdk,
        _platform = platform,
        _fileSystem = fileSystem,
@@ -243,6 +246,7 @@ class AndroidLicenseValidator extends DoctorValidator {
        _userMessages = userMessages,
        super('Android license subvalidator');
 
+  final Config _config;
   final Java? _java;
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
@@ -288,6 +292,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<bool> _checkJavaVersionNoOutput() async {
     final String? javaBinary = Java.find(
+      config: _config,
       logger: _logger,
       androidStudio: _androidStudio,
       fileSystem: _fileSystem,

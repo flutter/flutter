@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -22,6 +23,7 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
+  late Config config;
   late FakeAndroidSdk sdk;
   late Logger logger;
   late MemoryFileSystem fileSystem;
@@ -29,6 +31,7 @@ void main() {
   late FakeStdio stdio;
 
   setUp(() {
+    config = Config.test();
     sdk = FakeAndroidSdk();
     fileSystem = MemoryFileSystem.test();
     fileSystem.directory('/home/me').createSync(recursive: true);
@@ -123,6 +126,7 @@ void main() {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -142,6 +146,7 @@ void main() {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -166,6 +171,7 @@ void main() {
       ], stdout: 'asdasassad',
     ));
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -195,6 +201,7 @@ All SDK package licenses accepted.
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -224,6 +231,7 @@ All SDK package licenses accepted.
       )
     );
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: java,
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -254,6 +262,7 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -284,6 +293,7 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -310,6 +320,7 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -329,6 +340,7 @@ Review licenses that have not been accepted (y/N)?
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -358,6 +370,7 @@ Review licenses that have not been accepted (y/N)?
     final BufferLogger logger = BufferLogger.test();
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -379,6 +392,7 @@ Review licenses that have not been accepted (y/N)?
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,
@@ -406,6 +420,7 @@ Review licenses that have not been accepted (y/N)?
     );
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      config: config,
       java: FakeJava(),
       androidSdk: sdk,
       fileSystem: fileSystem,

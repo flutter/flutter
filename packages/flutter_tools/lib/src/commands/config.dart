@@ -4,12 +4,14 @@
 
 import '../../src/android/android_sdk.dart';
 import '../../src/android/android_studio.dart';
+import '../android/java.dart';
 import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
@@ -20,6 +22,11 @@ class ConfigCommand extends FlutterCommand {
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory. If unset, flutter will search for valid installs at well-known locations.');
+    argParser.addOption('jdk-dir', help: 'The Java Development Kit (JDK) install/home directory. '
+      'If unset, flutter will search for one in the following order:\n'
+      '1) the JDK bundled with the latest installation of Android Studio,\n'
+      '2) the JDK found at the directory found in the JAVA_HOME environment variable, and\n'
+      "3) the directory containing the java binary found in the user's path.");
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
@@ -154,6 +161,10 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
     }
 
+    if (argResults?.wasParsed('jdk-dir') ?? false) {
+      _updateConfig('jdk-dir', stringArg('jdk-dir')!);
+    }
+
     if (argResults?.wasParsed('clear-ios-signing-cert') ?? false) {
       _updateConfig('ios-signing-cert', '');
     }
@@ -202,6 +213,10 @@ class ConfigCommand extends FlutterCommand {
     final AndroidSdk? androidSdk = globals.androidSdk;
     if (results['android-sdk'] == null && androidSdk != null) {
       results['android-sdk'] = androidSdk.directory.path;
+    }
+    final Java? java = globals.java;
+    if (results['jdk-dir'] == null && java != null) {
+      results['jdk-dir'] = java.javaHome;
     }
 
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));

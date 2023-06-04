@@ -352,6 +352,7 @@ void main() {
         final String expectedJavaBinaryPath = globals.fs.path.join(androidStudioBundledJdkHome, 'bin', 'java');
 
         final String? foundJavaBinaryPath = Java.find(
+          config: globals.config,
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
@@ -372,6 +373,7 @@ void main() {
         final String expectedJavaBinaryPath = globals.fs.path.join('java-home-path', 'bin', 'java');
 
         final String? foundJavaBinaryPath = Java.find(
+          config: globals.config,
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
@@ -392,6 +394,7 @@ void main() {
 
       testUsingContext('returns the java binary found on PATH if no other can be found', () {
         final String? foundJavaBinaryPath = Java.find(
+          config: globals.config,
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,
@@ -416,6 +419,7 @@ void main() {
 
       testUsingContext('returns null if no java binary could be found', () {
         final String? foundJavaBinaryPath = Java.find(
+          config: globals.config,
           logger: globals.logger,
           androidStudio: globals.androidStudio,
           fileSystem: globals.fs,

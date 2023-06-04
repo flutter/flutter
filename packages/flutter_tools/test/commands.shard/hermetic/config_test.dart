@@ -70,6 +70,9 @@ void main() {
 
         expect(jsonObject.containsKey('android-sdk'), true);
         expect(jsonObject['android-sdk'], isNotNull);
+
+        expect(jsonObject.containsKey('jdk-dir'), true);
+        expect(jsonObject['jdk-dir'], isNotNull);
       }
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{

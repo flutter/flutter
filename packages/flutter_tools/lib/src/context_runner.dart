@@ -99,6 +99,7 @@ Future<T> runInContext<T>(
         androidStudio: globals.androidStudio,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
+        config: globals.config,
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
@@ -255,6 +256,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       Java: () => Java.find(
+        config: globals.config,
         androidStudio: globals.androidStudio,
         logger: globals.logger,
         fileSystem: globals.fs,
