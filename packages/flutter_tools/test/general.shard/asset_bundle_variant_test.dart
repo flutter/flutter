@@ -102,32 +102,27 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       );
 
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
-
-      expect(jsonManifest, hasLength(2));
-      expect(jsonManifest[image], equals(<String>[image, image2xVariant]));
-      expect(jsonManifest[imageNonVariant], equals(<String>[imageNonVariant]));
-
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
 
-      expect(smcBinManifest, equals(
-          <String, List<Map<String, Object>>>{
-            image: <Map<String, Object>>[
-              <String, String>{
-                'asset': image,
-              },
-              <String, Object>{
-                'asset': image2xVariant,
-                'dpr': 2.0,
-              }
-            ],
-            imageNonVariant: <Map<String, String>>[
-              <String, String>{
-                'asset': imageNonVariant,
-              }
-            ],
+      final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
+        image: <Map<String, Object>>[
+          <String, String>{
+            'asset': image,
+          },
+          <String, Object>{
+            'asset': image2xVariant,
+            'dpr': 2.0,
           }
-        )
-      );
+        ],
+        imageNonVariant: <Map<String, String>>[
+          <String, String>{
+            'asset': imageNonVariant,
+          }
+        ],
+      };
+
+      expect(smcBinManifest, equals(expectedAssetManifest));
+      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
     });
 
     testWithoutContext('Asset directories have their subdirectories searched for asset variants', () async {
@@ -160,32 +155,31 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestJsonFromBundle(bundle);
-      expect(manifest, hasLength(2));
-      expect(manifest[topLevelImage], equals(<String>[topLevelImage]));
-      expect(manifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
+      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
+      expect(jsonManifest, hasLength(2));
+      expect(jsonManifest[topLevelImage], equals(<String>[topLevelImage]));
+      expect(jsonManifest[secondLevelImage], equals(<String>[secondLevelImage, secondLevel2xVariant]));
 
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
 
-      expect(smcBinManifest, equals(
-          <String, List<Map<String, Object>>>{
-            topLevelImage: <Map<String, Object>>[
-              <String, String>{
-                'asset': topLevelImage,
-              },
-            ],
-            secondLevelImage: <Map<String, Object>>[
-              <String, String>{
-                'asset': secondLevelImage,
-              },
-              <String, Object>{
-                'asset': secondLevel2xVariant,
-                'dpr': 2.0,
-              },
-            ],
-          }
-        )
-      );
+      final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
+        topLevelImage: <Map<String, Object>>[
+          <String, String>{
+            'asset': topLevelImage,
+          },
+        ],
+        secondLevelImage: <Map<String, Object>>[
+          <String, String>{
+            'asset': secondLevelImage,
+          },
+          <String, Object>{
+            'asset': secondLevel2xVariant,
+            'dpr': 2.0,
+          },
+        ],
+      };
+      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
     testWithoutContext('Asset paths should never be URI-encoded', () async {
@@ -216,26 +210,23 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestJsonFromBundle(bundle);
-      expect(manifest, hasLength(1));
-      expect(manifest[image], equals(<String>[image, imageVariant]));
-
+      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
 
-      expect(smcBinManifest, equals(
-          <String, List<Map<String, Object>>>{
-            image: <Map<String, Object>>[
-              <String, Object>{
-                'asset': image,
-              },
-              <String, Object>{
-                'asset': imageVariant,
-                'dpr': 3.0
-              },
-            ],
-          }
-        )
-      );
+      final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
+        image: <Map<String, Object>>[
+          <String, Object>{
+            'asset': image,
+          },
+          <String, Object>{
+            'asset': imageVariant,
+            'dpr': 3.0
+          },
+        ],
+      };
+
+      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
     testWithoutContext('Main assets are not included if the file does not exist', () async {
@@ -264,22 +255,19 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestJsonFromBundle(bundle);
-      expect(manifest, hasLength(1));
-      expect(manifest['assets/image.png'], equals(<String>[imageVariant]));
-
+      final Map<String, List<Map<String, Object>>> expectedManifest = <String, List<Map<String, Object>>>{
+        'assets/image.png': <Map<String, Object>>[
+          <String, Object>{
+            'asset': imageVariant,
+            'dpr': 2.0
+          },
+        ],
+      };
+      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
-      expect(smcBinManifest, equals(
-          <String, List<Map<String, Object>>>{
-            'assets/image.png': <Map<String, Object>>[
-              <String, Object>{
-                'asset': imageVariant,
-                'dpr': 2.0
-              },
-            ],
-          }
-        )
-      );
+
+      expect(jsonManifest, equals(assetManifestBinToJson(expectedManifest)));
+      expect(smcBinManifest, equals(expectedManifest));
     });
   });
 
@@ -337,36 +325,40 @@ flutter:
         flutterProject:  FlutterProject.fromDirectoryTest(fs.currentDirectory),
       );
 
-      final Map<String, List<String>> manifest = await extractAssetManifestJsonFromBundle(bundle);
+      final Map<String, List<Map<String, Object>>> expectedAssetManifest = <String, List<Map<String, Object>>>{
+        'assets/foo.jpg': <Map<String, Object>>[
+          <String, Object>{
+            'asset': 'assets/foo.jpg',
+          },
+          <String, Object>{
+            'asset': 'assets/2x/foo.jpg',
+            'dpr': 2.0,
+          },
+        ],
+        'assets/somewhereElse/bar.jpg': <Map<String, Object>>[
+          <String, Object>{
+            'asset': 'assets/somewhereElse/bar.jpg',
+          },
+          <String, Object>{
+            'asset': 'assets/somewhereElse/2x/bar.jpg',
+            'dpr': 2.0,
+          },
+        ],
+      };
 
-      expect(manifest, hasLength(2));
-      expect(manifest['assets/foo.jpg'], equals(<String>['assets/foo.jpg', 'assets/2x/foo.jpg']));
-      expect(manifest['assets/somewhereElse/bar.jpg'], equals(<String>['assets/somewhereElse/bar.jpg', 'assets/somewhereElse/2x/bar.jpg']));
-
+      final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
-      expect(smcBinManifest, equals(
-          <String, List<Map<String, Object>>>{
-            'assets/foo.jpg': <Map<String, Object>>[
-              <String, Object>{
-                'asset': 'assets/foo.jpg',
-              },
-              <String, Object>{
-                'asset': 'assets/2x/foo.jpg',
-                'dpr': 2.0,
-              },
-            ],
-            'assets/somewhereElse/bar.jpg': <Map<String, Object>>[
-              <String, Object>{
-                'asset': 'assets/somewhereElse/bar.jpg',
-              },
-              <String, Object>{
-                'asset': 'assets/somewhereElse/2x/bar.jpg',
-                'dpr': 2.0,
-              },
-            ],
-          }
-        )
-      );
+
+      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(smcBinManifest, equals(expectedAssetManifest));
     });
   });
+}
+
+Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
+  List<Object> convertList(List<Object> variants) => variants
+    .map((Object variant) => (variant as Map<Object?, Object?>)['asset']!)
+    .toList();
+
+  return manifest.map((Object key, Object value) => MapEntry<Object, Object>(key, convertList(value as List<Object>)));
 }
