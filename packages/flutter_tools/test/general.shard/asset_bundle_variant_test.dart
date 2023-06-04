@@ -122,7 +122,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       };
 
       expect(smcBinManifest, equals(expectedAssetManifest));
-      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
     });
 
     testWithoutContext('Asset directories have their subdirectories searched for asset variants', () async {
@@ -178,7 +178,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
           },
         ],
       };
-      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
@@ -225,7 +225,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
         ],
       };
 
-      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
 
@@ -266,7 +266,7 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
 
-      expect(jsonManifest, equals(assetManifestBinToJson(expectedManifest)));
+      expect(jsonManifest, equals(_assetManifestBinToJson(expectedManifest)));
       expect(smcBinManifest, equals(expectedManifest));
     });
   });
@@ -349,13 +349,13 @@ flutter:
       final Map<String, List<String>> jsonManifest = await extractAssetManifestJsonFromBundle(bundle);
       final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(bundle);
 
-      expect(jsonManifest, equals(assetManifestBinToJson(expectedAssetManifest)));
+      expect(jsonManifest, equals(_assetManifestBinToJson(expectedAssetManifest)));
       expect(smcBinManifest, equals(expectedAssetManifest));
     });
   });
 }
 
-Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
+Map<Object, Object> _assetManifestBinToJson(Map<Object, Object> manifest) {
   List<Object> convertList(List<Object> variants) => variants
     .map((Object variant) => (variant as Map<Object?, Object?>)['asset']!)
     .toList();

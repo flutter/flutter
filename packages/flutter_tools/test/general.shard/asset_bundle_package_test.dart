@@ -16,7 +16,6 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import 'asset_bundle_variant_test.dart';
 
 void main() {
   String fixPath(String path) {
@@ -64,6 +63,14 @@ $assetsSection
       ..writeAsStringSync(packages);
   }
 
+  Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
+    List<Object> convertList(List<Object> variants) => variants
+      .map((Object variant) => (variant as Map<Object?, Object?>)['asset']!)
+      .toList();
+
+    return manifest.map((Object key, Object value) => MapEntry<Object, Object>(key, convertList(value as List<Object>)));
+  }
+
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
@@ -85,24 +92,23 @@ $assetsSection
       }
     }
 
-    final Map<Object?, Object?> assetManifest =
-      const StandardMessageCodec().decodeMessage(
-        ByteData.sublistView(
-          Uint8List.fromList(
-            await bundle.entries['AssetManifest.smcbin']!.contentsAsBytes()
-          )
+    final Map<Object?, Object?> assetManifest = const StandardMessageCodec().decodeMessage(
+      ByteData.sublistView(
+        Uint8List.fromList(
+          await bundle.entries['AssetManifest.smcbin']!.contentsAsBytes()
         )
-      ) as Map<Object?, Object?>;
+      )
+    ) as Map<Object?, Object?>;
 
-      expect(
-        json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
-        assetManifestBinToJson(expectedAssetManifest),
-      );
-      expect(
-        assetManifest,
-        expectedAssetManifest
-      );
-    }
+    expect(
+      json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
+      assetManifestBinToJson(expectedAssetManifest),
+    );
+    expect(
+      assetManifest,
+      expectedAssetManifest
+    );
+  }
 
   void writeAssets(String path, List<String> assets) {
     for (final String asset in assets) {
