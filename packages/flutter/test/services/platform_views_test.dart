@@ -344,6 +344,23 @@ void main() {
       await viewController.setOffset(const Offset(10, 20));
       expect(viewsController.offsets, equals(<int, Offset>{}));
     });
+
+    test('initAndroidView does not enable useOpaqueHCMode by default', () async {
+      viewsController.registerViewType('webview');
+      final AndroidViewController viewControllerDefault = PlatformViewsService.initAndroidView(
+        id: 7,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      );
+      final AndroidViewController viewController = PlatformViewsService.initAndroidView(
+        id: 8,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+        useOpaqueHCMode: true,
+      );
+      expect(viewControllerDefault is OpaqueHCAndroidViewController, isFalse);
+      expect(viewController is OpaqueHCAndroidViewController, isTrue);
+    });
   });
 
   group('iOS', () {

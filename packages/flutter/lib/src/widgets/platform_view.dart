@@ -459,7 +459,7 @@ class _AndroidViewState extends State<AndroidView> {
   TextDirection? _layoutDirection;
   bool _initialized = false;
   FocusNode? _focusNode;
-  late bool useOpaqueHCMode;
+  late bool _useOpaqueHCMode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
@@ -467,7 +467,7 @@ class _AndroidViewState extends State<AndroidView> {
   @override
   void initState() {
     super.initState();
-    useOpaqueHCMode = widget.useOpaqueHCMode ?? AndroidView.defaultUseOpaqueHCMode;
+    _useOpaqueHCMode = widget.useOpaqueHCMode ?? AndroidView.defaultUseOpaqueHCMode;
   }
 
   @override
@@ -480,10 +480,10 @@ class _AndroidViewState extends State<AndroidView> {
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
         clipBehavior: widget.clipBehavior,
-        useOpaqueHCMode: useOpaqueHCMode,
+        useOpaqueHCMode: _useOpaqueHCMode,
       ),
     );
-    if (useOpaqueHCMode) {
+    if (_useOpaqueHCMode) {
       return CustomPaint(
         painter: _ClearBackgroundPainter(),
         child: androidView,
@@ -559,7 +559,7 @@ class _AndroidViewState extends State<AndroidView> {
       onFocus: () {
         _focusNode!.requestFocus();
       },
-      useOpaqueHCMode: useOpaqueHCMode,
+      useOpaqueHCMode: _useOpaqueHCMode,
     );
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated!);
