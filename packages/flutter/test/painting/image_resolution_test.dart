@@ -43,8 +43,6 @@ void main() {
       final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
         <String, List<Map<Object?, Object?>>>{};
 
-      assetBundleMap[mainAssetPath] = <Map<Object?, Object?>>[];
-
       final AssetImage assetImage = AssetImage(
         mainAssetPath,
         bundle: TestAssetBundle(assetBundleMap),
