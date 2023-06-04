@@ -1228,6 +1228,10 @@ void main() {
       await tester.pump();
       expect(viewsController.offsets.values, equals(<Offset>[const Offset(10, 20)]));
     });
+
+    testWidgets('AndroidView does not enable useOpaqueHCMode by default', (WidgetTester tester) async {
+      expect(AndroidView.defaultUseOpaqueHCMode, isFalse);
+    });
   });
 
   group('AndroidViewSurface', () {

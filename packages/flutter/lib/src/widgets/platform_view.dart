@@ -78,6 +78,7 @@ class AndroidView extends StatefulWidget {
     this.creationParams,
     this.creationParamsCodec,
     this.clipBehavior = Clip.hardEdge,
+    this.useOpaqueHCMode,
   }) : assert(creationParams == null || creationParamsCodec != null);
 
   /// The unique identifier for Android view type to be embedded by this widget.
@@ -190,6 +191,30 @@ class AndroidView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
+
+  /// Enable Opaque hybrid composition Mode
+  ///
+  /// Unlike hybrid composition, this mode only renders the Flutter UI onto a single view.
+  /// The platform view will be placed below the FlutterView after it is created.
+  /// In order for the platform view to be visible, the content below it needs to be clipped.
+  /// Therefore, this mode does not support transparent platform views.
+  /// It is mandatory to enable BackgroundMode.transparent in MainActivity.kt.
+  ///
+  ///     override fun getBackgroundMode(): BackgroundMode {
+  ///          return BackgroundMode.transparent
+  ///     }
+  ///
+  /// The performance between having platform views and not having platform views will be almost the same.
+  /// Although this mode provides good performance, it comes with several limitations such as
+  /// not supporting platform views with transparent background, the synchronization between the platform view
+  /// and Flutter UI is not guaranteed...
+  /// This mode should only be used with platform views that have a fixed position and no alpha value,
+  /// such as map, video player, camera...
+  /// Currently, only support Android.
+  final bool? useOpaqueHCMode;
+
+  /// Default value of useOpaqueHCMode
+  static bool defaultUseOpaqueHCMode = false;
 
   @override
   State<AndroidView> createState() => _AndroidViewState();
@@ -434,13 +459,20 @@ class _AndroidViewState extends State<AndroidView> {
   TextDirection? _layoutDirection;
   bool _initialized = false;
   FocusNode? _focusNode;
+  late bool _useOpaqueHCMode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
+  void initState() {
+    super.initState();
+    _useOpaqueHCMode = widget.useOpaqueHCMode ?? AndroidView.defaultUseOpaqueHCMode;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Focus(
+    final Widget androidView = Focus(
       focusNode: _focusNode,
       onFocusChange: _onFocusChange,
       child: _AndroidPlatformView(
@@ -448,8 +480,16 @@ class _AndroidViewState extends State<AndroidView> {
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
         clipBehavior: widget.clipBehavior,
+        useOpaqueHCMode: _useOpaqueHCMode,
       ),
     );
+    if (_useOpaqueHCMode) {
+      return CustomPaint(
+        painter: _ClearBackgroundPainter(),
+        child: androidView,
+      );
+    }
+    return androidView;
   }
 
   void _initializeOnce() {
@@ -519,6 +559,7 @@ class _AndroidViewState extends State<AndroidView> {
       onFocus: () {
         _focusNode!.requestFocus();
       },
+      useOpaqueHCMode: _useOpaqueHCMode,
     );
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated!);
@@ -557,6 +598,26 @@ class _AndroidViewState extends State<AndroidView> {
         return;
       }
     });
+  }
+}
+
+/// In Opaque hybrid composition mode, this CustomPainter is utilized to clear
+/// the content below the platform view
+class _ClearBackgroundPainter extends CustomPainter {
+
+  final Paint _paint = Paint()
+    ..color = const Color(0x00000000)
+    ..blendMode = BlendMode.clear
+    ..style = PaintingStyle.fill;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), _paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }
 
@@ -686,6 +747,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
     required this.controller,
     required this.hitTestBehavior,
     required this.gestureRecognizers,
+    this.useOpaqueHCMode,
     this.clipBehavior = Clip.hardEdge,
   });
 
@@ -693,6 +755,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   final PlatformViewHitTestBehavior hitTestBehavior;
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
   final Clip clipBehavior;
+  final bool? useOpaqueHCMode;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
@@ -701,6 +764,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,
         clipBehavior: clipBehavior,
+        useOpaqueHCMode: useOpaqueHCMode,
       );
 
   @override

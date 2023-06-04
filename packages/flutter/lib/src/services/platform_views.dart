@@ -124,18 +124,30 @@ class PlatformViewsService {
     required String viewType,
     required TextDirection layoutDirection,
     dynamic creationParams,
+    bool useOpaqueHCMode = false,
     MessageCodec<dynamic>? creationParamsCodec,
     VoidCallback? onFocus,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
-    final TextureAndroidViewController controller = TextureAndroidViewController._(
-      viewId: id,
-      viewType: viewType,
-      layoutDirection: layoutDirection,
-      creationParams: creationParams,
-      creationParamsCodec: creationParamsCodec,
-    );
+    final AndroidViewController controller;
+    if (useOpaqueHCMode) {
+      controller = OpaqueHCAndroidViewController._(
+        viewId: id,
+        viewType: viewType,
+        layoutDirection: layoutDirection,
+        creationParams: creationParams,
+        creationParamsCodec: creationParamsCodec,
+      );
+    } else {
+      controller = TextureAndroidViewController._(
+        viewId: id,
+        viewType: viewType,
+        layoutDirection: layoutDirection,
+        creationParams: creationParams,
+        creationParamsCodec: creationParamsCodec,
+      );
+    }
 
     _instance._focusCallbacks[id] = onFocus ?? () {};
     return controller;
@@ -1134,6 +1146,63 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 }
 
+/// Controls an Android view created by Opaque hybrid composition mode.
+class OpaqueHCAndroidViewController extends AndroidViewController {
+  OpaqueHCAndroidViewController._({
+    required super.viewId,
+    required super.viewType,
+    required super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+  }) : super._();
+
+  final _OpaqueHCAndroidViewControllerInternals _internals = _OpaqueHCAndroidViewControllerInternals();
+
+  @override
+  bool get _createRequiresSize => true;
+
+  @override
+  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
+    assert(!size.isEmpty, 'trying to create $OpaqueHCAndroidViewController without setting a valid size.');
+
+    await _AndroidViewControllerInternals.sendCreateMessage(
+      viewId: viewId,
+      viewType: _viewType,
+      hybrid: false,
+      layoutDirection: _layoutDirection,
+      creationParams: _creationParams,
+      size: size,
+      position: position,
+      opaqueHybridComposition: true,
+    );
+  }
+
+  @override
+  int? get textureId {
+    return _internals.textureId;
+  }
+
+  @override
+  bool get requiresViewComposition {
+    return _internals.requiresViewComposition;
+  }
+
+  @override
+  Future<void> _sendDisposeMessage() {
+    return _internals.sendDisposeMessage(viewId: viewId);
+  }
+
+  @override
+  Future<Size> _sendResizeMessage(Size size) {
+    return _internals.setSize(size, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> setOffset(Offset off) {
+    return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+}
+
 // The base class for an implementation of AndroidViewController.
 //
 // Subclasses should correspond to different rendering modes for platform
@@ -1150,6 +1219,7 @@ abstract class _AndroidViewControllerInternals {
       required String viewType,
       required TextDirection layoutDirection,
       required bool hybrid,
+      bool opaqueHybridComposition = false,
       bool hybridFallback = false,
       _CreationParams? creationParams,
       Size? size,
@@ -1159,6 +1229,7 @@ abstract class _AndroidViewControllerInternals {
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
       if (hybrid) 'hybrid': hybrid,
+      if (opaqueHybridComposition) 'opaqueHybridComposition': opaqueHybridComposition,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
       if (hybridFallback) 'hybridFallback': hybridFallback,
@@ -1269,6 +1340,79 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
         .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': false,
+    });
+  }
+}
+
+class _OpaqueHCAndroidViewControllerInternals extends _AndroidViewControllerInternals {
+  _OpaqueHCAndroidViewControllerInternals();
+
+  /// The current offset of the platform view.
+  Offset _offset = Offset.zero;
+
+  @override
+  int? textureId;
+
+  @override
+  bool get requiresViewComposition => false;
+
+  @override
+  Future<Size> setSize(
+      Size size, {
+        required int viewId,
+        required _AndroidViewState viewState,
+      }) async {
+    assert(viewState != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
+    assert(!size.isEmpty);
+
+    final Map<Object?, Object?>? meta = await SystemChannels.platform_views.invokeMapMethod<Object?, Object?>(
+      'resize',
+      <String, dynamic>{
+        'id': viewId,
+        'width': size.width,
+        'height': size.height,
+      },
+    );
+    assert(meta != null);
+    assert(meta!.containsKey('width'));
+    assert(meta!.containsKey('height'));
+    return Size(meta!['width']! as double, meta['height']! as double);
+  }
+
+  @override
+  Future<void> setOffset(
+      Offset offset, {
+        required int viewId,
+        required _AndroidViewState viewState,
+      }) async {
+    if (offset == _offset) {
+      return;
+    }
+
+    // Don't set the offset unless the Android view has been created.
+    // The implementation of this method channel throws if the Android view for this viewId
+    // isn't addressable.
+    if (viewState != _AndroidViewState.created) {
+      return;
+    }
+
+    _offset = offset;
+
+    await SystemChannels.platform_views.invokeMethod<void>(
+      'offset',
+      <String, dynamic>{
+        'id': viewId,
+        'top': offset.dy,
+        'left': offset.dx,
+      },
+    );
+  }
+
+  @override
+  Future<void> sendDisposeMessage({required int viewId}) {
+    return SystemChannels
+        .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
+      'id': viewId,
     });
   }
 }

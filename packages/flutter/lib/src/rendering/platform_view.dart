@@ -79,9 +79,11 @@ class RenderAndroidView extends PlatformViewRenderBox {
     required AndroidViewController viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+    bool? useOpaqueHCMode,
     Clip clipBehavior = Clip.hardEdge,
   }) : _viewController = viewController,
        _clipBehavior = clipBehavior,
+       _useOpaqueHCMode = useOpaqueHCMode ?? false,
        super(controller: viewController, hitTestBehavior: hitTestBehavior, gestureRecognizers: gestureRecognizers) {
     _viewController.pointTransformer = (Offset offset) => globalToLocal(offset);
     updateGestureRecognizers(gestureRecognizers);
@@ -95,6 +97,8 @@ class RenderAndroidView extends PlatformViewRenderBox {
   Size? _currentTextureSize;
 
   bool _isDisposed = false;
+
+  final bool _useOpaqueHCMode;
 
   /// The Android view controller for the Android view associated with this render object.
   @override
@@ -206,7 +210,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_viewController.textureId == null || _currentTextureSize == null) {
+    if (_viewController.textureId == null || _currentTextureSize == null || _useOpaqueHCMode) {
       return;
     }
 
