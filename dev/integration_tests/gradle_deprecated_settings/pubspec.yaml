@@ -7,7 +7,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: 0.10.5+1
+  camera: 0.10.5+2
   # This is explicit to allow pinning for https://github.com/flutter/flutter/issues/122039
   flutter_plugin_android_lifecycle: 2.0.8
 
@@ -39,4 +39,4 @@ dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: e179
+# PUBSPEC CHECKSUM: 987a

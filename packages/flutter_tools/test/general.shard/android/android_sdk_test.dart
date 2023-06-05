@@ -384,7 +384,7 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.empty(),
         Platform: () => FakePlatform(environment: <String, String>{
-          AndroidSdk.javaHomeEnvironmentVariable: 'java-home-path',
+          Java.javaHomeEnvironmentVariable: 'java-home-path',
         }),
         Config: () => Config,
         AndroidStudio: () => FakeAndroidStudioWithoutJdk(),
