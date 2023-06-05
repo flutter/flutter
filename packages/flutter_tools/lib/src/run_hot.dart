@@ -246,7 +246,6 @@ class HotRunner extends ResidentRunner {
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
         flutterDevices: flutterDevices,
-        isStartPaused: debuggingOptions.startPaused,
       ));
     }
 
