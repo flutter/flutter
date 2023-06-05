@@ -395,10 +395,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  SemanticsActionCallback? get onSemanticsAction => _platformDispatcher.onSemanticsAction;
+  SemanticsActionEventCallback? get onSemanticsActionEvent => _platformDispatcher.onSemanticsActionEvent;
   @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    _platformDispatcher.onSemanticsAction = callback;
+  set onSemanticsActionEvent(SemanticsActionEventCallback? callback) {
+    _platformDispatcher.onSemanticsActionEvent = callback;
   }
 
   @override
@@ -678,7 +678,8 @@ class TestFlutterView implements FlutterView {
   final TestDisplay _display;
 
   @override
-  Object get viewId => _view.viewId;
+  // TODO(goderbauer): Clean ignore and cast up after https://github.com/flutter/engine/pull/42493 lands.
+  int get viewId => _view.viewId as int; // ignore: unnecessary_cast
 
   /// The device pixel ratio to use for this test.
   ///
@@ -1880,23 +1881,6 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
-  @Deprecated(
     'Use WidgetTester.platformDispatcher.accessibilityFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
@@ -2105,7 +2089,8 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  Object get viewId => _view.viewId;
+  // TODO(goderbauer): Clean ignore and cast up after https://github.com/flutter/engine/pull/42493 lands.
+  int get viewId => _view.viewId as int; // ignore: unnecessary_cast
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
