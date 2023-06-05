@@ -129,6 +129,7 @@ enum BottomNavigationBarLandscapeLayout {
 /// [NavigationBar], see the properties in the [NavigationBar]
 /// constructor for more details.
 ///
+/// ## Using [BottomNavigationBar]
 ///
 /// {@tool dartpad}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
@@ -139,6 +140,13 @@ enum BottomNavigationBarLandscapeLayout {
 /// and displays a corresponding message in the center of the [Scaffold].
 ///
 /// ** See code in examples/api/lib/material/bottom_navigation_bar/bottom_navigation_bar.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how you would migrate the above [BottomNavigationBar]
+/// to the new [NavigationBar].
+///
+/// ** See code in examples/api/lib/material/navigation_bar/navigation_bar.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
