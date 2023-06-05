@@ -263,7 +263,7 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
   }) {
-    final bool canCopy = selectionGeometry.hasSelection;
+    final bool canCopy = selectionGeometry.hasSelection && selectionGeometry.startSelectionPoint?.localPosition != selectionGeometry.endSelectionPoint?.localPosition;
     final bool canSelectAll = selectionGeometry.hasContent;
 
     // Determine which buttons will appear so that the order and total number is
@@ -492,9 +492,29 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleRightClickDown(TapDownDetails details) {
     lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
-    _selectWordAt(offset: details.globalPosition);
-    _showHandles();
-    _showToolbar(location: details.globalPosition);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        _selectStartTo(offset: details.globalPosition);
+        _selectEndTo(offset: details.globalPosition);
+        _showHandles();
+        _showToolbar(location: details.globalPosition);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        _selectWordAt(offset: details.globalPosition);
+        _showHandles();
+        _showToolbar(location: details.globalPosition);
+      case TargetPlatform.linux:
+        if (_selectionOverlay?.toolbarIsVisible ?? false) {
+          hideToolbar();
+          return;
+        }
+        _selectStartTo(offset: details.globalPosition);
+        _selectEndTo(offset: details.globalPosition);
+        _showHandles();
+        _showToolbar(location: details.globalPosition);
+    }
     _updateSelectedContentIfNeeded();
   }
 
