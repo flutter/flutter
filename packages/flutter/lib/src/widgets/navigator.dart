@@ -323,8 +323,14 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
-  /// Called after a route is popped.
-  void onPop() {}
+  /// {@template flutter.widgets.navigator.onPopped}
+  /// Called after a route pop was handled.
+  ///
+  /// Even when the pop is canceled, for example by a [CanPopScope] widget, this
+  /// will still be called. The `success` parameter indicates whether or not the
+  /// back navigation actually happened successfully.
+  /// {@endtemplate}
+  void onPopped(bool success) {}
 
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
@@ -3040,7 +3046,7 @@ class _RouteEntry extends RouteTransitionRecord {
     assert(isPresent);
     pendingResult = result;
     currentState = _RouteLifecycle.pop;
-    route.onPop();
+    route.onPopped(true);
   }
 
   bool _reportRemovalToObserver = true;
@@ -5114,11 +5120,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         pop(result);
         return true;
       case RoutePopDisposition.doNotPop:
-        // TODO(justinmc): Should I pass a boolean indicating whether or not the
-        // pop was successful?
-        // TODO(justinmc): Yeah probably should change this name since it sounds
-        // like a pop happened, not that a pop was attempted.
-        lastEntry.route.onPop();
+        lastEntry.route.onPopped(false);
         return true;
     }
   }

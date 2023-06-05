@@ -6,10 +6,16 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
+/// A callback type for informing that a navigation pop has happened.
+///
+/// Accepts a success boolean indicating whether or not back navigation
+/// succeded.
+typedef OnPoppedCallback = void Function(bool success);
+
 // TODO(justinmc): Change name to match popEnabled  more?
 /// Manages system back gestures.
 ///
-/// [popEnabled] can be used to disable system back gestures, while [onPop]
+/// [popEnabled] can be used to disable system back gestures, while [onPopped]
 /// reports when they occur.
 ///
 /// {@tool dartpad}
@@ -25,7 +31,7 @@ import 'routes.dart';
 ///    gestures in the case of nested [Navigator]s.
 ///  * [ModalRoute.registerCanPopScope] and [ModalRoute.unregisterCanPopScope],
 ///    which this widget uses to integrate with Flutter's navigation system.
-///  * [Form.popEnabled] and [Form.onPop], which can be used to handle system
+///  * [Form.popEnabled] and [Form.onPopped], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
 class CanPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
@@ -36,7 +42,7 @@ class CanPopScope extends StatefulWidget {
     super.key,
     required this.child,
     this.popEnabled = true,
-    this.onPop,
+    this.onPopped,
   });
 
   /// The widget below this widget in the tree.
@@ -44,17 +50,12 @@ class CanPopScope extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  // TODO(justinmc): Should this be called onPopped?
-  // TODO(justinmc): Document exactly when this is called. Currently after pop.
-  /// {@template flutter.widgets.CanPopScope.onPop}
-  /// Called immediately after a route has been popped from the current
-  /// navigation stack.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.navigator.onPopped}
   ///
   /// See also:
   ///
-  ///  * [Route.onPop], which is similar.
-  final VoidCallback? onPop;
+  ///  * [Route.onPopped], which is similar.
+  final OnPoppedCallback? onPopped;
 
   /// {@template flutter.widgets.CanPopScope.popEnabled}
   /// When false, blocks the current route from being popped.

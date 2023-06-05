@@ -1545,11 +1545,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void onPop() {
+  void onPopped(bool success) {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
     for (final CanPopScope widget in _canPopScopes) {
-      widget.onPop?.call();
+      widget.onPopped?.call(success);
     }
   }
 
@@ -1661,7 +1661,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Registers the existence of a CanPopScope widget in the route.
   ///
   /// CanPopScope widgets registered in this way will have their
-  /// [CanPopScope.onPop] callbacks called when a route is popped, and they will
+  /// [CanPopScope.onPopped] callbacks called when a route is popped, and they will
   /// also be able to block pop operations with [CanPopScope.popEnabled].
   ///
   /// See also:

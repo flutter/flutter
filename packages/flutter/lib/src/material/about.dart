@@ -1178,8 +1178,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     return CanPopScope(
       // Push pop check into nested navigator.
       popEnabled: rootPopEnabled,
-      onPop: () async {
-        if (rootPopEnabled) {
+      onPopped: (bool success) async {
+        if (success) {
           return;
         }
         setState(() {
@@ -1250,7 +1250,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
     return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
       return CanPopScope(
-        onPop: () {
+        onPopped: (bool success) {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
         },

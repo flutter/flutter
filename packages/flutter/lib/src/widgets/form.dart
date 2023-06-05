@@ -54,16 +54,16 @@ class Form extends StatefulWidget {
     super.key,
     required this.child,
     this.popEnabled,
-    this.onPop,
+    this.onPopped,
     @Deprecated(
-      'Use popEnabled and/or onPop instead. '
+      'Use popEnabled and/or onPopped instead. '
       'This feature was deprecated after v3.9.0-0.0.pre.',
     )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert((onPop == null && popEnabled == null) || onWillPop == null, 'onWillPop is deprecated; use popEnabled and/or onPop.');
+       assert((onPopped == null && popEnabled == null) || onWillPop == null, 'onWillPop is deprecated; use popEnabled and/or onPopped.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -159,12 +159,12 @@ class Form extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onPop], which also comes from [CanPopScope] and is often used in
+  ///  * [onPopped], which also comes from [CanPopScope] and is often used in
   ///    conjunction with this parameter.
   ///  * [CanPopScope.popEnabled], which is what [Form] delegates to internally.
   final bool? popEnabled;
 
-  /// {@macro flutter.widgets.CanPopScope.onPop}
+  /// {@macro flutter.widgets.navigator.onPopped}
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to use this parameter to show a confirmation
@@ -177,8 +177,8 @@ class Form extends StatefulWidget {
   ///
   ///  * [popEnabled], which also comes from [CanPopScope] and is often used in
   ///    conjunction with this parameter.
-  ///  * [CanPopScope.onPop], which is what [Form] delegates to internally.
-  final VoidCallback? onPop;
+  ///  * [CanPopScope.onPopped], which is what [Form] delegates to internally.
+  final OnPoppedCallback? onPopped;
 
   /// Called when one of the form fields changes.
   ///
@@ -247,7 +247,7 @@ class FormState extends State<Form> {
     if (widget.popEnabled != null) {
       return CanPopScope(
         popEnabled: widget.popEnabled!,
-        onPop: widget.onPop,
+        onPopped: widget.onPopped,
         child: _FormScope(
           formState: this,
           generation: _generation,
