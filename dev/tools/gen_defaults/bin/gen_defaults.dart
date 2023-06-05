@@ -1,10 +1,6 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-// Generate component theme data defaults based on the Material
-// Design Token database. These tokens were extracted into a
-// JSON file from the internal Google database.
 //
 // ## Usage
 //
@@ -60,8 +56,8 @@ import 'package:gen_defaults/time_picker_template.dart';
 import 'package:gen_defaults/token_logger.dart';
 import 'package:gen_defaults/typography_template.dart';
 
-Map<String, dynamic> _readTokenFile(String fileName) {
-  return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
+Map<String, dynamic> _readTokenFile(File file) {
+  return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
 const String materialLib = 'packages/flutter/lib/src/material';
@@ -79,17 +75,29 @@ Future<void> main(List<String> args) async {
   final ArgResults argResults = parser.parse(args);
   final bool verbose = argResults['verbose'] as bool;
 
-  // Generate a map with all the tokens to simplify the template interface.
+  // Map of version number to list of data files that use that version.
+  final Map<String, List<String>> versionMap = <String, List<String>>{};
+  // Map of all tokens to their values.
   final Map<String, dynamic> tokens = <String, dynamic>{};
-  for (final String tokenFile in tokenFiles) {
-    tokens.addAll(_readTokenFile(tokenFile));
+
+  // Initialize.
+  for (final FileSystemEntity tokenFile in Directory(dataDir).listSync()) {
+    final Map<String, dynamic> tokenFileTokens = _readTokenFile(tokenFile as File);
+    final String version = tokenFileTokens['version'] as String;
+    tokenFileTokens.remove('version');
+    if (versionMap[version] == null) {
+      versionMap[version] = List<String>.empty(growable: true);
+    }
+    versionMap[version]!.add(tokenFile.uri.pathSegments.last);
+
+    tokens.addAll(tokenFileTokens);
   }
-
-  // Special case the light and dark color schemes.
-  tokens['colorsLight'] = _readTokenFile('color_light.json');
-  tokens['colorsDark'] = _readTokenFile('color_dark.json');
   tokenLogger.init(allTokens: tokens, versionMap: versionMap);
+  // Handle light/dark color tokens separately because they share identical token names.
+  final Map<String, dynamic> colorLightTokens = _readTokenFile(File('$dataDir/color_light.json'));
+  final Map<String, dynamic> colorDarkTokens = _readTokenFile(File('$dataDir/color_dark.json'));
 
+  // Generate tokens files.
   ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
   AppBarTemplate('AppBar', '$materialLib/app_bar.dart', tokens).updateFile();
@@ -105,7 +113,7 @@ Future<void> main(List<String> args) async {
   ButtonTemplate('md.comp.text-button', 'TextButton', '$materialLib/text_button.dart', tokens).updateFile();
   CardTemplate('Card', '$materialLib/card.dart', tokens).updateFile();
   CheckboxTemplate('Checkbox', '$materialLib/checkbox.dart', tokens).updateFile();
-  ColorSchemeTemplate('ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
+  ColorSchemeTemplate(colorLightTokens, colorDarkTokens, 'ColorScheme', '$materialLib/theme_data.dart', tokens).updateFile();
   DatePickerTemplate('DatePicker', '$materialLib/date_picker_theme.dart', tokens).updateFile();
   DialogFullscreenTemplate('DialogFullscreen', '$materialLib/dialog.dart', tokens).updateFile();
   DialogTemplate('Dialog', '$materialLib/dialog.dart', tokens).updateFile();
