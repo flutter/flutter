@@ -162,14 +162,18 @@ void main() {
         await tester.pumpAndSettle();
 
         // In the tests below the number of RepaintBoundary widgets depends on:
-        // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
         // ModalRoute - builds 2
         // GlowingOverscrollIndicator - builds 2
-        // RawScrollbar - builds 2
+        // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
+
+        void expectModalRoute() {
+          expect(ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))), isA<MaterialPageRoute<void>>());
+        }
 
         switch (defaultTargetPlatform) {
           case TargetPlatform.fuchsia:
-            // Includes a scrollbar and an overscroll glow
+            expectModalRoute();
+            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
             expect(find.byType(RepaintBoundary), findsNWidgets(7));
 
           case TargetPlatform.android:
@@ -177,6 +181,7 @@ void main() {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(3));
         }
 
@@ -192,7 +197,8 @@ void main() {
 
         switch (defaultTargetPlatform) {
           case TargetPlatform.fuchsia:
-            // Includes a scrollbar and and overscroll glow
+            expectModalRoute();
+            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
             expect(find.byType(RepaintBoundary), findsNWidgets(6));
 
           case TargetPlatform.android:
@@ -200,6 +206,7 @@ void main() {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(2));
         }
       }, variant: TargetPlatformVariant.all());
