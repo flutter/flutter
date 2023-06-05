@@ -28,9 +28,6 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
@@ -180,8 +177,9 @@ bool FilterContents::Render(const ContentContext& renderer,
 std::optional<Rect> FilterContents::GetLocalCoverage(
     const Entity& local_entity) const {
   auto coverage = GetFilterCoverage(inputs_, local_entity, effect_transform_);
-  if (GetCoverageHint().has_value() && coverage.has_value()) {
-    coverage = coverage->Intersection(*GetCoverageHint());
+  auto coverage_hint = GetCoverageHint();
+  if (coverage_hint.has_value() && coverage.has_value()) {
+    coverage = coverage->Intersection(coverage_hint.value());
   }
 
   return coverage;
@@ -272,5 +270,3 @@ Matrix FilterContents::GetTransform(const Matrix& parent_transform) const {
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)
