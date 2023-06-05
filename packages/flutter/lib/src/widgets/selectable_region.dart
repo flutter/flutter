@@ -1908,6 +1908,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (lastSelectionResult == SelectionResult.next) {
           continue;
         }
+        if (index == 0 && lastSelectionResult == SelectionResult.previous) {
+          return SelectionResult.previous;
+        }
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.
@@ -1916,7 +1919,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
-        return index == 0 ? lastSelectionResult : SelectionResult.end;
+        return SelectionResult.end;
       }
     }
     return SelectionResult.next;
