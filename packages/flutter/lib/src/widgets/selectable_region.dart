@@ -490,6 +490,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleRightClickDown(TapDownDetails details) {
+    final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
+    final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
     lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
     switch (defaultTargetPlatform) {
@@ -501,12 +503,19 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         _showHandles();
         _showToolbar(location: details.globalPosition);
       case TargetPlatform.iOS:
+        _selectWordAt(offset: details.globalPosition);
+        _showHandles();
+        _showToolbar(location: details.globalPosition);
       case TargetPlatform.macOS:
+        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
+          hideToolbar();
+          return;
+        }
         _selectWordAt(offset: details.globalPosition);
         _showHandles();
         _showToolbar(location: details.globalPosition);
       case TargetPlatform.linux:
-        if (_selectionOverlay?.toolbarIsVisible ?? false) {
+        if (toolbarIsVisible) {
           hideToolbar();
           return;
         }
