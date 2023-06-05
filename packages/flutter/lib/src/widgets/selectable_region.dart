@@ -1916,7 +1916,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
             .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
-        return lastSelectionResult;
+        return index == 0 ? lastSelectionResult : SelectionResult.end;
       }
     }
     if (lastSelectionResult == SelectionResult.next) {
