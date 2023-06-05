@@ -146,15 +146,15 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           ),
         );
 
+        final _FakeAndroidStudioWithJdk androidStudio = _FakeAndroidStudioWithJdk();
         final FakePlatform platformWithJavaHome = FakePlatform(
           environment: <String, String>{
             'JAVA_HOME': '/old/jdk'
           },
         );
-
-        final Java? java = Java.find(
+        Java? java = Java.find(
           config: config,
-          androidStudio: _FakeAndroidStudioWithJdk(),
+          androidStudio: androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platformWithJavaHome,
@@ -164,6 +164,22 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         expect(java, isNotNull);
         expect(java!.javaHome, configuredJdkPath);
         expect(java.binaryPath, fs.path.join(configuredJdkPath, 'bin', 'java'));
+
+        config.removeValue('jdk-dir');
+
+        java = Java.find(
+          config: config,
+          androidStudio: androidStudio,
+          logger: logger,
+          fileSystem: fs,
+          platform: platformWithJavaHome,
+          processManager: processManager,
+        );
+
+        expect(java, isNotNull);
+        assert(androidStudio.javaPath != configuredJdkPath);
+        expect(java!.javaHome, androidStudio.javaPath);
+        expect(java.binaryPath, fs.path.join(androidStudio.javaPath!, 'bin', 'java'));
       });
     });
 
