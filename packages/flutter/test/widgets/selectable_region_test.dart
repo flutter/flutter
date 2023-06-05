@@ -560,212 +560,230 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('right-click mouse can select word at position on Apple platforms', (WidgetTester tester) async {
-      Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-      final UniqueKey toolbarKey = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: FocusNode(),
-            selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonTypes = selectableRegionState.contextMenuButtonItems
-                .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                .toSet();
-              return SizedBox.shrink(key: toolbarKey);
-            },
-            child: const Center(
-              child: Text('How are you'),
+    testWidgets(
+      'right-click mouse can select word at position on Apple platforms',
+      (WidgetTester tester) async {
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Center(
+                child: Text('How are you'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(buttonTypes.isEmpty, true);
-      expect(find.byKey(toolbarKey), findsNothing);
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
 
-      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
-      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes, contains(ContextMenuButtonType.copy));
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      await gesture.down(textOffsetToPosition(paragraph, 6));
-      await tester.pump();
-      expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+        await gesture.down(textOffsetToPosition(paragraph, 6));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes, contains(ContextMenuButtonType.copy));
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      await gesture.down(textOffsetToPosition(paragraph, 9));
-      await tester.pump();
-      expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 11));
+        await gesture.down(textOffsetToPosition(paragraph, 9));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 11));
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes, contains(ContextMenuButtonType.copy));
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      // Clear selection.
-      await tester.tapAt(textOffsetToPosition(paragraph, 1));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
-      expect(find.byKey(toolbarKey), findsNothing);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+      skip: kIsWeb, // Web handles its own context menu.
+    );
 
-    testWidgets('right-click mouse shows the context menu at position on Android, Fucshia, and Windows', (WidgetTester tester) async {
-      Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-      final UniqueKey toolbarKey = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: FocusNode(),
-            selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonTypes = selectableRegionState.contextMenuButtonItems
-                .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                .toSet();
-              return SizedBox.shrink(key: toolbarKey);
-            },
-            child: const Center(
-              child: Text('How are you'),
+    testWidgets(
+      'right-click mouse shows the context menu at position on Android, Fucshia, and Windows',
+      (WidgetTester tester) async {
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Center(
+                child: Text('How are you'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(buttonTypes.isEmpty, true);
-      expect(find.byKey(toolbarKey), findsNothing);
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
 
-      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
-      // Selection is collapsed so none is reported.
-      expect(paragraph.selections.isEmpty, true);
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        // Selection is collapsed so none is reported.
+        expect(paragraph.selections.isEmpty, true);
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes.length, 1);
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        expect(buttonTypes.length, 1);
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      await gesture.down(textOffsetToPosition(paragraph, 6));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
+        await gesture.down(textOffsetToPosition(paragraph, 6));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes.length, 1);
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        expect(buttonTypes.length, 1);
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      await gesture.down(textOffsetToPosition(paragraph, 9));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
+        await gesture.down(textOffsetToPosition(paragraph, 9));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes.length, 1);
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        expect(buttonTypes.length, 1);
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      // Clear selection.
-      await tester.tapAt(textOffsetToPosition(paragraph, 1));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
-      expect(find.byKey(toolbarKey), findsNothing);
-    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }),
+      skip: kIsWeb, // Web handles its own context menu.
+    );
 
-    testWidgets('right-click mouse toggles the context menu on Linux', (WidgetTester tester) async {
-      Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-      final UniqueKey toolbarKey = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: FocusNode(),
-            selectionControls: materialTextSelectionHandleControls,
-            contextMenuBuilder: (
-              BuildContext context,
-              SelectableRegionState selectableRegionState,
-            ) {
-              buttonTypes = selectableRegionState.contextMenuButtonItems
-                .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                .toSet();
-              return SizedBox.shrink(key: toolbarKey);
-            },
-            child: const Center(
-              child: Text('How are you'),
+    testWidgets(
+      'right-click mouse toggles the context menu on Linux',
+      (WidgetTester tester) async {
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Center(
+                child: Text('How are you'),
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(buttonTypes.isEmpty, true);
-      expect(find.byKey(toolbarKey), findsNothing);
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
 
-      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
-      addTearDown(gesture.removePointer);
-      await tester.pump();
-      // Selection is collapsed so none is reported.
-      expect(paragraph.selections.isEmpty, true);
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        // Selection is collapsed so none is reported.
+        expect(paragraph.selections.isEmpty, true);
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes.length, 1);
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        // Context menu toggled on.
+        expect(buttonTypes.length, 1);
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      await gesture.down(textOffsetToPosition(paragraph, 6));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
+        await gesture.down(textOffsetToPosition(paragraph, 6));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(find.byKey(toolbarKey), findsNothing);
+        // Context menu toggled off.
+        expect(find.byKey(toolbarKey), findsNothing);
 
-      await gesture.down(textOffsetToPosition(paragraph, 9));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
+        await gesture.down(textOffsetToPosition(paragraph, 9));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
 
-      await gesture.up();
-      await tester.pump();
+        await gesture.up();
+        await tester.pump();
 
-      expect(buttonTypes.length, 1);
-      expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
-      expect(find.byKey(toolbarKey), findsOneWidget);
+        // Context menu toggled on.
+        expect(buttonTypes.length, 1);
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
 
-      // Clear selection.
-      await tester.tapAt(textOffsetToPosition(paragraph, 1));
-      await tester.pump();
-      expect(paragraph.selections.isEmpty, true);
-      expect(find.byKey(toolbarKey), findsNothing);
-    }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.linux),
+      skip: kIsWeb, // Web handles its own context menu.
+    );
 
     testWidgets('can copy a selection made with the mouse', (WidgetTester tester) async {
       await tester.pumpWidget(
