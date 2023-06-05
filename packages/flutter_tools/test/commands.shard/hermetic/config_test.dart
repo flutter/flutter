@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -18,9 +19,11 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  late Java fakeJava;
   late FakeAndroidStudio fakeAndroidStudio;
   late FakeAndroidSdk fakeAndroidSdk;
   late FakeFlutterVersion fakeFlutterVersion;
@@ -31,6 +34,7 @@ void main() {
   });
 
   setUp(() {
+    fakeJava = FakeJava();
     fakeAndroidStudio = FakeAndroidStudio();
     fakeAndroidSdk = FakeAndroidSdk();
     fakeFlutterVersion = FakeFlutterVersion();
@@ -65,19 +69,15 @@ void main() {
       final dynamic jsonObject = json.decode(testLogger.statusText);
       expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
       if (jsonObject is Map<String, dynamic>) {
-        expect(jsonObject.containsKey('android-studio-dir'), true);
-        expect(jsonObject['android-studio-dir'], isNotNull);
-
-        expect(jsonObject.containsKey('android-sdk'), true);
-        expect(jsonObject['android-sdk'], isNotNull);
-
-        expect(jsonObject.containsKey('jdk-dir'), true);
-        expect(jsonObject['jdk-dir'], isNotNull);
+        expect(jsonObject['android-studio-dir'], fakeAndroidStudio.directory);
+        expect(jsonObject['android-sdk'], fakeAndroidSdk.directory.path);
+        expect(jsonObject['jdk-dir'], fakeJava.javaHome);
       }
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => fakeAndroidStudio,
       AndroidSdk: () => fakeAndroidSdk,
+      Java: () => fakeJava,
       Usage: () => testUsage,
     });
 
