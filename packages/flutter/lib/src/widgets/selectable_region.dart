@@ -1919,10 +1919,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         return index == 0 ? lastSelectionResult : SelectionResult.end;
       }
     }
-    if (lastSelectionResult == SelectionResult.next) {
-      return SelectionResult.next;
-    }
-    return SelectionResult.none;
+    return SelectionResult.next;
   }
 
   /// Removes the selection of all selectables this delegate manages.
