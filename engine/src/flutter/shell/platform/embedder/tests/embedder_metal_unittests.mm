@@ -21,6 +21,7 @@
 #include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
