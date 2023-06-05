@@ -11,12 +11,13 @@
 // Run this program from the root of the git repository.
 //
 // ```
-// dart dev/tools/gen_defaults/bin/gen_defaults.dart
+// dart dev/tools/gen_defaults/bin/gen_defaults.dart [-v]
 // ```
 
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:gen_defaults/action_chip_template.dart';
 import 'package:gen_defaults/app_bar_template.dart';
 import 'package:gen_defaults/badge_template.dart';
@@ -56,6 +57,7 @@ import 'package:gen_defaults/switch_template.dart';
 import 'package:gen_defaults/tabs_template.dart';
 import 'package:gen_defaults/text_field_template.dart';
 import 'package:gen_defaults/time_picker_template.dart';
+import 'package:gen_defaults/token_logger.dart';
 import 'package:gen_defaults/typography_template.dart';
 
 Map<String, dynamic> _readTokenFile(String fileName) {
@@ -86,6 +88,7 @@ Future<void> main(List<String> args) async {
   // Special case the light and dark color schemes.
   tokens['colorsLight'] = _readTokenFile('color_light.json');
   tokens['colorsDark'] = _readTokenFile('color_dark.json');
+  tokenLogger.init(allTokens: tokens, versionMap: versionMap);
 
   ChipTemplate('Chip', '$materialLib/chip.dart', tokens).updateFile();
   ActionChipTemplate('ActionChip', '$materialLib/action_chip.dart', tokens).updateFile();
@@ -137,4 +140,12 @@ Future<void> main(List<String> args) async {
   TextFieldTemplate('TextField', '$materialLib/text_field.dart', tokens).updateFile();
   TabsTemplate('Tabs', '$materialLib/tabs.dart', tokens).updateFile();
   TypographyTemplate('Typography', '$materialLib/typography.dart', tokens).updateFile();
+
+  tokenLogger.printVersionUsage(verbose: verbose);
+  tokenLogger.printTokensUsage(verbose: verbose);
+  if (!verbose) {
+    print('\nTo see detailed version and token usage, run with --verbose (-v).');
+  }
+
+  tokenLogger.dumpToFile('dev/tools/gen_defaults/generated/used_tokens.csv');
 }
