@@ -631,7 +631,7 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
-      skip: kIsWeb, // Web handles its own context menu.
+      skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
     testWidgets(
@@ -706,7 +706,7 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }),
-      skip: kIsWeb, // Web handles its own context menu.
+      skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
     testWidgets(
@@ -782,7 +782,7 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
-      skip: kIsWeb, // Web handles its own context menu.
+      skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
     testWidgets('can copy a selection made with the mouse', (WidgetTester tester) async {
