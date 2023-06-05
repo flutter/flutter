@@ -245,12 +245,18 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             constraints.maxHeight > height) {
             height = constraints.maxHeight;
           }
+          final double topPadding = _getCollapsePadding(t, settings);
           children.add(Positioned(
-            top: _getCollapsePadding(t, settings),
+            top: topPadding,
             left: 0.0,
             right: 0.0,
             height: height,
             child: Opacity(
+              // We need the child widget to repaint, however both the opacity
+              // and potentially `widget.background` can be constant which won't
+              // lead to repainting.
+              // see: https://github.com/flutter/flutter/issues/127836
+              key: ValueKey<double>(topPadding),
               // IOS is relying on this semantics node to correctly traverse
               // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
