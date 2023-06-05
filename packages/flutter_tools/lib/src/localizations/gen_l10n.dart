@@ -3,26 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 import 'message_parser.dart';
 
 /// Run the localizations generation script with the configuration [options].
-LocalizationsGenerator generateLocalizations({
+Future<LocalizationsGenerator> generateLocalizations({
   required Directory projectDir,
   Directory? dependenciesDir,
   required LocalizationOptions options,
   required Logger logger,
   required FileSystem fileSystem,
-}) {
+  required Artifacts artifacts,
+  required ProcessManager processManager,
+}) async {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
   final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
@@ -71,6 +75,37 @@ LocalizationsGenerator generateLocalizations({
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
+
+  final List<String> outputFileList = generator.outputFileList;
+  final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
+
+  // All other post processing.
+  if (options.format) {
+    final List<String> formatFileList = outputFileList.toList();
+    if (untranslatedMessagesFile != null) {
+      // Don't format the messages file using `dart format`.
+      formatFileList.remove(untranslatedMessagesFile.absolute.path);
+    }
+    if (formatFileList.isEmpty) {
+      return generator;
+    }
+    final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
+    final ProcessResult result = await processManager.run(command);
+    if (result.exitCode != 0) {
+      throw ProcessException(
+        dartBinary,
+        command,
+        '''
+`dart format` failed with exit code ${result.exitCode}
+
+stdout:\n${result.stdout}\n
+stderr:\n${result.stderr}''',
+        result.exitCode,
+      );
+    }
+  }
+
   return generator;
 }
 

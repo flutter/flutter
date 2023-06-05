@@ -708,6 +708,29 @@ void main() {
     expect(helperText.style?.color, focusedColor);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/127092.
+  testWidgets('The text is still centered when SearchBar text field is smaller than 48', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: const Center(
+          child: Material(
+            child: SearchBar(
+              constraints: BoxConstraints.tightFor(height: 35.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'input text');
+    final Finder textContent = find.text('input text');
+    final double textCenterY = tester.getCenter(textContent).dy;
+    final Finder searchBar = find.byType(SearchBar);
+    final double searchBarCenterY = tester.getCenter(searchBar).dy;
+    expect(textCenterY, searchBarCenterY);
+  });
+
   testWidgets('The search view defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -1670,7 +1693,7 @@ void main() {
   });
 
   testWidgets('Search view route does not throw exception during pop animation', (WidgetTester tester) async {
-    // regression test for https://github.com/flutter/flutter/issues/126590.
+    // Regression test for https://github.com/flutter/flutter/issues/126590.
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -1747,7 +1770,7 @@ void main() {
   });
 
 
-  // regression tests for https://github.com/flutter/flutter/issues/126623
+  // Regression tests for https://github.com/flutter/flutter/issues/126623
   group('Overall InputDecorationTheme does not impact SearchBar and SearchView', () {
 
     const InputDecorationTheme inputDecorationTheme = InputDecorationTheme(
@@ -1789,7 +1812,7 @@ void main() {
       expect(decoration?.fillColor, null);
       expect(decoration?.focusColor, null);
       expect(decoration?.hoverColor, null);
-      expect(decoration?.contentPadding, const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+      expect(decoration?.contentPadding, EdgeInsets.zero);
       expect(decoration?.hintStyle?.color, theme.colorScheme.onSurfaceVariant);
     }
 
