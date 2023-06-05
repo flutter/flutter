@@ -388,12 +388,12 @@ class SemanticsActionLogger {
     // fired.
     final Zone testZone = Zone.current;
 
-    ui.window.onSemanticsAction =
-        (int id, ui.SemanticsAction action, ByteData? args) {
-      _idLogController.add(id);
-      _actionLogController.add(action);
+    ui.PlatformDispatcher.instance.onSemanticsActionEvent =
+        (ui.SemanticsActionEvent event) {
+      _idLogController.add(event.nodeId);
+      _actionLogController.add(event.type);
       testZone.run(() {
-        expect(args, null);
+        expect(event.arguments, null);
       });
     };
   }

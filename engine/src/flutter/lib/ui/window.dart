@@ -756,21 +756,6 @@ class SingletonFlutterWindow extends FlutterView {
     platformDispatcher.onFrameDataChanged = callback;
   }
 
-  /// A callback that is invoked whenever the user requests an action to be
-  /// performed.
-  ///
-  /// {@macro dart.ui.window.accessorForwardWarning}
-  ///
-  /// This callback is used when the user expresses the action they wish to
-  /// perform based on the semantics supplied by [updateSemantics].
-  ///
-  /// The framework invokes this callback in the same zone in which the
-  /// callback was set.
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
   /// Additional accessibility features that may be enabled by the platform.
   AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
 

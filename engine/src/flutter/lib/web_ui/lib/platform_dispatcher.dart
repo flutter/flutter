@@ -9,7 +9,6 @@ typedef FrameCallback = void Function(Duration duration);
 typedef TimingsCallback = void Function(List<FrameTiming> timings);
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 typedef KeyDataCallback = bool Function(KeyData data);
-typedef SemanticsActionCallback = void Function(int nodeId, SemanticsAction action, ByteData? args);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 typedef PlatformMessageCallback = void Function(
@@ -134,9 +133,6 @@ abstract class PlatformDispatcher {
 
   VoidCallback? get onSemanticsEnabledChanged;
   set onSemanticsEnabledChanged(VoidCallback? callback);
-
-  SemanticsActionCallback? get onSemanticsAction;
-  set onSemanticsAction(SemanticsActionCallback? callback);
 
   SemanticsActionEventCallback? get onSemanticsActionEvent;
   set onSemanticsActionEvent(SemanticsActionEventCallback? callback);

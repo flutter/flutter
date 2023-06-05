@@ -699,10 +699,11 @@ abstract class SemanticsUpdateBuilder {
   ///
   /// The `actions` are a bit field of [SemanticsAction]s that can be undertaken
   /// by this node. If the user wishes to undertake one of these actions on this
-  /// node, the [PlatformDispatcher.onSemanticsAction] will be called with `id`
-  /// and one of the possible [SemanticsAction]s. Because the semantics tree is
-  /// maintained asynchronously, the [PlatformDispatcher.onSemanticsAction]
-  /// callback might be called with an action that is no longer possible.
+  /// node, the [PlatformDispatcher.onSemanticsActionEvent] will be called with
+  /// a [SemanticsActionEvent] specifying the action to be performed. Because
+  /// the semantics tree is maintained asynchronously, the
+  /// [PlatformDispatcher.onSemanticsActionEvent] callback might be called with
+  /// an action that is no longer possible.
   ///
   /// The `label` is a string that describes this node. The `value` property
   /// describes the current value of the node as a string. The `increasedValue`

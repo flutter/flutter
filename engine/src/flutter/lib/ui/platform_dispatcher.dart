@@ -32,10 +32,6 @@ typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 /// framework and should not be propagated further.
 typedef KeyDataCallback = bool Function(KeyData data);
 
-/// Signature for [PlatformDispatcher.onSemanticsAction].
-// TODO(goderbauer): Deprecate/remove this when the framework has migrated to SemanticsActionEventCallback.
-typedef SemanticsActionCallback = void Function(int nodeId, SemanticsAction action, ByteData? args);
-
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
@@ -1159,23 +1155,6 @@ class PlatformDispatcher {
   ///
   /// The framework invokes this callback in the same zone in which the
   /// callback was set.
-  // TODO(goderbauer): Deprecate/remove this when the framework has migrated to onSemanticsActionEvent.
-  SemanticsActionCallback? get onSemanticsAction => _onSemanticsAction;
-  SemanticsActionCallback? _onSemanticsAction;
-  Zone _onSemanticsActionZone = Zone.root;
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    _onSemanticsAction = callback;
-    _onSemanticsActionZone = Zone.current;
-  }
-
-  /// A callback that is invoked whenever the user requests an action to be
-  /// performed on a semantics node.
-  ///
-  /// This callback is used when the user expresses the action they wish to
-  /// perform based on the semantics node supplied by updateSemantics.
-  ///
-  /// The framework invokes this callback in the same zone in which the
-  /// callback was set.
   SemanticsActionEventCallback? get onSemanticsActionEvent => _onSemanticsActionEvent;
   SemanticsActionEventCallback? _onSemanticsActionEvent;
   Zone _onSemanticsActionEventZone = Zone.root;
@@ -1209,13 +1188,6 @@ class PlatformDispatcher {
 
   // Called from the engine, via hooks.dart
   void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
-    _invoke3<int, SemanticsAction, ByteData?>(
-      onSemanticsAction,
-      _onSemanticsActionZone,
-      nodeId,
-      SemanticsAction.fromIndex(action)!,
-      args,
-    );
     _invoke1<SemanticsActionEvent>(
       onSemanticsActionEvent,
       _onSemanticsActionEventZone,
