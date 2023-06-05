@@ -228,7 +228,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
       device,
       MTLShaderLibraryFromFileData(device, shader_libraries_data, label),
-      worker_task_runner, std::move(is_gpu_disabled_sync_switch)));
+      std::move(worker_task_runner), std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;
