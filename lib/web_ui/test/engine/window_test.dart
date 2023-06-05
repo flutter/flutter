@@ -211,17 +211,17 @@ Future<void> testMain() async {
     EnginePlatformDispatcher.instance.invokeOnSemanticsEnabledChanged();
   });
 
-  test('onSemanticsAction preserves the zone', () {
+  test('onSemanticsActionEvent preserves the zone', () {
     final Zone innerZone = Zone.current.fork();
 
     innerZone.runGuarded(() {
-      void callback(int _, ui.SemanticsAction __, ByteData? ___) {
+      void callback(ui.SemanticsActionEvent _) {
         expect(Zone.current, innerZone);
       }
-      window.onSemanticsAction = callback;
+      ui.PlatformDispatcher.instance.onSemanticsActionEvent = callback;
 
       // Test that the getter returns the exact same callback, e.g. it doesn't wrap it.
-      expect(window.onSemanticsAction, same(callback));
+      expect(ui.PlatformDispatcher.instance.onSemanticsActionEvent, same(callback));
     });
 
     EnginePlatformDispatcher.instance.invokeOnSemanticsAction(0, ui.SemanticsAction.tap, null);

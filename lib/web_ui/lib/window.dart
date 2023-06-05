@@ -114,11 +114,6 @@ abstract class SingletonFlutterWindow extends FlutterView {
     platformDispatcher.onSemanticsEnabledChanged = callback;
   }
 
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
   FrameData get frameData => const FrameData._();
 
   VoidCallback? get onFrameDataChanged => null;
