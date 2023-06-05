@@ -27,6 +27,7 @@ import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
+// TODO(justinmc): Find a permanent place for this.
 class NavigationNotification extends Notification {
   const NavigationNotification({
     required this.canPop,

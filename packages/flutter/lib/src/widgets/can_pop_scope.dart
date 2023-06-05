@@ -7,7 +7,6 @@ import 'navigator.dart';
 import 'routes.dart';
 
 // TODO(justinmc): Change name to match popEnabled  more?
-// TODO(justinmc): Document that this can't be set at the time of onPopCallback. Too late.
 /// Manages system back gestures.
 ///
 /// [popEnabled] can be used to disable system back gestures, while [onPop]
@@ -22,9 +21,12 @@ import 'routes.dart';
 ///
 /// See also:
 ///
+///  * [NavigatorPopHandler], which is a less verbose way to handle system back
+///    gestures in the case of nested [Navigator]s.
 ///  * [ModalRoute.registerCanPopScope] and [ModalRoute.unregisterCanPopScope],
 ///    which this widget uses to integrate with Flutter's navigation system.
-///  * [Form.popEnabled] and [Form.onPop], which use this widget internally.
+///  * [Form.popEnabled] and [Form.onPop], which can be used to handle system
+///    back gestures in the case of a form with unsaved data.
 class CanPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
@@ -48,6 +50,10 @@ class CanPopScope extends StatefulWidget {
   /// Called immediately after a route has been popped from the current
   /// navigation stack.
   /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [Route.onPop], which is similar.
   final VoidCallback? onPop;
 
   /// {@template flutter.widgets.CanPopScope.popEnabled}

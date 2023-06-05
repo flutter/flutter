@@ -1633,6 +1633,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    that [willPop] checks.
   @Deprecated(
+    // TODO(justinmc): onPopCallback doesn't exist.
     'Use addScopedOnPopCallback or CanPopScope instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
