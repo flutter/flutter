@@ -292,7 +292,10 @@ void main() {
 
 class FakeAndroidStudio extends Fake implements AndroidStudio, Comparable<AndroidStudio> {
   @override
-  String get directory => 'path/to/android/stdio';
+  String get directory => 'path/to/android/studio';
+
+  @override
+  String? get javaPath => 'path/to/android/studio/jbr';
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
