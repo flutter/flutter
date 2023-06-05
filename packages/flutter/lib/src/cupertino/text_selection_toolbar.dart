@@ -935,8 +935,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         // accommodate the back button.
       }
 
-      // Update the controller values so that we can check in the horizontal
-      // drag gesture callback when it's possible to navigate.
+      // Update previous/next page values so that we can check in the horizontal
+      // drag gesture callback if it's possible to navigate.
       hasNextPage = page != currentPage;
       hasPreviousPage = page > 0;
     } else {

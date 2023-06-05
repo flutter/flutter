@@ -85,10 +85,6 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
   /// {@endtemplate}
   final String? text;
 
-  /// Whether the button is enabled or disabled. Buttons are disabled by default. To
-  /// enable a button, set its [onPressed] property to a non-null value.
-  bool get enabled => onPressed != null;
-
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
   static String getButtonLabel(BuildContext context, ContextMenuButtonItem buttonItem) {
@@ -141,8 +137,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
         : const Color(0x00000000),
       borderRadius: null,
       disabledColor: const Color(0x00000000),
-      // The button itself is not the one that calls onPressed.
-      onPressed: widget.enabled ? widget.onPressed : null,
+      onPressed: widget.onPressed,
       padding: _kToolbarButtonPadding,
       // There's no foreground fade on iOS toolbar anymore, it just darkens the
       // background.
