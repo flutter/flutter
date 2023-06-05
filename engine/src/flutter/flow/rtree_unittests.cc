@@ -123,15 +123,15 @@ TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase1) {
   rect_paint.setStyle(SkPaint::Style::kFill_Style);
 
   // Given the A, and B rects, which intersect with the query rect,
-  // the result list contains the rect resulting from the union of A and B.
+  // the result list contains the three rectangles covering same area.
   //
-  // +-----+
-  // |  A  |
-  // |   +-----+
-  // |   |  C  |
-  // |   +-----+
-  // |     |
-  // +-----+
+  // +-----+        +-----+
+  // |  A  |        |  A  |
+  // |   +-----+    +---------+
+  // |   |     |    |   B     |
+  // +---|  B  |    +---+-----+
+  //     |     |        |  C  |
+  //     +-----+        +-----+
 
   // A
   recording_canvas->drawRect(SkRect::MakeLTRB(100, 100, 150, 150), rect_paint);
@@ -142,8 +142,10 @@ TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase1) {
 
   auto hits = rtree_factory.getInstance()->searchNonOverlappingDrawnRects(
       SkRect::MakeXYWH(120, 120, 126, 126));
-  ASSERT_EQ(1UL, hits.size());
-  ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(100, 100, 175, 175));
+  ASSERT_EQ(3UL, hits.size());
+  ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(100, 100, 150, 125));
+  ASSERT_EQ(*std::next(hits.begin(), 1), SkRect::MakeLTRB(100, 125, 175, 150));
+  ASSERT_EQ(*std::next(hits.begin(), 2), SkRect::MakeLTRB(125, 150, 175, 175));
 }
 
 TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase2) {
@@ -198,7 +200,7 @@ TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase3) {
   rect_paint.setStyle(SkPaint::Style::kFill_Style);
 
   // Given the A, B, C and D rects that intersect with the query rect,
-  // the result list contains a single rect, which is the union of
+  // the result list contains two rects - D and remainder of C
   // these four rects.
   //
   // +------------------------------+
@@ -227,8 +229,9 @@ TEST(RTree, searchNonOverlappingDrawnRectsJoinRectsWhenIntersectedCase3) {
 
   auto hits = rtree_factory.getInstance()->searchNonOverlappingDrawnRects(
       SkRect::MakeLTRB(30, 30, 550, 270));
-  ASSERT_EQ(1UL, hits.size());
-  ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(50, 50, 620, 300));
+  ASSERT_EQ(2UL, hits.size());
+  ASSERT_EQ(*hits.begin(), SkRect::MakeLTRB(50, 50, 620, 250));
+  ASSERT_EQ(*std::next(hits.begin(), 1), SkRect::MakeLTRB(500, 250, 600, 300));
 }
 
 }  // namespace testing
