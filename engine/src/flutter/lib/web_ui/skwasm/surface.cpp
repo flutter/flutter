@@ -4,6 +4,8 @@
 
 #include "surface.h"
 
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
+
 using namespace Skwasm;
 
 Surface::Surface(const char* canvasID) : _canvasID(canvasID) {
