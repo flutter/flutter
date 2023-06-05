@@ -1,4 +1,4 @@
-Signature: 3b36fd88c606e949dd1b43a46b81debe
+Signature: 1ebab5291898f573f535a7890fa2514b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -389,6 +389,7 @@ FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_image_remove.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
 FILE: ../../../third_party/skia/relnotes/sksamplingoptions_implicit.md
+FILE: ../../../third_party/skia/relnotes/skshaders_namespace.md
 FILE: ../../../third_party/skia/relnotes/sksurface_methods.md
 FILE: ../../../third_party/skia/relnotes/sktablecolorfilter.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
@@ -1131,7 +1132,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/src/codec/SkColorTable.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkColorPalette.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCubicClipper.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCubicClipper.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkEdgeClipper.cpp + ../../../third_party/skia/LICENSE
@@ -1139,7 +1140,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkEdgeClipper.h + ../../../third_part
 ORIGIN: ../../../third_party/skia/src/core/SkQuadClipper.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkQuadClipper.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/codec/SkColorTable.cpp
+FILE: ../../../third_party/skia/src/codec/SkColorPalette.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicClipper.h
 FILE: ../../../third_party/skia/src/core/SkEdgeClipper.cpp
@@ -1879,7 +1880,7 @@ ORIGIN: ../../../third_party/skia/include/private/SkWeakRefCnt.h + ../../../thir
 ORIGIN: ../../../third_party/skia/include/utils/SkNullCanvas.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkMathPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkTInternalLList.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/codec/SkColorTable.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/codec/SkColorPalette.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkAnnotation.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkChecksum.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFontDescriptor.cpp + ../../../third_party/skia/LICENSE
@@ -2038,7 +2039,7 @@ FILE: ../../../third_party/skia/include/private/SkWeakRefCnt.h
 FILE: ../../../third_party/skia/include/utils/SkNullCanvas.h
 FILE: ../../../third_party/skia/src/base/SkMathPriv.h
 FILE: ../../../third_party/skia/src/base/SkTInternalLList.h
-FILE: ../../../third_party/skia/src/codec/SkColorTable.h
+FILE: ../../../third_party/skia/src/codec/SkColorPalette.h
 FILE: ../../../third_party/skia/src/core/SkAnnotation.cpp
 FILE: ../../../third_party/skia/src/core/SkChecksum.h
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.cpp
