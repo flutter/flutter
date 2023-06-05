@@ -41,9 +41,6 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/tonic/common/log.h"
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace flutter {
 
 constexpr char kSkiaChannel[] = "flutter/skia";
@@ -1556,6 +1553,8 @@ fml::TimePoint Shell::GetLatestFrameTargetTime() const {
   std::scoped_lock time_recorder_lock(time_recorder_mutex_);
   FML_CHECK(latest_frame_target_time_.has_value())
       << "GetLatestFrameTargetTime called before OnAnimatorBeginFrame";
+  // Covered by FML_CHECK().
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   return latest_frame_target_time_.value();
 }
 
@@ -2147,5 +2146,3 @@ Shell::GetConcurrentWorkerTaskRunner() const {
 }
 
 }  // namespace flutter
-
-// NOLINTEND(bugprone-unchecked-optional-access)
