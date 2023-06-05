@@ -46,10 +46,8 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// To respond to other notifications, replace the [didChangeAppLifecycleState]
 /// method above with other methods from this class.
 abstract mixin class WidgetsBindingObserver {
-  // TODO(justinmc): Maybe state that this won't be called on API 33+ of Android?
-  /// Called when the system tells the app to pop the current route.
-  /// For example, on Android, this is called when the user presses
-  /// the back button.
+  /// Called when the system tells the app to pop the current route, such as
+  /// after a system back button press or back gesture.
   ///
   /// Observers are notified in registration order until one returns
   /// true. If none return true, the application quits.
@@ -62,10 +60,8 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
-  @Deprecated(
-    'Use popEnabled instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
-  )
+  ///
+  /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new route onto the
@@ -657,9 +653,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
-  // TODO(justinmc): This and didPopRoute probably need to be refactored. They
-  // give the impression that they can prevent system pops, but that's not true
-  // anymore. They won't be called at all for a root system pop.
   /// Called when the system pops the current route.
   ///
   /// This first notifies the binding observers (using
@@ -674,22 +667,33 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  ///
+  /// {@template flutter.widgets.AndroidPredictiveBack}
+  /// ## Handling backs ahead of time
+  ///
+  /// Not all system backs will result in a call to this method.  Some are
+  /// handled entirely by the system without informing the Flutter framework.
+  ///
+  /// Android API 33+ introduced a feature called predictive back, which allows
+  /// the user to peek behind the current app or route during a back gesture and
+  /// then decide to cancel or commit the back.  Flutter enables or disables
+  /// this feature ahead of time, before a back gesture occurs, and back
+  /// gestures that trigger predictive back are handled entirely by the system
+  /// and do not trigger this method here in the framework.
+  ///
+  /// By default, the framework communicates when it would like to handle system
+  /// back gestures using [SystemNavigator.setFrameworkHandlesBacks]. This is
+  /// done automatically based on the status of the [Navigator] stack and the
+  /// state of any [CanPopScope] widgets present.  Developers can manually set
+  /// this by calling the method directly or by using [NavigationNotification].
+  /// {@endtemplate}
   @protected
   Future<void> handlePopRoute() async {
-    // TODO(justinmc): This means that WillPopScope (and CanPopScope) will not
-    // be called inside of a nested Navigator unless the app developer manually
-    // registers a WidgetsBindingObserver. Only WidgetsApp does this automatically
-    // with the root navigator.
-    print('justin Received back from system. Iterating through all of the didPopRoutes, there are ${_observers.length}');
-    // TODO(justinmc): You usually see two here. The first from MediaQuery which
-    // always returns false, and the second from WidgetsApp.
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
         return;
       }
     }
-    // TODO(justinmc): This won't ever happen anymore? At least not in normal
-    // usage.
     SystemNavigator.pop();
   }
 

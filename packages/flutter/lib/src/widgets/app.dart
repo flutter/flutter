@@ -1489,12 +1489,8 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return result!;
   }
 
-  // TODO(justinmc): Deprecate.
-  // On Android: the user has triggered a system back, such as by pressing the
-  // system back button or performing a back gesture.
   @override
   Future<bool> didPopRoute() async {
-    print('justin WidgetsApp didPopRoute');
     assert(mounted);
     // The back button dispatcher should handle the pop route if we use a
     // router.
