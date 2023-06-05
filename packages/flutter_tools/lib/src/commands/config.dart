@@ -24,9 +24,9 @@ class ConfigCommand extends FlutterCommand {
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory. If unset, flutter will search for valid installs at well-known locations.');
     argParser.addOption('jdk-dir', help: 'The Java Development Kit (JDK) install/home directory. '
       'If unset, flutter will search for one in the following order:\n'
-      '1) the JDK bundled with the latest installation of Android Studio,\n'
-      '2) the JDK found at the directory found in the JAVA_HOME environment variable, and\n'
-      "3) the directory containing the java binary found in the user's path.");
+      '    1) the JDK bundled with the latest installation of Android Studio,\n'
+      '    2) the JDK found at the directory found in the JAVA_HOME environment variable, and\n'
+      "    3) the directory containing the java binary found in the user's path.");
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
