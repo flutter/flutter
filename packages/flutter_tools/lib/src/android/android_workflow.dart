@@ -7,9 +7,7 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -19,7 +17,6 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
-import 'android_studio.dart';
 import 'java.dart';
 
 const int kAndroidSdkMinVersion = 29;
@@ -224,35 +221,26 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
-    required Config config,
     required Java? java,
     required AndroidSdk? androidSdk,
     required Platform platform,
-    required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
-    required AndroidStudio? androidStudio,
     required Stdio stdio,
     required UserMessages userMessages,
-  }) : _config = config,
-       _java = java,
+  }) : _java = java,
        _androidSdk = androidSdk,
        _platform = platform,
-       _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
-       _androidStudio = androidStudio,
        _stdio = stdio,
        _userMessages = userMessages,
        super('Android license subvalidator');
 
-  final Config _config;
   final Java? _java;
   final AndroidSdk? _androidSdk;
-  final AndroidStudio? _androidStudio;
   final Stdio _stdio;
   final Platform _platform;
-  final FileSystem _fileSystem;
   final ProcessManager _processManager;
   final Logger _logger;
   final UserMessages _userMessages;

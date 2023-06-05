@@ -4,10 +4,8 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/java.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -23,7 +21,6 @@ import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  late Config config;
   late FakeAndroidSdk sdk;
   late Logger logger;
   late MemoryFileSystem fileSystem;
@@ -31,7 +28,6 @@ void main() {
   late FakeStdio stdio;
 
   setUp(() {
-    config = Config.test();
     sdk = FakeAndroidSdk();
     fileSystem = MemoryFileSystem.test();
     fileSystem.directory('/home/me').createSync(recursive: true);
@@ -126,16 +122,13 @@ void main() {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -146,16 +139,13 @@ void main() {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -171,16 +161,13 @@ void main() {
       ], stdout: 'asdasassad',
     ));
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -201,16 +188,13 @@ All SDK package licenses accepted.
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -231,16 +215,13 @@ All SDK package licenses accepted.
       )
     );
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: java,
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
 
@@ -262,16 +243,13 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -293,16 +271,13 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
     final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
@@ -320,16 +295,13 @@ Review licenses that have not been accepted (y/N)?
     ));
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     expect(await licenseValidator.runLicenseManager(), isTrue);
@@ -340,16 +312,13 @@ Review licenses that have not been accepted (y/N)?
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -370,16 +339,13 @@ Review licenses that have not been accepted (y/N)?
     final BufferLogger logger = BufferLogger.test();
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: logger,
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     await licenseValidator.runLicenseManager();
@@ -392,16 +358,13 @@ Review licenses that have not been accepted (y/N)?
     processManager.excludedExecutables.add('/foo/bar/sdkmanager');
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: BufferLogger.test(),
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     expect(licenseValidator.runLicenseManager(), throwsToolExit());
@@ -420,16 +383,13 @@ Review licenses that have not been accepted (y/N)?
     );
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
-      config: config,
       java: FakeJava(),
       androidSdk: sdk,
-      fileSystem: fileSystem,
       processManager: processManager,
       platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
       stdio: stdio,
       logger: logger,
       userMessages: UserMessages(),
-      androidStudio: FakeAndroidStudio(),
     );
 
     await expectLater(
@@ -664,11 +624,6 @@ class FakeAndroidSdkVersion extends Fake implements AndroidSdkVersion {
 
   @override
   String get platformName => '';
-}
-
-class FakeAndroidStudio extends Fake implements AndroidStudio {
-  @override
-  String get javaPath => 'java';
 }
 
 class ThrowingStdin<T> extends Fake implements IOSink {
