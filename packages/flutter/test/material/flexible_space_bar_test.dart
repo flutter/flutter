@@ -160,7 +160,10 @@ void main() {
       ),
     );
 
-    final Opacity backgroundOpacity = tester.firstWidget(find.byType(Opacity));
+    final dynamic backgroundOpacity = tester.firstWidget(
+      find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity'));
+    // accessing private type member.
+    // ignore: avoid_dynamic_calls
     expect(backgroundOpacity.opacity, 1.0);
   });
 
