@@ -110,7 +110,6 @@ void main() {
         'archive',
         'path_provider_android',
         'flutter_plugin_android_lifecycle',
-        'camera_android',
       ]),
     );
   });

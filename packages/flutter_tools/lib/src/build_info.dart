@@ -324,7 +324,7 @@ class BuildInfo {
         '-Pbundle-sksl-path=$bundleSkSLPath',
       if (codeSizeDirectory != null)
         '-Pcode-size-directory=$codeSizeDirectory',
-      for (String projectArg in androidProjectArgs)
+      for (final String projectArg in androidProjectArgs)
         '-P$projectArg',
     ];
     if (dartDefineConfigJsonMap != null) {

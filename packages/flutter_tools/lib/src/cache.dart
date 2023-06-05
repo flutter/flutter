@@ -1004,6 +1004,19 @@ class ArtifactUpdater {
   @visibleForTesting
   final List<File> downloadedFiles = <File>[];
 
+  /// These filenames, should they exist after extracting an archive, should be deleted.
+  static const Set<String> _denylistedBasenames = <String>{'entitlements.txt', 'without_entitlements.txt'};
+  void _removeDenylistedFiles(Directory directory) {
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      if (_denylistedBasenames.contains(entity.basename)) {
+        entity.deleteSync();
+      }
+    }
+  }
+
   /// Download a zip archive from the given [url] and unzip it to [location].
   Future<void> downloadZipArchive(
     String message,
@@ -1120,6 +1133,7 @@ class ArtifactUpdater {
         _deleteIgnoringErrors(tempFile);
         continue;
       }
+      _removeDenylistedFiles(location);
       return;
     }
   }
@@ -1276,7 +1290,7 @@ String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
 /// something that doesn't.
 String _flattenNameNoSubdirs(String fileName) {
   final List<int> replacedCodeUnits = <int>[
-    for (int codeUnit in fileName.codeUnits)
+    for (final int codeUnit in fileName.codeUnits)
       ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],
   ];
   return String.fromCharCodes(replacedCodeUnits);

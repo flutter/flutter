@@ -184,7 +184,7 @@ class CustomDevicePortForwarder extends DevicePortForwarder {
     // a port forwarding failure and we complete with a null value.
     unawaited(process.exitCode.whenComplete(() {
       if (!completer.isCompleted) {
-        completer.complete(null);
+        completer.complete();
       }
     }));
 

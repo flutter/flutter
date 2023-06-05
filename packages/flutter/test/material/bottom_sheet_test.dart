@@ -199,6 +199,43 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
   });
 
+  testWidgets('Tapping on a BottomSheet should not trigger a rebuild when enableDrag is true', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126833.
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    int buildCount = 0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    await tester.pump();
+    expect(buildCount, 0);
+    expect(find.text('BottomSheet'), findsNothing);
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      buildCount++;
+      return const SizedBox(
+        height: 200.0,
+        child: Text('BottomSheet'),
+      );
+    },
+     enableDrag: true,
+    );
+
+    await tester.pumpAndSettle();
+    expect(buildCount, 1);
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Tap on bottom sheet should not trigger a rebuild.
+    await tester.tap(find.text('BottomSheet'));
+    await tester.pumpAndSettle();
+    expect(buildCount, 1);
+    expect(find.text('BottomSheet'), findsOneWidget);
+  });
+
   testWidgets('Modal BottomSheet builder should only be called once', (WidgetTester tester) async {
     late BuildContext savedContext;
 
@@ -1998,6 +2035,58 @@ void main() {
       );
     });
 
+  });
+
+  group('showModalBottomSheet modalBarrierDismissLabel', () {
+    testWidgets('Verify that modalBarrierDismissLabel is used if provided',
+        (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      const String customLabel = 'custom label';
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ));
+
+      showModalBottomSheet<void>(
+        barrierLabel: 'custom label',
+        context: scaffoldKey.currentContext!,
+        builder: (BuildContext context) {
+          return const Text('BottomSheet');
+        },
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final ModalBarrier modalBarrier =
+          tester.widget(find.byType(ModalBarrier).last);
+      expect(modalBarrier.semanticsLabel, customLabel);
+    });
+
+    testWidgets('Verify that modalBarrierDismissLabel from context is used if barrierLabel is not provided',
+        (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: const Center(child: Text('body')),
+        ),
+      ));
+
+      showModalBottomSheet<void>(
+        context: scaffoldKey.currentContext!,
+        builder: (BuildContext context) {
+          return const Text('BottomSheet');
+        },
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final ModalBarrier modalBarrier =
+          tester.widget(find.byType(ModalBarrier).last);
+      expect(modalBarrier.semanticsLabel, MaterialLocalizations.of(scaffoldKey.currentContext!).scrimLabel);
+    });
   });
 }
 

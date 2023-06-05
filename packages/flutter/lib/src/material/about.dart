@@ -1024,9 +1024,6 @@ enum _ActionLevel {
 
 /// Describes which layout will be used by [_MasterDetailFlow].
 enum _LayoutMode {
-  /// Use a nested or lateral layout depending on available screen width.
-  auto,
-
   /// Always use a lateral layout.
   lateral,
 
@@ -1052,9 +1049,7 @@ class _MasterDetailFlow extends StatefulWidget {
   const _MasterDetailFlow({
     required this.detailPageBuilder,
     required this.masterViewBuilder,
-    this.automaticallyImplyLeading = true, // ignore: unused_element
     this.detailPageFABlessGutterWidth,
-    this.displayMode = _LayoutMode.auto, // ignore: unused_element
     this.title,
   });
 
@@ -1079,14 +1074,6 @@ class _MasterDetailFlow extends StatefulWidget {
   ///
   /// See [AppBar.title].
   final Widget? title;
-
-  /// Override the framework from determining whether to show a leading widget or not.
-  ///
-  /// See [AppBar.automaticallyImplyLeading].
-  final bool automaticallyImplyLeading;
-
-  /// Forces display mode and style.
-  final _LayoutMode displayMode;
 
   @override
   _MasterDetailFlowState createState() => _MasterDetailFlowState();
@@ -1175,21 +1162,13 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   @override
   Widget build(BuildContext context) {
-    switch (widget.displayMode) {
-      case _LayoutMode.nested:
-        return _nestedUI(context);
-      case _LayoutMode.lateral:
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      final double availableWidth = constraints.maxWidth;
+      if (availableWidth >= _materialWideDisplayThreshold) {
         return _lateralUI(context);
-      case _LayoutMode.auto:
-        return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          final double availableWidth = constraints.maxWidth;
-          if (availableWidth >= _materialWideDisplayThreshold) {
-            return _lateralUI(context);
-          } else {
-            return _nestedUI(context);
-          }
-        });
-    }
+      }
+      return _nestedUI(context);
+    });
   }
 
   Widget _nestedUI(BuildContext context) {
@@ -1257,11 +1236,10 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
       builder: (BuildContext c) {
         return BlockSemantics(
           child: _MasterPage(
-            leading: widget.automaticallyImplyLeading && Navigator.of(context).canPop()
+            leading: Navigator.of(context).canPop()
               ? BackButton(onPressed: () { Navigator.of(context).pop(); })
               : null,
             title: widget.title,
-            automaticallyImplyLeading: widget.automaticallyImplyLeading,
             masterViewBuilder: widget.masterViewBuilder,
           ),
         );
@@ -1285,7 +1263,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.lateral;
     return _MasterDetailScaffold(
       actionBuilder: (_, __) => const<Widget>[],
-      automaticallyImplyLeading: widget.automaticallyImplyLeading,
       detailPageBuilder: (BuildContext context, Object? args, ScrollController? scrollController) =>
           widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),
       detailPageFABlessGutterWidth: widget.detailPageFABlessGutterWidth,
@@ -1301,13 +1278,11 @@ class _MasterPage extends StatelessWidget {
     this.leading,
     this.title,
     this.masterViewBuilder,
-    required this.automaticallyImplyLeading,
   });
 
   final _MasterViewBuilder? masterViewBuilder;
   final Widget? title;
   final Widget? leading;
-  final bool automaticallyImplyLeading;
 
   @override
   Widget build(BuildContext context) {
@@ -1316,7 +1291,6 @@ class _MasterPage extends StatelessWidget {
         title: title,
         leading: leading,
         actions: const <Widget>[],
-        automaticallyImplyLeading: automaticallyImplyLeading,
       ),
       body: masterViewBuilder!(context, false),
     );
@@ -1336,7 +1310,6 @@ class _MasterDetailScaffold extends StatefulWidget {
     this.actionBuilder,
     this.initialArguments,
     this.title,
-    required this.automaticallyImplyLeading,
     this.detailPageFABlessGutterWidth,
   });
 
@@ -1351,7 +1324,6 @@ class _MasterDetailScaffold extends StatefulWidget {
   final _ActionBuilder? actionBuilder;
   final Object? initialArguments;
   final Widget? title;
-  final bool automaticallyImplyLeading;
   final double? detailPageFABlessGutterWidth;
 
   @override
@@ -1403,7 +1375,6 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
           appBar: AppBar(
             title: widget.title,
             actions: widget.actionBuilder!(context, _ActionLevel.top),
-            automaticallyImplyLeading: widget.automaticallyImplyLeading,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: Row(
@@ -1477,7 +1448,6 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               appBar: AppBar(
                 title: widget.title,
                 actions: widget.actionBuilder!(context, _ActionLevel.top),
-                automaticallyImplyLeading: widget.automaticallyImplyLeading,
               ),
               body: widget.masterViewBuilder(context, true),
             )

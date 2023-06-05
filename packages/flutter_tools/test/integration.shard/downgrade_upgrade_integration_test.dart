@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-const String _kInitialVersion = 'v1.9.1';
+const String _kInitialVersion = '3.0.0';
 const String _kBranch = 'beta';
 
 final Stdio stdio = Stdio();
@@ -80,6 +80,7 @@ void main() {
 
     printOnFailure('Step 4 - upgrade to the newest $_kBranch');
     // This should update the persistent tool state with the sha for HEAD
+    // This is probably a source of flakes as it mutates system-global state.
     exitCode = await processUtils.stream(<String>[
       flutterBin,
       'upgrade',
@@ -93,7 +94,7 @@ void main() {
       'git',
       'describe',
       '--match',
-      'v*.*.*',
+      '*.*.*',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);
@@ -114,7 +115,7 @@ void main() {
       'git',
       'describe',
       '--match',
-      'v*.*.*',
+      '*.*.*',
       '--long',
       '--tags',
     ], workingDirectory: testDirectory.path);

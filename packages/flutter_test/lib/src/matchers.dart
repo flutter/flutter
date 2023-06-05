@@ -1624,10 +1624,10 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
     final RenderObject renderObject = nodes.single.renderObject!;
 
     switch (renderObject.runtimeType) {
-      case RenderClipPath:
-      case RenderClipOval:
-      case RenderClipRect:
-      case RenderClipRRect:
+      case const (RenderClipPath):
+      case const (RenderClipOval):
+      case const (RenderClipRect):
+      case const (RenderClipRRect):
         return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
       default:
         return true;
