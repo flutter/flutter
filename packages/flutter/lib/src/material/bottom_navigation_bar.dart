@@ -113,8 +113,8 @@ enum BottomNavigationBarLandscapeLayout {
 /// takes a list of [BottomNavigationBarItem]s, use
 /// [NavigationBar.destinations], which takes a list of widgets.
 /// Usually, you use a list of [NavigationDestination] widgets.
-/// Just like [BottomNavigationItem]s, [NavigationDestination]s
-/// have a [label] and [icon] field.
+/// Just like [BottomNavigationBarItem]s, [NavigationDestination]s
+/// have a label and icon field.
 ///
 /// 2. Instead of using [BottomNavigationBar.onTap],
 /// use [NavigationBar.onDestinationSelected], which is also
