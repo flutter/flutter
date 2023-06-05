@@ -107,7 +107,7 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final List<String> rest = argResults?.rest ?? <String>[];
+    final List<String> rest = argResults!.rest;
     if (rest.isNotEmpty) {
       throwToolExit(exitCode: 2,
           'error: flutter config: Too many arguments.\n'
@@ -132,7 +132,7 @@ class ConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    if (argResults?.wasParsed('analytics') ?? false) {
+    if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
       // The tool sends the analytics event *before* toggling the flag
       // intentionally to be sure that opt-out events are sent correctly.
@@ -152,23 +152,23 @@ class ConfigCommand extends FlutterCommand {
       await globals.analytics.setTelemetry(value);
     }
 
-    if (argResults?.wasParsed('android-sdk') ?? false) {
+    if (argResults!.wasParsed('android-sdk')) {
       _updateConfig('android-sdk', stringArg('android-sdk')!);
     }
 
-    if (argResults?.wasParsed('android-studio-dir') ?? false) {
+    if (argResults!.wasParsed('android-studio-dir')) {
       _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
     }
 
-    if (argResults?.wasParsed('jdk-dir') ?? false) {
+    if (argResults!.wasParsed('jdk-dir')) {
       _updateConfig('jdk-dir', stringArg('jdk-dir')!);
     }
 
-    if (argResults?.wasParsed('clear-ios-signing-cert') ?? false) {
+    if (argResults!.wasParsed('clear-ios-signing-cert')) {
       _updateConfig('ios-signing-cert', '');
     }
 
-    if (argResults?.wasParsed('build-dir') ?? false) {
+    if (argResults!.wasParsed('build-dir')) {
       final String buildDir = stringArg('build-dir')!;
       if (globals.fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
@@ -181,7 +181,7 @@ class ConfigCommand extends FlutterCommand {
       if (configSetting == null) {
         continue;
       }
-      if (argResults?.wasParsed(configSetting) ?? false) {
+      if (argResults!.wasParsed(configSetting)) {
         final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
