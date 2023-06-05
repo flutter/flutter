@@ -15,12 +15,16 @@ import 'text_style.dart';
 /// An immutable placeholder that is embedded inline within text.
 ///
 /// [PlaceholderSpan] represents a placeholder that acts as a stand-in for other
-/// content. A [PlaceholderSpan] by itself does not contain useful
-/// information to change a [TextSpan]. Instead, this class must be extended
-/// to define contents.
+/// content. A [PlaceholderSpan] by itself does not contain useful information
+/// to change a [TextSpan]. [WidgetSpan] from the widgets library extends
+/// [PlaceholderSpan] and may be used instead to specify a widget as the contents
+/// of the placeholder.
 ///
-/// [WidgetSpan] from the widgets library extends [PlaceholderSpan] and may be
-/// used instead to specify a widget as the contents of the placeholder.
+/// Flutter widgets such as [TextField], [Text] and [RichText] do not recognize
+/// [PlaceholderSpan] subclasses other than [WidgetSpan]. **Consider
+/// implementing the [WidgetSpan] interface instead of the [Placeholder]
+/// interface.**
+///
 ///
 /// See also:
 ///
@@ -88,5 +92,11 @@ abstract class PlaceholderSpan extends InlineSpan {
 
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
+  }
+
+  @override
+  bool debugAssertIsValid() {
+    assert(false, 'Consider implementing the WidgetSpan interface instead.');
+    return super.debugAssertIsValid();
   }
 }
