@@ -130,7 +130,7 @@ mixin SemanticsBinding on BindingBase {
   /// perform the given `action` on the [SemanticsNode] specified by
   /// [SemanticsActionEvent.nodeId].
   ///
-  /// See [dart:ui.PlatformDispatcher.onSemanticsAction].
+  /// See [dart:ui.PlatformDispatcher.onSemanticsActionEvent].
   @protected
   void performSemanticsAction(ui.SemanticsActionEvent action);
 
