@@ -47,7 +47,7 @@ abstract final class SystemNavigator {
         try {
           print('justin telling platform frameworkHandlesPop: $frameworkHandlesBacks');
           await SystemChannels.platform.invokeMethod<void>(
-            'SystemNavigator.setFrameworkhandlesBacks',
+            'SystemNavigator.setFrameworkHandlesBacks',
             frameworkHandlesBacks,
           );
         } catch (error) {
