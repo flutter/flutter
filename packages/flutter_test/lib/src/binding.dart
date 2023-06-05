@@ -501,8 +501,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   @override
   Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
-    // The test framework shouldn't actually exit when requested.
-    throw FlutterError('Unexpected application exit request while running test');
+    switch (exitType) {
+      case ui.AppExitType.cancelable:
+        // The test framework shouldn't actually exit when requested.
+        return ui.AppExitResponse.cancel;
+      case ui.AppExitType.required:
+        throw FlutterError('Unexpected application exit request while running test');
+    }
   }
 
   /// Re-attempts the initialization of the lifecycle state after providing

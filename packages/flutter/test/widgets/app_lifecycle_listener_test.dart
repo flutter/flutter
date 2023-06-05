@@ -104,7 +104,6 @@ void main() {
     await expectLater(() => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
     await setAppLifeCycleState(AppLifecycleState.paused);
     await setAppLifeCycleState(AppLifecycleState.detached);
-    await expectLater(() => setAppLifeCycleState(AppLifecycleState.paused), throwsAssertionError);
 
     listener.dispose();
   });

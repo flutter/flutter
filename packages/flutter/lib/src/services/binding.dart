@@ -270,11 +270,9 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
     if (previousState == AppLifecycleState.paused && state == AppLifecycleState.detached) {
       // Handle the wrap-around from paused to detached
-      return const <AppLifecycleState>[AppLifecycleState.detached];
-    }
-    if (previousState == AppLifecycleState.detached && state == AppLifecycleState.paused) {
-      // Handle the wrap-around from detached to paused.
-      return const <AppLifecycleState>[AppLifecycleState.paused];
+      return const <AppLifecycleState>[
+        AppLifecycleState.detached,
+      ];
     }
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
     if (previousState == null) {
@@ -305,7 +303,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       }
       return true;
     }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
-
     return stateChanges;
   }
 

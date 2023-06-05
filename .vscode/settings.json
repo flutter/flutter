@@ -7,13 +7,12 @@
     "[dart]": {
         "editor.formatOnSave": false,
         "editor.formatOnType": false,
-        "editor.formatOnPaste": false
+        "editor.formatOnPaste": false,
     },
 
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true,
-    "dart.sdkPath": "/usr/local/google/home/gspencer/code/flutter/bin/cache/dart-sdk"
+    "files.trimTrailingWhitespace": true
 }
