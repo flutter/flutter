@@ -62,72 +62,20 @@ Map<String, dynamic> _readTokenFile(String fileName) {
   return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
 }
 
+const String materialLib = 'packages/flutter/lib/src/material';
+const String dataDir = 'dev/tools/gen_defaults/data';
+
 Future<void> main(List<String> args) async {
-  const String materialLib = 'packages/flutter/lib/src/material';
-  const List<String> tokenFiles = <String>[
-    'badge.json',
-    'banner.json',
-    'badge.json',
-    'bottom_app_bar.json',
-    'button_elevated.json',
-    'button_filled.json',
-    'button_filled_tonal.json',
-    'button_outlined.json',
-    'button_text.json',
-    'card_elevated.json',
-    'card_filled.json',
-    'card_outlined.json',
-    'checkbox.json',
-    'chip_assist.json',
-    'chip_filter.json',
-    'chip_input.json',
-    'chip_suggestion.json',
-    'color_dark.json',
-    'color_light.json',
-    'date_picker_docked.json',
-    'date_picker_modal.json',
-    'dialog.json',
-    'dialog_fullscreen.json',
-    'divider.json',
-    'elevation.json',
-    'fab_extended_primary.json',
-    'fab_large_primary.json',
-    'fab_primary.json',
-    'fab_small_primary.json',
-    'icon_button.json',
-    'icon_button_filled.json',
-    'icon_button_filled_tonal.json',
-    'icon_button_outlined.json',
-    'list.json',
-    'menu.json',
-    'motion.json',
-    'navigation_bar.json',
-    'navigation_drawer.json',
-    'navigation_rail.json',
-    'navigation_tab_primary.json',
-    'navigation_tab_secondary.json',
-    'palette.json',
-    'progress_indicator_circular.json',
-    'progress_indicator_linear.json',
-    'radio_button.json',
-    'search_bar.json',
-    'search_view.json',
-    'segmented_button_outlined.json',
-    'shape.json',
-    'sheet_bottom.json',
-    'slider.json',
-    'snackbar.json',
-    'state.json',
-    'switch.json',
-    'text_field_filled.json',
-    'text_field_outlined.json',
-    'text_style.json',
-    'time_picker.json',
-    'top_app_bar_large.json',
-    'top_app_bar_medium.json',
-    'top_app_bar_small.json',
-    'typeface.json',
-  ];
+  // Parse arguments
+  final ArgParser parser = ArgParser();
+  parser.addFlag(
+    'verbose',
+    abbr: 'v',
+    help: 'Enable verbose output',
+    negatable: false,
+  );
+  final ArgResults argResults = parser.parse(args);
+  final bool verbose = argResults['verbose'] as bool;
 
   // Generate a map with all the tokens to simplify the template interface.
   final Map<String, dynamic> tokens = <String, dynamic>{};
