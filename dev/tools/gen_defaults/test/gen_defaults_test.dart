@@ -365,7 +365,7 @@ class TestTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-static final String tokenFoo = '${tokens['foo']}';
-static final String tokenBar = '${tokens['bar']}';
+static final String tokenFoo = '${getToken('foo')}';
+static final String tokenBar = '${getToken('bar')}';
 ''';
 }
