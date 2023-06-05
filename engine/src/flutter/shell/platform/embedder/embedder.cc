@@ -69,6 +69,7 @@ extern const intptr_t kPlatformStrongDillSize;
 
 #ifdef SHELL_ENABLE_METAL
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
+#include "third_party/skia/include/ports/SkCFObject.h"
 #endif
 
 const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
