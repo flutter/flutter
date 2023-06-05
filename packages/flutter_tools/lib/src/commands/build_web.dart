@@ -213,7 +213,7 @@ class BuildWebCommand extends BuildSubCommand {
 
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built at ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+      'Compiled to ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
       color: TerminalColor.green,
     );
 
