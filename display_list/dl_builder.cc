@@ -751,7 +751,7 @@ void DisplayListBuilder::DrawLine(const SkPoint& p0,
 void DisplayListBuilder::drawRect(const SkRect& rect) {
   Push<DrawRectOp>(0, 1, rect);
   CheckLayerOpacityCompatibility();
-  AccumulateOpBounds(rect, kDrawRectFlags);
+  AccumulateOpBounds(rect.makeSorted(), kDrawRectFlags);
 }
 void DisplayListBuilder::DrawRect(const SkRect& rect, const DlPaint& paint) {
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawRectFlags);
@@ -760,7 +760,7 @@ void DisplayListBuilder::DrawRect(const SkRect& rect, const DlPaint& paint) {
 void DisplayListBuilder::drawOval(const SkRect& bounds) {
   Push<DrawOvalOp>(0, 1, bounds);
   CheckLayerOpacityCompatibility();
-  AccumulateOpBounds(bounds, kDrawOvalFlags);
+  AccumulateOpBounds(bounds.makeSorted(), kDrawOvalFlags);
 }
 void DisplayListBuilder::DrawOval(const SkRect& bounds, const DlPaint& paint) {
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawOvalFlags);

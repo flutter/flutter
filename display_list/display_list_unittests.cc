@@ -124,6 +124,95 @@ class DisplayListTestBase : public BaseT {
     EXPECT_EQ(builder.GetSaveCount(), 1);
   }
 
+  typedef const std::function<void(DlCanvas&)> DlSetup;
+  typedef const std::function<void(DlCanvas&, DlPaint&, SkRect& rect)>
+      DlRenderer;
+
+  static void verify_inverted_bounds(DlSetup& setup,
+                                     DlRenderer& renderer,
+                                     DlPaint paint,
+                                     SkRect render_rect,
+                                     SkRect expected_bounds,
+                                     const std::string& desc) {
+    DisplayListBuilder builder;
+    setup(builder);
+    renderer(builder, paint, render_rect);
+    auto dl = builder.Build();
+    EXPECT_EQ(dl->op_count(), 1u) << desc;
+    EXPECT_EQ(dl->bounds(), expected_bounds) << desc;
+  }
+
+  static void check_inverted_bounds(DlRenderer& renderer,
+                                    const std::string& desc) {
+    SkRect rect = SkRect::MakeLTRB(0.0f, 0.0f, 10.0f, 10.0f);
+    SkRect invertedLR = SkRect::MakeLTRB(rect.fRight, rect.fTop,  //
+                                         rect.fLeft, rect.fBottom);
+    SkRect invertedTB = SkRect::MakeLTRB(rect.fLeft, rect.fBottom,  //
+                                         rect.fRight, rect.fTop);
+    SkRect invertedLTRB = SkRect::MakeLTRB(rect.fRight, rect.fBottom,  //
+                                           rect.fLeft, rect.fTop);
+    auto empty_setup = [](DlCanvas&) {};
+
+    ASSERT_TRUE(rect.fLeft < rect.fRight);
+    ASSERT_TRUE(rect.fTop < rect.fBottom);
+    ASSERT_FALSE(rect.isEmpty());
+    ASSERT_TRUE(invertedLR.fLeft > invertedLR.fRight);
+    ASSERT_TRUE(invertedLR.isEmpty());
+    ASSERT_TRUE(invertedTB.fTop > invertedTB.fBottom);
+    ASSERT_TRUE(invertedTB.isEmpty());
+    ASSERT_TRUE(invertedLTRB.fLeft > invertedLTRB.fRight);
+    ASSERT_TRUE(invertedLTRB.fTop > invertedLTRB.fBottom);
+    ASSERT_TRUE(invertedLTRB.isEmpty());
+
+    DlPaint ref_paint = DlPaint();
+    SkRect ref_bounds = rect;
+    verify_inverted_bounds(empty_setup, renderer, ref_paint, invertedLR,
+                           ref_bounds, desc + " LR swapped");
+    verify_inverted_bounds(empty_setup, renderer, ref_paint, invertedTB,
+                           ref_bounds, desc + " TB swapped");
+    verify_inverted_bounds(empty_setup, renderer, ref_paint, invertedLTRB,
+                           ref_bounds, desc + " LR&TB swapped");
+
+    // Round joins are used because miter joins greatly pad the bounds,
+    // but only on paths. So we use round joins for consistency there.
+    // We aren't fully testing all stroke-related bounds computations here,
+    // those are more fully tested in the render tests. We are simply
+    // checking that they are applied to the ordered bounds.
+    DlPaint stroke_paint = DlPaint()                                 //
+                               .setDrawStyle(DlDrawStyle::kStroke)   //
+                               .setStrokeJoin(DlStrokeJoin::kRound)  //
+                               .setStrokeWidth(2.0f);
+    SkRect stroke_bounds = rect.makeOutset(1.0f, 1.0f);
+    verify_inverted_bounds(empty_setup, renderer, stroke_paint, invertedLR,
+                           stroke_bounds, desc + " LR swapped, sw 2");
+    verify_inverted_bounds(empty_setup, renderer, stroke_paint, invertedTB,
+                           stroke_bounds, desc + " TB swapped, sw 2");
+    verify_inverted_bounds(empty_setup, renderer, stroke_paint, invertedLTRB,
+                           stroke_bounds, desc + " LR&TB swapped, sw 2");
+
+    DlBlurMaskFilter mask_filter(DlBlurStyle::kNormal, 2.0f);
+    DlPaint maskblur_paint = DlPaint()  //
+                                 .setMaskFilter(&mask_filter);
+    SkRect maskblur_bounds = rect.makeOutset(6.0f, 6.0f);
+    verify_inverted_bounds(empty_setup, renderer, maskblur_paint, invertedLR,
+                           maskblur_bounds, desc + " LR swapped, mask 2");
+    verify_inverted_bounds(empty_setup, renderer, maskblur_paint, invertedTB,
+                           maskblur_bounds, desc + " TB swapped, mask 2");
+    verify_inverted_bounds(empty_setup, renderer, maskblur_paint, invertedLTRB,
+                           maskblur_bounds, desc + " LR&TB swapped, mask 2");
+
+    DlErodeImageFilter erode_filter(2.0f, 2.0f);
+    DlPaint erode_paint = DlPaint()  //
+                              .setImageFilter(&erode_filter);
+    SkRect erode_bounds = rect.makeInset(2.0f, 2.0f);
+    verify_inverted_bounds(empty_setup, renderer, erode_paint, invertedLR,
+                           erode_bounds, desc + " LR swapped, erode 2");
+    verify_inverted_bounds(empty_setup, renderer, erode_paint, invertedTB,
+                           erode_bounds, desc + " TB swapped, erode 2");
+    verify_inverted_bounds(empty_setup, renderer, erode_paint, invertedLTRB,
+                           erode_bounds, desc + " LR&TB swapped, erode 2");
+  }
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(DisplayListTestBase);
 };
@@ -2872,6 +2961,59 @@ TEST_F(DisplayListTest, DrawSaveDrawCannotInheritOpacity) {
   auto display_list = builder.Build();
 
   ASSERT_FALSE(display_list->can_apply_group_opacity());
+}
+
+TEST_F(DisplayListTest, DrawUnorderedRect) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    canvas.DrawRect(rect, paint);
+  };
+  check_inverted_bounds(renderer, "DrawRect");
+}
+
+TEST_F(DisplayListTest, DrawUnorderedRoundRect) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    canvas.DrawRRect(SkRRect::MakeRectXY(rect, 2.0f, 2.0f), paint);
+  };
+  check_inverted_bounds(renderer, "DrawRoundRect");
+}
+
+TEST_F(DisplayListTest, DrawUnorderedOval) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    canvas.DrawOval(rect, paint);
+  };
+  check_inverted_bounds(renderer, "DrawOval");
+}
+
+TEST_F(DisplayListTest, DrawUnorderedRectangularPath) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    canvas.DrawPath(SkPath().addRect(rect), paint);
+  };
+  check_inverted_bounds(renderer, "DrawRectangularPath");
+}
+
+TEST_F(DisplayListTest, DrawUnorderedOvalPath) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    canvas.DrawPath(SkPath().addOval(rect), paint);
+  };
+  check_inverted_bounds(renderer, "DrawOvalPath");
+}
+
+TEST_F(DisplayListTest, DrawUnorderedRoundRectPathCW) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    SkPath path = SkPath()  //
+                      .addRoundRect(rect, 2.0f, 2.0f, SkPathDirection::kCW);
+    canvas.DrawPath(path, paint);
+  };
+  check_inverted_bounds(renderer, "DrawRoundRectPath Clockwise");
+}
+
+TEST_F(DisplayListTest, DrawUnorderedRoundRectPathCCW) {
+  auto renderer = [](DlCanvas& canvas, DlPaint& paint, SkRect& rect) {
+    SkPath path = SkPath()  //
+                      .addRoundRect(rect, 2.0f, 2.0f, SkPathDirection::kCCW);
+    canvas.DrawPath(path, paint);
+  };
+  check_inverted_bounds(renderer, "DrawRoundRectPath Counter-Clockwise");
 }
 
 }  // namespace testing
