@@ -70,6 +70,7 @@ vars = {
   'dart_protobuf_rev': '346a72dd04602f004a5b2c06ee4196b6112492b7',
   'dart_pub_rev': '078c7fea0be2656debc675646806da14fa94f853',
   'dart_root_certificates_rev': '692f6d6488af68e0121317a9c2c9eb393eb0ee50',
+  'dart_tools_rev': 'd723a55062959713f715ca3f10190a72c79634ef',
   'dart_watcher_rev': '3f17faa2d09dca3e23bc07a01f2045ec0cd2837d',
   'dart_webdev_rev': 'd442fa89bfe8a81ec0679f2d927765e182f7baf9',
   'dart_webkit_inspection_protocol_rev': '39a3c297ff573635e7936b015ce4f3466e4739d6',
@@ -478,7 +479,7 @@ deps = {
    Var('dart_git') + '/test_reflective_loader.git@40d61b16647cd61b02d806fea46362ef07e7c502',
 
   'src/third_party/dart/third_party/pkg/tools':
-   Var('dart_git') + '/tools.git@d723a55062959713f715ca3f10190a72c79634ef',
+   Var('dart_git') + '/tools.git' + '@' + Var('dart_tools_rev'),
 
   'src/third_party/dart/third_party/pkg/typed_data':
    Var('dart_git') + '/typed_data.git@693f48e3d1d528f6f26d7069a2ad29b460650455',
