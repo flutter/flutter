@@ -75,8 +75,6 @@ class IconTreeShaker {
 
   final Environment _environment;
   final String? _fontManifest;
-  Future<void>? _iconDataProcessing;
-  Map<String, _IconTreeShakerData>? _iconData;
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -89,9 +87,9 @@ class IconTreeShaker {
                    && _environment.defines[kBuildMode] != 'debug';
 
   // Fills the [_iconData] map.
-  Future<void> _getIconData(Environment environment) async {
+  Future<Map<String, _IconTreeShakerData>?> _getIconData(Environment environment) async {
     if (!enabled) {
-      return;
+      return null;
     }
 
     final File appDill = environment.buildDir.childFile('app.dill');
@@ -140,7 +138,7 @@ class IconTreeShaker {
         codePoints: codePoints,
       );
     }
-    _iconData = result;
+    return result;
   }
 
   /// Calls font-subset, which transforms the [input] font file to a
@@ -155,7 +153,6 @@ class IconTreeShaker {
     required String outputPath,
     required String relativePath,
   }) async {
-
     if (!enabled) {
       return false;
     }
@@ -169,10 +166,9 @@ class IconTreeShaker {
     if (!kTtfMimeTypes.contains(mimeType)) {
       return false;
     }
-    await (_iconDataProcessing ??= _getIconData(_environment));
-    assert(_iconData != null);
 
-    final _IconTreeShakerData? iconTreeShakerData = _iconData![relativePath];
+    final Map<String, _IconTreeShakerData> iconDataMap = (await _getIconData(_environment))!;
+    final _IconTreeShakerData? iconTreeShakerData = iconDataMap[relativePath];
     if (iconTreeShakerData == null) {
       return false;
     }
