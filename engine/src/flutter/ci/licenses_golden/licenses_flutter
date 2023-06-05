@@ -1485,6 +1485,8 @@ ORIGIN: ../../../flutter/impeller/renderer/backend/metal/surface_mtl.h + ../../.
 ORIGIN: ../../../flutter/impeller/renderer/backend/metal/surface_mtl.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/metal/texture_mtl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/metal/texture_mtl.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/metal/texture_wrapper_mtl.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/renderer/backend/metal/texture_wrapper_mtl.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.cc + ../../../flutter/LICENSE
@@ -2804,6 +2806,10 @@ ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target.cc + ../
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_cache.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_cache.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_struct_macros.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface.h + ../../../flutter/LICENSE
@@ -2811,6 +2817,8 @@ ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc + ../../
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_metal.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_metal.mm + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_metal_impeller.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_software.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface_vulkan.cc + ../../../flutter/LICENSE
@@ -4154,6 +4162,8 @@ FILE: ../../../flutter/impeller/renderer/backend/metal/surface_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/surface_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/texture_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/texture_mtl.mm
+FILE: ../../../flutter/impeller/renderer/backend/metal/texture_wrapper_mtl.h
+FILE: ../../../flutter/impeller/renderer/backend/metal/texture_wrapper_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.h
 FILE: ../../../flutter/impeller/renderer/backend/metal/vertex_descriptor_mtl.mm
 FILE: ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk.cc
@@ -5489,6 +5499,10 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_render_target.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_render_target.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_cache.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_cache.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_struct_macros.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
@@ -5496,6 +5510,8 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal.mm
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal_impeller.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_vulkan.cc
