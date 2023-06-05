@@ -714,6 +714,7 @@ ORIGIN: ../../../flutter/display_list/benchmarking/dl_complexity_gl.h + ../../..
 ORIGIN: ../../../flutter/display_list/benchmarking/dl_complexity_helper.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/benchmarking/dl_complexity_metal.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/benchmarking/dl_complexity_metal.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/display_list/benchmarking/dl_region_benchmarks.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/display_list.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/dl_attributes.h + ../../../flutter/LICENSE
@@ -748,6 +749,8 @@ ORIGIN: ../../../flutter/display_list/effects/dl_path_effect.cc + ../../../flutt
 ORIGIN: ../../../flutter/display_list/effects/dl_path_effect.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/effects/dl_runtime_effect.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/effects/dl_runtime_effect.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/display_list/geometry/dl_region.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/display_list/geometry/dl_region.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/geometry/dl_rtree.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/geometry/dl_rtree.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/display_list/image/dl_image.cc + ../../../flutter/LICENSE
@@ -3380,6 +3383,7 @@ FILE: ../../../flutter/display_list/benchmarking/dl_complexity_gl.h
 FILE: ../../../flutter/display_list/benchmarking/dl_complexity_helper.h
 FILE: ../../../flutter/display_list/benchmarking/dl_complexity_metal.cc
 FILE: ../../../flutter/display_list/benchmarking/dl_complexity_metal.h
+FILE: ../../../flutter/display_list/benchmarking/dl_region_benchmarks.cc
 FILE: ../../../flutter/display_list/display_list.cc
 FILE: ../../../flutter/display_list/display_list.h
 FILE: ../../../flutter/display_list/dl_attributes.h
@@ -3414,6 +3418,8 @@ FILE: ../../../flutter/display_list/effects/dl_path_effect.cc
 FILE: ../../../flutter/display_list/effects/dl_path_effect.h
 FILE: ../../../flutter/display_list/effects/dl_runtime_effect.cc
 FILE: ../../../flutter/display_list/effects/dl_runtime_effect.h
+FILE: ../../../flutter/display_list/geometry/dl_region.cc
+FILE: ../../../flutter/display_list/geometry/dl_region.h
 FILE: ../../../flutter/display_list/geometry/dl_rtree.cc
 FILE: ../../../flutter/display_list/geometry/dl_rtree.h
 FILE: ../../../flutter/display_list/image/dl_image.cc

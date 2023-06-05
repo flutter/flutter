@@ -39,6 +39,7 @@
 ../../../flutter/display_list/effects/dl_image_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_mask_filter_unittests.cc
 ../../../flutter/display_list/effects/dl_path_effect_unittests.cc
+../../../flutter/display_list/geometry/dl_region_unittests.cc
 ../../../flutter/display_list/geometry/dl_rtree_unittests.cc
 ../../../flutter/display_list/skia/dl_sk_conversions_unittests.cc
 ../../../flutter/display_list/skia/dl_sk_paint_dispatcher_unittests.cc

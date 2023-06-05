@@ -158,17 +158,14 @@ static const CGFloat kCompareAccuracy = 0.001;
 
   XCUIElement* overlay1 = app.otherElements[@"platform_view[0].overlay[0]"];
   XCTAssertTrue(overlay1.exists);
-  XCTAssertEqual(overlay1.frame.origin.x, 150);
+  XCTAssertEqual(overlay1.frame.origin.x, 75);
   XCTAssertEqual(overlay1.frame.origin.y, 150);
-  XCTAssertEqual(overlay1.frame.size.width, 75);
-  XCTAssertEqual(overlay1.frame.size.height, 75);
+  XCTAssertEqual(overlay1.frame.size.width, 150);
+  XCTAssertEqual(overlay1.frame.size.height, 100);
 
-  XCUIElement* overlay2 = app.otherElements[@"platform_view[0].overlay[1]"];
-  XCTAssertTrue(overlay2.exists);
-  XCTAssertEqual(overlay2.frame.origin.x, 75);
-  XCTAssertEqual(overlay2.frame.origin.y, 225);
-  XCTAssertEqual(overlay2.frame.size.width, 50);
-  XCTAssertEqual(overlay2.frame.size.height, 25);
+  // There are three non overlapping rects above platform view, which
+  // FlutterPlatformViewsController merges into one.
+  XCTAssertFalse(app.otherElements[@"platform_view[0].overlay[1]"].exists);
 
   XCUIElement* overlayView0 = app.otherElements[@"platform_view[0].overlay_view[0]"];
   XCTAssertTrue(overlayView0.exists);
@@ -177,15 +174,6 @@ static const CGFloat kCompareAccuracy = 0.001;
   XCTAssertEqualWithAccuracy(overlayView0.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
   XCTAssertEqualWithAccuracy(overlayView0.frame.size.width, app.frame.size.width, kCompareAccuracy);
   XCTAssertEqualWithAccuracy(overlayView0.frame.size.height, app.frame.size.height,
-                             kCompareAccuracy);
-
-  XCUIElement* overlayView1 = app.otherElements[@"platform_view[0].overlay_view[1]"];
-  XCTAssertTrue(overlayView1.exists);
-  // Overlay should always be the same frame as the app.
-  XCTAssertEqualWithAccuracy(overlayView1.frame.origin.x, app.frame.origin.x, kCompareAccuracy);
-  XCTAssertEqualWithAccuracy(overlayView1.frame.origin.y, app.frame.origin.x, kCompareAccuracy);
-  XCTAssertEqualWithAccuracy(overlayView1.frame.size.width, app.frame.size.width, kCompareAccuracy);
-  XCTAssertEqualWithAccuracy(overlayView1.frame.size.height, app.frame.size.height,
                              kCompareAccuracy);
 }
 

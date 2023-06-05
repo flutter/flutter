@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/geometry/dl_rtree.h"
+#include "flutter/display_list/geometry/dl_region.h"
 
 #include "flutter/fml/logging.h"
 
@@ -159,44 +160,25 @@ void DlRTree::search(const SkRect& query, std::vector<int>* results) const {
   }
 }
 
-std::list<SkRect> DlRTree::searchAndConsolidateRects(
-    const SkRect& query) const {
+std::list<SkRect> DlRTree::searchAndConsolidateRects(const SkRect& query,
+                                                     bool deband) const {
   // Get the indexes for the operations that intersect with the query rect.
   std::vector<int> intermediary_results;
   search(query, &intermediary_results);
 
-  std::list<SkRect> final_results;
+  std::vector<SkIRect> rects;
+  rects.reserve(intermediary_results.size());
   for (int index : intermediary_results) {
-    auto current_record_rect = bounds(index);
-    auto replaced_existing_rect = false;
-    // // If the current record rect intersects with any of the rects in the
-    // // result list, then join them, and update the rect in final_results.
-    std::list<SkRect>::iterator curr_rect_itr = final_results.begin();
-    std::list<SkRect>::iterator first_intersecting_rect_itr;
-    while (!replaced_existing_rect && curr_rect_itr != final_results.end()) {
-      if (SkRect::Intersects(*curr_rect_itr, current_record_rect)) {
-        replaced_existing_rect = true;
-        first_intersecting_rect_itr = curr_rect_itr;
-        curr_rect_itr->join(current_record_rect);
-      }
-      curr_rect_itr++;
-    }
-    // It's possible that the result contains duplicated rects at this point.
-    // For example, consider a result list that contains rects A, B. If a
-    // new rect C is a superset of A and B, then A and B are the same set after
-    // the merge. As a result, find such cases and remove them from the result
-    // list.
-    while (replaced_existing_rect && curr_rect_itr != final_results.end()) {
-      if (SkRect::Intersects(*curr_rect_itr, *first_intersecting_rect_itr)) {
-        first_intersecting_rect_itr->join(*curr_rect_itr);
-        curr_rect_itr = final_results.erase(curr_rect_itr);
-      } else {
-        curr_rect_itr++;
-      }
-    }
-    if (!replaced_existing_rect) {
-      final_results.push_back(current_record_rect);
-    }
+    SkIRect current_record_rect;
+    bounds(index).roundOut(&current_record_rect);
+    rects.push_back(current_record_rect);
+  }
+  DlRegion region(std::move(rects));
+
+  auto non_overlapping_rects = region.getRects(deband);
+  std::list<SkRect> final_results;
+  for (const auto& rect : non_overlapping_rects) {
+    final_results.push_back(SkRect::Make(rect));
   }
   return final_results;
 }

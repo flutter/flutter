@@ -116,6 +116,7 @@ group("flutter") {
     public_deps += [
       "//flutter/display_list:display_list_benchmarks",
       "//flutter/display_list:display_list_builder_benchmarks",
+      "//flutter/display_list:display_list_region_benchmarks",
       "//flutter/fml:fml_benchmarks",
       "//flutter/impeller/geometry:geometry_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
