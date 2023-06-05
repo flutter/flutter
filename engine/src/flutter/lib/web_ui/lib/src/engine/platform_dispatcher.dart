@@ -1194,24 +1194,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   /// A callback that is invoked whenever the user requests an action to be
-  /// performed.
-  ///
-  /// This callback is used when the user expresses the action they wish to
-  /// perform based on the semantics supplied by [updateSemantics].
-  ///
-  /// The framework invokes this callback in the same zone in which the
-  /// callback was set.
-  @override
-  ui.SemanticsActionCallback? get onSemanticsAction => _onSemanticsAction;
-  ui.SemanticsActionCallback? _onSemanticsAction;
-  Zone? _onSemanticsActionZone;
-  @override
-  set onSemanticsAction(ui.SemanticsActionCallback? callback) {
-    _onSemanticsAction = callback;
-    _onSemanticsActionZone = Zone.current;
-  }
-
-  /// A callback that is invoked whenever the user requests an action to be
   /// performed on a semantics node.
   ///
   /// This callback is used when the user expresses the action they wish to
@@ -1233,8 +1215,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(
       int nodeId, ui.SemanticsAction action, ByteData? args) {
-    invoke3<int, ui.SemanticsAction, ByteData?>(
-        _onSemanticsAction, _onSemanticsActionZone, nodeId, action, args);
     invoke1<ui.SemanticsActionEvent>(
         _onSemanticsActionEvent, _onSemanticsActionEventZone, ui.SemanticsActionEvent(
           type: action,

@@ -826,27 +826,6 @@ void hooksTests() async {
     expectEquals(enabled, newValue);
   });
 
-  await test('onSemanticsAction preserves callback zone', () {
-    late Zone innerZone;
-    late Zone runZone;
-    late int id;
-    late int action;
-
-    runZoned(() {
-      innerZone = Zone.current;
-      window.onSemanticsAction = (int i, SemanticsAction a, ByteData? _) {
-        runZone = Zone.current;
-        action = a.index;
-        id = i;
-      };
-    });
-
-    _callHook('_dispatchSemanticsAction', 3, 1234, 4, null);
-    expectIdentical(runZone, innerZone);
-    expectEquals(id, 1234);
-    expectEquals(action, 4);
-  });
-
   await test('onSemanticsActionEvent preserves callback zone', () {
     late Zone innerZone;
     late Zone runZone;
