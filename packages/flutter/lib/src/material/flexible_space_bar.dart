@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -251,17 +252,12 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             left: 0.0,
             right: 0.0,
             height: height,
-            child: Opacity(
-              // We need the child widget to repaint, however both the opacity
-              // and potentially `widget.background` can be constant which won't
-              // lead to repainting.
-              // see: https://github.com/flutter/flutter/issues/127836
-              key: ValueKey<double>(topPadding),
+            child: _FlexibleSpaceHeaderOpacity(
               // IOS is relying on this semantics node to correctly traverse
               // through the app bar when it is collapsed.
               alwaysIncludeSemantics: true,
               opacity: opacity,
-              child: widget.background,
+              child: widget.background
             ),
           ));
 
@@ -425,4 +421,34 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
         || currentExtent != oldWidget.currentExtent
         || isScrolledUnder != oldWidget.isScrolledUnder;
   }
+}
+
+// We need the child widget to repaint, however both the opacity
+// and potentially `widget.background` can be constant which won't
+// lead to repainting.
+// see: https://github.com/flutter/flutter/issues/127836
+class _FlexibleSpaceHeaderOpacity extends SingleChildRenderObjectWidget {
+  const _FlexibleSpaceHeaderOpacity({required this.opacity, required super.child, required this.alwaysIncludeSemantics});
+
+  final double opacity;
+  final bool alwaysIncludeSemantics;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderFlexibleSpaceHeaderOpacity(opacity: opacity, alwaysIncludeSemantics: alwaysIncludeSemantics);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderFlexibleSpaceHeaderOpacity renderObject) {
+    renderObject
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics
+      ..opacity = opacity;
+  }
+}
+
+class _RenderFlexibleSpaceHeaderOpacity extends RenderOpacity {
+  _RenderFlexibleSpaceHeaderOpacity({super.opacity, super.alwaysIncludeSemantics});
+
+  @override
+  bool get isRepaintBoundary => false;
 }

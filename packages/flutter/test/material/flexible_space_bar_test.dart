@@ -8,6 +8,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -348,7 +349,7 @@ void main() {
                               rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  id: 18,
+                                  id: 11,
                                   rect: const Rect.fromLTRB(0.0, 36.0, 800.0, 92.0),
                                   label: 'Expanded title',
                                   textDirection: TextDirection.ltr,
@@ -790,7 +791,7 @@ void main() {
       home: SubCategoryScreenView(),
     ));
 
-    expect(RebuildTracker.count, 1);
+    expect(RenderRebuildTracker.count, 1);
 
     // We drag up to fully collapse the space bar.
     for (int i = 0; i < 20; i++) {
@@ -798,7 +799,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(RebuildTracker.count, greaterThan(1));
+    expect(RenderRebuildTracker.count, greaterThan(1));
   });
 }
 
@@ -825,15 +826,22 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(TestDelegate oldDelegate) => false;
 }
 
-class RebuildTracker extends StatelessWidget {
+class RebuildTracker extends SingleChildRenderObjectWidget {
   const RebuildTracker({super.key});
 
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderRebuildTracker();
+  }
+}
+
+class RenderRebuildTracker extends RenderProxyBox {
   static int count = 0;
 
   @override
-  Widget build(BuildContext context)  {
+  void paint(PaintingContext context, Offset offset) {
     count++;
-    return const SizedBox(width: 100, height: 100);
+    super.paint(context, offset);
   }
 }
 
