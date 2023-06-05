@@ -34,9 +34,6 @@
 #include "impeller/entity/contents/checkerboard_contents.h"
 #endif  // IMPELLER_DEBUG
 
-// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
-// NOLINTBEGIN(bugprone-unchecked-optional-access)
-
 namespace impeller {
 
 EntityPass::EntityPass() = default;
@@ -317,8 +314,9 @@ bool EntityPass::Render(ContentContext& renderer,
 
   // If a root stencil was provided by the caller, then verify that it has a
   // configuration which can be used to render this pass.
-  if (root_render_target.GetStencilAttachment().has_value()) {
-    auto stencil_texture = root_render_target.GetStencilAttachment()->texture;
+  auto stencil_attachment = root_render_target.GetStencilAttachment();
+  if (stencil_attachment.has_value()) {
+    auto stencil_texture = stencil_attachment->texture;
     if (!stencil_texture) {
       VALIDATION_LOG << "The root RenderTarget must have a stencil texture.";
       return false;
@@ -437,10 +435,13 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       pass_context.EndPass();
     }
 
-    if (stencil_coverage_stack.empty() ||
-        !stencil_coverage_stack.back().coverage.has_value()) {
+    if (stencil_coverage_stack.empty()) {
       // The current clip is empty. This means the pass texture won't be
       // visible, so skip it.
+      return EntityPass::EntityResult::Skip();
+    }
+    auto stencil_coverage_back = stencil_coverage_stack.back().coverage;
+    if (!stencil_coverage_back.has_value()) {
       return EntityPass::EntityResult::Skip();
     }
 
@@ -450,7 +451,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
         Rect(global_pass_position, Size(pass_context.GetPassTarget()
                                             .GetRenderTarget()
                                             .GetRenderTargetSize()))
-            .Intersection(*stencil_coverage_stack.back().coverage);
+            .Intersection(stencil_coverage_back.value());
     if (!coverage_limit.has_value()) {
       return EntityPass::EntityResult::Skip();
     }
@@ -913,5 +914,3 @@ void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
 }
 
 }  // namespace impeller
-
-// NOLINTEND(bugprone-unchecked-optional-access)
