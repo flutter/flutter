@@ -67,7 +67,7 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
   @override
   Widget build(BuildContext context) {
     return NavigatorPopHandler(
-      onPop: () {
+      onPopped: (bool success) {
         _nestedNavigatorKey.currentState!.pop();
       },
       child: Navigator(
@@ -77,7 +77,7 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
           switch (settings.name) {
             case 'nested_navigators/one':
               final BuildContext rootContext = context;
-              return MaterialPageRoute(
+              return MaterialPageRoute<void>(
                 builder: (BuildContext context) => NestedNavigatorsPageOne(
                   onBack: () {
                     Navigator.of(rootContext).pop();
@@ -85,7 +85,7 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
                 ),
               );
             case 'nested_navigators/one/another_one':
-              return MaterialPageRoute(
+              return MaterialPageRoute<void>(
                 builder: (BuildContext context) => const NestedNavigatorsPageTwo(
                 ),
               );

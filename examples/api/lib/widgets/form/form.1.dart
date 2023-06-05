@@ -96,8 +96,8 @@ class _HomePageState extends State<_HomePage> {
             const SizedBox(height: 20.0),
             Form(
               popEnabled: !_isDirty,
-              onPop: () {
-                if (!_isDirty) {
+              onPopped: (bool success) {
+                if (success) {
                   return;
                 }
                 _showDialog();
