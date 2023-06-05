@@ -7,9 +7,7 @@ import 'dart:io';
 
 final TokenLogger tokenLogger = TokenLogger();
 
-/// Prints version and tokens usage to the console and to dump to a file.
-///
-/// Must set [allTokens] before calling [log] to log a token.
+/// Class to keep track of used tokens and versions.
 class TokenLogger {
   TokenLogger();
 
