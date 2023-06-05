@@ -9,6 +9,13 @@
 
 namespace impeller {
 
+std::shared_ptr<Texture> WrapperMTL(TextureDescriptor desc,
+                                    const void* mtl_texture,
+                                    std::function<void()> deletion_proc) {
+  return TextureMTL::Wrapper(desc, (__bridge id<MTLTexture>)mtl_texture,
+                             std::move(deletion_proc));
+}
+
 TextureMTL::TextureMTL(TextureDescriptor p_desc,
                        id<MTLTexture> texture,
                        bool wrapped)
@@ -28,9 +35,18 @@ TextureMTL::TextureMTL(TextureDescriptor p_desc,
   is_valid_ = true;
 }
 
-std::shared_ptr<TextureMTL> TextureMTL::Wrapper(TextureDescriptor desc,
-                                                id<MTLTexture> texture) {
-  return std::make_shared<TextureMTL>(desc, texture, true);
+std::shared_ptr<TextureMTL> TextureMTL::Wrapper(
+    TextureDescriptor desc,
+    id<MTLTexture> texture,
+    std::function<void()> deletion_proc) {
+  if (deletion_proc) {
+    return std::shared_ptr<TextureMTL>(
+        new TextureMTL(desc, texture, true),
+        [deletion_proc = std::move(deletion_proc)](TextureMTL* t) {
+          deletion_proc();
+        });
+  }
+  return std::shared_ptr<TextureMTL>(new TextureMTL(desc, texture, true));
 }
 
 TextureMTL::~TextureMTL() = default;

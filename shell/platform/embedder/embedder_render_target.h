@@ -5,11 +5,17 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_RENDER_TARGET_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_RENDER_TARGET_H_
 
+#include <memory>
 #include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+
+namespace impeller {
+class RenderTarget;
+class AiksContext;
+}  // namespace impeller
 
 namespace flutter {
 
@@ -22,28 +28,11 @@ namespace flutter {
 class EmbedderRenderTarget {
  public:
   //----------------------------------------------------------------------------
-  /// @brief      Creates a render target whose backing store is managed by the
-  ///             embedder. The way this render target is exposed to the engine
-  ///             is via an SkSurface and a callback that is invoked by this
-  ///             object in its destructor.
-  ///
-  /// @param[in]  backing_store   The backing store describing this render
-  ///                             target.
-  /// @param[in]  render_surface  The surface for this target.
-  /// @param[in]  on_release      The callback to invoke (eventually forwarded
-  ///                             to the embedder) when the backing store is no
-  ///                             longer required by the engine.
-  ///
-  EmbedderRenderTarget(FlutterBackingStore backing_store,
-                       sk_sp<SkSurface> render_surface,
-                       fml::closure on_release);
-
-  //----------------------------------------------------------------------------
   /// @brief      Destroys this instance of the render target and invokes the
   ///             callback for the embedder to release its resource associated
   ///             with the particular backing store.
   ///
-  ~EmbedderRenderTarget();
+  virtual ~EmbedderRenderTarget();
 
   //----------------------------------------------------------------------------
   /// @brief      A render surface the rasterizer can use to draw into the
@@ -51,7 +40,30 @@ class EmbedderRenderTarget {
   ///
   /// @return     The render surface.
   ///
-  sk_sp<SkSurface> GetRenderSurface() const;
+  virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      An impeller render target the rasterizer can use to draw into
+  ///             the backing store.
+  ///
+  /// @return     The Impeller render target.
+  ///
+  virtual impeller::RenderTarget* GetImpellerRenderTarget() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns the AiksContext that should be used for rendering, if
+  ///             this render target is backed by Impeller.
+  ///
+  /// @return     The Impeller Aiks context.
+  ///
+  virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns the size of the render target.
+  ///
+  /// @return     The size of the render target.
+  ///
+  virtual SkISize GetRenderTargetSize() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      The embedder backing store descriptor. This is the descriptor
@@ -65,9 +77,25 @@ class EmbedderRenderTarget {
   ///
   const FlutterBackingStore* GetBackingStore() const;
 
+ protected:
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a render target whose backing store is managed by the
+  ///             embedder. The way this render target is exposed to the engine
+  ///             is via an SkSurface and a callback that is invoked by this
+  ///             object in its destructor.
+  ///
+  /// @param[in]  backing_store   The backing store describing this render
+  ///                             target.
+  /// @param[in]  on_release      The callback to invoke (eventually forwarded
+  ///                             to the embedder) when the backing store is no
+  ///                             longer required by the engine.
+  ///
+  EmbedderRenderTarget(FlutterBackingStore backing_store,
+                       fml::closure on_release);
+
  private:
   FlutterBackingStore backing_store_;
-  sk_sp<SkSurface> render_surface_;
+
   fml::closure on_release_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderRenderTarget);
