@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 
 void main() {
   final TokenLogger logger = tokenLogger;
-  logger.init(allTokens: {}, versionMap: {});
+  logger.init(allTokens: <String, dynamic>{}, versionMap: <String, List<String>>{});
 
   test('Templates will append to the end of a file', () {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
