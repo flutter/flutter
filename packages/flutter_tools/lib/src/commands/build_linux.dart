@@ -4,7 +4,9 @@
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/os.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -83,7 +85,7 @@ class BuildLinuxCommand extends BuildSubCommand {
           'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
     }
     displayNullSafetyMode(buildInfo);
-    await buildLinux(
+    final Directory outputDirectory = await buildLinux(
       flutterProject.linux,
       buildInfo,
       target: targetFile,
@@ -96,6 +98,18 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot')!,
     );
+
+    final String? directorySize = await getDirectorySize(outputDirectory);
+    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' ($directorySize)';
+
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+      color: TerminalColor.green,
+    );
+
     return FlutterCommandResult.success();
   }
 }

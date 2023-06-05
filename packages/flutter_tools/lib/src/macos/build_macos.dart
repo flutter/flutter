@@ -8,14 +8,15 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../globals.dart' as globals;
+import '../ios/mac.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
+import 'application_package.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
@@ -33,7 +34,7 @@ final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extensio
 
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
-Future<void> buildMacOS({
+Future<XcodeBuildResult> buildMacOS({
   required FlutterProject flutterProject,
   required BuildInfo buildInfo,
   String? targetOverride,
@@ -84,7 +85,7 @@ Future<void> buildMacOS({
     flutterProject.macos.outputFileList.createSync(recursive: true);
   }
   if (configOnly) {
-    return;
+    return XcodeBuildResult(success: true);
   }
 
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
@@ -137,49 +138,12 @@ Future<void> buildMacOS({
   } finally {
     status.cancel();
   }
-  if (result != 0) {
-    throwToolExit('Build process failed');
-  }
-  if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = DarwinArch.x86_64.name;
-    final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('snapshot.$arch.json');
-    final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-      .childFile('trace.$arch.json');
 
-    // This analysis is only supported for release builds.
-    // Attempt to guess the correct .app by picking the first one.
-    final Directory candidateDirectory = globals.fs.directory(
-      globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
-    );
-    final Directory appDirectory = candidateDirectory.listSync()
-      .whereType<Directory>()
-      .firstWhere((Directory directory) {
-      return globals.fs.path.extension(directory.path) == '.app';
-    });
-    final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
-      aotSnapshot: aotSnapshot,
-      precompilerTrace: precompilerTrace,
-      outputDirectory: appDirectory,
-      type: 'macos',
-      excludePath: 'Versions', // Avoid double counting caused by symlinks
-    );
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs
-        .directory(globals.fsUtils.homeDirPath)
-        .childDirectory('.flutter-devtools'), 'macos-code-size-analysis', 'json',
-    )..writeAsStringSync(jsonEncode(output));
-    // This message is used as a sentinel in analyze_apk_size_test.dart
-    globals.printStatus(
-      'A summary of your macOS bundle analysis can be found at: ${outputFile.path}',
-    );
-
-    // DevTools expects a file path relative to the .flutter-devtools/ dir.
-    final String relativeAppSizePath = outputFile.path.split('.flutter-devtools/').last.trim();
-    globals.printStatus(
-      '\nTo analyze your app size in Dart DevTools, run the following command:\n'
-      'dart devtools --appSizeBase=$relativeAppSizePath'
-    );
-  }
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
+
+  final MacOSApp project = MacOSApp.fromMacOSProject(flutterProject.macos);
+  return XcodeBuildResult(
+    success: result == 0,
+    output: project.applicationBundle(buildInfo),
+  );
 }

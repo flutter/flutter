@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
@@ -195,7 +196,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterVersion: globals.flutterVersion,
       usage: globals.flutterUsage,
     );
-    await webBuilder.buildWeb(
+    final Directory outputDirectory = await webBuilder.buildWeb(
       flutterProject,
       target,
       buildInfo,
@@ -204,6 +205,18 @@ class BuildWebCommand extends BuildSubCommand {
       baseHref: baseHref,
       outputDirectoryPath: outputDirectoryPath,
     );
+
+    final String? directorySize = await getDirectorySize(outputDirectory);
+    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' ($directorySize)';
+
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built at ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+      color: TerminalColor.green,
+    );
+
     return FlutterCommandResult.success();
   }
 }

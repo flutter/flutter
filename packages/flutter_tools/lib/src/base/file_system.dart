@@ -6,11 +6,13 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as local_fs;
 import 'package:meta/meta.dart';
 
+import '../convert.dart';
 import 'common.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'process.dart';
 import 'signals.dart';
+import 'utils.dart';
 
 // package:file/local.dart must not be exported. This exposes LocalFileSystem,
 // which we override to ensure that temporary directories are cleaned up when
@@ -171,6 +173,40 @@ File _getUniqueFile(Directory dir, String baseName, String ext) {
 /// directory.
 File getUniqueFile(Directory dir, String baseName, String ext) {
   return _getUniqueFile(dir, baseName, ext);
+}
+
+/// Return [directory]'s total size in a human-readable format.
+Future<String?> getDirectorySize(Directory directory) async {
+  const LocalPlatform platform = LocalPlatform();
+  if (platform.isMacOS || platform.isLinux) {
+    final ProcessResult result = await Process.run('du', <String>['-sh', directory.path]);
+    if (result.exitCode != 0) {
+      return null;
+    }
+    final String output = result.stdout as String;
+    final List<String> outputLines = output.trim().split('\t');
+    if (outputLines.isNotEmpty) {
+      return outputLines.first;
+    }
+  } else if (platform.isWindows) {
+    final ProcessResult result = await Process.run(
+      'powershell.exe',
+      <String>['ls', '-r', directory.path, '|', 'measure', '-sum', 'Length'],
+    );
+    if (result.exitCode != 0) {
+      return null;
+    }
+    final String output = result.stdout as String;
+    final RegExp regex = RegExp(r'Sum\s+:\s+(\d+)');
+    final List<String> lines = LineSplitter.split(output).toList();
+    final RegExpMatch? match = regex.firstMatch(lines.last);
+    if (match == null) {
+      return null;
+    }
+    final int totalBytes = int.parse(match.group(1)!);
+    return getSizeAsMB(totalBytes);
+  }
+  return null;
 }
 
 /// This class extends [local_fs.LocalFileSystem] in order to clean up

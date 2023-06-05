@@ -50,7 +50,7 @@ class WebBuilder {
   final FlutterVersion _flutterVersion;
   final FileSystem _fileSystem;
 
-  Future<void> buildWeb(
+  Future<Directory> buildWeb(
     FlutterProject flutterProject,
     String target,
     BuildInfo buildInfo,
@@ -142,6 +142,8 @@ class WebBuilder {
       compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
       Duration(milliseconds: sw.elapsedMilliseconds),
     );
+
+    return outputDirectory;
   }
 }
 

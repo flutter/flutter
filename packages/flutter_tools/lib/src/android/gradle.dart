@@ -495,7 +495,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     if (isBuildingBundle) {
       final File bundleFile = findBundleFile(project, buildInfo, _logger, _usage);
-      final String appSize = (buildInfo.mode == BuildMode.debug)
+      final String outputSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsMB(bundleFile.lengthSync())})';
 
@@ -504,7 +504,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       }
 
       _logger.printStatus(
-        '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(bundleFile.path)}$appSize.',
+        '${_logger.terminal.successMark} '
+        'Built ${_fileSystem.path.relative(bundleFile.path)}$outputSize.',
         color: TerminalColor.green,
       );
       return;
@@ -531,11 +532,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
       apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
-      final String appSize = (buildInfo.mode == BuildMode.debug)
+      final String outputSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsMB(apkFile.lengthSync())})';
       _logger.printStatus(
-        '${_logger.terminal.successMark}  Built ${_fileSystem.path.relative(apkFile.path)}$appSize.',
+        '${_logger.terminal.successMark} '
+        'Built ${_fileSystem.path.relative(apkFile.path)}$outputSize.',
         color: TerminalColor.green,
       );
 

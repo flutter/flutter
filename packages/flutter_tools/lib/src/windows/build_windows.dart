@@ -98,18 +98,19 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     status.stop();
   }
 
-  final String? binaryName = getCmakeExecutableName(windowsProject);
-  final File appFile = buildDirectory
+  final Directory outputDirectory = buildDirectory
     .childDirectory('runner')
-    .childDirectory(sentenceCase(buildModeName))
-    .childFile('$binaryName.exe');
+    .childDirectory(sentenceCase(buildModeName));
+  final File appFile = outputDirectory.childFile('${getCmakeExecutableName(windowsProject)}.exe');
   if (appFile.existsSync()) {
-    final String appSize = (buildInfo.mode == BuildMode.debug)
+    final String? directorySize = await getDirectorySize(outputDirectory);
+    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
         ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(appFile.lengthSync())})';
-    globals.logger.printStatus(
-      '${globals.logger.terminal.successMark}  '
-      'Built ${globals.fs.path.relative(appFile.path)}$appSize.',
+        : ' ($directorySize)';
+
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
       color: TerminalColor.green,
     );
   }

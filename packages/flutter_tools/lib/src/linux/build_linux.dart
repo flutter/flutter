@@ -26,7 +26,7 @@ import '../migrations/cmake_custom_command_migration.dart';
 final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(
+Future<Directory> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String? target,
@@ -66,10 +66,9 @@ Future<void> buildLinux(
   final Status status = globals.logger.startProgress(
     'Building Linux application...',
   );
+  final String buildModeName = buildInfo.mode.cliName;
+  final Directory buildDirectory = globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
   try {
-    final String buildModeName = buildInfo.mode.cliName;
-    final Directory buildDirectory =
-        globals.fs.directory(getLinuxBuildDirectory(targetPlatform)).childDirectory(buildModeName);
     await _runCmake(buildModeName, linuxProject.cmakeFile.parent, buildDirectory,
                     needCrossBuild, targetPlatform, targetSysroot);
     await _runBuild(buildDirectory);
@@ -108,6 +107,8 @@ Future<void> buildLinux(
       'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
+
+  return buildDirectory;
 }
 
 Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
