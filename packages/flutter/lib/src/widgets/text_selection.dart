@@ -563,6 +563,11 @@ class TextSelectionOverlay {
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
   /// {@macro flutter.widgets.SelectionOverlay.toolbarIsVisible}
+  ///
+  /// See also:
+  ///
+  ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
+  ///     specifically is visible.
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
 
   /// Whether the magnifier is currently visible.
@@ -981,11 +986,6 @@ class SelectionOverlay {
   /// Whether the toolbar is currently visible.
   ///
   /// Includes both the text selection toolbar and the spell check menu.
-  ///
-  /// See also:
-  ///
-  ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
-  ///     specifically is visible.
   /// {@endtemplate}
   bool get toolbarIsVisible {
     return selectionControls is TextSelectionHandleControls
