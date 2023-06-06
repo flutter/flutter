@@ -38,7 +38,7 @@ class PopupRouteExample extends StatelessWidget {
   }
 }
 
-class DismissibleDialog<T> extends PopupRoute<T> {
+final class DismissibleDialog<T> extends PopupRoute<T> {
   @override
   Color? get barrierColor => Colors.black.withAlpha(0x50);
 

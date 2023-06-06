@@ -63,7 +63,7 @@ class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContaine
   }
 }
 
-class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+final class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   Offset? _adjustedStartEdge;
   Offset? _adjustedEndEdge;
   bool _isSelected = false;
