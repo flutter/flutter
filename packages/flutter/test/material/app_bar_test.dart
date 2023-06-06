@@ -62,6 +62,15 @@ TextStyle? iconStyle(WidgetTester tester, IconData icon) {
   return iconRichText.text.style;
 }
 
+void _verifyTextNotClipped(Finder textFinder, WidgetTester tester) {
+  final Rect clipRect = tester.getRect(find.ancestor(of: textFinder, matching: find.byType(ClipRect)).first);
+  final Rect textRect = tester.getRect(textFinder);
+  expect(textRect.top, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.bottom, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.left, inInclusiveRange(clipRect.left, clipRect.right));
+  expect(textRect.right, inInclusiveRange(clipRect.left, clipRect.right));
+}
+
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
 double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
@@ -1138,7 +1147,9 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, closeTo(96.0, 0.1));
+    expect(titleOffset.dy, 96.0);
+
+    _verifyTextNotClipped(expandedTitle, tester);
 
     // Test the expanded title default color.
     expect(
@@ -1223,8 +1234,14 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, closeTo(128.0, 0.1));
-
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    // The expanded title and the bottom padding fits in the flexible space.
+    expect(
+      titleOffset.dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     // Test the expanded title default color.
     expect(
@@ -4704,13 +4721,16 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    expect(tester.getRect(expandedTitle).height, closeTo(31.9, 0.1));
+    expect(tester.getRect(expandedTitle).height, 32.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+    expect(tester.getRect(expandedTitle).height, 43.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+    expect(tester.getRect(expandedTitle).height, 43.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
@@ -4787,24 +4807,16 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     final Finder expandedTitle = find.text(title).first;
-    Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, 64.0);
-    Offset titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(96.0, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 96.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(57.0, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(100.0, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(57.0, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(100.0, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
@@ -4834,29 +4846,28 @@ void main() {
     }
 
     await tester.pumpWidget(buildAppBar());
-    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    // A bug in the HTML renderer and/or Chrome 96+ causes a
-    // discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
-    Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(hasIssue99933 ? 91.0 : 92.0, 0.1));
-    Offset titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(128.0, 0.1));
+    final RenderSliver renderSliverAppBar = tester.renderObject(find.byType(SliverAppBar));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
+    _verifyTextNotClipped(expandedTitle, tester);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
+    expect(
+      tester.getBottomLeft(expandedTitle).dy,
+      renderSliverAppBar.geometry!.scrollExtent - 28.0,
+      reason: 'bottom padding of a large expanded title should be 28.',
+    );
+    _verifyTextNotClipped(expandedTitle, tester);
 
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(86.1, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(134.1, 0.1));
-
+    // The bottom padding of the expanded title needs to be reduced for it to be
+    // fully visible.
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
-
-    titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(86.1, 0.1));
-    titleBottom = tester.getBottomLeft(expandedTitle);
-    expect(titleBottom.dy, closeTo(134.1, 0.1));
+    expect(tester.getBottomLeft(expandedTitle).dy, 124.0);
+    _verifyTextNotClipped(expandedTitle, tester);
   });
 
   group('AppBar.forceMaterialTransparency', () {
