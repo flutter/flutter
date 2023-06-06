@@ -5,7 +5,6 @@
 #ifndef FLUTTER_FLOW_EMBEDDED_VIEWS_H_
 #define FLUTTER_FLOW_EMBEDDED_VIEWS_H_
 
-#include <memory>
 #include <vector>
 
 #include "flutter/display_list/dl_builder.h"
@@ -22,16 +21,6 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
-
-#if IMPELLER_SUPPORTS_RENDERING
-#include "flutter/impeller/aiks/aiks_context.h"  // nogncheck
-#include "flutter/impeller/renderer/context.h"   // nogncheck
-#else                                            // IMPELLER_SUPPORTS_RENDERING
-namespace impeller {
-class Context;
-class AiksContext;
-}  // namespace impeller
-#endif                                           // !IMPELLER_SUPPORTS_RENDERING
 
 class GrDirectContext;
 
@@ -425,10 +414,8 @@ class ExternalViewEmbedder {
   // This method can mutate the root Skia canvas before submitting the frame.
   //
   // It can also allocate frames for overlay surfaces to compose hybrid views.
-  virtual void SubmitFrame(
-      GrDirectContext* context,
-      const std::shared_ptr<impeller::AiksContext>& aiks_context,
-      std::unique_ptr<SurfaceFrame> frame);
+  virtual void SubmitFrame(GrDirectContext* context,
+                           std::unique_ptr<SurfaceFrame> frame);
 
   // This method provides the embedder a way to do additional tasks after
   // |SubmitFrame|. For example, merge task runners if `should_resubmit_frame`
