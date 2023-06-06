@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html';
 import 'dart:js_interop';
 // The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
 // for `JSObject.[]=`.
@@ -1281,10 +1282,10 @@ void endMeasureFrame() {
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
     web.window.performance.mark('measured_frame_end#$_currentFrameNumber'.toJS);
-    web.window.performance.measure(
-      'measured_frame'.toJS,
-      'measured_frame_start#$_currentFrameNumber'.toJS,
-      'measured_frame_end#$_currentFrameNumber'.toJS,
+    html.window.performance.measure(
+      'measured_frame',
+      'measured_frame_start#$_currentFrameNumber',
+      'measured_frame_end#$_currentFrameNumber',
     );
 
     // Increment the current frame number.
