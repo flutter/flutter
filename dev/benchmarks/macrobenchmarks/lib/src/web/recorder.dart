@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js_interop';
 // The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
 // for `JSObject.[]=`.
@@ -1259,8 +1258,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
-
+    web.window.performance.mark('measured_frame_start#$_currentFrameNumber'.toJS);
     _isMeasuringFrame = true;
   }
 }
@@ -1282,11 +1280,11 @@ void endMeasureFrame() {
 
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
-    html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
-    html.window.performance.measure(
-      'measured_frame',
-      'measured_frame_start#$_currentFrameNumber',
-      'measured_frame_end#$_currentFrameNumber',
+    web.window.performance.mark('measured_frame_end#$_currentFrameNumber'.toJS);
+    web.window.performance.measure(
+      'measured_frame'.toJS,
+      'measured_frame_start#$_currentFrameNumber'.toJS,
+      'measured_frame_end#$_currentFrameNumber'.toJS,
     );
 
     // Increment the current frame number.
