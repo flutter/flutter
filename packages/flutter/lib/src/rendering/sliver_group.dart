@@ -184,11 +184,12 @@ bool _assertOutOfExtent(double extent) {
 /// A sliver that places multiple sliver children in a linear array along the
 /// main axis.
 ///
-/// The layout algorithm lays out slivers one by one. If the sliver is visible
-/// on the [Viewport] due to a sufficiently high [SliverConstraints.scrollOffset],
-/// then we compute a valid [SliverConstraints.scrollOffset] and
-/// [SliverConstraints.remainingPaintExtent] based on the total [SliverConstraints.scrollOffset]
-/// of all the sliver children laid out so far.
+/// The layout algorithm lays out slivers one by one. If the sliver is at the top
+/// of the viewport or above the top, then we pass in a nonzero [SliverConstraints.scrollOffset]
+/// to inform the sliver at what point along the main axis we should start layout.
+/// For the slivers that come after it, we compute the amount of space taken up so
+/// far to be used as the [SliverPhysicalParentData.paintOffset] and the
+/// [SliverConstraints.remainingPaintExtent] to be passed in as a constraint.
 ///
 /// Finally, this sliver will also ensure that all child slivers are painted within
 /// the total scroll extent of the group by adjusting the child's
