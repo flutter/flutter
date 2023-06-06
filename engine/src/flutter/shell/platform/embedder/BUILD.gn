@@ -5,7 +5,6 @@
 import("//build/toolchain/clang.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
-import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/platform/embedder/embedder.gni")
 import("//flutter/testing/testing.gni")
@@ -76,8 +75,6 @@ template("embedder_source_set") {
       "embedder_render_target.h",
       "embedder_render_target_cache.cc",
       "embedder_render_target_cache.h",
-      "embedder_render_target_skia.cc",
-      "embedder_render_target_skia.h",
       "embedder_struct_macros.h",
       "embedder_surface.cc",
       "embedder_surface.h",
@@ -93,8 +90,6 @@ template("embedder_source_set") {
       "vsync_waiter_embedder.cc",
       "vsync_waiter_embedder.h",
     ]
-
-    public_deps = [ ":embedder_headers" ]
 
     if (embedder_enable_gl) {
       sources += [
@@ -121,15 +116,6 @@ template("embedder_source_set") {
       "//third_party/skia",
     ]
 
-    if (impeller_supports_rendering) {
-      sources += [
-        "embedder_render_target_impeller.cc",
-        "embedder_render_target_impeller.h",
-      ]
-
-      deps += [ "//flutter/impeller" ]
-    }
-
     if (embedder_enable_metal) {
       sources += [
         "embedder_external_texture_metal.h",
@@ -137,13 +123,6 @@ template("embedder_source_set") {
         "embedder_surface_metal.h",
         "embedder_surface_metal.mm",
       ]
-
-      if (impeller_supports_rendering) {
-        sources += [
-          "embedder_surface_metal_impeller.h",
-          "embedder_surface_metal_impeller.mm",
-        ]
-      }
 
       cflags_objc = flutter_cflags_objc
       cflags_objcc = flutter_cflags_objcc
@@ -163,11 +142,12 @@ template("embedder_source_set") {
       ]
     }
 
+    public_deps = [ ":embedder_headers" ]
+
     public_configs += [
       ":embedder_gpu_configuration_config",
       ":embedder_header_config",
       "//flutter:config",
-      "//flutter/impeller:impeller_public_config",
     ]
   }
 }

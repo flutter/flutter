@@ -335,12 +335,11 @@ void DrawSimpleFrame(FlatlandExternalViewEmbedder& external_view_embedder,
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
   external_view_embedder.SubmitFrame(
-      nullptr, nullptr,
-      std::make_unique<flutter::SurfaceFrame>(
-          nullptr, std::move(framebuffer_info),
-          [](const flutter::SurfaceFrame& surface_frame,
-             flutter::DlCanvas* canvas) { return true; },
-          frame_size));
+      nullptr, std::make_unique<flutter::SurfaceFrame>(
+                   nullptr, std::move(framebuffer_info),
+                   [](const flutter::SurfaceFrame& surface_frame,
+                      flutter::DlCanvas* canvas) { return true; },
+                   frame_size));
 }
 
 void DrawFrameWithView(
@@ -366,12 +365,11 @@ void DrawFrameWithView(
   flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
   framebuffer_info.supports_readback = true;
   external_view_embedder.SubmitFrame(
-      nullptr, nullptr,
-      std::make_unique<flutter::SurfaceFrame>(
-          nullptr, std::move(framebuffer_info),
-          [](const flutter::SurfaceFrame& surface_frame,
-             flutter::DlCanvas* canvas) { return true; },
-          frame_size));
+      nullptr, std::make_unique<flutter::SurfaceFrame>(
+                   nullptr, std::move(framebuffer_info),
+                   [](const flutter::SurfaceFrame& surface_frame,
+                      flutter::DlCanvas* canvas) { return true; },
+                   frame_size));
 }
 
 };  // namespace
