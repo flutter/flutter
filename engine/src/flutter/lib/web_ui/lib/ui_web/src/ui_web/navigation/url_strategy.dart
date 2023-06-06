@@ -179,8 +179,17 @@ class HashUrlStrategy implements UrlStrategy {
     // if the empty URL is pushed it won't replace any existing fragment. So
     // when the hash path is empty, we still return the location's path and
     // query.
-    return '${_platformLocation.pathname}${_platformLocation.search}'
-        '${internalUrl.isEmpty ? '' : '#$internalUrl'}';
+    final String hash;
+    if (internalUrl.isEmpty || internalUrl == '/') {
+      // Let's not add the hash at all when the app is in the home page. That
+      // way, the URL of the home page is cleaner.
+      //
+      // See: https://github.com/flutter/flutter/issues/127608
+      hash = '';
+    } else {
+      hash = '#$internalUrl';
+    }
+    return '${_platformLocation.pathname}${_platformLocation.search}$hash';
   }
 
   @override
