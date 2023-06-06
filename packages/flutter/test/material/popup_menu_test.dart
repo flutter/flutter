@@ -3262,21 +3262,24 @@ void main() {
   });
 
   testWidgets('PopupmenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
-    final List<int> orderList = <int>[];
-
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
               PopupMenuButton<int>(
-                onSelected: (int value) {
-                  orderList.add(value);
-                },
                 itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
                   PopupMenuItem<int>(
                     onTap: () {
-                      orderList.add(1);
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const SizedBox(
+                            height: 200.0,
+                            child: Center(child: Text('ModalBottomSheet')),
+                          );
+                        },
+                      );
                     },
                     value: 10,
                     child: const Text('ACTION'),
@@ -3295,9 +3298,9 @@ void main() {
     await tester.tap(find.text('ACTION'));
     await tester.pumpAndSettle();
 
-    expect(orderList.length, 2);
-    expect(orderList[0], 1);
-    expect(orderList[1], 10);
+    // Verify that the ModalBottomSheet is displayed
+    final Finder modalBottomSheet = find.text('ModalBottomSheet');
+    expect(modalBottomSheet, findsOneWidget);
   });
 }
 
