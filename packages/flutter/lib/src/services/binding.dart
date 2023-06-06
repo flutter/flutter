@@ -275,22 +275,26 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       ];
     }
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
+    AppLifecycleState? initialState;
     if (previousState == null) {
-      // If there was no previous state, then just transition to the new state.
-      stateChanges.add(state);
+      // If there was no previous state, then transition to detached, and then
+      // to each intermediate state until we reach the new state. Keep the
+      // initial state in a separate variable so that we can validate more
+      // easily below.
+      initialState = AppLifecycleState.detached;
+      previousState = initialState;
+    }
+    final int previousStateIndex = AppLifecycleState.values.indexOf(previousState);
+    final int stateIndex = AppLifecycleState.values.indexOf(state);
+    assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
+    assert(stateIndex != -1, 'State $state missing in stateOrder array');
+    if (previousStateIndex > stateIndex) {
+      for (int i = stateIndex; i < previousStateIndex; ++i) {
+        stateChanges.insert(0, AppLifecycleState.values[i]);
+      }
     } else {
-      final int previousStateIndex = AppLifecycleState.values.indexOf(previousState);
-      final int stateIndex = AppLifecycleState.values.indexOf(state);
-      assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
-      assert(stateIndex != -1, 'State $state missing in stateOrder array');
-      if (previousStateIndex > stateIndex) {
-        for (int i = stateIndex; i < previousStateIndex; ++i) {
-          stateChanges.insert(0, AppLifecycleState.values[i]);
-        }
-      } else {
-        for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
-          stateChanges.add(AppLifecycleState.values[i]);
-        }
+      for (int i = previousStateIndex + 1; i <= stateIndex; ++i) {
+        stateChanges.add(AppLifecycleState.values[i]);
       }
     }
     assert((){
@@ -303,7 +307,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       }
       return true;
     }(), 'Invalid lifecycle state transition generated from $previousState to $state (generated $stateChanges)');
-    return stateChanges;
+    return <AppLifecycleState>[if (initialState != null) initialState, ...stateChanges];
   }
 
   static bool _debugVerifyLifecycleChange(AppLifecycleState? starting, AppLifecycleState ending) {

@@ -206,29 +206,29 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
     _lifecycleState = state;
     switch (state) {
       case AppLifecycleState.resumed:
-        assert(previousState == AppLifecycleState.inactive || previousState == AppLifecycleState.detached, 'Invalid state transition to $state from $previousState');
+        assert(previousState == null || previousState == AppLifecycleState.inactive || previousState == AppLifecycleState.detached, 'Invalid state transition to $state from $previousState');
         onResume?.call();
       case AppLifecycleState.inactive:
-        assert(previousState == AppLifecycleState.hidden || previousState == AppLifecycleState.resumed, 'Invalid state transition to $state from $previousState');
+        assert(previousState == null || previousState == AppLifecycleState.hidden || previousState == AppLifecycleState.resumed, 'Invalid state transition to $state from $previousState');
         if (previousState == AppLifecycleState.hidden) {
           onShow?.call();
-        } else if (previousState == AppLifecycleState.resumed) {
+        } else if (previousState == null || previousState == AppLifecycleState.resumed) {
           onInactive?.call();
         }
       case AppLifecycleState.hidden:
-        assert(previousState == AppLifecycleState.paused || previousState == AppLifecycleState.inactive, 'Invalid state transition to $state from $previousState');
+        assert(previousState == null || previousState == AppLifecycleState.paused || previousState == AppLifecycleState.inactive, 'Invalid state transition to $state from $previousState');
         if (previousState == AppLifecycleState.paused) {
           onRestart?.call();
-        } else if (previousState == AppLifecycleState.inactive) {
+        } else if (previousState == null || previousState == AppLifecycleState.inactive) {
           onHide?.call();
         }
       case AppLifecycleState.paused:
-        assert(previousState == AppLifecycleState.hidden, 'Invalid state transition to $state from $previousState');
-        if (previousState == AppLifecycleState.hidden) {
+        assert(previousState == null || previousState == AppLifecycleState.hidden, 'Invalid state transition to $state from $previousState');
+        if (previousState == null || previousState == AppLifecycleState.hidden) {
           onPause?.call();
         }
       case AppLifecycleState.detached:
-        assert(previousState == AppLifecycleState.paused, 'Invalid state transition to $state from $previousState');
+        assert(previousState == null || previousState == AppLifecycleState.paused, 'Invalid state transition to $state from $previousState');
         onDetach?.call();
     }
     // At this point, it can't be null anymore.
