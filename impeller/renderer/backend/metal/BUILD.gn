@@ -42,8 +42,6 @@ impeller_component("metal") {
     "surface_mtl.mm",
     "texture_mtl.h",
     "texture_mtl.mm",
-    "texture_wrapper_mtl.h",
-    "texture_wrapper_mtl.mm",
     "vertex_descriptor_mtl.h",
     "vertex_descriptor_mtl.mm",
   ]

@@ -76,7 +76,7 @@ class PlatformViewEmbedder final : public PlatformView {
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
       const flutter::TaskRunners& task_runners,
-      std::unique_ptr<EmbedderSurface> embedder_surface,
+      std::unique_ptr<EmbedderSurfaceMetal> embedder_surface,
       PlatformDispatchTable platform_dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 #endif
@@ -117,9 +117,6 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |PlatformView|
   std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
-
-  // |PlatformView|
-  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
   // |PlatformView|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
