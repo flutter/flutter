@@ -1911,6 +1911,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         if (index == 0 && lastSelectionResult == SelectionResult.previous) {
           return SelectionResult.previous;
         }
+        if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+          return SelectionResult.next;
+        }
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the
           // selection of other selectables to keep selection in sync.
@@ -1920,9 +1923,15 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           currentSelectionStartIndex = currentSelectionEndIndex = index;
         }
         return SelectionResult.end;
+      } else {
+        if (lastSelectionResult == SelectionResult.next) {
+          currentSelectionStartIndex = currentSelectionEndIndex = index - 1;
+          return SelectionResult.end;
+        }
       }
     }
-    return SelectionResult.next;
+    assert(lastSelectionResult == null);
+    return SelectionResult.end;
   }
 
   /// Removes the selection of all selectables this delegate manages.
