@@ -252,8 +252,10 @@ SKWASM_EXPORT void canvas_drawAtlas(SkCanvas* canvas,
                                     SkBlendMode mode,
                                     SkRect* cullRect,
                                     SkPaint* paint) {
-  canvas->drawAtlas(atlas, transforms, rects, colors, spriteCount, mode,
-                    SkSamplingOptions{}, cullRect, paint);
+  canvas->drawAtlas(
+      atlas, transforms, rects, colors, spriteCount, mode,
+      SkSamplingOptions{SkFilterMode::kLinear, SkMipmapMode::kNone}, cullRect,
+      paint);
 }
 
 SKWASM_EXPORT void canvas_getTransform(SkCanvas* canvas, SkM44* outTransform) {
