@@ -263,7 +263,7 @@ class SelectableRegion extends StatefulWidget {
     required final VoidCallback onCopy,
     required final VoidCallback onSelectAll,
   }) {
-    final bool canCopy = selectionGeometry.hasSelection && selectionGeometry.startSelectionPoint?.localPosition != selectionGeometry.endSelectionPoint?.localPosition;
+    final bool canCopy = selectionGeometry.hasSelection && selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
 
     // Determine which buttons will appear so that the order and total number is
@@ -498,31 +498,39 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.windows:
-        _selectStartTo(offset: details.globalPosition);
-        _selectEndTo(offset: details.globalPosition);
+        if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
+          // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
+        } else {
+          _selectStartTo(offset: lastSecondaryTapDownPosition);
+          _selectEndTo(offset: lastSecondaryTapDownPosition);
+        }
         _showHandles();
-        _showToolbar(location: details.globalPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.iOS:
-        _selectWordAt(offset: details.globalPosition);
+        _selectWordAt(offset: lastSecondaryTapDownPosition);
         _showHandles();
-        _showToolbar(location: details.globalPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
         if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        _selectWordAt(offset: details.globalPosition);
+        _selectWordAt(offset: lastSecondaryTapDownPosition);
         _showHandles();
-        _showToolbar(location: details.globalPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition);
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        _selectStartTo(offset: details.globalPosition);
-        _selectEndTo(offset: details.globalPosition);
+        if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
+          // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
+        } else {
+          _selectStartTo(offset: lastSecondaryTapDownPosition);
+          _selectEndTo(offset: lastSecondaryTapDownPosition);
+        }
         _showHandles();
-        _showToolbar(location: details.globalPosition);
+        _showToolbar(location: lastSecondaryTapDownPosition);
     }
     _updateSelectedContentIfNeeded();
   }
