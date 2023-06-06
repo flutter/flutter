@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -98,16 +97,22 @@ class _MyContextMenuState extends State<MyContextMenu> {
   }
 
   Future<void> _disableContextMenu() async {
+    if (!kIsWeb) {
+      // Does nothing on non-web platforms.
+      return;
+    }
     _menuWasEnabled = BrowserContextMenu.enabled;
     if (_menuWasEnabled) {
-      // Does nothing on non-web platforms.
       await BrowserContextMenu.disableContextMenu();
     }
   }
 
   void _reenableContextMenu() {
-    if (_menuWasEnabled && !BrowserContextMenu.enabled) {
+    if (!kIsWeb) {
       // Does nothing on non-web platforms.
+      return;
+    }
+    if (_menuWasEnabled && !BrowserContextMenu.enabled) {
       BrowserContextMenu.enableContextMenu();
     }
   }
@@ -168,7 +173,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
               children: <Widget>[
                 const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text('Ctrl-click anywhere on the background to show the menu.'),
+                  child: Text('Right-click anywhere on the background to show the menu.'),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
