@@ -499,6 +499,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.data/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.debugdata/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.device.fs/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/meta.json
@@ -629,6 +630,7 @@
 ../../../fuchsia/sdk/linux/pkg/async/meta.json
 ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_devfs_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/fdio/meta.json
 ../../../fuchsia/sdk/linux/pkg/fidl/meta.json
 ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
