@@ -175,7 +175,7 @@ bool LayerRasterCacheItem::Draw(const PaintContext& context,
 bool LayerRasterCacheItem::Draw(const PaintContext& context,
                                 DlCanvas* canvas,
                                 const DlPaint* paint) const {
-  if (!layer_children_id_.has_value() || !context.raster_cache || !canvas) {
+  if (!context.raster_cache || !canvas) {
     return false;
   }
   switch (cache_state_) {
@@ -185,6 +185,9 @@ bool LayerRasterCacheItem::Draw(const PaintContext& context,
       return context.raster_cache->Draw(key_id_, *canvas, paint);
     }
     case RasterCacheItem::kChildren: {
+      if (!layer_children_id_.has_value()) {
+        return false;
+      }
       return context.raster_cache->Draw(layer_children_id_.value(), *canvas,
                                         paint);
     }
