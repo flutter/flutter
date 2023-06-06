@@ -45,7 +45,7 @@ void LinearGradientContents::SetTileMode(Entity::TileMode tile_mode) {
 }
 
 bool LinearGradientContents::IsOpaque() const {
-  if (GetOpacity() < 1) {
+  if (GetOpacity() < 1 || tile_mode_ == Entity::TileMode::kDecal) {
     return false;
   }
   for (auto color : colors_) {

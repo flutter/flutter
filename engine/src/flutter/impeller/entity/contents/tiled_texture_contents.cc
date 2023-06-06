@@ -103,7 +103,8 @@ bool TiledTextureContents::UsesEmulatedTileMode(
 
 // |Contents|
 bool TiledTextureContents::IsOpaque() const {
-  if (GetOpacity() < 1) {
+  if (GetOpacity() < 1 || x_tile_mode_ == Entity::TileMode::kDecal ||
+      y_tile_mode_ == Entity::TileMode::kDecal) {
     return false;
   }
   if (color_filter_.has_value()) {
