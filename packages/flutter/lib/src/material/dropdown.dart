@@ -808,14 +808,14 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// takes a list of [DropdownMenuEntry]'s.
 ///
 /// 2. Instead of using [DropdownButton.onChanged],
-/// use [DropdownButton.onSelected], which is also
+/// use [DropdownMenu.onSelected], which is also
 /// a callback that is called when the user selects an entry.
 ///
 /// 3. In [DropdownMenu] it is not required to track
 /// the current selection in your app's state.
 /// So, instead of tracking the current selection in
 /// the [DropdownButton.value] property, you can set the
-/// [DropdownButton.initialSelection] property to the
+/// [DropdownMenu.initialSelection] property to the
 /// item that should be selected before there is any user action.
 ///
 /// 4. You may also need to make changes to the styling of the
