@@ -362,8 +362,10 @@ class _TextPainterLayoutCacheWithOffset {
   static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
     // TODO(LongCatIsLooong): remove the rounding when _applyFloatingPointHack
     // is removed.
-    minWidth = minWidth.floorToDouble();
-    maxWidth = maxWidth.floorToDouble();
+    if (_TextLayout._shouldApplyFloatingPointHack) {
+      minWidth = minWidth.floorToDouble();
+      maxWidth = maxWidth.floorToDouble();
+    }
     return switch (widthBasis) {
       TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
       TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),

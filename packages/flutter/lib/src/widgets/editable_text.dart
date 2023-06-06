@@ -5041,14 +5041,8 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 class _ScribblePlaceholder extends WidgetSpan {
   const _ScribblePlaceholder({
     required super.child,
-    super.alignment,
-    super.baseline,
     required this.size,
-  }) : assert(baseline != null || !(
-         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.baseline)
-       ));
+  });
 
   /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
   final Size size;
