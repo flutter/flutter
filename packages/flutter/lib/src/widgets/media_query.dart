@@ -759,7 +759,7 @@ class MediaQueryData {
 /// containing your app), you can use [MediaQuery.sizeOf]:
 /// `MediaQuery.sizeOf(context)`.
 ///
-/// Querying the current media using specific methods (for example:
+/// Querying the current media using specific methods (for example,
 /// [MediaQuery.sizeOf] and [MediaQuery.paddingOf]) will cause your widget to
 /// rebuild automatically whenever the property you query changes.
 ///
