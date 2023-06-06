@@ -10,7 +10,7 @@ import 'notification_listener.dart';
 /// Enables the handling of system back gestures.
 ///
 /// Typically wraps a nested [Navigator] widget and allows it to handle system
-/// back gestures in the [onPopped] callback.
+/// back gestures in the [onPop] callback.
 ///
 /// {@tool dartpad}
 /// This sample demonstrates how to use this widget to properly handle system
@@ -30,24 +30,23 @@ class NavigatorPopHandler extends StatefulWidget {
   const NavigatorPopHandler({
     super.key,
     required this.child,
-    this.onPopped,
+    this.onPop,
   });
 
   /// The widget to place below this in the widget tree.
   ///
-  /// Typically this is a [Navigator] that will handle the pop when [onPopped] is
+  /// Typically this is a [Navigator] that will handle the pop when [onPop] is
   /// called.
   final Widget child;
 
-  /// {@macro flutter.widgets.navigator.onPopped}
+  /// Called when a handleable pop event happens.
+  ///
+  /// A pop is handleable when the most recent [NavigationNotification.canPop]
+  /// was true.
   ///
   /// Typically this is used to pop the [Navigator] in [child].  See the sample
   /// code on [Navigator] for a full example of this.
-  ///
-  /// See also:
-  ///
-  ///  * [CanPopScope.onPopped], which is similar.
-  final OnPoppedCallback? onPopped;
+  final VoidCallback? onPop;
 
   @override
   State<NavigatorPopHandler> createState() => _NavigatorPopHandlerState();
@@ -63,10 +62,10 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
     return CanPopScope(
       popEnabled: _popEnabled,
       onPopped: (bool success) {
-        if (_popEnabled) {
+        if (success) {
           return;
         }
-        widget.onPopped?.call(success);
+        widget.onPop?.call();
       },
       // Listen to changes in the navigation stack in the widget subtree.
       child: NotificationListener<NavigationNotification>(
