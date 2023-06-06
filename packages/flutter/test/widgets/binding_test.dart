@@ -71,25 +71,38 @@ void main() {
 
     observer.accumulatedStates.clear();
     setAppLifeCycleState(AppLifecycleState.resumed);
-    expect(observer.accumulatedStates,
-        <AppLifecycleState>[AppLifecycleState.hidden, AppLifecycleState.inactive, AppLifecycleState.resumed,]);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]);
 
     observer.accumulatedStates.clear();
     setAppLifeCycleState(AppLifecycleState.paused);
-    expect(observer.accumulatedStates,
-        <AppLifecycleState>[AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.paused, ]);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ]);
 
     observer.accumulatedStates.clear();
     setAppLifeCycleState(AppLifecycleState.inactive);
-    expect(observer.accumulatedStates, <AppLifecycleState>[AppLifecycleState.hidden, AppLifecycleState.inactive, ]);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+    ]);
 
     observer.accumulatedStates.clear();
     setAppLifeCycleState(AppLifecycleState.hidden);
-    expect(observer.accumulatedStates, <AppLifecycleState>[AppLifecycleState.hidden]);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.hidden,
+    ]);
 
     observer.accumulatedStates.clear();
     setAppLifeCycleState(AppLifecycleState.paused);
-    expect(observer.accumulatedStates, <AppLifecycleState>[AppLifecycleState.paused]);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.paused,
+    ]);
 
     observer.accumulatedStates.clear();
     setAppLifeCycleState(AppLifecycleState.detached);

@@ -230,7 +230,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   /// Resets [initialLifecycleState] to the default value for the platform.
   void resetInitialLifecycleState() {
-    _initialLifecycleStateTestValue = 'AppLifecycleState.detached';
+    _initialLifecycleStateTestValue = '';
   }
 
   @override
