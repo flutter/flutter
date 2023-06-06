@@ -678,8 +678,7 @@ class TestFlutterView implements FlutterView {
   final TestDisplay _display;
 
   @override
-  // TODO(goderbauer): Clean ignore and cast up after https://github.com/flutter/engine/pull/42493 lands.
-  int get viewId => _view.viewId as int; // ignore: unnecessary_cast
+  int get viewId => _view.viewId;
 
   /// The device pixel ratio to use for this test.
   ///
@@ -2089,8 +2088,7 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  // TODO(goderbauer): Clean ignore and cast up after https://github.com/flutter/engine/pull/42493 lands.
-  int get viewId => _view.viewId as int; // ignore: unnecessary_cast
+  int get viewId => _view.viewId;
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
