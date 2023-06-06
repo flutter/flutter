@@ -985,6 +985,7 @@ mixin _CopyPointerHoverEvent on PointerEvent {
     int? embedderId,
   }) {
     return PointerHoverEvent(
+      viewId: viewId ?? this.viewId,
       timeStamp: timeStamp ?? this.timeStamp,
       kind: kind ?? this.kind,
       device: device ?? this.device,
@@ -1005,7 +1006,6 @@ mixin _CopyPointerHoverEvent on PointerEvent {
       tilt: tilt ?? this.tilt,
       synthesized: synthesized ?? this.synthesized,
       embedderId: embedderId ?? this.embedderId,
-      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2286,11 +2286,11 @@ mixin _CopyPointerPanZoomEndEvent on PointerEvent {
   }) {
     assert(kind == null || identical(kind, PointerDeviceKind.trackpad));
     return PointerPanZoomEndEvent(
+      viewId: viewId ?? this.viewId,
       timeStamp: timeStamp ?? this.timeStamp,
       device: device ?? this.device,
       position: position ?? this.position,
       embedderId: embedderId ?? this.embedderId,
-      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
@@ -2365,6 +2365,7 @@ mixin _CopyPointerCancelEvent on PointerEvent {
     int? embedderId,
   }) {
     return PointerCancelEvent(
+      viewId: viewId ?? this.viewId,
       timeStamp: timeStamp ?? this.timeStamp,
       pointer: pointer ?? this.pointer,
       kind: kind ?? this.kind,
@@ -2384,7 +2385,6 @@ mixin _CopyPointerCancelEvent on PointerEvent {
       orientation: orientation ?? this.orientation,
       tilt: tilt ?? this.tilt,
       embedderId: embedderId ?? this.embedderId,
-      viewId: viewId ?? this.viewId,
     ).transformed(transform);
   }
 }
