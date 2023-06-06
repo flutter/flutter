@@ -1029,7 +1029,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// creating menus that are displayed from an anchor.
 ///
 /// There are a few steps you would take to migrate from
-/// [PopupMenu] to [MenuAnchor]:
+/// [PopupMenuButton] to [MenuAnchor]:
 ///
 /// 1. Instead of using the [PopupMenuButton.itemBuilder] to build
 /// a list of [PopupMenuEntry]s, you would use the [MenuAnchor.menuChildren]
