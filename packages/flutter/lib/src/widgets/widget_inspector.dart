@@ -1317,17 +1317,10 @@ mixin WidgetInspectorService {
     }
   }
 
-  bool _printed = false;
-
   /// Returns a unique id for [object] that will remain live at least until
   /// [disposeGroup] is called on [groupName].
   @protected
   String? toId(Object? object, String groupName) {
-    if (!_printed) {
-      _printed = true;
-      debugPrint('!!!!!! hello from toId, debug');
-      print('!!!!!! hello from toId');
-    }
     if (object == null) {
       return null;
     }
