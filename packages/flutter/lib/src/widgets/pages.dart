@@ -14,7 +14,7 @@ import 'routes.dart';
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class PageRoute<T> extends ModalRoute<T> {
+abstract base class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
     super.settings,
@@ -63,7 +63,7 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-class PageRouteBuilder<T> extends PageRoute<T> {
+base class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that delegates to builder callbacks.
   ///
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],

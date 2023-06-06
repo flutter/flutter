@@ -1550,7 +1550,7 @@ bool _debugIsActive(BuildContext context) {
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-class DialogRoute<T> extends RawDialogRoute<T> {
+base class DialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route with Material entrance and exit animations,
   /// modal barrier color, and modal barrier behavior (dialog is dismissible
   /// with a tap on the barrier).

@@ -798,7 +798,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
 ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
-class ModalBottomSheetRoute<T> extends PopupRoute<T> {
+base class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// A modal bottom sheet route.
   ModalBottomSheetRoute({
     required this.builder,

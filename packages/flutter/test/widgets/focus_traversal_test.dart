@@ -3090,7 +3090,7 @@ void main() {
   });
 }
 
-class TestRoute extends PageRouteBuilder<void> {
+final class TestRoute extends PageRouteBuilder<void> {
   TestRoute({required Widget child})
       : super(
           pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) {

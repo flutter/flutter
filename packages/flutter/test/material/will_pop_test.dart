@@ -65,7 +65,7 @@ class SampleForm extends StatelessWidget {
 }
 
 // Expose the protected hasScopedWillPopCallback getter
-class _TestPageRoute<T> extends MaterialPageRoute<T> {
+final class _TestPageRoute<T> extends MaterialPageRoute<T> {
   _TestPageRoute({
     super.settings,
     required super.builder,

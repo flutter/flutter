@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestOverlayRoute extends OverlayRoute<void> {
+final class TestOverlayRoute extends OverlayRoute<void> {
   TestOverlayRoute({ super.settings });
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {

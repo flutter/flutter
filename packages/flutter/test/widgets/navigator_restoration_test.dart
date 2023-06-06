@@ -1338,4 +1338,6 @@ class _RouteFinder extends MatchFinder {
   }
 }
 
-class FakeRoute extends Fake implements Route<void> { }
+final class FakeRoute extends MaterialPageRoute<void> {
+  FakeRoute() : super(builder: (_) => const Placeholder());
+ }

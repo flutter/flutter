@@ -128,7 +128,7 @@ enum RoutePopDisposition {
 /// The type argument `T` is the route's return type, as used by
 /// [currentResult], [popped], and [didPop]. The type `void` may be used if the
 /// route does not return a value.
-abstract class Route<T> {
+abstract base class Route<T> {
   /// Initialize the [Route].
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
@@ -2830,7 +2830,7 @@ enum _RouteLifecycle {
 
 typedef _RouteEntryPredicate = bool Function(_RouteEntry entry);
 
-class _NotAnnounced extends Route<void> {
+final class _NotAnnounced extends Route<void> {
   // A placeholder for the lastAnnouncedPreviousRoute, the
   // lastAnnouncedPoppedNextRoute, and the lastAnnouncedNextRoute before any
   // change has been announced.

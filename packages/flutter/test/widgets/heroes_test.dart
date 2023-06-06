@@ -129,7 +129,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   ),
 };
 
-class ThreeRoute extends MaterialPageRoute<void> {
+final class ThreeRoute extends MaterialPageRoute<void> {
   ThreeRoute()
     : super(builder: (BuildContext context) {
         return Material(
@@ -145,7 +145,7 @@ class ThreeRoute extends MaterialPageRoute<void> {
       });
 }
 
-class MutatingRoute extends MaterialPageRoute<void> {
+final class MutatingRoute extends MaterialPageRoute<void> {
   MutatingRoute()
     : super(builder: (BuildContext context) {
         return Hero(tag: 'a', key: UniqueKey(), child: const Text('MutatingRoute'));

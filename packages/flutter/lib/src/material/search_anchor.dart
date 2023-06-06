@@ -396,7 +396,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 }
 
-class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
+final class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   _SearchViewRoute({
     this.toggleVisibility,
     this.textDirection,

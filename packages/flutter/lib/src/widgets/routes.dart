@@ -39,7 +39,7 @@ import 'transitions.dart';
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class OverlayRoute<T> extends Route<T> {
+abstract base class OverlayRoute<T> extends Route<T> {
   /// Creates a route that knows how to interact with an [Overlay].
   OverlayRoute({
     super.settings,
@@ -97,7 +97,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class TransitionRoute<T> extends OverlayRoute<T> {
+abstract base class TransitionRoute<T> extends OverlayRoute<T> {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
@@ -536,7 +536,7 @@ class LocalHistoryEntry {
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-mixin LocalHistoryRoute<T> on Route<T> {
+base mixin LocalHistoryRoute<T> on Route<T> {
   List<LocalHistoryEntry>? _localHistory;
   int _entriesImpliesAppBarDismissal = 0;
   /// Adds a local history entry to this route.
@@ -987,7 +987,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 /// See also:
 ///
 ///  * [Route], which further documents the meaning of the `T` generic type argument.
-abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
+abstract base class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T> {
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     super.settings,
@@ -1781,7 +1781,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 ///
 ///   * [ModalRoute], which is the base class for this class.
 ///   * [Navigator.pop], which is used to dismiss the route.
-abstract class PopupRoute<T> extends ModalRoute<T> {
+abstract base class PopupRoute<T> extends ModalRoute<T> {
   /// Initializes the [PopupRoute].
   PopupRoute({
     super.settings,
@@ -2020,7 +2020,7 @@ abstract mixin class RouteAware {
 ///  * [showGeneralDialog], which is a way to display a RawDialogRoute.
 ///  * [showDialog], which is a way to display a DialogRoute.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
-class RawDialogRoute<T> extends PopupRoute<T> {
+base class RawDialogRoute<T> extends PopupRoute<T> {
   /// A general dialog route which allows for customization of the dialog popup.
   RawDialogRoute({
     required RoutePageBuilder pageBuilder,

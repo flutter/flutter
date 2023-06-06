@@ -2841,7 +2841,7 @@ class _GeometryCachePainter extends CustomPainter {
   }
 }
 
-class _CustomPageRoute<T> extends PageRoute<T> {
+final class _CustomPageRoute<T> extends PageRoute<T> {
   _CustomPageRoute({
     required this.builder,
     RouteSettings super.settings = const RouteSettings(),

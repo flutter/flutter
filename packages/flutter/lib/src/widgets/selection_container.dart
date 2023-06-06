@@ -261,7 +261,7 @@ class SelectionRegistrarScope extends InheritedWidget {
 ///
 /// This delegate needs to implement [SelectionRegistrar] to register
 /// [Selectable]s in the [SelectionContainer] subtree.
-abstract class SelectionContainerDelegate implements SelectionHandler, SelectionRegistrar {
+abstract base class SelectionContainerDelegate implements SelectionHandler, SelectionRegistrar {
   BuildContext? _selectionContainerContext;
 
   /// Gets the paint transform from the [Selectable] child to

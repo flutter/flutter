@@ -384,7 +384,7 @@ enum _SearchBody {
   results,
 }
 
-class _SearchPageRoute<T> extends PageRoute<T> {
+final class _SearchPageRoute<T> extends PageRoute<T> {
   _SearchPageRoute({
     required this.delegate,
   }) {

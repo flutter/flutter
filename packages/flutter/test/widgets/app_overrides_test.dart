@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestRoute<T> extends PageRoute<T> {
+final class TestRoute<T> extends PageRoute<T> {
   TestRoute({ required this.child, super.settings });
 
   final Widget child;

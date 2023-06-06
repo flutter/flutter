@@ -415,7 +415,7 @@ class _MenuLimits {
   final double scrollOffset;
 }
 
-class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
+final class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   _DropdownRoute({
     required this.items,
     required this.padding,

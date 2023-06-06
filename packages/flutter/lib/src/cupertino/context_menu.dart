@@ -806,7 +806,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 }
 
 // The open CupertinoContextMenu modal.
-class _ContextMenuRoute<T> extends PopupRoute<T> {
+final class _ContextMenuRoute<T> extends PopupRoute<T> {
   // Build a _ContextMenuRoute.
   _ContextMenuRoute({
     required List<Widget> actions,

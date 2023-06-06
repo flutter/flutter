@@ -15,7 +15,7 @@ final List<String> results = <String>[];
 
 Set<TestRoute> routes = HashSet<TestRoute>();
 
-class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
+final class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   TestRoute(this.name);
   final String name;
 
@@ -1978,7 +1978,7 @@ double _getOpacity(GlobalKey key, WidgetTester tester) {
   });
 }
 
-class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
+final class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   ModifiedReverseTransitionDurationRoute({
     required super.builder,
     super.settings,
@@ -1990,9 +1990,22 @@ class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   final Duration reverseTransitionDuration;
 }
 
-class MockPageRoute extends Fake implements PageRoute<dynamic> { }
+final class MockPageRoute extends PageRoute<dynamic> {
+  @override
+  Color? get barrierColor => throw UnimplementedError();
+  @override
+  String? get barrierLabel => throw UnimplementedError();
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    throw UnimplementedError();
+  }
+  @override
+  bool get maintainState => throw UnimplementedError();
+  @override
+  Duration get transitionDuration => throw UnimplementedError();
+ }
 
-class MockRoute extends Fake implements Route<dynamic> { }
+final class MockRoute extends Route<dynamic> { }
 
 class MockRouteAware extends Fake implements RouteAware {
   int didPushCount = 0;
@@ -2021,7 +2034,7 @@ class MockRouteAware extends Fake implements RouteAware {
   }
 }
 
-class TestPageRouteBuilder extends PageRouteBuilder<void> {
+final class TestPageRouteBuilder extends PageRouteBuilder<void> {
   TestPageRouteBuilder({required super.pageBuilder});
 
   @override
@@ -2053,7 +2066,7 @@ class DialogObserver extends NavigatorObserver {
   }
 }
 
-class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
+final class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
     required Widget child,
     this.barrierLabel,

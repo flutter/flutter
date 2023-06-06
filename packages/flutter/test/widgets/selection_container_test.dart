@@ -204,7 +204,7 @@ void main() {
   });
 }
 
-class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+final class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   @override
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     throw UnimplementedError();

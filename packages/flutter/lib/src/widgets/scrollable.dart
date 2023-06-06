@@ -1064,7 +1064,7 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 /// selectable. The records are used to determine whether the selection is up to
 /// date with the scroll position when it sends the drag update event to a
 /// selectable.
-class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+final class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _ScrollableSelectionContainerDelegate({
     required this.state,
     required ScrollPosition position

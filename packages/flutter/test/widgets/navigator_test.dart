@@ -92,7 +92,7 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
+final class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings}) : super(
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
     transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
@@ -4157,9 +4157,9 @@ void main() {
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
 
-class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
+final class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
 
-class RouteAnnouncementSpy extends Route<void> {
+final class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({
     this.onDidChangePrevious,
     this.onDidChangeNext,
@@ -4302,7 +4302,7 @@ class TestPage extends Page<void> {
   }
 }
 
-class NoAnimationPageRoute extends PageRouteBuilder<void> {
+final class NoAnimationPageRoute extends PageRouteBuilder<void> {
   NoAnimationPageRoute({
     super.settings,
     required WidgetBuilder pageBuilder
@@ -4375,7 +4375,7 @@ class ZeroDurationPage extends Page<void> {
   }
 }
 
-class ZeroDurationPageRoute extends PageRoute<void> {
+final class ZeroDurationPageRoute extends PageRoute<void> {
   ZeroDurationPageRoute({required ZeroDurationPage page})
       : super(settings: page, allowSnapshotting: false);
 

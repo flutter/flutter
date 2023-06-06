@@ -26,7 +26,7 @@ class TestTransition extends AnimatedWidget {
   }
 }
 
-class TestRoute<T> extends PageRoute<T> {
+final class TestRoute<T> extends PageRoute<T> {
   TestRoute({
     required this.child,
     required RouteSettings settings,
