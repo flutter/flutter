@@ -46,7 +46,7 @@ const std::vector<Scalar>& RadialGradientContents::GetStops() const {
 }
 
 bool RadialGradientContents::IsOpaque() const {
-  if (GetOpacity() < 1) {
+  if (GetOpacity() < 1 || tile_mode_ == Entity::TileMode::kDecal) {
     return false;
   }
   for (auto color : colors_) {

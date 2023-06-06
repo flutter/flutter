@@ -791,6 +791,37 @@ TEST_P(AiksTest, CanRenderConicalGradient) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderGradientDecalWithBackground) {
+  std::vector<Color> colors = {Color::MakeRGBA8(0xF4, 0x43, 0x36, 0xFF),
+                               Color::MakeRGBA8(0xFF, 0xEB, 0x3B, 0xFF),
+                               Color::MakeRGBA8(0x4c, 0xAF, 0x50, 0xFF),
+                               Color::MakeRGBA8(0x21, 0x96, 0xF3, 0xFF)};
+  std::vector<Scalar> stops = {0.0, 1.f / 3.f, 2.f / 3.f, 1.0};
+
+  std::array<ColorSource, 3> color_sources = {
+      ColorSource::MakeLinearGradient({0, 0}, {100, 100}, colors, stops,
+                                      Entity::TileMode::kDecal, {}),
+      ColorSource::MakeRadialGradient({100, 100}, 100, colors, stops,
+                                      Entity::TileMode::kDecal, {}),
+      ColorSource::MakeSweepGradient({100, 100}, Degrees(45), Degrees(135),
+                                     colors, stops, Entity::TileMode::kDecal,
+                                     {}),
+  };
+
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::White();
+  canvas.DrawRect(Rect::MakeLTRB(0, 0, 605, 205), paint);
+  for (int i = 0; i < 3; i++) {
+    canvas.Save();
+    canvas.Translate({i * 200.0f, 0, 0});
+    paint.color_source = color_sources[i];
+    canvas.DrawRect(Rect::MakeLTRB(0, 0, 200, 200), paint);
+    canvas.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
   Canvas canvas;
   Paint paint;

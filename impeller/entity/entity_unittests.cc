@@ -2556,6 +2556,9 @@ TEST_P(EntityTest, LinearGradientContentsIsOpaque) {
   ASSERT_TRUE(contents.IsOpaque());
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
   ASSERT_FALSE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue()});
+  contents.SetTileMode(Entity::TileMode::kDecal);
+  ASSERT_FALSE(contents.IsOpaque());
 }
 
 TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
@@ -2564,6 +2567,9 @@ TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
   ASSERT_TRUE(contents.IsOpaque());
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
   ASSERT_FALSE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue()});
+  contents.SetTileMode(Entity::TileMode::kDecal);
+  ASSERT_FALSE(contents.IsOpaque());
 }
 
 TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
@@ -2571,6 +2577,9 @@ TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
   contents.SetColors({Color::CornflowerBlue()});
   ASSERT_TRUE(contents.IsOpaque());
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
+  ASSERT_FALSE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue()});
+  contents.SetTileMode(Entity::TileMode::kDecal);
   ASSERT_FALSE(contents.IsOpaque());
 }
 
