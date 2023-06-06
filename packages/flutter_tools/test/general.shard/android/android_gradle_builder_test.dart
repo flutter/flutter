@@ -871,6 +871,7 @@ Gradle Crashed
 
     testUsingContext('can call custom gradle task getApplicationIdForVariant and parse the result', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -901,6 +902,7 @@ ApplicationId: com.example.id
 
     testUsingContext('can call custom gradle task getApplicationIdForVariant with unknown crash', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -931,6 +933,7 @@ unknown crash
 
     testUsingContext('can call custom gradle task getAppLinkDomainsForVariant and parse the result', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
@@ -963,6 +966,7 @@ Domain: example2.com
 
     testUsingContext('can call custom gradle task getAppLinkDomainsForVariant with unknown crash', () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        java: FakeJava(),
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
