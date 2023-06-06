@@ -468,7 +468,6 @@ class ImageStreamCompleterHandle {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
-  final List<ImageStreamListener> _peekListeners = <ImageStreamListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
 
@@ -520,18 +519,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _checkDisposed();
     _hadAtLeastOneListener = true;
     _listeners.add(listener);
-    _synchronouslyCallAddedListener(listener);
-  }
-
-  /// Add a listener for errors. It is similar to [addListener], but see
-  /// [removePeekListener] for a comparison of the behaviors.
-  void addPeekListener(ImageStreamListener listener) {
-    _checkDisposed();
-    _peekListeners.add(listener);
-    _synchronouslyCallAddedListener(listener);
-  }
-
-  void _synchronouslyCallAddedListener(ImageStreamListener listener) {
     if (_currentImage != null) {
       try {
         listener.onImage(_currentImage!.clone(), !_addingInitialListeners);
@@ -600,20 +587,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// Remove a listener for errors.
-  /// This is similar to [removeListener]. However, even if all listeners have
-  /// been removed and all [keepAlive] handles have been disposed, this image
-  /// stream will not be automatically disposed.
-  void removePeekListener(ImageStreamListener listener) {
-    _checkDisposed();
-    for (int i = 0; i < _peekListeners.length; i += 1) {
-      if (_peekListeners[i] == listener) {
-        _peekListeners.removeAt(i);
-        break;
-      }
-    }
-  }
-
   bool _disposed = false;
 
   @mustCallSuper
@@ -667,18 +640,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _currentImage?.dispose();
     _currentImage = image;
 
-    _notifyListenersOnImage(image, _listeners);
-    _notifyListenersOnImage(image, _peekListeners);
-  }
-
-  void _notifyListenersOnImage(ImageInfo image, List<ImageStreamListener> listeners) {
-    if (listeners.isEmpty) {
+    if (_listeners.isEmpty) {
       return;
     }
-
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
-        List<ImageStreamListener>.of(listeners);
+        List<ImageStreamListener>.of(_listeners);
     for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image.clone(), false);
@@ -739,23 +706,13 @@ abstract class ImageStreamCompleter with Diagnosticable {
       silent: silent,
     );
 
-    bool handled = false;
-    handled |= _notifyListenersOnError(exception, stack, _listeners);
-    handled |= _notifyListenersOnError(exception, stack, _peekListeners);
-    if (!handled) {
-      FlutterError.reportError(_currentError!);
-    }
-  }
-
-  bool _notifyListenersOnError(Object exception, StackTrace? stack, List<ImageStreamListener> listeners) {
-    bool handled = false;
-
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = listeners
+    final List<ImageErrorListener> localErrorListeners = _listeners
         .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
         .whereType<ImageErrorListener>()
         .toList();
 
+    bool handled = false;
     for (final ImageErrorListener errorListener in localErrorListeners) {
       try {
         errorListener(exception, stack);
@@ -773,8 +730,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
         }
       }
     }
-
-    return handled;
+    if (!handled) {
+      FlutterError.reportError(_currentError!);
+    }
   }
 
   /// Calls all the registered [ImageChunkListener]s (listeners with an
@@ -783,22 +741,15 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @protected
   void reportImageChunkEvent(ImageChunkEvent event) {
     _checkDisposed();
-    _notifyListenersOnChunk(event, _listeners);
-    _notifyListenersOnChunk(event, _peekListeners);
-  }
-
-  void _notifyListenersOnChunk(ImageChunkEvent event, List<ImageStreamListener> listeners) {
-    if (listeners.isEmpty) {
-      return;
-    }
-
-    // Make a copy to allow for concurrent modification.
-    final List<ImageChunkListener> localListeners = listeners
-        .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
-        .whereType<ImageChunkListener>()
-        .toList();
-    for (final ImageChunkListener listener in localListeners) {
-      listener(event);
+    if (hasListeners) {
+      // Make a copy to allow for concurrent modification.
+      final List<ImageChunkListener> localListeners = _listeners
+          .map<ImageChunkListener?>((ImageStreamListener listener) => listener.onChunk)
+          .whereType<ImageChunkListener>()
+          .toList();
+      for (final ImageChunkListener listener in localListeners) {
+        listener(event);
+      }
     }
   }
 
@@ -812,11 +763,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
       'listeners',
       _listeners,
       ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
-    ));
-    description.add(ObjectFlagProperty<List<ImageStreamListener>>(
-      'peekListeners',
-      _peekListeners,
-      ifPresent: '${_peekListeners.length} peekListener${_peekListeners.length == 1 ? "" : "s" }',
     ));
     description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }
