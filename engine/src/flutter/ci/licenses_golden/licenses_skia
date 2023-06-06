@@ -1,4 +1,4 @@
-Signature: 5e5ab2c425ba4a244b9c701d13426808
+Signature: 082826fe4a7f3f97d8fee3e6706b9f92
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1230,7 +1230,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkRasterClip.cpp + ../../../third_par
 ORIGIN: ../../../third_party/skia/src/core/SkRasterClip.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkStrikeCache.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/BufferWriter.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/GrRectanizer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/Rectanizer.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/RectanizerPow2.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/Device_v1.h + ../../../third_party/skia/LICENSE
@@ -1252,7 +1251,6 @@ FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.h
 FILE: ../../../third_party/skia/src/gpu/BufferWriter.h
-FILE: ../../../third_party/skia/src/gpu/GrRectanizer.h
 FILE: ../../../third_party/skia/src/gpu/Rectanizer.h
 FILE: ../../../third_party/skia/src/gpu/RectanizerPow2.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/Device_v1.h
