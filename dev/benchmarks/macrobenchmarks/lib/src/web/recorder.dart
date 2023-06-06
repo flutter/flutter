@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
+import 'dart:html' as html;
 import 'dart:js_interop';
 // The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
 // for `JSObject.[]=`.
