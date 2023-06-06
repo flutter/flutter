@@ -1,4 +1,4 @@
-Signature: 4ad361b485ba07de77093f7c9fec3f5f
+Signature: 5e5ab2c425ba4a244b9c701d13426808
 
 ====================================================================================================
 LIBRARY: etc1
@@ -385,6 +385,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/skblenders_arithmetic_saturate.md
+FILE: ../../../third_party/skia/relnotes/skcolortable.md
 FILE: ../../../third_party/skia/relnotes/skif_runtimeshader_sampleradius.md
 FILE: ../../../third_party/skia/relnotes/skimagefilters_image_remove.md
 FILE: ../../../third_party/skia/relnotes/skimagegenerator_grexternaltexturegenerator.md
@@ -8921,6 +8922,7 @@ ORIGIN: ../../../third_party/skia/include/codec/SkPngDecoder.h + ../../../third_
 ORIGIN: ../../../third_party/skia/include/codec/SkRawDecoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/codec/SkWbmpDecoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/codec/SkWebpDecoder.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/core/SkColorTable.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkEncodedImageFormat.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkICC.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkTextureCompressionType.h + ../../../third_party/skia/LICENSE
@@ -8945,6 +8947,7 @@ ORIGIN: ../../../third_party/skia/src/core/SkBlitter_A8.h + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkChecksum.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkColorTable.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkDrawBase.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp + ../../../third_party/skia/LICENSE
@@ -9072,6 +9075,7 @@ FILE: ../../../third_party/skia/include/codec/SkPngDecoder.h
 FILE: ../../../third_party/skia/include/codec/SkRawDecoder.h
 FILE: ../../../third_party/skia/include/codec/SkWbmpDecoder.h
 FILE: ../../../third_party/skia/include/codec/SkWebpDecoder.h
+FILE: ../../../third_party/skia/include/core/SkColorTable.h
 FILE: ../../../third_party/skia/include/core/SkEncodedImageFormat.h
 FILE: ../../../third_party/skia/include/core/SkICC.h
 FILE: ../../../third_party/skia/include/core/SkTextureCompressionType.h
@@ -9096,6 +9100,7 @@ FILE: ../../../third_party/skia/src/core/SkBlitter_A8.h
 FILE: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.h
 FILE: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp
 FILE: ../../../third_party/skia/src/core/SkChecksum.cpp
+FILE: ../../../third_party/skia/src/core/SkColorTable.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawBase.h
 FILE: ../../../third_party/skia/src/core/SkFilterColorProgram.cpp
