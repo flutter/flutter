@@ -770,7 +770,7 @@ void main() {
     );
 
     testWidgets(
-      'select word can when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
+      'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/127076.
       final UniqueKey outerText = UniqueKey();
       await tester.pumpWidget(
