@@ -749,6 +749,48 @@ TEST_P(AiksTest, CanRenderSweepGradientManyColorsDecal) {
   CanRenderSweepGradientManyColors(this, Entity::TileMode::kDecal);
 }
 
+TEST_P(AiksTest, CanRenderConicalGradient) {
+  Scalar size = 256;
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::White();
+  canvas.DrawRect({0, 0, size * 3, size * 3}, paint);
+  std::vector<Color> colors = {Color::MakeRGBA8(0xF4, 0x43, 0x36, 0xFF),
+                               Color::MakeRGBA8(0xFF, 0xEB, 0x3B, 0xFF),
+                               Color::MakeRGBA8(0x4c, 0xAF, 0x50, 0xFF),
+                               Color::MakeRGBA8(0x21, 0x96, 0xF3, 0xFF)};
+  std::vector<Scalar> stops = {0.0, 1.f / 3.f, 2.f / 3.f, 1.0};
+  std::array<std::tuple<Point, float, Point, float>, 8> array{
+      std::make_tuple(Point{size / 2.f, size / 2.f}, 0.f,
+                      Point{size / 2.f, size / 2.f}, size / 2.f),
+      std::make_tuple(Point{size / 2.f, size / 2.f}, size / 4.f,
+                      Point{size / 2.f, size / 2.f}, size / 2.f),
+      std::make_tuple(Point{size / 4.f, size / 4.f}, 0.f,
+                      Point{size / 2.f, size / 2.f}, size / 2.f),
+      std::make_tuple(Point{size / 4.f, size / 4.f}, size / 2.f,
+                      Point{size / 2.f, size / 2.f}, 0),
+      std::make_tuple(Point{size / 4.f, size / 4.f}, size / 4.f,
+                      Point{size / 2.f, size / 2.f}, size / 2.f),
+      std::make_tuple(Point{size / 4.f, size / 4.f}, size / 16.f,
+                      Point{size / 2.f, size / 2.f}, size / 8.f),
+      std::make_tuple(Point{size / 4.f, size / 4.f}, size / 8.f,
+                      Point{size / 2.f, size / 2.f}, size / 16.f),
+      std::make_tuple(Point{size / 8.f, size / 8.f}, size / 8.f,
+                      Point{size / 2.f, size / 2.f}, size / 8.f),
+  };
+  for (int i = 0; i < 8; i++) {
+    canvas.Save();
+    canvas.Translate({(i % 3) * size, i / 3 * size, 0});
+    paint.color_source = ColorSource::MakeConicalGradient(
+        std::get<0>(array[i]), std::get<1>(array[i]), colors, stops,
+        std::get<2>(array[i]), std::get<3>(array[i]), Entity::TileMode::kClamp,
+        {});
+    canvas.DrawRect({0, 0, size, size}, paint);
+    canvas.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderDifferentShapesWithSameColorSource) {
   Canvas canvas;
   Paint paint;
