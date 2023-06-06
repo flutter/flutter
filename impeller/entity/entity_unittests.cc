@@ -2545,7 +2545,7 @@ TEST_P(EntityTest, SolidColorContentsIsOpaque) {
 TEST_P(EntityTest, ConicalGradientContentsIsOpaque) {
   ConicalGradientContents contents;
   contents.SetColors({Color::CornflowerBlue()});
-  ASSERT_TRUE(contents.IsOpaque());
+  ASSERT_FALSE(contents.IsOpaque());
   contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
   ASSERT_FALSE(contents.IsOpaque());
 }

@@ -32,10 +32,14 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  float t =
-      IPComputeConicalT(frag_info.center, frag_info.radius, frag_info.focus,
-                        frag_info.focus_radius, v_position);
+  vec2 res = IPComputeConicalT(frag_info.focus, frag_info.focus_radius,
+                               frag_info.center, frag_info.radius, v_position);
+  if (res.y < 0.0) {
+    frag_color = vec4(0);
+    return;
+  }
 
+  float t = res.x;
   if ((t < 0.0 || t > 1.0) && frag_info.tile_mode == kTileModeDecal) {
     frag_color = vec4(0);
     return;

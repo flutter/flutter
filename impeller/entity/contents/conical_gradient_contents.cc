@@ -51,18 +51,6 @@ void ConicalGradientContents::SetFocus(std::optional<Point> focus,
   focus_radius_ = radius;
 }
 
-bool ConicalGradientContents::IsOpaque() const {
-  if (GetOpacity() < 1) {
-    return false;
-  }
-  for (auto color : colors_) {
-    if (!color.IsOpaque()) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool ConicalGradientContents::Render(const ContentContext& renderer,
                                      const Entity& entity,
                                      RenderPass& pass) const {
