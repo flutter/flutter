@@ -1059,7 +1059,7 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 /// {@tool dartpad}
 /// This example shows how to migrate the above to a [MenuAnchor].
 ///
-/// ** See code in examples/api/lib/material/popup_menu/menu_anchor.2.dart **
+/// ** See code in examples/api/lib/material/menu_anchor/menu_anchor.2.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
