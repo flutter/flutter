@@ -25,9 +25,14 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  float t =
-      IPComputeConicalT(frag_info.center, frag_info.radius, frag_info.focus,
-                        frag_info.focus_radius, v_position);
+  vec2 res = IPComputeConicalT(frag_info.focus, frag_info.focus_radius,
+                               frag_info.center, frag_info.radius, v_position);
+  if (res.y < 0.0) {
+    frag_color = vec4(0);
+    return;
+  }
+
+  float t = res.x;
   frag_color = IPSampleLinearWithTileMode(
       texture_sampler, vec2(t, 0.5), frag_info.texture_sampler_y_coord_scale,
       frag_info.half_texel, frag_info.tile_mode);
