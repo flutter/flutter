@@ -429,7 +429,6 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
 
   @override
   Future<Profile> run() async {
-    print('time: ${html.window.performance.now()}');
     _runCompleter = Completer<void>();
     final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
     final _RecordingWidgetsBinding binding =
@@ -1260,7 +1259,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    web.window.performance.mark('measured_frame_start#$_currentFrameNumber'.toJS);
+    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
     _isMeasuringFrame = true;
   }
 }
