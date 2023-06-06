@@ -1476,6 +1476,11 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     }
     final TextRange word = paragraph.getWordBoundary(position);
     assert(word.isNormalized);
+    if (word.start < range.start && word.end < range.start) {
+      return SelectionResult.previous;
+    } else if (word.start > range.end && word.end > range.end) {
+      return SelectionResult.next;
+    }
     // Fragments are separated by placeholder span, the word boundary shouldn't
     // expand across fragments.
     assert(word.start >= range.start && word.end <= range.end);
