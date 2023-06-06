@@ -2335,7 +2335,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -2444,7 +2444,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override

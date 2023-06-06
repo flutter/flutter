@@ -140,7 +140,7 @@ Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext conte
 /// [childWhenDragging] when one or more drags are underway. Otherwise, this
 /// widget always displays [child].
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=q4x2G_9-Mu0}
 ///
 /// {@tool dartpad}
 /// The following example has a [Draggable] widget along with a [DragTarget]

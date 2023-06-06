@@ -201,9 +201,9 @@ class XcodeProjectInterpreter {
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (buildContext.isWatch == true && buildContext.environmentType == EnvironmentType.physical)
+      if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=watchOS'
-      else if (buildContext.isWatch == true)
+      else if (buildContext.isWatch)
         'generic/platform=watchOS Simulator'
       else if (deviceId != null)
         'id=$deviceId'

@@ -439,10 +439,13 @@ class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Dia
 
   @override
   Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return overlay.withOpacity(0.12);
+    }
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+    if (states.contains(MaterialState.focused)) {
       return overlay.withOpacity(0.12);
     }
     return null;
@@ -588,13 +591,13 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onPrimary.withOpacity(0.12);
+      }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onPrimary.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onPrimary.withOpacity(0.12);
       }
       return null;
@@ -614,13 +617,13 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
+      if (states.contains(MaterialState.pressed)) {
+        return 0.0;
+      }
       if (states.contains(MaterialState.hovered)) {
         return 1.0;
       }
       if (states.contains(MaterialState.focused)) {
-        return 0.0;
-      }
-      if (states.contains(MaterialState.pressed)) {
         return 0.0;
       }
       return 0.0;
@@ -712,13 +715,13 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSecondaryContainer.withOpacity(0.12);
+      }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSecondaryContainer.withOpacity(0.12);
       }
       return null;
@@ -738,13 +741,13 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
+      if (states.contains(MaterialState.pressed)) {
+        return 0.0;
+      }
       if (states.contains(MaterialState.hovered)) {
         return 1.0;
       }
       if (states.contains(MaterialState.focused)) {
-        return 0.0;
-      }
-      if (states.contains(MaterialState.pressed)) {
         return 0.0;
       }
       return 0.0;

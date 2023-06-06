@@ -18,7 +18,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.bin') {
+    if (key == 'AssetManifest.smcbin') {
       return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
     }
 

@@ -1133,6 +1133,59 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
+  testWidgets('IconButton default overlayColor resolves pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return IconButton(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  icon: const Icon(Icons.add),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+  });
+
   testWidgets('IconButton.fill defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
@@ -1217,6 +1270,59 @@ void main() {
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('IconButton.fill default overlayColor resolves pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return IconButton.filled(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  icon: const Icon(Icons.add),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
   });
 
   testWidgets('Toggleable IconButton.fill defaults - M3', (WidgetTester tester) async {
@@ -1420,6 +1526,59 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
+  testWidgets('IconButton.filledTonal default overlayColor resolves pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return IconButton.filledTonal(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  icon: const Icon(Icons.add),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+  });
+
   testWidgets('Toggleable IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
     final ThemeData themeM3 = ThemeData.from(colorScheme: colorScheme, useMaterial3: true);
 
@@ -1619,6 +1778,59 @@ void main() {
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
+  });
+
+  testWidgets('IconButton.outlined default overlayColor resolves pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return IconButton.outlined(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  icon: const Icon(Icons.add),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(IconButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
   });
 
   testWidgets('Toggleable IconButton.outlined defaults - M3', (WidgetTester tester) async {

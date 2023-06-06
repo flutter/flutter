@@ -45,6 +45,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
+    initializationComplete();
   }
 
   /// The current [ServicesBinding], if one has been created.
@@ -284,6 +285,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
+      case 'AppLifecycleState.hidden':
+        return AppLifecycleState.hidden;
       case 'AppLifecycleState.paused':
         return AppLifecycleState.paused;
       case 'AppLifecycleState.detached':
@@ -414,6 +417,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
+  }
+
+  /// Alert the engine that the binding is registered. This instructs the engine to
+  /// register its top level window handler on Windows. This signals that the app
+  /// is able to process "System.requestAppExit" signals from the engine.
+  @protected
+  Future<void> initializationComplete() async {
+    await SystemChannels.platform.invokeMethod('System.initializationComplete');
   }
 }
 

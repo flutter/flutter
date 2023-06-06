@@ -99,7 +99,7 @@ class ValidateProject {
 
   String getStringResult(ProjectValidatorResult result) {
     final String icon;
-    switch(result.status) {
+    switch (result.status) {
       case StatusProjectValidator.error:
         icon = '[✗]';
       case StatusProjectValidator.info:

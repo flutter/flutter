@@ -80,7 +80,7 @@ class PathBoundsMatcher extends Matcher {
     final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
     final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
 
-    for(int idx = 0; idx < matchers.length; idx++) {
+    for (int idx = 0; idx < matchers.length; idx++) {
       if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
         failedMatcher[matchers[idx]!] = values[idx];
       }
@@ -9512,5 +9512,50 @@ void main() {
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsOneWidget);
+
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // After the gesture is down but not up, the toolbar is already gone.
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+  },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
 }

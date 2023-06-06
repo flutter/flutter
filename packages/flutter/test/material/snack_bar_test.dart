@@ -445,7 +445,6 @@ void main() {
     final ThemeData theme = ThemeData.light().copyWith(
       visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
-      primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
       primaryColorDark: Colors.black,
       canvasColor: Colors.black,
@@ -2081,7 +2080,7 @@ void main() {
     Widget buildApp() {
       final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          for(final TargetPlatform platform in TargetPlatform.values)
+          for (final TargetPlatform platform in TargetPlatform.values)
             platform: const CupertinoPageTransitionsBuilder(),
         },
       );

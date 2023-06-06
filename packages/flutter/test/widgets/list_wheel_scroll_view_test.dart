@@ -1642,6 +1642,65 @@ void main() {
 
       expect(pageController.page, 1.0);
     });
+
+    testWidgets('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/12649
+
+      final FixedExtentScrollController controller = FixedExtentScrollController();
+      final List<int> children = List<int>.generate(100, (int index) => index);
+      final List<int> paintedChildren = <int>[];
+      final Set<int> tappedChildren = <int>{};
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 120,
+              child: ListWheelScrollView.useDelegate(
+                controller: controller,
+                physics: const FixedExtentScrollPhysics(),
+                diameterRatio: 0.9,
+                itemExtent: 55,
+                squeeze: 1.45,
+                childDelegate: ListWheelChildListDelegate(
+                  children: children
+                    .map((int index) => GestureDetector(
+                      key: ValueKey<int>(index),
+                      onTap: () {
+                        tappedChildren.add(index);
+                      },
+                      child: SizedBox(
+                        width: 55,
+                        height: 55,
+                        child: CustomPaint(
+                          painter: TestCallbackPainter(onPaint: () {
+                            paintedChildren.add(index);
+                          }),
+                        ),
+                      ),
+                    ))
+                    .toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(paintedChildren, <int>[0, 1]);
+
+      // Expect hitting 0 and 1, which are painted
+      await tester.tap(find.byKey(const ValueKey<int>(0)));
+      expect(tappedChildren, const <int>[0]);
+
+      await tester.tap(find.byKey(const ValueKey<int>(1)));
+      expect(tappedChildren, const <int>[0, 1]);
+
+      // The third child is not painted, so is not hit
+      await tester.tap(find.byKey(const ValueKey<int>(2)), warnIfMissed: false);
+      expect(tappedChildren, const <int>[0, 1]);
+    });
   });
 
   testWidgets('ListWheelScrollView creates only one opacity layer for all children', (WidgetTester tester) async {

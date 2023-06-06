@@ -277,6 +277,135 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
+  testWidgets('FilledButton default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return FilledButton(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  child: const Text('FilledButton'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    double elevation() {
+      return tester.widget<PhysicalShape>(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.byType(PhysicalShape),
+        ),
+      ).elevation;
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FilledButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 1.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+  });
+
+  testWidgets('FilledButton.tonal default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return FilledButton.tonal(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  child: const Text('FilledButton'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    double elevation() {
+      return tester.widget<PhysicalShape>(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.byType(PhysicalShape),
+        ),
+      ).elevation;
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FilledButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 1.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+  });
 
   testWidgets('FilledButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();

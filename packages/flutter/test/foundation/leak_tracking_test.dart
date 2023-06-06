@@ -35,8 +35,8 @@ Future<void> main() async {
         await tester.pumpWidget(_StatelessLeakingWidget());
       },
       leakTrackingConfig: LeakTrackingTestConfig(
-        notDisposedAllowList: <String>{_leakTrackedClassName},
-        notGCedAllowList: <String>{_leakTrackedClassName},
+        notDisposedAllowList: <String, int?>{_leakTrackedClassName: null},
+        notGCedAllowList: <String, int?>{_leakTrackedClassName: null},
       ),
     );
 
@@ -55,7 +55,7 @@ Future<void> main() async {
             leaks = theLeaks;
           },
           failTestOnLeaks: false,
-          notGCedAllowList: <String>{_leakTrackedClassName},
+          notGCedAllowList: <String, int?>{_leakTrackedClassName: null},
         ),
       );
 

@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
-const String _kAssetManifestFilename = 'AssetManifest.bin';
+const String _kAssetManifestFilename = 'AssetManifest.smcbin';
 
 /// Contains details about available assets and their variants.
 /// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)

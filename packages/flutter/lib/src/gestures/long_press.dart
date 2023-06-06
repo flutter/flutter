@@ -629,7 +629,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
 
     if (event is PointerUpEvent) {
-      if (_longPressAccepted == true) {
+      if (_longPressAccepted) {
         _checkLongPressEnd(event);
       } else {
         // Pointer is lifted before timeout.

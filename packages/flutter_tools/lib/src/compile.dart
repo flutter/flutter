@@ -114,7 +114,7 @@ class StdoutHandler {
         }
       }
       if (message.length <= messageBoundaryKey.length) {
-        compilerOutput?.complete(null);
+        compilerOutput?.complete();
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
@@ -793,7 +793,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--platform',
         platformDill!,
       ],
-      if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if (unsafePackageSerialization) '--unsafe-package-serialization',
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
       ...?extraFrontEndOptions,
@@ -809,7 +809,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
           if (_stdoutHandler.compilerOutput?.isCompleted == false) {
-            _stdoutHandler.compilerOutput?.complete(null);
+            _stdoutHandler.compilerOutput?.complete();
             throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });

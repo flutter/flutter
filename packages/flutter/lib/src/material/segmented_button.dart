@@ -763,23 +763,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
+          if (states.contains(MaterialState.pressed)) {
+            return _colors.onSecondaryContainer.withOpacity(0.12);
+          }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSecondaryContainer.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
             return _colors.onSecondaryContainer.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.pressed)) {
-            return _colors.onSecondaryContainer.withOpacity(0.12);
-          }
         } else {
+          if (states.contains(MaterialState.pressed)) {
+            return _colors.onSurface.withOpacity(0.12);
+          }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSurface.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSurface.withOpacity(0.12);
-          }
-          if (states.contains(MaterialState.pressed)) {
             return _colors.onSurface.withOpacity(0.12);
           }
         }

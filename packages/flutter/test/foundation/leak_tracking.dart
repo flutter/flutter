@@ -144,7 +144,7 @@ class LeakCleaner {
 
   Leaks clean(Leaks leaks) {
     final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
-      for (LeakType leakType in leaks.byType.keys)
+      for (final LeakType leakType in leaks.byType.keys)
         leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak)).toList()
     });
     return result;
@@ -160,10 +160,10 @@ class LeakCleaner {
 
     switch (leakType) {
       case LeakType.notDisposed:
-        return !config.notDisposedAllowList.contains(leak.type);
+        return !config.notDisposedAllowList.containsKey(leak.type);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !config.notGCedAllowList.contains(leak.type);
+        return !config.notGCedAllowList.containsKey(leak.type);
     }
   }
 }

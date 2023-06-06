@@ -15661,6 +15661,49 @@ void main() {
     },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );
+
+    testWidgets('contextMenuBuilder changes from default to null', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(MaterialApp(home: Material(child: TextField(key: key, controller: controller))));
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pump();
+
+      expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+      // Set contextMenuBuilder to null.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(
+              key: key,
+              controller: controller,
+              contextMenuBuilder: null,
+            ),
+          ),
+        ),
+      );
+
+      // Trigger build one more time...
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Padding(
+                padding: EdgeInsets.zero,
+                child: TextField(key: key, controller: controller, contextMenuBuilder: null),
+              ),
+            ),
+          ),
+        );
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+    );
   });
 
   group('magnifier builder', () {
@@ -16183,9 +16226,9 @@ void main() {
 
         await click(find.text('Outside'));
 
-        switch(pointerDeviceKind) {
+        switch (pointerDeviceKind) {
           case PointerDeviceKind.touch:
-            switch(defaultTargetPlatform) {
+            switch (defaultTargetPlatform) {
               case TargetPlatform.iOS:
               case TargetPlatform.android:
               case TargetPlatform.fuchsia:
@@ -16315,6 +16358,53 @@ void main() {
       expectedConfiguration.spellCheckSuggestionsToolbarBuilder,
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 8),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    gesture = await tester.startGesture(
+      textOffsetToPosition(tester, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // After the gesture is down but not up, the toolbar is already gone.
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+  },
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+  );
 }
 
 /// A Simple widget for testing the obscure text.

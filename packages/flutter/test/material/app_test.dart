@@ -1476,7 +1476,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -1522,7 +1522,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
