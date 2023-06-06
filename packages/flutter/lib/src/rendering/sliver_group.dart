@@ -325,4 +325,15 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
     }
     return false;
   }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    RenderSliver? child = firstChild;
+    while (child != null) {
+      if (child.geometry!.visible) {
+        visitor(child);
+      }
+      child = childAfter(child);
+    }
+  }
 }

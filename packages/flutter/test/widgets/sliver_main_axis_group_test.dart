@@ -167,7 +167,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
   });
 
-testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed', (WidgetTester tester) async {
+  testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
 
@@ -310,6 +310,31 @@ testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed'
     final RenderBox second = tester.renderObject(find.text('second box'));
     expect(first.localToGlobal(Offset.zero), Offset.zero);
     expect(second.localToGlobal(Offset.zero), Offset(0, first.size.height));
+  });
+
+  testWidgets('visitChildrenForSemantics visits children in the correct order', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(_buildSliverMainAxisGroup(
+      controller: controller,
+      slivers: const <Widget>[
+        SliverToBoxAdapter(child: SizedBox(height: 200)),
+        SliverToBoxAdapter(child: SizedBox(height: 300)),
+        SliverToBoxAdapter(child: SizedBox(height: 500)),
+        SliverToBoxAdapter(child: SizedBox(height: 400)),
+      ]),
+    );
+    controller.jumpTo(300);
+    await tester.pumpAndSettle();
+
+    final List<RenderSliver> visitedChildren = <RenderSliver>[];
+    final RenderSliverMainAxisGroup renderGroup = tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
+    void visitor(RenderObject child) {
+      visitedChildren.add(child as RenderSliver);
+    }
+    renderGroup.visitChildrenForSemantics(visitor);
+    expect(visitedChildren.length, equals(2));
+    expect(visitedChildren[0].geometry!.scrollExtent, equals(300));
+    expect(visitedChildren[1].geometry!.scrollExtent, equals(500));
   });
 
   testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverMainAxisGroup', (WidgetTester tester) async {
