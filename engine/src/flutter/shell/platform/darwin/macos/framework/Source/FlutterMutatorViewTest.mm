@@ -13,6 +13,8 @@
 
 @end
 
+static constexpr float kMaxErr = 1e-10;
+
 namespace {
 void ApplyFlutterLayer(FlutterMutatorView* view,
                        FlutterSize size,
@@ -45,8 +47,6 @@ void ApplyFlutterLayer(FlutterMutatorView* view,
 // In order to avoid architecture-specific floating point differences we don't check for exact
 // equality using, for example, CATransform3DEqualToTransform.
 void ExpectTransform3DEqual(const CATransform3D& t, const CATransform3D& u) {
-  constexpr float kMaxErr = 1e-10;
-
   EXPECT_NEAR(t.m11, u.m11, kMaxErr);
   EXPECT_NEAR(t.m12, u.m12, kMaxErr);
   EXPECT_NEAR(t.m13, u.m13, kMaxErr);
@@ -338,6 +338,42 @@ TEST(FlutterMutatorViewTest, ViewsSetIsFlipped) {
   ASSERT_EQ(mutatorView.pathClipViews.count, 1ul);
   EXPECT_TRUE(mutatorView.pathClipViews.firstObject.isFlipped);
   EXPECT_TRUE(mutatorView.platformViewContainer.isFlipped);
+}
+
+TEST(FlutterMutatorViewTest, RectsClipsToPathWhenRotated) {
+  NSView* platformView = [[NSView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+  std::vector<FlutterPlatformViewMutation> mutations{
+      {
+          .type = kFlutterPlatformViewMutationTypeTransformation,
+          // Roation M_PI / 8
+          .transformation =
+              FlutterTransformation{
+                  .scaleX = 0.9238795325112867,
+                  .skewX = -0.3826834323650898,
+                  .skewY = 0.3826834323650898,
+                  .scaleY = 0.9238795325112867,
+              },
+      },
+      {
+          .type = kFlutterPlatformViewMutationTypeClipRect,
+          .clip_rect = FlutterRect{110, 60, 150, 150},
+      },
+      {
+          .type = kFlutterPlatformViewMutationTypeTransformation,
+          .transformation =
+              FlutterTransformation{
+                  .scaleX = 1,
+                  .transX = 100,
+                  .scaleY = 1,
+                  .transY = 50,
+              },
+      },
+  };
+  ApplyFlutterLayer(mutatorView, FlutterSize{30, 20}, mutations);
+  EXPECT_EQ(mutatorView.pathClipViews.count, 1ul);
+  EXPECT_NEAR(mutatorView.platformViewContainer.frame.size.width, 35.370054622640396, kMaxErr);
+  EXPECT_NEAR(mutatorView.platformViewContainer.frame.size.height, 29.958093621178421, kMaxErr);
 }
 
 TEST(FlutterMutatorViewTest, RoundRectClipsToPath) {
