@@ -32,20 +32,32 @@ ui.Image generateAtlas() {
   // Draw the square
   canvas.save();
   canvas.clipRect(kBlueSquareRegion);
-  canvas.drawPaint(ui.Paint()..color = const ui.Color(0xFF0000FF));
+  canvas.drawRect(
+    // Inset the square by one pixel so it doesn't bleed into the other sprites.
+    kBlueSquareRegion.deflate(1.0),
+    ui.Paint()..color = const ui.Color(0xFF0000FF)
+  );
   canvas.restore();
 
   // Draw the circle
   canvas.save();
   canvas.clipRect(kRedCircleRegion);
-  canvas.drawCircle(kRedCircleRegion.center, kRedCircleRegion.width / 2.0, ui.Paint()..color = const ui.Color(0xFFFF0000));
+  canvas.drawCircle(
+    kRedCircleRegion.center,
+    // Make the circle one pixel smaller than the bounds to it doesn't bleed
+    // into the other shapes.
+    (kRedCircleRegion.width / 2.0) - 1.0,
+    ui.Paint()..color = const ui.Color(0xFFFF0000));
   canvas.restore();
 
   // Draw the star
   canvas.save();
   canvas.clipRect(kMagentaStarRegion);
   final ui.Offset starCenter = kMagentaStarRegion.center;
-  final double radius = kMagentaStarRegion.height / 2.0;
+
+  // Make the star one pixel smaller than the bounds so that it doesn't bleed
+  // into the other shapes.
+  final double radius = (kMagentaStarRegion.height / 2.0) - 1.0;
 
   // Start at the top (rotated 90 degrees)
   double theta = -math.pi / 2.0;
@@ -76,11 +88,11 @@ ui.Image generateAtlas() {
   canvas.save();
   canvas.clipRect(kGreenSquiggleRegion);
   final ui.Path squigglePath = ui.Path();
-  squigglePath.moveTo(kGreenSquiggleRegion.topCenter.dx, kGreenSquiggleRegion.topCenter.dy);
+  squigglePath.moveTo(kGreenSquiggleRegion.topCenter.dx, kGreenSquiggleRegion.topCenter.dy + 2.0);
   squigglePath.cubicTo(
     kGreenSquiggleRegion.left - 10.0, kGreenSquiggleRegion.top + kGreenSquiggleRegion.height * 0.33,
     kGreenSquiggleRegion.right + 10.0, kGreenSquiggleRegion.top + kGreenSquiggleRegion.height * 0.66,
-    kGreenSquiggleRegion.bottomCenter.dx, kGreenSquiggleRegion.bottomCenter.dy
+    kGreenSquiggleRegion.bottomCenter.dx, kGreenSquiggleRegion.bottomCenter.dy - 2.0
   );
   canvas.drawPath(
     squigglePath,
