@@ -78,7 +78,7 @@ class _AssetManifestBin implements AssetManifest {
           final Object? dpr = data['dpr'];
           return AssetMetadata(
             key: data['asset']! as String,
-            targetDevicePixelRatio: dpr == null ? null : dpr as double,
+            targetDevicePixelRatio: dpr as double?,
             main: key == asset,
           );
         })
