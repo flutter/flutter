@@ -4,7 +4,11 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
+// The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
+// for `JSObject.[]=`.
+// ignore: unused_import
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -15,6 +19,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+import 'package:web/web.dart' as web;
 
 /// The default number of samples from warm-up iterations.
 ///
@@ -1310,9 +1315,11 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 
   if (_engineBenchmarkListeners.isEmpty) {
     // The first listener is being registered. Register the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', _dispatchEngineBenchmarkValue);
+    web.window['_flutter_internal_on_benchmark'.toJS] =
+        // Upcast to [Object] to export.
+        // ignore: unnecessary_cast
+        (_dispatchEngineBenchmarkValue as Object).toJS;
   }
-
   _engineBenchmarkListeners[name] = listener;
 }
 
@@ -1320,8 +1327,9 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 void stopListeningToEngineBenchmarkValues(String name) {
   _engineBenchmarkListeners.remove(name);
   if (_engineBenchmarkListeners.isEmpty) {
+
     // The last listener unregistered. Remove the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', null);
+    web.window['_flutter_internal_on_benchmark'.toJS] = null;
   }
 }
 
