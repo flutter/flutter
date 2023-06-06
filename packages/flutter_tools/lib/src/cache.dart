@@ -519,10 +519,15 @@ class Cache {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
+    // Automated testing of Flutter builds using non-released artifacts
+    // need to be able to use the --fatal-warnings flag without failing
+    // due to their custom artifact download location.
+    final bool oldWarnings = _logger.hadWarningOutput;
     _logger.printWarning(
       'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
       emphasis: true,
     );
+    _logger.hadWarningOutput = oldWarnings;
     _hasWarnedAboutStorageOverride = true;
   }
 
