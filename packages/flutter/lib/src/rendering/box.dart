@@ -2106,7 +2106,7 @@ abstract class RenderBox extends RenderObject {
   @override
   void debugResetSize() {
     // updates the value of size._canBeUsedByParent if necessary
-    size = size;
+    size = size; // ignore: no_self_assignments
   }
 
   Map<TextBaseline, double?>? _cachedBaselines;

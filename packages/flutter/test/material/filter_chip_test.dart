@@ -84,7 +84,289 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
   expect(materials.last.clipBehavior, clipBehavior);
 }
 
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(FilterChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+  return tester.widget(
+    find.ancestor(
+      of: find.text(labelText),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
+  );
+}
+
 void main() {
+  testWidgets('FilterChip defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const String label = 'filter chip';
+
+    // Test enabled FilterChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip(
+              onSelected: (bool valueChanged) { },
+              label: const Text(label),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test default chip size.
+    expect(tester.getSize(find.byType(FilterChip)), const Size(190.0, 48.0));
+    // Test default label style.
+    expect(
+      getLabelStyle(tester, label).style.color!.value,
+      theme.textTheme.labelLarge!.color!.value,
+    );
+
+    Material chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, Colors.transparent);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: theme.colorScheme.outline),
+      ),
+    );
+
+    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, null);
+
+    // Test disabled FilterChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: FilterChip(
+            onSelected: null,
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, Colors.transparent);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      RoundedRectangleBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.12)),
+      ),
+    );
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, null);
+
+    // Test selected enabled FilterChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: FilterChip(
+            selected: true,
+            onSelected: (bool valueChanged) { },
+            label: const Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, null);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: Colors.transparent),
+      ),
+    );
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, theme.colorScheme.secondaryContainer);
+
+    // Test selected disabled FilterChip defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: FilterChip(
+            selected: true,
+            onSelected: null,
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, null);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: Colors.transparent),
+      ),
+    );
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
+  });
+
+  testWidgets('FilterChip.elevated defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const String label = 'filter chip';
+
+    // Test enabled FilterChip.elevated defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Center(
+            child: FilterChip.elevated(
+              onSelected: (bool valueChanged) { },
+              label: const Text(label),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test default chip size.
+    expect(tester.getSize(find.byType(FilterChip)), const Size(190.0, 48.0));
+    // Test default label style.
+    expect(
+      getLabelStyle(tester, 'filter chip').style.color!.value,
+      theme.textTheme.labelLarge!.color!.value,
+    );
+
+    Material chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 1);
+    expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: Colors.transparent),
+      ),
+    );
+
+    ShapeDecoration decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, null);
+
+    // Test disabled FilterChip.elevated defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: FilterChip.elevated(
+            onSelected: null,
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, theme.colorScheme.shadow);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: Colors.transparent),
+      ),
+    );
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
+
+    // Test selected enabled FilterChip.elevated defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: FilterChip.elevated(
+            selected: true,
+            onSelected: (bool valueChanged) { },
+            label: const Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 1);
+    expect(chipMaterial.shadowColor, null);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: Colors.transparent),
+      ),
+    );
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, theme.colorScheme.secondaryContainer);
+
+    // Test selected disabled FilterChip.elevated defaults.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: FilterChip.elevated(
+            selected: true,
+            onSelected: null,
+            label: Text(label),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    chipMaterial = getMaterial(tester);
+    expect(chipMaterial.elevation, 0);
+    expect(chipMaterial.shadowColor, null);
+    expect(chipMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(
+      chipMaterial.shape,
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        side: BorderSide(color: Colors.transparent),
+      ),
+    );
+
+    decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
+    expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
+  });
+
   testWidgets('FilterChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

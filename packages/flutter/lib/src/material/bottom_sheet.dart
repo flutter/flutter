@@ -357,15 +357,14 @@ class _BottomSheetState extends State<BottomSheet> {
         dragHandleColor: widget.dragHandleColor,
         dragHandleSize: widget.dragHandleSize,
       );
-      // Only add [GestureDetector] to the drag handle when the rest of the
+      // Only add [_BottomSheetGestureDetector] to the drag handle when the rest of the
       // bottom sheet is not draggable. If the whole bottom sheet is draggable,
       // no need to add it.
       if (!widget.enableDrag) {
-        dragHandle = GestureDetector(
+        dragHandle = _BottomSheetGestureDetector(
           onVerticalDragStart: _handleDragStart,
           onVerticalDragUpdate: _handleDragUpdate,
           onVerticalDragEnd: _handleDragEnd,
-          excludeFromSemantics: true,
           child: dragHandle,
         );
       }
@@ -407,11 +406,10 @@ class _BottomSheetState extends State<BottomSheet> {
       );
     }
 
-    return !widget.enableDrag ? bottomSheet : GestureDetector(
+    return !widget.enableDrag ? bottomSheet : _BottomSheetGestureDetector(
       onVerticalDragStart: _handleDragStart,
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
-      excludeFromSemantics: true,
       child: bottomSheet,
     );
   }
@@ -1300,7 +1298,39 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   );
 }
 
+class _BottomSheetGestureDetector extends StatelessWidget {
+  const _BottomSheetGestureDetector({
+    required this.child,
+    required this.onVerticalDragStart,
+    required this.onVerticalDragUpdate,
+    required this.onVerticalDragEnd,
+  });
 
+  final Widget child;
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      excludeFromSemantics: true,
+      gestures: <Type, GestureRecognizerFactory<GestureRecognizer>>{
+        VerticalDragGestureRecognizer : GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+          () => VerticalDragGestureRecognizer(debugOwner: this),
+          (VerticalDragGestureRecognizer instance) {
+            instance
+              ..onStart = onVerticalDragStart
+              ..onUpdate = onVerticalDragUpdate
+              ..onEnd = onVerticalDragEnd
+              ..onlyAcceptDragOnThreshold = true;
+          },
+        ),
+      },
+      child: child,
+    );
+  }
+}
 
 // BEGIN GENERATED TOKEN PROPERTIES - BottomSheet
 
