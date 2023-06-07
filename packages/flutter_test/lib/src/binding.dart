@@ -1828,7 +1828,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         .forEach(pointerIdToRecord.remove);
       if (dirty) {
         scheduleMicrotask(() {
-          _markViewsNeedPaint(renderView.flutterView.viewId as int);
+          _markViewsNeedPaint(renderView.flutterView.viewId);
         });
       }
     }
@@ -1893,7 +1893,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           // The pointer events received with this source has a global position
           // (see [handlePointerEventForSource]). Transform it to the local
           // coordinate space used by the testing widgets.
-          final RenderView renderView = renderViews.firstWhere((RenderView r) => r.flutterView.viewId == viewId);
+          final RenderView renderView = renderViews.firstWhere((RenderView r) => r.flutterView.viewId == event.viewId);
           final PointerEvent localEvent = event.copyWith(position: globalToLocal(event.position, renderView));
           withPointerEventSource(TestBindingEventSource.device,
             () => super.handlePointerEvent(localEvent)

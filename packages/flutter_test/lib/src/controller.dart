@@ -1242,7 +1242,7 @@ abstract class WidgetController {
 
   /// Forwards the given location to the binding's hitTest logic.
   HitTestResult hitTestOnBinding(Offset location, { int? viewId }) {
-    viewId ??= view.viewId as int;
+    viewId ??= view.viewId;
     final HitTestResult result = HitTestResult();
     binding.hitTest(result, location, viewId);
     return result;
@@ -1366,7 +1366,7 @@ abstract class WidgetController {
     if (warnIfMissed) {
       final FlutterView view = _viewOf(finder);
       final HitTestResult result = HitTestResult();
-      binding.hitTest(result, location, view.viewId as int);
+      binding.hitTest(result, location, view.viewId);
       bool found = false;
       for (final HitTestEntry entry in result.path) {
         if (entry.target == box) {

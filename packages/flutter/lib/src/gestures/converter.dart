@@ -72,7 +72,7 @@ abstract final class PointerEventConverter {
     return data
         .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
         .map<PointerEvent?>((ui.PointerData datum) {
-          final int viewId = datum.viewId as int;
+          final int viewId = datum.viewId;
           final double? devicePixelRatio = devicePixelRatioGetter(viewId);
           if (devicePixelRatio == null) {
             // View doesn't exist anymore.
@@ -335,9 +335,4 @@ abstract final class PointerEventConverter {
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
-}
-
-// TODO(goderbauer): This needs to move to the engine.
-extension _PointerDataExtention on ui.PointerData {
-  Object get viewId => 0;
 }

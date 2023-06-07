@@ -828,8 +828,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
-    viewId ??= view.viewId as int;
-    final RenderView renderView = renderViews.firstWhere((RenderView r) => r.flutterView.viewId == event.viewId);
+    viewId ??= view.viewId;
+    final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView.viewId == viewId);
     location = binding.localToGlobal(location, renderView);
     return super.hitTestOnBinding(location, viewId: viewId);
   }
