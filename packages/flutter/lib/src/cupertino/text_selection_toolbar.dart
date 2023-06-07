@@ -31,8 +31,7 @@ const Radius _kToolbarBorderRadius = Radius.circular(8);
 
 // Color was measured from a screenshot of iOS 16.0.2
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
-const CupertinoDynamicColor _kToolbarBackgroundColor =
-    CupertinoDynamicColor.withBrightness(
+const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFF6F6F6),
   darkColor: Color(0xFF222222),
 );
@@ -957,7 +956,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         final Offset childOffset = childParentData.offset + offset;
         context.paintChild(child, childOffset);
 
-        // backButton is not in the children list, that's probably why its
+        // backButton is not in the children list, that's why its
         // childParentData.nextSibling is null. So either when there's a
         // nextSibling or when child is the backButton, draw a divider to the
         // child's right.

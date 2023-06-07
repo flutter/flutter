@@ -137,10 +137,13 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
         : const Color(0x00000000),
       borderRadius: null,
       disabledColor: const Color(0x00000000),
+      // This CupertinoButton does not actually handle the onPressed callback,
+      // this is only here to correctly enable/disable the button (see
+      // GestureDetector comment below).
       onPressed: widget.onPressed,
       padding: _kToolbarButtonPadding,
-      // There's no foreground fade on iOS toolbar anymore, it just darkens the
-      // background.
+      // There's no foreground fade on iOS toolbar anymore, just the background
+      // is darkened.
       pressedOpacity: 1.0,
       child: widget.child ?? Text(
          widget.text ?? CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
@@ -154,8 +157,9 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
     );
 
     if (widget.onPressed != null) {
-      // The toolbar buttons on iOS are different from the default CupertinoButton.
-      // When pressed, the background changes and the foreground remains the same.
+      // As it's needed to change the CupertinoButton's backgroundColor when
+      // pressed, not its opacity, this GestureDetector handles both the
+      // onPressed callback and the backgroundColor change.
       return GestureDetector(
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
