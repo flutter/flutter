@@ -167,7 +167,7 @@ class ReorderableList extends StatefulWidget {
   /// to a new location in the list and the application should update the order
   /// of the items.
   ///
-  /// Note that if oldIndex is before newIndex,
+  /// If oldIndex is before newIndex,
   /// removing the item at oldIndex from the list will
   /// reduce the list's length by one.
   /// Implementations will need to account for this
