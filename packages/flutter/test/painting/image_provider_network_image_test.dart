@@ -86,12 +86,12 @@ void main() {
 
     expect(imageCache.pendingImageCount, 1);
 
-    result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-    }, onError: (dynamic error, StackTrace? stackTrace) {
+    result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {},
+        onError: (dynamic error, StackTrace? stackTrace) {
       caughtError.complete(error);
     }));
 
-    final dynamic err = await caughtError.future;
+    final Object? err = await caughtError.future;
     await Future<void>.delayed(Duration.zero);
 
     expect(imageCache.pendingImageCount, 0);
@@ -213,7 +213,7 @@ void main() {
       },
     ));
 
-    final dynamic err = await caughtError.future;
+    final Object? err = await caughtError.future;
 
     expect(err, isA<SocketException>());
 

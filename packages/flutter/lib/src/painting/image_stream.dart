@@ -490,6 +490,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// and similarly, by overriding [removeListener], checking if [hasListeners]
   /// is false after calling `super.removeListener()`, and if so, stopping that
   /// same work.
+  ///
+  /// The ephemeral error listeners (added through [addEphemeralErrorListener])
+  /// will not be taken into consideration in this property.
   @protected
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
