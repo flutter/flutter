@@ -49,7 +49,7 @@ import 'package:flutter/painting.dart';
 ///
 /// ```dart
 /// ThemeData(
-///   primarySwatch: Colors.blue,
+///   primarySwatch: Colors.amber,
 /// )
 /// ```
 ///
@@ -59,7 +59,7 @@ import 'package:flutter/painting.dart';
 ///
 ///  ```dart
 /// ThemeData(
-///   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+///   colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
 /// )
 /// ```
 ///
@@ -71,7 +71,7 @@ import 'package:flutter/painting.dart';
 ///
 /// ```dart
 /// ThemeData(
-///  colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+///  colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
 /// )
 /// ```
 ///
