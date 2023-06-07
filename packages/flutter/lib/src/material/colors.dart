@@ -10,6 +10,76 @@ import 'package:flutter/painting.dart';
 /// darker the color. There are 10 valid indices: 50, 100, 200, ..., 900.
 /// The value of this color should the same the value of index 500 and [shade500].
 ///
+/// ## Updating to [ColorScheme]
+///
+/// There is a new class,[ColorScheme], that is is preferred for
+/// representing colors in applications that are configured
+/// for Material 3 (see [ThemeData.useMaterial3]).
+/// For more information on colors in Material 3 see
+/// the spec at <https://m3.material.io/styles/color/the-color-system>.
+///
+/// In Material 3, colors are represented using color roles and
+/// corresponding tokens. Each property in the [ColorScheme] class
+/// represents one color role as defined in the spec above.
+///
+/// ### Material 3 Colors in Flutter
+///
+/// Flutter's Material widgets can be assigned colors at the widget level
+/// using widget properties,
+/// or at the app level using theme classes.
+///
+/// For example, you can set the background of the [AppBar] by
+/// setting the [AppBar.backgroundColor] to a specific [Color] value.
+///
+/// To globally set the AppBar background color for your app, you
+/// can set the [ThemeData.appBarTheme] property for your app
+/// using the [ThemeData] class.
+///
+/// Alternatively, you can set the [ThemeData.colorScheme] property
+/// to a custom [ColorScheme]. The [AppBar.backgroundColor] uses the
+/// [ColorScheme.surface].
+///
+/// ### Migrating from [MaterialColor] to [ColorScheme]
+///
+/// In most cases, there are new properties in Flutter widgets that
+/// accept a [ColorScheme] instead of a [MaterialColor].
+///
+/// For example, you may have previously constructed a [ThemeData]
+/// using a primarySwatch:
+///
+/// ```dart
+/// ThemeData(
+///   primarySwatch: Colors.blue,
+/// )
+/// ```
+///
+/// In Material 3, you can use the [ColorScheme] class to
+/// construct a [ThemeData] with the same color palette
+/// by using the [ColorScheme.fromSeed] constructor:
+///
+///  ```dart
+/// ThemeData(
+///   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+/// )
+/// ```
+///
+/// The [ColorScheme.fromSeed] constructor
+/// will generate a set of tonal palettes,
+/// which are used to create the color scheme.
+///
+/// Alternatively you can use the [ColorScheme.fromSwatch] constructor:
+///
+/// ```dart
+/// ThemeData(
+///  colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+/// )
+/// ```
+///
+/// The [ColorScheme.fromSwatch] constructor will
+/// create the color scheme directly from the specific
+/// color values used in the [MaterialColor].
+///
+///
 /// See also:
 ///
 ///  * [Colors], which defines all of the standard material colors.

@@ -18,6 +18,12 @@ import 'theme_data.dart';
 /// that can be used to configure the color properties of most components.
 /// {@endtemplate}
 ///
+/// ### Colors in Material 3
+///
+/// In Material 3, colors are represented using color roles and
+/// corresponding tokens. Each property in the [ColorScheme] class
+/// represents one color role as defined in the spec above.
+///
 /// The main accent color groups in the scheme are [primary], [secondary],
 /// and [tertiary].
 ///
@@ -43,6 +49,23 @@ import 'theme_data.dart';
 /// and icons on top of it. For this reason, the 'on' colors should have a
 /// contrast ratio with their matching colors of at least 4.5:1 in order to
 /// be readable.
+///
+/// ### Setting Colors in Flutter
+///
+/// Flutter's Material widgets can be assigned colors at the widget level
+/// using widget properties,
+/// or at the app level using theme classes.
+///
+/// For example, you can set the background of the [AppBar] by
+/// setting the [AppBar.backgroundColor] to a specific [Color] value.
+///
+/// To globally set the AppBar background color for your app, you
+/// can set the [ThemeData.appBarTheme] property for your app
+/// using the [ThemeData] class.
+///
+/// Alternatively, you can set the [ThemeData.colorScheme] property
+/// to a custom [ColorScheme]. The [AppBar.backgroundColor] uses the
+/// [ColorScheme.surface].
 ///
 /// The [Theme] has a color scheme, [ThemeData.colorScheme], which can either be
 /// passed in as a parameter to the constructor or by using 'brightness' and
