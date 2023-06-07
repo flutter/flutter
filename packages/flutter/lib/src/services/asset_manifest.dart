@@ -33,8 +33,8 @@ abstract class AssetManifest {
   /// Retrieves metadata about an asset and its variants. Returns null if the
   /// key was not found in the asset manifest.
   ///
-  /// This method considers a main asset to be a variant of itself and
-  /// includes it in the returned list.
+  /// This method considers a main asset to be a variant of itself. The returned
+  /// list will include it if it exists.
   List<AssetMetadata>? getAssetVariants(String key);
 }
 
@@ -73,22 +73,21 @@ class _AssetManifestBin implements AssetManifest {
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) => AssetMetadata(
+        .map((Map<Object?, Object?> data) {
+          final String asset = data['asset']! as String;
+          final Object? dpr = data['dpr'];
+          return AssetMetadata(
             key: data['asset']! as String,
-            targetDevicePixelRatio: data['dpr']! as double,
-            main: false,
-        ))
+            targetDevicePixelRatio: dpr as double?,
+            main: key == asset,
+          );
+        })
         .toList();
 
       _data.remove(key);
     }
 
-    final AssetMetadata mainAsset = AssetMetadata(key: key,
-      targetDevicePixelRatio: null,
-      main: true
-    );
-
-    return <AssetMetadata>[mainAsset, ..._typeCastedData[key]!];
+    return _typeCastedData[key]!;
   }
 
   @override
