@@ -192,16 +192,21 @@ class HotRunner extends ResidentRunner {
     String isolateId,
     String expression,
     List<String> definitions,
+    List<String> definitionTypes,
     List<String> typeDefinitions,
+    List<String> typeBounds,
+    List<String> typeDefaults,
     String libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   ) async {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.generator != null) {
         final CompilerOutput? compilerOutput =
             await device.generator!.compileExpression(expression, definitions,
-                typeDefinitions, libraryUri, klass, isStatic);
+                definitionTypes, typeDefinitions, typeBounds, typeDefaults,
+                libraryUri, klass, method, isStatic);
         if (compilerOutput != null && compilerOutput.expressionData != null) {
           return base64.encode(compilerOutput.expressionData!);
         }
