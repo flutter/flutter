@@ -717,7 +717,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:114.0"},
+          {"dependency": "chrome_and_driver", "version": "version:114.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -871,7 +871,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "chrome_and_driver", "version": "version:114.0"},
+          {"dependency": "chrome_and_driver", "version": "version:114.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
