@@ -45,6 +45,8 @@ struct _FlAccessibleNodeClass {
   void (*set_actions)(FlAccessibleNode* node, FlutterSemanticsAction actions);
   void (*set_value)(FlAccessibleNode* node, const gchar* value);
   void (*set_text_selection)(FlAccessibleNode* node, gint base, gint extent);
+  void (*set_text_direction)(FlAccessibleNode* node,
+                             FlutterTextDirection direction);
 
   void (*perform_action)(FlAccessibleNode* node,
                          FlutterSemanticsAction action,
@@ -150,6 +152,16 @@ void fl_accessible_node_set_value(FlAccessibleNode* node, const gchar* value);
 void fl_accessible_node_set_text_selection(FlAccessibleNode* node,
                                            gint base,
                                            gint extent);
+
+/**
+ * fl_accessible_node_set_text_direction:
+ * @node: an #FlAccessibleNode.
+ * @direction: the direction of the text.
+ *
+ * Sets the text direction of this node.
+ */
+void fl_accessible_node_set_text_direction(FlAccessibleNode* node,
+                                           FlutterTextDirection direction);
 
 /**
  * fl_accessible_node_dispatch_action:
