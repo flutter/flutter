@@ -103,6 +103,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
+  /// The [FlutterView] into which this [RenderView] will render.
+  ui.FlutterView get flutterView => _view;
   final ui.FlutterView _view;
 
   /// Whether Flutter should automatically compute the desired system UI.

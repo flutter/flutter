@@ -153,6 +153,10 @@ void main() {
     retrieveTestBinding(tester).platformDispatcher.localesTestValue = defaultLocales;
   });
 
+  testWidgets('TestPlatformDispatcher.view getter returns the implicit view', (WidgetTester tester) async {
+    expect(WidgetsBinding.instance.platformDispatcher.view(id: tester.view.viewId), same(tester.view));
+  });
+
   // TODO(pdblasi-google): Removed this group of tests when the Display API is stable and supported on all platforms.
   group('TestPlatformDispatcher with unsupported Display API', () {
     testWidgets('can initialize with empty displays', (WidgetTester tester) async {
