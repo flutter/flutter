@@ -8,7 +8,6 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -18,7 +17,6 @@ import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
 import 'android_sdk.dart';
-import 'android_studio.dart';
 import 'java.dart';
 
 const int kAndroidSdkMinVersion = 29;
@@ -226,29 +224,23 @@ class AndroidLicenseValidator extends DoctorValidator {
     required Java? java,
     required AndroidSdk? androidSdk,
     required Platform platform,
-    required FileSystem fileSystem,
     required ProcessManager processManager,
     required Logger logger,
-    required AndroidStudio? androidStudio,
     required Stdio stdio,
     required UserMessages userMessages,
   }) : _java = java,
        _androidSdk = androidSdk,
        _platform = platform,
-       _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
-       _androidStudio = androidStudio,
        _stdio = stdio,
        _userMessages = userMessages,
        super('Android license subvalidator');
 
   final Java? _java;
   final AndroidSdk? _androidSdk;
-  final AndroidStudio? _androidStudio;
   final Stdio _stdio;
   final Platform _platform;
-  final FileSystem _fileSystem;
   final ProcessManager _processManager;
   final Logger _logger;
   final UserMessages _userMessages;
@@ -287,13 +279,8 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
-    final String? javaBinary = Java.find(
-      logger: _logger,
-      androidStudio: _androidStudio,
-      fileSystem: _fileSystem,
-      platform: _platform,
-      processManager: _processManager,
-    )?.binaryPath;
+    final String? javaBinary = _java?.binaryPath;
+
     if (javaBinary == null) {
       return false;
     }
