@@ -25,7 +25,6 @@ import io.flutter.util.FakeKeyEvent;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -1564,23 +1563,5 @@ public class KeyboardManagerTest {
     assertEmbedderEventEquals(
         calls.get(0).keyData, Type.kUp, PHYSICAL_CAPS_LOCK, LOGICAL_CAPS_LOCK, null, false);
     calls.clear();
-  }
-
-  @Test
-  public void getPressedState() {
-    final KeyboardTester tester = new KeyboardTester();
-
-    tester.respondToTextInputWith(true); // Suppress redispatching.
-
-    // Initial pressed state is empty.
-    assertEquals(tester.keyboardManager.getPressedState(), Map.of());
-
-    tester.keyboardManager.handleEvent(
-        new FakeKeyEvent(ACTION_DOWN, SCAN_KEY_A, KEYCODE_A, 1, 'a', 0));
-    assertEquals(tester.keyboardManager.getPressedState(), Map.of(PHYSICAL_KEY_A, LOGICAL_KEY_A));
-
-    tester.keyboardManager.handleEvent(
-        new FakeKeyEvent(ACTION_UP, SCAN_KEY_A, KEYCODE_A, 0, 'a', 0));
-    assertEquals(tester.keyboardManager.getPressedState(), Map.of());
   }
 }

@@ -26,7 +26,6 @@ import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.DeferredComponentChannel;
-import io.flutter.embedding.engine.systemchannels.KeyboardChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -90,7 +89,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   // System channels.
   @NonNull private final AccessibilityChannel accessibilityChannel;
   @NonNull private final DeferredComponentChannel deferredComponentChannel;
-  @NonNull private final KeyboardChannel keyboardChannel;
   @NonNull private final LifecycleChannel lifecycleChannel;
   @NonNull private final LocalizationChannel localizationChannel;
   @NonNull private final MouseCursorChannel mouseCursorChannel;
@@ -326,7 +324,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
 
     accessibilityChannel = new AccessibilityChannel(dartExecutor, flutterJNI);
     deferredComponentChannel = new DeferredComponentChannel(dartExecutor);
-    keyboardChannel = new KeyboardChannel(dartExecutor);
     lifecycleChannel = new LifecycleChannel(dartExecutor);
     localizationChannel = new LocalizationChannel(dartExecutor);
     mouseCursorChannel = new MouseCursorChannel(dartExecutor);
@@ -517,12 +514,6 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public AccessibilityChannel getAccessibilityChannel() {
     return accessibilityChannel;
-  }
-
-  /** System channel that allows querying the keyboard pressed state. */
-  @NonNull
-  public KeyboardChannel getKeyboardChannel() {
-    return keyboardChannel;
   }
 
   /** System channel that sends Android lifecycle events to Flutter. */
