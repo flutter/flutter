@@ -152,7 +152,7 @@ void main() {
     binding.onHandleEvent = (PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent) {
-        binding.cancelPointer(pointer: event.pointer, viewId: event.viewId);
+        binding.cancelPointer(event.pointer);
       }
     };
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
@@ -309,11 +310,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   ///
   /// The pointer event will be dispatched before the next pointer event and
   /// before the end of the microtask but not within this function call.
-  void cancelPointer({ required int pointer, required int viewId }) {
+  void cancelPointer(int pointer) {
     if (_pendingPointerEvents.isEmpty && !locked) {
       scheduleMicrotask(_flushPointerEventQueue);
     }
-    _pendingPointerEvents.addFirst(PointerCancelEvent(pointer: pointer, viewId: viewId));
+    _pendingPointerEvents.addFirst(PointerCancelEvent(pointer: pointer));
   }
 
   void _flushPointerEventQueue() {

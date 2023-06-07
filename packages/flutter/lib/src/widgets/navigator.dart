@@ -25,7 +25,6 @@ import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
-import 'view.dart';
 
 // Examples can assume:
 // typedef MyAppHome = Placeholder;
@@ -3462,15 +3461,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   String? get restorationId => widget.restorationScopeId;
 
-  // Needed to cancel pointers in _cancelActivePointers which may be called
-  // while the widget is about to be disposed, so it cannot be looked up
-  // on-demand.
-  int _viewId = -1;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _viewId = View.of(context).viewId;
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
@@ -5273,10 +5266,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         // to false on the next frame.
       });
     }
-
-    for (final int pointer in _activePointers) {
-      WidgetsBinding.instance.cancelPointer(pointer: pointer, viewId: _viewId);
-    }
+    _activePointers.forEach(WidgetsBinding.instance.cancelPointer);
   }
 
   /// Gets first route entry satisfying the predicate, or null if not found.
