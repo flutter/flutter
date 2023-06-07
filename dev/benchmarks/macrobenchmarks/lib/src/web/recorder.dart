@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
 import 'dart:js_interop';
 // The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
 // for `JSObject.[]=`.
@@ -1261,7 +1262,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    _performance.mark('measured_frame_start#$_currentFrameNumber'.toJS);
+    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
     _isMeasuringFrame = true;
   }
 }
