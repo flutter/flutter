@@ -1316,8 +1316,8 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
 /// Controls an iOS UIView.
 ///
 /// Typically created with [PlatformViewsService.initUiKitView].
-class UiKitViewController {
-  UiKitViewController._(
+class DarwinPlatformViewController {
+  DarwinPlatformViewController(
     this.id,
     TextDirection layoutDirection,
   ) : _layoutDirection = layoutDirection;
@@ -1380,6 +1380,13 @@ class UiKitViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     PlatformViewsService._instance._focusCallbacks.remove(id);
   }
+}
+
+class UiKitViewController extends DarwinPlatformViewController {
+  UiKitViewController._(
+    super.id,
+    super.layoutDirection,
+  );
 }
 
 /// An interface for controlling a single platform view.
