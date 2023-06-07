@@ -98,8 +98,9 @@ typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
 ///
 ///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
 ///    mechanism.
+// TODO(justinmc): addScopedOnPopCallback is gone.
 @Deprecated(
-  'Use addScopedOnPopCallback or CanPopScope instead. '
+  'Use addScopedOnPopCallback or PopScope instead. '
   'This feature was deprecated after v3.9.0-0.0.pre.',
 )
 enum RoutePopDisposition {
@@ -326,7 +327,7 @@ abstract class Route<T> {
   /// {@template flutter.widgets.navigator.onPopped}
   /// Called after a route pop was handled.
   ///
-  /// Even when the pop is canceled, for example by a [CanPopScope] widget, this
+  /// Even when the pop is canceled, for example by a [PopScope] widget, this
   /// will still be called. The `success` parameter indicates whether or not the
   /// back navigation actually happened successfully.
   /// {@endtemplate}

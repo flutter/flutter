@@ -26,8 +26,6 @@ abstract final class SystemNavigator {
   ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
   ///    for predictive back in native Android apps.
   static Future<void> setFrameworkHandlesBack(bool frameworkHandlesBack) async {
-    // Yes, because this should include the presence of CanPopScopes too, not
-    // just the presence of routes.
     if (frameworkHandlesBack == _frameworkHandlesBack) {
       return;
     }
@@ -47,7 +45,6 @@ abstract final class SystemNavigator {
         // calls to this method don't cause duplicate calls to the platform.
         _frameworkHandlesBack = frameworkHandlesBack;
         try {
-          print('justin telling platform frameworkHandlesPop: $frameworkHandlesBack');
           await SystemChannels.platform.invokeMethod<void>(
             'SystemNavigator.setFrameworkHandlesBack',
             frameworkHandlesBack,

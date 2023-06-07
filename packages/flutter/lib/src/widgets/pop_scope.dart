@@ -9,10 +9,9 @@ import 'routes.dart';
 /// A callback type for informing that a navigation pop has happened.
 ///
 /// Accepts a success boolean indicating whether or not back navigation
-/// succeded.
+/// succeeded.
 typedef OnPoppedCallback = void Function(bool success);
 
-// TODO(justinmc): Change name to match popEnabled  more?
 /// Manages system back gestures.
 ///
 /// [popEnabled] can be used to disable system back gestures, while [onPopped]
@@ -22,23 +21,23 @@ typedef OnPoppedCallback = void Function(bool success);
 /// This sample demonstrates how to use this widget to properly handle system
 /// back gestures when using nested [Navigator]s.
 ///
-/// ** See code in examples/api/lib/widgets/can_pop_scope/nested_navigators.0.dart **
+/// ** See code in examples/api/lib/widgets/pop_scope/nested_navigators.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
 ///    gestures in the case of nested [Navigator]s.
-///  * [ModalRoute.registerCanPopScope] and [ModalRoute.unregisterCanPopScope],
-///    which this widget uses to integrate with Flutter's navigation system.
 ///  * [Form.popEnabled] and [Form.onPopped], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
-class CanPopScope extends StatefulWidget {
+///  * [ModalRoute.registerPopScope] and [ModalRoute.unregisterPopScope],
+///    which this widget uses to integrate with Flutter's navigation system.
+class PopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   ///
   /// The [child] argument must not be null.
-  const CanPopScope({
+  const PopScope({
     super.key,
     required this.child,
     this.popEnabled = true,
@@ -50,20 +49,24 @@ class CanPopScope extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// {@macro flutter.widgets.navigator.onPopped}
+  /// Called after a route pop was handled.
+  ///
+  /// Even when the pop is canceled, such as when [popEnabled] is false, this
+  /// will still be called. The `success` parameter indicates whether or not the
+  /// back navigation actually happened successfully.
   ///
   /// See also:
   ///
   ///  * [Route.onPopped], which is similar.
   final OnPoppedCallback? onPopped;
 
-  /// {@template flutter.widgets.CanPopScope.popEnabled}
+  /// {@template flutter.widgets.PopScope.popEnabled}
   /// When false, blocks the current route from being popped.
   ///
   /// This includes the root route, where upon popping, the Flutter app would
   /// exit.
   ///
-  /// If multiple CanPopScope widgets appear in a route's widget subtree, then
+  /// If multiple [PopScope] widgets appear in a route's widget subtree, then
   /// each and every `popEnabled` must be `true` in order for the route to be
   /// able to pop.
   ///
@@ -75,30 +78,30 @@ class CanPopScope extends StatefulWidget {
   final bool popEnabled;
 
   @override
-  State<CanPopScope> createState() => _CanPopScopeState();
+  State<PopScope> createState() => _PopScopeState();
 }
 
-class _CanPopScopeState extends State<CanPopScope> {
+class _PopScopeState extends State<PopScope> {
   ModalRoute<dynamic>? _route;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _route = ModalRoute.of(context);
-    _route?.registerCanPopScope(widget);
+    _route?.registerPopScope(widget);
   }
 
   @override
-  void didUpdateWidget(CanPopScope oldWidget) {
+  void didUpdateWidget(PopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
     _route = ModalRoute.of(context);
-    _route?.unregisterCanPopScope(oldWidget);
-    _route?.registerCanPopScope(widget);
+    _route?.unregisterPopScope(oldWidget);
+    _route?.registerPopScope(widget);
   }
 
   @override
   void dispose() {
-    _route?.unregisterCanPopScope(widget);
+    _route?.unregisterPopScope(widget);
     super.dispose();
   }
 

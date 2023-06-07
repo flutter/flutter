@@ -23,12 +23,19 @@ import 'routes.dart';
 ///    which this widget uses to register and unregister [onWillPop].
 ///  * [Form], which provides an `onWillPop` callback that enables the form
 ///    to veto a `pop` initiated by the app's back button.
-///
+@Deprecated(
+  'Use PopScope instead. '
+  'This feature was deprecated after v3.12.0-1.0.pre.',
+)
 class WillPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   ///
   /// The [child] argument must not be null.
+  @Deprecated(
+    'Use PopScope instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   const WillPopScope({
     super.key,
     required this.child,

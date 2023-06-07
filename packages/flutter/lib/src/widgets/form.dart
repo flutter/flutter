@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'can_pop_scope.dart';
+import 'pop_scope.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'restoration.dart';
@@ -148,20 +148,20 @@ class Form extends StatefulWidget {
   )
   final WillPopCallback? onWillPop;
 
-  /// {@macro flutter.widgets.CanPopScope.popEnabled}
+  /// {@macro flutter.widgets.PopScope.popEnabled}
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to use this parameter to show a confirmation
   /// dialog when a navigation pop would cause form data to be lost.
   ///
-  /// ** See code in examples/api/lib/widgets/can_pop_scope/confirmation_dialog.0.dart **
+  /// ** See code in examples/api/lib/widgets/form/form.1.dart **
   /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * [onPopped], which also comes from [CanPopScope] and is often used in
+  ///  * [onPopped], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
-  ///  * [CanPopScope.popEnabled], which is what [Form] delegates to internally.
+  ///  * [PopScope.popEnabled], which is what [Form] delegates to internally.
   final bool? popEnabled;
 
   /// {@macro flutter.widgets.navigator.onPopped}
@@ -170,14 +170,14 @@ class Form extends StatefulWidget {
   /// This sample demonstrates how to use this parameter to show a confirmation
   /// dialog when a navigation pop would cause form data to be lost.
   ///
-  /// ** See code in examples/api/lib/widgets/can_pop_scope/confirmation_dialog.0.dart **
+  /// ** See code in examples/api/lib/widgets/form/form.1.dart **
   /// {@end-tool}
   ///
   /// See also:
   ///
-  ///  * [popEnabled], which also comes from [CanPopScope] and is often used in
+  ///  * [popEnabled], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
-  ///  * [CanPopScope.onPopped], which is what [Form] delegates to internally.
+  ///  * [PopScope.onPopped], which is what [Form] delegates to internally.
   final OnPoppedCallback? onPopped;
 
   /// Called when one of the form fields changes.
@@ -245,7 +245,7 @@ class FormState extends State<Form> {
     }
 
     if (widget.popEnabled != null) {
-      return CanPopScope(
+      return PopScope(
         popEnabled: widget.popEnabled!,
         onPopped: widget.onPopped,
         child: _FormScope(

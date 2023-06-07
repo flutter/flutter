@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'can_pop_scope.dart';
+import 'pop_scope.dart';
 import 'display_feature_sub_screen.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -1494,7 +1494,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  final Set<CanPopScope> _canPopScopes = <CanPopScope>{};
+  final Set<PopScope> _popScopes = <PopScope>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1534,7 +1534,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   RoutePopDisposition popEnabled() {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    final bool popEnabled = _canPopScopes.every((CanPopScope widget) {
+    final bool popEnabled = _popScopes.every((PopScope widget) {
       return widget.popEnabled;
     });
 
@@ -1548,7 +1548,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void onPopped(bool success) {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
     assert(scope != null);
-    for (final CanPopScope widget in _canPopScopes) {
+    for (final PopScope widget in _popScopes) {
       widget.onPopped?.call(success);
     }
   }
@@ -1634,7 +1634,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    that [willPop] checks.
   @Deprecated(
     // TODO(justinmc): onPopCallback doesn't exist.
-    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'Use addScopedOnPopCallback or PopScope instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   void addScopedWillPopCallback(WillPopCallback callback) {
@@ -1650,7 +1650,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [addScopedWillPopCallback], which adds callback to the list
   ///    checked by [willPop].
   @Deprecated(
-    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'Use addScopedOnPopCallback or PopScope instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   void removeScopedWillPopCallback(WillPopCallback callback) {
@@ -1658,24 +1658,22 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _willPopCallbacks.remove(callback);
   }
 
-  /// Registers the existence of a CanPopScope widget in the route.
+  /// Registers the existence of a PopScope widget in the route.
   ///
-  /// CanPopScope widgets registered in this way will have their
-  /// [CanPopScope.onPopped] callbacks called when a route is popped, and they will
-  /// also be able to block pop operations with [CanPopScope.popEnabled].
+  /// PopScope widgets registered in this way will have their
+  /// [PopScope.onPopped] callbacks called when a route is popped, and they will
+  /// also be able to block pop operations with [PopScope.popEnabled].
   ///
   /// See also:
   ///
-  /// [unregisterCanPopScope], which performs the opposite operation.
-  void registerCanPopScope(CanPopScope widget) {
-    _canPopScopes.add(widget);
-    print('justin registered a CanPopScope, seding notification with popEnabled: ${popEnabled()}');
+  /// [unregisterPopScope], which performs the opposite operation.
+  void registerPopScope(PopScope widget) {
+    _popScopes.add(widget);
     _updateSystemNavigator();
   }
 
-  void unregisterCanPopScope(CanPopScope widget) {
-    _canPopScopes.remove(widget);
-    print('justin unregistered a CanPopScope, seding notification with popEnabled: ${popEnabled()}');
+  void unregisterPopScope(PopScope widget) {
+    _popScopes.remove(widget);
     _updateSystemNavigator();
   }
 
@@ -1685,11 +1683,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     // systems now...
     final NavigationNotification notification = NavigationNotification(
       // canPop indicates that the originator of the Notification can handle a
-      // pop. In the case of CanPopScope, it handles pops when popEnabled is
+      // pop. In the case of PopScope, it handles pops when popEnabled is
       // false. Hence the seemingly backward logic here.
       canPop: popEnabled() == RoutePopDisposition.doNotPop,
     );
-    //print('justin CanPopScope\'s _updateSystemNavigator is dispatching with canPop ${notification.canPop}');
+    //print('justin PopScope\'s _updateSystemNavigator is dispatching with canPop ${notification.canPop}');
     notification.dispatch(subtreeContext);
 
     /*
@@ -1697,7 +1695,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
     // TODO(justinmc): These two calls to updateNavigationStackStatus are also
     // not considering complex Navigator arrangements etc. I need to rethink how
-    // to consider CanPopScope with NotificationListener?
+    // to consider PopScope with NotificationListener?
 
     // If pop is disabled here then it's disabled for the entire app, and the
     // SystemNavigator should be informed.
@@ -1706,7 +1704,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       return;
     }
     // Otherwise, the navigation stack status depends on the root navigator.
-    // TODO(justinmc): Write a test for this: You should be able to remove a CanPopScope
+    // TODO(justinmc): Write a test for this: You should be able to remove a PopScope
     // from the tree (but not its route) and the SystemNavigator should update.
     // TODO(justinmc): Pare down all these checks, or remove them all if not needed.
     if (!isActive || subtreeContext == null || !subtreeContext!.mounted || navigator == null || !navigator!.mounted || _scopeKey.currentState != null) {
@@ -1741,7 +1739,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [willHandlePopInternally], which reports on another reason why
   ///    a pop might be vetoed.
   @Deprecated(
-    'Use addScopedOnPopCallback or CanPopScope instead. '
+    'Use addScopedOnPopCallback or PopScope instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   @protected

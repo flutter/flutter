@@ -554,9 +554,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [removeObserver], to release the resources reserved by this method.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  void addObserver(WidgetsBindingObserver observer) {
-    _observers.add(observer);
-  }
+  void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
@@ -684,8 +682,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// By default, the framework communicates when it would like to handle system
   /// back gestures using [SystemNavigator.setFrameworkHandlesBack]. This is
   /// done automatically based on the status of the [Navigator] stack and the
-  /// state of any [CanPopScope] widgets present.  Developers can manually set
-  /// this by calling the method directly or by using [NavigationNotification].
+  /// state of any [PopScope] widgets present.  Developers can manually set this
+  /// by calling the method directly or by using [NavigationNotification].
   /// {@endtemplate}
   @protected
   Future<void> handlePopRoute() async {

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'can_pop_scope.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'notification_listener.dart';
+import 'pop_scope.dart';
 
 /// Enables the handling of system back gestures.
 ///
@@ -16,12 +16,12 @@ import 'notification_listener.dart';
 /// This sample demonstrates how to use this widget to properly handle system
 /// back gestures when using nested [Navigator]s.
 ///
-/// ** See code in examples/api/lib/widgets/can_pop_scope/nested_navigators.0.dart **
+/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [CanPopScope], which allows toggling the ability of a [Navigator] to
+///  * [PopScope], which allows toggling the ability of a [Navigator] to
 ///    handle pops.
 ///  * [NavigationNotification], which indicates whether a [Navigator] in a
 ///    subtree can handle pops.
@@ -59,7 +59,7 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
   Widget build(BuildContext context) {
     // When the widget subtree indicates it can handle a pop, disable popping
     // here, so that it can be manually handled in canPop.
-    return CanPopScope(
+    return PopScope(
       popEnabled: _popEnabled,
       onPopped: (bool success) {
         if (success) {

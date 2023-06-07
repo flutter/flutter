@@ -157,7 +157,7 @@ class _BottomNavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CanPopScope(
+    return PopScope(
       popEnabled: _popEnabled,
       onPopped: (bool success) {
         if (success) {

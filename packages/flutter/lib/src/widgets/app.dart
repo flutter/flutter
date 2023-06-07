@@ -1489,6 +1489,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return result!;
   }
 
+  // On Android: the user has pressed the back button.
   @override
   Future<bool> didPopRoute() async {
     assert(mounted);

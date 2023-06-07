@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-/// This sample demonstrates using [CanPopScope] to get the correct behavior
-/// from system back gestures when there are nested [Navigator] widgets.
+/// This sample demonstrates using [PopScope] to get the correct behavior from
+/// system back gestures when there are nested [Navigator] widgets.
 
 void main() => runApp(const MyApp());
 
@@ -65,7 +65,7 @@ class _NestedNavigatorsPageState extends State<NestedNavigatorsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CanPopScope(
+    return PopScope(
       popEnabled: popEnabled,
       onPopped: (bool success) {
         if (success) {
