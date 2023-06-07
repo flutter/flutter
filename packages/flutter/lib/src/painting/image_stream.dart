@@ -519,6 +519,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// this listener's [ImageStreamListener.onImage] will fire multiple times.
   ///
   /// {@macro flutter.painting.imageStream.addListener}
+  ///
+  /// See also:
+  ///
+  ///  * [addEphemeralErrorListener], which adds an error listener that is
+  ///  automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
     _hadAtLeastOneListener = true;
@@ -556,12 +561,28 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// The callback will be removed automatically after the first successful
   /// image load or the first error - that is why it is called "ephemeral".
   ///
-  /// If a concrete image is already available, the listener will be thrown
-  /// away synchronously. If an error has been already reported, the listener
+  /// If a concrete image is already available, the listener will be discarded
+  /// synchronously. If an error has been already reported, the listener
   /// will be notified synchronously.
   ///
   /// The listener will not affect the lifecycle of this object, neither the
   /// [hasListeners] property.
+  ///
+  /// It is different from [addListener] in a few points: Firstly, this one only
+  /// listens to errors, while [addListener] listens to all kinds of events.
+  /// Secondly, this listener will be automatically removed according to the
+  /// rules mentioned above, while [addListener] will need manual removal.
+  /// Thirdly, this listener will not affect how this object is disposed, while
+  /// any non-removed listener added via [addListener] will forbid this object
+  /// from disposal.
+  ///
+  /// When you want to know full information and full control, use [addListener].
+  /// When you only want to get notified for an error ephemerally, use this function.
+  ///
+  /// See also:
+  ///
+  ///  * [addListener], which adds a full-featured listener and needs manual
+  ///  removal.
   void addEphemeralErrorListener(ImageErrorListener listener) {
     _checkDisposed();
     if (_currentError != null) {
