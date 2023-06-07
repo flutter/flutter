@@ -1021,6 +1021,7 @@ class _Dial extends StatefulWidget {
     required this.hourDialType,
     required this.onChanged,
     required this.onHourSelected,
+    required this.roundOff,
   });
 
   final TimeOfDay selectedTime;
@@ -1028,6 +1029,7 @@ class _Dial extends StatefulWidget {
   final _HourDialType hourDialType;
   final ValueChanged<TimeOfDay>? onChanged;
   final VoidCallback? onHourSelected;
+  final bool roundOff;
 
   @override
   _DialState createState() => _DialState();
@@ -1261,8 +1263,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _dialSize = box.size;
-    _updateThetaForPan(roundMinutes: true);
-    final TimeOfDay newTime = _notifyOnChangedIfNeeded(roundMinutes: true);
+     _updateThetaForPan(roundMinutes: widget.roundOff);
+    final TimeOfDay newTime = _notifyOnChangedIfNeeded(roundMinutes: widget.roundOff);
     if (widget.hourMinuteMode == _HourMinuteMode.hour) {
       switch (widget.hourDialType) {
         case _HourDialType.twentyFourHour:
@@ -2770,6 +2772,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
                   selectedTime: _selectedTime.value,
                   onChanged: _handleTimeChanged,
                   onHourSelected: _handleHourSelected,
+                  roundOff:false
                 ),
               ),
             ),
