@@ -11,7 +11,7 @@ abstract final class SystemNavigator {
   // This defaults to null because it can't be assumed that the engine is in a
   // certain state when the app starts.  After a hot reload, for example, the
   // platform will retain its state while this boolean will be reset.
-  static bool? _frameworkHandlesBacks;
+  static bool? _frameworkHandlesBack;
 
   /// Inform the platform of whether or not the Flutter framework will handle
   /// back events.
@@ -25,10 +25,10 @@ abstract final class SystemNavigator {
   ///  * The
   ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
   ///    for predictive back in native Android apps.
-  static Future<void> setFrameworkHandlesBacks(bool frameworkHandlesBacks) async {
+  static Future<void> setFrameworkHandlesBack(bool frameworkHandlesBack) async {
     // Yes, because this should include the presence of CanPopScopes too, not
     // just the presence of routes.
-    if (frameworkHandlesBacks == _frameworkHandlesBacks) {
+    if (frameworkHandlesBack == _frameworkHandlesBack) {
       return;
     }
     // Currently, this method call is only relevant on Android.
@@ -45,15 +45,15 @@ abstract final class SystemNavigator {
       case TargetPlatform.android:
         // Set the local boolean before the call is made, so that duplicate
         // calls to this method don't cause duplicate calls to the platform.
-        _frameworkHandlesBacks = frameworkHandlesBacks;
+        _frameworkHandlesBack = frameworkHandlesBack;
         try {
-          print('justin telling platform frameworkHandlesPop: $frameworkHandlesBacks');
+          print('justin telling platform frameworkHandlesPop: $frameworkHandlesBack');
           await SystemChannels.platform.invokeMethod<void>(
-            'SystemNavigator.setFrameworkHandlesBacks',
-            frameworkHandlesBacks,
+            'SystemNavigator.setFrameworkHandlesBack',
+            frameworkHandlesBack,
           );
         } catch (error) {
-          _frameworkHandlesBacks = !frameworkHandlesBacks;
+          _frameworkHandlesBack = !frameworkHandlesBack;
           rethrow;
         }
     }

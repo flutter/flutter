@@ -4173,7 +4173,7 @@ void main() {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-      SystemNavigator.setFrameworkHandlesBacks(true);
+      SystemNavigator.setFrameworkHandlesBack(true);
     });
 
     // Simulates a system back, like a back gesture on Android.

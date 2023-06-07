@@ -1329,7 +1329,7 @@ class WidgetsApp extends StatefulWidget {
   /// Updates the platform with [NavigationNotification.canPop] and stops
   /// bubbling.
   static bool defaultOnNavigationNotification(NavigationNotification notification) {
-    SystemNavigator.setFrameworkHandlesBacks(notification.canPop);
+    SystemNavigator.setFrameworkHandlesBack(notification.canPop);
     return true;
   }
 

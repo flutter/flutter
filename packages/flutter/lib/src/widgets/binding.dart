@@ -682,7 +682,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// and do not trigger this method here in the framework.
   ///
   /// By default, the framework communicates when it would like to handle system
-  /// back gestures using [SystemNavigator.setFrameworkHandlesBacks]. This is
+  /// back gestures using [SystemNavigator.setFrameworkHandlesBack]. This is
   /// done automatically based on the status of the [Navigator] stack and the
   /// state of any [CanPopScope] widgets present.  Developers can manually set
   /// this by calling the method directly or by using [NavigationNotification].
