@@ -86,7 +86,7 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
-    std::unique_ptr<EmbedderSurfaceMetal> embedder_surface,
+    std::unique_ptr<EmbedderSurface> embedder_surface,
     PlatformDispatchTable platform_dispatch_table,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : PlatformView(delegate, task_runners),
@@ -155,6 +155,11 @@ std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewEmbedder::CreateExternalViewEmbedder() {
   return external_view_embedder_;
+}
+
+std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
+    const {
+  return embedder_surface_->CreateImpellerContext();
 }
 
 // |PlatformView|
