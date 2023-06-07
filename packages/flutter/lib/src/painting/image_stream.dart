@@ -468,6 +468,7 @@ class ImageStreamCompleterHandle {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter with Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
+  final List<ImageErrorListener> _ephemeralErrorListeners = <ImageErrorListener>[];
   ImageInfo? _currentImage;
   FlutterErrorDetails? _currentError;
 
@@ -545,6 +546,32 @@ abstract class ImageStreamCompleter with Diagnosticable {
           );
         }
       }
+    }
+  }
+
+  /// TODO doc
+  void addEphemeralErrorListener(ImageErrorListener listener) {
+    _checkDisposed();
+    if (_currentError != null) {
+      // immediately fire the listener, and no need to add to _ephemeralErrorListeners
+      try {
+        listener(_currentError!.exception, _currentError!.stack);
+      } catch (newException, newStack) {
+        if (newException != _currentError!.exception) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: newException,
+              library: 'image resource service',
+              context: ErrorDescription('by a synchronously-called image error listener'),
+              stack: newStack,
+            ),
+          );
+        }
+      }
+    } else if (_currentImage == null) {
+      // add to _ephemeralErrorListeners to wait for the error,
+      // only if no image has been loaded
+      _ephemeralErrorListeners.add(listener);
     }
   }
 
@@ -640,6 +667,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
     _currentImage?.dispose();
     _currentImage = image;
 
+    _ephemeralErrorListeners.clear();
+
     if (_listeners.isEmpty) {
       return;
     }
@@ -707,10 +736,14 @@ abstract class ImageStreamCompleter with Diagnosticable {
     );
 
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = _listeners
-        .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
-        .whereType<ImageErrorListener>()
-        .toList();
+    final List<ImageErrorListener> localErrorListeners = [
+      ..._listeners
+          .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
+          .whereType<ImageErrorListener>(),
+      ..._ephemeralErrorListeners,
+    ];
+
+    _ephemeralErrorListeners.clear();
 
     bool handled = false;
     for (final ImageErrorListener errorListener in localErrorListeners) {
@@ -763,6 +796,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
       'listeners',
       _listeners,
       ifPresent: '${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }',
+    ));
+    description.add(ObjectFlagProperty<List<ImageErrorListener>>(
+      'ephemeralErrorListeners',
+      _ephemeralErrorListeners,
+      ifPresent: '${_ephemeralErrorListeners.length} ephemeralErrorListener${_ephemeralErrorListeners.length == 1 ? "" : "s" }',
     ));
     description.add(FlagProperty('disposed', value: _disposed, ifTrue: '<disposed>'));
   }
