@@ -57,7 +57,7 @@ class Form extends StatefulWidget {
     this.onPopped,
     @Deprecated(
       'Use popEnabled and/or onPopped instead. '
-      'This feature was deprecated after v3.9.0-0.0.pre.',
+      'This feature was deprecated after v3.12.0-1.0.pre.',
     )
     this.onWillPop,
     this.onChanged,
@@ -144,7 +144,7 @@ class Form extends StatefulWidget {
   ///    back button.
   @Deprecated(
     'Use popEnabled instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   final WillPopCallback? onWillPop;
 

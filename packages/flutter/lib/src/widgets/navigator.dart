@@ -298,7 +298,7 @@ abstract class Route<T> {
   // TODO(justinmc): Update all of the versions in these deprecated annotations.
   @Deprecated(
     'Use popEnabled instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;

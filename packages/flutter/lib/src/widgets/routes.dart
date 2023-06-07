@@ -720,7 +720,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
 
   @Deprecated(
     'Use popEnabled instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   @override
   Future<RoutePopDisposition> willPop() async {
@@ -1516,7 +1516,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    this method checks.
   @Deprecated(
     'Use popEnabled instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   @override
   Future<RoutePopDisposition> willPop() async {
@@ -1634,7 +1634,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    that [willPop] checks.
   @Deprecated(
     'Use registerPopScope or PopScope instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to add a willPop callback to a route that is not currently in the tree.');
@@ -1650,7 +1650,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    checked by [willPop].
   @Deprecated(
     'Use registerPopScope or PopScope instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
@@ -1739,7 +1739,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    a pop might be vetoed.
   @Deprecated(
     'Use popEnabled instead. '
-    'This feature was deprecated after v3.9.0-0.0.pre.',
+    'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   @protected
   bool get hasScopedWillPopCallback {
