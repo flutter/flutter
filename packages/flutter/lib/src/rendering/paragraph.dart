@@ -886,7 +886,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       }
       context.canvas.restore();
     }
-
   }
 
   /// Returns the offset at which to paint the caret.
