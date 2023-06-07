@@ -549,7 +549,16 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
-  /// TODO doc
+  /// Adds a error listener callback that is called when the first error is reported.
+  /// The callback will be removed automatically after the first successful
+  /// image load or the first error - that is why it is called "ephemeral".
+  ///
+  /// If a concrete image is already available, the listener will be thrown
+  /// away synchronously. If an error has been already reported, the listener
+  /// will be notified synchronously.
+  ///
+  /// The listener will not affect the lifecycle of this object, neither the
+  /// [hasListeners] property.
   void addEphemeralErrorListener(ImageErrorListener listener) {
     _checkDisposed();
     if (_currentError != null) {
