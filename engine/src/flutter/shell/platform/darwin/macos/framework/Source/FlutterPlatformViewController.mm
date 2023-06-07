@@ -25,9 +25,10 @@
   return self;
 }
 
-- (void)onCreateWithViewID:(int64_t)viewId
-                  viewType:(nonnull NSString*)viewType
-                    result:(nonnull FlutterResult)result {
+- (void)onCreateWithViewIdentifier:(int64_t)viewId
+                          viewType:(nonnull NSString*)viewType
+                         arguments:(nullable id)args
+                            result:(nonnull FlutterResult)result {
   if (_platformViews.count(viewId) != 0) {
     result([FlutterError errorWithCode:@"recreating_view"
                                message:@"trying to create an already created view"
@@ -52,7 +53,7 @@
     return;
   }
 
-  NSView* platform_view = [factory createWithViewIdentifier:viewId arguments:nil];
+  NSView* platform_view = [factory createWithViewIdentifier:viewId arguments:args];
   // Flutter compositing requires CALayer-backed platform views.
   // Force the platform view to be backed by a CALayer.
   [platform_view setWantsLayer:YES];
@@ -92,7 +93,20 @@
     if ([args objectForKey:@"id"]) {
       int64_t viewId = [args[@"id"] longLongValue];
       NSString* viewType = [NSString stringWithUTF8String:([args[@"viewType"] UTF8String])];
-      [self onCreateWithViewID:viewId viewType:viewType result:result];
+
+      id creationArgs = nil;
+      NSObject<FlutterPlatformViewFactory>* factory = _platformViewFactories[viewType];
+      if ([factory respondsToSelector:@selector(createArgsCodec)]) {
+        NSObject<FlutterMessageCodec>* codec = [factory createArgsCodec];
+        if (codec != nil && args[@"params"] != nil) {
+          FlutterStandardTypedData* creationArgsData = args[@"params"];
+          creationArgs = [codec decode:creationArgsData.data];
+        }
+      }
+      [self onCreateWithViewIdentifier:viewId
+                              viewType:viewType
+                             arguments:creationArgs
+                                result:result];
     } else {
       result([FlutterError errorWithCode:@"unknown_view"
                                  message:@"'id' argument must be passed to create a platform view."

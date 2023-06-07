@@ -9,8 +9,9 @@
 
 @implementation TestFlutterPlatformView
 
-- (instancetype)initWithFrame:(CGRect)frame {
+- (instancetype)initWithFrame:(CGRect)frame arguments:(nullable NSDictionary*)args {
   self = [super initWithFrame:frame];
+  _args = args;
   return self;
 }
 
@@ -18,7 +19,7 @@
 
 @implementation TestFlutterPlatformViewFactory
 - (NSView*)createWithViewIdentifier:(int64_t)viewId arguments:(nullable id)args {
-  return [[TestFlutterPlatformView alloc] initWithFrame:CGRectZero];
+  return [[TestFlutterPlatformView alloc] initWithFrame:CGRectZero arguments:args];
 }
 
 - (NSObject<FlutterMessageCodec>*)createArgsCodec {
