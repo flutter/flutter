@@ -4669,8 +4669,8 @@ void main() {
               builderSetState = setState;
               return PopScope(
                 popEnabled: popEnabled(),
-                onPop: () {
-                  if (popEnabled() || pages.last == _Page.noPop) {
+                onPopped: (bool success) {
+                  if (success || pages.last == _Page.noPop) {
                     return;
                   }
                   setState(() {
@@ -5151,8 +5151,8 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
     final BuildContext rootContext = context;
     return PopScope(
       popEnabled: _popEnabled,
-      onPop: () {
-        if (_popEnabled || widget.popScopePageEnabled == false) {
+      onPopped: (bool success) {
+        if (success || widget.popScopePageEnabled == false) {
           return;
         }
         _navigatorKey.currentState!.pop();

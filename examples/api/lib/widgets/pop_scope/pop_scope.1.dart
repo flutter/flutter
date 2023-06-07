@@ -180,7 +180,7 @@ class _BottomNavTab extends StatelessWidget {
         pages: pages.map((_TabPage page) {
           switch (page) {
             case _TabPage.home:
-              return MaterialPage(
+              return MaterialPage<void>(
                 child: _LinksPage(
                   title: 'Bottom nav - tab $title - route $page',
                   backgroundColor: color,
@@ -198,7 +198,7 @@ class _BottomNavTab extends StatelessWidget {
                 ),
               );
             case _TabPage.one:
-              return MaterialPage(
+              return MaterialPage<void>(
                 child: _LinksPage(
                   backgroundColor: color,
                   title: 'Bottom nav - tab $title - route $page',

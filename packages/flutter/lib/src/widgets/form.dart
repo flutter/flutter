@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'pop_scope.dart';
 import 'framework.dart';
 import 'navigator.dart';
+import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
