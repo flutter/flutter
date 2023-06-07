@@ -60,9 +60,9 @@ Future<void> main() async {
   await runWebServiceWorkerTestWithBlockedServiceWorkers(headless: false);
 
   if (hasError) {
-    print('One or more tests failed.');
-    reportErrorsAndExit();
+    reportErrorsAndExit('${bold}One or more tests failed.$reset');
   }
+  reportSuccessAndExit('${bold}Tests successful.$reset');
 }
 
 // Regression test for https://github.com/flutter/flutter/issues/109093.
@@ -107,25 +107,18 @@ String _testTypeToIndexFile(ServiceWorkerTestType type) {
   switch (type) {
     case ServiceWorkerTestType.blockedServiceWorkers:
       indexFile = 'index_with_blocked_service_workers.html';
-      break;
     case ServiceWorkerTestType.withFlutterJs:
       indexFile = 'index_with_flutterjs.html';
-      break;
     case ServiceWorkerTestType.withoutFlutterJs:
       indexFile = 'index_without_flutterjs.html';
-      break;
     case ServiceWorkerTestType.withFlutterJsShort:
       indexFile = 'index_with_flutterjs_short.html';
-      break;
     case ServiceWorkerTestType.withFlutterJsEntrypointLoadedEvent:
       indexFile = 'index_with_flutterjs_entrypoint_loaded.html';
-      break;
     case ServiceWorkerTestType.withFlutterJsTrustedTypesOn:
       indexFile = 'index_with_flutterjs_el_tt_on.html';
-      break;
     case ServiceWorkerTestType.generatedEntrypoint:
       indexFile = 'generated_entrypoint.html';
-      break;
   }
   return indexFile;
 }
@@ -147,7 +140,7 @@ Future<void> _rebuildApp({ required int version, required ServiceWorkerTestType 
   );
   await runCommand(
     _flutter,
-    <String>['build', 'web', '--profile', '-t', target],
+    <String>['build', 'web', '--web-resources-cdn', '--profile', '-t', target],
     workingDirectory: _testAppDirectory,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
@@ -382,9 +375,8 @@ Future<void> runWebServiceWorkerTest({
       'index.html': 2,
       if (shouldExpectFlutterJs)
         'flutter.js': 1,
-      // We still download some resources multiple times if the server is non-caching.
-      'main.dart.js': 2,
-      'assets/FontManifest.json': 2,
+      'main.dart.js': 1,
+      'assets/FontManifest.json': 1,
       'flutter_service_worker.js': 1,
       'assets/AssetManifest.json': 1,
       'assets/fonts/MaterialIcons-Regular.otf': 1,
@@ -413,7 +405,6 @@ Future<void> runWebServiceWorkerTest({
       if (shouldExpectFlutterJs)
         'flutter.js': 1,
       'flutter_service_worker.js': 1,
-      'assets/fonts/MaterialIcons-Regular.otf': 1,
       'CLOSE': 1,
       if (!headless)
         'manifest.json': 1,
@@ -439,10 +430,9 @@ Future<void> runWebServiceWorkerTest({
       if (shouldExpectFlutterJs)
         'flutter.js': 1,
       'flutter_service_worker.js': 2,
-      'main.dart.js': 2,
+      'main.dart.js': 1,
       'assets/AssetManifest.json': 1,
-      'assets/FontManifest.json': 2,
-      'assets/fonts/MaterialIcons-Regular.otf': 1,
+      'assets/FontManifest.json': 1,
       'CLOSE': 1,
       if (!headless)
         ...<String, int>{

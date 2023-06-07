@@ -86,7 +86,7 @@ flutter:
         pluginClass: none
 
 environment:
-  sdk: ">=2.12.0-259.9.beta <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
   flutter: ">=1.20.0"
 ''';
 
@@ -257,7 +257,6 @@ void main() {
           "          '`path_provider_linux` threw an error: \$err. '\n"
           "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
-          '        rethrow;\n'
           '      }\n'
           '\n'
           '    } else if (Platform.isMacOS) {\n'
@@ -385,7 +384,6 @@ void main() {
           "          '`path_provider_linux` threw an error: \$err. '\n"
           "          'The app may not function as expected until you remove this plugin from pubspec.yaml'\n"
           '        );\n'
-          '        rethrow;\n'
           '      }\n'
           '\n'
           '    } else if (Platform.isMacOS) {\n'

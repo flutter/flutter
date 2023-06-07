@@ -12,6 +12,12 @@ void main() {
     expect(const DrawerThemeData().hashCode, const DrawerThemeData().copyWith().hashCode);
   });
 
+  test('DrawerThemeData lerp special cases', () {
+    expect(DrawerThemeData.lerp(null, null, 0), null);
+    const DrawerThemeData data = DrawerThemeData();
+    expect(identical(DrawerThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);

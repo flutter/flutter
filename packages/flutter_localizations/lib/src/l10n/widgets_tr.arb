@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "Başa taşı",
+  "reorderItemToEnd": "Sona taşı",
+  "reorderItemUp": "Yukarı taşı",
+  "reorderItemDown": "Aşağı taşı",
+  "reorderItemLeft": "Sola taşı",
+  "reorderItemRight": "Sağa taşı"
+}

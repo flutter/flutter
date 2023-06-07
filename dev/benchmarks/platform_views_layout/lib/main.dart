@@ -55,8 +55,8 @@ class PlatformViewLayout extends StatelessWidget {
             child: Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
-              child: Stack(
-                children: const <Widget> [
+              child: const Stack(
+                children: <Widget> [
                   DummyPlatformView(),
                   RotationContainer(),
                 ],

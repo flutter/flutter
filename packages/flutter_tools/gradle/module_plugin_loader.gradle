@@ -11,7 +11,7 @@ def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
 def object = null;
 String flutterModulePath = project(':flutter').projectDir.parentFile.getAbsolutePath()
-// Note: if this logic is changed, also change the logic in app_plugin_loader.gradle.
+// If this logic is changed, also change the logic in app_plugin_loader.gradle.
 def pluginsFile = new File(moduleProjectRoot, '.flutter-plugins-dependencies')
 if (pluginsFile.exists()) {
     object = new JsonSlurper().parseText(pluginsFile.text)

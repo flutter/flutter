@@ -501,4 +501,59 @@ void main() {
 
     expect(depfile.outputs[2].path, '/out/abi1/app.so-4.part.so');
   });
+
+  testUsingContext('DebugAndroidApplication with impeller and shader compilation', () async {
+    // Create impellerc to work around fallback detection logic.
+    fileSystem.file(artifacts.getHostArtifact(HostArtifact.impellerc)).createSync(recursive: true);
+
+    final Environment environment = Environment.test(
+      fileSystem.currentDirectory,
+      outputDir: fileSystem.directory('out')..createSync(),
+      defines: <String, String>{
+        kBuildMode: 'debug',
+      },
+      processManager: processManager,
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    environment.buildDir.createSync(recursive: true);
+
+    // create pre-requisites.
+    environment.buildDir.childFile('app.dill')
+      .writeAsStringSync('abcd');
+    fileSystem
+      .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+      .createSync(recursive: true);
+    fileSystem
+      .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+      .createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
+    fileSystem.file('.packages').writeAsStringSync('\n');
+    fileSystem.file('shader.glsl').writeAsStringSync('test');
+
+    processManager.addCommands(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'HostArtifact.impellerc',
+        '--runtime-stage-gles',
+        '--iplr',
+        '--sl=out/flutter_assets/shader.glsl',
+        '--spirv=out/flutter_assets/shader.glsl.spirv',
+        '--input=/shader.glsl',
+        '--input-type=frag',
+        '--include=/',
+        '--include=/./shader_lib',
+      ]),
+    ]);
+
+    await const DebugAndroidApplication().build(environment);
+    expect(processManager, hasNoRemainingExpectations);
+
+    expect(fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data')).existsSync(), true);
+    expect(fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data')).existsSync(), true);
+    expect(fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'kernel_blob.bin')).existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
 }

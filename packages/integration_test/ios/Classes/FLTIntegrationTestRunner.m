@@ -26,13 +26,6 @@
 
 - (void)testIntegrationTestWithResults:(NS_NOESCAPE FLTIntegrationTestResults)testResult {
   IntegrationTestPlugin *integrationTestPlugin = self.integrationTestPlugin;
-  UIViewController *rootViewController = UIApplication.sharedApplication.delegate.window.rootViewController;
-  if (![rootViewController isKindOfClass:[FlutterViewController class]]) {
-    testResult(NSSelectorFromString(@"testSetup"), NO, @"rootViewController was not expected FlutterViewController");
-  }
-  FlutterViewController *flutterViewController = (FlutterViewController *)rootViewController;
-  [integrationTestPlugin setupChannels:flutterViewController.engine.binaryMessenger];
-
   // Spin the runloop.
   while (!integrationTestPlugin.testResults) {
     [NSRunLoop.currentRunLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];

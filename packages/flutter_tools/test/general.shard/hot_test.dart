@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -572,6 +573,9 @@ class FakeDevFs extends Fake implements DevFS {
   Set<String> shaderPathsToEvict= <String>{};
 
   @override
+  Set<String> scenePathsToEvict= <String>{};
+
+  @override
   Uri? baseUri;
 }
 
@@ -607,7 +611,7 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    covariant ApplicationPackage? app, {
+    ApplicationPackage? app, {
     String? userIdentifier,
   }) async {
     return true;
@@ -664,8 +668,7 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
-  })  : assert(exception != null),
-        super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
+  })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
@@ -676,6 +679,7 @@ class TestFlutterDevice extends FlutterDevice {
     Restart? restart,
     CompileExpression? compileExpression,
     GetSkSLMethod? getSkSLMethod,
+    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     bool disableServiceAuthCodes = false,
     bool enableDds = true,
@@ -748,7 +752,10 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   const FakeShaderCompiler();
 
   @override
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) { }
+  void configureCompiler(
+    TargetPlatform? platform, {
+    required ImpellerStatus impellerStatus,
+  }) { }
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {

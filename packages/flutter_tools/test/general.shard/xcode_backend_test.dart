@@ -195,12 +195,12 @@ void main() {
     });
   });
 
-  group('test_observatory_bonjour_service', () {
+  group('test_vm_service_bonjour_service', () {
     test('handles when the Info.plist is missing', () {
       final Directory buildDir = fileSystem.directory('/path/to/builds');
       buildDir.createSync(recursive: true);
       final TestContext context = TestContext(
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDir.path,
@@ -212,7 +212,7 @@ void main() {
       expect(
         context.stdout,
         contains(
-            'Info.plist does not exist. Skipping _dartobservatory._tcp NSBonjourServices insertion.'),
+            'Info.plist does not exist. Skipping _dartVmService._tcp NSBonjourServices insertion.'),
       );
     });
   });

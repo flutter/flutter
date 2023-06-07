@@ -25,9 +25,9 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
-        return style.apply(color: ${componentColor('md.comp.menu.list-item.disabled.label-text')});
+        return style.apply(color: ${componentColor('md.comp.list.list-item.disabled.label-text')});
       }
-      return style.apply(color: ${componentColor('md.comp.menu.list-item.label-text')});
+      return style.apply(color: ${componentColor('md.comp.list.list-item.label-text')});
     });
   }
 

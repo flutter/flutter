@@ -23,7 +23,7 @@ enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
 
-  /// Button text is [ThemeData.accentColor].
+  /// Button text is [ColorScheme.secondary].
   accent,
 
   /// Button text is based on [ThemeData.primaryColor].
@@ -87,11 +87,8 @@ class ButtonTheme extends InheritedTheme {
     ColorScheme? colorScheme,
     MaterialTapTargetSize? materialTapTargetSize,
     required super.child,
-  }) : assert(textTheme != null),
-       assert(minWidth != null && minWidth >= 0.0),
-       assert(height != null && height >= 0.0),
-       assert(alignedDropdown != null),
-       assert(layoutBehavior != null),
+  }) : assert(minWidth >= 0.0),
+       assert(height >= 0.0),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -117,7 +114,7 @@ class ButtonTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// Specifies the color and geometry of buttons.
   final ButtonThemeData data;
@@ -194,11 +191,8 @@ class ButtonThemeData with Diagnosticable {
     Color? splashColor,
     this.colorScheme,
     MaterialTapTargetSize? materialTapTargetSize,
-  }) : assert(textTheme != null),
-       assert(minWidth != null && minWidth >= 0.0),
-       assert(height != null && height >= 0.0),
-       assert(alignedDropdown != null),
-       assert(layoutBehavior != null),
+  }) : assert(minWidth >= 0.0),
+       assert(height >= 0.0),
        _buttonColor = buttonColor,
        _disabledColor = disabledColor,
        _focusColor = focusColor,
@@ -235,7 +229,7 @@ class ButtonThemeData with Diagnosticable {
   /// Defaults to [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
-  /// Simply a convenience that returns [minWidth] and [height] as a
+  /// Convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object.
   BoxConstraints get constraints {
     return BoxConstraints(
@@ -382,13 +376,12 @@ class ButtonThemeData with Diagnosticable {
   /// A set of thirteen colors that can be used to derive the button theme's
   /// colors.
   ///
-  /// This property was added much later than the theme's set of highly
-  /// specific colors, like [ThemeData.buttonColor], [ThemeData.highlightColor],
-  /// [ThemeData.splashColor] etc.
+  /// This property was added much later than the theme's set of highly specific
+  /// colors, like [ThemeData.highlightColor] and [ThemeData.splashColor] etc.
   ///
-  /// The colors for new button classes can be defined exclusively in terms
-  /// of [colorScheme]. When it's possible, the existing buttons will
-  /// (continue to) gradually migrate to it.
+  /// The colors for new button classes can be defined exclusively in terms of
+  /// [colorScheme]. When it's possible, the existing buttons will (continue to)
+  /// gradually migrate to it.
   final ColorScheme? colorScheme;
 
   // The minimum size of a button's tap target.

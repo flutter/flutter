@@ -302,6 +302,20 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
+
+    // Ensure that package prefix is not duplicated after copying.
+    final TextStyle s11 = s8.copyWith();
+    expect(s11.fontFamilyFallback![0], 'packages/p/test');
+    expect(s11.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s11.fontFamilyFallback!.length, 2);
+    expect(s8, s11);
+
+    // Ensure that package prefix is not duplicated after applying.
+    final TextStyle s12 = s8.apply();
+    expect(s12.fontFamilyFallback![0], 'packages/p/test');
+    expect(s12.fontFamilyFallback![1], 'packages/p/test2');
+    expect(s12.fontFamilyFallback!.length, 2);
+    expect(s8, s12);
   });
 
   test('TextStyle package font merge', () {
@@ -539,6 +553,12 @@ void main() {
     expect(const TextStyle().merge(const TextStyle(fontFamily: 'fontFamily', package: 'bar')).fontFamily, 'packages/bar/fontFamily');
     expect(const TextStyle().apply(fontFamily: 'fontFamily', package: 'foo').fontFamily, 'packages/foo/fontFamily');
     expect(const TextStyle(fontFamily: 'fontFamily', package: 'foo').apply(fontFamily: 'fontFamily', package: 'bar').fontFamily, 'packages/bar/fontFamily');
+  });
+
+  test('TextStyle.lerp identical a,b', () {
+    expect(TextStyle.lerp(null, null, 0), null);
+    const TextStyle style = TextStyle();
+    expect(identical(TextStyle.lerp(style, style, 0.5), style), true);
   });
 
   test('Throws when lerping between inherit:true and inherit:false with unspecified fields', () {

@@ -58,7 +58,7 @@ class TestRootState extends State<TestRoot> {
 }
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  ZoneIgnoringTestBinding.ensureInitialized();
   initTimelineTests();
   test('Timeline', () async {
     // We don't have expectations around the first frame because there's a race around

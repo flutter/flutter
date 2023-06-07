@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Tümünü Seç",
   "tabSemanticsLabel": "Sekme $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Kapat",
-  "searchTextFieldPlaceholderLabel": "Ara"
+  "searchTextFieldPlaceholderLabel": "Ara",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

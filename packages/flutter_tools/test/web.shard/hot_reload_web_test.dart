@@ -40,6 +40,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
   });
 
   testWithoutContext('$testName: hot restart works without error', () async {
+    flutter.stdout.listen(printOnFailure);
     await flutter.run(chrome: true, additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     await flutter.hotRestart();
   });
@@ -47,6 +48,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
   testWithoutContext('$testName: newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      printOnFailure(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }
@@ -64,6 +66,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
   testWithoutContext('$testName: newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      printOnFailure(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
       }

@@ -2,37 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [RadioListTile.toggleable].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [RadioListTile.toggleable].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const RadioListTileApp());
 
-  static const String _title = 'Flutter Code Sample';
+class RadioListTileApp extends StatelessWidget {
+  const RadioListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
+        appBar: AppBar(title: const Text('RadioListTile.toggleable Sample')),
+        body: const RadioListTileExample(),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class RadioListTileExample extends StatefulWidget {
+  const RadioListTileExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<RadioListTileExample> createState() => _RadioListTileExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _RadioListTileExampleState extends State<RadioListTileExample> {
   int? groupValue;
   static const List<String> selections = <String>[
     'Hercules Mulligan',

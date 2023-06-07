@@ -5,8 +5,9 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -1072,8 +1073,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
       await tester.pumpWidget(

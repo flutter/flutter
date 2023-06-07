@@ -144,8 +144,7 @@
 /// ```
 ///
 /// ```dart
-/// import 'dart:io'; // error (unused_import)
-/// final Widget p = Placeholder(); // error (undefined_class, undefined_function, avoid_dynamic_calls)
+/// import 'dart:io'; // error (unused_import)/// final Widget p = Placeholder(); // error (undefined_class, undefined_function)
 /// ```
 ///
 /// ```dart
@@ -166,3 +165,4 @@
 /// error (something about backticks)
 /// this must be the last error, since it aborts parsing of this file
 /// ```
+String? foo;

@@ -26,7 +26,7 @@ abstract class TokenTemplate {
   /// Defaults to 'Theme.of(context).colorScheme.'
   final String colorSchemePrefix;
 
-  /// Optional prefix prepended to text style definitians.
+  /// Optional prefix prepended to text style definitions.
   ///
   /// Defaults to 'Theme.of(context).textTheme.'
   final String textThemePrefix;
@@ -145,13 +145,17 @@ abstract class TokenTemplate {
   }
 
   /// Generate the opacity value for the given token.
-  String? opacity(String token) {
-    final dynamic value = tokens[token];
+  String? opacity(String token) => _numToString(tokens[token]);
+
+  String? _numToString(Object? value, [int? digits]) {
     if (value == null) {
       return null;
     }
-    if (value is double) {
-      return value.toString();
+    if (value is num) {
+      if (value == double.infinity) {
+        return 'double.infinity';
+      }
+      return digits == null ? value.toString() : value.toStringAsFixed(digits);
     }
     return tokens[value].toString();
   }
@@ -159,6 +163,24 @@ abstract class TokenTemplate {
   /// Generate an elevation value for the given component token.
   String elevation(String componentToken) {
     return tokens[tokens['$componentToken.elevation']!]!.toString();
+  }
+
+  /// Generate a size value for the given component token.
+  ///
+  /// Non-square sizes are specified as width and height.
+  String size(String componentToken) {
+    final String sizeToken = '$componentToken.size';
+    if (!tokens.containsKey(sizeToken)) {
+      final String widthToken = '$componentToken.width';
+      final String heightToken = '$componentToken.height';
+      if (!tokens.containsKey(widthToken) && !tokens.containsKey(heightToken)) {
+        throw Exception('Unable to find width, height, or size tokens for $componentToken');
+      }
+      final String? width = _numToString(tokens.containsKey(widthToken) ? tokens[widthToken]! as num : double.infinity, 0);
+      final String? height = _numToString(tokens.containsKey(heightToken) ? tokens[heightToken]! as num : double.infinity, 0);
+      return 'const Size($width, $height)';
+    }
+    return 'const Size.square(${_numToString(tokens[sizeToken])})';
   }
 
   /// Generate a shape constant for the given component token.
@@ -213,5 +235,16 @@ abstract class TokenTemplate {
   /// Generate a [TextTheme] text style name for the given component token.
   String textStyle(String componentToken) {
     return '$textThemePrefix${tokens["$componentToken.text-style"]}';
+  }
+
+  String textStyleWithColor(String componentToken) {
+    if (!tokens.containsKey('$componentToken.text-style')) {
+      return 'null';
+    }
+    String style = textStyle(componentToken);
+    if (tokens.containsKey('$componentToken.color')) {
+      style = '$style?.copyWith(color: ${componentColor(componentToken)})';
+    }
+    return style;
   }
 }

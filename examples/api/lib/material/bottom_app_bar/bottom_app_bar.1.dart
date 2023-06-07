@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [BottomAppBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [BottomAppBar].
 
 void main() {
   runApp(const BottomAppBarDemo());
@@ -20,8 +20,7 @@ class BottomAppBarDemo extends StatefulWidget {
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   bool _showFab = true;
   bool _showNotch = true;
-  FloatingActionButtonLocation _fabLocation =
-      FloatingActionButtonLocation.endDocked;
+  FloatingActionButtonLocation _fabLocation = FloatingActionButtonLocation.endDocked;
 
   void _onShowNotchChanged(bool value) {
     setState(() {
@@ -120,8 +119,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
 
-  static final List<FloatingActionButtonLocation> centerLocations =
-      <FloatingActionButtonLocation>[
+  static final List<FloatingActionButtonLocation> centerLocations = <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.centerDocked,
     FloatingActionButtonLocation.centerFloat,
   ];

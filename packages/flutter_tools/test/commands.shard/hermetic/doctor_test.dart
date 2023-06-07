@@ -58,7 +58,7 @@ void main() {
   group('doctor', () {
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -85,7 +85,7 @@ void main() {
     testUsingContext('vs code validator when 64bit installed', () async {
       expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -100,7 +100,7 @@ void main() {
 
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
@@ -157,7 +157,7 @@ void main() {
           userMessages: UserMessages(),
         );
         final ValidationResult result = await deviceValidator.validate();
-        expect(result.type, ValidationType.installed);
+        expect(result.type, ValidationType.success);
         expect(result.messages, const <ValidationMessage>[
           ValidationMessage('name (mobile) • device-id • android • 1.2.3'),
           ValidationMessage.hint('Device locked'),
@@ -368,7 +368,7 @@ void main() {
       await FakeAsync().run((FakeAsync time) {
         unawaited(FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((bool r) {
           expect(r, isFalse);
-          completer.complete(null);
+          completer.complete();
         }));
         time.elapse(const Duration(seconds: 1));
         time.flushMicrotasks();
@@ -842,7 +842,7 @@ class NoOpDoctor implements Doctor {
 }
 
 class PassingValidator extends DoctorValidator {
-  PassingValidator(super.name);
+  PassingValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -850,7 +850,7 @@ class PassingValidator extends DoctorValidator {
       ValidationMessage('A helpful message'),
       ValidationMessage('A second, somewhat longer helpful message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+    return const ValidationResult(ValidationType.success, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -862,7 +862,7 @@ class PiiValidator extends DoctorValidator {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('Contains PII path/to/username', piiStrippedMessage: 'Does not contain PII'),
     ];
-    return const ValidationResult(ValidationType.installed, messages);
+    return const ValidationResult(ValidationType.success, messages);
   }
 }
 
@@ -1082,19 +1082,19 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(super.name);
+  PassingGroupedValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A helpful message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages);
+    return const ValidationResult(ValidationType.success, messages);
   }
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(super.name);
+  MissingGroupedValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -1106,7 +1106,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(super.name);
+  PartialGroupedValidator(super.title);
 
   @override
   Future<ValidationResult> validate() async {
@@ -1118,14 +1118,14 @@ class PartialGroupedValidator extends DoctorValidator {
 }
 
 class PassingGroupedValidatorWithStatus extends DoctorValidator {
-  PassingGroupedValidatorWithStatus(super.name);
+  PassingGroupedValidatorWithStatus(super.title);
 
   @override
   Future<ValidationResult> validate() async {
     const List<ValidationMessage> messages = <ValidationMessage>[
       ValidationMessage('A different message'),
     ];
-    return const ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+    return const ValidationResult(ValidationType.success, messages, statusInfo: 'A status message');
   }
 }
 
@@ -1192,7 +1192,15 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   List<Device> devices = <Device>[];
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async => devices;
+  Future<List<Device>> getAllDevices({
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
+
+  @override
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
 
   @override
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;

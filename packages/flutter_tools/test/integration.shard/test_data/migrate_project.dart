@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Timeout(Duration(seconds: 600))
+library;
 
 import 'dart:io';
 import 'package:file/file.dart';
@@ -21,9 +22,7 @@ class MigrateProject extends Project {
   }) async {
     this.dir = dir;
     _appPath = dir.path;
-    if (androidLocalProperties != null) {
-      writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
-    }
+    writeFile(fileSystem.path.join(dir.path, 'android', 'local.properties'), androidLocalProperties);
     final Directory tempDir = createResolvedTempDirectorySync('cipd_dest.');
     final Directory depotToolsDir = createResolvedTempDirectorySync('depot_tools.');
 
@@ -176,7 +175,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   flutter:

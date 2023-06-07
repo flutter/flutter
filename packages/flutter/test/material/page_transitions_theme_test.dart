@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -22,7 +23,6 @@ void main() {
             isNotNull,
             reason: 'theme builder for $platform is null',
           );
-          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
@@ -31,7 +31,6 @@ void main() {
             isNull,
             reason: 'theme builder for $platform is not null',
           );
-          break;
       }
     }
   });
@@ -175,7 +174,138 @@ void main() {
     expect(findFadeUpwardsPageTransition(), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('_ZoomPageTransition only cause child widget built once', (WidgetTester tester) async {
+  Widget boilerplate({
+    required bool themeAllowSnapshotting,
+    bool secondRouteAllowSnapshotting = true,
+  }) {
+    return MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        pageTransitionsTheme: PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: ZoomPageTransitionsBuilder(
+              allowSnapshotting: themeAllowSnapshotting,
+            ),
+          },
+        ),
+      ),
+      onGenerateRoute: (RouteSettings settings) {
+        if (settings.name == '/') {
+          return MaterialPageRoute<Widget>(
+            builder: (_) => const Material(child: Text('Page 1')),
+          );
+        }
+        return MaterialPageRoute<Widget>(
+          builder: (_) => const Material(child: Text('Page 2')),
+          allowSnapshotting: secondRouteAllowSnapshotting,
+        );
+      },
+    );
+  }
+
+  bool isTransitioningWithSnapshotting(WidgetTester tester, Finder of) {
+    final Iterable<Layer> layers = tester.layerListOf(
+      find.ancestor(of: of, matching: find.byType(SnapshotWidget)).first,
+    );
+    final bool hasOneOpacityLayer = layers.whereType<OpacityLayer>().length == 1;
+    final bool hasOneTransformLayer = layers.whereType<TransformLayer>().length == 1;
+    // When snapshotting is on, the OpacityLayer and TransformLayer will not be
+    // applied directly.
+    return !(hasOneOpacityLayer && hasOneTransformLayer);
+  }
+
+  testWidgets('ZoomPageTransitionsBuilder default route snapshotting behavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(themeAllowSnapshotting: true),
+    );
+
+    final Finder page1 = find.text('Page 1');
+    final Finder page2 = find.text('Page 2');
+
+    // Transitioning from page 1 to page 2.
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/2');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Exiting route should be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
+
+    // Entering route should be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page2), isTrue);
+
+    await tester.pumpAndSettle();
+
+    // Transitioning back from page 2 to page 1.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Exiting route should be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page2), isTrue);
+
+    // Entering route should be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+
+  testWidgets('ZoomPageTransitionsBuilder.allowSnapshotting can disable route snapshotting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(themeAllowSnapshotting: false),
+    );
+
+    final Finder page1 = find.text('Page 1');
+    final Finder page2 = find.text('Page 2');
+
+    // Transitioning from page 1 to page 2.
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/2');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Exiting route should not be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page1), isFalse);
+
+    // Entering route should not be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page2), isFalse);
+
+    await tester.pumpAndSettle();
+
+    // Transitioning back from page 2 to page 1.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Exiting route should not be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page2), isFalse);
+
+    // Entering route should not be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page1), isFalse);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+
+  testWidgets('Setting PageRoute.allowSnapshotting to false overrides ZoomPageTransitionsBuilder.allowSnapshotting = true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        themeAllowSnapshotting: true,
+        secondRouteAllowSnapshotting: false,
+      ),
+    );
+
+    final Finder page1 = find.text('Page 1');
+    final Finder page2 = find.text('Page 2');
+
+    // Transitioning from page 1 to page 2.
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/2');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // First route should be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page1), isTrue);
+
+    // Second route should not be snapshotted.
+    expect(isTransitioningWithSnapshotting(tester, page2), isFalse);
+
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android), skip: kIsWeb); // [intended] rasterization is not used on the web.
+
+  testWidgets('_ZoomPageTransition only causes child widget built once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/58345
 
     int builtCount = 0;

@@ -67,11 +67,16 @@ void main() {
   });
 
   testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
     const String contentText = 'Content';
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    late final ThemeData localizedTheme;
 
     await tester.pumpWidget(MaterialApp(
       theme: theme,
+      builder:(BuildContext context, Widget? child) {
+        localizedTheme = Theme.of(context);
+        return child!;
+      },
       home: Scaffold(
         body: MaterialBanner(
           content: const Text(contentText),
@@ -93,12 +98,9 @@ void main() {
     expect(material.elevation, 0.0);
 
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    // Default value for ThemeData.typography is Typography.material2021()
     expect(
       content.text.style,
-      Typography.material2021().englishLike.bodyMedium!.merge(
-        Typography.material2021().black.bodyMedium,
-      ),
+      localizedTheme.textTheme.bodyMedium,
     );
 
     final Offset rowTopLeft = tester.getTopLeft(find.byType(Row));
@@ -114,15 +116,17 @@ void main() {
   });
 
   testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    late final ThemeData localizedTheme;
 
     await tester.pumpWidget(MaterialApp(
       theme: theme,
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) {
+            localizedTheme = Theme.of(context);
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -157,12 +161,9 @@ void main() {
     expect(material.elevation, 0.0);
 
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    // Default value for ThemeData.typography is Typography.material2021()
     expect(
       content.text.style,
-      Typography.material2021().englishLike.bodyMedium!.merge(
-        Typography.material2021().black.bodyMedium,
-      ),
+      localizedTheme.textTheme.bodyMedium,
     );
 
     final Offset rowTopLeft = tester.getTopLeft(find.byType(Row));
@@ -448,8 +449,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
       const String contentText = 'Content';

@@ -5,6 +5,8 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -280,14 +282,12 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('CircleAvatar default colors with light theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        primaryColor: Colors.grey.shade100,
-        primaryColorBrightness: Brightness.light,
-      );
+      final ThemeData theme = ThemeData(primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
         wrap(
           child: Theme(
@@ -309,10 +309,7 @@ void main() {
     });
 
     testWidgets('CircleAvatar default colors with dark theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        primaryColor: Colors.grey.shade800,
-        primaryColorBrightness: Brightness.dark,
-      );
+      final ThemeData theme = ThemeData(primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
         wrap(
           child: Theme(

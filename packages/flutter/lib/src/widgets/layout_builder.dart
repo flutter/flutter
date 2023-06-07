@@ -40,7 +40,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   const ConstrainedLayoutBuilder({
     super.key,
     required this.builder,
-  }) : assert(builder != null);
+  });
 
   @override
   RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
@@ -48,7 +48,7 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   /// Called at layout time to construct the widget tree.
   ///
   /// The builder must not return null.
-  final Widget Function(BuildContext, ConstraintType) builder;
+  final Widget Function(BuildContext context, ConstraintType constraints) builder;
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
@@ -267,7 +267,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const LayoutBuilder({
     super.key,
     required super.builder,
-  }) : assert(builder != null);
+  });
 
   @override
   RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();

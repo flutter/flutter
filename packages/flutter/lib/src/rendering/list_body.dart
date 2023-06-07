@@ -32,8 +32,7 @@ class RenderListBody extends RenderBox
   RenderListBody({
     List<RenderBox>? children,
     AxisDirection axisDirection = AxisDirection.down,
-  }) : assert(axisDirection != null),
-       _axisDirection = axisDirection {
+  }) : _axisDirection = axisDirection {
     addAll(children);
   }
 
@@ -51,7 +50,6 @@ class RenderListBody extends RenderBox
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
-    assert(value != null);
     if (_axisDirection == value) {
       return;
     }
@@ -97,12 +95,10 @@ class RenderListBody extends RenderBox
           if (!constraints.hasBoundedWidth) {
             return true;
           }
-          break;
         case Axis.vertical:
           if (!constraints.hasBoundedHeight) {
             return true;
           }
-          break;
       }
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderListBody must have unlimited space along its main axis.'),
@@ -123,12 +119,10 @@ class RenderListBody extends RenderBox
           if (constraints.hasBoundedHeight) {
             return true;
           }
-          break;
         case Axis.vertical:
           if (constraints.hasBoundedWidth) {
             return true;
           }
-          break;
       }
       // TODO(ianh): Detect if we're actually nested blocks and say something
       // more specific to the exact situation in that case, and don't mention
@@ -172,7 +166,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
-        break;
       case AxisDirection.left:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
         while (child != null) {
@@ -192,7 +185,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
-        break;
       case AxisDirection.down:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
@@ -204,7 +196,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
-        break;
       case AxisDirection.up:
         final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
         while (child != null) {
@@ -224,7 +215,6 @@ class RenderListBody extends RenderBox
           child = childParentData.nextSibling;
         }
         size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
-        break;
     }
     assert(size.isFinite);
   }
@@ -259,7 +249,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
@@ -270,7 +259,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
@@ -281,7 +269,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
@@ -292,7 +279,6 @@ class RenderListBody extends RenderBox
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
         return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));

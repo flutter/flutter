@@ -12,6 +12,7 @@ void main() {
     expect(localizations.datePickerYear(2018), isNotNull);
     expect(localizations.datePickerMonth(1), isNotNull);
     expect(localizations.datePickerDayOfMonth(1), isNotNull);
+    expect(localizations.datePickerDayOfMonth(1, 1), isNotNull);
     expect(localizations.datePickerHour(0), isNotNull);
     expect(localizations.datePickerHourSemanticsLabel(0), isNotNull);
     expect(localizations.datePickerMinute(0), isNotNull);
@@ -32,6 +33,7 @@ void main() {
 
     expect(localizations.modalBarrierDismissLabel, isNotNull);
     expect(localizations.searchTextFieldPlaceholderLabel, isNotNull);
+    expect(localizations.noSpellCheckReplacementsLabel, isNotNull);
   });
 
   testWidgets('CupertinoLocalizations.of throws', (WidgetTester tester) async {

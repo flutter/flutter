@@ -23,6 +23,73 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/123352
+  - title: "Migrate to 'rootElement'"
+    date: 2023-03-13
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'renderViewElement'
+      inClass: 'WidgetsBinding'
+    changes:
+      - kind: 'rename'
+        newName: 'rootElement'
+
+  # Changes made in https://github.com/flutter/flutter/pull/122555
+  - title: "Migrate to 'decorationClipBehavior'"
+    date: 2023-03-13
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      field: 'clipBehavior'
+      inClass: 'ScrollableDetails'
+    changes:
+      - kind: 'rename'
+        newName: 'decorationClipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/122555
+  - title: "Migrate to 'decorationClipBehavior'"
+    date: 2023-03-13
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: ''
+      inClass: 'ScrollableDetails'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'clipBehavior'
+        newName: 'decorationClipBehavior'
+
+  # Changes made in https://github.com/flutter/flutter/pull/119647
+  - title: "Migrate to 'fromView'"
+    date: 2022-10-28
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'fromWindow'
+      inClass: 'MediaQueryData'
+    changes:
+      - kind: 'rename'
+        newName: 'fromView'
+
+  # Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
+  - title: "Remove 'vsync'"
+    date: 2023-01-30
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      constructor: ''
+      inClass: 'AnimatedSize'
+    changes:
+      - kind: 'removeParameter'
+        name: 'vsync'
+
+  # Changes made in https://github.com/flutter/flutter/pull/114459
+  - title: "Migrate to 'boldTextOf'"
+    date: 2022-10-28
+    element:
+      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      method: 'boldTextOverride'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'boldTextOf'
+
   # Changes made in https://github.com/flutter/flutter/pull/87839
   - title: "Migrate to 'disallowIndicator'"
     date: 2021-08-06

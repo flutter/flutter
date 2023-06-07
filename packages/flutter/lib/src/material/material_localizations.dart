@@ -160,6 +160,19 @@ abstract class MaterialLocalizations {
   /// as a hint text in the text field.
   String get searchFieldLabel;
 
+  /// Label indicating that a given date is the current date.
+  String get currentDateLabel;
+
+  /// Label for the scrim rendered underneath the content of a modal route.
+  String get scrimLabel;
+
+  /// Label for a BottomSheet.
+  String get bottomSheetLabel;
+
+  /// Hint text announced when tapping on the scrim underneath the content of
+  /// a modal route.
+  String scrimOnTapHint(String modalRouteContentName);
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -411,26 +424,50 @@ abstract class MaterialLocalizations {
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the start of the list.
+  @Deprecated(
+    'Use the reorderItemToStart from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemToStart;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list to the end of the list.
+  @Deprecated(
+    'Use the reorderItemToEnd from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemToEnd;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space up the list.
+  @Deprecated(
+    'Use the reorderItemUp from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemUp;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space down the list.
+  @Deprecated(
+    'Use the reorderItemDown from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemDown;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space left in the list.
+  @Deprecated(
+    'Use the reorderItemLeft from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemLeft;
 
   /// The semantics label used for [ReorderableListView] to reorder an item in the
   /// list one space right in the list.
+  @Deprecated(
+    'Use the reorderItemRight from WidgetsLocalizations instead. '
+    'This feature was deprecated after v3.10.0-2.0.pre.'
+  )
   String get reorderItemRight;
 
   /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
@@ -438,6 +475,30 @@ abstract class MaterialLocalizations {
 
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
+
+  /// The semantics hint to describe the tap action on an expanded
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [collapsedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Expanded
+  /// double tap to collapse".
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed
+  /// [ExpansionTile] on iOS and macOS. This is appended to the [expandedHint]
+  /// hint to provide a more detailed description of the action, e.g. "Collapsed
+  /// double tap to expand".
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  /// The semantics hint to describe the tap action on an expanded [ExpansionTile].
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpansionTile].
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  /// The semantics hint to describe the [ExpansionTile] expanded state.
+  String get expandedHint => 'Collapsed';
+
+  /// The semantics hint to describe the [ExpansionTile] collapsed state.
+  String get collapsedHint => 'Expanded';
 
   /// The label for the [TextField]'s character counter.
   String remainingTextFieldCharacterCount(int remaining);
@@ -579,6 +640,9 @@ abstract class MaterialLocalizations {
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.select].
   String get keyboardKeySelect;
+
+  /// The shortcut label for the keyboard key [LogicalKeyboardKey.shift].
+  String get keyboardKeyShift;
 
   /// The shortcut label for the keyboard key [LogicalKeyboardKey.space].
   String get keyboardKeySpace;
@@ -820,7 +884,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
       return null;
     }
-    return DateTime(year, month, day);
+
+    try {
+      return DateTime(year, month, day);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   @override
@@ -1016,6 +1085,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get searchFieldLabel => 'Search';
 
   @override
+  String get currentDateLabel => 'Today';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get bottomSheetLabel => 'Bottom Sheet';
+
+  @override
+  String scrimOnTapHint(String modalRouteContentName) => 'Close $modalRouteContentName';
+
+  @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
 
   @override
@@ -1147,6 +1228,24 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get collapsedIconTapHint => 'Expand';
+
+  @override
+  String get expansionTileExpandedHint => 'double tap to collapse';
+
+  @override
+  String get expansionTileCollapsedHint => 'double tap to expand';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Collapse';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Expand for more details';
+
+  @override
+  String get expandedHint => 'Collapsed';
+
+  @override
+  String get collapsedHint => 'Expanded';
 
   @override
   String get refreshIndicatorSemanticLabel => 'Refresh';
@@ -1314,6 +1413,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get keyboardKeySelect => 'Select';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
 
   @override
   String get keyboardKeySpace => 'Space';

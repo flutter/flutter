@@ -143,7 +143,6 @@ class _ListDemoState extends State<ReorderableListDemo> {
           subtitle: secondary,
           secondary: const Icon(Icons.drag_handle),
         );
-        break;
       case _ReorderableListType.horizontalAvatar:
       case _ReorderableListType.verticalAvatar:
         listTile = SizedBox(
@@ -155,12 +154,10 @@ class _ListDemoState extends State<ReorderableListDemo> {
             child: Text(item.value),
           ),
         );
-        break;
       case null:
         listTile = Container(
           key: Key(item.value),
         );
-        break;
     }
 
     return listTile;

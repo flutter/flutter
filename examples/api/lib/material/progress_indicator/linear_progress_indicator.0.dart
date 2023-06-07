@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [LinearProgressIndicator].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [LinearProgressIndicator].
 
 void main() => runApp(const ProgressIndicatorApp());
 
@@ -26,8 +26,7 @@ class ProgressIndicatorExample extends StatefulWidget {
   State<ProgressIndicatorExample> createState() => _ProgressIndicatorExampleState();
 }
 
-class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
-    with TickerProviderStateMixin {
+class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> with TickerProviderStateMixin {
   late AnimationController controller;
 
   @override

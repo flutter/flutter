@@ -110,7 +110,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
 
     @Override
     public void onMethodCall(MethodCall methodCall, MethodChannel.Result result) {
-        switch(methodCall.method) {
+        switch (methodCall.method) {
             case "getStoragePermission":
                 if (permissionResult != null) {
                     result.error("error", "already waiting for permissions", null);
@@ -143,8 +143,8 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode != STORAGE_PERMISSION_CODE || permissionResult == null)
             return;
-        boolean permisisonGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-        sendPermissionResult(permisisonGranted);
+        boolean permissionGranted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        sendPermissionResult(permissionGranted);
     }
 
     private void getExternalStoragePermissions() {

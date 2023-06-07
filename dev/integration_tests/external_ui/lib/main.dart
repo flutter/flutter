@@ -50,14 +50,12 @@ Widget builds: $_widgetBuilds''';
         _state = FrameState.slow;
         _icon = Icons.stop;
         channel.invokeMethod<void>('start', _flutterFrameRate ~/ 2);
-        break;
       case FrameState.slow:
         debugPrint('Stopping .5x speed test...');
         await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _icon = Icons.fast_forward;
         _state = FrameState.afterSlow;
-        break;
       case FrameState.afterSlow:
         debugPrint('Starting 2x speed test...');
         _widgetBuilds = 0;
@@ -65,20 +63,17 @@ Widget builds: $_widgetBuilds''';
         _state = FrameState.fast;
         _icon = Icons.stop;
         channel.invokeMethod<void>('start', (_flutterFrameRate * 2).toInt());
-        break;
       case FrameState.fast:
         debugPrint('Stopping 2x speed test...');
         await channel.invokeMethod<void>('stop');
         await _summarizeStats();
         _state = FrameState.afterFast;
         _icon = Icons.replay;
-        break;
       case FrameState.afterFast:
         debugPrint('Test complete.');
         _summary = 'Press play to start again';
         _state = FrameState.initial;
         _icon = Icons.play_arrow;
-        break;
     }
     setState(() {});
   }

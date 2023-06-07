@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 /// A set of platform-adaptive Material Design icons.
 ///
 /// Use [Icons.adaptive] to access a static instance of this class.
-class PlatformAdaptiveIcons implements Icons {
+final class PlatformAdaptiveIcons implements Icons {
   const PlatformAdaptiveIcons._();
 
   static bool _isCupertino() {
@@ -119,9 +119,9 @@ class PlatformAdaptiveIcons implements Icons {
 /// ![The following code snippet would generate a row of icons consisting of a pink heart, a green musical note, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
-/// Row(
+/// const Row(
 ///   mainAxisAlignment: MainAxisAlignment.spaceAround,
-///   children: const <Widget>[
+///   children: <Widget>[
 ///     Icon(
 ///       Icons.favorite,
 ///       color: Colors.pink,
@@ -149,11 +149,8 @@ class PlatformAdaptiveIcons implements Icons {
 ///  * [IconButton]
 ///  * <https://material.io/resources/icons>
 ///  * [AnimatedIcons], for the list of available animated Material Icons.
-class Icons {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  Icons._();
-
+@staticIconProvider
+abstract final class Icons {
   /// A set of platform-adaptive Material Design icons.
   ///
   /// Provides a convenient way to show a certain set of platform-appropriate

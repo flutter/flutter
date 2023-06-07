@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "시작으로 이동",
+  "reorderItemToEnd": "끝으로 이동",
+  "reorderItemUp": "위로 이동",
+  "reorderItemDown": "아래로 이동",
+  "reorderItemLeft": "왼쪽으로 이동",
+  "reorderItemRight": "오른쪽으로 이동"
+}

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
@@ -78,6 +79,17 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           },
         ),
+        TextButton(
+          key: const ValueKey<String>('platform_view_z_order_test'),
+          child: const Text('platform view z order test'),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute<ZOrderTestPage>(
+                  builder: (BuildContext context) => const ZOrderTestPage()),
+            );
+          },
+        ),
       ]),
     );
   }
@@ -150,6 +162,71 @@ class _FocusTestPageState extends State<FocusTestPage> {
             controller: _controller,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A page to test a platform view in an alert dialog prompt is still tappable.
+/// See [this issue](https://github.com/flutter/flutter/issues/118366).
+class ZOrderTestPage extends StatefulWidget {
+  const ZOrderTestPage({super.key});
+
+  @override
+  State<ZOrderTestPage> createState() => _ZOrderTestPageState();
+}
+
+class _ZOrderTestPageState extends State<ZOrderTestPage> {
+  bool _showBackground = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Platform view z order test'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Visibility(
+                visible: _showBackground,
+                child: const SizedBox(
+                  width: 500,
+                  height: 500,
+                  child: UiKitView(
+                    viewType: 'platform_view',
+                    creationParamsCodec: StandardMessageCodec(),
+                  ),
+                )),
+            TextButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SizedBox(
+                          width: 250,
+                          height: 250,
+                          child: UiKitView(
+                            viewType: 'platform_button',
+                            creationParamsCodec: StandardMessageCodec(),
+                          ),
+                        );
+                      });
+
+                  // XCUITest fails to query the background platform view,
+                  // Since it is covered by the dialog prompt, which removes
+                  // semantic nodes underneath.
+                  // As a workaround, we show the background with a delay.
+                  Future<void>.delayed(const Duration(seconds: 1)).then((void value) {
+                    setState(() {
+                      _showBackground = true;
+                    });
+                  });
+                },
+                child: const Text('Show Alert')),
+          ],
+        ),
       ),
     );
   }

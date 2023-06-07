@@ -279,7 +279,7 @@ abstract class SceneBuilderRecorder extends Recorder {
           _profile!.record('sceneBuildDuration', () {
             final Scene scene = sceneBuilder.build();
             _profile!.record('windowRenderDuration', () {
-              window.render(scene);
+              view.render(scene);
             }, reported: false);
           }, reported: false);
         }, reported: true);
@@ -297,6 +297,11 @@ abstract class SceneBuilderRecorder extends Recorder {
     };
     PlatformDispatcher.instance.scheduleFrame();
     return profileCompleter.future;
+  }
+
+  FlutterView get view {
+    assert(PlatformDispatcher.instance.implicitView != null, 'This benchmark requires the embedder to provide an implicit view.');
+    return PlatformDispatcher.instance.implicitView!;
   }
 }
 
@@ -650,7 +655,8 @@ class Timeseries {
     final double dirtyStandardDeviation = _computeStandardDeviationForPopulation(name, candidateValues);
 
     // Any value that's higher than this is considered an outlier.
-    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation;
+    // Two standard deviations captures 95% of a normal distribution.
+    final double outlierCutOff = dirtyAverage + dirtyStandardDeviation * 2;
 
     // Candidates with outliers removed.
     final Iterable<double> cleanValues = candidateValues.where((double value) => value <= outlierCutOff);
@@ -841,8 +847,7 @@ class Profile {
   /// If [useCustomWarmUp] is true the benchmark will continue running until
   /// [stopBenchmark] is called. Otherwise, the benchmark collects the
   /// [kDefaultTotalSampleCount] samples and stops automatically.
-  Profile({required this.name, this.useCustomWarmUp = false})
-      : assert(name != null);
+  Profile({required this.name, this.useCustomWarmUp = false});
 
   /// The name of the benchmark that produced this profile.
   final String name;
@@ -1296,13 +1301,6 @@ final Map<String, EngineBenchmarkValueListener> _engineBenchmarkListeners = <Str
 ///
 /// If another listener is already registered, overrides it.
 void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListener listener) {
-  if (listener == null) {
-    throw ArgumentError(
-      'Listener must not be null. To stop listening to engine benchmark values '
-      'under label "$name", call stopListeningToEngineBenchmarkValues(\'$name\').',
-    );
-  }
-
   if (_engineBenchmarkListeners.containsKey(name)) {
     throw StateError(
       'A listener for "$name" is already registered.\n'

@@ -17,7 +17,7 @@ import 'dart/package_map.dart';
 /// They are escaped in Kotlin files.
 ///
 /// https://kotlinlang.org/docs/keyword-reference.html
-const List<String> kReservedKotlinKeywords = <String>['when', 'in'];
+const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All files
@@ -86,7 +86,7 @@ class Template {
           from: templateFiles[entity]!.absolute.path);
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
-        // is a candidate for rendering. This catches cases where the folder
+        // a candidate for rendering. This catches cases where the folder
         // itself is a template.
         _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
@@ -228,7 +228,7 @@ class Template {
         .replaceAll(testTemplateExtension, '')
         .replaceAll(templateExtension, '');
 
-      if (android != null && android && androidIdentifier != null) {
+      if (android && androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
@@ -374,4 +374,25 @@ String _escapeKotlinKeywords(String androidIdentifier) {
     (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
   ).toList();
   return correctedSegments.join('.');
+}
+
+String escapeYamlString(String value) {
+  final StringBuffer result = StringBuffer();
+  result.write('"');
+  for (final int rune in value.runes) {
+    result.write(
+      switch (rune) {
+        0x00 => r'\0',
+        0x09 => r'\t',
+        0x0A => r'\n',
+        0x0D => r'\r',
+        0x22 => r'\"',
+        0x5C => r'\\',
+        < 0x20 => '\\x${rune.toRadixString(16).padLeft(2, "0")}',
+        _ => String.fromCharCode(rune),
+      }
+    );
+  }
+  result.write('"');
+  return result.toString();
 }

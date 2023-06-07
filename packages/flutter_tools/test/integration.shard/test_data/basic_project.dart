@@ -10,7 +10,7 @@ class BasicProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=2.12.0-0 <3.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -63,7 +63,7 @@ class BasicProjectThatThrows extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=2.12.0-0 <3.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -120,7 +120,7 @@ class BasicProjectWithTimelineTraces extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=2.12.0-0 <3.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -169,7 +169,7 @@ class BasicProjectWithFlutterGen extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=2.12.0-0 <3.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -181,8 +181,6 @@ class BasicProjectWithFlutterGen extends Project {
 
   @override
   final String main = r'''
-  // @dart = 2.8
-  // generated package does not support null safety.
   import 'dart:async';
   import 'package:flutter_gen/flutter_gen.dart';
 
@@ -196,7 +194,7 @@ class BasicProjectWithUnaryMain extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=2.12.0-0 <3.0.0'
+    sdk: '>=3.0.0-0 <4.0.0'
   dependencies:
     flutter:
       sdk: flutter

@@ -2,54 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ListTile.selected].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ListTile.selected].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ListTileApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ListTileApp extends StatelessWidget {
+  const ListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
-      home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatefulWidget(),
-      ),
+      theme: ThemeData(useMaterial3: true),
+      home: const LisTileExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class LisTileExample extends StatefulWidget {
+  const LisTileExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<LisTileExample> createState() => _LisTileExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _LisTileExampleState extends State<LisTileExample> {
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 10,
-      itemBuilder: (BuildContext context, int index) {
-        return ListTile(
-          title: Text('Item $index'),
-          selected: index == _selectedIndex,
-          onTap: () {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(title: const Text('Custom List Item Sample')),
+      body: ListView.builder(
+        itemCount: 10,
+        itemBuilder: (BuildContext context, int index) {
+          return ListTile(
+            title: Text('Item $index'),
+            selected: index == _selectedIndex,
+            onTap: () {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+          );
+        },
+      ),
     );
   }
 }

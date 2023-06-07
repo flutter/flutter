@@ -66,7 +66,7 @@ void main() {
     expect(result.exitCode, isNot(0));
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 
-  group('observatory Bonjour service keys', () {
+  group('vmService Bonjour service keys', () {
     late Directory buildDirectory;
     late File infoPlist;
 
@@ -78,7 +78,7 @@ void main() {
     test('handles when the Info.plist is missing', () async {
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -102,7 +102,7 @@ void main() {
 
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Release',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -112,7 +112,7 @@ void main() {
 
       final String actualInfoPlist = infoPlist.readAsStringSync();
       expect(actualInfoPlist, isNot(contains('NSBonjourServices')));
-      expect(actualInfoPlist, isNot(contains('dartobservatory')));
+      expect(actualInfoPlist, isNot(contains('dartVmService')));
       expect(actualInfoPlist, isNot(contains('NSLocalNetworkUsageDescription')));
 
       expect(result.exitCode, 0);
@@ -124,7 +124,7 @@ void main() {
 
         final ProcessResult result = await Process.run(
           xcodeBackendPath,
-          <String>['test_observatory_bonjour_service'],
+          <String>['test_vm_service_bonjour_service'],
           environment: <String, String>{
             'CONFIGURATION': buildConfiguration,
             'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -134,7 +134,7 @@ void main() {
 
         final String actualInfoPlist = infoPlist.readAsStringSync();
         expect(actualInfoPlist, contains('NSBonjourServices'));
-        expect(actualInfoPlist, contains('dartobservatory'));
+        expect(actualInfoPlist, contains('dartVmService'));
         expect(actualInfoPlist, contains('NSLocalNetworkUsageDescription'));
 
         expect(result.exitCode, 0);
@@ -158,7 +158,7 @@ void main() {
 
       final ProcessResult result = await Process.run(
         xcodeBackendPath,
-        <String>['test_observatory_bonjour_service'],
+        <String>['test_vm_service_bonjour_service'],
         environment: <String, String>{
           'CONFIGURATION': 'Debug',
           'BUILT_PRODUCTS_DIR': buildDirectory.path,
@@ -173,7 +173,7 @@ void main() {
 <dict>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_dartobservatory._tcp</string>
+		<string>_dartVmService._tcp</string>
 		<string>_bogus._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>

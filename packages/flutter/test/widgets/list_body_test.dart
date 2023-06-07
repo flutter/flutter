@@ -29,7 +29,7 @@ void expectRects(WidgetTester tester, List<Rect> expected) {
 void main() {
 
   testWidgets('ListBody down', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
       children: <Widget>[ ListBody(children: children) ],
     ));
@@ -46,7 +46,7 @@ void main() {
   });
 
   testWidgets('ListBody up', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
       children: <Widget>[ ListBody(reverse: true, children: children) ],
     ));
@@ -63,7 +63,7 @@ void main() {
   });
 
   testWidgets('ListBody right', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
       children: <Widget>[
@@ -86,7 +86,7 @@ void main() {
   });
 
   testWidgets('ListBody left', (WidgetTester tester) async {
-    await tester.pumpWidget(Flex(
+    await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
       children: <Widget>[
@@ -114,7 +114,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
-        SizedBox(
+        const SizedBox(
           width: 100,
           height: 100,
           child: Directionality(
@@ -147,7 +147,7 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
-        Flex(
+        const Flex(
           textDirection: TextDirection.ltr,
           direction: Axis.horizontal,
           children: <Widget>[

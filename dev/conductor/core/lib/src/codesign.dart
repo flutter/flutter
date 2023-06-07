@@ -99,7 +99,7 @@ class CodesignCommand extends Command<void> {
       );
     }
 
-    if (argResults!['verify'] as bool != true) {
+    if (!(argResults!['verify'] as bool)) {
       throw ConductorException(
         'Sorry, but codesigning is not implemented yet. Please pass the '
         '--$kVerify flag to verify signatures.',
@@ -170,6 +170,7 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/dart',
       'dart-sdk/bin/dartaotruntime',
       'dart-sdk/bin/utils/gen_snapshot',
+      'dart-sdk/bin/utils/wasm-opt',
     ]
         .map((String relativePath) =>
             fileSystem.path.join(frameworkCacheDirectory, relativePath))

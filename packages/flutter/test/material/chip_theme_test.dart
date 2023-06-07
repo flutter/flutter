@@ -42,6 +42,12 @@ void main() {
     expect(const ChipThemeData().hashCode, const ChipThemeData().copyWith().hashCode);
   });
 
+  test('ChipThemeData lerp special cases', () {
+    expect(ChipThemeData.lerp(null, null, 0), null);
+    const ChipThemeData data = ChipThemeData();
+    expect(identical(ChipThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ChipThemeData defaults', () {
     const ChipThemeData themeData = ChipThemeData();
     expect(themeData.backgroundColor, null);

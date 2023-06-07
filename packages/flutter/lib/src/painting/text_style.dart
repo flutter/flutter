@@ -38,6 +38,8 @@ const double _kDefaultFontSize = 14.0;
 
 /// An immutable style describing how to format and paint text.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1z6YP7YmvwA}
+///
 /// ### Bold
 ///
 /// {@tool snippet}
@@ -502,7 +504,6 @@ class TextStyle with Diagnosticable {
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
-       assert(inherit != null),
        assert(color == null || foreground == null, _kColorForegroundWarning),
        assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
 
@@ -594,14 +595,19 @@ class TextStyle with Diagnosticable {
   // in the [fontFamilyFallback] getter.
   final String? _package;
 
-  /// The size of glyphs (in logical pixels) to use when painting the text.
+  /// The size of fonts (in logical pixels) to use when painting the text.
+  ///
+  /// The value specified matches the dimension of the
+  /// [em square](https://fonts.google.com/knowledge/glossary/em) of the
+  /// underlying font, and more often then not isn't exactly the height or the
+  /// width of glyphs in the font.
   ///
   /// During painting, the [fontSize] is multiplied by the current
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size.
   ///
-  /// [getParagraphStyle] will default to 14 logical pixels if the font size
-  /// isn't specified here.
+  /// The [getParagraphStyle] method defaults to 14 logical pixels if [fontSize]
+  /// is set to null.
   final double? fontSize;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
@@ -895,7 +901,7 @@ class TextStyle with Diagnosticable {
       decorationThickness: decorationThickness ?? this.decorationThickness,
       debugLabel: newDebugLabel,
       fontFamily: fontFamily ?? _fontFamily,
-      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       package: package ?? _package,
       overflow: overflow ?? this.overflow,
     );
@@ -959,21 +965,10 @@ class TextStyle with Diagnosticable {
     String? package,
     TextOverflow? overflow,
   }) {
-    assert(fontSizeFactor != null);
-    assert(fontSizeDelta != null);
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
-    assert(fontWeightDelta != null);
     assert(fontWeight != null || fontWeightDelta == 0.0);
-    assert(letterSpacingFactor != null);
-    assert(letterSpacingDelta != null);
     assert(letterSpacing != null || (letterSpacingFactor == 1.0 && letterSpacingDelta == 0.0));
-    assert(wordSpacingFactor != null);
-    assert(wordSpacingDelta != null);
     assert(wordSpacing != null || (wordSpacingFactor == 1.0 && wordSpacingDelta == 0.0));
-    assert(heightFactor != null);
-    assert(heightDelta != null);
-    assert(decorationThicknessFactor != null);
-    assert(decorationThicknessDelta != null);
     assert(decorationThickness != null || (decorationThicknessFactor == 1.0 && decorationThicknessDelta == 0.0));
 
     String? modifiedDebugLabel;
@@ -989,7 +984,7 @@ class TextStyle with Diagnosticable {
       color: foreground == null ? color ?? this.color : null,
       backgroundColor: background == null ? backgroundColor ?? this.backgroundColor : null,
       fontFamily: fontFamily ?? _fontFamily,
-      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
+      fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize! * fontSizeFactor + fontSizeDelta,
       fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight!.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)], // ignore_clamp_double_lint
       fontStyle: fontStyle ?? this.fontStyle,
@@ -1087,7 +1082,7 @@ class TextStyle with Diagnosticable {
   /// implementation uses the non-null value throughout the transition for
   /// lerpable fields such as colors (for example, if one [TextStyle] specified
   /// `fontSize` but the other didn't, the returned [TextStyle] will use the
-  /// `fontSize` from the [TextStyle] that specified it, regarless of the `t`
+  /// `fontSize` from the [TextStyle] that specified it, regardless of the `t`
   /// value).
   ///
   /// This method throws when the given [TextStyle]s don't have the same
@@ -1104,11 +1099,9 @@ class TextStyle with Diagnosticable {
   /// as if they have a [background] paint (creating a new [Paint] if necessary
   /// based on the [backgroundColor] property).
   static TextStyle? lerp(TextStyle? a, TextStyle? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
-
     String? lerpDebugLabel;
     assert(() {
       lerpDebugLabel = 'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
@@ -1330,7 +1323,6 @@ class TextStyle with Diagnosticable {
     double? height,
     StrutStyle? strutStyle,
   }) {
-    assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
     final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
     final ui.TextHeightBehavior? effectiveTextHeightBehavior = textHeightBehavior

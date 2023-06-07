@@ -7,10 +7,14 @@ import 'package:flutter/widgets.dart';
 
 import 'chip.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+
+enum _ChipVariant { flat, elevated }
 
 /// A Material Design action chip.
 ///
@@ -20,7 +24,7 @@ import 'theme_data.dart';
 /// Action chips can be tapped to trigger an action or show progress and
 /// confirmation. For Material 3, a disabled state is supported for Action
 /// chips and is specified with [onPressed] being null. For previous versions
-/// of Material Design, it is recommended to remove the Action chip from the
+/// of Material Design, it is recommended to remove the Action chip from
 /// the interface entirely rather than display a disabled chip.
 ///
 /// Action chips are displayed after primary content, such as below a card or
@@ -86,11 +90,41 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-  }) : assert(label != null),
-       assert(clipBehavior != null),
-       assert(autofocus != null),
-       assert(pressElevation == null || pressElevation >= 0.0),
-       assert(elevation == null || elevation >= 0.0);
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       _chipVariant = _ChipVariant.flat;
+
+  /// Create an elevated chip that acts like a button.
+  ///
+  /// The [label], [onPressed], [autofocus], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or
+  /// non-negative. Typically, [pressElevation] is greater than [elevation].
+  const ActionChip.elevated({
+    super.key,
+    this.avatar,
+    required this.label,
+    this.labelStyle,
+    this.labelPadding,
+    this.onPressed,
+    this.pressElevation,
+    this.tooltip,
+    this.side,
+    this.shape,
+    this.clipBehavior = Clip.none,
+    this.focusNode,
+    this.autofocus = false,
+    this.backgroundColor,
+    this.disabledColor,
+    this.padding,
+    this.visualDensity,
+    this.materialTapTargetSize,
+    this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
+    this.iconTheme,
+  }) : assert(pressElevation == null || pressElevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
+       _chipVariant = _ChipVariant.elevated;
 
   @override
   final Widget? avatar;
@@ -138,11 +172,13 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   bool get isEnabled => onPressed != null;
 
+  final _ChipVariant _chipVariant;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ActionChipDefaultsM3(context, isEnabled)
+      ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
       : null;
     return RawChip(
       defaultProperties: defaults,
@@ -178,30 +214,42 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_141
+// Token database version: v0_162
 
 class _ActionChipDefaultsM3 extends ChipThemeData {
-  const _ActionChipDefaultsM3(this.context, this.isEnabled)
+  _ActionChipDefaultsM3(this.context, this.isEnabled, this._chipVariant)
     : super(
-        elevation: 0.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
   final BuildContext context;
   final bool isEnabled;
+  final _ChipVariant _chipVariant;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  TextStyle? get labelStyle => Theme.of(context).textTheme.labelLarge;
+  double? get elevation => _chipVariant == _ChipVariant.flat
+    ? 0.0
+    : isEnabled ? 1.0 : 0.0;
+
+  @override
+  double? get pressElevation => 1.0;
+
+  @override
+  TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
   Color? get backgroundColor => null;
 
   @override
-  Color? get shadowColor => Colors.transparent;
+  Color? get shadowColor => _chipVariant == _ChipVariant.flat
+    ? Colors.transparent
+    : _colors.shadow;
 
   @override
-  Color? get surfaceTintColor => Theme.of(context).colorScheme.surfaceTint;
+  Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override
   Color? get selectedColor => null;
@@ -210,21 +258,25 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   Color? get checkmarkColor => null;
 
   @override
-  Color? get disabledColor => null;
+  Color? get disabledColor => _chipVariant == _ChipVariant.flat
+    ? null
+    : _colors.onSurface.withOpacity(0.12);
 
   @override
   Color? get deleteIconColor => null;
 
   @override
-  BorderSide? get side => isEnabled
-    ? BorderSide(color: Theme.of(context).colorScheme.outline)
-    : BorderSide(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12));
+  BorderSide? get side => _chipVariant == _ChipVariant.flat
+    ? isEnabled
+        ? BorderSide(color: _colors.outline)
+        : BorderSide(color: _colors.onSurface.withOpacity(0.12))
+    : const BorderSide(color: Colors.transparent);
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: isEnabled
-      ? Theme.of(context).colorScheme.primary
-      : Theme.of(context).colorScheme.onSurface,
+      ? _colors.primary
+      : _colors.onSurface,
     size: 18.0,
   );
 
@@ -239,7 +291,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.of(context).textScaleFactor - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
   )!;
 }
 

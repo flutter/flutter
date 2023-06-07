@@ -248,6 +248,12 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// If `T` is not nullable, then [begin] and [end] must both be set to
 /// non-null values before using [lerp] or [transform], otherwise they
 /// will throw.
+///
+/// ## Implementing a Tween
+///
+/// To specialize this class for a new type, the subclass should implement
+/// the [lerp] method (and a constructor). The other methods of this class
+/// are all defined in terms of [lerp].
 class Tween<T extends Object?> extends Animatable<T> {
   /// Creates a tween.
   ///
@@ -364,8 +370,7 @@ class Tween<T extends Object?> extends Animatable<T> {
 class ReverseTween<T extends Object?> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
-    : assert(parent != null),
-      super(begin: parent.end, end: parent.begin);
+    : super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
@@ -544,8 +549,7 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ required this.curve })
-    : assert(curve != null);
+  CurveTween({ required this.curve });
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

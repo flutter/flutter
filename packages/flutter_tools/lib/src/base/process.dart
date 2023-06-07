@@ -98,8 +98,7 @@ class ProcessExit implements Exception {
 
 class RunResult {
   RunResult(this.processResult, this._command)
-    : assert(_command != null),
-      assert(_command.isNotEmpty);
+    : assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 
@@ -197,6 +196,7 @@ abstract class ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    ProcessStartMode mode = ProcessStartMode.normal,
   });
 
   /// This runs the command and streams stdout/stderr from the child process to
@@ -255,7 +255,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     Duration? timeout,
     int timeoutRetries = 0,
   }) async {
-    if (cmd == null || cmd.isEmpty) {
+    if (cmd.isEmpty) {
       throw ArgumentError('cmd must be a non-empty list');
     }
     if (timeoutRetries < 0) {
@@ -422,12 +422,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     return _processManager.start(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      mode: mode,
     );
   }
 

@@ -14,6 +14,12 @@ void main() {
     expect(const TextSelectionThemeData().hashCode, const TextSelectionThemeData().copyWith().hashCode);
   });
 
+  test('TextSelectionThemeData lerp special cases', () {
+    expect(TextSelectionThemeData.lerp(null, null, 0), null);
+    const TextSelectionThemeData data = TextSelectionThemeData();
+    expect(identical(TextSelectionThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('TextSelectionThemeData null fields by default', () {
     const TextSelectionThemeData theme = TextSelectionThemeData();
     expect(theme.cursorColor, null);

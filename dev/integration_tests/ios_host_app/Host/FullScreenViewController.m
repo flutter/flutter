@@ -22,9 +22,9 @@
   self.navigationController.navigationBarHidden = NO;
   self.navigationController.hidesBarsOnSwipe = NO;
   if (self.isMovingFromParentViewController) {
-    // Note that if we were doing things that might cause the VC
+    // If we were doing things that might cause the VC
     // to disappear (like using the image_picker plugin)
-    // we shouldn't do this.  But in this case we know we're
+    // we shouldn't do this, but in this case we know we're
     // just going back to the navigation controller.
     // If we needed Flutter to tell us when we could actually go away,
     // we'd need to communicate over a method channel with it.

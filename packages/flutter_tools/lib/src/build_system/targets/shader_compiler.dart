@@ -17,6 +17,7 @@ import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
+import '../../device.dart';
 import '../build_system.dart';
 
 /// The output shader format that should be used by the [ShaderCompiler].
@@ -51,18 +52,18 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, { required bool enableImpeller }) {
+  void configureCompiler(TargetPlatform? platform, { required ImpellerStatus impellerStatus }) {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = ShaderTarget.impelleriOS;
-        break;
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
       case TargetPlatform.android_arm:
       case TargetPlatform.android:
-        _shaderTarget = enableImpeller ? ShaderTarget.impellerAndroid : ShaderTarget.sksl;
-        break;
+        _shaderTarget = impellerStatus == ImpellerStatus.enabled
+          ? ShaderTarget.impellerAndroid
+          : ShaderTarget.sksl;
       case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
       case TargetPlatform.linux_arm64:
@@ -70,14 +71,12 @@ class DevelopmentShaderCompiler {
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
-        assert(!enableImpeller);
+        assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
-        break;
       case TargetPlatform.web_javascript:
-        assert(!enableImpeller);
+        assert(impellerStatus != ImpellerStatus.enabled);
         _shaderTarget = ShaderTarget.sksl;
         _jsonMode = true;
-        break;
       case null:
         return;
     }
@@ -175,8 +174,7 @@ class ShaderCompiler {
       );
     }
 
-    final String shaderLibPath = _fs.path.join(_fs.path.dirname(impellerc.path), 'shader_lib');
-
+    final String shaderLibPath = _fs.path.join(impellerc.parent.absolute.path, 'shader_lib');
     final List<String> cmd = <String>[
       impellerc.path,
       target.target,
@@ -190,6 +188,7 @@ class ShaderCompiler {
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
     ];
+    _logger.printTrace('shaderc command: $cmd');
     final Process impellercProcess = await _processManager.start(cmd);
     final int code = await impellercProcess.exitCode;
     if (code != 0) {

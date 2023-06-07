@@ -6,6 +6,7 @@
 // See https://flutter.dev/go/icu-message-parser.
 
 // Symbol Types
+import '../base/logger.dart';
 import 'gen_l10n_types.dart';
 
 enum ST {
@@ -69,6 +70,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
   ],
   ST.selectPart: <List<ST>>[
     <ST>[ST.identifier, ST.openBrace, ST.message, ST.closeBrace],
+    <ST>[ST.number, ST.openBrace, ST.message, ST.closeBrace],
     <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
 };
@@ -129,7 +131,7 @@ $indent])''';
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
   bool operator==(covariant Node other) {
-    if(value != other.value
+    if (value != other.value
       || type != other.type
       || positionInMessage != other.positionInMessage
       || children.length != other.children.length
@@ -149,24 +151,21 @@ $indent])''';
   }
 }
 
-RegExp unescapedString = RegExp(r'[^{}]+');
+RegExp escapedString = RegExp(r"'[^']*'");
+RegExp unescapedString = RegExp(r"[^{}']+");
+RegExp normalString = RegExp(r'[^{}]+');
+
 RegExp brace = RegExp(r'{|}');
 
 RegExp whitespace = RegExp(r'\s+');
-RegExp pluralKeyword = RegExp(r'plural');
-RegExp selectKeyword = RegExp(r'select');
-RegExp otherKeyword = RegExp(r'other');
 RegExp numeric = RegExp(r'[0-9]+');
-RegExp alphanumeric = RegExp(r'[a-zA-Z0-9]+');
+RegExp alphanumeric = RegExp(r'[a-zA-Z0-9|_]+');
 RegExp comma = RegExp(r',');
 RegExp equalSign = RegExp(r'=');
 
 // List of token matchers ordered by precedence
 Map<ST, RegExp> matchers = <ST, RegExp>{
   ST.empty: whitespace,
-  ST.plural: pluralKeyword,
-  ST.select: selectKeyword,
-  ST.other: otherKeyword,
   ST.number: numeric,
   ST.comma: comma,
   ST.equalSign: equalSign,
@@ -174,11 +173,21 @@ Map<ST, RegExp> matchers = <ST, RegExp>{
 };
 
 class Parser {
-  Parser(this.messageId, this.filename, this.messageString);
+  Parser(
+    this.messageId,
+    this.filename,
+    this.messageString,
+    {
+      this.useEscaping = false,
+      this.logger
+    }
+  );
 
   final String messageId;
   final String messageString;
   final String filename;
+  final bool useEscaping;
+  final Logger? logger;
 
   static String indentForError(int position) {
     return '${List<String>.filled(position, ' ').join()}^';
@@ -201,20 +210,41 @@ class Parser {
     while (startIndex < messageString.length) {
       Match? match;
       if (isString) {
-        // TODO(thkim1011): Uncomment this when we add escaping as an option.
-        // See https://github.com/flutter/flutter/issues/113455.
-        // match = escapedString.matchAsPrefix(message, startIndex);
-        // if (match != null) {
-        //   final String string = match.group(0)!;
-        //   tokens.add(Node.string(startIndex, string == "''" ? "'" : string.substring(1, string.length - 1)));
-        //   startIndex = match.end;
-        //   continue;
-        // }
-        match = unescapedString.matchAsPrefix(messageString, startIndex);
-        if (match != null) {
-          tokens.add(Node.string(startIndex, match.group(0)!));
-          startIndex = match.end;
-          continue;
+        if (useEscaping) {
+          // This case is slightly involved. Essentially, wrapping any syntax in
+          // single quotes escapes the syntax except when there are consecutive pair of single
+          // quotes. For example, "Hello! 'Flutter''s amazing'. { unescapedPlaceholder }"
+          // converts the '' in "Flutter's" to a single quote for convenience, since technically,
+          // we should interpret this as two strings 'Flutter' and 's amazing'. To get around this,
+          // we also check if the previous character is a ', and if so, add a single quote at the beginning
+          // of the token.
+          match = escapedString.matchAsPrefix(messageString, startIndex);
+          if (match != null) {
+            final String string = match.group(0)!;
+            if (string == "''") {
+              tokens.add(Node.string(startIndex, "'"));
+            } else if (startIndex > 1 && messageString[startIndex - 1] == "'") {
+              // Include a single quote in the beginning of the token.
+              tokens.add(Node.string(startIndex, string.substring(0, string.length - 1)));
+            } else {
+              tokens.add(Node.string(startIndex, string.substring(1, string.length - 1)));
+            }
+            startIndex = match.end;
+            continue;
+          }
+          match = unescapedString.matchAsPrefix(messageString, startIndex);
+          if (match != null) {
+            tokens.add(Node.string(startIndex, match.group(0)!));
+            startIndex = match.end;
+            continue;
+          }
+        } else {
+          match = normalString.matchAsPrefix(messageString, startIndex);
+          if (match != null) {
+            tokens.add(Node.string(startIndex, match.group(0)!));
+            startIndex = match.end;
+            continue;
+          }
         }
         match = brace.matchAsPrefix(messageString, startIndex);
         if (match != null) {
@@ -267,7 +297,22 @@ class Parser {
           // Do not add whitespace as a token.
           startIndex = match.end;
           continue;
+        } else if (<ST>[ST.identifier].contains(matchedType) && tokens.last.type == ST.openBrace) {
+          // Treat any token as identifier if it comes right after an open brace, whether it's a keyword or not.
+          tokens.add(Node(ST.identifier, startIndex, value: match.group(0)));
+          startIndex = match.end;
+          continue;
         } else {
+          // Handle keywords separately. Otherwise, lexer will assume parts of identifiers may be keywords.
+          final String tokenStr = match.group(0)!;
+          switch (tokenStr) {
+            case 'plural':
+              matchedType = ST.plural;
+            case 'select':
+              matchedType = ST.select;
+            case 'other':
+              matchedType = ST.other;
+          }
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
           continue;
@@ -294,7 +339,7 @@ class Parser {
       parsingStack.addAll(grammarRule.reversed);
 
       // For tree construction, add nodes to the parent until the parent has all
-      // all the children it is expecting.
+      // the children it is expecting.
       parent.children.add(node);
       if (parent.isFull) {
         treeTraversalStack.removeLast();
@@ -306,7 +351,7 @@ class Parser {
       final ST symbol = parsingStack.removeLast();
 
       // Figure out which production rule to use.
-      switch(symbol) {
+      switch (symbol) {
         case ST.message:
           if (tokens.isEmpty) {
             parseAndConstructNode(ST.message, 4);
@@ -326,13 +371,10 @@ class Parser {
             // Theoretically, we can never get here.
             throw L10nException('ICU Syntax Error.');
           }
-          break;
         case ST.placeholderExpr:
           parseAndConstructNode(ST.placeholderExpr, 0);
-          break;
         case ST.pluralExpr:
           parseAndConstructNode(ST.pluralExpr, 0);
-          break;
         case ST.pluralParts:
           if (tokens.isNotEmpty && (
               tokens[0].type == ST.identifier ||
@@ -344,7 +386,6 @@ class Parser {
           } else {
             parseAndConstructNode(ST.pluralParts, 1);
           }
-          break;
         case ST.pluralPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.pluralPart, 0);
@@ -361,25 +402,25 @@ class Parser {
               tokens[0].positionInMessage,
             );
           }
-          break;
         case ST.selectExpr:
           parseAndConstructNode(ST.selectExpr, 0);
-          break;
         case ST.selectParts:
           if (tokens.isNotEmpty && (
             tokens[0].type == ST.identifier ||
+            tokens[0].type == ST.number ||
             tokens[0].type == ST.other
           )) {
             parseAndConstructNode(ST.selectParts, 0);
           } else {
             parseAndConstructNode(ST.selectParts, 1);
           }
-          break;
         case ST.selectPart:
           if (tokens.isNotEmpty && tokens[0].type == ST.identifier) {
             parseAndConstructNode(ST.selectPart, 0);
-          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.number) {
             parseAndConstructNode(ST.selectPart, 1);
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.other) {
+            parseAndConstructNode(ST.selectPart, 2);
           } else {
             throw L10nParserException(
               'ICU Syntax Error: Select parts must be of the form "identifier { message }"',
@@ -389,7 +430,6 @@ class Parser {
               tokens[0].positionInMessage
             );
           }
-          break;
         // At this point, we are only handling terminal symbols.
         // ignore: no_default_cases
         default:
@@ -441,23 +481,24 @@ class Parser {
     ST.other: 'other',
   };
 
-  // Compress the syntax tree. Note that after
-  // parse(lex(message)), the individual parts (ST.string, ST.placeholderExpr,
-  // ST.pluralExpr, and ST.selectExpr) are structured as a linked list See diagram
-  // below. This
-  // function compresses these parts into a single children array (and does this
-  // for ST.pluralParts and ST.selectParts as well). Then it checks extra syntax
-  // rules. Essentially, it converts
+  // Compress the syntax tree.
   //
-  //            Message
-  //            /     \
-  //    PluralExpr  Message
-  //                /     \
-  //            String  Message
-  //                    /     \
-  //            SelectExpr   ...
+  // After `parse(lex(message))`, the individual parts (`ST.string`,
+  // `ST.placeholderExpr`, `ST.pluralExpr`, and `ST.selectExpr`) are structured
+  // as a linked list (see diagram below). This function compresses these parts
+  // into a single children array (and does this for `ST.pluralParts` and
+  // `ST.selectParts` as well). Then it checks extra syntax rules. Essentially, it
+  // converts:
   //
-  // to
+  //             Message
+  //             /     \
+  //     PluralExpr  Message
+  //                 /     \
+  //             String  Message
+  //                     /     \
+  //             SelectExpr   ...
+  //
+  // ...to:
   //
   //                Message
   //               /   |   \
@@ -478,7 +519,6 @@ class Parser {
           node = node.children[1];
         }
         syntaxTree.children = children;
-        break;
       // ignore: no_default_cases
       default:
         node.children.forEach(compress);
@@ -490,7 +530,7 @@ class Parser {
   // plural parts and select parts.
   void checkExtraRules(Node syntaxTree) {
     final List<Node> children = syntaxTree.children;
-    switch(syntaxTree.type) {
+    switch (syntaxTree.type) {
       case ST.pluralParts:
         // Must have an "other" case.
         if (children.every((Node node) => node.children[0].type != ST.other)) {
@@ -516,7 +556,6 @@ class Parser {
             );
           }
         }
-        break;
       case ST.selectParts:
         if (children.every((Node node) => node.children[0].type != ST.other)) {
           throw L10nParserException(
@@ -527,7 +566,6 @@ class Parser {
             syntaxTree.positionInMessage,
           );
         }
-        break;
       // ignore: no_default_cases
       default:
         break;

@@ -23,8 +23,7 @@ class IconTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null),
-       assert(child != null);
+  });
 
   /// Creates an icon theme that controls the properties of
   /// descendant widgets, and merges in the current icon theme, if any.

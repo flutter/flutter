@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Tooltip].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Tooltip].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const TooltipExampleApp());
 
-  static const String _title = 'Tooltip Sample';
+class TooltipExampleApp extends StatelessWidget {
+  const TooltipExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Tooltip Sample')),
         body: const Center(
           child: TooltipSample(),
         ),

@@ -50,6 +50,12 @@ void main() {
     expect(const PopupMenuThemeData().hashCode, const PopupMenuThemeData().copyWith().hashCode);
   });
 
+  test('PopupMenuThemeData lerp special cases', () {
+    expect(PopupMenuThemeData.lerp(null, null, 0), null);
+    const PopupMenuThemeData data = PopupMenuThemeData();
+    expect(identical(PopupMenuThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('PopupMenuThemeData null fields by default', () {
     const PopupMenuThemeData popupMenuTheme = PopupMenuThemeData();
     expect(popupMenuTheme.color, null);
@@ -394,8 +400,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
      final Key popupButtonKey = UniqueKey();

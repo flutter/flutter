@@ -67,11 +67,7 @@ flutter:
 
     expect(depfile, exists);
 
-    final DepfileService depfileService = DepfileService(
-      logger: BufferLogger.test(),
-      fileSystem: fileSystem,
-    );
-    final Depfile dependencies = depfileService.parse(depfile);
+    final Depfile dependencies = environment.depFileService.parse(depfile);
 
     expect(
       dependencies.inputs.firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),

@@ -56,8 +56,7 @@ void main() {
     TargetPlatform.android_x64,
   ]) {
     testWithoutContext('AndroidDevice.startApp allows release builds on $targetPlatform', () async {
-      final String arch = getNameForAndroidArch(
-        getAndroidArchForName(getNameForTargetPlatform(targetPlatform)));
+      final String arch = getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
       final AndroidDevice device = AndroidDevice('1234', modelID: 'TestModel',
         fileSystem: fileSystem,
         processManager: processManager,
@@ -278,14 +277,14 @@ void main() {
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
+        enableImpeller: ImpellerStatus.enabled,
         nullAssertions: true,
-        enableImpeller: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',
     );
 
-    // This fails to start due to observatory discovery issues.
+    // This fails to start due to VM Service discovery issues.
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });

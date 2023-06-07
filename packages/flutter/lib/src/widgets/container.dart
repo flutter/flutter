@@ -62,8 +62,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     required this.decoration,
     this.position = DecorationPosition.background,
     super.child,
-  }) : assert(decoration != null),
-       assert(position != null);
+  });
 
   /// What decoration to paint.
   ///
@@ -97,10 +96,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     switch (position) {
       case DecorationPosition.background:
         label = 'bg';
-        break;
       case DecorationPosition.foreground:
         label = 'fg';
-        break;
     }
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
@@ -268,7 +265,6 @@ class Container extends StatelessWidget {
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(clipBehavior != null),
        assert(decoration != null || clipBehavior == Clip.none),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
@@ -369,14 +365,14 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null || decoration!.padding == null) {
+    if (decoration == null) {
       return padding;
     }
-    final EdgeInsetsGeometry? decorationPadding = decoration!.padding;
+    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
     if (padding == null) {
       return decorationPadding;
     }
-    return padding!.add(decorationPadding!);
+    return padding!.add(decorationPadding);
   }
 
   @override
@@ -464,8 +460,7 @@ class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
     TextDirection? textDirection,
     required this.decoration,
-  }) : assert(decoration != null),
-       textDirection = textDirection ?? TextDirection.ltr;
+  }) : textDirection = textDirection ?? TextDirection.ltr;
 
   final TextDirection textDirection;
   final Decoration decoration;

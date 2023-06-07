@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fake_platform_views.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Android', () {
     late FakeAndroidPlatformViewsController viewsController;
@@ -214,7 +214,7 @@ void main() {
       await viewController.dispose();
       final ByteData message =
           SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
-      await SystemChannels.platform_views.binaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
       expect(didFocus, isFalse);
     });
 
@@ -268,6 +268,19 @@ void main() {
       await controller2.create(size: const Size(100.0, 200.0));
       expect(createdViews, orderedEquals(<int>[0, 5]));
 
+      final AndroidViewController controller3 = PlatformViewsService.initAndroidView(
+        id: 10,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      )..addOnPlatformViewCreatedListener(callback);
+      expect(createdViews, orderedEquals(<int>[0, 5]));
+
+      await Future.wait(<Future<void>>[
+        controller3.create(size: const Size(100.0, 200.0)),
+        controller3.dispose(),
+      ]);
+
+      expect(createdViews, orderedEquals(<int>[0, 5]));
     });
 
     test("change Android view's directionality before creation", () async {

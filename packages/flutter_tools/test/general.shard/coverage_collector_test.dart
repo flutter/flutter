@@ -647,7 +647,7 @@ class TestTestDevice extends TestDevice {
   Future<void> kill() => Future<void>.value();
 
   @override
-  Future<Uri?> get observatoryUri => Future<Uri?>.value(Uri());
+  Future<Uri?> get vmServiceUri => Future<Uri?>.value(Uri());
 
   @override
   Future<StreamChannel<String>> start(String entrypointPath) {

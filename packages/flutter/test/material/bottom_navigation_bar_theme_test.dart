@@ -15,6 +15,11 @@ void main() {
     expect(const BottomNavigationBarThemeData().hashCode, const BottomNavigationBarThemeData().copyWith().hashCode);
   });
 
+  test('BottomNavigationBarThemeData lerp special cases', () {
+    const BottomNavigationBarThemeData data = BottomNavigationBarThemeData();
+    expect(identical(BottomNavigationBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('BottomNavigationBarThemeData defaults', () {
     const BottomNavigationBarThemeData themeData = BottomNavigationBarThemeData();
     expect(themeData.backgroundColor, null);

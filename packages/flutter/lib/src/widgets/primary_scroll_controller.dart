@@ -17,6 +17,8 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 
 /// Associates a [ScrollController] with a subtree.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=33_0ABjFJUU}
+///
 /// When a [ScrollView] has [ScrollView.primary] set to true, the [ScrollView]
 /// uses [of] to inherit the [PrimaryScrollController] associated with its
 /// subtree.
@@ -51,7 +53,7 @@ class PrimaryScrollController extends InheritedWidget {
     this.automaticallyInheritForPlatforms = _kMobilePlatforms,
     this.scrollDirection = Axis.vertical,
     required super.child,
-  }) : assert(controller != null);
+  });
 
   /// Creates a subtree without an associated [ScrollController].
   const PrimaryScrollController.none({
@@ -81,6 +83,9 @@ class PrimaryScrollController extends InheritedWidget {
   /// PrimaryScrollController is inherited, ScrollView will insert
   /// PrimaryScrollController.none into the tree to prevent further descendant
   /// ScrollViews from inheriting the current PrimaryScrollController.
+  ///
+  /// For the direction in which active scrolling may be occurring, see
+  /// [ScrollDirection].
   ///
   /// Defaults to [Axis.vertical].
   final Axis? scrollDirection;

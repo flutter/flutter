@@ -2,34 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [EditableText.onChanged].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [EditableText.onChanged].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const OnChangedExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class OnChangedExampleApp extends StatelessWidget {
+  const OnChangedExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: OnChangedExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class OnChangedExample extends StatefulWidget {
+  const OnChangedExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<OnChangedExample> createState() => _OnChangedExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _OnChangedExampleState extends State<OnChangedExample> {
   final TextEditingController _controller = TextEditingController();
 
   @override

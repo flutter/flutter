@@ -18,7 +18,7 @@ class Velocity {
   /// The [pixelsPerSecond] argument must not be null.
   const Velocity({
     required this.pixelsPerSecond,
-  }) : assert(pixelsPerSecond != null);
+  });
 
   /// A velocity that isn't moving at all.
   static const Velocity zero = Velocity(pixelsPerSecond: Offset.zero);
@@ -50,8 +50,8 @@ class Velocity {
   /// If the magnitude of this Velocity is within the specified bounds then
   /// just return this.
   Velocity clampMagnitude(double minValue, double maxValue) {
-    assert(minValue != null && minValue >= 0.0);
-    assert(maxValue != null && maxValue >= 0.0 && maxValue >= minValue);
+    assert(minValue >= 0.0);
+    assert(maxValue >= 0.0 && maxValue >= minValue);
     final double valueSquared = pixelsPerSecond.distanceSquared;
     if (valueSquared > maxValue * maxValue) {
       return Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * maxValue);
@@ -97,10 +97,7 @@ class VelocityEstimate {
     required this.confidence,
     required this.duration,
     required this.offset,
-  }) : assert(pixelsPerSecond != null),
-       assert(confidence != null),
-       assert(duration != null),
-       assert(offset != null);
+  });
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
@@ -124,9 +121,7 @@ class VelocityEstimate {
 }
 
 class _PointAtTime {
-  const _PointAtTime(this.point, this.time)
-    : assert(point != null),
-      assert(time != null);
+  const _PointAtTime(this.point, this.time);
 
   final Duration time;
   final Offset point;

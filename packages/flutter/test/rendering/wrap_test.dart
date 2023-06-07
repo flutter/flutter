@@ -210,16 +210,14 @@ void main() {
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final RenderWrap wrap;
-      switch(clip){
+      switch (clip){
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200], clipBehavior: clip!);
-          break;
         case null:
           wrap = RenderWrap(textDirection: TextDirection.ltr, children: <RenderBox>[box200x200]);
-          break;
       }
       layout(wrap, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       context.paintChild(wrap, Offset.zero);

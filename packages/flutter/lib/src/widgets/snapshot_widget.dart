@@ -141,7 +141,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     return _RenderSnapshotWidget(
       controller: controller,
       mode: mode,
-      devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
+      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
       painter: painter,
       autoresize: autoresize,
     );
@@ -153,7 +153,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
     (renderObject as _RenderSnapshotWidget)
       ..controller = controller
       ..mode = mode
-      ..devicePixelRatio = MediaQuery.of(context).devicePixelRatio
+      ..devicePixelRatio = MediaQuery.devicePixelRatioOf(context)
       ..painter = painter
       ..autoresize = autoresize;
   }

@@ -31,5 +31,6 @@
   "selectAllButtonLabel": "Vybrat vše",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
-  "searchTextFieldPlaceholderLabel": "Hledat"
+  "searchTextFieldPlaceholderLabel": "Hledat",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

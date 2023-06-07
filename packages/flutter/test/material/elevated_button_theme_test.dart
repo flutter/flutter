@@ -6,6 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('ElevatedButtonThemeData lerp special cases', () {
+    expect(ElevatedButtonThemeData.lerp(null, null, 0), null);
+    const ElevatedButtonThemeData data = ElevatedButtonThemeData();
+    expect(identical(ElevatedButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   testWidgets('Passing no ElevatedButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(

@@ -170,7 +170,7 @@ Future<void> main() async {
         '''
 dependencies:
   url_launcher: 6.0.20
-  android_alarm_manager: 0.4.5+11
+  android_alarm_manager: 2.0.2
   google_sign_in_ios: 5.5.0
   $dartPluginName:
     path: ../$dartPluginName

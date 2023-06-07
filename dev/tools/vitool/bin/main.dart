@@ -80,7 +80,7 @@ void main(List<String> args) {
   }
 
   if (argResults.wasParsed('part-of')) {
-    generatedSb.write('part of ${argResults['part-of']};\n');
+    generatedSb.write('part of ${argResults['part-of']}; // ignore: use_string_in_part_of_directives\n');
   }
 
   final Animation animation = Animation.fromFrameData(frames);
