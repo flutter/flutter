@@ -273,14 +273,13 @@ final class _Float64ListChain {
   /// This getter is not optimized to be fast. It is assumed that when metrics
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
-  Iterable<double> get elements sync* {
+  List<double> get elements {
+    final List<double> result = <double>[];
     for (int i = 0; i < _pointer; i++) {
-      yield _slice[i];
+      result.add(_slice[i]);
     }
-
-    for (final Float64List slice in _chain) {
-      yield* slice;
-    }
+    _chain.forEach(result.addAll);
+    return result;
   }
 }
 
@@ -312,14 +311,17 @@ final class _StringListChain {
   /// This getter is not optimized to be fast. It is assumed that when metrics
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
-  Iterable<String> get elements sync* {
+  List<String> get elements {
+    final List<String> result = <String>[];
     for (int i = 0; i < _pointer; i++) {
-      yield _slice[i]!;
+      result.add(_slice[i]!);
     }
-
     for (final List<String?> slice in _chain) {
-      yield* slice.whereType<String>();
+      for (final String? element in slice) {
+        result.add(element!);
+      }
     }
+    return result;
   }
 }
 
@@ -348,9 +350,9 @@ final class _BlockBuffer {
 
     final List<TimedBlock> result = <TimedBlock>[];
     final int length = _finishes.length;
-    final List<double> starts = _starts.elements.toList();
-    final List<double> finishes = _finishes.elements.toList();
-    final List<String> names = _names.elements.toList();
+    final List<double> starts = _starts.elements;
+    final List<double> finishes = _finishes.elements;
+    final List<String> names = _names.elements;
 
     assert(starts.length == length);
     assert(finishes.length == length);
