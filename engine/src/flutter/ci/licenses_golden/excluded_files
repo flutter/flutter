@@ -1657,6 +1657,7 @@
 ../../../third_party/dart/runtime/vm/debugger_api_impl_test.cc
 ../../../third_party/dart/runtime/vm/debugger_api_impl_test.h
 ../../../third_party/dart/runtime/vm/exceptions_test.cc
+../../../third_party/dart/runtime/vm/ffi_callback_metadata_test.cc
 ../../../third_party/dart/runtime/vm/fixed_cache_test.cc
 ../../../third_party/dart/runtime/vm/flags_test.cc
 ../../../third_party/dart/runtime/vm/growable_array_test.cc
