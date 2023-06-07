@@ -26,6 +26,16 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// individual state transitions ([onResume], [onInactive], etc.) are also
 /// called if the state transition they represent occurs.
 ///
+/// State changes will occur in accordance with the state machine described by
+/// this diagram:
+///
+/// ![Diagram of the application lifecycle defined by the AppLifecycleState enum](
+/// https://flutter.github.io/assets-for-api-docs/assets/dart-ui/app_lifecycle.png)
+///
+/// The initial state of the state machine is the [AppLifecycleState.detached]
+/// state, and the arrows describe valid state transitions. Transitions in blue
+/// are transitions that only happen on iOS and Android.
+///
 /// {@tool dartpad}
 /// This example shows how an application can listen to changes in the
 /// application state.
