@@ -110,6 +110,7 @@ class GfxExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void SubmitFrame(GrDirectContext* context,
+                   const std::shared_ptr<impeller::AiksContext>& aiks_context,
                    std::unique_ptr<flutter::SurfaceFrame> frame) override;
 
   // |ExternalViewEmbedder|
