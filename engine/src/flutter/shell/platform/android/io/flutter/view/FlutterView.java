@@ -48,7 +48,6 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
-import io.flutter.embedding.engine.systemchannels.KeyboardChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -60,7 +59,6 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel;
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.editing.TextInputPlugin;
-import io.flutter.plugin.keyboard.KeyboardPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -126,14 +124,12 @@ public class FlutterView extends SurfaceView
   private final FlutterRenderer flutterRenderer;
   private final NavigationChannel navigationChannel;
   private final LifecycleChannel lifecycleChannel;
-  private final KeyboardChannel keyboardChannel;
   private final LocalizationChannel localizationChannel;
   private final PlatformChannel platformChannel;
   private final SettingsChannel settingsChannel;
   private final SystemChannel systemChannel;
   private final InputMethodManager mImm;
   private final TextInputPlugin mTextInputPlugin;
-  private final KeyboardPlugin mKeyboardPlugin;
   private final LocalizationPlugin mLocalizationPlugin;
   private final MouseCursorPlugin mMouseCursorPlugin;
   private final KeyboardManager mKeyboardManager;
@@ -217,7 +213,6 @@ public class FlutterView extends SurfaceView
 
     // Create all platform channels
     navigationChannel = new NavigationChannel(dartExecutor);
-    keyboardChannel = new KeyboardChannel(dartExecutor);
     lifecycleChannel = new LifecycleChannel(dartExecutor);
     localizationChannel = new LocalizationChannel(dartExecutor);
     platformChannel = new PlatformChannel(dartExecutor);
@@ -238,9 +233,7 @@ public class FlutterView extends SurfaceView
         mNativeView.getPluginRegistry().getPlatformViewsController();
     mTextInputPlugin =
         new TextInputPlugin(this, new TextInputChannel(dartExecutor), platformViewsController);
-
     mKeyboardManager = new KeyboardManager(this);
-    mKeyboardPlugin = new KeyboardPlugin(mKeyboardManager, keyboardChannel);
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       mMouseCursorPlugin = new MouseCursorPlugin(this, new MouseCursorChannel(dartExecutor));

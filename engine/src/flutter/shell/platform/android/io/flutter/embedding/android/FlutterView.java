@@ -62,7 +62,6 @@ import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.editing.SpellCheckPlugin;
 import io.flutter.plugin.editing.TextInputPlugin;
-import io.flutter.plugin.keyboard.KeyboardPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
@@ -131,7 +130,6 @@ public class FlutterView extends FrameLayout
   @Nullable private MouseCursorPlugin mouseCursorPlugin;
   @Nullable private TextInputPlugin textInputPlugin;
   @Nullable private SpellCheckPlugin spellCheckPlugin;
-  @Nullable private KeyboardPlugin keyboardPlugin;
   @Nullable private LocalizationPlugin localizationPlugin;
   @Nullable private KeyboardManager keyboardManager;
   @Nullable private AndroidTouchProcessor androidTouchProcessor;
@@ -1179,8 +1177,6 @@ public class FlutterView extends FrameLayout
     localizationPlugin = this.flutterEngine.getLocalizationPlugin();
 
     keyboardManager = new KeyboardManager(this);
-    keyboardPlugin = new KeyboardPlugin(keyboardManager, this.flutterEngine.getKeyboardChannel());
-
     androidTouchProcessor =
         new AndroidTouchProcessor(this.flutterEngine.getRenderer(), /*trackMotionEvents=*/ false);
     accessibilityBridge =
@@ -1277,11 +1273,9 @@ public class FlutterView extends FrameLayout
     if (spellCheckPlugin != null) {
       spellCheckPlugin.destroy();
     }
+
     if (mouseCursorPlugin != null) {
       mouseCursorPlugin.destroy();
-    }
-    if (keyboardPlugin != null) {
-      keyboardPlugin.destroy();
     }
 
     // Instruct our FlutterRenderer that we are no longer interested in being its RenderSurface.

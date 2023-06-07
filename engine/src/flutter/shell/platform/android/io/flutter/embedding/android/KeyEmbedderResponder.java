@@ -11,9 +11,7 @@ import io.flutter.embedding.android.KeyboardMap.PressingGoal;
 import io.flutter.embedding.android.KeyboardMap.TogglingGoal;
 import io.flutter.plugin.common.BinaryMessenger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A {@link KeyboardManager.Responder} of {@link KeyboardManager} that handles events by sending
@@ -406,15 +404,5 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
       synthesizeEvent(true, 0L, 0L, 0L);
       onKeyEventHandledCallback.onKeyEventHandled(true);
     }
-  }
-
-  /**
-   * Returns an unmodifiable view of the pressed state.
-   *
-   * @return A map whose keys are physical keyboard key IDs and values are the corresponding logical
-   *     keyboard key IDs.
-   */
-  public Map<Long, Long> getPressedState() {
-    return Collections.unmodifiableMap(pressingRecords);
   }
 }
