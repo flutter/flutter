@@ -1009,7 +1009,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       actionString = @"TextInputAction.next";
       break;
     case FlutterTextInputActionContinue:
-      actionString = @"TextInputAction.continue";
+      actionString = @"TextInputAction.continueAction";
       break;
     case FlutterTextInputActionJoin:
       actionString = @"TextInputAction.join";
