@@ -43,11 +43,22 @@ TEST(FlutterPlatformViewController, TestRegisterPlatformViewFactoryAndCreate) {
 
   [platformViewController registerViewFactory:factory withId:@"MockPlatformView"];
 
+  NSDictionary* creationArgs = @{
+    @"album" : @"スコットとリバース",
+    @"releaseYear" : @2013,
+    @"artists" : @[ @"Scott Murphy", @"Rivers Cuomo" ],
+    @"playlist" : @[ @"おかしいやつ", @"ほどけていたんだ" ],
+  };
+  NSObject<FlutterMessageCodec>* codec = [factory createArgsCodec];
+  FlutterStandardTypedData* creationArgsData =
+      [FlutterStandardTypedData typedDataWithBytes:[codec encode:creationArgs]];
+
   FlutterMethodCall* methodCall =
       [FlutterMethodCall methodCallWithMethodName:@"create"
                                         arguments:@{
                                           @"id" : @2,
-                                          @"viewType" : @"MockPlatformView"
+                                          @"viewType" : @"MockPlatformView",
+                                          @"params" : creationArgsData,
                                         }];
 
   __block bool success = false;
@@ -58,8 +69,33 @@ TEST(FlutterPlatformViewController, TestRegisterPlatformViewFactoryAndCreate) {
     }
   };
   [platformViewController handleMethodCall:methodCall result:result];
-
   EXPECT_TRUE(success);
+
+  // Verify PlatformView parameters are decoded correctly.
+  TestFlutterPlatformView* view =
+      (TestFlutterPlatformView*)[platformViewController platformViewWithID:2];
+  ASSERT_TRUE(view != nil);
+  ASSERT_TRUE(view.args != nil);
+
+  // Verify string type.
+  NSString* album = [view.args objectForKey:@"album"];
+  EXPECT_TRUE([album isEqualToString:@"スコットとリバース"]);
+
+  // Verify int type.
+  NSNumber* releaseYear = [view.args objectForKey:@"releaseYear"];
+  EXPECT_EQ(releaseYear.intValue, 2013);
+
+  // Verify list/array types.
+  NSArray* artists = [view.args objectForKey:@"artists"];
+  ASSERT_TRUE(artists != nil);
+  ASSERT_EQ(artists.count, 2ul);
+  EXPECT_TRUE([artists[0] isEqualToString:@"Scott Murphy"]);
+  EXPECT_TRUE([artists[1] isEqualToString:@"Rivers Cuomo"]);
+
+  NSArray* playlist = [view.args objectForKey:@"playlist"];
+  ASSERT_EQ(playlist.count, 2ul);
+  EXPECT_TRUE([playlist[0] isEqualToString:@"おかしいやつ"]);
+  EXPECT_TRUE([playlist[1] isEqualToString:@"ほどけていたんだ"]);
 }
 
 TEST(FlutterPlatformViewController, TestCreateAndDispose) {
