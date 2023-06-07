@@ -4,10 +4,13 @@
 
 # See https://github.com/actions/labeler/blob/main/README.md for docs.
 'a: accessibility':
+  - '**/accessibility/*'
   - '**/*accessibility*'
+  - '**/semantics/*'
   - '**/*semantics*'
 
 'a: animation':
+  - '**/animation/*'
   - '**/*animation*'
 
 'a: internationalization':
@@ -20,6 +23,7 @@
   - packages/flutter_test/**/*
 
 'a: text input':
+  - '**/text/*'
   - '**/*text*'
 
 'd: api docs':
@@ -35,25 +39,34 @@ engine:
   - bin/internal/engine.version
 
 'f: cupertino':
+  - '**/cupertino/*'
   - '**/*cupertino*'
 
 'f: focus':
+  - '**/focus/*'
   - '**/*focus*'
 
 'f: gestures':
+  - '**/gestures/*'
   - '**/*gestures*'
 
 'f: material design':
+  - '**/material/*'
   - '**/*material*'
 
 'f: routes':
+  - '**/navigator/*'
   - '**/*navigator*'
+  - '**/route/*'
   - '**/*route*'
 
 'f: scrolling':
   - '**/*scroll*'
+  - '**/scroll/*'
   - '**/*sliver*'
+  - '**/sliver/*'
   - '**/*viewport*'
+  - '**/viewport/*'
 
 framework:
   - packages/flutter/**/*
