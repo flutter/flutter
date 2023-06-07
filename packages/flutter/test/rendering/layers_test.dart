@@ -899,8 +899,8 @@ void main() {
       expect(() => layer.markNeedsAddToScene(), throwsAssertionError);
       expect(() => layer.debugMarkClean(), throwsAssertionError);
       expect(() => layer.updateSubtreeNeedsAddToScene(), throwsAssertionError);
-      expect(() => layer.dropChild(ContainerLayer()), throwsAssertionError);
-      expect(() => layer.adoptChild(ContainerLayer()), throwsAssertionError);
+      expect(() => (layer as ContainerLayer).dropChild(ContainerLayer()), throwsAssertionError);
+      expect(() => (layer as ContainerLayer).adoptChild(ContainerLayer()), throwsAssertionError);
       expect(() => (layer as ContainerLayer).append(ContainerLayer()), throwsAssertionError);
       expect(() => layer.engineLayer = null, throwsAssertionError);
       compositedB1 = true;
