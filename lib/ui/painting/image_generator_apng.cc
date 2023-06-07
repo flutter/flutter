@@ -156,51 +156,58 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
 
   FML_DCHECK(frame_info.bytesPerPixel() == sizeof(Pixel));
 
-  for (int y = 0; y < frame_info.height(); y++) {
-    auto src_row = frame.pixels.data() + y * frame_row_bytes;
-    auto dst_row = static_cast<uint8_t*>(pixels) +
-                   (y + frame.y_offset) * row_bytes +
-                   frame.x_offset * frame_info.bytesPerPixel();
+  bool result = true;
 
-    switch (frame.frame_info->blend_mode) {
-      case SkCodecAnimation::Blend::kSrcOver: {
-        for (int x = 0; x < frame_info.width(); x++) {
-          auto x_offset_bytes = x * frame_info.bytesPerPixel();
+  if (frame.frame_info->blend_mode == SkCodecAnimation::Blend::kSrc) {
+    SkPixmap src_pixmap(frame_info, frame.pixels.data(), frame_row_bytes);
+    uint8_t* dst_pixels = static_cast<uint8_t*>(pixels) +
+                          frame.y_offset * row_bytes +
+                          frame.x_offset * frame_info.bytesPerPixel();
+    result = src_pixmap.readPixels(info, dst_pixels, row_bytes);
+    if (!result) {
+      FML_DLOG(ERROR) << "Failed to copy pixels at index " << image_index
+                      << " (frame index: " << frame_index << ") of APNG.";
+    }
+  } else if (frame.frame_info->blend_mode ==
+             SkCodecAnimation::Blend::kSrcOver) {
+    for (int y = 0; y < frame_info.height(); y++) {
+      auto src_row = frame.pixels.data() + y * frame_row_bytes;
+      auto dst_row = static_cast<uint8_t*>(pixels) +
+                     (y + frame.y_offset) * row_bytes +
+                     frame.x_offset * frame_info.bytesPerPixel();
 
-          Pixel src = *reinterpret_cast<Pixel*>(src_row + x_offset_bytes);
-          Pixel* dst_p = reinterpret_cast<Pixel*>(dst_row + x_offset_bytes);
-          Pixel dst = *dst_p;
+      for (int x = 0; x < frame_info.width(); x++) {
+        auto x_offset_bytes = x * frame_info.bytesPerPixel();
 
-          // Ensure both colors are premultiplied for the blending operation.
-          if (info.alphaType() == kUnpremul_SkAlphaType) {
-            dst.Premultiply();
-          }
-          if (frame_info.alphaType() == kUnpremul_SkAlphaType) {
-            src.Premultiply();
-          }
+        Pixel src = *reinterpret_cast<Pixel*>(src_row + x_offset_bytes);
+        Pixel* dst_p = reinterpret_cast<Pixel*>(dst_row + x_offset_bytes);
+        Pixel dst = *dst_p;
 
-          for (int i = 0; i < 4; i++) {
-            dst.channel[i] = src.channel[i] +
-                             dst.channel[i] * (0xFF - src.GetAlpha()) / 0xFF;
-          }
-
-          // The final color is premultiplied. Unpremultiply to match the
-          // backdrop surface if necessary.
-          if (info.alphaType() == kUnpremul_SkAlphaType) {
-            dst.Unpremultiply();
-          }
-
-          *dst_p = dst;
+        // Ensure both colors are premultiplied for the blending operation.
+        if (info.alphaType() == kUnpremul_SkAlphaType) {
+          dst.Premultiply();
         }
-        break;
+        if (frame_info.alphaType() == kUnpremul_SkAlphaType) {
+          src.Premultiply();
+        }
+
+        for (int i = 0; i < 4; i++) {
+          dst.channel[i] =
+              src.channel[i] + dst.channel[i] * (0xFF - src.GetAlpha()) / 0xFF;
+        }
+
+        // The final color is premultiplied. Unpremultiply to match the
+        // backdrop surface if necessary.
+        if (info.alphaType() == kUnpremul_SkAlphaType) {
+          dst.Unpremultiply();
+        }
+
+        *dst_p = dst;
       }
-      case SkCodecAnimation::Blend::kSrc:
-        memcpy(dst_row, src_row, frame_row_bytes);
-        break;
     }
   }
 
-  return true;
+  return result;
 }
 
 std::unique_ptr<ImageGenerator> APNGImageGenerator::MakeFromData(
