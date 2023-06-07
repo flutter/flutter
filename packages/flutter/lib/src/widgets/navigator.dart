@@ -295,7 +295,6 @@ abstract class Route<T> {
   ///    mechanism.
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
-  // TODO(justinmc): Update all of the versions in these deprecated annotations.
   @Deprecated(
     'Use popEnabled instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',

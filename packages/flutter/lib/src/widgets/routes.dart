@@ -1530,6 +1530,23 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return super.willPop();
   }
 
+  /// Returns [RoutePopDisposition.doNotPop] if any of the [PopScope] widgets
+  /// registered with [registerPopScope] have [PopScope.popEnabled] set to
+  /// false.
+  ///
+  /// Typically this method is not overridden because applications usually
+  /// don't create modal routes directly, they use higher level primitives
+  /// like [showDialog]. The scoped [PopScope] list makes it possible
+  /// for ModalRoute descendants to collectively define the value of
+  /// [popEnabled].
+  ///
+  /// See also:
+  ///
+  ///  * [Form], which provides an `onPopped` callback that is similar.
+  ///  * [registerPopScope], which adds a [PopScope] to the list this method
+  ///    checks.
+  ///  * [unregisterPopScope], which removes a [PopScope] from the list this
+  ///    method checks.
   @override
   RoutePopDisposition popEnabled() {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
@@ -1657,11 +1674,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _willPopCallbacks.remove(callback);
   }
 
-  /// Registers the existence of a PopScope widget in the route.
+  /// Registers the existence of a [PopScope] widget in the route.
   ///
-  /// PopScope widgets registered in this way will have their
-  /// [PopScope.onPopped] callbacks called when a route is popped, and they will
-  /// also be able to block pop operations with [PopScope.popEnabled].
+  /// [PopScope] widgets registered in this way will have their
+  /// [PopScope.onPopped] callbacks called when a route is popped or a pop is
+  /// attempted. They will also be able to block pop operations with
+  /// [PopScope.popEnabled].
   ///
   /// See also:
   ///
