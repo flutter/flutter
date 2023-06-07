@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'android/android_app_link_settings.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
@@ -42,6 +43,7 @@ const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
 const String kFlutterGetIOSBuildOptionsServiceName = 'flutterGetIOSBuildOptions';
 const String kFlutterGetAndroidBuildVariantsServiceName = 'flutterGetAndroidBuildVariants';
 const String kFlutterGetIOSUniversalLinkSettingsServiceName = 'flutterGetIOSUniversalLinkSettings';
+const String kFlutterGetAndroidAppLinkSettingsName = 'flutterGetAndroidAppLinkSettings';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -364,6 +366,21 @@ Future<vm_service.VmService> setUpVmService({
     });
     registrationRequests.add(
       vmService.registerService(kFlutterGetIOSUniversalLinkSettingsServiceName, kFlutterToolAlias),
+    );
+
+    vmService.registerServiceCallback(kFlutterGetAndroidAppLinkSettingsName, (Map<String, Object?> params) async {
+      final String variant = params['variant']! as String;
+      final AndroidAppLinkSettings settings = await flutterProject.android.getAppLinksSettings(variant: variant);
+      return <String, Object>{
+        'result': <String, Object>{
+          kResultType: kResultTypeSuccess,
+          'applicationId': settings.applicationId,
+          'domains': settings.domains,
+        },
+      };
+    });
+    registrationRequests.add(
+      vmService.registerService(kFlutterGetAndroidAppLinkSettingsName, kFlutterToolAlias),
     );
   }
 
