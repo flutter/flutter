@@ -1444,23 +1444,15 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   }
 
   void _configureErrorListener(ImageStreamCompleter completer, ResizeImageKey key) {
-    late final ImageStreamListener listener;
-    listener = ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {
-        completer.removePeekListener(listener);
-      },
-      onError: (Object exception, StackTrace? stackTrace) {
-        completer.removePeekListener(listener);
-        // The microtask is scheduled because of the same reason as NetworkImage:
-        // Depending on where the exception was thrown, the image cache may not
-        // have had a chance to track the key in the cache at all.
-        // Schedule a microtask to give the cache a chance to add the key.
-        scheduleMicrotask(() {
-          PaintingBinding.instance.imageCache.evict(key);
-        });
-      }
-    );
-    completer.addPeekListener(listener);
+    completer.addEphemeralErrorListener((Object exception, StackTrace? stackTrace) {
+      // The microtask is scheduled because of the same reason as NetworkImage:
+      // Depending on where the exception was thrown, the image cache may not
+      // have had a chance to track the key in the cache at all.
+      // Schedule a microtask to give the cache a chance to add the key.
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
+    });
   }
 
   @override
