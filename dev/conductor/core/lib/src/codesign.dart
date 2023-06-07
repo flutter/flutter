@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Don't merge this PR. Using this PR to test the create check run functionality
+// Don't merge this PR. Using this PR to test create check run functionality
 // of Frob. context: cl/535324405.
 import 'dart:io' as io;
 
