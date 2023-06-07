@@ -1137,7 +1137,7 @@ CreateEmbedderRenderTarget(
     }
     case kFlutterBackingStoreTypeMetal: {
       if (enable_impeller) {
-        auto impeller_target = MakeRenderTargetFromBackingStoreImpeller(
+        render_target = MakeRenderTargetFromBackingStoreImpeller(
             backing_store, collect_callback.Release(), aiks_context, config,
             &backing_store.metal);
       } else {
