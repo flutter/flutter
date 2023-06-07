@@ -6,12 +6,18 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoContext, g_object_unref)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoLayout, g_object_unref)
+
+typedef bool (*FlTextBoundaryCallback)(const PangoLogAttr* attr);
+
 struct _FlAccessibleTextField {
   FlAccessibleNode parent_instance;
 
   gint selection_base;
   gint selection_extent;
   GtkEntryBuffer* buffer;
+  FlutterTextDirection text_direction;
 };
 
 static void fl_accessible_text_iface_init(AtkTextIface* iface);
@@ -34,6 +40,145 @@ static gchar* get_substring(FlAccessibleTextField* self,
     end = g_utf8_strlen(value, -1);
   }
   return g_utf8_substring(value, start, end);
+}
+
+static PangoContext* get_pango_context(FlAccessibleTextField* self) {
+  PangoFontMap* font_map = pango_cairo_font_map_get_default();
+  PangoContext* context = pango_font_map_create_context(font_map);
+  pango_context_set_base_dir(context,
+                             self->text_direction == kFlutterTextDirectionRTL
+                                 ? PANGO_DIRECTION_RTL
+                                 : PANGO_DIRECTION_LTR);
+  return context;
+}
+
+static PangoLayout* create_pango_layout(FlAccessibleTextField* self) {
+  g_autoptr(PangoContext) context = get_pango_context(self);
+  PangoLayout* layout = pango_layout_new(context);
+  pango_layout_set_text(layout, gtk_entry_buffer_get_text(self->buffer), -1);
+  return layout;
+}
+
+static gchar* get_string_at_offset(FlAccessibleTextField* self,
+                                   gint start,
+                                   gint end,
+                                   FlTextBoundaryCallback is_start,
+                                   FlTextBoundaryCallback is_end,
+                                   gint* start_offset,
+                                   gint* end_offset) {
+  g_autoptr(PangoLayout) layout = create_pango_layout(self);
+
+  gint n_attrs = 0;
+  const PangoLogAttr* attrs =
+      pango_layout_get_log_attrs_readonly(layout, &n_attrs);
+
+  while (start > 0 && !is_start(&attrs[start])) {
+    --start;
+  }
+  if (start_offset != nullptr) {
+    *start_offset = start;
+  }
+
+  while (end < n_attrs && !is_end(&attrs[end])) {
+    ++end;
+  }
+  if (end_offset != nullptr) {
+    *end_offset = end;
+  }
+
+  return get_substring(self, start, end);
+}
+
+static gchar* get_char_at_offset(FlAccessibleTextField* self,
+                                 gint offset,
+                                 gint* start_offset,
+                                 gint* end_offset) {
+  return get_string_at_offset(
+      self, offset, offset + 1,
+      [](const PangoLogAttr* attr) -> bool { return attr->is_char_break; },
+      [](const PangoLogAttr* attr) -> bool { return attr->is_char_break; },
+      start_offset, end_offset);
+}
+
+static gchar* get_word_at_offset(FlAccessibleTextField* self,
+                                 gint offset,
+                                 gint* start_offset,
+                                 gint* end_offset) {
+  return get_string_at_offset(
+      self, offset, offset,
+      [](const PangoLogAttr* attr) -> bool { return attr->is_word_start; },
+      [](const PangoLogAttr* attr) -> bool { return attr->is_word_end; },
+      start_offset, end_offset);
+}
+
+static gchar* get_sentence_at_offset(FlAccessibleTextField* self,
+                                     gint offset,
+                                     gint* start_offset,
+                                     gint* end_offset) {
+  return get_string_at_offset(
+      self, offset, offset,
+      [](const PangoLogAttr* attr) -> bool { return attr->is_sentence_start; },
+      [](const PangoLogAttr* attr) -> bool { return attr->is_sentence_end; },
+      start_offset, end_offset);
+}
+
+static gchar* get_line_at_offset(FlAccessibleTextField* self,
+                                 gint offset,
+                                 gint* start_offset,
+                                 gint* end_offset) {
+  g_autoptr(PangoLayout) layout = create_pango_layout(self);
+
+  GSList* lines = pango_layout_get_lines_readonly(layout);
+  while (lines != nullptr) {
+    PangoLayoutLine* line = static_cast<PangoLayoutLine*>(lines->data);
+    if (offset >= line->start_index &&
+        offset <= line->start_index + line->length) {
+      if (start_offset != nullptr) {
+        *start_offset = line->start_index;
+      }
+      if (end_offset != nullptr) {
+        *end_offset = line->start_index + line->length;
+      }
+      return get_substring(self, line->start_index,
+                           line->start_index + line->length);
+    }
+    lines = lines->next;
+  }
+
+  return nullptr;
+}
+
+static gchar* get_paragraph_at_offset(FlAccessibleTextField* self,
+                                      gint offset,
+                                      gint* start_offset,
+                                      gint* end_offset) {
+  g_autoptr(PangoLayout) layout = create_pango_layout(self);
+
+  PangoLayoutLine* start = nullptr;
+  PangoLayoutLine* end = nullptr;
+  gint n_lines = pango_layout_get_line_count(layout);
+  for (gint i = 0; i < n_lines; ++i) {
+    PangoLayoutLine* line = pango_layout_get_line(layout, i);
+    if (line->is_paragraph_start) {
+      end = line;
+    }
+    if (start != nullptr && end != nullptr && offset >= start->start_index &&
+        offset <= end->start_index + end->length) {
+      if (start_offset != nullptr) {
+        *start_offset = start->start_index;
+      }
+      if (end_offset != nullptr) {
+        *end_offset = end->start_index + end->length;
+      }
+      return get_substring(self, start->start_index,
+                           end->start_index + end->length);
+    }
+    if (line->is_paragraph_start) {
+      start = line;
+    }
+  }
+
+  return nullptr;
 }
 
 static void perform_set_text_action(FlAccessibleTextField* self,
@@ -109,6 +254,16 @@ static void fl_accessible_text_field_set_text_selection(FlAccessibleNode* node,
   }
 }
 
+// Implements FlAccessibleNode::set_text_direction.
+static void fl_accessible_text_field_set_text_direction(
+    FlAccessibleNode* node,
+    FlutterTextDirection direction) {
+  g_return_if_fail(FL_IS_ACCESSIBLE_TEXT_FIELD(node));
+  FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(node);
+
+  self->text_direction = direction;
+}
+
 // Overrides FlAccessibleNode::perform_action.
 void fl_accessible_text_field_perform_action(FlAccessibleNode* self,
                                              FlutterSemanticsAction action,
@@ -152,6 +307,65 @@ static gchar* fl_accessible_text_field_get_text(AtkText* text,
   FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(text);
 
   return get_substring(self, start_offset, end_offset);
+}
+
+// Implements AtkText::get_string_at_offset.
+static gchar* fl_accessible_text_field_get_string_at_offset(
+    AtkText* text,
+    gint offset,
+    AtkTextGranularity granularity,
+    gint* start_offset,
+    gint* end_offset) {
+  g_return_val_if_fail(FL_IS_ACCESSIBLE_TEXT_FIELD(text), nullptr);
+  FlAccessibleTextField* self = FL_ACCESSIBLE_TEXT_FIELD(text);
+
+  switch (granularity) {
+    case ATK_TEXT_GRANULARITY_CHAR:
+      return get_char_at_offset(self, offset, start_offset, end_offset);
+    case ATK_TEXT_GRANULARITY_WORD:
+      return get_word_at_offset(self, offset, start_offset, end_offset);
+    case ATK_TEXT_GRANULARITY_SENTENCE:
+      return get_sentence_at_offset(self, offset, start_offset, end_offset);
+    case ATK_TEXT_GRANULARITY_LINE:
+      return get_line_at_offset(self, offset, start_offset, end_offset);
+    case ATK_TEXT_GRANULARITY_PARAGRAPH:
+      return get_paragraph_at_offset(self, offset, start_offset, end_offset);
+    default:
+      return nullptr;
+  }
+}
+
+// Implements AtkText::get_text_at_offset (deprecated but still commonly used).
+static gchar* fl_accessible_text_field_get_text_at_offset(
+    AtkText* text,
+    gint offset,
+    AtkTextBoundary boundary_type,
+    gint* start_offset,
+    gint* end_offset) {
+  switch (boundary_type) {
+    case ATK_TEXT_BOUNDARY_CHAR:
+      return fl_accessible_text_field_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_CHAR, start_offset, end_offset);
+      break;
+    case ATK_TEXT_BOUNDARY_WORD_START:
+    case ATK_TEXT_BOUNDARY_WORD_END:
+      return fl_accessible_text_field_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_WORD, start_offset, end_offset);
+      break;
+    case ATK_TEXT_BOUNDARY_SENTENCE_START:
+    case ATK_TEXT_BOUNDARY_SENTENCE_END:
+      return fl_accessible_text_field_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_SENTENCE, start_offset,
+          end_offset);
+      break;
+    case ATK_TEXT_BOUNDARY_LINE_START:
+    case ATK_TEXT_BOUNDARY_LINE_END:
+      return fl_accessible_text_field_get_string_at_offset(
+          text, offset, ATK_TEXT_GRANULARITY_LINE, start_offset, end_offset);
+      break;
+    default:
+      return nullptr;
+  }
 }
 
 // Implements AtkText::get_caret_offset.
@@ -338,6 +552,8 @@ static void fl_accessible_text_field_class_init(
       fl_accessible_text_field_set_value;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_text_selection =
       fl_accessible_text_field_set_text_selection;
+  FL_ACCESSIBLE_NODE_CLASS(klass)->set_text_direction =
+      fl_accessible_text_field_set_text_direction;
   FL_ACCESSIBLE_NODE_CLASS(klass)->perform_action =
       fl_accessible_text_field_perform_action;
 }
@@ -345,7 +561,8 @@ static void fl_accessible_text_field_class_init(
 static void fl_accessible_text_iface_init(AtkTextIface* iface) {
   iface->get_character_count = fl_accessible_text_field_get_character_count;
   iface->get_text = fl_accessible_text_field_get_text;
-  // TODO(jpnurmi): get_text_at/before/after_offset
+  iface->get_text_at_offset = fl_accessible_text_field_get_text_at_offset;
+  iface->get_string_at_offset = fl_accessible_text_field_get_string_at_offset;
 
   iface->get_caret_offset = fl_accessible_text_field_get_caret_offset;
   iface->set_caret_offset = fl_accessible_text_field_set_caret_offset;
