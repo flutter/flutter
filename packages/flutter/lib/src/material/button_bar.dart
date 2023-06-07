@@ -21,21 +21,22 @@ import 'dialog.dart';
 /// ButtonBar(
 ///   alignment: MainAxisAlignment.spaceEvenly,
 ///   children: <Widget>[
-///     TextButton( child: Text('Button 1'), onPressed: () {}),
-///     TextButton( child: Text('Button 2'), onPressed: () {}),
-///     TextButton( child: Text('Button 3'), onPressed: () {}),
+///     TextButton( child: const Text('Button 1'), onPressed: () {}),
+///     TextButton( child: const Text('Button 2'), onPressed: () {}),
+///     TextButton( child: const Text('Button 3'), onPressed: () {}),
 ///   ],
-/// )
-///
+/// );
+/// ```
+/// ```dart
 /// // After
 /// OverflowBar(
 ///   alignment: MainAxisAlignment.spaceEvenly,
 ///   children: <Widget>[
-///     TextButton( child: Text('Button 1'), onPressed: () {}),
-///     TextButton( child: Text('Button 2'), onPressed: () {}),
-///     TextButton( child: Text('Button 3'), onPressed: () {}),
+///     TextButton( child: const Text('Button 1'), onPressed: () {}),
+///     TextButton( child: const Text('Button 2'), onPressed: () {}),
+///     TextButton( child: const Text('Button 3'), onPressed: () {}),
 ///   ],
-/// )
+/// );
 /// ```
 ///
 /// See the [OverflowBar] documentation for more details.
