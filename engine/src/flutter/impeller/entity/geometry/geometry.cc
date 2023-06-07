@@ -56,9 +56,9 @@ ComputeUVGeometryCPU(
        &texture_origin](SolidFillVertexShader::PerVertexData old_vtx) {
         TextureFillVertexShader::PerVertexData data;
         data.position = old_vtx.position;
-        auto coverage_coords =
-            (old_vtx.position - texture_origin) / texture_coverage;
-        data.texture_coords = effect_transform * coverage_coords;
+        data.texture_coords = effect_transform *
+                              (old_vtx.position - texture_origin) /
+                              texture_coverage;
         vertex_builder.AppendVertex(data);
       });
   return vertex_builder;
@@ -76,8 +76,8 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
   auto points = source_rect.GetPoints();
   for (auto i = 0u, j = 0u; i < 8; i += 2, j++) {
     data[i] = points[j];
-    data[i + 1] = effect_transform * ((points[j] - texture_coverage.origin) /
-                                      texture_coverage.size);
+    data[i + 1] = effect_transform * (points[j] - texture_coverage.origin) /
+                  texture_coverage.size;
   }
 
   return GeometryResult{

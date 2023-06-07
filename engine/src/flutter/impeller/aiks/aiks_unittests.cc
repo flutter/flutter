@@ -147,7 +147,9 @@ bool GenerateMipmap(const std::shared_ptr<Context>& context,
   return buffer->SubmitCommands();
 }
 
-void CanRenderTiledTexture(AiksTest* aiks_test, Entity::TileMode tile_mode) {
+void CanRenderTiledTexture(AiksTest* aiks_test,
+                           Entity::TileMode tile_mode,
+                           Matrix local_matrix = {}) {
   auto context = aiks_test->GetContext();
   ASSERT_TRUE(context);
   auto texture = aiks_test->CreateTextureForFixture("table_mountain_nx.png",
@@ -158,7 +160,7 @@ void CanRenderTiledTexture(AiksTest* aiks_test, Entity::TileMode tile_mode) {
   canvas.Translate({100.0f, 100.0f, 0});
   Paint paint;
   paint.color_source =
-      ColorSource::MakeImage(texture, tile_mode, tile_mode, {}, {});
+      ColorSource::MakeImage(texture, tile_mode, tile_mode, {}, local_matrix);
   paint.color = Color(1, 1, 1, 1);
   canvas.DrawRect({0, 0, 600, 600}, paint);
 
@@ -197,6 +199,11 @@ TEST_P(AiksTest, CanRenderTiledTextureMirror) {
 
 TEST_P(AiksTest, CanRenderTiledTextureDecal) {
   CanRenderTiledTexture(this, Entity::TileMode::kDecal);
+}
+
+TEST_P(AiksTest, CanRenderTiledTextureClampWithTranslate) {
+  CanRenderTiledTexture(this, Entity::TileMode::kClamp,
+                        Matrix::MakeTranslation({172.f, 172.f, 0.f}));
 }
 
 TEST_P(AiksTest, CanRenderImageRect) {
