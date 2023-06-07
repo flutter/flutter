@@ -7,6 +7,10 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 
 @interface TestFlutterPlatformView : NSView
+
+/// Arguments passed via the params value in the create method call.
+@property(nonatomic, copy) id args;
+
 @end
 
 @interface TestFlutterPlatformViewFactory : NSObject <FlutterPlatformViewFactory>
