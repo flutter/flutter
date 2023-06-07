@@ -27,17 +27,6 @@ import 'restoration_properties.dart';
 import 'routes.dart';
 import 'ticker_provider.dart';
 
-// TODO(justinmc): Find a permanent place for this.
-class NavigationNotification extends Notification {
-  const NavigationNotification({
-    required this.canPop,
-  });
-
-  /// Indicates that the originator of this [Notification] is capable of
-  /// handling a navigation pop.
-  final bool canPop;
-}
-
 // Examples can assume:
 // typedef MyAppHome = Placeholder;
 // typedef MyHomePage = Placeholder;
@@ -98,11 +87,6 @@ typedef PopPageCallback = bool Function(Route<dynamic> route, dynamic result);
 ///
 ///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
 ///    mechanism.
-// TODO(justinmc): addScopedOnPopCallback is gone.
-@Deprecated(
-  'Use addScopedOnPopCallback or PopScope instead. '
-  'This feature was deprecated after v3.9.0-0.0.pre.',
-)
 enum RoutePopDisposition {
   /// Pop the route.
   ///
@@ -311,6 +295,7 @@ abstract class Route<T> {
   ///    mechanism.
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
+  // TODO(justinmc): Update all of the versions in these deprecated annotations.
   @Deprecated(
     'Use popEnabled instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
@@ -319,7 +304,30 @@ abstract class Route<T> {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
 
-  // TODO(justinmc): Document. Probably copy a lot from willPop.
+  /// Returns whether calling [Navigator.maybePop] when this [Route] is current
+  /// ([isCurrent]) should do anything.
+  ///
+  /// [Navigator.maybePop] is usually used instead of [Navigator.pop] to handle
+  /// the system back button, when it hasn't been disabled via
+  /// [SystemNavigator.setFrameworkHandlesBack].
+  ///
+  /// By default, if a [Route] is the first route in the history (i.e., if
+  /// [isFirst]), it reports that pops should be bubbled
+  /// ([RoutePopDisposition.bubble]). This behavior prevents the user from
+  /// popping the first route off the history and being stranded at a blank
+  /// screen; instead, the larger scope is popped (e.g. the application quits,
+  /// so that the user returns to the previous application).
+  ///
+  /// In other cases, the default behavior is to accept the pop
+  /// ([RoutePopDisposition.pop]).
+  ///
+  /// The third possible value is [RoutePopDisposition.doNotPop], which causes
+  /// the pop request to be ignored entirely.
+  ///
+  /// See also:
+  ///
+  ///  * [Form], which provides a [Form.popEnabled] boolean that is similar.
+  ///  * [PopScope], a widget that provides a way to intercept the back button.
   RoutePopDisposition popEnabled() {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
@@ -1434,7 +1442,6 @@ class Navigator extends StatefulWidget {
   const Navigator({
     super.key,
     this.pages = const <Page<dynamic>>[],
-    // TODO(justinmc): Is this something else I need to worry about? It returns a bool.
     this.onPopPage,
     this.initialRoute,
     this.onGenerateInitialRoutes = Navigator.defaultGenerateInitialRoutes,
@@ -3424,7 +3431,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           ? widget.pages.length > 1
           : canPop(),
     );
-    print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. History: $_history');
     notification.dispatch(context);
     return;
   }
@@ -5074,17 +5080,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return true; // there's at least two routes, so we can pop
   }
 
-  /// Consults the current route's [Route.willPop] method, and acts accordingly,
-  /// potentially popping the route as a result; returns whether the pop request
-  /// should be considered handled.
+  /// Consults the current route's [Route.popEnabled] method, and acts
+  /// accordingly, potentially popping the route as a result; returns whether
+  /// the pop request should be considered handled.
   ///
   /// {@macro flutter.widgets.navigator.maybePop}
   ///
   /// See also:
   ///
-  ///  * [Form], which provides an `onWillPop` callback that enables the form
-  ///    to veto a [pop] initiated by the app's back button.
-  ///  * [ModalRoute], which provides a `scopedWillPopCallback` that can be used
+  ///  * [Form], which provides a [Form.popEnabled] boolean that enables the
+  ///    form to prevent any [pop]s initiated by the app's back button.
+  ///  * [ModalRoute], which provides a `scopedOnPopCallback` that can be used
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object?>([ T? result ]) async {
@@ -5115,9 +5121,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       case RoutePopDisposition.bubble:
         return false;
       case RoutePopDisposition.pop:
-        // TODO(justinmc): This will eventually call onPop. Is it better to do
-        // it here? I guess I probably want a direct call to `pop` to also call
-        // onPop though.
         pop(result);
         return true;
       case RoutePopDisposition.doNotPop:
@@ -5418,7 +5421,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return HeroControllerScope.none(
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          print('justin received notification in Navigator. canPop here: ${canPop()}, canPop from notification: ${notification.canPop}');
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification.
           if (notification.canPop || !canPop()) {
@@ -5429,7 +5431,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           const NavigationNotification nextNotification = NavigationNotification(
             canPop: true,
           );
-          print('justin Navigator re-dispatching with canPop true');
           nextNotification.dispatch(context);
           return true;
         },
@@ -5935,4 +5936,16 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   }
 
   static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context);
+}
+
+/// A notification that navigation has taken place.
+class NavigationNotification extends Notification {
+  /// Creates a notification that some navigation has happened.
+  const NavigationNotification({
+    required this.canPop,
+  });
+
+  /// Indicates that the originator of this [Notification] is capable of
+  /// handling a navigation pop.
+  final bool canPop;
 }

@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'pop_scope.dart';
 import 'display_feature_sub_screen.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -22,6 +21,7 @@ import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
+import 'pop_scope.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
@@ -1633,8 +1633,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    that [willPop] checks.
   @Deprecated(
-    // TODO(justinmc): onPopCallback doesn't exist.
-    'Use addScopedOnPopCallback or PopScope instead. '
+    'Use registerPopScope or PopScope instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   void addScopedWillPopCallback(WillPopCallback callback) {
@@ -1650,7 +1649,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [addScopedWillPopCallback], which adds callback to the list
   ///    checked by [willPop].
   @Deprecated(
-    'Use addScopedOnPopCallback or PopScope instead. '
+    'Use registerPopScope or PopScope instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   void removeScopedWillPopCallback(WillPopCallback callback) {
@@ -1739,7 +1738,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [willHandlePopInternally], which reports on another reason why
   ///    a pop might be vetoed.
   @Deprecated(
-    'Use addScopedOnPopCallback or PopScope instead. '
+    'Use popEnabled instead. '
     'This feature was deprecated after v3.9.0-0.0.pre.',
   )
   @protected
