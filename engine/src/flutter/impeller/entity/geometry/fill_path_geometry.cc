@@ -84,9 +84,9 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
     for (auto i = 0u; i < points.size(); i++) {
       VS::PerVertexData data;
       data.position = points[i];
-      auto coverage_coords =
-          (points[i] - texture_coverage.origin) / texture_coverage.size;
-      data.texture_coords = effect_transform * coverage_coords;
+      data.texture_coords = effect_transform *
+                            (points[i] - texture_coverage.origin) /
+                            texture_coverage.size;
       vertex_builder.AppendVertex(data);
     }
     for (auto i = 0u; i < indices.size(); i++) {
@@ -114,9 +114,9 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
           VS::PerVertexData data;
           Point vtx = {vertices[i], vertices[i + 1]};
           data.position = vtx;
-          auto coverage_coords =
-              (vtx - texture_coverage.origin) / texture_coverage.size;
-          data.texture_coords = effect_transform * coverage_coords;
+          data.texture_coords = effect_transform *
+                                (vtx - texture_coverage.origin) /
+                                texture_coverage.size;
           vertex_builder.AppendVertex(data);
         }
         FML_DCHECK(vertex_builder.GetVertexCount() == vertices_count / 2);
