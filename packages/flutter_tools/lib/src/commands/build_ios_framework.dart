@@ -147,7 +147,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       'xcrun',
       'xcodebuild',
       '-create-xcframework',
-      for (Directory framework in frameworks) ...<String>[
+      for (final Directory framework in frameworks) ...<String>[
         '-framework',
         framework.path,
         ...framework.parent

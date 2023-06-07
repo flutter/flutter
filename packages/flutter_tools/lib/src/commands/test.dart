@@ -422,6 +422,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       disablePortPublication: true,
       enableDds: enableDds,
       nullAssertions: boolArg(FlutterOptions.kNullAssertions),
+      usingCISystem: usingCISystem,
     );
 
     Device? integrationTestDevice;

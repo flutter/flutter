@@ -1381,6 +1381,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   DeviceLogReader getLogReader({
     IOSApp? app,
     bool includePastLogs = false,
+    bool usingCISystem = false,
   }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(

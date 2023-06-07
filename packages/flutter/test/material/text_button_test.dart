@@ -608,7 +608,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 1.3),
+            data: const MediaQueryData(textScaleFactor: 1.25),
             child: Center(
               child: TextButton(
                 onPressed: () { },
@@ -620,8 +620,14 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(TextButton)), const Size(71.0, 48.0));
-    expect(tester.getSize(find.byType(Text)), const Size(55.0, 18.0));
+    const Size textButtonSize = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? Size(68.5, 48.0)
+      : Size(69.0, 48.0);
+    const Size textSize = bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? Size(52.5, 18.0)
+      : Size(53.0, 18.0);
+    expect(tester.getSize(find.byType(TextButton)), textButtonSize);
+    expect(tester.getSize(find.byType(Text)), textSize);
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(

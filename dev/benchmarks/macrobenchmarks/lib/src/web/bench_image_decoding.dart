@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
+import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
-import 'package:web/web.dart' as web;
 
 import 'recorder.dart';
 
@@ -45,11 +43,8 @@ class BenchImageDecoding extends RawRecorder {
       return;
     }
     for (final String imageUrl in _imageUrls) {
-      final Future<JSAny?> fetchFuture = web.window.fetch(imageUrl.toJS).toDart;
-      final web.Body image = (await fetchFuture)! as web.Body;
-      final Future<JSAny?> imageFuture = image.arrayBuffer().toDart;
-      final JSArrayBuffer imageBuffer = (await imageFuture)! as JSArrayBuffer;
-      _imageData.add(imageBuffer.toDart.asUint8List());
+      final html.Body image = await html.window.fetch(imageUrl) as html.Body;
+      _imageData.add((await image.arrayBuffer() as ByteBuffer).asUint8List());
     }
   }
 

@@ -368,7 +368,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         notifyListeners();
         didUpdateScrollPositionBy(pixels - oldPixels);
       }
-      if (overscroll != 0.0) {
+      if (overscroll.abs() > precisionErrorTolerance) {
         didOverscrollBy(overscroll);
         return overscroll;
       }

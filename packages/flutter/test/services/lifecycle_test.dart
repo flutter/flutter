@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,5 +21,14 @@ void main() {
     // The lifecycleState should now be the state we passed above,
     // even though no lifecycle event was fired from the platform.
     expect(ServicesBinding.instance.lifecycleState.toString(), equals('AppLifecycleState.paused'));
+  });
+  testWidgets('Handles all of the allowed states of AppLifecycleState', (WidgetTester tester) async {
+    final TestWidgetsFlutterBinding binding = tester.binding;
+    for (final AppLifecycleState state in AppLifecycleState.values) {
+      binding.resetLifecycleState();
+      binding.platformDispatcher.initialLifecycleStateTestValue = state.toString();
+      binding.readTestInitialLifecycleStateFromNativeWindow();
+      expect(ServicesBinding.instance.lifecycleState.toString(), equals(state.toString()));
+    }
   });
 }

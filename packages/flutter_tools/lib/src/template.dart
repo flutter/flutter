@@ -375,3 +375,24 @@ String _escapeKotlinKeywords(String androidIdentifier) {
   ).toList();
   return correctedSegments.join('.');
 }
+
+String escapeYamlString(String value) {
+  final StringBuffer result = StringBuffer();
+  result.write('"');
+  for (final int rune in value.runes) {
+    result.write(
+      switch (rune) {
+        0x00 => r'\0',
+        0x09 => r'\t',
+        0x0A => r'\n',
+        0x0D => r'\r',
+        0x22 => r'\"',
+        0x5C => r'\\',
+        < 0x20 => '\\x${rune.toRadixString(16).padLeft(2, "0")}',
+        _ => String.fromCharCode(rune),
+      }
+    );
+  }
+  result.write('"');
+  return result.toString();
+}
