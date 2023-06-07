@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 #import <OCMock/OCMock.h>
@@ -308,7 +310,7 @@ FLUTTER_ASSERT_ARC
                                 withClient:0]);
 }
 
-- (void)testIngoresSelectionChangeIfSelectionIsDisabled {
+- (void)testIgnoresSelectionChangeIfSelectionIsDisabled {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   __block int updateCount = 0;
   OCMStub([engine flutterTextInputView:inputView updateEditingClient:0 withState:[OCMArg isNotNil]])
@@ -676,6 +678,27 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(callCount, 1);
   XCTAssertFalse(inputView.isSecureTextEntry);
+}
+
+- (void)testInputActionContinueAction {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* testEngine = [[FlutterEngine alloc] init];
+  [testEngine setBinaryMessenger:mockBinaryMessenger];
+  [testEngine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+
+  FlutterTextInputPlugin* inputPlugin =
+      [[FlutterTextInputPlugin alloc] initWithDelegate:(id<FlutterTextInputDelegate>)testEngine];
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:inputPlugin];
+
+  [testEngine flutterTextInputView:inputView
+                     performAction:FlutterTextInputActionContinue
+                        withClient:123];
+
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.performAction"
+                                        arguments:@[ @(123), @"TextInputAction.continueAction" ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
 #pragma mark - TextEditingDelta tests
