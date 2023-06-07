@@ -315,9 +315,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker((Offset position) {
+    _mouseTracker = tracker ?? MouseTracker((int viewId, Offset position) {
       final HitTestResult result = HitTestResult();
-      hitTest(result, position);
+      hitTestInView(result, position, viewId);
       return result;
     });
   }
@@ -523,6 +523,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void hitTestInView(HitTestResult result, Offset position, int viewId) {
+    final RenderView renderView = _viewIdToRenderView[viewId]!;
     assert(viewId == renderView.flutterView.viewId);
     renderView.hitTest(result, position: position);
     super.hitTestInView(result, position, viewId);

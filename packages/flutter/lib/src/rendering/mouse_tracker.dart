@@ -24,7 +24,7 @@ export 'package:flutter/services.dart' show
 ///
 /// It is used by the [MouseTracker] to fetch annotations for the mouse
 /// position.
-typedef MouseTrackerRenderViewHitTest = HitTestResult Function(Offset offset);
+typedef MouseTrackerRenderViewHitTest = HitTestResult Function(int viewId, Offset offset);
 
 // Various states of a connected mouse device used by [MouseTracker].
 class _MouseState {
@@ -253,11 +253,12 @@ class MouseTracker extends ChangeNotifier {
   LinkedHashMap<MouseTrackerAnnotation, Matrix4> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
+    final int viewId = state.latestEvent.viewId;
     if (!_mouseStates.containsKey(device)) {
       return LinkedHashMap<MouseTrackerAnnotation, Matrix4>();
     }
 
-    return _hitTestResultToAnnotations(_renderViewHitTest(globalPosition));
+    return _hitTestResultToAnnotations(_renderViewHitTest(viewId, globalPosition));
   }
 
   // A callback that is called on the update of a device.
@@ -314,7 +315,8 @@ class MouseTracker extends ChangeNotifier {
     if (event is PointerRemovedEvent) {
       result = HitTestResult();
     } else {
-      result = hitTestResult ?? _renderViewHitTest(event.position);
+      final int viewId = event.viewId;
+      result = hitTestResult ?? _renderViewHitTest(viewId, event.position);
     }
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
