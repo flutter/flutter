@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
-    // The lifecycleState is detached initially in tests, since the binding is
-    // already initialized.
     expect(ServicesBinding.instance.lifecycleState, isNull);
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.resetLifecycleState();

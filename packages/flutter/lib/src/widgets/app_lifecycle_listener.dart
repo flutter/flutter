@@ -24,9 +24,7 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 ///
 /// The [onStateChange] callback is called for each state change, and the
 /// individual state transitions ([onResume], [onInactive], etc.) are also
-/// called if the state transition they represent occurs. Both [onStateChange]
-/// and the specific state transition callback will be called when the state
-/// changes.
+/// called if the state transition they represent occurs.
 ///
 /// {@tool dartpad} This example shows how an application can listen to changes
 /// in the application state.

@@ -51,7 +51,7 @@ class _AppLifecycleDisplayState extends State<AppLifecycleDisplay> {
       // specific state transitions.
       onStateChange: _handleStateChange,
     );
-    if (_state != null && SchedulerBinding.instance.lifecycleState != null) {
+    if (_state != null) {
       _states.add(_state!.name);
     }
   }
