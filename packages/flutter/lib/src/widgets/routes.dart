@@ -1679,7 +1679,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// [PopScope] widgets registered in this way will have their
   /// [PopScope.onPopped] callbacks called when a route is popped or a pop is
   /// attempted. They will also be able to block pop operations with
-  /// [PopScope.popEnabled].
+  /// [PopScope.popEnabled] through this route's [popEnabled] method.
   ///
   /// See also:
   ///
@@ -1689,53 +1689,31 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _updateSystemNavigator();
   }
 
+  /// Unregisters a [PopScope] widget in the route's widget subtree.
+  ///
+  /// See also:
+  ///
+  /// [registerPopScope], which performs the opposite operation.
   void unregisterPopScope(PopScope widget) {
     _popScopes.remove(widget);
     _updateSystemNavigator();
   }
 
-  // Tells the SystemNavigator whether or not a system pop should have effect.
+  // Tells the SystemNavigator whether or not a system pop should have an
+  // effect.
   void _updateSystemNavigator() {
-    // TODO(justinmc): I'm slightly confused by the existence of 2 bubbling
-    // systems now...
+    // TODO(justinmc): This is not really navigating. Maybe the name needs to
+    // change? Or a second notification type? Also, rename this method.
     final NavigationNotification notification = NavigationNotification(
       // canPop indicates that the originator of the Notification can handle a
       // pop. In the case of PopScope, it handles pops when popEnabled is
       // false. Hence the seemingly backward logic here.
       canPop: popEnabled() == RoutePopDisposition.doNotPop,
     );
-    //print('justin PopScope\'s _updateSystemNavigator is dispatching with canPop ${notification.canPop}');
     notification.dispatch(subtreeContext);
 
-    /*
-    final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
-
-    // TODO(justinmc): These two calls to updateNavigationStackStatus are also
-    // not considering complex Navigator arrangements etc. I need to rethink how
-    // to consider PopScope with NotificationListener?
-
-    // If pop is disabled here then it's disabled for the entire app, and the
-    // SystemNavigator should be informed.
-    if (popDisabled) {
-      SystemNavigator.updateNavigationStackStatus(popDisabled);
-      return;
-    }
-    // Otherwise, the navigation stack status depends on the root navigator.
     // TODO(justinmc): Write a test for this: You should be able to remove a PopScope
     // from the tree (but not its route) and the SystemNavigator should update.
-    // TODO(justinmc): Pare down all these checks, or remove them all if not needed.
-    if (!isActive || subtreeContext == null || !subtreeContext!.mounted || navigator == null || !navigator!.mounted || _scopeKey.currentState != null) {
-      return;
-    }
-    final NavigatorState? rootNavigatorState = Navigator.maybeOf(
-      subtreeContext!,
-      rootNavigator: true,
-    );
-    if (rootNavigatorState == null) {
-      return;
-    }
-    SystemNavigator.updateNavigationStackStatus(rootNavigatorState.canPop());
-    */
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.

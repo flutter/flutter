@@ -1068,10 +1068,7 @@ class RootBackButtonDispatcher extends BackButtonDispatcher with WidgetsBindingO
   }
 
   @override
-  Future<bool> didPopRoute() {
-    print('justin router didPopRoute');
-    return invokeCallback(Future<bool>.value(false));
-  }
+  Future<bool> didPopRoute() => invokeCallback(Future<bool>.value(false));
 }
 
 /// A variant of [BackButtonDispatcher] which listens to notifications from a
