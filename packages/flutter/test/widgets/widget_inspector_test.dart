@@ -953,7 +953,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
         expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode?>());
 
         expect(chainNode['children'], isList);
         final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
@@ -969,7 +969,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
           expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         }
       }
     });
@@ -986,7 +986,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -1015,7 +1015,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -2161,7 +2161,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
         expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode?>());
 
         expect(chainNode['children'], isList);
         final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
@@ -2177,7 +2177,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
           expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         }
       }
     });
@@ -2196,7 +2196,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -2227,7 +2227,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -2258,13 +2258,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']! as String)! as DiagnosticsNode;
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           final Object? property = service.toObject(propertyJson['objectId']! as String);
-          expect(property, isA<DiagnosticsNode>());
+          expect(property, isA<DiagnosticsNode?>());
           expect(expectedProperties, contains(property));
         }
       }
@@ -2299,7 +2299,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           expect(propertyJson, isNot(contains('children')));
@@ -2308,7 +2308,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           final Object property = service.toObject(propertyJson['objectId']! as String)!;
-          expect(property, isA<DiagnosticsNode>());
+          expect(property, isA<DiagnosticsNode?>());
           expect(expectedProperties, contains(property));
         }
       }
