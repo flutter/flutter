@@ -26,14 +26,16 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// individual state transitions ([onResume], [onInactive], etc.) are also
 /// called if the state transition they represent occurs.
 ///
-/// {@tool dartpad} This example shows how an application can listen to changes
-/// in the application state.
+/// {@tool dartpad}
+/// This example shows how an application can listen to changes in the
+/// application state.
 ///
 /// ** See code in examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad} This example shows how an application can optionally decide
-/// to abort a request for exiting instead of obeying the request.
+/// {@tool dartpad}
+/// This example shows how an application can optionally decide to abort a
+/// request for exiting instead of obeying the request.
 ///
 /// ** See code in examples/api/lib/widgets/app_lifecycle_listener/app_lifecycle_listener.1.dart **
 /// {@end-tool}
