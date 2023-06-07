@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1595,8 +1596,10 @@ BoxConstraints _constraintsScaleFactor(double textScaleFactor, bool useMaterial3
   } else {
     return textScaleFactor == 1.0
       ? _dialogConstraints
-      // Scale the max height of the dialog by the text scale factor to aid in readability.
-      : _dialogConstraints.copyWith(maxHeight: _dialogConstraints.maxHeight * textScaleFactor);
+      // Scale the max height of the dialog by the text scale factor to aid in
+      // readability. To handle extreme cases, limit the text scale factor to
+      // 2.0.
+      : _dialogConstraints.copyWith(maxHeight: _dialogConstraints.maxHeight * min(2.0, textScaleFactor));
   }
 }
 
