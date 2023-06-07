@@ -11,7 +11,7 @@ permissions: read-all
 
 jobs:
   triage:
-    if: ${{ github.repository == 'flutter/flutter' }}
+    if: ${{ github.repository == 'flutter/engine' }}
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
