@@ -809,7 +809,10 @@ class _IndicatorInkWell extends InkResponse {
   );
 
   final bool useMaterial3;
+  // The offset used to position Ink highlight.
   final Offset indicatorOffset;
+  // Whether the horizontal offset from indicatorOffset should be used to position Ink highlight.
+  // If true, Ink highlight uses the indicator horizontal offset. If false, Ink highlight is centered horizontally.
   final bool applyXOffset;
 
   @override
