@@ -19,6 +19,11 @@ import 'theme.dart';
 /// This sample shows by dragging the user can reorder the items of the list.
 /// The [onReorder] parameter is required and will be called when a child
 /// widget is dragged to a new position.
+/// Note that if oldIndex is before newIndex,
+/// removing the item at oldIndex from the list will
+/// reduce the list's length by one.
+/// Implementations will need to account for this
+/// when inserting before newIndex.
 ///
 /// {@tool dartpad}
 ///

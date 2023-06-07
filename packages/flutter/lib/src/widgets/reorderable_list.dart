@@ -166,6 +166,12 @@ class ReorderableList extends StatefulWidget {
   /// A callback used by the list to report that a list item has been dragged
   /// to a new location in the list and the application should update the order
   /// of the items.
+  ///
+  /// Note that if oldIndex is before newIndex,
+  /// removing the item at oldIndex from the list will
+  /// reduce the list's length by one.
+  /// Implementations will need to account for this
+  /// when inserting before newIndex.
   /// {@endtemplate}
   final ReorderCallback onReorder;
 
