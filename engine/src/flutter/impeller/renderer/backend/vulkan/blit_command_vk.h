@@ -43,6 +43,15 @@ struct BlitCopyTextureToBufferCommandVK : public BlitCopyTextureToBufferCommand,
   [[nodiscard]] bool Encode(CommandEncoderVK& encoder) const override;
 };
 
+struct BlitCopyBufferToTextureCommandVK : public BlitCopyBufferToTextureCommand,
+                                          public BlitEncodeVK {
+  ~BlitCopyBufferToTextureCommandVK() override;
+
+  std::string GetLabel() const override;
+
+  [[nodiscard]] bool Encode(CommandEncoderVK& encoder) const override;
+};
+
 struct BlitGenerateMipmapCommandVK : public BlitGenerateMipmapCommand,
                                      public BlitEncodeVK {
   ~BlitGenerateMipmapCommandVK() override;

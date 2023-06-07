@@ -48,6 +48,27 @@ TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
   EXPECT_TRUE(encoder.IsTracking(cmd.destination));
 }
 
+TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
+  auto context = CreateMockVulkanContext();
+  auto pool = CommandPoolVK::GetThreadLocal(context.get());
+  CommandEncoderVK encoder(context->GetDeviceHolder(),
+                           context->GetGraphicsQueue(), pool,
+                           context->GetFenceWaiter());
+  BlitCopyBufferToTextureCommandVK cmd;
+  cmd.destination = context->GetResourceAllocator()->CreateTexture({
+      .size = ISize(100, 100),
+  });
+  cmd.source = context->GetResourceAllocator()
+                   ->CreateBuffer({
+                       .size = 1,
+                   })
+                   ->AsBufferView();
+  bool result = cmd.Encode(encoder);
+  EXPECT_TRUE(result);
+  EXPECT_TRUE(encoder.IsTracking(cmd.source.buffer));
+  EXPECT_TRUE(encoder.IsTracking(cmd.destination));
+}
+
 TEST(BlitCommandVkTest, BlitGenerateMipmapCommandVK) {
   auto context = CreateMockVulkanContext();
   auto pool = CommandPoolVK::GetThreadLocal(context.get());

@@ -383,7 +383,7 @@ static std::shared_ptr<Texture> CreateTextureForDecompressedImage(
     DecompressedImage& decompressed_image,
     bool enable_mipmapping) {
   // TODO(https://github.com/flutter/flutter/issues/123468): copying buffers to
-  // textures is not implemented for GLES/Vulkan.
+  // textures is not implemented for GLES.
   if (context->GetCapabilities()->SupportsBufferToTextureBlits()) {
     impeller::TextureDescriptor texture_descriptor;
     texture_descriptor.storage_mode = impeller::StorageMode::kDevicePrivate;

@@ -55,11 +55,7 @@ class BlitPassVK final : public BlitPass {
   bool OnCopyBufferToTextureCommand(BufferView source,
                                     std::shared_ptr<Texture> destination,
                                     IPoint destination_origin,
-                                    std::string label) override {
-    IMPELLER_UNIMPLEMENTED;
-    return false;
-  }
-
+                                    std::string label) override;
   // |BlitPass|
   bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                std::string label) override;

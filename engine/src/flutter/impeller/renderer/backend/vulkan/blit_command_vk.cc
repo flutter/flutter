@@ -145,6 +145,62 @@ bool BlitCopyTextureToBufferCommandVK::Encode(CommandEncoderVK& encoder) const {
 }
 
 //------------------------------------------------------------------------------
+/// BlitCopyBufferToTextureCommandVK
+///
+
+BlitCopyBufferToTextureCommandVK::~BlitCopyBufferToTextureCommandVK() = default;
+
+std::string BlitCopyBufferToTextureCommandVK::GetLabel() const {
+  return label;
+}
+
+bool BlitCopyBufferToTextureCommandVK::Encode(CommandEncoderVK& encoder) const {
+  const auto& cmd_buffer = encoder.GetCommandBuffer();
+
+  // cast destination to TextureVK
+  const auto& dst = TextureVK::Cast(*destination);
+  const auto& src = DeviceBufferVK::Cast(*source.buffer);
+
+  if (!encoder.Track(source.buffer) || !encoder.Track(destination)) {
+    return false;
+  }
+
+  LayoutTransition dst_tran;
+  dst_tran.cmd_buffer = cmd_buffer;
+  dst_tran.new_layout = vk::ImageLayout::eTransferDstOptimal;
+  dst_tran.src_access = {};
+  dst_tran.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
+  dst_tran.dst_access =
+      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferWrite;
+  dst_tran.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
+                       vk::PipelineStageFlagBits::eTransfer;
+
+  vk::BufferImageCopy image_copy;
+  image_copy.setBufferOffset(source.range.offset);
+  image_copy.setBufferRowLength(0);
+  image_copy.setBufferImageHeight(0);
+  image_copy.setImageSubresource(
+      vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
+  image_copy.setImageOffset(
+      vk::Offset3D(destination_origin.x, destination_origin.y, 0));
+  image_copy.setImageExtent(vk::Extent3D(destination->GetSize().width,
+                                         destination->GetSize().height, 1));
+
+  if (!dst.SetLayout(dst_tran)) {
+    VALIDATION_LOG << "Could not encode layout transition.";
+    return false;
+  }
+
+  cmd_buffer.copyBufferToImage(src.GetBuffer(),      //
+                               dst.GetImage(),       //
+                               dst_tran.new_layout,  //
+                               image_copy            //
+  );
+
+  return true;
+}
+
+//------------------------------------------------------------------------------
 /// BlitGenerateMipmapCommandVK
 ///
 
