@@ -53,7 +53,7 @@ abstract final class PointerEventConverter {
   /// Expand the given packet of pointer data into a sequence of framework
   /// pointer events.
   ///
-  /// The [DevicePixelRatioGetter] is used to obtain the device pixel ratio for
+  /// The `devicePixelRatioForView` is used to obtain the device pixel ratio for
   /// the view a particular event occurred in to convert its data from physical
   /// coordinates to logical pixels. See the discussion at [PointerEvent] for
   /// more details on the [PointerEvent] coordinate space.
