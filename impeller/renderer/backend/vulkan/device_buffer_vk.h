@@ -14,7 +14,7 @@
 namespace impeller {
 
 class DeviceBufferVK final : public DeviceBuffer,
-                             public BackendCast<DeviceBufferVK, DeviceBuffer> {
+                             public BackendCast<DeviceBufferVK, Buffer> {
  public:
   DeviceBufferVK(DeviceBufferDescriptor desc,
                  std::weak_ptr<Context> context,

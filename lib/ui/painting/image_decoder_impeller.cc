@@ -481,21 +481,19 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
         }
         auto upload_texture_and_invoke_result = [result, context, bitmap_result,
                                                  gpu_disabled_switch]() {
-          // TODO(jonahwilliams): remove ifdef once blit from buffer
-          // to texture is implemented on other platforms.
           sk_sp<DlImage> image;
           std::string decode_error;
-
-#ifdef FML_OS_IOS
-          std::tie(image, decode_error) = UploadTextureToPrivate(
-              context, bitmap_result.device_buffer, bitmap_result.image_info,
-              bitmap_result.sk_bitmap, gpu_disabled_switch);
-#else
-          std::tie(image, decode_error) =
-              UploadTextureToShared(context, bitmap_result.sk_bitmap,
-                                    gpu_disabled_switch, /*create_mips=*/true);
-#endif  // FML_OS_IOS
-          result(image, decode_error);
+          if (context->GetCapabilities()->SupportsBufferToTextureBlits()) {
+            std::tie(image, decode_error) = UploadTextureToPrivate(
+                context, bitmap_result.device_buffer, bitmap_result.image_info,
+                bitmap_result.sk_bitmap, gpu_disabled_switch);
+            result(image, decode_error);
+          } else {
+            std::tie(image, decode_error) = UploadTextureToShared(
+                context, bitmap_result.sk_bitmap, gpu_disabled_switch,
+                /*create_mips=*/true);
+            result(image, decode_error);
+          }
         };
         // TODO(jonahwilliams):
         // https://github.com/flutter/flutter/issues/123058 Technically we

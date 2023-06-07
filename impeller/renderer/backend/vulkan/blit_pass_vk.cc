@@ -88,6 +88,23 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
 }
 
 // |BlitPass|
+bool BlitPassVK::OnCopyBufferToTextureCommand(
+    BufferView source,
+    std::shared_ptr<Texture> destination,
+    IPoint destination_origin,
+    std::string label) {
+  auto command = std::make_unique<BlitCopyBufferToTextureCommandVK>();
+
+  command->source = std::move(source);
+  command->destination = std::move(destination);
+  command->destination_origin = destination_origin;
+  command->label = std::move(label);
+
+  commands_.push_back(std::move(command));
+  return true;
+}
+
+// |BlitPass|
 bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                          std::string label) {
   auto command = std::make_unique<BlitGenerateMipmapCommandVK>();
