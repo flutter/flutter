@@ -1985,7 +1985,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     }());
-    return _size!;
+    return _size ?? (throw StateError('RenderBox was not laid out: $runtimeType#${shortHash(this)}'));
   }
   Size? _size;
   /// Setting the size, in debug mode, triggers some analysis of the render box,
@@ -2106,7 +2106,7 @@ abstract class RenderBox extends RenderObject {
   @override
   void debugResetSize() {
     // updates the value of size._canBeUsedByParent if necessary
-    size = size;
+    size = size; // ignore: no_self_assignments
   }
 
   Map<TextBaseline, double?>? _cachedBaselines;

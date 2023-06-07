@@ -3312,6 +3312,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   TextSelectionOverlay _createSelectionOverlay() {
+    final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
     final TextSelectionOverlay selectionOverlay = TextSelectionOverlay(
       clipboardStatus: clipboardStatus,
       context: context,
@@ -3325,10 +3326,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: widget.contextMenuBuilder == null
+      contextMenuBuilder: contextMenuBuilder == null
         ? null
         : (BuildContext context) {
-          return widget.contextMenuBuilder!(
+          return contextMenuBuilder(
             context,
             this,
           );
@@ -5017,7 +5018,7 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
     }
     final Rect intersection = calculatedBounds.intersect(rect);
     final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance.hitTest(result, intersection.center);
+    WidgetsBinding.instance.hitTestInView(result, intersection.center, View.of(context).viewId);
     return result.path.any((HitTestEntry entry) => entry.target == renderEditable);
   }
 
@@ -5040,14 +5041,8 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 class _ScribblePlaceholder extends WidgetSpan {
   const _ScribblePlaceholder({
     required super.child,
-    super.alignment,
-    super.baseline,
     required this.size,
-  }) : assert(baseline != null || !(
-         identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
-         identical(alignment, ui.PlaceholderAlignment.baseline)
-       ));
+  });
 
   /// The size of the span, used in place of adding a placeholder size to the [TextPainter].
   final Size size;

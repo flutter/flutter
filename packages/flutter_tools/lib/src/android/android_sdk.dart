@@ -38,7 +38,6 @@ class AndroidSdk {
     reinitialize();
   }
 
-  static const String javaHomeEnvironmentVariable = 'JAVA_HOME';
   /// The Android SDK root directory.
   final Directory directory;
 
