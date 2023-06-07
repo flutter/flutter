@@ -956,7 +956,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         final Offset childOffset = childParentData.offset + offset;
         context.paintChild(child, childOffset);
 
-        // backButton is not in the children list, that's why its
+        // backButton is a slotted child and is not in the children list, so its
         // childParentData.nextSibling is null. So either when there's a
         // nextSibling or when child is the backButton, draw a divider to the
         // child's right.
