@@ -769,7 +769,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
     );
 
     // Make a copy to allow for concurrent modification.
-    final List<ImageErrorListener> localErrorListeners = [
+    final List<ImageErrorListener> localErrorListeners = <ImageErrorListener>[
       ..._listeners
           .map<ImageErrorListener?>((ImageStreamListener listener) => listener.onError)
           .whereType<ImageErrorListener>(),
