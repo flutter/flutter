@@ -1822,10 +1822,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         record.decay += 1;
       }
       pointerIdToRecord
-        .keys
-        .where((int pointer) => pointerIdToRecord[pointer]!.decay == 0)
-        .toList()
-        .forEach(pointerIdToRecord.remove);
+          .keys
+          .where((int pointer) => pointerIdToRecord[pointer]!.decay == 0)
+          .toList()
+          .forEach(pointerIdToRecord.remove);
       if (dirty) {
         scheduleMicrotask(() {
           _markViewsNeedPaint(renderView.flutterView.viewId);
@@ -2025,7 +2025,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       size: view.physicalSize / devicePixelRatio,
       view: view,
     );
-
   }
 
   @override

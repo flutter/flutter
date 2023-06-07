@@ -642,7 +642,7 @@ String _debugCollectRenderTrees() {
 /// It prints the trees associated with every [RenderView] in
 /// [RendererBinding.renderView], separated by two blank lines.
 /// {@endtemplate}
-void debugDumpRenderTree({RenderView? renderView, FlutterView? flutterView, Object? viewId}) {
+void debugDumpRenderTree() {
   debugPrint(_debugCollectRenderTrees());
 }
 

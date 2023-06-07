@@ -102,9 +102,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  /// Whether [configuration] has been set.
-  bool get hasConfiguration => _configuration != null;
-
   /// The [FlutterView] into which this [RenderView] will render.
   ui.FlutterView get flutterView => _view;
   final ui.FlutterView _view;

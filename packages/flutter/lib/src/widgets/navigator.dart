@@ -5266,7 +5266,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         // to false on the next frame.
       });
     }
-    _activePointers.forEach(WidgetsBinding.instance.cancelPointer);
+    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
   /// Gets first route entry satisfying the predicate, or null if not found.
