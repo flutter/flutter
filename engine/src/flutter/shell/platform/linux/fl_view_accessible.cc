@@ -209,6 +209,7 @@ void fl_view_accessible_handle_update_semantics_node(
   fl_accessible_node_set_value(atk_node, node->value);
   fl_accessible_node_set_text_selection(atk_node, node->text_selection_base,
                                         node->text_selection_extent);
+  fl_accessible_node_set_text_direction(atk_node, node->text_direction);
 
   FlValue* children = fl_value_new_int32_list(node->children_in_traversal_order,
                                               node->child_count);

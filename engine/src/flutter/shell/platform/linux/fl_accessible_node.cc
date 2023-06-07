@@ -405,6 +405,11 @@ static void fl_accessible_node_set_text_selection_impl(FlAccessibleNode* self,
                                                        gint base,
                                                        gint extent) {}
 
+// Implements FlAccessibleNode::set_text_direction.
+static void fl_accessible_node_set_text_direction_impl(
+    FlAccessibleNode* self,
+    FlutterTextDirection direction) {}
+
 // Implements FlAccessibleNode::perform_action.
 static void fl_accessible_node_perform_action_impl(
     FlAccessibleNode* self,
@@ -436,6 +441,8 @@ static void fl_accessible_node_class_init(FlAccessibleNodeClass* klass) {
       fl_accessible_node_set_value_impl;
   FL_ACCESSIBLE_NODE_CLASS(klass)->set_text_selection =
       fl_accessible_node_set_text_selection_impl;
+  FL_ACCESSIBLE_NODE_CLASS(klass)->set_text_direction =
+      fl_accessible_node_set_text_direction_impl;
   FL_ACCESSIBLE_NODE_CLASS(klass)->perform_action =
       fl_accessible_node_perform_action_impl;
 
@@ -559,6 +566,14 @@ void fl_accessible_node_set_text_selection(FlAccessibleNode* self,
 
   return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_text_selection(self, base,
                                                                 extent);
+}
+
+void fl_accessible_node_set_text_direction(FlAccessibleNode* self,
+                                           FlutterTextDirection direction) {
+  g_return_if_fail(FL_IS_ACCESSIBLE_NODE(self));
+
+  return FL_ACCESSIBLE_NODE_GET_CLASS(self)->set_text_direction(self,
+                                                                direction);
 }
 
 void fl_accessible_node_perform_action(FlAccessibleNode* self,

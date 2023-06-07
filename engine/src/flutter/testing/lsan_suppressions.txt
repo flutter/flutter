@@ -68,3 +68,6 @@ leak:g_realloc
 # ANGLE's egl impelementation uses annotations that our LSAN setup does
 # not respect. Ignore leaks from egl::*
 leak:egl::*
+
+# False positives in libfontconfig. http://crbug.com/39050
+leak:libfontconfig
