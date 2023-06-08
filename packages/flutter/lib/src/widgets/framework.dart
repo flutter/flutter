@@ -6264,7 +6264,25 @@ abstract class RenderObjectElement extends Element {
     assert(_ancestorRenderObjectElement == null);
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
-    // TODO(goderbauer): Error checking: if no ancestor can be found that means we are  not inside a view.
+    assert(() {
+      if (_ancestorRenderObjectElement == null) {
+        FlutterError.reportError(FlutterErrorDetails(exception: FlutterError.fromParts(
+        <DiagnosticsNode>[
+          ErrorSummary(
+            'RenderObject for ${toStringShort()} cannot find ancestor RenderObject to attach to.',
+          ),
+          ErrorDescription(
+            'The ownership chain for the RenderObject in question was:\n ${debugGetCreatorChain(10)}',
+          ),
+          ErrorHint(
+            'Try wrapping your Widget in a View widget or any other widget that is backed by '
+            'a $RenderTreeRootElement to serve as the root of the render tree.',
+          ),
+        ]
+        )));
+      }
+      return true;
+    }());
     _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final ParentDataElement<ParentData>? parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null) {
@@ -6612,6 +6630,32 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
   @override
   @mustCallSuper
   void attachRenderObject(Object? newSlot) {
+    assert(() {
+      if (newSlot is! RenderTreeRootSlot) {
+        FlutterError.reportError(FlutterErrorDetails(exception: FlutterError.fromParts(
+          <DiagnosticsNode>[
+            ErrorSummary(
+              'The RenderObject for ${toStringShort()} cannot maintain an independent render tree at its current location.'
+            ),
+            ErrorDescription(
+              'The ownership chain for the RenderObject in question was:\n ${debugGetCreatorChain(10)}',
+            ),
+            ErrorDescription(
+              'This RenderObject is the root of an independent render tree and it will not '
+              'attach itself to an ancestor in an existing tree. The ancestor RenderObject, '
+              'however, expects that a child will be attached in slot "$newSlot".',
+            ),
+            ErrorHint(
+              'Try moving the subtree that contains the ${toStringShort()} widget into the '
+              'view property of a ViewAnchor widget, where it is not expected to attach '
+              'its RenderObject to its ancestor.',
+            ),
+          ],
+        )));
+      }
+      return true;
+    }());
+
     _slot = newSlot;
   }
 
@@ -6620,6 +6664,15 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
   void detachRenderObject() {
     _slot = null;
   }
+}
+
+///
+mixin class RenderTreeRootSlot {
+  /// Creates a [RenderTreeRootSlot].
+  const RenderTreeRootSlot();
+
+  ///
+  static const RenderTreeRootSlot instance = RenderTreeRootSlot();
 }
 
 /// A wrapper class for the [Element] that is the creator of a [RenderObject].

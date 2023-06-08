@@ -1154,7 +1154,7 @@ class RootWidget extends Widget {
         element!.assignOwner(owner);
       });
       owner.buildScope(element!, () {
-        element!.mount(/* parent */ null, null); // TODO(goderbauer): slot
+        element!.mount(/* parent */ null, /* slot */ null);
       });
     } else {
       element._newWidget = this;
@@ -1222,7 +1222,7 @@ class RootElement extends Element with RootElementMixin {
   }
 
   void _rebuild() {
-    _child = updateChild(_child, (widget as RootWidget).child, null); // TODO(goderbauer): slot
+    _child = updateChild(_child, (widget as RootWidget).child, RenderTreeRootSlot.instance);
   }
 
   // TODO(goderbauer): ??
