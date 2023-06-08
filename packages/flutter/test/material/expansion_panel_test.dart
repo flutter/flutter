@@ -649,7 +649,6 @@ void main() {
   });
 
   testWidgets('ExpansionPanelList.radio callback displays true or false based on the visibility of a list item',  (WidgetTester tester) async {
-
     late int lastExpanded;
     bool topElementExpanded = false;
     bool bottomElementExpanded = false;
