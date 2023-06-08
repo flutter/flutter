@@ -315,7 +315,7 @@ class TextButton extends ButtonStyleButton {
   ///   * hovered - Theme.colorScheme.primary(0.08)
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   ///   * others - null
-  /// * `shadowColor` - null
+  /// * `shadowColor` - Colors.transparent,
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
