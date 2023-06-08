@@ -32,6 +32,7 @@
 /dev/bots/android_tools/
 /dev/devicelab/ABresults*.json
 /dev/docs/doc/
+/dev/docs/api_docs.zip
 /dev/docs/flutter.docs.zip
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
