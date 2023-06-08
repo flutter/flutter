@@ -443,23 +443,11 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_asset_fonts =
       !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
 
-  {
-    std::string enable_impeller_value;
-    if (command_line.GetOptionValue(FlagForSwitch(Switch::EnableImpeller),
-                                    &enable_impeller_value)) {
-      settings.enable_impeller =
-          enable_impeller_value.empty() || "true" == enable_impeller_value;
-    }
-  }
-
-  {
-    std::string impeller_backend_value;
-    if (command_line.GetOptionValue(FlagForSwitch(Switch::ImpellerBackend),
-                                    &impeller_backend_value)) {
-      if (!impeller_backend_value.empty()) {
-        settings.impeller_backend = impeller_backend_value;
-      }
-    }
+  std::string enable_impeller_value;
+  if (command_line.GetOptionValue(FlagForSwitch(Switch::EnableImpeller),
+                                  &enable_impeller_value)) {
+    settings.enable_impeller =
+        enable_impeller_value.empty() || "true" == enable_impeller_value;
   }
 
   settings.enable_vulkan_validation =
