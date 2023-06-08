@@ -261,10 +261,6 @@ DEF_SWITCH(EnableImpeller,
            "enable-impeller",
            "Enable the Impeller renderer on supported platforms. Ignored if "
            "Impeller is not supported on the platform.")
-DEF_SWITCH(ImpellerBackend,
-           "impeller-backend",
-           "Requests a particular Impeller backend on platforms that support "
-           "multiple backends. (ex `opengles` or `vulkan`)")
 DEF_SWITCH(EnableVulkanValidation,
            "enable-vulkan-validation",
            "Enable loading Vulkan validation layers. The layers must be "
