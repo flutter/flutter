@@ -107,7 +107,7 @@ void main() {
       find.byType(Align),
       <Color>{ const Color(0xFFFFFFFF), const Color(0xFFBFBFBF) }, // 0x80808080 blended with 0xFFFFFFFF
       <Offset, Color>{
-      //  Offset.zero: const Color(0xFFBFBFBF), // the selected text
+        Offset.zero: const Color(0xFFBFBFBF), // the selected text
         const Offset(10, 10): const Color(0xFFBFBFBF), // the selected text
         const Offset(50, 95): const Color(0xFFBFBFBF), // the selected background (under the É)
         const Offset(250, 50): const Color(0xFFBFBFBF), // the selected background (above the p)
