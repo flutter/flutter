@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
 import 'dart:js_interop';
 // The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
 // for `JSObject.[]=`.
@@ -20,9 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart' as web;
-
-@JS('performance')
-external web.Performance get _performance;
 
 /// The default number of samples from warm-up iterations.
 ///
@@ -1262,7 +1258,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
+    web.window.performance.mark('measured_frame_start#$_currentFrameNumber'.toJS);
     _isMeasuringFrame = true;
   }
 }
@@ -1284,8 +1280,8 @@ void endMeasureFrame() {
 
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
-    _performance.mark('measured_frame_end#$_currentFrameNumber'.toJS);
-    _performance.measure(
+    web.window.performance.mark('measured_frame_end#$_currentFrameNumber'.toJS);
+    web.window.performance.measure(
       'measured_frame'.toJS,
       'measured_frame_start#$_currentFrameNumber'.toJS,
       'measured_frame_end#$_currentFrameNumber'.toJS,

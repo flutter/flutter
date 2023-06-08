@@ -30,7 +30,6 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       'web',
       '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
       '--web-renderer=${useCanvasKit ? 'canvaskit' : 'html'}',
-      '--no-native-null-assertions',
       '--profile',
       '--no-web-resources-cdn',
       '-t',
