@@ -16,6 +16,7 @@ class BlendFilterContents : public ColorFilterContents {
                                           const ContentContext& renderer,
                                           const Entity& entity,
                                           const Rect& coverage,
+                                          BlendMode blend_mode,
                                           std::optional<Color> foreground_color,
                                           bool absorb_opacity,
                                           std::optional<Scalar> alpha)>;
