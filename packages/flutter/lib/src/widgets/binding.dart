@@ -1221,22 +1221,8 @@ class RootElement extends Element with RootElementMixin {
     assert(_newWidget == null);
   }
 
-  @pragma('vm:notify-debugger-on-exception')
   void _rebuild() {
-    try {
-      _child = updateChild(_child, (widget as RootWidget).child, null); // TODO(goderbauer): slot
-    } catch (exception, stack) {
-      final FlutterErrorDetails details = FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'widgets library',
-        context: ErrorDescription('attaching to the root widget'),
-      );
-      // TODO(goderbauer): There is nothing to render the error widget into.
-      FlutterError.reportError(details);
-      final Widget error = ErrorWidget.builder(details);
-      _child = updateChild(null, error, null); // TODO(goderbauer): slot
-    }
+    _child = updateChild(_child, (widget as RootWidget).child, null); // TODO(goderbauer): slot
   }
 
   // TODO(goderbauer): ??
