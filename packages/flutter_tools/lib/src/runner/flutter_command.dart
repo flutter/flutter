@@ -111,7 +111,6 @@ abstract final class FlutterOptions {
   static const String kInitializeFromDill = 'initialize-from-dill';
   static const String kAssumeInitializeFromDillUpToDate = 'assume-initialize-from-dill-up-to-date';
   static const String kFatalWarnings = 'fatal-warnings';
-  static const String kFatalStorageWarning = 'fatal-storage-url-warning';
   static const String kUseApplicationBinary = 'use-application-binary';
   static const String kWebBrowserFlag = 'web-browser-flag';
   static const String kWebRendererFlag = 'web-renderer';
@@ -168,8 +167,6 @@ abstract class FlutterCommand extends Command<void> {
   bool _usesIpv6Flag = false;
 
   bool _usesFatalWarnings = false;
-
-  bool _usesFatalStorageWarning = false;
 
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
@@ -291,16 +288,6 @@ abstract class FlutterCommand extends Command<void> {
               'during its execution.'
     );
     _usesFatalWarnings = true;
-  }
-
-  void usesFatalStorageWarningOption({required bool verboseHelp}) {
-    argParser.addFlag(FlutterOptions.kFatalStorageWarning,
-        hide: !verboseHelp,
-        help: 'Causes the the warning when a custom FLUTTER_STORAGE_BASE_URL '
-              'is used to be fatal when --fatal-warnings is used',
-        defaultsTo: true
-    );
-    _usesFatalStorageWarning = true;
   }
 
   String get targetFile {
@@ -1297,10 +1284,6 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (_usesFatalWarnings) {
           globals.logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
-        }
-        if (_usesFatalStorageWarning) {
-          globals.cache.fatalStorageWarning =
-              boolArg(FlutterOptions.kFatalStorageWarning);
         }
         // Prints the welcome message if needed.
         globals.flutterUsage.printWelcome();
