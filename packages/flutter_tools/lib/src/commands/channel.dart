@@ -22,7 +22,7 @@ class ChannelCommand extends FlutterCommand {
     argParser.addFlag(
       'cache-artifacts',
       help: 'After switching channels, download all required binary artifacts. '
-            'This is the equivalent of running "flutter precache" with the "--all" flag.',
+            'This is the equivalent of running "flutter precache" with the "--all-platforms" flag.',
       defaultsTo: true,
     );
   }
