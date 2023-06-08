@@ -3431,7 +3431,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           : canPop(),
     );
     notification.dispatch(context);
-    return;
   }
 
   @override

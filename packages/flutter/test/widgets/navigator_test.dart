@@ -4159,10 +4159,14 @@ void main() {
   group('Android Predictive Back', () {
     final List<bool> calls = <bool>[];
     setUp(() {
+      // Initialize to false. Because this uses a static boolean internally, it
+      // is not reset between tests or calls to pumpWidget. Explicitly setting
+      // it to false befoer each test makes them behave deterministically.
+      SystemNavigator.setFrameworkHandlesBack(false);
       calls.clear();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-          if (methodCall.method == 'SystemNavigator.updateNavigationStackStatus') {
+          if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
             expect(methodCall.arguments, isA<bool>());
             calls.add(methodCall.arguments as bool);
           }
@@ -4187,7 +4191,7 @@ void main() {
       );
     }
 
-    testWidgets('a single route sets stack status on start', (WidgetTester tester) async {
+    testWidgets('a single route is already defaulted to false', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -4196,8 +4200,7 @@ void main() {
         )
       );
 
-      expect(calls, hasLength(1));
-      expect(calls.last, isFalse);
+      expect(calls, hasLength(0));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
@@ -4237,28 +4240,27 @@ void main() {
       );
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(1));
-      expect(calls.last, isFalse);
+      expect(calls, hasLength(0));
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(2));
+      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to one/one'));
@@ -4266,21 +4268,21 @@ void main() {
 
       expect(find.text('Page one - one'), findsOneWidget);
       // calls doesn't increment when the value is the same.
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(5));
+      expect(calls, hasLength(4));
       expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
@@ -4321,28 +4323,27 @@ void main() {
       );
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(1));
-      expect(calls.last, isFalse);
+      expect(calls, hasLength(0));
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(2));
+      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to one/one'));
@@ -4350,27 +4351,27 @@ void main() {
 
       expect(find.text('Page one - one'), findsOneWidget);
       // calls doesn't increment when the value is the same.
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(5));
+      expect(calls, hasLength(4));
       expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('a single Navigator with a PopScope', (WidgetTester tester) async {
+    testWidgets('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
       bool popEnabled = true;
       late StateSetter setState;
       await tester.pumpWidget(
@@ -4390,15 +4391,14 @@ void main() {
         ),
       );
 
-      expect(calls, hasLength(1));
-      expect(calls.last, isFalse);
+      expect(calls, hasLength(0));
 
       setState(() {
         popEnabled = false;
       });
       await tester.pump();
 
-      expect(calls, hasLength(2));
+      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
 
       setState(() {
@@ -4406,8 +4406,50 @@ void main() {
       });
       await tester.pump();
 
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
+
+    testWidgets('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
+      bool popEnabled = false;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MaterialApp(
+              initialRoute: '/',
+              routes: <String, WidgetBuilder>{
+                '/': (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  popEnabled: popEnabled,
+                ),
+              },
+            );
+          },
+        ),
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls.last, isTrue);
+
+      setState(() {
+        popEnabled = true;
+      });
+      await tester.pump();
+
+      expect(calls, hasLength(2));
+      expect(calls.last, isFalse);
+
+      setState(() {
+        popEnabled = false;
+      });
+      await tester.pump();
+
+      expect(calls, hasLength(3));
+      expect(calls.last, isTrue);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
@@ -4471,49 +4513,48 @@ void main() {
         );
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(1));
-        expect(calls.last, isFalse);
+        expect(calls, hasLength(0));
 
         await tester.tap(find.text('Go to one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Page one'), findsOneWidget);
-        expect(calls, hasLength(2));
+        expect(calls, hasLength(1));
         expect(calls.last, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(3));
+        expect(calls, hasLength(2));
         expect(calls.last, isFalse);
 
         await tester.tap(find.text('Go to nested'));
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - home'), findsOneWidget);
-        expect(calls, hasLength(4));
+        expect(calls, hasLength(3));
         expect(calls.last, isTrue);
 
         await tester.tap(find.text('Go to nested/one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - page one'), findsOneWidget);
-        expect(calls, hasLength(4));
+        expect(calls, hasLength(3));
         expect(calls.last, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - home'), findsOneWidget);
-        expect(calls, hasLength(4));
+        expect(calls, hasLength(3));
         expect(calls.last, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(5));
+        expect(calls, hasLength(4));
         expect(calls.last, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
@@ -4568,35 +4609,34 @@ void main() {
       );
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(1));
-      expect(calls.last, isFalse);
+      expect(calls, hasLength(0));
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(2));
+      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to nested'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to nested/popscope'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       // Going back works because popEnabled is true.
@@ -4604,14 +4644,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to nested/popscope'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       setState(() {
@@ -4619,7 +4659,7 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       // Now going back doesn't work because popEnabled is false, but it still
@@ -4628,7 +4668,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       setState(() {
@@ -4636,7 +4676,7 @@ void main() {
       });
       await tester.pump();
 
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       // And going back works again after switching popEnabled back to true.
@@ -4644,145 +4684,238 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(5));
+      expect(calls, hasLength(4));
       expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('Navigator page API', (WidgetTester tester) async {
-      late StateSetter builderSetState;
-      final List<_Page> pages = <_Page>[_Page.home];
-      bool popEnabled() => pages.length <= 1;
+    group('Navigator page API', () {
+      testWidgets('starting with one route as usual', (WidgetTester tester) async {
+        late StateSetter builderSetState;
+        final List<_Page> pages = <_Page>[_Page.home];
+        bool popEnabled() => pages.length <= 1;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              builderSetState = setState;
-              return PopScope(
-                popEnabled: popEnabled(),
-                onPopped: (bool success) {
-                  if (success || pages.last == _Page.noPop) {
-                    return;
-                  }
-                  setState(() {
-                    pages.removeLast();
-                  });
-                },
-                child: Navigator(
-                  onPopPage: (Route<void> route, void result) {
-                    if (!route.didPop(null)) {
-                      return false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                builderSetState = setState;
+                return PopScope(
+                  popEnabled: popEnabled(),
+                  onPopped: (bool success) {
+                    if (success || pages.last == _Page.noPop) {
+                      return;
                     }
                     setState(() {
                       pages.removeLast();
                     });
-                    return true;
                   },
-                  pages: pages.map((_Page page) {
-                    switch (page) {
-                      case _Page.home:
-                        return MaterialPage<void>(
-                          child: _LinksPage(
-                            title: 'Home page',
-                            buttons: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    pages.add(_Page.one);
-                                  });
-                                },
-                                child: const Text('Go to _Page.one'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    pages.add(_Page.noPop);
-                                  });
-                                },
-                                child: const Text('Go to _Page.noPop'),
-                              ),
-                            ],
-                          ),
-                        );
-                      case _Page.one:
-                        return const MaterialPage<void>(
-                          child: _LinksPage(
-                            title: 'Page one',
-                          ),
-                        );
-                      case _Page.noPop:
-                        return const MaterialPage<void>(
-                          child: _LinksPage(
-                            title: 'Cannot pop page',
-                            popEnabled: false,
-                          ),
-                        );
-                    }
-                  }).toList(),
-                ),
-              );
-            },
+                  child: Navigator(
+                    onPopPage: (Route<void> route, void result) {
+                      if (!route.didPop(null)) {
+                        return false;
+                      }
+                      setState(() {
+                        pages.removeLast();
+                      });
+                      return true;
+                    },
+                    pages: pages.map((_Page page) {
+                      switch (page) {
+                        case _Page.home:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.noPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _Page.one:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Page one',
+                            ),
+                          );
+                        case _Page.noPop:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Cannot pop page',
+                              popEnabled: false,
+                            ),
+                          );
+                      }
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
+        );
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(calls, hasLength(0));
+
+        await tester.tap(find.text('Go to _Page.one'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page one'), findsOneWidget);
+        expect(calls.last, isTrue);
+        expect(calls, hasLength(1));
+
+        await systemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(calls.last, isFalse);
+        expect(calls, hasLength(2));
+
+        await tester.tap(find.text('Go to _Page.noPop'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Cannot pop page'), findsOneWidget);
+        expect(calls.last, isTrue);
+        expect(calls, hasLength(3));
+
+        await systemBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Cannot pop page'), findsOneWidget);
+        expect(calls.last, isTrue);
+        expect(calls, hasLength(3));
+
+        // Circumvent "Cannot pop page" by directly modifying pages.
+        builderSetState(() {
+          pages.removeLast();
+        });
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(calls.last, isFalse);
+        // TODO(justinmc): It's actually 7. This is due to some diffing and updating that is
+        // done in NavigatorState.updatePages. I think it's an implementation detail
+        // and shouldn't be tested... So deleted all these expectations of calls length?
+        // Or maybe there's a better way to detect changes to _history.
+        //expect(calls, hasLength(5));
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       );
 
-      expect(find.text('Home page'), findsOneWidget);
-      expect(calls.last, isFalse);
-      expect(calls, hasLength(1));
+      testWidgets('starting with existing route history', (WidgetTester tester) async {
+        final List<_Page> pages = <_Page>[_Page.home, _Page.one];
+        bool popEnabled() => pages.length <= 1;
 
-      await tester.tap(find.text('Go to _Page.one'));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return PopScope(
+                  popEnabled: popEnabled(),
+                  onPopped: (bool success) {
+                    if (success || pages.last == _Page.noPop) {
+                      return;
+                    }
+                    setState(() {
+                      pages.removeLast();
+                    });
+                  },
+                  child: Navigator(
+                    onPopPage: (Route<void> route, void result) {
+                      if (!route.didPop(null)) {
+                        return false;
+                      }
+                      setState(() {
+                        pages.removeLast();
+                      });
+                      return true;
+                    },
+                    pages: pages.map((_Page page) {
+                      switch (page) {
+                        case _Page.home:
+                          return MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Home page',
+                              buttons: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.one);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.one'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      pages.add(_Page.noPop);
+                                    });
+                                  },
+                                  child: const Text('Go to _Page.noPop'),
+                                ),
+                              ],
+                            ),
+                          );
+                        case _Page.one:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Page one',
+                            ),
+                          );
+                        case _Page.noPop:
+                          return const MaterialPage<void>(
+                            child: _LinksPage(
+                              title: 'Cannot pop page',
+                              popEnabled: false,
+                            ),
+                          );
+                      }
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
 
-      expect(find.text('Page one'), findsOneWidget);
-      expect(calls.last, isTrue);
-      expect(calls, hasLength(2));
+        expect(find.text('Home page'), findsNothing);
+        expect(find.text('Page one'), findsOneWidget);
+        expect(calls.last, isTrue);
+        expect(calls, hasLength(1));
 
-      await systemBack();
-      await tester.pumpAndSettle();
+        await systemBack();
+        await tester.pumpAndSettle();
 
-      expect(find.text('Home page'), findsOneWidget);
-      expect(calls.last, isFalse);
-      expect(calls, hasLength(3));
-
-      await tester.tap(find.text('Go to _Page.noPop'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Cannot pop page'), findsOneWidget);
-      expect(calls.last, isTrue);
-      expect(calls, hasLength(4));
-
-      await systemBack();
-      await tester.pumpAndSettle();
-
-      expect(find.text('Cannot pop page'), findsOneWidget);
-      expect(calls.last, isTrue);
-      expect(calls, hasLength(4));
-
-      // Circumvent "Cannot pop page" by directly modifying pages.
-      builderSetState(() {
-        pages.removeLast();
-      });
-      await tester.pumpAndSettle();
-
-      expect(find.text('Home page'), findsOneWidget);
-      expect(calls.last, isFalse);
-      // TODO(justinmc): It's actually 7. This is due to some diffing and updating that is
-      // done in NavigatorState.updatePages. I think it's an implementation detail
-      // and shouldn't be tested... So deleted all these expectations of calls length?
-      // Or maybe there's a better way to detect changes to _history.
-      //expect(calls, hasLength(5));
-    },
-      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
-    );
+        expect(find.text('Home page'), findsOneWidget);
+        expect(find.text('Page one'), findsNothing);
+        expect(calls.last, isFalse);
+        expect(calls, hasLength(2));
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      );
+    });
   });
 }
 
