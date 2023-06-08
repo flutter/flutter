@@ -228,11 +228,27 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   late PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
+  // TODO(dkwingsmt): Once there are multiple render views in the binding,
+  // correctly implement _viewIdToRenderView.
+  // https://github.com/flutter/flutter/issues/121573
   RenderView get renderView => _pipelineOwner.rootNode! as RenderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
     _pipelineOwner.rootNode = value;
+  }
+
+  late final int? _implicitViewId = platformDispatcher.implicitView?.viewId;
+
+  // TODO(dkwingsmt): Make this function return the correct renderView for the
+  // ID after Flutter supports multi-view.
+  // https://github.com/flutter/flutter/issues/121573
+  RenderView? _viewIdToRenderView(int viewId) {
+    // Currently Flutter only supports one view, the implicit view.
+    if (_implicitViewId != null && viewId == _implicitViewId) {
+      return renderView;
+    }
+    return null;
   }
 
   /// Called when the system metrics change.
@@ -523,9 +539,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   @override
   void hitTestInView(HitTestResult result, Offset position, int viewId) {
-    final RenderView renderView = _viewIdToRenderView[viewId]!;
-    assert(viewId == renderView.flutterView.viewId);
-    renderView.hitTest(result, position: position);
+    final RenderView targetView = _viewIdToRenderView(viewId)!;
+    assert(viewId == targetView.flutterView.viewId);
+    targetView.hitTest(result, position: position);
     super.hitTestInView(result, position, viewId);
   }
 
