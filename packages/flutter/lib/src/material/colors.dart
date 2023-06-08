@@ -12,18 +12,21 @@ import 'package:flutter/painting.dart';
 ///
 /// ## Updating to [ColorScheme]
 ///
-/// There is a new class,[ColorScheme], that is is preferred for
+/// The [ColorScheme] is preferred for
 /// representing colors in applications that are configured
 /// for Material 3 (see [ThemeData.useMaterial3]).
 /// For more information on colors in Material 3 see
 /// the spec at <https://m3.material.io/styles/color/the-color-system>.
 ///
+///{@template flutter.material.colors.colorRoles}
 /// In Material 3, colors are represented using color roles and
 /// corresponding tokens. Each property in the [ColorScheme] class
 /// represents one color role as defined in the spec above.
+/// {@endtemplate}
 ///
 /// ### Material 3 Colors in Flutter
 ///
+///{@template flutter.material.colors.settingColors}
 /// Flutter's Material widgets can be assigned colors at the widget level
 /// using widget properties,
 /// or at the app level using theme classes.
@@ -32,12 +35,16 @@ import 'package:flutter/painting.dart';
 /// setting the [AppBar.backgroundColor] to a specific [Color] value.
 ///
 /// To globally set the AppBar background color for your app, you
-/// can set the [ThemeData.appBarTheme] property for your app
-/// using the [ThemeData] class.
+/// can set the [ThemeData.appBarTheme] property for your [MaterialApp]
+/// using the [ThemeData] class. You can also override
+/// the default appearance of all the [AppBar]s in a widget subtree by
+/// placing the [AppBarTheme] at the root of the subtree.
 ///
 /// Alternatively, you can set the [ThemeData.colorScheme] property
-/// to a custom [ColorScheme]. The [AppBar.backgroundColor] uses the
-/// [ColorScheme.surface].
+/// to a custom [ColorScheme]. This creates a unified [ColorScheme] to be
+/// used across the app. The [AppBar.backgroundColor] uses the
+/// [ColorScheme.surface] by default.
+///{@endtemplate}
 ///
 /// ### Migrating from [MaterialColor] to [ColorScheme]
 ///
