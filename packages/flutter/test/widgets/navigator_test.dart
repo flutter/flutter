@@ -4241,49 +4241,53 @@ void main() {
 
       expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(0));
+      int lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one/one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one - one'), findsOneWidget);
       // calls doesn't increment when the value is the same.
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(4));
       expect(calls.last, isFalse);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
@@ -4324,49 +4328,54 @@ void main() {
 
       expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(0));
+      int lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one/one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one - one'), findsOneWidget);
       // calls doesn't increment when the value is the same.
-      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(lastCallsLength));
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(4));
       expect(calls.last, isFalse);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
@@ -4392,22 +4401,25 @@ void main() {
       );
 
       expect(calls, hasLength(0));
+      int lastCallsLength = calls.length;
 
       setState(() {
         popEnabled = false;
       });
       await tester.pump();
 
-      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       setState(() {
         popEnabled = true;
       });
       await tester.pump();
 
-      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
@@ -4514,48 +4526,52 @@ void main() {
 
         expect(find.text('Home page'), findsOneWidget);
         expect(calls, hasLength(0));
+        int lastCallsLength = calls.length;
 
         await tester.tap(find.text('Go to one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Page one'), findsOneWidget);
-        expect(calls, hasLength(1));
         expect(calls.last, isTrue);
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(2));
         expect(calls.last, isFalse);
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
 
         await tester.tap(find.text('Go to nested'));
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - home'), findsOneWidget);
-        expect(calls, hasLength(3));
         expect(calls.last, isTrue);
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
 
         await tester.tap(find.text('Go to nested/one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - page one'), findsOneWidget);
-        expect(calls, hasLength(3));
+        expect(calls, hasLength(lastCallsLength));
         expect(calls.last, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Nested - home'), findsOneWidget);
-        expect(calls, hasLength(3));
+        expect(calls, hasLength(lastCallsLength));
         expect(calls.last, isTrue);
 
         await goBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
-        expect(calls, hasLength(4));
         expect(calls.last, isFalse);
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       );
@@ -4610,33 +4626,37 @@ void main() {
 
       expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(0));
+      int lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
       expect(find.text('Page one'), findsOneWidget);
-      expect(calls, hasLength(1));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(2));
       expect(calls.last, isFalse);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to nested'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(3));
       expect(calls.last, isTrue);
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
+      lastCallsLength = calls.length;
 
       await tester.tap(find.text('Go to nested/popscope'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       // Going back works because popEnabled is true.
@@ -4644,14 +4664,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to nested/popscope'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       setState(() {
@@ -4659,7 +4679,7 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       // Now going back doesn't work because popEnabled is false, but it still
@@ -4668,7 +4688,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - PopScope'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       setState(() {
@@ -4676,7 +4696,7 @@ void main() {
       });
       await tester.pump();
 
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       // And going back works again after switching popEnabled back to true.
@@ -4684,14 +4704,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Nested - home'), findsOneWidget);
-      expect(calls, hasLength(3));
+      expect(calls, hasLength(lastCallsLength));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Home page'), findsOneWidget);
-      expect(calls, hasLength(4));
+      expect(calls, hasLength(greaterThan(lastCallsLength)));
       expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
@@ -4778,34 +4798,42 @@ void main() {
 
         expect(find.text('Home page'), findsOneWidget);
         expect(calls, hasLength(0));
+        int lastCallsLength = calls.length;
 
         await tester.tap(find.text('Go to _Page.one'));
         await tester.pumpAndSettle();
 
         expect(find.text('Page one'), findsOneWidget);
         expect(calls.last, isTrue);
-        expect(calls, hasLength(1));
+        // The precise number of calls is an implementation detail. Some cases
+        // may result in diffing the navigation stack and cause multiple calls.
+        // So, only test that the number of calls has increased, not the exact
+        // number.
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
 
         await systemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Home page'), findsOneWidget);
         expect(calls.last, isFalse);
-        expect(calls, hasLength(2));
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
 
         await tester.tap(find.text('Go to _Page.noPop'));
         await tester.pumpAndSettle();
 
         expect(find.text('Cannot pop page'), findsOneWidget);
         expect(calls.last, isTrue);
-        expect(calls, hasLength(3));
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
 
         await systemBack();
         await tester.pumpAndSettle();
 
         expect(find.text('Cannot pop page'), findsOneWidget);
         expect(calls.last, isTrue);
-        expect(calls, hasLength(3));
+        expect(calls, hasLength(lastCallsLength));
 
         // Circumvent "Cannot pop page" by directly modifying pages.
         builderSetState(() {
@@ -4815,11 +4843,8 @@ void main() {
 
         expect(find.text('Home page'), findsOneWidget);
         expect(calls.last, isFalse);
-        // TODO(justinmc): It's actually 7. This is due to some diffing and updating that is
-        // done in NavigatorState.updatePages. I think it's an implementation detail
-        // and shouldn't be tested... So deleted all these expectations of calls length?
-        // Or maybe there's a better way to detect changes to _history.
-        //expect(calls, hasLength(5));
+        expect(calls, hasLength(greaterThan(lastCallsLength)));
+        lastCallsLength = calls.length;
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       );
