@@ -97,7 +97,7 @@ void main() {
     await _expectColors(
       tester,
       find.byType(Align),
-      <Color>{ const Color(0xFFFFFFFF), const Color(0xFF000000)},
+      <Color>{ const Color(0xFFFFFFFF), const Color(0xFF000000) },
     );
     // fake a "select all" event to select the text
     Actions.invoke(key.currentContext!, const SelectAllTextIntent(SelectionChangedCause.keyboard));
@@ -105,7 +105,7 @@ void main() {
     await _expectColors(
       tester,
       find.byType(Align),
-      <Color>{ const Color(0xFFFFFFFF),const Color(0xFF000000), const Color(0xFFBFBFBF)}, // 0x80808080 blended with 0xFFFFFFFF
+      <Color>{ const Color(0xFFFFFFFF), const Color(0xFF000000), const Color(0xFFBFBFBF) }, // 0x80808080 blended with 0xFFFFFFFF
       <Offset, Color>{
         Offset.zero: const Color(0xFF000000), // the selected text
         const Offset(10, 10): const Color(0xFF000000), // the selected text
