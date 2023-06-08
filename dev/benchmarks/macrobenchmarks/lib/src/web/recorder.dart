@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html' as html;
-import 'dart:js_util' as js_util;
+import 'dart:js_interop';
+// The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
+// for `JSObject.[]=`.
+// ignore: unused_import
+import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -15,6 +18,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+import 'package:web/web.dart' as web;
 
 /// The default number of samples from warm-up iterations.
 ///
@@ -1254,8 +1258,7 @@ void startMeasureFrame(Profile profile) {
 
   if (!profile.isWarmingUp) {
     // Tell the browser to mark the beginning of the frame.
-    html.window.performance.mark('measured_frame_start#$_currentFrameNumber');
-
+    web.window.performance.mark('measured_frame_start#$_currentFrameNumber'.toJS);
     _isMeasuringFrame = true;
   }
 }
@@ -1277,11 +1280,11 @@ void endMeasureFrame() {
 
   if (_isMeasuringFrame) {
     // Tell the browser to mark the end of the frame, and measure the duration.
-    html.window.performance.mark('measured_frame_end#$_currentFrameNumber');
-    html.window.performance.measure(
-      'measured_frame',
-      'measured_frame_start#$_currentFrameNumber',
-      'measured_frame_end#$_currentFrameNumber',
+    web.window.performance.mark('measured_frame_end#$_currentFrameNumber'.toJS);
+    web.window.performance.measure(
+      'measured_frame'.toJS,
+      'measured_frame_start#$_currentFrameNumber'.toJS,
+      'measured_frame_end#$_currentFrameNumber'.toJS,
     );
 
     // Increment the current frame number.
@@ -1311,9 +1314,11 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 
   if (_engineBenchmarkListeners.isEmpty) {
     // The first listener is being registered. Register the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', _dispatchEngineBenchmarkValue);
+    web.window['_flutter_internal_on_benchmark'.toJS] =
+        // Upcast to [Object] to export.
+        // ignore: unnecessary_cast
+        (_dispatchEngineBenchmarkValue as Object).toJS;
   }
-
   _engineBenchmarkListeners[name] = listener;
 }
 
@@ -1321,8 +1326,9 @@ void registerEngineBenchmarkValueListener(String name, EngineBenchmarkValueListe
 void stopListeningToEngineBenchmarkValues(String name) {
   _engineBenchmarkListeners.remove(name);
   if (_engineBenchmarkListeners.isEmpty) {
+
     // The last listener unregistered. Remove the global listener.
-    js_util.setProperty(html.window, '_flutter_internal_on_benchmark', null);
+    web.window['_flutter_internal_on_benchmark'.toJS] = null;
   }
 }
 
