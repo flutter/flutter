@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker;
@@ -15,7 +16,7 @@ import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
 /// A DAP Debug Adapter for running and debugging Flutter applications.
-class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
+class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFileUtils {
   FlutterDebugAdapter(
     super.channel, {
     required super.fileSystem,
@@ -120,6 +121,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
   @override
   Future<void> attachImpl() async {
     final FlutterAttachRequestArguments args = this.args as FlutterAttachRequestArguments;
+    String? vmServiceUri = args.vmServiceUri;
+    final String? vmServiceInfoFile = args.vmServiceInfoFile;
+
+    if (vmServiceUri != null && vmServiceInfoFile != null) {
+      sendConsoleOutput(
+        'To attach, provide only one of vmServiceUri/vmServiceInfoFile',
+      );
+      handleSessionTerminate();
+      return;
+    }
 
     launchProgress = startProgressNotification(
       'launch',
@@ -127,7 +138,11 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
       message: 'Attaching…',
     );
 
-    final String? vmServiceUri = args.vmServiceUri;
+    if (vmServiceUri == null && vmServiceInfoFile != null) {
+      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, File(vmServiceInfoFile));
+      vmServiceUri = uriFromFile.toString();
+    }
+
     final List<String> toolArgs = <String>[
       'attach',
       '--machine',
