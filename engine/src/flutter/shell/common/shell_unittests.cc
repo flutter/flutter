@@ -5,9 +5,11 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
+#include <chrono>
 #include <ctime>
 #include <future>
 #include <memory>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -676,9 +678,13 @@ static void CheckFrameTimings(const std::vector<FrameTiming>& timings,
 }
 
 TEST_F(ShellTest, ReportTimingsIsCalled) {
-  fml::TimePoint start = fml::TimePoint::Now();
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // We MUST put |start| after |CreateShell| because the clock source will be
+  // reset through |TimePoint::SetClockSource()| in
+  // |DartVMInitializer::Initialize()| within |CreateShell()|.
+  fml::TimePoint start = fml::TimePoint::Now();
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -726,19 +732,10 @@ TEST_F(ShellTest, ReportTimingsIsCalled) {
 }
 
 TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
-  fml::TimePoint start = fml::TimePoint::Now();
-
   auto settings = CreateSettingsForFixture();
-  fml::AutoResetWaitableEvent timingLatch;
+
   FrameTiming timing;
-
-  for (auto phase : FrameTiming::kPhases) {
-    timing.Set(phase, fml::TimePoint());
-    // Check that the time points are initially smaller than start, so
-    // CheckFrameTimings will fail if they're not properly set later.
-    ASSERT_TRUE(timing.Get(phase) < start);
-  }
-
+  fml::AutoResetWaitableEvent timingLatch;
   settings.frame_rasterized_callback = [&timing,
                                         &timingLatch](const FrameTiming& t) {
     timing = t;
@@ -746,6 +743,22 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   };
 
   std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Wait to make |start| bigger than zero
+  using namespace std::chrono_literals;
+  std::this_thread::sleep_for(1ms);
+
+  // We MUST put |start| after |CreateShell()| because the clock source will be
+  // reset through |TimePoint::SetClockSource()| in
+  // |DartVMInitializer::Initialize()| within |CreateShell()|.
+  fml::TimePoint start = fml::TimePoint::Now();
+
+  for (auto phase : FrameTiming::kPhases) {
+    timing.Set(phase, fml::TimePoint());
+    // Check that the time points are initially smaller than start, so
+    // CheckFrameTimings will fail if they're not properly set later.
+    ASSERT_TRUE(timing.Get(phase) < start);
+  }
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
