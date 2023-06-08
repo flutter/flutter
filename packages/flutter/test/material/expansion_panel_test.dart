@@ -654,7 +654,7 @@ void main() {
     bool bottomElementExpanded = false;
 
     final List<ExpansionPanel> demoItemsRadio = <ExpansionPanelRadio>[
-      //topElement
+      // topElement
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'B' : 'A');
@@ -662,7 +662,7 @@ void main() {
         body: const SizedBox(height: 100.0),
         value: 0,
       ),
-      //bottomElement
+      // bottomElement
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return Text(isExpanded ? 'D' : 'C');
@@ -698,7 +698,7 @@ void main() {
       ),
     );
 
-    // Initializes with all panels closed
+    // Initializes with all panels closed.
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsOneWidget);
@@ -708,7 +708,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
-    // Now the first panel is open
+    // Now the first panel is open.
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
@@ -721,7 +721,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
-    //Open the other panel and ensure the first is now closed
+    // Open the other panel and ensure the first is now closed.
     expect(lastExpanded,1);
     expect(bottomElementExpanded,true);
     expect(topElementExpanded,false);
@@ -732,11 +732,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
-    //close the item that was expanded should now be false
+    // Close the item that was expanded should now be false.
     expect(lastExpanded,1);
     expect(bottomElementExpanded,false);
 
-    // All panels should be closed
+    // All panels should be closed.
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsOneWidget);
