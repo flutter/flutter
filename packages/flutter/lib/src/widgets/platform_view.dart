@@ -196,11 +196,11 @@ class AndroidView extends StatefulWidget {
 }
 
 /// Common superclass for platform views.
-abstract class DarwinPlatformView extends StatefulWidget {
-  /// Creates a widget that embeds an iOS view.
+abstract class _DarwinView extends StatefulWidget {
+  /// Creates a widget that embeds a platform view.
   ///
   /// {@macro flutter.widgets.AndroidView.constructorArgs}
-  const DarwinPlatformView({
+  const _DarwinView({
     super.key,
     required this.viewType,
     this.onPlatformViewCreated,
@@ -302,7 +302,7 @@ abstract class DarwinPlatformView extends StatefulWidget {
 /// Clipping operations on a UiKitView can result slow performance.
 /// If a conic path clipping is applied to a UIKitView,
 /// a quad path is used to approximate the clip due to limitation of Quartz.
-class UiKitView extends DarwinPlatformView {
+class UiKitView extends _DarwinView {
   /// Creates a widget that embeds an iOS view.
   ///
   /// {@macro flutter.widgets.AndroidView.constructorArgs}
@@ -577,7 +577,7 @@ class _AndroidViewState extends State<AndroidView> {
   }
 }
 
-abstract class _DarwinPlatformViewState<TPlatformView extends DarwinPlatformView, TController extends DarwinPlatformViewController, TRender extends RenderDarwinPlatformView<TController>, TPrivateView extends _DarwinPlatformView<TController, TRender>> extends State<TPlatformView> {
+abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController extends DarwinPlatformViewController, TRender extends RenderDarwinPlatformView<TController>, TPrivateView extends _DarwinPlatformView<TController, TRender>> extends State<TPlatformView> {
   TController? _controller;
   TextDirection? _layoutDirection;
   bool _initialized = false;
@@ -691,7 +691,7 @@ abstract class _DarwinPlatformViewState<TPlatformView extends DarwinPlatformView
   }
 }
 
-class _UiKitViewState extends _DarwinPlatformViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
+class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
   @override
   Future<UiKitViewController> obtainNewViewController(int id) async {
     return PlatformViewsService.initUiKitView(
@@ -711,7 +711,7 @@ class _UiKitViewState extends _DarwinPlatformViewState<UiKitView, UiKitViewContr
     return _UiKitPlatformView(
         controller: _controller!,
         hitTestBehavior: widget.hitTestBehavior,
-        gestureRecognizers: widget.gestureRecognizers ?? _DarwinPlatformViewState._emptyRecognizersSet,
+        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
       );
   }
 }
