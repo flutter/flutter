@@ -362,19 +362,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     BlendMode blend_mode,
     std::optional<Scalar> alpha,
     bool absorb_opacity) const {
-  auto dst_snapshot =
-      input->GetSnapshot("ForegroundPorterDuffBlend", renderer, entity);
-  if (!dst_snapshot.has_value()) {
-    return std::nullopt;
-  }
-
   if (blend_mode == BlendMode::kClear) {
     return std::nullopt;
-  }
-
-  if (blend_mode == BlendMode::kDestination) {
-    return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
-                                entity.GetStencilDepth());
   }
 
   if (blend_mode == BlendMode::kSource) {
@@ -387,6 +376,17 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     foreground_entity.SetStencilDepth(entity.GetStencilDepth());
     foreground_entity.SetContents(std::move(contents));
     return foreground_entity;
+  }
+
+  auto dst_snapshot =
+      input->GetSnapshot("ForegroundPorterDuffBlend", renderer, entity);
+  if (!dst_snapshot.has_value()) {
+    return std::nullopt;
+  }
+
+  if (blend_mode == BlendMode::kDestination) {
+    return Entity::FromSnapshot(dst_snapshot, entity.GetBlendMode(),
+                                entity.GetStencilDepth());
   }
 
   RenderProc render_proc = [foreground_color, coverage, dst_snapshot,
