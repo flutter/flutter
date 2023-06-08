@@ -1313,10 +1313,9 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
-/// Controls an iOS UIView.
-///
-/// Typically created with [PlatformViewsService.initUiKitView].
+/// Encapsulates common aspects of platform view controllers.
 class DarwinPlatformViewController {
+  /// Cannot be private in order to be overridden, right?
   DarwinPlatformViewController(
     this.id,
     TextDirection layoutDirection,
@@ -1382,6 +1381,9 @@ class DarwinPlatformViewController {
   }
 }
 
+/// Controls an iOS UIView.
+///
+/// Typically created with [PlatformViewsService.initUiKitView].
 class UiKitViewController extends DarwinPlatformViewController {
   UiKitViewController._(
     super.id,

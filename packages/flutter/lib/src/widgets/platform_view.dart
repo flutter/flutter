@@ -195,25 +195,7 @@ class AndroidView extends StatefulWidget {
   State<AndroidView> createState() => _AndroidViewState();
 }
 
-// TODO(amirh): describe the embedding mechanism.
-// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
-/// Embeds an iOS view in the Widget hierarchy.
-///
-/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
-/// equivalent is possible.
-///
-/// {@macro flutter.widgets.AndroidView.layout}
-///
-/// {@macro flutter.widgets.AndroidView.gestures}
-///
-/// {@macro flutter.widgets.AndroidView.lifetime}
-///
-/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
-/// nothing while maintaining the same layout constraints.
-///
-/// Clipping operations on a UiKitView can result slow performance.
-/// If a conic path clipping is applied to a UIKitView,
-/// a quad path is used to approximate the clip due to limitation of Quartz.
+/// Common superclass for platform views.
 abstract class DarwinPlatformView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
@@ -301,6 +283,25 @@ abstract class DarwinPlatformView extends StatefulWidget {
   final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
 }
 
+// TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
+/// Embeds an iOS view in the Widget hierarchy.
+///
+/// Embedding iOS views is an expensive operation and should be avoided when a Flutter
+/// equivalent is possible.
+///
+/// {@macro flutter.widgets.AndroidView.layout}
+///
+/// {@macro flutter.widgets.AndroidView.gestures}
+///
+/// {@macro flutter.widgets.AndroidView.lifetime}
+///
+/// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
+/// nothing while maintaining the same layout constraints.
+///
+/// Clipping operations on a UiKitView can result slow performance.
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
 class UiKitView extends DarwinPlatformView {
   /// Creates a widget that embeds an iOS view.
   ///
@@ -765,7 +766,7 @@ abstract class _DarwinPlatformView<TController extends DarwinPlatformViewControl
 }
 
 class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, RenderUiKitView> {
-  _UiKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
+  const _UiKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
 
   @override
   RenderObject createRenderObject(BuildContext context) {

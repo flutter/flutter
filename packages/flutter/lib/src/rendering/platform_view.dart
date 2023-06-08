@@ -269,23 +269,9 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 }
 
-/// A render object for an iOS UIKit UIView.
-///
-/// [RenderUiKitView] is responsible for sizing and displaying an iOS
-/// [UIView](https://developer.apple.com/documentation/uikit/uiview).
-///
-/// UIViews are added as sub views of the FlutterView and are composited by Quartz.
-///
-/// {@macro flutter.rendering.RenderAndroidView.layout}
-///
-/// {@macro flutter.rendering.RenderAndroidView.gestures}
-///
-/// See also:
-///
-///  * [UiKitView] which is a widget that is used to show a UIView.
-///  * [PlatformViewsService] which is a service for controlling platform views.
+/// Superclass for common fucntionality of platform view RenderBoxes
 class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends RenderBox {
-  /// Creates a render object for an iOS UIView.
+  /// Creates a render object for a platform view.
   ///
   /// The `viewId`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   RenderDarwinPlatformView({
@@ -391,7 +377,25 @@ class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends R
   }
 }
 
+/// A render object for an iOS UIKit UIView.
+///
+/// [RenderUiKitView] is responsible for sizing and displaying an iOS
+/// [UIView](https://developer.apple.com/documentation/uikit/uiview).
+///
+/// UIViews are added as sub views of the FlutterView and are composited by Quartz.
+///
+/// {@macro flutter.rendering.RenderAndroidView.layout}
+///
+/// {@macro flutter.rendering.RenderAndroidView.gestures}
+///
+/// See also:
+///
+///  * [UiKitView] which is a widget that is used to show a UIView.
+///  * [PlatformViewsService] which is a service for controlling platform views.
 class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
+  /// Creates a render object for an iOS UIView.
+  ///
+  /// The `viewId`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   RenderUiKitView({required super.viewController, required super.hitTestBehavior, required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers}) {
     updateGestureRecognizers(gestureRecognizers);
   }
