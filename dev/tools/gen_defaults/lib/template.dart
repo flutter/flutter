@@ -38,8 +38,8 @@ abstract class TokenTemplate {
   bool tokenAvailable(String tokenName) => _tokens.containsKey(tokenName);
 
   /// Resolve a token while logging its usage.
-  dynamic getToken(dynamic tokenName) {
-    tokenLogger.log(tokenName as String);
+  dynamic getToken(String tokenName) {
+    tokenLogger.log(tokenName);
     return _tokens[tokenName];
   }
 
@@ -171,7 +171,7 @@ abstract class TokenTemplate {
       }
       return digits == null ? value.toString() : value.toStringAsFixed(digits);
     }
-    return getToken(value).toString();
+    return getToken(value as String).toString();
   }
 
   /// Generate an elevation value for the given component token.
@@ -204,7 +204,7 @@ abstract class TokenTemplate {
   ///   - "SHAPE_FAMILY_CIRCULAR" which maps to a [StadiumBorder].
   String shape(String componentToken, [String prefix = 'const ']) {
 
-    final Map<String, dynamic> shape = getToken(getToken('$componentToken.shape')) as Map<String, dynamic>;
+    final Map<String, dynamic> shape = getToken(getToken('$componentToken.shape') as String) as Map<String, dynamic>;
     switch (shape['family']) {
       case 'SHAPE_FAMILY_ROUNDED_CORNERS':
         final double topLeft = shape['topLeft'] as double;

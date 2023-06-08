@@ -83,6 +83,6 @@ class TokenLogger {
     final File file = File(path);
     file.createSync(recursive: true);
     final String versionsString = 'Versions used, ${_versionMap.keys.join(', ')}';
-    file.writeAsStringSync('$versionsString\n${_usedTokens.join(',\n')}');
+    file.writeAsStringSync('$versionsString\n${_usedTokens.join(',\n')}\n');
   }
 }

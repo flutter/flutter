@@ -59,7 +59,7 @@ class _M3Typography {
   }
 
   String _fontWeight(String textStyleTokenName) {
-    final String weightValue = getToken(getToken('$textStyleTokenName.weight')).toString();
+    final String weightValue = getToken(getToken('$textStyleTokenName.weight') as String).toString();
     return 'FontWeight.w$weightValue';
   }
 

@@ -16,12 +16,12 @@ class ColorSchemeTemplate extends TokenTemplate {
 
   dynamic light(String tokenName) {
     tokenLogger.log(tokenName);
-    return getToken(_colorTokensLight[tokenName]);
+    return getToken(_colorTokensLight[tokenName] as String);
   }
 
   dynamic dark(String tokenName) {
     tokenLogger.log(tokenName);
-    return getToken(_colorTokensDark[tokenName]);
+    return getToken(_colorTokensDark[tokenName] as String);
   }
 
   @override
