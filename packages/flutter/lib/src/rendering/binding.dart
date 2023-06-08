@@ -228,27 +228,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   late PipelineOwner _pipelineOwner;
 
   /// The render tree that's attached to the output surface.
-  // TODO(dkwingsmt): Once there are multiple render views in the binding,
-  // correctly implement _viewIdToRenderView.
-  // https://github.com/flutter/flutter/issues/121573
   RenderView get renderView => _pipelineOwner.rootNode! as RenderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
   set renderView(RenderView value) {
     _pipelineOwner.rootNode = value;
-  }
-
-  late final int? _implicitViewId = platformDispatcher.implicitView?.viewId;
-
-  // TODO(dkwingsmt): Make this function return the correct renderView for the
-  // ID after Flutter supports multi-view.
-  // https://github.com/flutter/flutter/issues/121573
-  RenderView? _viewIdToRenderView(int viewId) {
-    // Currently Flutter only supports one view, the implicit view.
-    if (_implicitViewId != null && viewId == _implicitViewId) {
-      return renderView;
-    }
-    return null;
   }
 
   /// Called when the system metrics change.
@@ -331,7 +315,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker((int viewId, Offset position) {
+    _mouseTracker = tracker ?? MouseTracker((Offset position, int viewId) {
       final HitTestResult result = HitTestResult();
       hitTestInView(result, position, viewId);
       return result;
@@ -537,11 +521,18 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await endOfFrame;
   }
 
+  late final int _implicitViewId = platformDispatcher.implicitView!.viewId;
+
   @override
   void hitTestInView(HitTestResult result, Offset position, int viewId) {
-    final RenderView targetView = _viewIdToRenderView(viewId)!;
-    assert(viewId == targetView.flutterView.viewId);
-    targetView.hitTest(result, position: position);
+    // Currently Flutter only supports one view, the implicit view `renderView`.
+    // TODO(dkwingsmt): After Flutter supports multi-view, look up the correct
+    // render view for the ID.
+    // https://github.com/flutter/flutter/issues/121573
+    assert(viewId == _implicitViewId,
+        'Unexpected view ID $viewId (expecting implicit view ID $_implicitViewId)');
+    assert(viewId == renderView.flutterView.viewId);
+    renderView.hitTest(result, position: position);
     super.hitTestInView(result, position, viewId);
   }
 
