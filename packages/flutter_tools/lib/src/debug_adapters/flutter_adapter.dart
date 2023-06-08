@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker;
@@ -12,6 +11,7 @@ import 'package:vm_service/vm_service.dart' as vm;
 import '../base/io.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../globals.dart' show fs;
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
@@ -139,7 +139,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     );
 
     if (vmServiceUri == null && vmServiceInfoFile != null) {
-      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, File(vmServiceInfoFile));
+      final Uri uriFromFile = await waitForVmServiceInfoFile(logger, fs.file(vmServiceInfoFile));
       vmServiceUri = uriFromFile.toString();
     }
 
