@@ -3507,44 +3507,24 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Value indicator disappears after a bit when clicked', (WidgetTester tester) async {
-    double currentValue = 0.5;
-    final FocusNode focusNode = FocusNode();
-
-    Widget buildApp({bool enabled = true}) {
-      return MaterialApp(
-        theme: ThemeData(
-          sliderTheme: const SliderThemeData(
-            showValueIndicator: ShowValueIndicator.always,
+  testWidgets('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+    const double currentValue = 0.5;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: Slider(
+            value: currentValue,
+            divisions: 5,
+            label: currentValue.toStringAsFixed(1),
+            onChanged: (double value) {},
           ),
         ),
-        home: Material(
-          child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return Slider(
-                value: currentValue,
-                focusNode: focusNode,
-                divisions: 5,
-                label: currentValue.toStringAsFixed(1),
-                onChanged: enabled
-                    ? (double newValue) {
-                  setState(() {
-                    currentValue = newValue;
-                  });
-                }
-                    : null,
-              );
-            }),
-          ),
-        ),
-      );
-    }
+      ),
+    ));
 
-    await tester.pumpWidget(buildApp());
-
-    // Slider does not show value indicator before being clicked
+    // Slider does not show value indicator initially.
     await tester.pumpAndSettle();
-    expect(focusNode.hasFocus, false);
     RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
@@ -3554,25 +3534,21 @@ void main() {
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
     final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
 
-    // Click somewhere to bring up the value indicator
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.down(tapLocation);
-    await gesture.up();
-    focusNode.requestFocus();
+    // Tap the slider to bring up the value indicator.
+    await tester.tapAt(tapLocation);
     await tester.pumpAndSettle();
 
-    // Slider shows value indicator after being clicked
-    expect(focusNode.hasFocus, true);
+    // Value indicator is visible.
     valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
       paints..path(color: const Color(0xff000000))..paragraph(),
     );
 
+    // Wait for the value indicator to disappear.
     await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    // Slider value indicator is no longer visible after 2 seconds
+    // Value indicator is no longer visible.
     expect(
       valueIndicatorBox,
       isNot(paints..path(color: const Color(0xff000000))..paragraph()),
