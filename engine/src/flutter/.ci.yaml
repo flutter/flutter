@@ -106,7 +106,6 @@ targets:
     recipe: engine/scenarios
     enabled_branches:
       - main
-      - master
     properties:
       dependencies: >-
         [
@@ -187,7 +186,6 @@ targets:
     bringup: true
     enabled_branches:
       - main
-      - master
     recipe: engine/engine_metrics
     presubmit: false
     properties:
@@ -250,7 +248,6 @@ targets:
     recipe: engine/framework_smoke
     enabled_branches:
       - main
-      - master
     timeout: 60
 
   - name: Linux Host Engine
@@ -420,7 +417,6 @@ targets:
     recipe: engine/web_engine_framework
     enabled_branches:
       - main
-      - master
     properties:
       add_recipes_cq: "true"
       cores: "32"
