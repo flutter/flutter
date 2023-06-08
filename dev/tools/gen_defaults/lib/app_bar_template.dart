@@ -79,7 +79,7 @@ class _MediumScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     ${textStyle('md.comp.top-app-bar.medium.headline')}?.apply(color: ${color('md.comp.top-app-bar.medium.headline.color')});
 
   @override
-  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
+  EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
 }
 
 class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
@@ -102,7 +102,7 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     ${textStyle('md.comp.top-app-bar.large.headline')}?.apply(color: ${color('md.comp.top-app-bar.large.headline.color')});
 
   @override
-  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
+  EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
 }
 ''';
 }

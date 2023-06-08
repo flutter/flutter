@@ -519,9 +519,10 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @override
-  void hitTest(HitTestResult result, Offset position) {
+  void hitTestInView(HitTestResult result, Offset position, int viewId) {
+    assert(viewId == renderView.flutterView.viewId);
     renderView.hitTest(result, position: position);
-    super.hitTest(result, position);
+    super.hitTestInView(result, position, viewId);
   }
 
   Future<void> _forceRepaint() {
