@@ -6,9 +6,11 @@
 
 #include <limits>
 #include <sstream>
+#include <type_traits>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/testing/testing.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/gradient.h"
 #include "impeller/geometry/half.h"
@@ -1443,6 +1445,20 @@ TEST(GeometryTest, ColorMakeRGBA8) {
     Color a = Color::MakeRGBA8(63, 127, 191, 127);
     Color b(0.247059, 0.498039, 0.74902, 0.498039);
     ASSERT_COLOR_NEAR(a, b);
+  }
+}
+
+#define _BLEND_MODE_NAME_CHECK(blend_mode) \
+  case BlendMode::k##blend_mode:           \
+    ASSERT_STREQ(result, #blend_mode);     \
+    break;
+
+TEST(GeometryTest, BlendModeToString) {
+  using BlendT = std::underlying_type_t<BlendMode>;
+  for (BlendT i = 0; i <= static_cast<BlendT>(BlendMode::kLast); i++) {
+    auto mode = static_cast<BlendMode>(i);
+    auto result = BlendModeToString(mode);
+    switch (mode) { IMPELLER_FOR_EACH_BLEND_MODE(_BLEND_MODE_NAME_CHECK) }
   }
 }
 

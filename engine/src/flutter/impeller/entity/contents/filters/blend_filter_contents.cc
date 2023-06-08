@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 
+#include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
@@ -15,6 +16,7 @@
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/sampler_library.h"
@@ -37,6 +39,7 @@ static std::optional<Entity> AdvancedBlend(
     const ContentContext& renderer,
     const Entity& entity,
     const Rect& coverage,
+    BlendMode blend_mode,
     std::optional<Color> foreground_color,
     bool absorb_opacity,
     PipelineProc pipeline_proc,
@@ -114,7 +117,8 @@ static std::optional<Entity> AdvancedBlend(
         std::invoke(pipeline_proc, renderer, options);
 
     Command cmd;
-    cmd.label = "Advanced Blend Filter";
+    cmd.label =
+        SPrintF("Advanced Blend Filter (%s)", BlendModeToString(blend_mode));
     cmd.BindVertices(vtx_buffer);
     cmd.pipeline = std::move(pipeline);
 
@@ -228,7 +232,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
-    cmd.label = "Foreground Advanced Blend Filter";
+    cmd.label = SPrintF("Foreground Advanced Blend Filter (%s)",
+                        BlendModeToString(blend_mode));
     cmd.BindVertices(vtx_buffer);
     cmd.stencil_reference = entity.GetStencilDepth();
     auto options = OptionsFromPass(pass);
@@ -413,7 +418,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
-    cmd.label = "Foreground PorterDuff Blend Filter";
+    cmd.label = SPrintF("Foreground PorterDuff Blend Filter (%s)",
+                        BlendModeToString(blend_mode));
     cmd.BindVertices(vtx_buffer);
     cmd.stencil_reference = entity.GetStencilDepth();
     auto options = OptionsFromPass(pass);
@@ -475,7 +481,7 @@ static std::optional<Entity> PipelineBlend(
     const ContentContext& renderer,
     const Entity& entity,
     const Rect& coverage,
-    BlendMode pipeline_blend,
+    BlendMode blend_mode,
     std::optional<Color> foreground_color,
     bool absorb_opacity,
     std::optional<Scalar> alpha) {
@@ -493,7 +499,8 @@ static std::optional<Entity> PipelineBlend(
     auto& host_buffer = pass.GetTransientsBuffer();
 
     Command cmd;
-    cmd.label = "Pipeline Blend Filter";
+    cmd.label =
+        SPrintF("Pipeline Blend Filter (%s)", BlendModeToString(blend_mode));
     auto options = OptionsFromPass(pass);
 
     auto add_blend_command = [&](std::optional<Snapshot> input) {
@@ -548,7 +555,7 @@ static std::optional<Entity> PipelineBlend(
     // Write subsequent textures using the selected blend mode.
 
     if (inputs.size() >= 2) {
-      options.blend_mode = pipeline_blend;
+      options.blend_mode = blend_mode;
       cmd.pipeline = renderer.GetBlendPipeline(options);
 
       for (auto texture_i = inputs.begin() + 1; texture_i < inputs.end();
@@ -570,7 +577,7 @@ static std::optional<Entity> PipelineBlend(
       contents->SetColor(foreground_color.value());
 
       Entity foreground_entity;
-      foreground_entity.SetBlendMode(pipeline_blend);
+      foreground_entity.SetBlendMode(blend_mode);
       foreground_entity.SetContents(contents);
       if (!foreground_entity.Render(renderer, pass)) {
         return false;
@@ -598,19 +605,18 @@ static std::optional<Entity> PipelineBlend(
       entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
-#define BLEND_CASE(mode)                                                     \
-  case BlendMode::k##mode:                                                   \
-    advanced_blend_proc_ = [](const FilterInput::Vector& inputs,             \
-                              const ContentContext& renderer,                \
-                              const Entity& entity, const Rect& coverage,    \
-                              std::optional<Color> fg_color,                 \
-                              bool absorb_opacity,                           \
-                              std::optional<Scalar> alpha) {                 \
-      PipelineProc p = &ContentContext::GetBlend##mode##Pipeline;            \
-      return AdvancedBlend<Blend##mode##Pipeline>(inputs, renderer, entity,  \
-                                                  coverage, fg_color,        \
-                                                  absorb_opacity, p, alpha); \
-    };                                                                       \
+#define BLEND_CASE(mode)                                                      \
+  case BlendMode::k##mode:                                                    \
+    advanced_blend_proc_ =                                                    \
+        [](const FilterInput::Vector& inputs, const ContentContext& renderer, \
+           const Entity& entity, const Rect& coverage, BlendMode blend_mode,  \
+           std::optional<Color> fg_color, bool absorb_opacity,                \
+           std::optional<Scalar> alpha) {                                     \
+          PipelineProc p = &ContentContext::GetBlend##mode##Pipeline;         \
+          return AdvancedBlend<Blend##mode##Pipeline>(                        \
+              inputs, renderer, entity, coverage, blend_mode, fg_color,       \
+              absorb_opacity, p, alpha);                                      \
+        };                                                                    \
     break;
 
 void BlendFilterContents::SetBlendMode(BlendMode blend_mode) {
@@ -683,7 +689,7 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
           blend_mode_, GetAlpha(), GetAbsorbOpacity());
     }
-    return advanced_blend_proc_(inputs, renderer, entity, coverage,
+    return advanced_blend_proc_(inputs, renderer, entity, coverage, blend_mode_,
                                 foreground_color_, GetAbsorbOpacity(),
                                 GetAlpha());
   }

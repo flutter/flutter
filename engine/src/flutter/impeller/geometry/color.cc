@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <sstream>
+#include <type_traits>
 
 #include "impeller/base/strings.h"
 #include "impeller/geometry/constants.h"
@@ -36,6 +37,16 @@ static constexpr inline bool ValidateBlendModes() {
 }
 static_assert(ValidateBlendModes(),
               "IMPELLER_FOR_EACH_BLEND_MODE must match impeller::BlendMode.");
+
+#define _IMPELLER_BLEND_MODE_NAME_LIST(blend_mode) #blend_mode,
+
+static constexpr const char* kBlendModeNames[] = {
+    IMPELLER_FOR_EACH_BLEND_MODE(_IMPELLER_BLEND_MODE_NAME_LIST)};
+
+const char* BlendModeToString(BlendMode blend_mode) {
+  return kBlendModeNames[static_cast<std::underlying_type_t<BlendMode>>(
+      blend_mode)];
+}
 
 ColorHSB ColorHSB::FromRGB(Color rgb) {
   Scalar R = rgb.red;

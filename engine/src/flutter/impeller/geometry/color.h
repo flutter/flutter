@@ -54,7 +54,7 @@ enum class YUVColorSpace { kBT601LimitedRange, kBT601FullRange };
 enum class BlendMode {
   // The following blend modes are able to be used as pipeline blend modes or
   // via `BlendFilterContents`.
-  kClear,
+  kClear = 0,
   kSource,
   kDestination,
   kSourceOver,
@@ -90,6 +90,8 @@ enum class BlendMode {
 
   kLast = kLuminosity,
 };
+
+const char* BlendModeToString(BlendMode blend_mode);
 
 /**
  *  Represents a RGBA color
