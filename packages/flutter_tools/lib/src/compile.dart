@@ -233,6 +233,7 @@ class KernelCompiler {
     String? initializeFromDill,
     String? platformDill,
     Directory? buildDir,
+    String? targetOS,
     bool checkDartPluginRegistry = false,
     required String? packagesPath,
     required BuildMode buildMode,
@@ -293,6 +294,11 @@ class KernelCompiler {
       if (aot) ...<String>[
         '--aot',
         '--tfa',
+        // The --target-os flag only makes sense for whole program compilation.
+        if (targetOS != null) ...<String>[
+          '--target-os',
+          targetOS,
+        ],
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
