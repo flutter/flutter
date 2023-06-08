@@ -3260,6 +3260,48 @@ void main() {
     final Offset menuTopLeft = tester.getTopLeft(find.bySemanticsLabel('Popup menu'));
     expect(childBottomLeft, menuTopLeft);
   });
+
+  testWidgets('PopupmenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
+                  PopupMenuItem<int>(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const SizedBox(
+                            height: 200.0,
+                            child: Center(child: Text('ModalBottomSheet')),
+                          );
+                        },
+                      );
+                    },
+                    value: 10,
+                    child: const Text('ACTION'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<int>));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ACTION'));
+    await tester.pumpAndSettle();
+
+    // Verify that the ModalBottomSheet is displayed
+    final Finder modalBottomSheet = find.text('ModalBottomSheet');
+    expect(modalBottomSheet, findsOneWidget);
+  });
 }
 
 class TestApp extends StatelessWidget {
