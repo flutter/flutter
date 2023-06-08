@@ -239,7 +239,15 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 
   @override
   CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name == 'clamp') {
+    final NodeList<Expression> arguments = node.argumentList.arguments;
+    // This may produce false positives when the receiver of the method
+    // invocation is not a subtype of num. The ast of the receiver isn't
+    // guaranteed to be resolved at this time. Check whether the argument list
+    // consists of 2 positional args to reduce false positives.
+    final bool isNumClampInvocatoin = node.methodName.name == 'clamp'
+                                   && arguments.length == 2
+                                   && !arguments.any((Expression exp) => exp is NamedExpression);
+    if (isNumClampInvocatoin) {
       final _Line line = _getLine(parseResult, node.function.offset);
       if (!line.content.contains('// ignore_clamp_double_lint')) {
         clamps.add(line);
