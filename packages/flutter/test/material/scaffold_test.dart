@@ -2801,6 +2801,43 @@ void main() {
     // The scrim should be gone.
     expect(findModalBarrier(), findsNothing);
   });
+
+  testWidgets('Animated closing bottom sheet and removing floating action button', (WidgetTester tester) async {
+    PersistentBottomSheetController<void>? controller;
+    bool show = true;
+    late StateSetter setState;
+
+    await tester.pumpWidget(StatefulBuilder(builder: (_, StateSetter stateSetter) {
+      setState = stateSetter;
+      return MaterialApp(
+        home: Scaffold(
+          body: Builder(builder: (BuildContext context) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (show) {
+                controller = Scaffold.of(context).showBottomSheet(
+                  (_) => Container(height: 200),
+                );
+              } else {
+                controller?.close();
+              }
+            });
+            return Container();
+          }),
+          floatingActionButton: show
+              ? FloatingActionButton(onPressed: () {})
+              : null,
+        ),
+      );
+    }));
+
+    setState(() => show = false);
+
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(controller?.closed, completes);
+    expect(find.byType(FloatingActionButton), findsNothing);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
