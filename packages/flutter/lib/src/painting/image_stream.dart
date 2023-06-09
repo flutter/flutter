@@ -558,6 +558,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   }
 
   /// Adds a error listener callback that is called when the first error is reported.
+  ///
   /// The callback will be removed automatically after the first successful
   /// image load or the first error - that is why it is called "ephemeral".
   ///
