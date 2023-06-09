@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
@@ -535,7 +536,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
 
     _route = _ContextMenuRoute<void>(
       actions: widget.actions,
-      barrierLabel: 'Dismiss',
+      barrierLabel: MaterialLocalizations.of(context).contextMenuDismissLabel,
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
         sigmaY: 5.0,
