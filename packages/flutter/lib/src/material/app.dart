@@ -345,7 +345,7 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   final RouteFactory? onUnknownRoute;
 
-  /// {@macro flutter.widgets.widgetApp.onNavigationNotification}
+  /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
   final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}

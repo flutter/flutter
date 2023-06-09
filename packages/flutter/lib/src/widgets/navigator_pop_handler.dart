@@ -26,7 +26,7 @@ import 'pop_scope.dart';
 ///  * [NavigationNotification], which indicates whether a [Navigator] in a
 ///    subtree can handle pops.
 class NavigatorPopHandler extends StatefulWidget {
-  /// Creates an instance of [NavigatorPophandler].
+  /// Creates an instance of [NavigatorPopHandler].
   const NavigatorPopHandler({
     super.key,
     required this.child,
