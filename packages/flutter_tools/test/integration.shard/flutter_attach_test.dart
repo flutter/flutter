@@ -158,7 +158,7 @@ void main() {
       final Uri vmServiceUri = Uri.parse(vmServiceUriString);
       expect(vmServiceUri.port, equals(ddsPort));
     });
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/128546
 
   group('--serve-observatory', () {
     late FlutterRunTestDriver flutterRun, flutterAttach;
