@@ -22,6 +22,9 @@ template("fidl_library") {
 
   assert(defined(invoker.sources), "A FIDL library requires some sources.")
 
+  assert(fuchsia_target_api_level != -1,
+         "Must set a target api level when using FIDL libraries")
+
   library_name = target_name
   if (defined(invoker.name)) {
     library_name = invoker.name
@@ -85,6 +88,8 @@ template("fidl_library") {
              rebase_path(coding_tables, root_build_dir),
              "--name",
              library_name,
+             "--available",
+             "fuchsia:${fuchsia_target_api_level}",
              "--sources",
            ] + rebase_path(sources, root_build_dir)
 
