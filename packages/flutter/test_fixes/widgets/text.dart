@@ -6,9 +6,5 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   // Change made in https://github.com/flutter/flutter/pull/128522
-  Text();
-  Text.rich();
-  Text.rich(textScaleFactor: 2.0);
-  Text(textScaleFactor: 2.0)
-    .textScaleFactor;
+  Text().textScaleFactor;
 }
