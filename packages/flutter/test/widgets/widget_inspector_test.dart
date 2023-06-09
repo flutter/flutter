@@ -5271,24 +5271,3 @@ extension WidgetInspectorServiceExtension on WidgetInspectorService {
       ))['result'] as List<Object?>).cast<String>();
   }
 }
-
-/// Forces garbage collection by aggressive memory allocation.
-Future<void> _forceGC() async {
-  const Duration timeout = Duration(seconds: 5);
-  const int gcCycles = 3; // 1 should be enough, but we do 3 to make sure test is not flaky.
-  final int barrier = reachabilityBarrier;
-
-  final List<List<DateTime>> storage = <List<DateTime>>[];
-
-  void allocateMemory() {
-    storage.add(Iterable<DateTime>.generate(10000, (_) => DateTime.now()).toList());
-    if (storage.length > 100) {
-      storage.removeAt(0);
-    }
-  }
-
-  while (reachabilityBarrier < barrier + gcCycles) {
-    await Future<void>.delayed(Duration.zero);
-    allocateMemory();
-  }
-}
