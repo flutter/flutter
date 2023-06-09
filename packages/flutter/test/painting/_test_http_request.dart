@@ -4,7 +4,7 @@
 
 import 'dart:js_interop';
 
-import 'package:flutter/src/services/dom.dart';
+import 'package:web/web.dart' as web;
 
 /// Defines a new property on an Object.
 @JS('Object.defineProperty')
@@ -34,6 +34,8 @@ class DomXMLHttpRequestMock {
     JSFunction addEventListener,
   });
 }
+
+typedef _DartDomEventListener = JSVoid Function(web.Event event);
 
 class TestHttpRequest {
   TestHttpRequest() {
@@ -66,20 +68,20 @@ class TestHttpRequest {
     headers[name.toDart] = value.toDart;
   }
 
-  JSVoid addEventListener(JSString type, DomEventListener listener) {
+  JSVoid addEventListener(JSString type, web.EventListener listener) {
     if (type.toDart == mockEvent?.type) {
-      final DartDomEventListener dartListener =
-        (listener as JSExportedDartFunction).toDart as DartDomEventListener;
+      final _DartDomEventListener dartListener =
+          (listener as JSExportedDartFunction).toDart as _DartDomEventListener;
       dartListener(mockEvent!.event);
     }
   }
 
-  DomXMLHttpRequest getMock() => _mock as DomXMLHttpRequest;
+  web.XMLHttpRequest getMock() => _mock as web.XMLHttpRequest;
 }
 
 class MockEvent {
   MockEvent(this.type, this.event);
 
   final String type;
-  final DomEvent event;
+  final web.Event event;
 }
