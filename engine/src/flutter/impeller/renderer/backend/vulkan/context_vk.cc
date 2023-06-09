@@ -184,6 +184,17 @@ void ContextVK::Setup(Settings settings) {
 
   vk::InstanceCreateInfo instance_info;
   if (caps->AreValidationsEnabled()) {
+    std::stringstream ss;
+    ss << "Enabling validation layers, features: [";
+    for (const auto& validation : enabled_validations) {
+      ss << vk::to_string(validation) << " ";
+    }
+    ss << "]";
+    FML_LOG(ERROR) << ss.str();
+#if !defined(IMPELLER_ENABLE_VULKAN_VALIDATION_LAYERS) && FML_OS_ANDROID
+    FML_LOG(ERROR) << "Vulkan validation layers turned on but the gn argument "
+                      "`--enable-vulkan-validation-layers` is missing.";
+#endif
     instance_info.pNext = &validation;
   }
   instance_info.setPEnabledLayerNames(enabled_layers_c);

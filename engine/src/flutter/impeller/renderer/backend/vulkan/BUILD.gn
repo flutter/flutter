@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/vulkan/config.gni")
 import("../../../tools/impeller.gni")
 
 impeller_component("vulkan_unittests") {
@@ -96,4 +97,8 @@ impeller_component("vulkan") {
     "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//third_party/vulkan_memory_allocator",
   ]
+
+  if (enable_vulkan_validation_layers) {
+    defines = [ "IMPELLER_ENABLE_VULKAN_VALIDATION_LAYERS" ]
+  }
 }
