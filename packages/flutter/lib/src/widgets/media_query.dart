@@ -41,15 +41,8 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.devicePixelRatio].
   devicePixelRatio,
   /// Specifies the aspect corresponding to [MediaQueryData.textScaleFactor].
-  ///
-  /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [textScaler] instead.
-  @Deprecated(
-    'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
-  )
   textScaleFactor,
+  /// Specifies the aspect corresponding to [MediaQueryData.textScaler].
   textScaler,
   /// Specifies the aspect corresponding to [MediaQueryData.platformBrightness].
   platformBrightness,
