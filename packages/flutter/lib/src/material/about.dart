@@ -1143,8 +1143,6 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   /// Key to access navigator in the nested layout.
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
-  bool rootPopEnabled = true;
-
   @override
   void openDetailPage(Object arguments) {
     _cachedDetailArguments = arguments;
@@ -1175,17 +1173,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
-    return PopScope(
-      // Push pop check into nested navigator.
-      popEnabled: rootPopEnabled,
-      onPopped: (bool success) async {
-        if (success) {
-          return;
-        }
-        setState(() {
-          rootPopEnabled = true;
-        });
-        await _navigatorKey.currentState!.maybePop();
+    return NavigatorPopHandler(
+      onPop: () {
+        _navigatorKey.currentState!.maybePop();
       },
       child: Navigator(
         key: _navigatorKey,
@@ -1204,20 +1194,10 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {
             case _navMaster:
-              if (!rootPopEnabled) {
-                setState(() {
-                  rootPopEnabled = true;
-                });
-              }
               // Matching state to navigation event.
               focus = _Focus.master;
               return masterPageRoute;
             case _navDetail:
-              if (rootPopEnabled) {
-                setState(() {
-                  rootPopEnabled = false;
-                });
-              }
               // Matching state to navigation event.
               focus = _Focus.detail;
               // Cache detail page settings.
