@@ -22,8 +22,11 @@ class PrecacheCommand extends FlutterCommand {
        _platform = platform,
        _logger = logger,
        _featureFlags = featureFlags {
-    argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
-        help: 'Precache artifacts for all host platforms.');
+    argParser.addFlag('all-platforms',
+        abbr: 'a',
+        negatable: false,
+        help: 'Precache artifacts for all host platforms.',
+        aliases: const <String>['all']);
     argParser.addFlag('force', abbr: 'f', negatable: false,
         help: 'Force re-downloading of artifacts.');
     argParser.addFlag('android',
