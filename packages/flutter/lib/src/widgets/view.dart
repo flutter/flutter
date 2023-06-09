@@ -422,6 +422,7 @@ class ViewAnchor extends StatelessWidget {
   }
 }
 
+// TODO(goderbauer): consider splitting this in two.
 class _MultiChildComponentElement extends Element {
   _MultiChildComponentElement(super.widget);
 
@@ -450,7 +451,9 @@ class _MultiChildComponentElement extends Element {
   }
 
   @override
-  void update(Widget newWidget) {
+  void update(_MultiChildComponentWidget newWidget) {
+    // Cannot switch from ViewAnchor config to ViewCollection config.
+    assert((newWidget._child == null) == ((widget as _MultiChildComponentWidget)._child == null));
     super.update(newWidget);
     rebuild(force: true);
     assert(_debugAssertChildren());

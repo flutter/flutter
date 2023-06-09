@@ -6105,7 +6105,6 @@ abstract class RenderObjectElement extends Element {
 
   RenderObjectElement? _findAncestorRenderObjectElement() {
     Element? ancestor = _parent;
-    bool debugFailure = false;
     while (ancestor != null && ancestor is! RenderObjectElement) {
       // In debug mode we check whether the ancestor accepts RenderObjects to
       // produce a better error message in attachRenderObject. In release mode,
@@ -6113,11 +6112,19 @@ abstract class RenderObjectElement extends Element {
       // debugAcceptsRenderObjectForSlot always returns true) and don't check
       // explicitly.
       assert(() {
-        debugFailure = !ancestor!.debugAcceptsRenderObjectForSlot(slot);
+        if (!ancestor!.debugAcceptsRenderObjectForSlot(slot)) {
+          ancestor = null;
+        }
         return true;
-      } ());
-      ancestor = debugFailure ? null : ancestor._parent;
+      }());
+      ancestor = ancestor?._parent;
     }
+    assert(() {
+      if (ancestor?.debugAcceptsRenderObjectForSlot(slot) == false) {
+        ancestor = null;
+      }
+      return true;
+    }());
     return ancestor as RenderObjectElement?;
   }
 
