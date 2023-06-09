@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
