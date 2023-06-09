@@ -315,18 +315,21 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @visibleForTesting
   void initMouseTracker([MouseTracker? tracker]) {
     _mouseTracker?.dispose();
-    _mouseTracker = tracker ?? MouseTracker();
+    _mouseTracker = tracker ?? MouseTracker((Offset position, int viewId) {
+      final HitTestResult result = HitTestResult();
+      hitTestInView(result, position, viewId);
+      return result;
+    });
   }
 
   @override // from GestureBinding
   void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
     _mouseTracker!.updateWithEvent(
       event,
-      // Enter and exit events should be triggered with or without buttons
-      // pressed. When the button is pressed, normal hit test uses a cached
+      // When the button is pressed, normal hit test uses a cached
       // result, but MouseTracker requires that the hit test is re-executed to
       // update the hovering events.
-      () => (hitTestResult == null || event is PointerMoveEvent) ? renderView.hitTestMouseTrackers(event.position) : hitTestResult,
+      event is PointerMoveEvent ? null : hitTestResult,
     );
     super.dispatchEvent(event, hitTestResult);
   }
@@ -372,7 +375,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
         _debugMouseTrackerUpdateScheduled = false;
         return true;
       }());
-      _mouseTracker!.updateAllDevices(renderView.hitTestMouseTrackers);
+      _mouseTracker!.updateAllDevices();
     });
   }
 
@@ -518,8 +521,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await endOfFrame;
   }
 
+  late final int _implicitViewId = platformDispatcher.implicitView!.viewId;
+
   @override
   void hitTestInView(HitTestResult result, Offset position, int viewId) {
+    // Currently Flutter only supports one view, the implicit view `renderView`.
+    // TODO(dkwingsmt): After Flutter supports multi-view, look up the correct
+    // render view for the ID.
+    // https://github.com/flutter/flutter/issues/121573
+    assert(viewId == _implicitViewId,
+        'Unexpected view ID $viewId (expecting implicit view ID $_implicitViewId)');
     assert(viewId == renderView.flutterView.viewId);
     renderView.hitTest(result, position: position);
     super.hitTestInView(result, position, viewId);
