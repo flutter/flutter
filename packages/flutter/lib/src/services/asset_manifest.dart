@@ -7,7 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
-const String _kAssetManifestFilename = 'AssetManifest.smcbin';
+// We use .bin as the extension since it is well-known to represent
+// data in some arbitrary binary format. Using a well-known extension here
+// is important for web, because some web servers will not serve files with
+// unrecognized file extensions by default.
+// See https://github.com/flutter/flutter/issues/128456.
+const String _kAssetManifestFilename = 'AssetManifest.bin';
 
 /// Contains details about available assets and their variants.
 /// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
