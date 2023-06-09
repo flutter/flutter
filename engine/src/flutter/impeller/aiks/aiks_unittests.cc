@@ -2448,6 +2448,54 @@ TEST_P(AiksTest, CanRenderClippedBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderForegroundBlendWithMaskBlur) {
+  // This case triggers the ForegroundPorterDuffBlend path. The color filter
+  // should apply to the color only, and respect the alpha mask.
+  Canvas canvas;
+  canvas.ClipRect(Rect::MakeXYWH(100, 150, 400, 400));
+  canvas.DrawCircle({400, 400}, 200,
+                    {
+                        .color = Color::White(),
+                        .color_filter =
+                            [](const FilterInput::Ref& input) {
+                              return ColorFilterContents::MakeBlend(
+                                  BlendMode::kSource, {input}, Color::Green());
+                            },
+                        .mask_blur_descriptor =
+                            Paint::MaskBlurDescriptor{
+                                .style = FilterContents::BlurStyle::kNormal,
+                                .sigma = Radius(20),
+                            },
+                    });
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderForegroundAdvancedBlendWithMaskBlur) {
+  // This case triggers the ForegroundAdvancedBlend path. The color filter
+  // should apply to the color only, and respect the alpha mask.
+  Canvas canvas;
+  canvas.ClipRect(Rect::MakeXYWH(100, 150, 400, 400));
+  canvas.DrawCircle({400, 400}, 200,
+                    {
+                        .color = Color::White(),
+                        .color_filter =
+                            [](const FilterInput::Ref& input) {
+                              return ColorFilterContents::MakeBlend(
+                                  BlendMode::kColor, {input}, Color::Green());
+                            },
+                        .mask_blur_descriptor =
+                            Paint::MaskBlurDescriptor{
+                                .style = FilterContents::BlurStyle::kNormal,
+                                .sigma = Radius(20),
+                            },
+                    });
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 // Regression test for https://github.com/flutter/flutter/issues/126701 .
 TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
   if (GetParam() != PlaygroundBackend::kMetal) {
