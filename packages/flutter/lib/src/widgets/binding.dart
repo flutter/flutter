@@ -1222,15 +1222,8 @@ class RootElement extends Element with RootElementMixin {
   }
 
   void _rebuild() {
-    _child = updateChild(_child, (widget as RootWidget).child, RenderTreeRootSlot.instance);
+    _child = updateChild(_child, (widget as RootWidget).child, /* slot */ null);
   }
-
-  // TODO(goderbauer): ??
-  // @override
-  // RenderObject? get renderObject {
-  //   // assert(false);
-  //   return null;
-  // }
 
   @override
   bool get debugDoingBuild => false; // This element doesn't have a build phase.

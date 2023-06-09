@@ -456,6 +456,11 @@ class _MultiChildComponentElement extends Element {
     assert(_debugAssertChildren());
   }
 
+  static const Object _viewSlot = Object();
+
+  @override
+  bool debugAcceptsRenderObjectForSlot(Object? slot) => slot != _viewSlot;
+
   @override
   void performRebuild() {
     final _MultiChildComponentWidget typedWidget = widget as _MultiChildComponentWidget;
@@ -467,7 +472,7 @@ class _MultiChildComponentElement extends Element {
       _viewElements,
       views,
       forgottenChildren: _forgottenViewElements,
-      slots: List<Object>.generate(views.length, (_) => RenderTreeRootSlot.instance),
+      slots: List<Object>.generate(views.length, (_) => _viewSlot),
     );
     _forgottenViewElements.clear();
 
@@ -503,13 +508,8 @@ class _MultiChildComponentElement extends Element {
   bool get debugDoingBuild => false; // This element does not have a concept of "building".
 
   @override
-  // TODO(window): Update documentation.
-  // TODO(goderbauer): The base class implementation doesn't consider this currently.
-  RenderObject? get renderObject {
-    // If we don't have a _childElement this returns null on purpose because
-    // nothing above this element has an associated render object.
-    return _childElement?.renderObject;
-  }
+  // TODO(window): Update documentation on renderObject getter.
+  Element? get renderObjectAttachingChild => _childElement;
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
