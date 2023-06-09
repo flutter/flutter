@@ -2327,6 +2327,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     });
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
+      // ???
       const String group = 'test-group';
 
       const Directionality theWidget = Directionality(
@@ -2342,6 +2343,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.pumpWidget(theWidget);
 
       final Element element = find.byWidget(theWidget).evaluate().first;
+      final children = element.debugDescribeChildren();
 
 
 
