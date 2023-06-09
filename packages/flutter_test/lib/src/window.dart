@@ -167,8 +167,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       : null;
   }
 
-  final Map<Object, TestFlutterView> _testViews = <Object, TestFlutterView>{};
-  final Map<Object, TestDisplay> _testDisplays = <Object, TestDisplay>{};
+  final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
+  final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
@@ -511,6 +511,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestFlutterView> get views => _testViews.values;
 
   @override
+  FlutterView? view({required int id}) => _testViews[id];
+
+  @override
   Iterable<TestDisplay> get displays => _testDisplays.values;
 
   void _updateViewsAndDisplays() {
@@ -678,8 +681,7 @@ class TestFlutterView implements FlutterView {
   final TestDisplay _display;
 
   @override
-  // TODO(goderbauer): Clean ignore and cast up after https://github.com/flutter/engine/pull/42493 lands.
-  int get viewId => _view.viewId as int; // ignore: unnecessary_cast
+  int get viewId => _view.viewId;
 
   /// The device pixel ratio to use for this test.
   ///
@@ -2089,8 +2091,7 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  // TODO(goderbauer): Clean ignore and cast up after https://github.com/flutter/engine/pull/42493 lands.
-  int get viewId => _view.viewId as int; // ignore: unnecessary_cast
+  int get viewId => _view.viewId;
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give
