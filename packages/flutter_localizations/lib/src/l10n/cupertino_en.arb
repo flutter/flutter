@@ -178,5 +178,10 @@
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
     "description": "Label read out by accessibility tools (VoiceOver) for a modal barrier to indicate that a tap dismisses the barrier. A modal barrier can, for example, be found behind an alert or popup to block user interaction with elements behind it."
+  },
+
+  "contextMenuDismissLabel": "Dismiss context menu",
+  "@contextMenuDismissLabel": {
+    "description": "Label read out by accessibility tools (TalkBack or VoiceOver) for the area around a context menu to indicate that a tap dismisses the context menu."
   }
 }

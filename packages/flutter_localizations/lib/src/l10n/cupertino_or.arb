@@ -22,5 +22,6 @@
   "tabSemanticsLabel": "$tabCountର $tabIndex ଟାବ୍",
   "modalBarrierDismissLabel": "ଖାରଜ କରନ୍ତୁ",
   "searchTextFieldPlaceholderLabel": "ସନ୍ଧାନ କରନ୍ତୁ",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "contextMenuDismissLabel": "Dismiss context menu"
 }

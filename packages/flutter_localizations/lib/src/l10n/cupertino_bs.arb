@@ -27,5 +27,6 @@
   "tabSemanticsLabel": "Kartica $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Odbaci",
   "searchTextFieldPlaceholderLabel": "Pretraživanje",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "contextMenuDismissLabel": "Dismiss context menu"
 }
