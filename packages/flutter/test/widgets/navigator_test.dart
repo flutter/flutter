@@ -4203,6 +4203,7 @@ void main() {
       expect(calls, hasLength(0));
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
     testWidgets('navigating around a single Navigator with .pop', (WidgetTester tester) async {
@@ -4290,6 +4291,7 @@ void main() {
       expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
     testWidgets('navigating around a single Navigator with system back', (WidgetTester tester) async {
@@ -4378,6 +4380,7 @@ void main() {
       lastCallsLength = calls.length;
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
     testWidgets('a single Navigator with a PopScope that defaults to enabled', (WidgetTester tester) async {
@@ -4422,6 +4425,7 @@ void main() {
       lastCallsLength = calls.length;
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
     testWidgets('a single Navigator with a PopScope that defaults to disabled', (WidgetTester tester) async {
@@ -4464,6 +4468,7 @@ void main() {
       expect(calls.last, isTrue);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
     // Test both system back gestures and Navigator.pop.
@@ -4574,6 +4579,7 @@ void main() {
         expect(calls.last, isFalse);
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
     }
 
@@ -4715,6 +4721,7 @@ void main() {
       expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: isBrowser, // [intended] only non-web Android supports predictive back.
     );
 
     group('Navigator page API', () {
@@ -4847,6 +4854,7 @@ void main() {
         lastCallsLength = calls.length;
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
 
       testWidgets('starting with existing route history', (WidgetTester tester) async {
@@ -4939,6 +4947,7 @@ void main() {
         expect(calls, hasLength(2));
       },
         variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+        skip: isBrowser, // [intended] only non-web Android supports predictive back.
       );
     });
   });
