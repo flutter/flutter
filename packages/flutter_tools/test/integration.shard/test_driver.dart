@@ -757,7 +757,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // to throw if it sees an app.stop event before the response to this request.
     final Future<Map<String, Object?>> responseFuture = _waitFor(
       id: requestId,
-      ignoreAppStopEvent: method == 'app.stop',
+      ignoreAppStopEvent: method == 'app.stop' || method == 'app.detach',
     );
     _process?.stdin.writeln(jsonEncoded);
     final Map<String, Object?> response = await responseFuture;
