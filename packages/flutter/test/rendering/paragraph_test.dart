@@ -805,10 +805,14 @@ void main() {
       expect(paintingContext.canvas.drawnRect, isNull);
       expect(paintingContext.canvas.drawnRectPaint, isNull);
       selectionParagraph(paragraph, const TextPosition(offset: 1), const TextPosition(offset: 5));
+
+      paintingContext.canvas.clear();
       paragraph.paint(paintingContext, Offset.zero);
       expect(paintingContext.canvas.drawnRect, const Rect.fromLTWH(14.0, 0.0, 56.0, 14.0));
       expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
       expect(paintingContext.canvas.drawnRectPaint!.color, selectionColor);
+      // Selection highlight is painted before text.
+      expect(paintingContext.canvas.drawnItemTypes, <Type>[Rect, ui.Paragraph]);
 
       selectionParagraph(paragraph, const TextPosition(offset: 2), const TextPosition(offset: 4));
       paragraph.paint(paintingContext, Offset.zero);
@@ -1293,15 +1297,24 @@ void main() {
 class MockCanvas extends Fake implements Canvas {
   Rect? drawnRect;
   Paint? drawnRectPaint;
+  List<Type> drawnItemTypes=<Type>[];
 
   @override
   void drawRect(Rect rect, Paint paint) {
     drawnRect = rect;
     drawnRectPaint = paint;
+    drawnItemTypes.add(Rect);
   }
 
   @override
-  void drawParagraph(ui.Paragraph paragraph, Offset offset) { }
+  void drawParagraph(ui.Paragraph paragraph, Offset offset) {
+    drawnItemTypes.add(ui.Paragraph);
+  }
+  void clear() {
+    drawnRect = null;
+    drawnRectPaint = null;
+    drawnItemTypes.clear();
+  }
 }
 
 class MockPaintingContext extends Fake implements PaintingContext {
