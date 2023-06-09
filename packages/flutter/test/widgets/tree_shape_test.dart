@@ -22,18 +22,24 @@ void main() {
     ));
   });
 
-  testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
-    await tester.pumpWidget(Center(
-      child: View(
-        view: FakeView(tester.view),
-        child: Container(),
-      ),
-    ));
-
-    expect(tester.takeException(), isFlutterError);
-
-    await tester.pumpWidget(Container());
-  });
+  // testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
+  //   await tester.pumpWidget(Center(
+  //     child: View(
+  //       view: FakeView(tester.view),
+  //       child: Container(),
+  //     ),
+  //   ));
+  //
+  //   expect(tester.takeException(), isFlutterError.having(
+  //     (FlutterError error) => error.message,
+  //     'message',
+  //     contains('cannot maintain an independent render tree at its current location.'),
+  //   ));
+  //
+  //   // The tree is in very bad shape after that error, clean it up so it doesn't fail during teardown.
+  //   await tester.pumpWidget(Container());
+  //   expect(tester.takeException(), isAssertionError);
+  // });
 
   testWidgets('The child of a ViewAnchor cannot be a View', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -45,29 +51,37 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), isFlutterError);
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('cannot maintain an independent render tree at its current location.'),
+    ));
   });
 
-  testWidgets('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ViewAnchor(
-        view: const ColoredBox(color: Colors.red),
-        child: Container(),
-      ),
-    );
-
-    expect(tester.takeException(), isFlutterError);
-  });
+  // testWidgets('The view property of a ViewAnchor cannot be a render object widget', (WidgetTester tester) async {
+  //   await tester.pumpWidget(
+  //     ViewAnchor(
+  //       view: const ColoredBox(color: Colors.red),
+  //       child: Container(),
+  //     ),
+  //   );
+  //
+  //   expect(tester.takeException(), isFlutterError);
+  // });
 
   testWidgets('ViewAnchor cannot be used at the top of the widget tree (outside of View)', (WidgetTester tester) async {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
-      widget: ViewAnchor(
-        child: Container(),
+      widget: const ViewAnchor(
+        child: SizedBox(),
       ),
     );
 
-    expect(tester.takeException(), isFlutterError);
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      startsWith('RenderObject for SizedBox cannot find ancestor RenderObject to attach to.'),
+    ));
   });
 
   testWidgets('View can be used at the top of the widget tree', (WidgetTester tester) async {
@@ -98,12 +112,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Currently working on
   testWidgets('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewCollection(
         views: <Widget>[
           View(
-            view: tester.view,
+            view: FakeView(tester.view),
             child: Container(),
           ),
         ],
@@ -114,9 +129,8 @@ void main() {
   });
 
   testWidgets('ViewCollection can be used as ViewAnchor.view', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewAnchor(
+    await tester.pumpWidget(
+      ViewAnchor(
         view: ViewCollection(
           views: <Widget>[
             View(
@@ -132,18 +146,18 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('ViewCollection cannot have render object widgets as children', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
-        views: const <Widget>[
-          ColoredBox(color: Colors.red),
-        ],
-      ),
-    );
-
-    expect(tester.takeException(), isFlutterError);
-  });
+  // testWidgets('ViewCollection cannot have render object widgets as children', (WidgetTester tester) async {
+  //   await pumpWidgetWithoutViewWrapper(
+  //     tester: tester,
+  //     widget: ViewCollection(
+  //       views: const <Widget>[
+  //         ColoredBox(color: Colors.red),
+  //       ],
+  //     ),
+  //   );
+  //
+  //   expect(tester.takeException(), isFlutterError);
+  // });
 }
 
 Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {

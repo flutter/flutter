@@ -467,8 +467,7 @@ class _MultiChildComponentElement extends Element {
       _viewElements,
       views,
       forgottenChildren: _forgottenViewElements,
-      // TODO(goderbauer): figure out slots
-      // slots: List<Object>.generate(stages.length, (_) => View.viewSlot),
+      slots: List<Object>.generate(views.length, (_) => RenderTreeRootSlot.instance),
     );
     _forgottenViewElements.clear();
 
