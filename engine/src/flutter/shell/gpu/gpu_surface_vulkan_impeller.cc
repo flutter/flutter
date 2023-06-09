@@ -12,8 +12,7 @@
 namespace flutter {
 
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
-    std::shared_ptr<impeller::Context> context)
-    : weak_factory_(this) {
+    std::shared_ptr<impeller::Context> context) {
   if (!context || !context->IsValid()) {
     return;
   }
