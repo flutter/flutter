@@ -663,6 +663,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter {
     bool fullRestart, [
     String? reason,
   ]) async {
+    // Don't do anything if the app hasn't started yet, as restarts and reloads
+    // can only operate on a running app.
+    if (_appId == null) {
+      return;
+    }
+
     final String progressId = fullRestart ? 'hotRestart' : 'hotReload';
     final String progressMessage = fullRestart ? 'Hot restarting…' : 'Hot reloading…';
     final DapProgressReporter progress = startProgressNotification(
