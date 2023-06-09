@@ -111,7 +111,7 @@ abstract final class FlutterTimeline {
   /// This is a drop-in replacement for [Timeline.now].
   static int get now => impl.performanceTimestamp.toInt();
 
-  /// Returns timings collected since [collectionEnabled] was set to true, or
+  /// Returns timings collected since [debugCollectionEnabled] was set to true, or
   /// since the previous [debugReset], whichever was last.
   ///
   /// This is only meant to be used in non-release modes, typically in profile
