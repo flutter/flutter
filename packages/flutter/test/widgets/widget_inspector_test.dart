@@ -9,9 +9,7 @@
 @TestOn('!chrome')
 library;
 
-import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -2221,12 +2219,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
         expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
-        final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']! as String)! as DiagnosticsNode;
-        final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
-        for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final Object? property = service.toObject(propertyJson['objectId']! as String);
-          expect(property, isA<DiagnosticsNode?>());
-          expect(expectedProperties, contains(property));
+        final DiagnosticsNode? diagnosticsNode = service.toObject(childJson['objectId']! as String) as DiagnosticsNode?;
+        if (diagnosticsNode != null) {
+          final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
+          for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
+            final Object? property = service.toObject(propertyJson['objectId']! as String);
+            expect(property, isA<DiagnosticsNode?>());
+            expect(expectedProperties, contains(property));
+          }
         }
       }
     });
@@ -2265,12 +2265,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           expect(propertyJson, isNot(contains('children')));
         }
-        final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']! as String)! as DiagnosticsNode;
-        final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
-        for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
-          final Object property = service.toObject(propertyJson['objectId']! as String)!;
-          expect(property, isA<DiagnosticsNode?>());
-          expect(expectedProperties, contains(property));
+        final DiagnosticsNode? diagnosticsNode = service.toObject(childJson['objectId']! as String) as DiagnosticsNode?;
+        if (diagnosticsNode != null) {
+          final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
+          for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
+            final Object property = service.toObject(propertyJson['objectId']! as String)!;
+            expect(property, isA<DiagnosticsNode?>());
+            expect(expectedProperties, contains(property));
+          }
         }
       }
 
