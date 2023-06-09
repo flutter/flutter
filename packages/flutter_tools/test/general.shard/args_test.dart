@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -15,6 +16,14 @@ import '../src/testbed.dart';
 import 'runner/utils.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  tearDownAll(() {
+    Cache.enableLocking();
+  });
+
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     executable.generateCommands(
