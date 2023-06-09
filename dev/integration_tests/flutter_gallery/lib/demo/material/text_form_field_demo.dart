@@ -8,9 +8,6 @@ import 'package:flutter/services.dart';
 
 import '../../gallery/demo.dart';
 
-// This demo is based on
-// https://material.io/design/components/dialogs.html#full-screen-dialog
-
 class TextFormFieldDemo extends StatefulWidget {
   const TextFormFieldDemo({ super.key });
 
