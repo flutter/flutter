@@ -228,7 +228,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: const ColorScheme.light(),
+        colorScheme: colorScheme,
       ).copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           extendedSizeConstraints: constraints,
@@ -250,7 +250,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(labelKey)).dx - tester.getTopRight(find.byKey(iconKey)).dx, iconLabelSpacing);
     expect(tester.getTopLeft(find.byKey(iconKey)).dx - tester.getTopLeft(find.byType(FloatingActionButton)).dx, padding.start);
     expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
-    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const ColorScheme.light().onPrimaryContainer));
+    expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: colorScheme.onPrimaryContainer));
   });
 
   testWidgets('Material2: FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
