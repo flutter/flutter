@@ -64,6 +64,16 @@ void fl_key_embedder_responder_sync_modifiers_if_needed(
     guint state,
     double event_time);
 
+/**
+ * fl_key_embedder_responder_get_pressed_state:
+ * @responder: the #FlKeyEmbedderResponder self.
+ *
+ * Returns the keyboard pressed state. The hash table contains one entry per
+ * pressed keys, mapping from the logical key to the physical key.
+ */
+GHashTable* fl_key_embedder_responder_get_pressed_state(
+    FlKeyEmbedderResponder* responder);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_KEY_EMBEDDER_RESPONDER_H_

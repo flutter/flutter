@@ -54,6 +54,8 @@ struct _FlKeyboardViewDelegateInterface {
 
   guint (*lookup_key)(FlKeyboardViewDelegate* view_delegate,
                       const GdkKeymapKey* key);
+
+  GHashTable* (*get_keyboard_state)(FlKeyboardViewDelegate* delegate);
 };
 
 /**
@@ -115,6 +117,16 @@ void fl_keyboard_view_delegate_subscribe_to_layout_change(
 
 guint fl_keyboard_view_delegate_lookup_key(FlKeyboardViewDelegate* delegate,
                                            const GdkKeymapKey* key);
+
+/**
+ * fl_keyboard_view_delegate_get_keyboard_state:
+ *
+ * Returns the keyboard pressed state. The hash table contains one entry per
+ * pressed keys, mapping from the logical key to the physical key.*
+ *
+ */
+GHashTable* fl_keyboard_view_delegate_get_keyboard_state(
+    FlKeyboardViewDelegate* delegate);
 
 G_END_DECLS
 
