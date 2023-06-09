@@ -46,6 +46,9 @@ bool DeviceBufferVK::OnCopyHostBuffer(const uint8_t* source,
   if (source) {
     ::memmove(dest + offset, source + source_range.offset, source_range.length);
   }
+  // See https://github.com/flutter/flutter/issues/128556 . Some devices do not
+  // have support for coherent host memory and require an explicit flush.
+  ::vmaFlushAllocation(allocator_, allocation_, offset, source_range.length);
 
   return true;
 }
