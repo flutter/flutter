@@ -3,10 +3,6 @@
 # found in the LICENSE file.
 
 declare_args() {
-  # Whether to include vulkan validation layers, if available.
-  #
-  # Currently these are only supported on Fuchsia, where by default they are
-  # disabled, to enable them pass `--enable-vulkan-validation-layers` to your
-  # gn args.
+  # Whether to include vulkan validation layers.
   enable_vulkan_validation_layers = false
 }

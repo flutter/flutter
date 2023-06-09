@@ -6,6 +6,7 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("//flutter/common/config.gni")
+import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/testing/testing.gni")
 import("//flutter/tools/fuchsia/dart.gni")

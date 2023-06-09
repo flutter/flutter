@@ -80,6 +80,8 @@ def to_command_line(gn_args):
   def merge(key, value):
     if isinstance(value, bool):
       return '%s=%s' % (key, 'true' if value else 'false')
+    if isinstance(value, int):
+      return '%s=%d' % (key, value)
     return '%s="%s"' % (key, value)
 
   return [merge(x, y) for x, y in gn_args.items()]
@@ -548,11 +550,8 @@ def to_gn_args(args):
     gn_args['use_fstack_protector'] = True
 
   if args.enable_vulkan_validation_layers:
-    if args.target_os != 'fuchsia':
-      print(
-          'Vulkan validation layers are currently only supported on Fuchsia targets.'
-      )
-      sys.exit(1)
+    if args.target_os == 'android':
+      gn_args['android_api_level'] = 26
     gn_args['enable_vulkan_validation_layers'] = True
 
   # Enable pointer compression on 64-bit mobile targets. iOS is excluded due to
