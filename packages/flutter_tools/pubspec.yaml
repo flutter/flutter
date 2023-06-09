@@ -105,3 +105,5 @@ dev_dependencies:
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
+
+# PUBSPEC CHECKSUM: 0694

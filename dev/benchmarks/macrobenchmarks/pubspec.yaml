@@ -209,3 +209,5 @@ flutter:
     - family: GalleryIcons
       fonts:
         - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
+
+# PUBSPEC CHECKSUM: 9626
