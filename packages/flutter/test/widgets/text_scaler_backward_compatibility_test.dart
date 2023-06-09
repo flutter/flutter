@@ -185,6 +185,7 @@ void main() {
         tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaler,
         const TextScaler.linear(2.0),
       );
+      expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaleFactor, 2.0);
     });
 
     testWidgets('Text', (WidgetTester tester) async {

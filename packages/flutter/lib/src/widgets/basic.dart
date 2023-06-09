@@ -5727,8 +5727,8 @@ class RichText extends MultiChildRenderObjectWidget {
       'This enables non-linear accessibility font scaling on Android 14. '
       'This feature was deprecated after [TBD].',
     )
-    this.textScaleFactor = 1.0,
-    this.textScaler = TextScaler.noScaling,
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     this.maxLines,
     this.locale,
     this.strutStyle,
@@ -5738,7 +5738,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       _effectiveTextScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
+       textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
        super(children: WidgetSpan.extractFromInlineSpan(text, _effectiveTextScalerFrom(textScaler, textScaleFactor)));
 
   static TextScaler _effectiveTextScalerFrom(TextScaler textScaler, double textScaleFactor) {
@@ -5791,13 +5791,10 @@ class RichText extends MultiChildRenderObjectWidget {
     'This enables non-linear accessibility font scaling on Android 14. '
     'This feature was deprecated after [TBD].',
   )
-  final double textScaleFactor;
+  double get textScaleFactor => textScaler.textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}
   final TextScaler textScaler;
-
-  // Temporary variable for textScaleFactor backwardsCompatibility.
-  final TextScaler _effectiveTextScaler;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -5847,7 +5844,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
-      textScaler: _effectiveTextScaler,
+      textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
@@ -5867,7 +5864,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
-      ..textScaler = _effectiveTextScaler
+      ..textScaler = textScaler
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
@@ -5884,7 +5881,7 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
-    properties.add(DiagnosticsProperty<TextScaler>('textScaler', _effectiveTextScaler, defaultValue: TextScaler.noScaling));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
