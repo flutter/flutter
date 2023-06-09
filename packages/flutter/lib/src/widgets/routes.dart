@@ -1574,24 +1574,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Enables this route to veto attempts by the user to dismiss it.
   ///
-  /// {@tool snippet}
-  /// This callback is typically added using a [WillPopScope] widget. That
-  /// widget finds the enclosing [ModalRoute] and uses this function to register
-  /// this callback:
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return WillPopScope(
-  ///     onWillPop: () async {
-  ///       // ask the user if they are sure
-  ///       return true;
-  ///     },
-  ///     child: Container(),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
   /// This callback runs asynchronously and it's possible that it will be called
   /// after its route has been disposed. The callback should check [State.mounted]
   /// before doing anything.
@@ -1599,49 +1581,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// A typical application of this callback would be to warn the user about
   /// unsaved [Form] data if the user attempts to back out of the form. In that
   /// case, use the [Form.onWillPop] property to register the callback.
-  ///
-  /// {@tool snippet}
-  /// To register a callback manually, look up the enclosing [ModalRoute] in a
-  /// [State.didChangeDependencies] callback:
-  ///
-  /// ```dart
-  /// abstract class _MyWidgetState extends State<MyWidget> {
-  ///   ModalRoute<dynamic>? _route;
-  ///
-  ///   // ...
-  ///
-  ///   @override
-  ///   void didChangeDependencies() {
-  ///    super.didChangeDependencies();
-  ///    _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///    _route = ModalRoute.of(context);
-  ///    _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// If you register a callback manually, be sure to remove the callback with
-  /// [removeScopedWillPopCallback] by the time the widget has been disposed. A
-  /// stateful widget can do this in its dispose method (continuing the previous
-  /// example):
-  ///
-  /// ```dart
-  /// abstract class _MyWidgetState2 extends State<MyWidget> {
-  ///   ModalRoute<dynamic>? _route;
-  ///
-  ///   // ...
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///     _route = null;
-  ///     super.dispose();
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
   ///
   /// See also:
   ///
