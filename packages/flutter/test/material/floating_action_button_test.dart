@@ -20,8 +20,11 @@ import 'feedback_tester.dart';
 
 void main() {
 
-  final ThemeData material3Theme = ThemeData.light().copyWith(useMaterial3: true);
-  final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
+  //final ThemeData material3Theme = ThemeData.light().copyWith(useMaterial3: true);
+  //final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
+
+  final ThemeData material3Theme = ThemeData(useMaterial3: true);
+  final ThemeData material2Theme = ThemeData(useMaterial3: false);
 
   testWidgets('Floating Action Button control test', (WidgetTester tester) async {
     bool didPressButton = false;
@@ -950,6 +953,7 @@ void main() {
     const Color splashColor = Color(0xcafefeed);
 
     await tester.pumpWidget(MaterialApp(
+      theme: material2Theme,
       home: FloatingActionButton(
         onPressed: () {},
         splashColor: splashColor,
@@ -1051,6 +1055,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: material2Theme,
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
             label: const Text('', key: labelKey),
