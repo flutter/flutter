@@ -136,6 +136,13 @@ public class PlatformChannel {
                   result.error("error", exception.getMessage(), null);
                 }
                 break;
+              case "SystemNavigator.setFrameworkHandlesBack":
+                {
+                  boolean frameworkHandlesBacks = (boolean) arguments;
+                  platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBacks);
+                  result.success(null);
+                  break;
+                }
               case "SystemNavigator.pop":
                 platformMessageHandler.popSystemNavigator();
                 result.success(null);
@@ -508,6 +515,9 @@ public class PlatformChannel {
      * systemUiOverlayStyle}, i.e., the given status bar and navigation bar colors and brightness.
      */
     void setSystemUiOverlayStyle(@NonNull SystemChromeStyle systemUiOverlayStyle);
+
+    /** The Flutter application would or would not like to handle navigation pop events itself. */
+    void setFrameworkHandlesBack(boolean frameworkHandlesBack);
 
     /**
      * The Flutter application would like to pop the top item off of the Android app's navigation

@@ -56,6 +56,8 @@ public class PlatformPlugin {
      *     androidx.activity.OnBackPressedDispatcher} will be executed.
      */
     boolean popSystemNavigator();
+
+    void setFrameworkHandlesBack(boolean frameworkHandlesBacks);
   }
 
   @VisibleForTesting
@@ -107,6 +109,11 @@ public class PlatformPlugin {
         public void setSystemUiOverlayStyle(
             @NonNull PlatformChannel.SystemChromeStyle systemUiOverlayStyle) {
           setSystemChromeSystemUIOverlayStyle(systemUiOverlayStyle);
+        }
+
+        @Override
+        public void setFrameworkHandlesBack(boolean frameworkHandlesBacks) {
+          PlatformPlugin.this.setFrameworkHandlesBack(frameworkHandlesBacks);
         }
 
         @Override
@@ -473,6 +480,10 @@ public class PlatformPlugin {
     }
 
     currentTheme = systemChromeStyle;
+  }
+
+  private void setFrameworkHandlesBack(boolean frameworkHandlesBacks) {
+    platformPluginDelegate.setFrameworkHandlesBack(frameworkHandlesBacks);
   }
 
   private void popSystemNavigator() {

@@ -1689,6 +1689,11 @@ public class FlutterFragment extends Fragment
     return getArguments().getBoolean(ARG_SHOULD_DELAY_FIRST_ANDROID_VIEW_DRAW);
   }
 
+  @Override
+  public void setFrameworkHandlesBack(boolean frameworkHandlesBacks) {
+    // Irrelevant to FlutterFragment.
+  }
+
   private boolean stillAttachedForEvent(String event) {
     if (delegate == null) {
       Log.w(TAG, "FlutterFragment " + hashCode() + " " + event + " called after release.");

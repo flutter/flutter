@@ -417,5 +417,8 @@ public class FlutterAndroidComponentTest {
     public boolean popSystemNavigator() {
       return false;
     }
+
+    @Override
+    public void setFrameworkHandlesBack(boolean frameworkHandlesBacks) {}
   }
 }

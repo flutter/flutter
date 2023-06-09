@@ -217,6 +217,8 @@ public class FlutterActivity extends Activity
     implements FlutterActivityAndFragmentDelegate.Host, LifecycleOwner {
   private static final String TAG = "FlutterActivity";
 
+  private boolean hasRegisteredBackCallback = false;
+
   /**
    * The ID of the {@code FlutterView} created by this activity.
    *
@@ -643,8 +645,6 @@ public class FlutterActivity extends Activity
 
     lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
 
-    registerOnBackInvokedCallback();
-
     configureWindowForTransparency();
 
     setContentView(createFlutterView());
@@ -668,6 +668,7 @@ public class FlutterActivity extends Activity
       getOnBackInvokedDispatcher()
           .registerOnBackInvokedCallback(
               OnBackInvokedDispatcher.PRIORITY_DEFAULT, onBackInvokedCallback);
+      hasRegisteredBackCallback = true;
     }
   }
 
@@ -681,6 +682,7 @@ public class FlutterActivity extends Activity
   public void unregisterOnBackInvokedCallback() {
     if (Build.VERSION.SDK_INT >= 33) {
       getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(onBackInvokedCallback);
+      hasRegisteredBackCallback = false;
     }
   }
 
@@ -697,6 +699,15 @@ public class FlutterActivity extends Activity
             }
           }
           : null;
+
+  @Override
+  public void setFrameworkHandlesBack(boolean frameworkHandlesBacks) {
+    if (frameworkHandlesBacks && !hasRegisteredBackCallback) {
+      registerOnBackInvokedCallback();
+    } else if (!frameworkHandlesBacks && hasRegisteredBackCallback) {
+      unregisterOnBackInvokedCallback();
+    }
+  }
 
   /**
    * Switches themes for this {@code Activity} from the theme used to launch this {@code Activity}
