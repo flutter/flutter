@@ -267,13 +267,13 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   @override
   void build(
     ui.ParagraphBuilder builder, {
-    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     List<PlaceholderDimensions>? dimensions,
   }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
     if (text != null) {
       try {
@@ -294,7 +294,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
       for (final InlineSpan child in children) {
         child.build(
           builder,
-          textScaleFactor: textScaleFactor,
+          textScaler: textScaler,
           dimensions: dimensions,
         );
       }

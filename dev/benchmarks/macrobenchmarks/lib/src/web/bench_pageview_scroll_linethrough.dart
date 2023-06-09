@@ -95,7 +95,7 @@ class _CustomPainter extends CustomPainter {
     yPosition = viewPadding;
     _textPainter.textDirection = TextDirection.ltr;
     _textPainter.textWidthBasis = TextWidthBasis.longestLine;
-    _textPainter.textScaleFactor = 1;
+    _textPainter.textScaler = TextScaler.noScaling;
     const TextStyle textStyle =
         TextStyle(color: Colors.black87, fontSize: 13, fontFamily: 'Roboto');
 

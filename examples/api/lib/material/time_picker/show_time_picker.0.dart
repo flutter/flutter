@@ -129,7 +129,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 350,
                 mainAxisSpacing: 4,
-                mainAxisExtent: 200 * MediaQuery.textScaleFactorOf(context),
+                mainAxisExtent: 200 * MediaQuery.textScalerOf(context).textScaleFactor,
                 crossAxisSpacing: 4,
               ),
               children: <Widget>[

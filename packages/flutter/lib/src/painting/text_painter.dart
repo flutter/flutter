@@ -267,6 +267,142 @@ class _UntilTextBoundary extends TextBoundary {
   }
 }
 
+/// A class that describes how textual contents should be scaled for better
+/// readability.
+///
+/// The [scale] function computes the scaled font size given the original
+/// unscaled font size specified by app developers.
+///
+/// The [==] operator defines the equality of 2 [TextScaler]s, which the
+/// framework uses to determine whether text widgets should rebuild when their
+/// [TextScaler] changes. Consider overridding the [==] operator if applicable
+/// to avoid unnecessary rebuilds.
+@immutable
+abstract class TextScaler {
+  /// Creates a TextScaler.
+  const TextScaler();
+
+  /// Creates a proportional [TextScaler] that scales the incoming font size by
+  /// multiplying it with the given `textScaleFactor`.
+  const factory TextScaler.linear(double textScaleFactor) = _LinearTextScaler;
+
+  /// A [TextScaler] that doesn't scale the ipnut font size.
+  ///
+  /// This is equivalent to `TextScaler.linear(1.0)`, the [TextScaler.scale]
+  /// implementation always returns the input font size as-is.
+  static const TextScaler noScaling = _LinearTextScaler(1.0);
+
+  /// Computes the scaled font size (in logical pixels) with the given unscaled
+  /// `fontSize` (in logical pixels).
+  ///
+  /// The input `fontSize` must be finite and non-negative.
+  ///
+  /// When given the same `fontSize` input, this method returns the same value.
+  /// The output of a larger input `fontSize` is typically larger than that of a
+  /// smaller input, but on unusual occasions they may produce the same output.
+  /// For example, some platforms use single-precision floats to represent font
+  /// sizes, as a result of truncation two different unscaled font sizes can be
+  /// scaled to the same value.
+  double scale(double fontSize);
+
+  /// The estimated number of font pixels for each logical pixel.
+  ///
+  /// The value of this property is only an estimate, so it may not reflect the
+  /// exact text scaling strategy this [TextScaler] represents, especially when
+  /// this [TextScaler] is not linear. Consider using [TextScaler.scale] instead.
+  /// This property exists solely for backward compatibility purposes, such that
+  /// unmigrated APIs can get an estimated `textScaleFactor` when the caller has
+  /// already migrated to using [TextScaler].
+  double get textScaleFactor;
+
+  /// Returns a new [TextScaler] that restricts the scaled font size to within
+  /// the range `[minScaleFactor * fontSize, maxScaleFactor * fontSize]`.
+  TextScaler clamp({ double minScaleFactor = 0, double maxScaleFactor = double.infinity }) {
+    assert(maxScaleFactor >= minScaleFactor);
+    assert(maxScaleFactor.isFinite);
+    assert(minScaleFactor.isFinite);
+    assert(minScaleFactor >= 0);
+
+    return minScaleFactor == maxScaleFactor
+      ? TextScaler.linear(minScaleFactor)
+      : _ClampedTextScaler(this, minScaleFactor, maxScaleFactor);
+  }
+}
+
+final class _LinearTextScaler implements TextScaler {
+  const _LinearTextScaler(this.textScaleFactor) : assert(textScaleFactor >= 0);
+
+  @override
+  final double textScaleFactor;
+
+  @override
+  double scale(double fontSize) {
+    assert(fontSize >= 0);
+    assert(fontSize.isFinite);
+    return fontSize * textScaleFactor;
+  }
+
+  @override
+  TextScaler clamp({ double minScaleFactor = 0, double maxScaleFactor = double.infinity }) {
+    final double newScaleFactor = clampDouble(textScaleFactor, minScaleFactor, maxScaleFactor);
+    return newScaleFactor == textScaleFactor ? this : _LinearTextScaler(newScaleFactor);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is _LinearTextScaler && other.textScaleFactor == textScaleFactor;
+  }
+
+  @override
+  int get hashCode => textScaleFactor.hashCode;
+
+  @override
+  String toString() => textScaleFactor == 1.0 ? 'no scaling' : 'linear (${textScaleFactor}x)';
+}
+
+final class _ClampedTextScaler implements TextScaler {
+  const _ClampedTextScaler(this.scaler, this.minScale, this.maxScale) : assert(maxScale > minScale);
+  final TextScaler scaler;
+  final double minScale;
+  final double maxScale;
+
+  @override
+  double get textScaleFactor => clampDouble(scaler.textScaleFactor, minScale, maxScale);
+
+  @override
+  double scale(double fontSize) {
+    assert(fontSize >= 0);
+    assert(fontSize.isFinite);
+    return minScale == maxScale
+      ? minScale * fontSize
+      : clampDouble(scaler.scale(fontSize), minScale * fontSize, maxScale * fontSize);
+  }
+
+  @override
+  TextScaler clamp({ double minScaleFactor = 0, double maxScaleFactor = double.infinity }) {
+    return minScaleFactor == maxScaleFactor
+      ? _LinearTextScaler(minScaleFactor)
+      : _ClampedTextScaler(scaler, max(minScaleFactor, minScale), min(maxScaleFactor, maxScale));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is _ClampedTextScaler
+        && minScale == other.minScale
+        && maxScale == other.maxScale
+        && (minScale == maxScale || scaler == other.scaler);
+  }
+
+  @override
+  int get hashCode => minScale == maxScale ? minScale.hashCode : Object.hash(scaler, minScale, maxScale);
+}
+
 class _TextLayout {
   _TextLayout._(this._paragraph);
 
@@ -490,7 +626,13 @@ class TextPainter {
     InlineSpan? text,
     TextAlign textAlign = TextAlign.start,
     TextDirection? textDirection,
+    @Deprecated(
+      'Use textScaler instead. '
+      'This enables non-linear accessibility font scaling on Android 14. '
+      'This feature was deprecated after [TBD].',
+    )
     double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     int? maxLines,
     String? ellipsis,
     Locale? locale,
@@ -502,7 +644,7 @@ class TextPainter {
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
-       _textScaleFactor = textScaleFactor,
+       _textScaler = textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
@@ -522,7 +664,13 @@ class TextPainter {
     required InlineSpan text,
     required TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
+    @Deprecated(
+      'Use textScale instead. '
+      'This enables non-linear accessibility font scaling on Android 14. '
+      'This feature was deprecated after [TBD].',
+    )
     double textScaleFactor = 1.0,
+    TextScaler textScale = TextScaler.noScaling,
     int? maxLines,
     String? ellipsis,
     Locale? locale,
@@ -564,7 +712,13 @@ class TextPainter {
     required InlineSpan text,
     required TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
+    @Deprecated(
+      'Use textScale instead. '
+      'This enables non-linear accessibility font scaling on Android 14. '
+      'This feature was deprecated after [TBD].',
+    )
     double textScaleFactor = 1.0,
+    TextScaler textScale = TextScaler.noScaling,
     int? maxLines,
     String? ellipsis,
     Locale? locale,
@@ -731,19 +885,48 @@ class TextPainter {
     _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
   }
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
-  double get textScaleFactor => _textScaleFactor;
-  double _textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'This enables non-linear accessibility font scaling on Android 14. '
+    'This feature was deprecated after [TBD].',
+  )
+  double get textScaleFactor => textScaler.textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'This enables non-linear accessibility font scaling on Android 14. '
+    'This feature was deprecated after [TBD].',
+  )
   set textScaleFactor(double value) {
-    if (_textScaleFactor == value) {
+    textScaler = TextScaler.linear(value);
+  }
+
+  /// {@template flutter.painting.textPainter.textScaler}
+  /// The font scaling strategy to use when laying out and rendering the text.
+  ///
+  /// The value usually comes from [MediaQuery.textScalerOf], which typically
+  /// reflects the user-specified text scaling value in the platform's
+  /// accessibility settings. The [TextStyle.fontSize] of the text will be
+  /// adjusted by the [TextScaler] before the text is laid out and rendered.
+  /// {@endtemplate}
+  ///
+  /// The [layout] method must be called after [textScaler] changes as it
+  /// affects the text layout.
+  TextScaler get textScaler => _textScaler;
+  TextScaler _textScaler;
+  set textScaler(TextScaler value) {
+    if (value == _textScaler) {
       return;
     }
-    _textScaleFactor = value;
+    _textScaler = value;
     markNeedsLayout();
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
@@ -908,7 +1091,7 @@ class TextPainter {
     return _text!.style?.getParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       maxLines: _maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: _ellipsis,
@@ -919,8 +1102,8 @@ class TextPainter {
       textDirection: textDirection ?? defaultTextDirection,
       // Use the default font size to multiply by as RichText does not
       // perform inheriting [TextStyle]s and would otherwise
-      // fail to apply textScaleFactor.
-      fontSize: _kDefaultFontSize * textScaleFactor,
+      // fail to apply textScaler.
+      fontSize: textScaler.scale(_kDefaultFontSize),
       maxLines: maxLines,
       textHeightBehavior: _textHeightBehavior,
       ellipsis: ellipsis,
@@ -933,7 +1116,7 @@ class TextPainter {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
       _createParagraphStyle(TextDirection.rtl),
     ); // direction doesn't matter, text is just a space
-    final ui.TextStyle? textStyle = text?.style?.getTextStyle(textScaleFactor: textScaleFactor);
+    final ui.TextStyle? textStyle = text?.style?.getTextStyle(textScaler: textScaler);
     if (textStyle != null) {
       builder.pushStyle(textStyle);
     }
@@ -1028,7 +1211,7 @@ class TextPainter {
   // assign it to _paragraph.
   ui.Paragraph _createParagraph(InlineSpan text) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
-    text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
+    text.build(builder, textScaler: textScaler, dimensions: _placeholderDimensions);
     assert(() {
       _debugMarkNeedsLayoutCallStack = null;
       return true;
