@@ -5,49 +5,58 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// IMPORTANT: keep this in sync with the same constant defined
+//            in foundation/timeline.dart
+const int kSliceSize = 500;
+
 void main() {
   setUp(() {
-    FlutterTimeline.reset();
-    FlutterTimeline.collectionEnabled = false;
+    FlutterTimeline.debugReset();
+    FlutterTimeline.debugCollectionEnabled = false;
   });
 
   test('Does not collect when collection not enabled', () {
     FlutterTimeline.startSync('TEST');
     FlutterTimeline.finishSync();
     expect(
-      () => FlutterTimeline.collect(),
+      () => FlutterTimeline.debugCollect(),
       throwsStateError,
     );
   });
 
   test('Collects when collection is enabled', () {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
     FlutterTimeline.startSync('TEST');
     FlutterTimeline.finishSync();
-    final AggregatedTimings data = FlutterTimeline.collect();
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
     expect(data.timedBlocks, hasLength(1));
     expect(data.aggregatedBlocks, hasLength(1));
 
     final AggregatedTimedBlock block = data.getAggregated('TEST');
     expect(block.name, 'TEST');
     expect(block.count, 1);
+
+    // After collection the timeline is reset back to empty.
+    final AggregatedTimings data2 = FlutterTimeline.debugCollect();
+    expect(data2.timedBlocks, isEmpty);
+    expect(data2.aggregatedBlocks, isEmpty);
   });
 
   test('Deletes old data when reset', () {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
     FlutterTimeline.startSync('TEST');
     FlutterTimeline.finishSync();
-    FlutterTimeline.reset();
+    FlutterTimeline.debugReset();
 
-    final AggregatedTimings data = FlutterTimeline.collect();
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
     expect(data.timedBlocks, isEmpty);
     expect(data.aggregatedBlocks, isEmpty);
   });
 
   test('Reports zero aggregation when requested missing block', () {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
 
-    final AggregatedTimings data = FlutterTimeline.collect();
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
     final AggregatedTimedBlock block = data.getAggregated('MISSING');
     expect(block.name, 'MISSING');
     expect(block.count, 0);
@@ -55,7 +64,7 @@ void main() {
   });
 
   test('Measures the runtime of a function', () {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
 
     // The off-by-one values for `start` and `end` are for web's sake where
     // timer values are reported as float64 and toInt/toDouble conversions
@@ -69,7 +78,7 @@ void main() {
     });
     final int end = FlutterTimeline.now + 1;
 
-    final AggregatedTimings data = FlutterTimeline.collect();
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
     expect(data.timedBlocks, hasLength(1));
     expect(data.aggregatedBlocks, hasLength(1));
 
@@ -86,36 +95,49 @@ void main() {
   });
 
   test('FlutterTimeline.instanceSync does not collect anything', () {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
     FlutterTimeline.instantSync('TEST');
 
-    final AggregatedTimings data = FlutterTimeline.collect();
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
     expect(data.timedBlocks, isEmpty);
     expect(data.aggregatedBlocks, isEmpty);
   });
 
   test('FlutterTimeline.now returns a value', () {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
     expect(FlutterTimeline.now, isNotNull);
   });
 
   test('Can collect more than one slice of data', () {
-    // IMPORTANT: keep this in sync with the same constant defined
-    //            in foundation/timeline.dart
-    const int kSliceSize = 500;
-
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
 
     for (int i = 0; i < 10 * kSliceSize; i++) {
       FlutterTimeline.startSync('TEST');
       FlutterTimeline.finishSync();
     }
-    final AggregatedTimings data = FlutterTimeline.collect();
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
     expect(data.timedBlocks, hasLength(10 * kSliceSize));
     expect(data.aggregatedBlocks, hasLength(1));
 
     final AggregatedTimedBlock block = data.getAggregated('TEST');
     expect(block.name, 'TEST');
     expect(block.count, 10 * kSliceSize);
+  });
+
+  test('Collects blocks in a correct order', () {
+    FlutterTimeline.debugCollectionEnabled = true;
+    const int testCount = 7 * kSliceSize ~/ 2;
+
+    for (int i = 0; i < testCount; i++) {
+      FlutterTimeline.startSync('TEST$i');
+      FlutterTimeline.finishSync();
+    }
+
+    final AggregatedTimings data = FlutterTimeline.debugCollect();
+    expect(data.timedBlocks, hasLength(testCount));
+    expect(
+      data.timedBlocks.map<String>((TimedBlock block) => block.name).toList(),
+      List<String>.generate(testCount, (int i) => 'TEST$i'),
+    );
   });
 }

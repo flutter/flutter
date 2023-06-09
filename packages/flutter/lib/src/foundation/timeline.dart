@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import '_timeline_io.dart'
   if (dart.library.js_util) '_timeline_web.dart' as impl;
+import 'constants.dart';
 
 /// Measures how long blocks of code take to run.
 ///
@@ -16,7 +17,7 @@ import '_timeline_io.dart'
 /// provides methods compatible with [Timeline] signature-wise, and it has
 /// minimal overhead.
 ///
-/// Provides [reset] and [collect] methods that make it convenient to use in
+/// Provides [debugReset] and [debugCollect] methods that make it convenient to use in
 /// frame-oriented environment where collected metrics can be attributed to a
 /// frame, then aggregated into frame statistics, e.g. frame averages.
 ///
@@ -25,8 +26,10 @@ abstract final class FlutterTimeline {
   static _BlockBuffer _buffer = _BlockBuffer();
 
   /// Whether block timings are collected and can be retrieved using the
-  /// [collect] method.
-  static bool get collectionEnabled => _collectionEnabled;
+  /// [debugCollect] method.
+  ///
+  /// This is always false in release mode.
+  static bool get debugCollectionEnabled => _collectionEnabled;
 
   /// Enables metric collection.
   ///
@@ -34,35 +37,46 @@ abstract final class FlutterTimeline {
   /// useful in the profile mode where application performance is representative
   /// of a deployed application.
   ///
-  /// When disabled, resets collected data by calling [reset].
+  /// When disabled, resets collected data by calling [debugReset].
   ///
   /// Throws a [StateError] if invoked in release mode.
-  static set collectionEnabled(bool value) {
+  static set debugCollectionEnabled(bool value) {
+    if (kReleaseMode) {
+      throw _createReleaseModeNotSupportedError();
+    }
     if (value == _collectionEnabled) {
       return;
     }
     _collectionEnabled = value;
-    reset();
+    debugReset();
+  }
+
+  static StateError _createReleaseModeNotSupportedError() {
+    return StateError('FlutterTimeline metric collection not supported in release mode.');
   }
 
   static bool _collectionEnabled = false;
 
-  /// Start a synchronous operation labeled [name].
+  /// Start a synchronous operation labeled `name`.
   ///
-  /// Optionally takes a map of [arguments]. This slice may also optionally be
+  /// Optionally takes a map of `arguments`. This slice may also optionally be
   /// associated with a [Flow] event. This operation must be finished by calling
   /// [finishSync] before returning to the event queue.
+  ///
+  /// This is a drop-in replacement for [Timeline.startSync].
   static void startSync(String name, { Map<String, Object?>? arguments, Flow? flow }) {
     Timeline.startSync(name, arguments: arguments, flow: flow);
-    if (_collectionEnabled) {
+    if (!kReleaseMode && _collectionEnabled) {
       _buffer.startSync(name, arguments: arguments, flow: flow);
     }
   }
 
   /// Finish the last synchronous operation that was started.
+  ///
+  /// This is a drop-in replacement for [Timeline.finishSync].
   static void finishSync() {
     Timeline.finishSync();
-    if (_collectionEnabled) {
+    if (!kReleaseMode && _collectionEnabled) {
       _buffer.finishSync();
     }
   }
@@ -72,8 +86,10 @@ abstract final class FlutterTimeline {
     Timeline.instantSync(name, arguments: arguments);
   }
 
-  /// A utility method to time a synchronous [function]. Internally calls
-  /// [function] bracketed by calls to [startSync] and [finishSync].
+  /// A utility method to time a synchronous `function`. Internally calls
+  /// `function` bracketed by calls to [startSync] and [finishSync].
+  ///
+  /// This is a drop-in replacement for [Timeline.timeSync].
   static T timeSync<T>(String name, TimelineSyncFunction<T> function,
       { Map<String, Object?>? arguments, Flow? flow }) {
     startSync(name, arguments: arguments, flow: flow);
@@ -91,23 +107,38 @@ abstract final class FlutterTimeline {
   /// API's `Dart_TimelineGetMicros`.
   ///
   /// When run on the web, uses `window.performance.now`.
+  ///
+  /// This is a drop-in replacement for [Timeline.now].
   static int get now => impl.performanceTimestamp.toInt();
 
   /// Returns timings collected since [collectionEnabled] was set to true, or
-  /// since the previous [reset], whichever was last.
-  static AggregatedTimings collect() {
+  /// since the previous [debugReset], whichever was last.
+  ///
+  /// This is only meant to be used in non-release modes, typically in profile
+  /// mode that provides timings close to release mode timings.
+  static AggregatedTimings debugCollect() {
+    if (kReleaseMode) {
+      throw _createReleaseModeNotSupportedError();
+    }
     if (!_collectionEnabled) {
       throw StateError('Timeline metric collection not enabled.');
     }
-    return AggregatedTimings(_buffer.timings);
+    final AggregatedTimings result = AggregatedTimings(_buffer.computeTimings());
+    debugReset();
+    return result;
   }
 
   /// Forgets all previously collected timing data.
   ///
   /// This method can be used to break up the data by frames. To do that, call
-  /// [collect] at the end of the frame, then call [reset] so that the next
+  /// [debugCollect] at the end of the frame, then call [debugReset] so that the next
   /// frame collects independent data.
-  static void reset() {
+  ///
+  /// This is only meant to be used in non-release modes.
+  static void debugReset() {
+    if (kReleaseMode) {
+      throw _createReleaseModeNotSupportedError();
+    }
     _buffer = _BlockBuffer();
   }
 }
@@ -132,11 +163,11 @@ final class TimedBlock {
   /// easily tell which part of code was measured.
   final String name;
 
-  /// The timestamp in microseconds that marks the beginning of the measure block
-  /// of code.
+  /// The timestamp in microseconds that marks the beginning of the measured
+  /// block of code.
   final double start;
 
-  /// The timestamp in microseconds that marks the end of the measure block of
+  /// The timestamp in microseconds that marks the end of the measured block of
   /// code.
   final double end;
 
@@ -153,29 +184,30 @@ final class TimedBlock {
 @immutable
 final class AggregatedTimings {
   /// Creates aggregated timings for the provided timed blocks.
-  AggregatedTimings(this.timedBlocks) {
+  AggregatedTimings(this.timedBlocks);
+
+  /// All timed blocks collected between the last reset and [FlutterTimeline.debugCollect].
+  final List<TimedBlock> timedBlocks;
+
+  /// Aggregated timed blocks collected between the last reset and [FlutterTimeline.debugCollect].
+  ///
+  /// Does not guarantee that all code blocks will be reported. Only those that
+  /// executed since the last reset are listed here. Use [getAggregated] for
+  /// graceful handling of missing code blocks.
+  late final List<AggregatedTimedBlock> aggregatedBlocks = _computeAggregatedBlocks();
+
+  List<AggregatedTimedBlock> _computeAggregatedBlocks() {
     final Map<String, (double, int)> aggregate = <String, (double, int)>{};
     for (final TimedBlock block in timedBlocks) {
       final (double, int) previousValue = aggregate.putIfAbsent(block.name, () => (0, 0));
       aggregate[block.name] = (previousValue.$1 + block.duration, previousValue.$2 + 1);
     }
-
-    aggregatedBlocks = aggregate.entries.map<AggregatedTimedBlock>(
+    return aggregate.entries.map<AggregatedTimedBlock>(
       (MapEntry<String, (double, int)> entry) {
         return AggregatedTimedBlock(name: entry.key, duration: entry.value.$1, count: entry.value.$2);
       }
     ).toList();
   }
-
-  /// All timed blocks collected between the last reset and [FlutterTimeline.collect].
-  final List<TimedBlock> timedBlocks;
-
-  /// Aggregated timed blocks collected between the last reset and [FlutterTimeline.collect].
-  ///
-  /// Does not guarantee that all code blocks will be reported. Only those that
-  /// executed since the last reset are listed here. Use [getAggregated] for
-  /// graceful handling of missing code blocks.
-  late final List<AggregatedTimedBlock> aggregatedBlocks;
 
   /// Returns aggregated numbers for a named block of code.
   ///
@@ -273,12 +305,12 @@ final class _Float64ListChain {
   /// This getter is not optimized to be fast. It is assumed that when metrics
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
-  List<double> get elements {
+  List<double> extractElements() {
     final List<double> result = <double>[];
+    _chain.forEach(result.addAll);
     for (int i = 0; i < _pointer; i++) {
       result.add(_slice[i]);
     }
-    _chain.forEach(result.addAll);
     return result;
   }
 }
@@ -311,15 +343,15 @@ final class _StringListChain {
   /// This getter is not optimized to be fast. It is assumed that when metrics
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
-  List<String> get elements {
+  List<String> extractElements() {
     final List<String> result = <String>[];
-    for (int i = 0; i < _pointer; i++) {
-      result.add(_slice[i]!);
-    }
     for (final List<String?> slice in _chain) {
       for (final String? element in slice) {
         result.add(element!);
       }
+    }
+    for (int i = 0; i < _pointer; i++) {
+      result.add(_slice[i]!);
     }
     return result;
   }
@@ -330,7 +362,7 @@ final class _BlockBuffer {
   // Start-finish blocks can be nested. Track this nestedness by stacking the
   // start timestamps. Finish timestamps will pop timings from the stack and
   // add the (start, finish) tuple to the _block.
-  static const int _stackDepth = 10000;
+  static const int _stackDepth = 1000;
   static final Float64List _startStack = Float64List(_stackDepth);
   static final List<String?> _nameStack = List<String?>.filled(_stackDepth, null);
   static int _stackPointer = 0;
@@ -339,7 +371,7 @@ final class _BlockBuffer {
   final _Float64ListChain _finishes = _Float64ListChain();
   final _StringListChain _names = _StringListChain();
 
-  List<TimedBlock> get timings {
+  List<TimedBlock> computeTimings() {
     assert(
       _stackPointer == 0,
       'Invalid sequence of `startSync` and `finishSync`.\n'
@@ -350,9 +382,9 @@ final class _BlockBuffer {
 
     final List<TimedBlock> result = <TimedBlock>[];
     final int length = _finishes.length;
-    final List<double> starts = _starts.elements;
-    final List<double> finishes = _finishes.elements;
-    final List<String> names = _names.elements;
+    final List<double> starts = _starts.extractElements();
+    final List<double> finishes = _finishes.extractElements();
+    final List<String> names = _names.extractElements();
 
     assert(starts.length == length);
     assert(finishes.length == length);

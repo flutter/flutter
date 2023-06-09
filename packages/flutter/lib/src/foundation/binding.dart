@@ -142,7 +142,9 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// VM service extensions, if any.
   BindingBase() {
-    FlutterTimeline.startSync('Framework initialization');
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Framework initialization');
+    }
     assert(() {
       _debugConstructed = true;
       return true;
@@ -158,7 +160,9 @@ abstract class BindingBase {
 
     developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
 
-    FlutterTimeline.finishSync();
+    if (!kReleaseMode) {
+      FlutterTimeline.finishSync();
+    }
   }
 
   bool _debugConstructed = false;

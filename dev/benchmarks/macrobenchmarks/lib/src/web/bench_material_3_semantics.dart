@@ -21,14 +21,14 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
 
   @override
   Future<void> setUpAll() async {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
     super.setUpAll();
     SemanticsBinding.instance.ensureSemantics();
   }
 
   @override
   Future<void> tearDownAll() async {
-    FlutterTimeline.reset();
+    FlutterTimeline.debugReset();
   }
 
   @override
@@ -36,7 +36,7 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
     // Only record frames that show the widget. Frames that remove the widget
     // are not interesting.
     if (showWidget) {
-      final AggregatedTimings timings = FlutterTimeline.collect();
+      final AggregatedTimings timings = FlutterTimeline.debugCollect();
       final AggregatedTimedBlock semanticsBlock = timings.getAggregated('SEMANTICS');
       final AggregatedTimedBlock getFragmentBlock = timings.getAggregated('Semantics.GetFragment');
       final AggregatedTimedBlock compileChildrenBlock = timings.getAggregated('Semantics.compileChildren');
@@ -46,7 +46,7 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
     }
 
     super.frameDidDraw();
-    FlutterTimeline.reset();
+    FlutterTimeline.debugReset();
   }
 
   @override
@@ -63,7 +63,7 @@ class BenchMaterial3Semantics extends WidgetBuildRecorder {
 /// add/remove widgets, but its enough to trigger the framework to recompute
 /// some of the semantics.
 ///
-/// The expect output numbers of this benchmarks should be very small as
+/// The expected output numbers of this benchmarks should be very small as
 /// scrolling a list view should be a matter of shifting some widgets and
 /// updating the projected clip imposed by the viewport. As of June 2023, the
 /// numbers are not great. Semantics consumes >50% of frame time.
@@ -74,19 +74,19 @@ class BenchMaterial3ScrollSemantics extends WidgetRecorder {
 
   @override
   Future<void> setUpAll() async {
-    FlutterTimeline.collectionEnabled = true;
+    FlutterTimeline.debugCollectionEnabled = true;
     super.setUpAll();
     SemanticsBinding.instance.ensureSemantics();
   }
 
   @override
   Future<void> tearDownAll() async {
-    FlutterTimeline.reset();
+    FlutterTimeline.debugReset();
   }
 
   @override
   void frameDidDraw() {
-    final AggregatedTimings timings = FlutterTimeline.collect();
+    final AggregatedTimings timings = FlutterTimeline.debugCollect();
     final AggregatedTimedBlock semanticsBlock = timings.getAggregated('SEMANTICS');
     final AggregatedTimedBlock getFragmentBlock = timings.getAggregated('Semantics.GetFragment');
     final AggregatedTimedBlock compileChildrenBlock = timings.getAggregated('Semantics.compileChildren');
@@ -95,7 +95,7 @@ class BenchMaterial3ScrollSemantics extends WidgetRecorder {
     profile!.addTimedBlock(compileChildrenBlock, reported: true);
 
     super.frameDidDraw();
-    FlutterTimeline.reset();
+    FlutterTimeline.debugReset();
   }
 
   @override
@@ -120,7 +120,7 @@ class _ScrollTestState extends State<_ScrollTest> with SingleTickerProviderState
     bool forward = true;
 
     // A one-off timer is necessary to allow the framework to measure the
-    // available scroll extends before the scroll controller can be exercised
+    // available scroll extents before the scroll controller can be exercised
     // to change the scroll position.
     Timer.run(() {
       ticker = createTicker((_) {
