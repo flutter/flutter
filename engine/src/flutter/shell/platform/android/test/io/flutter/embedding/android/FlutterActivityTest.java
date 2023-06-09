@@ -92,7 +92,7 @@ public class FlutterActivityTest {
   // test that directly exercises the OnBackInvoked APIs when API 33 is supported.
   @Test
   @TargetApi(33)
-  public void itRegistersOnBackInvokedCallbackOnCreate() {
+  public void itRegistersOnBackInvokedCallbackOnChangingFrameworkHandlesBack() {
     Intent intent = FlutterActivityWithReportFullyDrawn.createDefaultIntent(ctx);
     ActivityController<FlutterActivityWithReportFullyDrawn> activityController =
         Robolectric.buildActivity(FlutterActivityWithReportFullyDrawn.class, intent);
@@ -100,6 +100,12 @@ public class FlutterActivityTest {
 
     activity.onCreate(null);
 
+    verify(activity, times(0)).registerOnBackInvokedCallback();
+
+    activity.setFrameworkHandlesBack(false);
+    verify(activity, times(0)).registerOnBackInvokedCallback();
+
+    activity.setFrameworkHandlesBack(true);
     verify(activity, times(1)).registerOnBackInvokedCallback();
   }
 
