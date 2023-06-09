@@ -199,9 +199,9 @@ static constexpr Color FromRGB(Vector3 color, Scalar alpha) {
   return {color.x, color.y, color.z, alpha};
 }
 
-Color Color::BlendColor(const Color& src,
-                        const Color& dst,
-                        BlendMode blend_mode) {
+Color Color::Blend(const Color& src, BlendMode blend_mode) const {
+  const Color& dst = *this;
+
   static auto apply_rgb_srcover_alpha = [&](auto f) -> Color {
     return Color(f(src.red, dst.red), f(src.green, dst.green),
                  f(src.blue, dst.blue),
@@ -370,6 +370,38 @@ Color Color::BlendColor(const Color& src,
       return blended + dst * (1 - blended.alpha);
     }
   }
+}
+
+Color Color::ApplyColorMatrix(const ColorMatrix& color_matrix) const {
+  auto* c = color_matrix.array;
+  return Color(
+             c[0] * red + c[1] * green + c[2] * blue + c[3] * alpha + c[4],
+             c[5] * red + c[6] * green + c[7] * blue + c[8] * alpha + c[9],
+             c[10] * red + c[11] * green + c[12] * blue + c[13] * alpha + c[14],
+             c[15] * red + c[16] * green + c[17] * blue + c[18] * alpha + c[19])
+      .Clamp01();
+}
+
+Color Color::LinearToSRGB() const {
+  static auto conversion = [](Scalar component) {
+    if (component <= 0.0031308) {
+      return component * 12.92;
+    }
+    return 1.055 * pow(component, (1.0 / 2.4)) - 0.055;
+  };
+
+  return Color(conversion(red), conversion(green), conversion(blue), alpha);
+}
+
+Color Color::SRGBToLinear() const {
+  static auto conversion = [](Scalar component) {
+    if (component <= 0.04045) {
+      return component / 12.92;
+    }
+    return pow((component + 0.055) / 1.055, 2.4);
+  };
+
+  return Color(conversion(red), conversion(green), conversion(blue), alpha);
 }
 
 std::string ColorToString(const Color& color) {

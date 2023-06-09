@@ -75,7 +75,7 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
       } else if (scaled_i < next_stop) {
         // We're still between the current stop and the next stop.
         auto t = (scaled_i - previous_stop) / (next_stop - previous_stop);
-        auto mixed_color = Color::lerp(previous_color, next_color, t);
+        auto mixed_color = Color::Lerp(previous_color, next_color, t);
 
         AppendColor(mixed_color, &data);
       } else {
@@ -87,7 +87,7 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
         auto next_stop = stops[previous_color_index + 1];
 
         auto t = (scaled_i - previous_stop) / (next_stop - previous_stop);
-        auto mixed_color = Color::lerp(previous_color, next_color, t);
+        auto mixed_color = Color::Lerp(previous_color, next_color, t);
 
         AppendColor(mixed_color, &data);
       }

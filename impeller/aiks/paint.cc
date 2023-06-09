@@ -102,7 +102,7 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
 
 /// A color matrix which inverts colors.
 // clang-format off
-constexpr ColorFilterContents::ColorMatrix kColorInversion = {
+constexpr ColorMatrix kColorInversion = {
   .array = {
     -1.0,    0,    0, 1.0, 0, //
        0, -1.0,    0, 1.0, 0, //
