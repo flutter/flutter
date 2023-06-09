@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // This demo is based on
@@ -109,16 +110,15 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   bool _hasName = false;
   late String _eventName;
 
-  Future<bool> _onWillPop() async {
-    _saveNeeded = _hasLocation || _hasName || _saveNeeded;
-    if (!_saveNeeded) {
-      return true;
+  Future<void> _onPopped(bool success) async {
+    if (success) {
+      return;
     }
 
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
 
-    return showDialog<bool>(
+    final bool? shouldDiscard = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -136,13 +136,17 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
-                Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
+                Navigator.of(context).pop(true); // Pops the confirmation dialog and the page.
               },
             ),
           ],
         );
       },
-    ) as Future<bool>;
+    );
+
+    if (shouldDiscard ?? false) {
+      SystemNavigator.pop();
+    }
   }
 
   @override
@@ -162,7 +166,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ],
       ),
       body: Form(
-        onWillPop: _onWillPop,
+        popEnabled: !_saveNeeded && !_hasLocation && !_hasName,
+        onPopped: _onPopped,
         child: Scrollbar(
           child: ListView(
             primary: true,

@@ -361,14 +361,12 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 
   // Closes the cart if the cart is open, otherwise exits the app (this should
   // only be relevant for Android).
-  Future<bool> _onWillPop() async {
-    if (!_isOpen) {
-      await SystemNavigator.pop();
-      return true;
+  void _onPopped(bool success) {
+    if (success) {
+      return;
     }
 
     close();
-    return true;
   }
 
   @override
@@ -378,8 +376,9 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       duration: const Duration(milliseconds: 225),
       curve: Curves.easeInOut,
       alignment: FractionalOffset.topLeft,
-      child: WillPopScope(
-        onWillPop: _onWillPop,
+      child: PopScope(
+        popEnabled: !_isOpen,
+        onPopped: _onPopped,
         child: AnimatedBuilder(
           animation: widget.hideController,
           builder: _buildSlideAnimation,

@@ -8,6 +8,9 @@ import 'package:flutter/services.dart';
 
 import '../../gallery/demo.dart';
 
+// This demo is based on
+// https://material.io/design/components/dialogs.html#full-screen-dialog
+
 class TextFormFieldDemo extends StatefulWidget {
   const TextFormFieldDemo({ super.key });
 
@@ -143,10 +146,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return null;
   }
 
-  Future<bool> _warnUserAboutInvalidData() async {
-    final FormState? form = _formKey.currentState;
-    if (form == null || !_formWasEdited || form.validate()) {
-      return true;
+  Future<void> _onPopped(bool success) async {
+    if (success) {
+      return;
     }
 
     final bool? result = await showDialog<bool>(
@@ -168,7 +170,10 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         );
       },
     );
-    return result!;
+
+    if (result ?? false) {
+      SystemNavigator.pop();
+    }
   }
 
   @override
@@ -185,7 +190,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         child: Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode,
-          onWillPop: _warnUserAboutInvalidData,
+          popEnabled: _formKey.currentState == null || !_formWasEdited || _formKey.currentState!.validate(),
+          onPopped: _onPopped,
           child: Scrollbar(
             child: SingleChildScrollView(
               primary: true,
