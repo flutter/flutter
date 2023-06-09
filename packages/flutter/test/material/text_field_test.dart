@@ -15986,6 +15986,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
+    testWidgets('magnifier does not show when tapping outside field', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/128321
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(20),
+              child: TextField(
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                      _,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                ),
+                onTapOutside: (PointerDownEvent event) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tapAt(
+        tester.getCenter(find.byType(TextField)),
+      );
+      await tester.pump();
+
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      await tester.tapAt(
+        tester.getBottomLeft(find.byType(TextField)) - const Offset(10.0, 20.0),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+    },
+      skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
   });
 
   group('TapRegion integration', () {
