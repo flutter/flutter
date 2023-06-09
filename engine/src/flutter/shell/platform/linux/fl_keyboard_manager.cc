@@ -12,10 +12,15 @@
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
 #include "flutter/shell/platform/linux/key_mapping.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 
 // Turn on this flag to print complete layout data when switching IMEs. The data
 // is used in unit tests.
 #define DEBUG_PRINT_LAYOUT
+
+static constexpr char kChannelName[] = "flutter/keyboard";
+static constexpr char kGetKeyboardStateMethod[] = "getKeyboardState";
 
 /* Declarations of private classes */
 
@@ -287,6 +292,9 @@ struct _FlKeyboardManager {
   // It is set up when the manager is initialized and is not changed ever after.
   std::unique_ptr<std::map<uint64_t, const LayoutGoal*>>
       logical_to_mandatory_goals;
+
+  // The channel used by the framework to query the keyboard pressed state.
+  FlMethodChannel* channel;
 };
 
 G_DEFINE_TYPE(FlKeyboardManager, fl_keyboard_manager, G_TYPE_OBJECT);
@@ -532,7 +540,50 @@ static void guarantee_layout(FlKeyboardManager* self, FlKeyEvent* event) {
   }
 }
 
+// Returns the keyboard pressed state.
+FlMethodResponse* get_keyboard_state(FlKeyboardManager* self) {
+  g_autoptr(FlValue) result = fl_value_new_map();
+
+  GHashTable* pressing_records =
+      fl_keyboard_view_delegate_get_keyboard_state(self->view_delegate);
+
+  g_hash_table_foreach(
+      pressing_records,
+      [](gpointer key, gpointer value, gpointer user_data) {
+        int64_t physical_key = reinterpret_cast<int64_t>(key);
+        int64_t logical_key = reinterpret_cast<int64_t>(value);
+        FlValue* fl_value_map = reinterpret_cast<FlValue*>(user_data);
+
+        fl_value_set_take(fl_value_map, fl_value_new_int(physical_key),
+                          fl_value_new_int(logical_key));
+      },
+      result);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+// Called when a method call on flutter/keyboard is received from Flutter.
+static void method_call_handler(FlMethodChannel* channel,
+                                FlMethodCall* method_call,
+                                gpointer user_data) {
+  FlKeyboardManager* self = FL_KEYBOARD_MANAGER(user_data);
+
+  const gchar* method = fl_method_call_get_name(method_call);
+
+  g_autoptr(FlMethodResponse) response = nullptr;
+  if (strcmp(method, kGetKeyboardStateMethod) == 0) {
+    response = get_keyboard_state(self);
+  } else {
+    response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
+  }
+
+  g_autoptr(GError) error = nullptr;
+  if (!fl_method_call_respond(method_call, response, &error)) {
+    g_warning("Failed to send method call response: %s", error->message);
+  }
+}
+
 FlKeyboardManager* fl_keyboard_manager_new(
+    FlBinaryMessenger* messenger,
     FlKeyboardViewDelegate* view_delegate) {
   g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(view_delegate), nullptr);
 
@@ -560,6 +611,13 @@ FlKeyboardManager* fl_keyboard_manager_new(
 
   fl_keyboard_view_delegate_subscribe_to_layout_change(
       self->view_delegate, [self]() { self->derived_layout->clear(); });
+
+  // Setup the flutter/keyboard channel.
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  self->channel =
+      fl_method_channel_new(messenger, kChannelName, FL_METHOD_CODEC(codec));
+  fl_method_channel_set_method_call_handler(self->channel, method_call_handler,
+                                            self, nullptr);
   return self;
 }
 
@@ -614,10 +672,22 @@ gboolean fl_keyboard_manager_is_state_clear(FlKeyboardManager* self) {
 void fl_keyboard_manager_sync_modifier_if_needed(FlKeyboardManager* self,
                                                  guint state,
                                                  double event_time) {
+  g_return_if_fail(FL_IS_KEYBOARD_MANAGER(self));
+
   // The embedder responder is the first element in
   // FlKeyboardManager.responder_list.
   FlKeyEmbedderResponder* responder =
       FL_KEY_EMBEDDER_RESPONDER(g_ptr_array_index(self->responder_list, 0));
   fl_key_embedder_responder_sync_modifiers_if_needed(responder, state,
                                                      event_time);
+}
+
+GHashTable* fl_keyboard_manager_get_pressed_state(FlKeyboardManager* self) {
+  g_return_val_if_fail(FL_IS_KEYBOARD_MANAGER(self), nullptr);
+
+  // The embedder responder is the first element in
+  // FlKeyboardManager.responder_list.
+  FlKeyEmbedderResponder* responder =
+      FL_KEY_EMBEDDER_RESPONDER(g_ptr_array_index(self->responder_list, 0));
+  return fl_key_embedder_responder_get_pressed_state(responder);
 }

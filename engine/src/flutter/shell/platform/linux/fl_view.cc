@@ -116,7 +116,7 @@ static void init_keyboard(FlView* self) {
   self->text_input_plugin = fl_text_input_plugin_new(
       messenger, im_context, FL_TEXT_INPUT_VIEW_DELEGATE(self));
   self->keyboard_manager =
-      fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(self));
+      fl_keyboard_manager_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(self));
 }
 
 static void init_scrolling(FlView* self) {
@@ -303,6 +303,12 @@ static void fl_view_keyboard_delegate_iface_init(
     FlView* self = FL_VIEW(view_delegate);
     g_return_val_if_fail(self->keymap != nullptr, 0);
     return gdk_keymap_lookup_key(self->keymap, key);
+  };
+
+  iface->get_keyboard_state =
+      [](FlKeyboardViewDelegate* view_delegate) -> GHashTable* {
+    FlView* self = FL_VIEW(view_delegate);
+    return fl_view_get_keyboard_state(self);
   };
 }
 
@@ -753,4 +759,10 @@ void fl_view_set_textures(FlView* self,
   }
 
   fl_gl_area_queue_render(self->gl_area, textures);
+}
+
+GHashTable* fl_view_get_keyboard_state(FlView* self) {
+  g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
+
+  return fl_keyboard_manager_get_pressed_state(self->keyboard_manager);
 }
