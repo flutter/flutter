@@ -1345,9 +1345,13 @@ void main() {
                   Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
                 ],
               ),
-              const MaterialButton(
+              ElevatedButton(
                 onPressed: null,
-                child: Text('Material Button', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
+                style: ElevatedButton.styleFrom(textStyle: const TextStyle(
+                  fontFamily: 'FlutterTest',
+                  fontSize: 20.0,
+                )),
+                child: const Text('Elevated Button'),
               ),
               const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
             ],
@@ -1366,11 +1370,11 @@ void main() {
 
     final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
     final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
-    final double materialButtonDy = tester.getBottomLeft(find.text('Material Button')).dy;
+    final double elevatedButtonDy = tester.getBottomLeft(find.text('Elevated Button')).dy;
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, materialButtonDy - 3.0);
+    expect(firstToggleButtonDy, elevatedButtonDy - 3.0);
     expect(firstToggleButtonDy, textDy - 5.0);
   });
 
