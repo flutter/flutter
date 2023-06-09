@@ -541,7 +541,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   }
 
   bool _needRebuild(Map<String, DevFSContent> entries) {
-    // todo(andrewkolos): This logic might fail in the future if we change the
+    // TODO(andrewkolos): This logic might fail in the future if we change the
     // schema of the contents of the asset manifest file and the user does not
     // perform a `flutter clean` after upgrading.
     // See https://github.com/flutter/flutter/issues/128563.
