@@ -29,11 +29,6 @@ class FilterContents : public Contents {
     kInner,
   };
 
-  // Domain is kRGBA, we may decide to support more color modes later.
-  struct ColorMatrix {
-    float array[20];
-  };
-
   enum class MorphType { kDilate, kErode };
 
   static std::shared_ptr<FilterContents> MakeDirectionalGaussianBlur(

@@ -5,6 +5,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <ostream>
@@ -93,6 +94,26 @@ enum class BlendMode {
 
 const char* BlendModeToString(BlendMode blend_mode);
 
+/// 4x5 matrix for transforming the color and alpha components of a Bitmap.
+///
+///   [ a, b, c, d, e,
+///     f, g, h, i, j,
+///     k, l, m, n, o,
+///     p, q, r, s, t ]
+///
+/// When applied to a color [R, G, B, A], the resulting color is computed as:
+///
+///    R’ = a*R + b*G + c*B + d*A + e;
+///    G’ = f*R + g*G + h*B + i*A + j;
+///    B’ = k*R + l*G + m*B + n*A + o;
+///    A’ = p*R + q*G + r*B + s*A + t;
+///
+/// That resulting color [R’, G’, B’, A’] then has each channel clamped to the 0
+/// to 1 range.
+struct ColorMatrix {
+  Scalar array[20];
+};
+
 /**
  *  Represents a RGBA color
  */
@@ -166,10 +187,15 @@ struct Color {
    * @param t A value between 0.0f and 1.0f, inclusive.
    * @return constexpr Color
    */
-  constexpr static Color lerp(Color a, Color b, Scalar t) {
+  constexpr static Color Lerp(Color a, Color b, Scalar t) {
     Scalar tt = 1.0f - t;
     return {a.red * tt + b.red * t, a.green * tt + b.green * t,
             a.blue * tt + b.blue * t, a.alpha * tt + b.alpha * t};
+  }
+
+  constexpr Color Clamp01() const {
+    return Color(std::clamp(red, 0.0f, 1.0f), std::clamp(green, 0.0f, 1.0f),
+                 std::clamp(blue, 0.0f, 1.0f), std::clamp(alpha, 0.0f, 1.0f));
   }
 
   /**
@@ -780,9 +806,34 @@ struct Color {
     };
   }
 
-  static Color BlendColor(const Color& src,
-                          const Color& dst,
-                          BlendMode blend_mode);
+  /// @brief Blends an unpremultiplied destination color into a given
+  ///        unpremultiplied source color to form a new unpremultiplied color.
+  ///
+  ///        If either the source or destination are premultiplied, the result
+  ///        will be incorrect.
+  Color Blend(const Color& source, BlendMode blend_mode) const;
+
+  /// @brief A color filter that transforms colors through a 4x5 color matrix.
+  ///
+  ///        This filter can be used to change the saturation of pixels, convert
+  ///        from YUV to RGB, etc.
+  ///
+  ///        Each channel of the output color is clamped to the 0 to 1 range.
+  ///
+  /// @see   `ColorMatrix`
+  Color ApplyColorMatrix(const ColorMatrix& color_matrix) const;
+
+  /// @brief Convert the color from linear space to sRGB space.
+  ///
+  ///        The color is assumed to be unpremultiplied. If the color is
+  ///        premultipled, the conversion output will be incorrect.
+  Color LinearToSRGB() const;
+
+  /// @brief Convert the color from sRGB space to linear space.
+  ///
+  ///        The color is assumed to be unpremultiplied. If the color is
+  ///        premultipled, the conversion output will be incorrect.
+  Color SRGBToLinear() const;
 
   Color operator*(const Color& c) const {
     return Color(red * c.red, green * c.green, blue * c.blue, alpha * c.alpha);
