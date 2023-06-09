@@ -20,7 +20,7 @@ class _${blockName}DefaultsM3 extends ${blockName}ThemeData {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
-  static double fullScreenBarHeight = ${tokens['md.comp.search-view.full-screen.header.container.height']};
+  static double fullScreenBarHeight = ${getToken('md.comp.search-view.full-screen.header.container.height')};
 
   @override
   Color? get backgroundColor => ${componentColor('md.comp.search-view.container')};
