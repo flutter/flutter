@@ -14,6 +14,9 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 
+export '_html_element_view_io.dart'
+    if (dart.library.js_util) '_html_element_view_web.dart';
+
 // Examples can assume:
 // PlatformViewController createFooWebView(PlatformViewCreationParams params) { return (null as dynamic) as PlatformViewController; }
 // Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{};
@@ -302,143 +305,6 @@ class UiKitView extends StatefulWidget {
 
   @override
   State<UiKitView> createState() => _UiKitViewState();
-}
-
-/// Embeds an HTML element in the Widget hierarchy in Flutter Web.
-///
-/// *NOTE*: This only works in Flutter Web. To embed web content on other
-/// platforms, consider using the `flutter_webview` plugin.
-///
-/// Embedding HTML is an expensive operation and should be avoided when a
-/// Flutter equivalent is possible.
-///
-/// The embedded HTML is painted just like any other Flutter widget and
-/// transformations apply to it as well. This widget should only be used in
-/// Flutter Web.
-///
-/// {@macro flutter.widgets.AndroidView.layout}
-///
-/// Due to security restrictions with cross-origin `<iframe>` elements, Flutter
-/// cannot dispatch pointer events to an HTML view. If an `<iframe>` is the
-/// target of an event, the window containing the `<iframe>` is not notified
-/// of the event. In particular, this means that any pointer events which land
-/// on an `<iframe>` will not be seen by Flutter, and so the HTML view cannot
-/// participate in gesture detection with other widgets.
-///
-/// The way we enable accessibility on Flutter for web is to have a full-page
-/// button which waits for a double tap. Placing this full-page button in front
-/// of the scene would cause platform views not to receive pointer events. The
-/// tradeoff is that by placing the scene in front of the semantics placeholder
-/// will cause platform views to block pointer events from reaching the
-/// placeholder. This means that in order to enable accessibility, you must
-/// double tap the app *outside of a platform view*. As a consequence, a
-/// full-screen platform view will make it impossible to enable accessibility.
-/// Make sure that your HTML views are sized no larger than necessary, or you
-/// may cause difficulty for users trying to enable accessibility.
-///
-/// {@macro flutter.widgets.AndroidView.lifetime}
-class HtmlElementView extends StatelessWidget {
-  /// Creates a platform view for Flutter Web.
-  ///
-  /// `viewType` identifies the type of platform view to create.
-  const HtmlElementView({
-    super.key,
-    required this.viewType,
-    this.onPlatformViewCreated,
-    this.creationParams,
-  });
-
-  /// The unique identifier for the HTML view type to be embedded by this widget.
-  ///
-  /// A PlatformViewFactory for this type must have been registered.
-  final String viewType;
-
-  /// Callback to invoke after the platform view has been created.
-  ///
-  /// May be null.
-  final PlatformViewCreatedCallback? onPlatformViewCreated;
-
-  /// Passed as the 2nd argument (i.e. `params`) of the registered view factory.
-  final Object? creationParams;
-
-  @override
-  Widget build(BuildContext context) {
-    assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
-    return PlatformViewLink(
-      viewType: viewType,
-      onCreatePlatformView: _createHtmlElementView,
-      surfaceFactory: (BuildContext context, PlatformViewController controller) {
-        return PlatformViewSurface(
-          controller: controller,
-          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        );
-      },
-    );
-  }
-
-  /// Creates the controller and kicks off its initialization.
-  _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(
-      params.id,
-      viewType,
-      creationParams,
-    );
-    controller._initialize().then((_) {
-      params.onPlatformViewCreated(params.id);
-      onPlatformViewCreated?.call(params.id);
-    });
-    return controller;
-  }
-}
-
-class _HtmlElementViewController extends PlatformViewController {
-  _HtmlElementViewController(
-    this.viewId,
-    this.viewType,
-    this.creationParams,
-  );
-
-  @override
-  final int viewId;
-
-  /// The unique identifier for the HTML view type to be embedded by this widget.
-  ///
-  /// A PlatformViewFactory for this type must have been registered.
-  final String viewType;
-
-  final dynamic creationParams;
-
-  bool _initialized = false;
-
-  Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
-      'params': creationParams,
-    };
-    await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    _initialized = true;
-  }
-
-  @override
-  Future<void> clearFocus() async {
-    // Currently this does nothing on Flutter Web.
-    // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
-  }
-
-  @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
-    // We do not dispatch pointer events to HTML views because they may contain
-    // cross-origin iframes, which only accept user-generated events.
-  }
-
-  @override
-  Future<void> dispose() async {
-    if (_initialized) {
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
-    }
-  }
 }
 
 class _AndroidViewState extends State<AndroidView> {
