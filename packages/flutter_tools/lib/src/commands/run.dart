@@ -26,6 +26,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../vmservice.dart';
 import '../web/web_runner.dart';
@@ -247,6 +248,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        usingCISystem: usingCISystem,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -298,6 +300,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
+        usingCISystem: usingCISystem,
       );
     }
   }
@@ -643,7 +646,7 @@ class RunCommand extends RunCommandBase {
               : globals.fs.file(applicationBinaryPath),
           trackWidgetCreation: trackWidgetCreation,
           projectRootPath: stringArg('project-root'),
-          packagesFilePath: globalResults!['packages'] as String?,
+          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           dillOutputPath: stringArg('output-dill'),
           ipv6: ipv6 ?? false,
           multidexEnabled: boolArg('multidex'),
