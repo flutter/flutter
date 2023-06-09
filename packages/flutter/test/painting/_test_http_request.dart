@@ -14,7 +14,7 @@ void createGetter(JSAny mock, String key, JSAny? Function() get) {
   objectDefineProperty(
     mock,
     key.toJS,
-    <String, Object>{
+    <String, JSFunction>{
       'get': (() => get()).toJS,
     }.jsify()!,
   );
