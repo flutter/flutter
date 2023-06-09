@@ -2329,8 +2329,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
       const String group = 'test-group';
 
-      await tester.pumpWidget(
-        const Directionality(
+      const Directionality theWidget = Directionality(
           textDirection: TextDirection.ltr,
           child: Stack(
             children: <Widget>[
@@ -2339,11 +2338,27 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               Text('c', textDirection: TextDirection.ltr),
             ],
           ),
-        ),
-      );
+        );
+      await tester.pumpWidget(theWidget);
+
+      final Element element = find.byWidget(theWidget).evaluate().first;
+
+
+
+      Map<String, Object?> rootJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
+        <String, String>{'objectGroup': group},
+      ))! as Map<String, Object?>;
+
+      List<Object?> alternateChildrenJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
+        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
+      ))! as List<Object?>;
+
+      expect(alternateChildrenJson.length, equals(1));
+
       final Element elementA = find.text('a').evaluate().first;
 
-      service.disposeAllGroups();
       service.resetPubRootDirectories();
       service.setSelection(elementA, 'my-group');
       final Map<String, dynamic> jsonA = (await service.testExtension(
@@ -2352,10 +2367,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       ))! as Map<String, dynamic>;
 
       service.resetPubRootDirectories();
-      Map<String, Object?> rootJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
-        <String, String>{'objectGroup': group},
-      ))! as Map<String, Object?>;
+
       // We haven't yet properly specified which directories are summary tree
       // directories so we get an empty tree other than the root that is always
       // included.
@@ -2389,10 +2401,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       childrenJson = rootJson['children']! as List<Object?>;
       expect(childrenJson.length, equals(1));
 
-      List<Object?> alternateChildrenJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getChildrenSummaryTree.name,
-        <String, String>{'arg': rootJson['objectId']! as String, 'objectGroup': group},
-      ))! as List<Object?>;
+
+
+      // ???
       expect(alternateChildrenJson.length, equals(1));
       Map<String, Object?> childJson = childrenJson[0]! as Map<String, Object?>;
       Map<String, Object?> alternateChildJson = alternateChildrenJson[0]! as Map<String, Object?>;
@@ -2433,6 +2444,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(alternateChildrenJson.length , equals(0));
       // Tests are failing when this typo is fixed.
       expect(childJson['chidlren'], isNull);
+
+      service.disposeAllGroups();
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTreeWithPreviews', (WidgetTester tester) async {
