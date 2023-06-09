@@ -51,6 +51,10 @@ class PopScope extends StatefulWidget {
 
   /// Called after a route pop was handled.
   ///
+  /// It's not possible to prevent the pop from happening at the time that this
+  /// method is called; the pop has already happened. Use [popEnabled] to
+  /// disable pops in advance.
+  ///
   /// Even when the pop is canceled, such as when [popEnabled] is false, this
   /// will still be called. The `success` parameter indicates whether or not the
   /// back navigation actually happened successfully.

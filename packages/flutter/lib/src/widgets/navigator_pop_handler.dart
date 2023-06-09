@@ -16,7 +16,7 @@ import 'pop_scope.dart';
 /// This sample demonstrates how to use this widget to properly handle system
 /// back gestures when using nested [Navigator]s.
 ///
-/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
+/// ** See code in examples/api/lib/widgets/navigator_pop_handler/navigator_pop_handler.0.dart **
 /// {@end-tool}
 ///
 /// See also:
