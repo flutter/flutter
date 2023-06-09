@@ -707,8 +707,8 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
   /// The callback to use when receiving a [NavigationNotification].
   ///
-  /// By default set to [defaultOnNavigationNotification], which updates the
-  /// engine with the navigation status.
+  /// By default set to [WidgetsApp.defaultOnNavigationNotification], which
+  /// updates the engine with the navigation status.
   ///
   /// If null, [NavigationNotification] is not listened for at all, and so will
   /// continue to propagate.
