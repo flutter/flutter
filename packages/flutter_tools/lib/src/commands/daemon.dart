@@ -1250,6 +1250,7 @@ class NotifyingLogger extends DelegatingLogger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _sendMessage(LogMessage('warning', message));
   }
