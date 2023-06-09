@@ -885,3 +885,8 @@ void fl_key_embedder_responder_sync_modifiers_if_needed(
                        synchronize_pressed_states_loop_body,
                        &sync_state_context);
 }
+
+GHashTable* fl_key_embedder_responder_get_pressed_state(
+    FlKeyEmbedderResponder* self) {
+  return self->pressing_records;
+}

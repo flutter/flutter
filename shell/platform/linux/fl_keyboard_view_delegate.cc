@@ -64,3 +64,10 @@ guint fl_keyboard_view_delegate_lookup_key(FlKeyboardViewDelegate* self,
 
   return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->lookup_key(self, key);
 }
+
+GHashTable* fl_keyboard_view_delegate_get_keyboard_state(
+    FlKeyboardViewDelegate* self) {
+  g_return_val_if_fail(FL_IS_KEYBOARD_VIEW_DELEGATE(self), nullptr);
+
+  return FL_KEYBOARD_VIEW_DELEGATE_GET_IFACE(self)->get_keyboard_state(self);
+}

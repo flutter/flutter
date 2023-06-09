@@ -8,8 +8,18 @@
 #include <vector>
 
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
+#include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
+#include "flutter/shell/platform/linux/fl_method_codec_private.h"
+#include "flutter/shell/platform/linux/key_mapping.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
+#include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_text_input_plugin.h"
+#include "flutter/testing/testing.h"
+
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 // Define compound `expect` in macros. If they were defined in functions, the
@@ -100,6 +110,10 @@ constexpr guint16 kKeyCodeSemicolon = 0x2fu;
 constexpr guint16 kKeyCodeKeyLeftBracket = 0x22u;
 
 static constexpr char kKeyEventChannelName[] = "flutter/keyevent";
+static constexpr char kKeyboardChannelName[] = "flutter/keyboard";
+static constexpr char kGetKeyboardStateMethod[] = "getKeyboardState";
+static constexpr uint64_t kMockPhysicalKey = 42;
+static constexpr uint64_t kMockLogicalKey = 42;
 
 // All key clues for a keyboard layout.
 //
@@ -128,6 +142,19 @@ G_DECLARE_FINAL_TYPE(FlMockKeyBinaryMessenger,
                      GObject)
 
 G_END_DECLS
+
+MATCHER_P(MethodSuccessResponse, result, "") {
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  g_autoptr(FlMethodResponse) response =
+      fl_method_codec_decode_response(FL_METHOD_CODEC(codec), arg, nullptr);
+  fl_method_response_get_result(response, nullptr);
+  if (fl_value_equal(fl_method_response_get_result(response, nullptr),
+                     result)) {
+    return true;
+  }
+  *result_listener << ::testing::PrintToString(response);
+  return false;
+}
 
 /***** FlMockKeyBinaryMessenger *****/
 /* Mock a binary messenger that only processes messages from the embedding on
@@ -322,6 +349,15 @@ static guint fl_mock_view_keyboard_lookup_key(FlKeyboardViewDelegate* delegate,
   return (*group_layout)[key->keycode * 2 + shift];
 }
 
+static GHashTable* fl_mock_view_keyboard_get_keyboard_state(
+    FlKeyboardViewDelegate* view_delegate) {
+  GHashTable* result = g_hash_table_new(g_direct_hash, g_direct_equal);
+  g_hash_table_insert(result, reinterpret_cast<gpointer>(kMockPhysicalKey),
+                      reinterpret_cast<gpointer>(kMockLogicalKey));
+
+  return result;
+}
+
 static void fl_mock_view_keyboard_delegate_iface_init(
     FlKeyboardViewDelegateInterface* iface) {
   iface->send_key_event = fl_mock_view_keyboard_send_key_event;
@@ -331,6 +367,7 @@ static void fl_mock_view_keyboard_delegate_iface_init(
   iface->subscribe_to_layout_change =
       fl_mock_view_keyboard_subscribe_to_layout_change;
   iface->lookup_key = fl_mock_view_keyboard_lookup_key;
+  iface->get_keyboard_state = fl_mock_view_keyboard_get_keyboard_state;
 }
 
 static FlMockViewDelegate* fl_mock_view_delegate_new() {
@@ -406,13 +443,16 @@ static FlKeyEvent* fl_key_event_new_by_mock(bool is_press,
 class KeyboardTester {
  public:
   KeyboardTester() {
+    ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
+
     view_ = fl_mock_view_delegate_new();
     respondToEmbedderCallsWith(false);
     respondToChannelCallsWith(false);
     respondToTextInputWith(false);
     setLayout(kLayoutUs);
 
-    manager_ = fl_keyboard_manager_new(FL_KEYBOARD_VIEW_DELEGATE(view_));
+    manager_ =
+        fl_keyboard_manager_new(messenger, FL_KEYBOARD_VIEW_DELEGATE(view_));
   }
 
   ~KeyboardTester() {
@@ -924,6 +964,47 @@ TEST(FlKeyboardManagerTest, SynthesizeModifiersIfNeeded) {
   verifyModifierIsSynthesized(GDK_MOD1_MASK, kPhysicalAltLeft, kLogicalAltLeft);
   verifyModifierIsSynthesized(GDK_SHIFT_MASK, kPhysicalShiftLeft,
                               kLogicalShiftLeft);
+}
+
+TEST(FlKeyboardManagerTest, GetPressedState) {
+  KeyboardTester tester;
+  tester.respondToTextInputWith(true);
+
+  // Dispatch a key event.
+  fl_keyboard_manager_handle_event(
+      tester.manager(),
+      fl_key_event_new_by_mock(true, GDK_KEY_a, kKeyCodeKeyA, 0, false));
+
+  GHashTable* pressedState =
+      fl_keyboard_manager_get_pressed_state(tester.manager());
+  EXPECT_EQ(g_hash_table_size(pressedState), 1u);
+
+  gpointer physical_key =
+      g_hash_table_lookup(pressedState, uint64_to_gpointer(kPhysicalKeyA));
+  EXPECT_EQ(gpointer_to_uint64(physical_key), kLogicalKeyA);
+}
+
+TEST(FlKeyboardPluginTest, KeyboardChannelGetPressedState) {
+  ::testing::NiceMock<flutter::testing::MockBinaryMessenger> messenger;
+
+  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(
+      messenger, FL_KEYBOARD_VIEW_DELEGATE(fl_mock_view_delegate_new()));
+  EXPECT_NE(manager, nullptr);
+
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), kGetKeyboardStateMethod, nullptr, nullptr);
+
+  g_autoptr(FlValue) response = fl_value_new_map();
+  fl_value_set_take(response, fl_value_new_int(kMockPhysicalKey),
+                    fl_value_new_int(kMockLogicalKey));
+  EXPECT_CALL(messenger,
+              fl_binary_messenger_send_response(
+                  ::testing::Eq<FlBinaryMessenger*>(messenger), ::testing::_,
+                  MethodSuccessResponse(response), ::testing::_))
+      .WillOnce(::testing::Return(true));
+
+  messenger.ReceiveMessage(kKeyboardChannelName, message);
 }
 
 // The following layout data is generated using DEBUG_PRINT_LAYOUT.
