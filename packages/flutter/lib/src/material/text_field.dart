@@ -1503,8 +1503,6 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
   if (states.contains(MaterialState.disabled)) {
     return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));

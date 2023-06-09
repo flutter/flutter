@@ -1274,8 +1274,6 @@ class _SearchBarState extends State<SearchBar> {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _SearchBarDefaultsM3 extends SearchBarThemeData {
   _SearchBarDefaultsM3(this.context);
 
@@ -1345,8 +1343,6 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SearchViewDefaultsM3 extends SearchViewThemeData {
   _SearchViewDefaultsM3(this.context, {required this.isFullScreen});

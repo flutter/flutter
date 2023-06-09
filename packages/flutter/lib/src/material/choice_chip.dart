@@ -240,8 +240,6 @@ class ChoiceChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _ChoiceChipDefaultsM3 extends ChipThemeData {
   _ChoiceChipDefaultsM3(
     this.context,

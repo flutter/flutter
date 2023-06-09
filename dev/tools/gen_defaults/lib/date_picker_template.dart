@@ -11,10 +11,10 @@ class DatePickerTemplate extends TokenTemplate {
   });
 
   String _layerOpacity(String layerToken) {
-    if (tokens.containsKey(layerToken)) {
-      final String? layerValue = tokens[layerToken] as String?;
-      if (tokens.containsKey(layerValue)) {
-        final String? opacityValue = opacity(layerValue!);
+    if (tokenAvailable(layerToken)) {
+      final String layerValue = getToken(layerToken) as String;
+      if (tokenAvailable(layerValue)) {
+        final String? opacityValue = opacity(layerValue);
         if (opacityValue != null) {
           return '.withOpacity($opacityValue)';
         }

@@ -15,7 +15,7 @@ class _${blockName}DefaultsM3 extends BottomAppBarTheme {
   _${blockName}DefaultsM3(this.context)
     : super(
       elevation: ${elevation('md.comp.bottom-app-bar.container')},
-      height: ${tokens['md.comp.bottom-app-bar.container.height']},
+      height: ${getToken('md.comp.bottom-app-bar.container.height')},
       shape: const AutomaticNotchedShape(${shape('md.comp.bottom-app-bar.container', '')}),
     );
 

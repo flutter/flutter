@@ -296,8 +296,6 @@ class _BottomAppBarDefaultsM2 extends BottomAppBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _BottomAppBarDefaultsM3 extends BottomAppBarTheme {
   _BottomAppBarDefaultsM3(this.context)
     : super(
