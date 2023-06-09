@@ -9,6 +9,8 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../version.dart';
 
+import 'upgrade.dart' show precacheArtifacts;
+
 class ChannelCommand extends FlutterCommand {
   ChannelCommand({ bool verboseHelp = false }) {
     argParser.addFlag(
@@ -16,6 +18,12 @@ class ChannelCommand extends FlutterCommand {
       abbr: 'a',
       help: 'Include all the available branches (including local branches) when listing channels.',
       hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'cache-artifacts',
+      help: 'After switching channels, download all required binary artifacts. '
+            'This is the equivalent of running "flutter precache" with the "--all-platforms" flag.',
+      defaultsTo: true,
     );
   }
 
@@ -134,6 +142,9 @@ class ChannelCommand extends FlutterCommand {
       globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     await _checkout(branchName);
+    if (boolArg('cache-artifacts')) {
+      await precacheArtifacts(Cache.flutterRoot);
+    }
     globals.printStatus("Successfully switched to flutter channel '$branchName'.");
     globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
   }

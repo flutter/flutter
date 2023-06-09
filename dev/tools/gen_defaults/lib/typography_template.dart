@@ -41,13 +41,13 @@ class _M3Typography {
     return theme.toString();
   }
 
-  String _textStyleDef(String tokenName, String debugLabel, String baseline) {
+  String _textStyleDef(String tokenPrefix, String debugLabel, String baseline) {
     final StringBuffer style = StringBuffer("TextStyle(debugLabel: '$debugLabel'");
     style.write(', inherit: false');
-    style.write(', fontSize: ${_fontSize(tokenName)}');
-    style.write(', fontWeight: ${_fontWeight(tokenName)}');
-    style.write(', letterSpacing: ${_fontSpacing(tokenName)}');
-    style.write(', height: ${_fontHeight(tokenName)}');
+    style.write(', fontSize: ${_fontSize(tokenPrefix)}');
+    style.write(', fontWeight: ${_fontWeight(tokenPrefix)}');
+    style.write(', letterSpacing: ${_fontSpacing(tokenPrefix)}');
+    style.write(', height: ${_fontHeight(tokenPrefix)}');
     style.write(', textBaseline: TextBaseline.$baseline');
     style.write(', leadingDistribution: TextLeadingDistribution.even');
     style.write(')');
@@ -55,21 +55,21 @@ class _M3Typography {
   }
 
   String _fontSize(String textStyleTokenName) {
-    return tokens['$textStyleTokenName.size']!.toString();
+    return getToken('$textStyleTokenName.size').toString();
   }
 
   String _fontWeight(String textStyleTokenName) {
-    final String weightValue = tokens[tokens['$textStyleTokenName.weight']!]!.toString();
+    final String weightValue = getToken(getToken('$textStyleTokenName.weight') as String).toString();
     return 'FontWeight.w$weightValue';
   }
 
   String _fontSpacing(String textStyleTokenName) {
-    return tokens['$textStyleTokenName.tracking']!.toString();
+    return getToken('$textStyleTokenName.tracking').toString();
   }
 
   String _fontHeight(String textStyleTokenName) {
-    final double size = tokens['$textStyleTokenName.size']! as double;
-    final double lineHeight = tokens['$textStyleTokenName.line-height']! as double;
+    final double size = getToken('$textStyleTokenName.size') as double;
+    final double lineHeight = getToken('$textStyleTokenName.line-height') as double;
     return (lineHeight / size).toStringAsFixed(2);
   }
 }

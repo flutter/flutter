@@ -1402,9 +1402,9 @@ void main() {
                     reverseDuration: const Duration(seconds: 2),
                   ),
                   builder: (BuildContext context) {
-                    return MaterialButton(
-                      onPressed: () => Navigator.pop(context),
+                    return ElevatedButton(
                       key: tapTargetToClose,
+                      onPressed: () => Navigator.pop(context),
                       child: const Text('BottomSheet'),
                     );
                   },
@@ -1551,9 +1551,9 @@ void main() {
                   context: context,
                   transitionAnimationController: controller,
                   builder: (BuildContext context) {
-                    return MaterialButton(
-                      onPressed: () => Navigator.pop(context),
+                    return ElevatedButton(
                       key: tapTargetToClose,
+                      onPressed: () => Navigator.pop(context),
                       child: const Text('BottomSheet'),
                     );
                   },
