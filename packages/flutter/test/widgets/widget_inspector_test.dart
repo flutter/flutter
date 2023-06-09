@@ -9,7 +9,9 @@
 @TestOn('!chrome')
 library;
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -240,7 +242,67 @@ extension TextFromString on String {
   }
 }
 
+/// Forces garbage collection by aggressive memory allocation.
+Future<void> _forceGC() async {
+  const Duration timeout = Duration(seconds: 5);
+  const int gcCycles = 3; // 1 should be enough, but we do 3 to make sure test is not flaky.
+  final Stopwatch stopwatch = Stopwatch()..start();
+  final int barrier = reachabilityBarrier;
+
+  final List<List<DateTime>> storage = <List<DateTime>>[];
+
+  void allocateMemory() {
+    storage.add(Iterable<DateTime>.generate(10000, (_) => DateTime.now()).toList());
+    if (storage.length > 100) {
+      storage.removeAt(0);
+    }
+  }
+
+  while (reachabilityBarrier < barrier + gcCycles) {
+    if (stopwatch.elapsed > timeout) {
+      throw TimeoutException('forceGC timed out', timeout);
+    }
+    await Future<void>.delayed(Duration.zero);
+    allocateMemory();
+  }
+}
+
+
+final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];
+
 void main() {
+  group('$InspectorReferenceData', (){
+    for (final Object item in _weakValueTests) {
+      test('can be created for any type but $Record, $item', () async {
+        final InspectorReferenceData weakValue = InspectorReferenceData(item, 'id');
+        expect(weakValue.value, item);
+      });
+    }
+
+    test('throws for $Record', () async {
+      expect(()=> InspectorReferenceData((1, 2), 'id'), throwsA(isA<ArgumentError>()));
+    });
+  });
+
+  group('$WeakMap', (){
+    for (final Object item in _weakValueTests) {
+      test('assigns and removes value, $item', () async {
+        final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+        weakMap[item] = 1;
+        expect(weakMap[item], 1);
+        expect(weakMap.remove(item), 1);
+        expect(weakMap[item], null);
+      });
+    }
+
+    for (final Object item in _weakValueTests) {
+      test('returns null for absent value, $item', () async {
+        final WeakMap<Object, Object> weakMap = WeakMap<Object, Object>();
+        expect(weakMap[item], null);
+      });
+    }
+  });
+
   _TestWidgetInspectorService.runTests();
 }
 
@@ -259,6 +321,19 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           <String, String>{'enabled': 'false'},
         );
       }
+    });
+
+    test('WidgetInspector does not hold objects from GC', () async {
+      List<DateTime>? someObject = <DateTime>[DateTime.now(), DateTime.now()];
+      final String? id = service.toId(someObject, 'group_name');
+
+      expect(id, isNotNull);
+
+      final WeakReference<Object> ref = WeakReference<Object>(someObject);
+      someObject = null;
+      await _forceGC();
+
+      expect(ref.target, null);
     });
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
@@ -878,7 +953,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
         expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode?>());
 
         expect(chainNode['children'], isList);
         final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
@@ -894,7 +969,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
           expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         }
       }
     });
@@ -911,7 +986,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -940,7 +1015,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -2086,7 +2161,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(chainNode['node'], isMap);
         final Map<String, Object?> jsonNode = chainNode['node']! as Map<String, Object?>;
         expect(service.toObject(jsonNode['valueId']! as String), equals(element));
-        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(jsonNode['objectId']! as String), isA<DiagnosticsNode?>());
 
         expect(chainNode['children'], isList);
         final List<Object?> jsonChildren = chainNode['children']! as List<Object?>;
@@ -2102,7 +2177,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           expect(jsonChildren[j], isMap);
           final Map<String, Object?> childJson = jsonChildren[j]! as Map<String, Object?>;
           expect(service.toObject(childJson['valueId']! as String), equals(childrenElements[j]));
-          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+          expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         }
       }
     });
@@ -2121,7 +2196,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId'] as String?), equals(properties[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -2152,7 +2227,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < propertiesJson.length; ++i) {
         final Map<String, Object?> propertyJson = propertiesJson[i]! as Map<String, Object?>;
         expect(service.toObject(propertyJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(propertyJson['objectId']! as String), isA<DiagnosticsNode?>());
       }
     });
 
@@ -2183,13 +2258,13 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId']! as String)! as DiagnosticsNode;
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           final Object? property = service.toObject(propertyJson['objectId']! as String);
-          expect(property, isA<DiagnosticsNode>());
+          expect(property, isA<DiagnosticsNode?>());
           expect(expectedProperties, contains(property));
         }
       }
@@ -2224,7 +2299,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       for (int i = 0; i < childrenJson.length; ++i) {
         final Map<String, Object?> childJson = childrenJson[i]! as Map<String, Object?>;
         expect(service.toObject(childJson['valueId']! as String), equals(children[i].value));
-        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode>());
+        expect(service.toObject(childJson['objectId']! as String), isA<DiagnosticsNode?>());
         final List<Object?> propertiesJson = childJson['properties']! as List<Object?>;
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           expect(propertyJson, isNot(contains('children')));
@@ -2233,7 +2308,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
         for (final Map<String, Object?> propertyJson in propertiesJson.cast<Map<String, Object?>>()) {
           final Object property = service.toObject(propertyJson['objectId']! as String)!;
-          expect(property, isA<DiagnosticsNode>());
+          expect(property, isA<DiagnosticsNode?>());
           expect(expectedProperties, contains(property));
         }
       }
@@ -3745,7 +3820,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(55));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3755,7 +3830,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(93));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3782,7 +3857,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(55));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3792,7 +3867,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(93));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
