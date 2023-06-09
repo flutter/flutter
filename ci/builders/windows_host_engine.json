@@ -98,7 +98,7 @@
                     "include_paths": [
                         "out/host_release/zip_archives/windows-x64-release/windows-x64-flutter.zip"
                     ],
-                    "name": "host_profile",
+                    "name": "host_release",
                     "realm": "production"
                 }
             ],
