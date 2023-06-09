@@ -19,6 +19,7 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
+import 'material_state_mixin.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -841,7 +842,7 @@ class RawChip extends StatefulWidget
   State<RawChip> createState() => _RawChipState();
 }
 
-class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {
+class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProviderStateMixin<RawChip> {
   static const Duration pressedAnimationDuration = Duration(milliseconds: 75);
 
   late AnimationController selectController;
@@ -853,7 +854,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   late Animation<double> deleteDrawerAnimation;
   late Animation<double> enableAnimation;
   late Animation<double> selectionFade;
-  late final Set<MaterialState> states;
 
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
@@ -871,10 +871,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
-    states = <MaterialState>{
-      if (!widget.isEnabled) MaterialState.disabled,
-      if (widget.selected) MaterialState.selected,
-    };
+    setMaterialState(MaterialState.disabled, !widget.isEnabled);
+    setMaterialState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
       value: widget.selected ? 1.0 : 0.0,
@@ -949,7 +947,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!canTap) {
       return;
     }
-    states.add(MaterialState.pressed);
+    setMaterialState(MaterialState.pressed, true);
     setState(() {
       _isTapping = true;
     });
@@ -959,7 +957,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!canTap) {
       return;
     }
-    states.remove(MaterialState.pressed);
+    setMaterialState(MaterialState.pressed, false);
     setState(() {
       _isTapping = false;
     });
@@ -969,7 +967,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!canTap) {
       return;
     }
-    states.remove(MaterialState.pressed);
+    setMaterialState(MaterialState.pressed, false);
     setState(() {
       _isTapping = false;
     });
@@ -978,33 +976,13 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     widget.onPressed?.call();
   }
 
-  void _updateFocusState(bool focused) {
-    setState(() {
-      if (focused) {
-        states.add(MaterialState.focused);
-      } else {
-        states.remove(MaterialState.focused);
-      }
-    });
-  }
-
-  void _updateHoverState(bool hovered) {
-    setState(() {
-      if (hovered) {
-        states.add(MaterialState.hovered);
-      } else {
-        states.remove(MaterialState.hovered);
-      }
-    });
-  }
-
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
-    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, states)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, states)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, states);
-    final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, states)
-      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, states)
-      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, states)
+    final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
+    final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
+      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
+      ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates)
       ?? const StadiumBorder();
     return resolvedShape.copyWith(side: resolvedSide);
   }
@@ -1054,9 +1032,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
-        if (!widget.isEnabled) {
-          states.add(MaterialState.disabled);
-        }
+        setMaterialState(MaterialState.disabled, !widget.isEnabled);
         if (widget.isEnabled) {
           enableController.forward();
         } else {
@@ -1075,9 +1051,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
-        if (widget.selected) {
-          states.add(MaterialState.selected);
-        }
+        setMaterialState(MaterialState.selected, widget.selected);
         if (widget.selected) {
           selectController.forward();
         } else {
@@ -1213,7 +1187,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       ?? chipDefaults.iconTheme;
 
     final TextStyle effectiveLabelStyle = labelStyle.merge(widget.labelStyle);
-    final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, states);
+    final Color? resolvedLabelColor = MaterialStateProperty.resolveAs<Color?>(effectiveLabelStyle.color, materialStates);
     final TextStyle resolvedLabelStyle = effectiveLabelStyle.copyWith(color: resolvedLabelColor);
     final Widget? avatar = iconTheme != null && hasAvatar
       ? IconTheme(data: iconTheme, child: widget.avatar!)
@@ -1227,14 +1201,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       shape: resolvedShape,
       clipBehavior: widget.clipBehavior,
       child: InkWell(
-        onFocusChange: _updateFocusState,
+        onFocusChange: updateMaterialState(MaterialState.focused),
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         canRequestFocus: widget.isEnabled,
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
-        onHover: canTap ? _updateHoverState : null,
+        onHover: canTap ? updateMaterialState(MaterialState.hovered) : null,
         customBorder: resolvedShape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
