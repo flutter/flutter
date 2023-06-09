@@ -9,14 +9,6 @@ import 'routes.dart';
 /// Registers a callback to veto attempts by the user to dismiss the enclosing
 /// [ModalRoute].
 ///
-/// {@tool dartpad}
-/// Whenever the back button is pressed, you will get a callback at [onWillPop],
-/// which returns a [Future]. If the [Future] returns true, the screen is
-/// popped.
-///
-/// ** See code in examples/api/lib/widgets/will_pop_scope/will_pop_scope.0.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],

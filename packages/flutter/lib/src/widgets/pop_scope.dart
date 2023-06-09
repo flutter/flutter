@@ -21,7 +21,7 @@ typedef OnPoppedCallback = void Function(bool success);
 /// This sample demonstrates how to use this widget to properly handle system
 /// back gestures when using nested [Navigator]s.
 ///
-/// ** See code in examples/api/lib/widgets/pop_scope/nested_navigators.0.dart **
+/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
 ///
 /// See also:
