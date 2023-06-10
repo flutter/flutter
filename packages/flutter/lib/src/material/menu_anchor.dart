@@ -1062,6 +1062,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       style: mergedStyle,
       statesController: widget.statesController,
       clipBehavior: widget.clipBehavior,
+      isSemanticButton: null,
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
@@ -1903,6 +1904,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           focusNode: _buttonFocusNode,
           onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
           onPressed: _enabled ? () => toggleShowMenu(context) : null,
+          isSemanticButton: null,
           child: _MenuItemLabel(
             leadingIcon: widget.leadingIcon,
             trailingIcon: widget.trailingIcon,

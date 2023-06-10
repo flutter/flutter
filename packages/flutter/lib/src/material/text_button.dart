@@ -87,6 +87,7 @@ class TextButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.isSemanticButton,
     required Widget super.child,
   });
 
