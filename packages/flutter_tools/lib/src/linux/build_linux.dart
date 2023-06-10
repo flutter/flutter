@@ -108,7 +108,7 @@ Future<Directory> buildLinux(
     );
   }
 
-  return buildDirectory;
+  return buildDirectory.childDirectory('bundle');
 }
 
 Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
