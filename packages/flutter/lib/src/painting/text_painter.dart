@@ -124,7 +124,14 @@ class PlaceholderDimensions {
 
   @override
   String toString() {
-    return 'PlaceholderDimensions($size, $baseline${baselineOffset == null ? ", $baselineOffset" : ""})';
+    return switch (alignment) {
+      ui.PlaceholderAlignment.top ||
+      ui.PlaceholderAlignment.bottom ||
+      ui.PlaceholderAlignment.middle ||
+      ui.PlaceholderAlignment.aboveBaseline ||
+      ui.PlaceholderAlignment.belowBaseline => 'PlaceholderDimensions($size, $alignment)',
+      ui.PlaceholderAlignment.baseline      => 'PlaceholderDimensions($size, $alignment($baselineOffset from top))',
+    };
   }
 }
 
@@ -355,13 +362,16 @@ class _TextPainterLayoutCacheWithOffset {
   static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
     // TODO(LongCatIsLooong): remove the rounding when _applyFloatingPointHack
     // is removed.
-    minWidth = minWidth.floorToDouble();
-    maxWidth = maxWidth.floorToDouble();
+    if (_TextLayout._shouldApplyFloatingPointHack) {
+      minWidth = minWidth.floorToDouble();
+      maxWidth = maxWidth.floorToDouble();
+    }
     return switch (widthBasis) {
       TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
       TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),
     };
   }
+
   // Try to resize the contentWidth to fit the new input constraints, by just
   // adjusting the paint offset (so no line-breaking changes needed).
   //
@@ -391,8 +401,8 @@ class _TextPainterLayoutCacheWithOffset {
       assert(paragraph.width == double.infinity);
       return false;
     }
-    final double maxIntrinsicWidth = layout._paragraph.maxIntrinsicWidth;
-    if ((layout._paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance) {
+    final double maxIntrinsicWidth = paragraph.maxIntrinsicWidth;
+    if ((paragraph.width - maxIntrinsicWidth) > -precisionErrorTolerance && (maxWidth - maxIntrinsicWidth) > -precisionErrorTolerance) {
       // Adjust the paintOffset and contentWidth to the new input constraints.
       contentWidth = newContentWidth;
       return true;
@@ -863,16 +873,6 @@ class TextPainter {
     return rawBoxes.map((TextBox box) => _shiftTextBox(box, offset)).toList(growable: false);
   }
 
-  /// An ordered list of scales for each placeholder in the paragraph.
-  ///
-  /// The scale is used as a multiplier on the height, width and baselineOffset of
-  /// the placeholder. Scale is primarily used to handle accessibility scaling.
-  ///
-  /// Each scale corresponds to a [PlaceholderSpan] in the order they were defined
-  /// in the [InlineSpan] tree.
-  List<double>? get inlinePlaceholderScales => _inlinePlaceholderScales;
-  List<double>? _inlinePlaceholderScales;
-
   /// Sets the dimensions of each placeholder in [text].
   ///
   /// The number of [PlaceholderDimensions] provided should be the same as the
@@ -892,7 +892,7 @@ class TextPainter {
         if (span is PlaceholderSpan) {
           placeholderCount += 1;
         }
-        return value.length >= placeholderCount ;
+        return value.length >= placeholderCount;
       });
       return placeholderCount == value.length;
     }());
@@ -1029,7 +1029,6 @@ class TextPainter {
   ui.Paragraph _createParagraph(InlineSpan text) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
     text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
-    _inlinePlaceholderScales = builder.placeholderScales;
     assert(() {
       _debugMarkNeedsLayoutCallStack = null;
       return true;
@@ -1133,7 +1132,7 @@ class TextPainter {
         return true;
       }());
 
-      final ui.Paragraph paragraph = layoutCache.layout._paragraph;
+      final ui.Paragraph paragraph = layoutCache.paragraph;
       // Unfortunately even if we know that there is only paint changes, there's
       // no API to only make those updates so the paragraph has to be recreated
       // and re-laid out.

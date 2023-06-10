@@ -2159,8 +2159,6 @@ bool _hitIsOnDeleteIcon({
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _ChipDefaultsM3 extends ChipThemeData {
   _ChipDefaultsM3(this.context, this.isEnabled)
     : super(
@@ -2215,7 +2213,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get padding => const EdgeInsets.all(8.0);
 
   /// The chip at text scale 1 starts with 8px on each side and as text scaling
-  /// gets closer to 2 the label padding is linearly interpolated from 8px to 4px.
+  /// gets closer to 2, the label padding is linearly interpolated from 8px to 4px.
   /// Once the widget has a text scaling of 2 or higher than the label padding
   /// remains 4px.
   @override

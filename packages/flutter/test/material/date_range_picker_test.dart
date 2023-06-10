@@ -132,7 +132,10 @@ void main() {
       final Offset entryButtonBottomLeft = tester.getBottomLeft(
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
-      expect(saveButtonBottomLeft.dx, 800 - 89.0);
+      expect(
+        saveButtonBottomLeft.dx,
+        const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
+      );
       expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
       expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
@@ -1462,8 +1465,9 @@ void main() {
 
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Default layout (calendar mode)', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {

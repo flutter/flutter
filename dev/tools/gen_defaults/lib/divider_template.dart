@@ -12,7 +12,7 @@ class DividerTemplate extends TokenTemplate {
 class _${blockName}DefaultsM3 extends DividerThemeData {
   const _${blockName}DefaultsM3(this.context) : super(
     space: 16,
-    thickness: ${tokens["md.comp.divider.thickness"]},
+    thickness: ${getToken("md.comp.divider.thickness")},
     indent: 0,
     endIndent: 0,
   );

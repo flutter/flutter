@@ -114,7 +114,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
         profileData.completeError(error, stackTrace);
         return Response.internalServerError(body: '$error');
       }
-    }).add(createStaticHandler(
+    }).add(createBuildDirectoryHandler(
       path.join(macrobenchmarksDirectory, 'build', 'web'),
     ));
 
@@ -187,4 +187,24 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       chrome?.stop();
     }
   });
+}
+
+Handler createBuildDirectoryHandler(String buildDirectoryPath) {
+  final Handler childHandler = createStaticHandler(buildDirectoryPath);
+  return (Request request) async {
+    final Response response = await childHandler(request);
+    final String? mimeType = response.mimeType;
+
+    // Provide COOP/COEP headers so that the browser loads the page as
+    // crossOriginIsolated. This will make sure that we get high-resolution
+    // timers for our benchmark measurements.
+    if (mimeType == 'text/html' || mimeType == 'text/javascript') {
+      return response.change(headers: <String, String>{
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+      });
+    } else {
+      return response;
+    }
+  };
 }

@@ -155,7 +155,7 @@ void main() {
           ],
           stdout: allBinaries.join('\n'),
         ),
-        for (String bin in allBinaries)
+        for (final String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -239,7 +239,7 @@ void main() {
           ],
           stdout: allBinaries.join('\n'),
         ),
-        for (String bin in allBinaries)
+        for (final String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -329,7 +329,7 @@ void main() {
           ],
           stdout: allBinaries.join('\n'),
         ),
-        for (String bin in allBinaries)
+        for (final String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -422,7 +422,7 @@ void main() {
           ],
           stdout: allBinaries.join('\n'),
         ),
-        for (String bin in allBinaries)
+        for (final String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -514,7 +514,7 @@ void main() {
           ],
           stdout: allBinaries.join('\n'),
         ),
-        for (String bin in allBinaries)
+        for (final String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',
@@ -578,7 +578,7 @@ void main() {
           ],
           stdout: allBinaries.join('\n'),
         ),
-        for (String bin in allBinaries)
+        for (final String bin in allBinaries)
           FakeCommand(
             command: <String>['file', '--mime-type', '-b', bin],
             stdout: 'application/x-mach-binary',

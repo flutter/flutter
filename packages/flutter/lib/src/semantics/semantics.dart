@@ -1367,8 +1367,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// the finger without moving it. For example, a button should implement this
   /// action.
   ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// VoiceOver users on iOS and TalkBack users on Android *may* trigger this
   /// action by double-tapping the screen while an element is focused.
+  ///
+  /// Note: different OSes or assistive technologies may decide to interpret
+  /// user inputs differently. Some may simulate real screen taps, while others
+  /// may call semantics tap. One way to handle taps properly is to provide the
+  /// same handler to both gesture tap and semantics tap.
   final VoidCallback? onTap;
 
   /// The handler for [SemanticsAction.longPress].
@@ -1376,9 +1381,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is the semantic equivalent of a user pressing and holding the screen
   /// with the finger for a few seconds without moving it.
   ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// VoiceOver users on iOS and TalkBack users on Android *may* trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
+  ///
+  /// Note: different OSes or assistive technologies may decide to interpret
+  /// user inputs differently. Some may simulate real long presses, while others
+  /// may call semantics long press. One way to handle long press properly is to
+  /// provide the same handler to both gesture long press and semantics long
+  /// press.
   final VoidCallback? onLongPress;
 
   /// The handler for [SemanticsAction.scrollLeft].
