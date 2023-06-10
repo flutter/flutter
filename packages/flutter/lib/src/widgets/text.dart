@@ -435,11 +435,6 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
-    @Deprecated(
-      'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
-    )
     this.textScaleFactor,
     this.textScaler,
     this.maxLines,
@@ -469,11 +464,6 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
-    @Deprecated(
-      'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
-    )
     this.textScaleFactor,
     this.textScaler,
     this.maxLines,
@@ -552,11 +542,6 @@ class Text extends StatelessWidget {
   /// The value given to the constructor as textScaleFactor. If null, will
   /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
-  @Deprecated(
-    'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
-  )
   final double? textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}
