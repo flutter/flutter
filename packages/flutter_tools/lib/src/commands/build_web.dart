@@ -206,14 +206,12 @@ class BuildWebCommand extends BuildSubCommand {
       outputDirectoryPath: outputDirectoryPath,
     );
 
-    final String? directorySize = await getDirectorySize(outputDirectory);
-    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-        ? '' // Don't display the size when building a debug variant.
-        : ' ($directorySize)';
-
+    // We don't print the output directory size because it may be overinflated
+    // due to the output directory containing additional files not seen by
+    // users.
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Compiled to ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+      'Compiled to ${globals.fs.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 
