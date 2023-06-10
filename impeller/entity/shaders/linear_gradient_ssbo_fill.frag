@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <impeller/gradient.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
@@ -30,9 +29,9 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  vec2 start_to_end = frag_info.end_point - frag_info.start_point;
-  vec2 start_to_position = v_position - frag_info.start_point;
-  float t =
+  highp vec2 start_to_end = frag_info.end_point - frag_info.start_point;
+  highp vec2 start_to_position = v_position - frag_info.start_point;
+  highp float t =
       dot(start_to_position, start_to_end) / dot(start_to_end, start_to_end);
 
   if ((t < 0.0 || t > 1.0) && frag_info.tile_mode == kTileModeDecal) {
@@ -41,21 +40,20 @@ void main() {
   }
   t = IPFloatTile(t, frag_info.tile_mode);
 
-  vec4 result_color = vec4(0);
   for (int i = 1; i < frag_info.colors_length; i++) {
     ColorPoint prev_point = color_data.colors[i - 1];
     ColorPoint current_point = color_data.colors[i];
     if (t >= prev_point.stop && t <= current_point.stop) {
       float delta = (current_point.stop - prev_point.stop);
       if (delta < 0.001) {
-        result_color = current_point.color;
+        frag_color = current_point.color;
       } else {
         float ratio = (t - prev_point.stop) / delta;
-        result_color = mix(prev_point.color, current_point.color, ratio);
+        frag_color = mix(prev_point.color, current_point.color, ratio);
       }
       break;
     }
   }
   frag_color =
-      vec4(result_color.xyz * result_color.a, result_color.a) * frag_info.alpha;
+      vec4(frag_color.xyz * frag_color.a, frag_color.a) * frag_info.alpha;
 }

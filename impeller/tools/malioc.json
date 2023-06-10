@@ -11338,7 +11338,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 70,
+          "fp16_arithmetic": 32,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -11366,10 +11366,10 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.109375,
+              0.125,
               0.09375,
-              0.109375,
-              0.0,
+              0.125,
+              0.0625,
               0.0,
               0.25,
               0.0
@@ -11378,10 +11378,10 @@
               "load_store"
             ],
             "total_cycles": [
-              0.59375,
-              0.359375,
-              0.59375,
-              0.0625,
+              0.65625,
+              0.375,
+              0.65625,
+              0.125,
               4.0,
               0.25,
               0.0
@@ -11389,7 +11389,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 12,
+          "uniform_registers_used": 14,
           "work_registers_used": 15
         }
       }
