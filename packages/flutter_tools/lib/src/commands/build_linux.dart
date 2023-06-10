@@ -99,14 +99,12 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetSysroot: stringArg('target-sysroot')!,
     );
 
-    final String? directorySize = await getDirectorySize(outputDirectory);
-    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
-        ? '' // Don't display the size when building a debug variant.
-        : ' ($directorySize)';
-
+    // We don't include the output directory size because it may be overinflated
+    // due to the output directory containing additional files not seen by
+    // users.
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+      'Built to ${globals.fs.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 

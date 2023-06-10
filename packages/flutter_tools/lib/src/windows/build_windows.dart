@@ -104,12 +104,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     .childDirectory(sentenceCase(buildModeName))
     .childFile('$binaryName.exe');
   if (appFile.existsSync()) {
-    final String appSize = (buildInfo.mode == BuildMode.debug)
-        ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(appFile.lengthSync())})';
+    // We don't include the output directory size because it may be overinflated
+    // due to the output directory containing additional files not seen by
+    // users.
     globals.logger.printStatus(
       '${globals.logger.terminal.successMark}  '
-      'Built ${globals.fs.path.relative(appFile.path)}$appSize.',
+      'Built to ${globals.fs.path.relative(appFile.path)}',
       color: TerminalColor.green,
     );
   }
