@@ -500,6 +500,22 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.windows:
         if (_selectionDelegate.value.hasSelection && _selectionDelegate.value.status == SelectionStatus.uncollapsed) {
           // If lastSecondaryTapDownPosition is within the current selection then keep the current selection, else collapse it.
+          bool lastSecondaryTapDownPositionWasOnActiveSelection = false;
+          for (final Selectable selectable in _selectionDelegate.selectables) {
+            if (selectable.value.hasSelection && selectable.value.status == SelectionStatus.uncollapsed) {
+              final Rect localRect = Rect.fromLTWH(0, 0, selectable.size.width, selectable.size.height);
+              final Matrix4 transform = selectable.getTransformTo(null);
+              final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
+              if (globalRect.contains(details.globalPosition)) {
+                lastSecondaryTapDownPositionWasOnActiveSelection = true;
+                break;
+              }
+            }
+          }
+          if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
+            _selectStartTo(offset: lastSecondaryTapDownPosition);
+            _selectEndTo(offset: lastSecondaryTapDownPosition);
+          }
         } else {
           _selectStartTo(offset: lastSecondaryTapDownPosition);
           _selectEndTo(offset: lastSecondaryTapDownPosition);
