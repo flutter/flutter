@@ -106,8 +106,8 @@ class _GalleryAppState extends State<GalleryApp> {
     return Builder(
       builder: (BuildContext context) {
         return MediaQuery.withClampedTextScaling(
-          minScale: textScaleFactor ?? 0.0,
-          maxScale: textScaleFactor ?? double.infinity,
+          minScaleFactor: textScaleFactor ?? 0.0,
+          maxScaleFactor: textScaleFactor ?? double.infinity,
           child: child,
         );
       },

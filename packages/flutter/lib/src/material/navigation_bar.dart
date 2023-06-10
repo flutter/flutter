@@ -388,7 +388,7 @@ class NavigationDestination extends StatelessWidget {
           child: MediaQuery.withClampedTextScaling(
             // Don't scale labels of destinations, instead, tooltip text will
             // upscale.
-            maxScale: 1.0,
+            maxScaleFactor: 1.0,
             child: Text(label, style: textStyle),
           ),
         );

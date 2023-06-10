@@ -663,7 +663,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         child: MediaQuery.withClampedTextScaling(
           // Constrain the textScaleFactor to the largest supported value to prevent
           // layout issues.
-          maxScale: 1.3,
+          maxScaleFactor: 1.3,
           child: Builder(builder: (BuildContext context) {
             switch (orientation) {
               case Orientation.portrait:
@@ -1533,7 +1533,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
         duration: _dialogSizeAnimationDuration,
         curve: Curves.easeIn,
         child: MediaQuery.withClampedTextScaling(
-          maxScale: 1.3,
+          maxScaleFactor: 1.3,
           child: Builder(builder: (BuildContext context) {
             return contents;
           }),

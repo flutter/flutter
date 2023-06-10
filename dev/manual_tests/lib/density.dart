@@ -630,8 +630,8 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Directionality(
                 textDirection: _model.rtl ? TextDirection.rtl : TextDirection.ltr,
                 child: MediaQuery.withClampedTextScaling(
-                  minScale: _model.size,
-                  maxScale: _model.size,
+                  minScaleFactor: _model.size,
+                  maxScaleFactor: _model.size,
                   child: SizedBox.expand(
                     child: ListView(
                       children: tiles,

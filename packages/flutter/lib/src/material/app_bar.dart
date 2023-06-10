@@ -984,7 +984,7 @@ class _AppBarState extends State<AppBar> {
       // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
       // with a different `TextScaler`.
       title = MediaQuery.withClampedTextScaling(
-        maxScale: _kMaxTitleTextScaleFactor,
+        maxScaleFactor: _kMaxTitleTextScaleFactor,
         child: title,
       );
     }
@@ -2120,7 +2120,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     // with a different TextScaler.
     // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
     return MediaQuery.withClampedTextScaling(
-      maxScale: _kMaxTitleTextScaleFactor,
+      maxScaleFactor: _kMaxTitleTextScaleFactor,
       // This column will assume the full height of the parent Stack.
       child: Column(
         children: <Widget>[

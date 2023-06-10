@@ -1073,16 +1073,21 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     );
   }
 
-  //static Widget withSystemTextScaling({Key? key, required Widget child}) {
-  //  throw UnimplementedError();
-  //}
-
-  /// Creates a [MediaQuery] with a clamped [TextScaler], and inherits all other
-  /// properties from the closest ancestor MediaQuery.
+  /// Wraps the `child` in a [MediaQuery] and applies [TextScaler.clamp] on the
+  /// current [MediaQueryData.textScaler].
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
+  ///
+  /// This is a convenience function to restrict the range of the scaled text
+  /// size to `[minScaleFactor * fontSize, maxScaleFactor * fontSize]` (to
+  /// prevent excessive text scaling that would break the UI, for example). When
+  /// `minScaleFactor` equals `maxScaleFactor`, the scaler becomes
+  /// `TextScaler.linear(minScaleFactor)`.
   static Widget withClampedTextScaling({
     Key? key,
-    double minScale = 0.0,
-    double maxScale = double.infinity,
+    double minScaleFactor = 0.0,
+    double maxScaleFactor = double.infinity,
     required Widget child,
   }) {
     return Builder(builder: (BuildContext context) {
@@ -1090,8 +1095,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       final MediaQueryData data = of(context);
       return MediaQuery(
         data: data.copyWith(
-          textScaler: data.textScaler.clamp(minScaleFactor: minScale, maxScaleFactor: maxScale),
-          textScaleFactor: clampDouble(data.textScaleFactor, minScale, maxScale),
+          textScaler: data.textScaler.clamp(minScaleFactor: minScaleFactor, maxScaleFactor: maxScaleFactor),
         ),
         child: child,
       );

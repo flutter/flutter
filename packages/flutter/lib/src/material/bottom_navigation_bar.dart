@@ -785,7 +785,7 @@ class _Label extends StatelessWidget {
       // Do not grow text in bottom navigation bar when we can show a tooltip
       // instead.
       text = MediaQuery.withClampedTextScaling(
-        maxScale: 1.0,
+        maxScaleFactor: 1.0,
         child: text,
       );
     }

@@ -321,7 +321,7 @@ class CupertinoAlertDialog extends StatelessWidget {
       data: CupertinoUserInterfaceLevelData.elevated,
       child: MediaQuery.withClampedTextScaling(
         // iOS does not shrink dialog content below a 1.0 scale factor
-        minScale: 1.0,
+        minScaleFactor: 1.0,
         child: ScrollConfiguration(
           // A CupertinoScrollbar is built-in below.
           behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
