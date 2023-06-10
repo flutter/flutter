@@ -129,14 +129,14 @@ class BuildMacosCommand extends BuildSubCommand {
     }
 
     final Directory outputDirectory = globals.fs.directory(result.output);
-    final String? directorySize = await getDirectorySize(outputDirectory);
-    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+    final String? directorySize = globals.os.directorySize(outputDirectory);
+    final String outputSize = (directorySize == null)
         ? '' // Don't display the size when building a debug variant.
         : ' ($directorySize)';
 
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize',
       color: TerminalColor.green,
     );
 

@@ -103,8 +103,8 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
-  /// Return a directory's total size in bytes.
-  int? directorySize(Directory directory);
+  /// Return a directory's total size in human-readable format.
+  String? directorySize(Directory directory);
 
   void unzip(File file, Directory targetDirectory);
 
@@ -261,10 +261,11 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  int? directorySize(Directory directory) {
+  String? directorySize(Directory directory) {
     final List<String> command = <String>[
       'du',
-      '-s'
+      '-sk',
+      directory.path,
     ];
     final ProcessResult result = _processManager.runSync(command);
     if (result.exitCode != 0) {
@@ -275,7 +276,11 @@ class _PosixUtils extends OperatingSystemUtils {
     if (outputLines.isEmpty) {
       return null;
     }
-    return int.tryParse(outputLines.first);
+    final int? kiloBytes = int.tryParse(outputLines.first);
+    if (kiloBytes == null) {
+      return null;
+    }
+    return '${(kiloBytes / 1000).toStringAsFixed(1)}MB';
   }
 
   @override

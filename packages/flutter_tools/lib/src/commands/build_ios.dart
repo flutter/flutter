@@ -726,10 +726,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     }
 
     final Directory outputDirectory = globals.fs.directory(result.output);
-    final int? directorySize = globals.os.directorySize(outputDirectory);
-    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+    final String? directorySize = globals.os.directorySize(outputDirectory);
+    final String outputSize = (directorySize == null)
         ? '' // Don't display the size when building a debug variant.
-        : ' (${getSizeAsMB(directorySize)})';
+        : ' ($directorySize)';
 
     globals.printStatus(
       '${globals.terminal.successMark} '
