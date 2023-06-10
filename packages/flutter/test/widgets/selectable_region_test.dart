@@ -770,6 +770,48 @@ void main() {
     );
 
     testWidgets(
+      'can select word when a selectables rect is completely inside of another selectables rect', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/127076.
+      final UniqueKey outerText = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: Scaffold(
+              body: Center(
+                child: Text.rich(
+                  const TextSpan(
+                      children: <InlineSpan>[
+                        TextSpan(
+                          text:
+                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                        ),
+                        WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
+                        TextSpan(text: 'Hello, world.'),
+                      ],
+                  ),
+                  key: outerText,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+      // Right click to select word at position.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      // Should select "Hello".
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 124, extentOffset: 129));
+    },
+      skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
+    );
+
+    testWidgets(
       'widget span is ignored if it does not contain text - non Apple',
       (WidgetTester tester) async {
         final UniqueKey outerText = UniqueKey();

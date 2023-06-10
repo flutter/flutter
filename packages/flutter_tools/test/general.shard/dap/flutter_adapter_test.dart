@@ -186,6 +186,30 @@ void main() {
         expect(adapter.dapToFlutterRequests, isNot(contains('app.stop')));
       });
 
+      test('does not call "app.restart" before app has been started', () async {
+        final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+          simulateAppStarted: false,
+        );
+
+        final Completer<void> launchCompleter = Completer<void>();
+         final FlutterLaunchRequestArguments launchArgs = FlutterLaunchRequestArguments(
+          cwd: '/project',
+          program: 'foo.dart',
+        );
+        final Completer<void> restartCompleter = Completer<void>();
+        final RestartArguments restartArgs = RestartArguments();
+
+        await adapter.configurationDoneRequest(MockRequest(), null, () {});
+        await adapter.launchRequest(MockRequest(), launchArgs, launchCompleter.complete);
+        await launchCompleter.future;
+        await adapter.restartRequest(MockRequest(), restartArgs, restartCompleter.complete);
+        await restartCompleter.future;
+
+        expect(adapter.dapToFlutterRequests, isNot(contains('app.restart')));
+      });
+
       test('includes Dart Debug extension progress update', () async {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
