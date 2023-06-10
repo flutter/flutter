@@ -5722,11 +5722,6 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
-    @Deprecated(
-      'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
-    )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
     this.maxLines,
@@ -5779,18 +5774,10 @@ class RichText extends MultiChildRenderObjectWidget {
   /// How visual overflow should be handled.
   final TextOverflow overflow;
 
-  /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [textScaler] instead.
-  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
-  @Deprecated(
-    'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
-  )
   double get textScaleFactor => textScaler.textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}

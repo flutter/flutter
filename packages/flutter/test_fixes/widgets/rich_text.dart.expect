@@ -8,5 +8,5 @@ void main() {
   // Change made in https://github.com/flutter/flutter/pull/128522
   RichText();
   RichText(textScaler: TextScaler.linear(2.0))
-    .textScaler.textScaleFactor;
+    .textScaleFactor;
 }

@@ -147,11 +147,6 @@ class MediaQueryData {
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
-    @Deprecated(
-      'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
-    )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
     this.platformBrightness = Brightness.light,
@@ -1232,14 +1227,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
-  ///
-  /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [textScalerOf] instead.
-  @Deprecated(
-    'Use textScalerOf instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
-  )
   static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or

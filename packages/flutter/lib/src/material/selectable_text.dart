@@ -185,11 +185,6 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
-    @Deprecated(
-      'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
-    )
     this.textScaleFactor,
     this.textScaler,
     this.showCursor = false,
@@ -240,11 +235,6 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
-    @Deprecated(
-      'Use textScaler instead. '
-      'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
-    )
     this.textScaleFactor,
     this.textScaler,
     this.showCursor = false,
@@ -334,11 +324,6 @@ class SelectableText extends StatefulWidget {
   final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.textScaleFactor}
-  @Deprecated(
-    'Use textScaler instead. '
-    'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
-  )
   final double? textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}
