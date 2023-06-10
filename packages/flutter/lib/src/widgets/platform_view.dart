@@ -606,7 +606,6 @@ class _AndroidViewState extends State<AndroidView> {
 class _ClearBackgroundPainter extends CustomPainter {
 
   final Paint _paint = Paint()
-    ..color = const Color(0x00000000)
     ..blendMode = BlendMode.clear
     ..style = PaintingStyle.fill;
 
