@@ -590,7 +590,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  int? directorySize(Directory directory) {
+  String? directorySize(Directory directory) {
     throw UnsupportedError('directorySize is not implemented on Windows.');
   }
 
