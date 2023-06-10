@@ -4420,7 +4420,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   ///
-  bool debugAcceptsRenderObjectForSlot(Object? slot) => true;
+  bool debugWantsRenderObjectForSlot(Object? slot) => true;
 
   @override
   RenderObject? findRenderObject() {
@@ -6112,7 +6112,7 @@ abstract class RenderObjectElement extends Element {
       // debugAcceptsRenderObjectForSlot always returns true) and don't check
       // explicitly.
       assert(() {
-        if (!ancestor!.debugAcceptsRenderObjectForSlot(slot)) {
+        if (!ancestor!.debugWantsRenderObjectForSlot(slot)) {
           ancestor = null;
         }
         return true;
@@ -6120,7 +6120,7 @@ abstract class RenderObjectElement extends Element {
       ancestor = ancestor?._parent;
     }
     assert(() {
-      if (ancestor?.debugAcceptsRenderObjectForSlot(slot) == false) {
+      if (ancestor?.debugWantsRenderObjectForSlot(slot) == false) {
         ancestor = null;
       }
       return true;
@@ -6164,7 +6164,7 @@ abstract class RenderObjectElement extends Element {
               ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
             ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
             ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
-            ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
+            ErrorDescription('The ownership chain for the RenderObject that received the parent data was: ${debugGetCreatorChain(10)}'),
           ]);
         } on FlutterError catch (e) {
           _reportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
@@ -6702,7 +6702,7 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
               'The RenderObject for ${toStringShort()} cannot maintain an independent render tree at its current location.',
             ),
             ErrorDescription(
-              'The ownership chain for the RenderObject in question was:\n ${debugGetCreatorChain(10)}',
+              'The ownership chain for the RenderObject in question was: ${debugGetCreatorChain(10)}',
             ),
             ErrorDescription(
               'This RenderObject is the root of an independent render tree and it cannot '
@@ -6711,8 +6711,8 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
             ),
             ErrorHint(
               'Try moving the subtree that contains the ${toStringShort()} widget into the '
-              'view property of a ViewAnchor widget, where it is not expected to attach '
-              'its RenderObject to its ancestor.',
+              'view property of a ViewAnchor widget or to the root of the widget tree, where '
+              'it is not expected to attach its RenderObject to its ancestor.',
             ),
           ],
         )),

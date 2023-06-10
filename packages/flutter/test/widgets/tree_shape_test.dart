@@ -116,21 +116,25 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // testWidgets('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
-  //   await tester.pumpWidget(
-  //     ViewCollection(
-  //       views: <Widget>[
-  //         View(
-  //           view: FakeView(tester.view),
-  //           child: Container(),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  //
-  //   expect(tester.takeException(), isFlutterError);
-  // });
-  //
+  testWidgets('ViewCollection cannot be used inside a View', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ViewCollection(
+        views: <Widget>[
+          View(
+            view: FakeView(tester.view),
+            child: Container(),
+          ),
+        ],
+      ),
+    );
+
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      startsWith('The Element for ViewCollection cannot be inserted into slot "null" of its ancestor.'),
+    ));
+  });
+
   testWidgets('ViewCollection can be used as ViewAnchor.view', (WidgetTester tester) async {
     await tester.pumpWidget(
       ViewAnchor(
@@ -184,4 +188,4 @@ class FakeView extends TestFlutterView{
   int get viewId => 100;
 }
 
-// TODO: global key moves.
+// TODO(goderbauer): global key moves, slot updates?

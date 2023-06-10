@@ -442,12 +442,65 @@ class _MultiChildComponentElement extends Element {
   }
 
   @override
+  void attachRenderObject(Object? newSlot) {
+    super.attachRenderObject(newSlot);
+    assert(_debugCheckMustAttachRenderObject(newSlot));
+  }
+
+  @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
+    assert(_debugCheckMustAttachRenderObject(newSlot));
     assert(_viewElements.isEmpty);
     assert(_childElement == null);
     rebuild();
     assert(_debugAssertChildren());
+  }
+
+  // TODO(goderbauer): Should be checking this in _updateSlot as well.
+  bool _debugCheckMustAttachRenderObject(Object? slot) {
+    // Check only applies in the ViewCollection configuration.
+    if (!kDebugMode || (widget as _MultiChildComponentWidget)._child != null) {
+      return true;
+    }
+    bool hasAncestorRenderObjectElement = false;
+    bool ancestorWantsRenderObject = true;
+    visitAncestorElements((Element ancestor) {
+      if (!ancestor.debugWantsRenderObjectForSlot(slot)) {
+        ancestorWantsRenderObject = false;
+        return false;
+      }
+      if (ancestor is RenderObjectElement) {
+        hasAncestorRenderObjectElement = true;
+        return false;
+      }
+      return true;
+    });
+    if (hasAncestorRenderObjectElement && ancestorWantsRenderObject) {
+      FlutterError.reportError(
+        FlutterErrorDetails(exception: FlutterError.fromParts(
+          <DiagnosticsNode>[
+            ErrorSummary(
+              'The Element for ${toStringShort()} cannot be inserted into slot "$slot" of its ancestor. ',
+            ),
+            ErrorDescription(
+              'The ownership chain for the Element in question was: ${debugGetCreatorChain(10)}',
+            ),
+            ErrorDescription(
+              'This Element allows the creation of multiple independent render trees, which cannot '
+              'be attached to an ancestor in an existing render tree. However, an ancestor RenderObject '
+              'is expecting that a child will be attached.'
+            ),
+            ErrorHint(
+              'Try moving the subtree that contains the ${toStringShort()} widget into the '
+              'view property of a ViewAnchor widget or to the root of the widget tree, where '
+              'it is not expected to attach its RenderObject to its ancestor.',
+            ),
+          ],
+        )),
+      );
+    }
+    return true;
   }
 
   @override
@@ -462,7 +515,7 @@ class _MultiChildComponentElement extends Element {
   static const Object _viewSlot = Object();
 
   @override
-  bool debugAcceptsRenderObjectForSlot(Object? slot) => slot != _viewSlot;
+  bool debugWantsRenderObjectForSlot(Object? slot) => slot != _viewSlot;
 
   @override
   void performRebuild() {
