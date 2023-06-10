@@ -481,7 +481,7 @@ class _MultiChildComponentElement extends Element {
               'The Element for ${toStringShort()} cannot be inserted into slot "$slot" of its ancestor. ',
             ),
             ErrorDescription(
-              'The ownership chain for the Element in question was: ${debugGetCreatorChain(10)}',
+              'The ownership chain for the Element in question was:\n  ${debugGetCreatorChain(10)}',
             ),
             ErrorDescription(
               'This Element allows the creation of multiple independent render trees, which cannot '

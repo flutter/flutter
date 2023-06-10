@@ -6164,7 +6164,7 @@ abstract class RenderObjectElement extends Element {
               ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
             ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
             ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
-            ErrorDescription('The ownership chain for the RenderObject that received the parent data was: ${debugGetCreatorChain(10)}'),
+            ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
           ]);
         } on FlutterError catch (e) {
           _reportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
@@ -6315,7 +6315,7 @@ abstract class RenderObjectElement extends Element {
             'RenderObject for ${toStringShort()} cannot find ancestor RenderObject to attach to.',
           ),
           ErrorDescription(
-            'The ownership chain for the RenderObject in question was:\n ${debugGetCreatorChain(10)}',
+            'The ownership chain for the RenderObject in question was:\n  ${debugGetCreatorChain(10)}',
           ),
           ErrorHint(
             'Try wrapping your Widget in a View widget or any other widget that is backed by '
@@ -6701,7 +6701,7 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
             'The RenderObject for ${toStringShort()} cannot maintain an independent render tree at its current location.',
           ),
           ErrorDescription(
-            'The ownership chain for the RenderObject in question was: ${debugGetCreatorChain(10)}',
+            'The ownership chain for the RenderObject in question was:\n  ${debugGetCreatorChain(10)}',
           ),
           ErrorDescription(
             'This RenderObject is the root of an independent render tree and it cannot '
