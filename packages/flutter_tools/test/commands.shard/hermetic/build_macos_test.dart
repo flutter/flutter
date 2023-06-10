@@ -256,6 +256,29 @@ STDERR STUFF
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
+  testUsingContext('macOS build outputs directory and size when successful', () async {
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('✓ Built build/macos/Build/Products/Release/example.app (1337.0MB)'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      setUpFakeXcodeBuildHandler('Release'),
+    ]),
+    Platform: () => macosPlatform,
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
   testUsingContext('macOS build invokes xcode build (debug)', () async {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
