@@ -340,7 +340,7 @@ class SegmentedButton<T> extends StatelessWidget {
             child: label,
           );
 
-      final Widget buttonWithTooltip = (segment.tooltip != null)
+      final Widget buttonWithTooltip = segment.tooltip != null
         ? Tooltip(
             message: segment.tooltip,
             child: button,
