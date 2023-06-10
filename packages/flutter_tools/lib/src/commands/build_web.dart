@@ -206,7 +206,7 @@ class BuildWebCommand extends BuildSubCommand {
       outputDirectoryPath: outputDirectoryPath,
     );
 
-    // We don't print the output directory size because it may be overinflated
+    // We don't include the output directory size because it may be overinflated
     // due to the output directory containing additional files not seen by
     // users.
     globals.printStatus(
