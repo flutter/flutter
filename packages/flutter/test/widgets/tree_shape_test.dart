@@ -22,24 +22,20 @@ void main() {
     ));
   });
 
-  // testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
-  //   await tester.pumpWidget(Center(
-  //     child: View(
-  //       view: FakeView(tester.view),
-  //       child: Container(),
-  //     ),
-  //   ));
-  //
-  //   expect(tester.takeException(), isFlutterError.having(
-  //     (FlutterError error) => error.message,
-  //     'message',
-  //     contains('cannot maintain an independent render tree at its current location.'),
-  //   ));
-  //
-  //   // The tree is in very bad shape after that error, clean it up so it doesn't fail during teardown.
-  //   await tester.pumpWidget(Container());
-  //   expect(tester.takeException(), isAssertionError);
-  // });
+  testWidgets('A View cannot be a child of a render object widget', (WidgetTester tester) async {
+    await tester.pumpWidget(Center(
+      child: View(
+        view: FakeView(tester.view),
+        child: Container(),
+      ),
+    ));
+
+    expect(tester.takeException(), isFlutterError.having(
+      (FlutterError error) => error.message,
+      'message',
+      contains('cannot maintain an independent render tree at its current location.'),
+    ));
+  });
 
   testWidgets('The child of a ViewAnchor cannot be a View', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -6695,27 +6695,25 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
       return true;
     }
     if (_findAncestorRenderObjectElement() != null) {
-      FlutterError.reportError(
-        FlutterErrorDetails(exception: FlutterError.fromParts(
-          <DiagnosticsNode>[
-            ErrorSummary(
-              'The RenderObject for ${toStringShort()} cannot maintain an independent render tree at its current location.',
-            ),
-            ErrorDescription(
-              'The ownership chain for the RenderObject in question was: ${debugGetCreatorChain(10)}',
-            ),
-            ErrorDescription(
-              'This RenderObject is the root of an independent render tree and it cannot '
-              'attach itself to an ancestor in an existing tree. The ancestor RenderObject, '
-              'however, expects that a child will be attached.',
-            ),
-            ErrorHint(
-              'Try moving the subtree that contains the ${toStringShort()} widget into the '
-              'view property of a ViewAnchor widget or to the root of the widget tree, where '
-              'it is not expected to attach its RenderObject to its ancestor.',
-            ),
-          ],
-        )),
+      throw FlutterError.fromParts(
+        <DiagnosticsNode>[
+          ErrorSummary(
+            'The RenderObject for ${toStringShort()} cannot maintain an independent render tree at its current location.',
+          ),
+          ErrorDescription(
+            'The ownership chain for the RenderObject in question was: ${debugGetCreatorChain(10)}',
+          ),
+          ErrorDescription(
+            'This RenderObject is the root of an independent render tree and it cannot '
+            'attach itself to an ancestor in an existing tree. The ancestor RenderObject, '
+            'however, expects that a child will be attached.',
+          ),
+          ErrorHint(
+            'Try moving the subtree that contains the ${toStringShort()} widget into the '
+            'view property of a ViewAnchor widget or to the root of the widget tree, where '
+            'it is not expected to attach its RenderObject to its ancestor.',
+          ),
+        ],
       );
     }
     return true;

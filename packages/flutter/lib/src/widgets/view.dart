@@ -227,8 +227,6 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    // TODO(goderbauer): why do we need this? - Views are only allowed in certain places.
-    // assert(newSlot == View.viewSlot);
     super.mount(parent, newSlot); // calls attachRenderObject(), updates slot member.
     _updateChild();
     renderObject.prepareInitialFrame();
@@ -241,14 +239,13 @@ class _RawViewElement extends RenderTreeRootElement {
 
   @override
   void attachRenderObject(Object? newSlot) {
-    // assert(newSlot == View.viewSlot);
+    super.attachRenderObject(newSlot); // updates slot member
     final RawView viewWidget = widget as RawView;
     viewWidget.hooks.pipelineOwner.adoptChild(_effectivePipelineOwner);
     assert(_effectivePipelineOwner.rootNode == null);
     _effectivePipelineOwner.rootNode = renderObject;
     viewWidget.hooks.renderViewRepository.addRenderView(renderObject);
     _attached = true;
-    super.attachRenderObject(newSlot); // updates slot member
   }
 
   @override
