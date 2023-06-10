@@ -512,7 +512,17 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return FlutterCommandResult.success();
     }
 
-    globals.printStatus('Built IPA to $absoluteOutputPath.');
+    final Directory outputDirectory = globals.fs.directory(absoluteOutputPath);
+    final String? directorySize = globals.os.directorySize(outputDirectory);
+    final String outputSize = (directorySize == null)
+        ? ''
+        : ' ($directorySize)';
+
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built IPA to ${globals.fs.path.relative(outputDirectory.path)}$outputSize',
+      color: TerminalColor.green,
+    );
 
     if (isAppStoreUpload) {
       globals.printStatus('To upload to the App Store either:');
