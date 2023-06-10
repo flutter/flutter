@@ -505,7 +505,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
       _logger.printStatus(
         '${_logger.terminal.successMark} '
-        'Built ${_fileSystem.path.relative(bundleFile.path)}$outputSize.',
+        'Built ${_fileSystem.path.relative(bundleFile.path)}$outputSize',
         color: TerminalColor.green,
       );
       return;
@@ -537,7 +537,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
           : ' (${getSizeAsMB(apkFile.lengthSync())})';
       _logger.printStatus(
         '${_logger.terminal.successMark} '
-        'Built ${_fileSystem.path.relative(apkFile.path)}$outputSize.',
+        'Built ${_fileSystem.path.relative(apkFile.path)}$outputSize',
         color: TerminalColor.green,
       );
 
@@ -722,7 +722,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     }
     _logger.printStatus(
-      '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(repoDirectory.path)}.',
+      '${_logger.terminal.successMark} Built ${_fileSystem.path.relative(repoDirectory.path)}',
       color: TerminalColor.green,
     );
   }
