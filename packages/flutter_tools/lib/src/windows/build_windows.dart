@@ -18,7 +18,6 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
-import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
 import 'visual_studio.dart';
 
@@ -55,7 +54,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
     VersionMigration(windowsProject, globals.logger),
-    ShowWindowMigration(windowsProject, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -98,19 +96,18 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     status.stop();
   }
 
-  final Directory outputDirectory = buildDirectory
+  final String? binaryName = getCmakeExecutableName(windowsProject);
+  final File appFile = buildDirectory
     .childDirectory('runner')
-    .childDirectory(sentenceCase(buildModeName));
-  final File appFile = outputDirectory.childFile('${getCmakeExecutableName(windowsProject)}.exe');
+    .childDirectory(sentenceCase(buildModeName))
+    .childFile('$binaryName.exe');
   if (appFile.existsSync()) {
-    final String? directorySize = await getDirectorySize(outputDirectory);
-    final String outputSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+    final String appSize = (buildInfo.mode == BuildMode.debug)
         ? '' // Don't display the size when building a debug variant.
-        : ' ($directorySize)';
-
-    globals.printStatus(
-      '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize.',
+        : ' (${getSizeAsMB(appFile.lengthSync())})';
+    globals.logger.printStatus(
+      '${globals.logger.terminal.successMark}  '
+      'Built ${globals.fs.path.relative(appFile.path)}$appSize.',
       color: TerminalColor.green,
     );
   }
