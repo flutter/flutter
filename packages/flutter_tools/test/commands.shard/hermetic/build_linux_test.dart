@@ -188,7 +188,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux', '--no-pub']
     );
-    expect(testLogger.statusText, contains('✓ Built to build/linux/x64/release/bundle'));
+    expect(testLogger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,

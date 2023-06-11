@@ -104,7 +104,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     // users.
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built to ${globals.fs.path.relative(outputDirectory.path)}',
+      'Built ${globals.fs.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
 

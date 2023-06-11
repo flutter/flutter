@@ -117,7 +117,7 @@ void main() {
     final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
 
     expect(buildDir.existsSync(), true);
-    expect(testLogger.statusText, contains('Compiled to ${buildDir.path}'));
+    expect(testLogger.statusText, contains('Built ${buildDir.path}'));
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
@@ -170,7 +170,7 @@ void main() {
     ]);
 
     expect(buildDir.existsSync(), true);
-    expect(testLogger.statusText, contains('Compiled to $newBuildDir'));
+    expect(testLogger.statusText, contains('Built $newBuildDir'));
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,

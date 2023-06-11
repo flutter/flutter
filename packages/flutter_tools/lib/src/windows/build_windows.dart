@@ -109,7 +109,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     // users.
     globals.logger.printStatus(
       '${globals.logger.terminal.successMark}  '
-      'Built to ${globals.fs.path.relative(appFile.path)}',
+      'Built ${globals.fs.path.relative(appFile.path)}',
       color: TerminalColor.green,
     );
   }
