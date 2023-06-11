@@ -99,9 +99,9 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetSysroot: stringArg('target-sysroot')!,
     );
 
-    // We don't include the output directory size because it may be overinflated
-    // due to the output directory containing additional files not seen by
-    // users.
+    // We don't print a size because the containing directory may contain
+    // additional files not seen by the user and because the binary is not
+    // self-contained.
     globals.printStatus(
       '${globals.terminal.successMark} '
       'Built ${globals.fs.path.relative(output.path)}',
