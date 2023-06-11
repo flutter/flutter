@@ -139,6 +139,10 @@ Future<XcodeBuildResult> buildMacOS({
     status.cancel();
   }
 
+  if (result != 0) {
+    throwToolExit('Build process failed');
+  }
+
   globals.flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 
   final MacOSApp project = MacOSApp.fromMacOSProject(flutterProject.macos);
