@@ -284,15 +284,23 @@ static void CubicPathBoundingPopulateValues(std::vector<Scalar>& values,
 
   Scalar rootB2Minus4AC = ::sqrt(b2Minus4AC);
 
+  /* From Numerical Recipes in C.
+   *
+   * q = -1/2 (b + sign(b) sqrt[b^2 - 4ac])
+   * x1 = q / a
+   * x2 = c / q
+   */
+  Scalar q = (b < 0) ? -(b - rootB2Minus4AC) / 2 : -(b + rootB2Minus4AC) / 2;
+
   {
-    Scalar t = (-b + rootB2Minus4AC) / (2.0 * a);
+    Scalar t = q / a;
     if (t >= 0.0 && t <= 1.0) {
       values.emplace_back(t);
     }
   }
 
   {
-    Scalar t = (-b - rootB2Minus4AC) / (2.0 * a);
+    Scalar t = c / q;
     if (t >= 0.0 && t <= 1.0) {
       values.emplace_back(t);
     }
