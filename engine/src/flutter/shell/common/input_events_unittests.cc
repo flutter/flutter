@@ -54,7 +54,12 @@ static void TestSimulatedInputEvents(
     bool restart_engine = false) {
   ///// Begin constructing shell ///////////////////////////////////////////////
   auto settings = fixture->CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = fixture->CreateShell(settings, true);
+  std::unique_ptr<Shell> shell = fixture->CreateShell({
+      .settings = settings,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .simulate_vsync = true,
+      }),
+  });
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onPointerDataPacketMain");
@@ -300,7 +305,12 @@ TEST_F(ShellTest, HandlesActualIphoneXsInputEvents) {
 TEST_F(ShellTest, CanCorrectlyPipePointerPacket) {
   // Sets up shell with test fixture.
   auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(settings, true);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .simulate_vsync = true,
+      }),
+  });
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onPointerDataPacketMain");
@@ -361,7 +371,12 @@ TEST_F(ShellTest, CanCorrectlyPipePointerPacket) {
 TEST_F(ShellTest, CanCorrectlySynthesizePointerPacket) {
   // Sets up shell with test fixture.
   auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(settings, true);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .simulate_vsync = true,
+      }),
+  });
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onPointerDataPacketMain");

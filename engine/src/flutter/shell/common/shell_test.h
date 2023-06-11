@@ -31,22 +31,24 @@ namespace testing {
 
 class ShellTest : public FixtureTest {
  public:
+  struct Config {
+    // Required.
+    const Settings& settings;
+    // Defaults to GetTaskRunnersForFixture().
+    std::optional<TaskRunners> task_runners = {};
+    bool is_gpu_disabled = false;
+    // Defaults to calling ShellTestPlatformView::Create with the provided
+    // arguments.
+    Shell::CreateCallback<PlatformView> platform_view_create_callback;
+  };
+
   ShellTest();
 
   Settings CreateSettingsForFixture() override;
-  std::unique_ptr<Shell> CreateShell(const Settings& settings,
-                                     bool simulate_vsync = false);
   std::unique_ptr<Shell> CreateShell(
       const Settings& settings,
-      TaskRunners task_runners,
-      bool simulate_vsync = false,
-      const std::shared_ptr<ShellTestExternalViewEmbedder>&
-          shell_test_external_view_embedder = nullptr,
-      bool is_gpu_disabled = false,
-      ShellTestPlatformView::BackendType rendering_backend =
-          ShellTestPlatformView::BackendType::kDefaultBackend,
-      Shell::CreateCallback<PlatformView> platform_view_create_callback =
-          nullptr);
+      std::optional<TaskRunners> task_runners = {});
+  std::unique_ptr<Shell> CreateShell(const Config& config);
   void DestroyShell(std::unique_ptr<Shell> shell);
   void DestroyShell(std::unique_ptr<Shell> shell,
                     const TaskRunners& task_runners);
