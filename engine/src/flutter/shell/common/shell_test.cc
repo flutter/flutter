@@ -320,49 +320,23 @@ fml::TimePoint ShellTest::GetLatestFrameTargetTime(Shell* shell) const {
   return shell->GetLatestFrameTargetTime();
 }
 
-std::unique_ptr<Shell> ShellTest::CreateShell(const Settings& settings,
-                                              bool simulate_vsync) {
-  return CreateShell(settings, GetTaskRunnersForFixture(), simulate_vsync);
-}
-
 std::unique_ptr<Shell> ShellTest::CreateShell(
     const Settings& settings,
-    TaskRunners task_runners,
-    bool simulate_vsync,
-    const std::shared_ptr<ShellTestExternalViewEmbedder>&
-        shell_test_external_view_embedder,
-    bool is_gpu_disabled,
-    ShellTestPlatformView::BackendType rendering_backend,
-    Shell::CreateCallback<PlatformView> platform_view_create_callback) {
-  const auto vsync_clock = std::make_shared<ShellTestVsyncClock>();
+    std::optional<TaskRunners> task_runners) {
+  return CreateShell({
+      .settings = settings,
+      .task_runners = std::move(task_runners),
+  });
+}
 
-  CreateVsyncWaiter create_vsync_waiter = [&]() {
-    if (simulate_vsync) {
-      return static_cast<std::unique_ptr<VsyncWaiter>>(
-          std::make_unique<ShellTestVsyncWaiter>(task_runners, vsync_clock));
-    } else {
-      return static_cast<std::unique_ptr<VsyncWaiter>>(
-          std::make_unique<VsyncWaiterFallback>(task_runners, true));
-    }
-  };
-
+std::unique_ptr<Shell> ShellTest::CreateShell(const Config& config) {
+  TaskRunners task_runners = config.task_runners.has_value()
+                                 ? config.task_runners.value()
+                                 : GetTaskRunnersForFixture();
+  Shell::CreateCallback<PlatformView> platform_view_create_callback =
+      config.platform_view_create_callback;
   if (!platform_view_create_callback) {
-    platform_view_create_callback = [vsync_clock,                        //
-                                     &create_vsync_waiter,               //
-                                     shell_test_external_view_embedder,  //
-                                     rendering_backend                   //
-    ](Shell& shell) {
-      return ShellTestPlatformView::Create(
-          shell,                                  //
-          shell.GetTaskRunners(),                 //
-          vsync_clock,                            //
-          create_vsync_waiter,                    //
-          rendering_backend,                      //
-          shell_test_external_view_embedder,      //
-          shell.GetConcurrentWorkerTaskRunner(),  //
-          shell.GetIsGpuDisabledSyncSwitch()      //
-      );
-    };
+    platform_view_create_callback = ShellTestPlatformViewBuilder({});
   }
 
   Shell::CreateCallback<Rasterizer> rasterizer_create_callback =
@@ -370,10 +344,10 @@ std::unique_ptr<Shell> ShellTest::CreateShell(
 
   return Shell::Create(flutter::PlatformData(),        //
                        task_runners,                   //
-                       settings,                       //
+                       config.settings,                //
                        platform_view_create_callback,  //
                        rasterizer_create_callback,     //
-                       is_gpu_disabled                 //
+                       config.is_gpu_disabled          //
   );
 }
 

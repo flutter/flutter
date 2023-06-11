@@ -44,8 +44,8 @@ class MockPlatformMessageResponse : public PlatformMessageResponse {
 
 @implementation PlatformMessageHandlerIosTest
 - (void)testCreate {
-  flutter::TaskRunners task_runners("test", GetCurrentTaskRunner(), CreateNewThread("raster"),
-                                    CreateNewThread("ui"), CreateNewThread("io"));
+  TaskRunners task_runners("test", GetCurrentTaskRunner(), CreateNewThread("raster"),
+                           CreateNewThread("ui"), CreateNewThread("io"));
   auto handler = std::make_unique<PlatformMessageHandlerIos>(task_runners.GetPlatformTaskRunner());
   XCTAssertTrue(handler);
 }
