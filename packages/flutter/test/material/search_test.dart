@@ -1057,7 +1057,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) {
     queriesForSuggestions.add(query);
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: () {
         showResults(context);
       },
@@ -1099,7 +1099,7 @@ class _TestEmptySearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return MaterialButton(
+    return ElevatedButton(
       onPressed: () {
         showResults(context);
       },

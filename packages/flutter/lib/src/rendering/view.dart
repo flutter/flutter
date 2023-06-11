@@ -198,18 +198,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     return true;
   }
 
-  /// Determines the set of mouse tracker annotations at the given position.
-  ///
-  /// See also:
-  ///
-  ///  * [Layer.findAllAnnotations], which is used by this method to find all
-  ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
-  HitTestResult hitTestMouseTrackers(Offset position) {
-    final BoxHitTestResult result = BoxHitTestResult();
-    hitTest(result, position: position);
-    return result;
-  }
-
   @override
   bool get isRepaintBoundary => true;
 
