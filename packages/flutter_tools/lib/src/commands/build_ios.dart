@@ -514,13 +514,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
     final Directory outputDirectory = globals.fs.directory(absoluteOutputPath);
     final String? directorySize = globals.os.directorySize(outputDirectory);
-    final String outputSize = (directorySize == null)
+    final String appSize = (directorySize == null)
         ? ''
         : ' ($directorySize)';
 
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built IPA to ${globals.fs.path.relative(outputDirectory.path)}$outputSize',
+      'Built IPA to ${globals.fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
 
@@ -737,13 +737,13 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     final Directory outputDirectory = globals.fs.directory(result.output);
     final String? directorySize = globals.os.directorySize(outputDirectory);
-    final String outputSize = (directorySize == null)
+    final String appSize = (directorySize == null)
         ? '' // Don't display the size when building a debug variant.
         : ' ($directorySize)';
 
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}$outputSize',
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
 
