@@ -26,7 +26,7 @@ import '../migrations/cmake_custom_command_migration.dart';
 final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:error|warning):\s.*', caseSensitive: false);
 
 /// Builds the Linux project through the Makefile.
-Future<Directory> buildLinux(
+Future<FileSystemEntity> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
     String? target,
@@ -108,7 +108,14 @@ Future<Directory> buildLinux(
     );
   }
 
-  return buildDirectory.childDirectory('bundle');
+  final String? binaryName = getCmakeExecutableName(linuxProject);
+  final File appFile = buildDirectory
+    .childDirectory('bundle')
+    .childFile('$binaryName');
+  if (!appFile.existsSync()) {
+    return appFile.parent;
+  }
+  return appFile;
 }
 
 Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
