@@ -6,6 +6,8 @@ import 'package:meta/meta.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -53,7 +55,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
     displayNullSafetyMode(buildInfo);
-    await buildWindows(
+    final FileSystemEntity output = await buildWindows(
       flutterProject.windows,
       buildInfo,
       target: targetFile,
@@ -65,6 +67,16 @@ class BuildWindowsCommand extends BuildSubCommand {
         flutterUsage: globals.flutterUsage,
       ),
     );
+
+    // We don't include the output directory size because it may be overinflated
+    // due to the output directory containing additional files not seen by
+    // users.
+    globals.logger.printStatus(
+      '${globals.logger.terminal.successMark}  '
+      'Built ${globals.fs.path.relative(output.path)}',
+      color: TerminalColor.green,
+    );
+
     return FlutterCommandResult.success();
   }
 }

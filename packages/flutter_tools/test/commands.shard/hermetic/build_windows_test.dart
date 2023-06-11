@@ -517,6 +517,28 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
+  testUsingContext('Windows build outputs path when successful', () async {
+    final FakeVisualStudio fakeVisualStudio = FakeVisualStudio();
+    final BuildWindowsCommand command = BuildWindowsCommand(logger: BufferLogger.test())
+      ..visualStudioOverride = fakeVisualStudio;
+    setUpMockProjectFilesForBuild();
+
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeGenerationCommand(),
+      buildCommand('Release'),
+    ]);
+
+    await createTestCommandRunner(command).run(
+      const <String>['windows', '--release', '--no-pub']
+    );
+    expect(testLogger.statusText, contains(r'✓  Built build\windows\runner\Release'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => windowsPlatform,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
   testUsingContext('Windows build passes correct generator', () async {
     const String generator = 'A different generator';
     final FakeVisualStudio fakeVisualStudio = FakeVisualStudio(

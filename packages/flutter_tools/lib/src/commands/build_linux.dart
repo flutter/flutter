@@ -85,7 +85,7 @@ class BuildLinuxCommand extends BuildSubCommand {
           'Cross-build from Linux x64 host to Linux arm64 target is not currently supported.');
     }
     displayNullSafetyMode(buildInfo);
-    final Directory outputDirectory = await buildLinux(
+    final FileSystemEntity output = await buildLinux(
       flutterProject.linux,
       buildInfo,
       target: targetFile,
@@ -104,7 +104,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     // users.
     globals.printStatus(
       '${globals.terminal.successMark} '
-      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+      'Built ${globals.fs.path.relative(output.path)}',
       color: TerminalColor.green,
     );
 

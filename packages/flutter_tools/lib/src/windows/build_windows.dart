@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -26,7 +25,7 @@ import 'visual_studio.dart';
 const String _kBadCharacters = r"'#!$^&*=|,;<>?";
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
+Future<FileSystemEntity> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   String? target,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
@@ -98,22 +97,6 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
     status.stop();
   }
 
-  final String? binaryName = getCmakeExecutableName(windowsProject);
-  final File appFile = buildDirectory
-    .childDirectory('runner')
-    .childDirectory(sentenceCase(buildModeName))
-    .childFile('$binaryName.exe');
-  if (appFile.existsSync()) {
-    // We don't include the output directory size because it may be overinflated
-    // due to the output directory containing additional files not seen by
-    // users.
-    globals.logger.printStatus(
-      '${globals.logger.terminal.successMark}  '
-      'Built ${globals.fs.path.relative(appFile.path)}',
-      color: TerminalColor.green,
-    );
-  }
-
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = getNameForTargetPlatform(TargetPlatform.windows_x64);
     final File codeSizeFile = globals.fs.directory(buildInfo.codeSizeDirectory)
@@ -146,6 +129,16 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
       'dart devtools --appSizeBase=$relativeAppSizePath'
     );
   }
+
+  final String? binaryName = getCmakeExecutableName(windowsProject);
+  final File appFile = buildDirectory
+    .childDirectory('runner')
+    .childDirectory(sentenceCase(buildModeName))
+    .childFile('$binaryName.exe');
+  if (!appFile.existsSync()) {
+    return appFile.parent;
+  }
+  return appFile;
 }
 
 Future<void> _runCmakeGeneration({
