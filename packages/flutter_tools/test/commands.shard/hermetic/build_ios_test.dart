@@ -253,7 +253,7 @@ void main() {
   });
 
 
-  testUsingContext('ios build outputs directory and size when successful', () async {
+  testUsingContext('ios build outputs path and size when successful', () async {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

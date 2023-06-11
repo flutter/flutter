@@ -170,7 +170,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(),
   });
 
-  testUsingContext('Linux build outputs directory when successful', () async {
+  testUsingContext('Linux build outputs path when successful', () async {
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
