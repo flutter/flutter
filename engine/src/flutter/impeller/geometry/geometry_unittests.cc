@@ -671,6 +671,16 @@ TEST(GeometryTest, BoundingBoxOfCompositePathIsCorrect) {
   ASSERT_RECT_NEAR(actual.value(), expected);
 }
 
+TEST(GeometryTest, ExtremaOfCubicPathComponentIsCorrect) {
+  CubicPathComponent cubic{{11.769268, 252.883148},
+                           {-6.2857933, 204.356461},
+                           {-4.53997231, 156.552902},
+                           {17.0067291, 109.472488}};
+  auto points = cubic.Extrema();
+  ASSERT_EQ(points.size(), static_cast<size_t>(3));
+  ASSERT_POINT_NEAR(points[2], cubic.Solve(0.455916));
+}
+
 TEST(GeometryTest, PathGetBoundingBoxForCubicWithNoDerivativeRootsIsCorrect) {
   PathBuilder builder;
   // Straight diagonal line.
