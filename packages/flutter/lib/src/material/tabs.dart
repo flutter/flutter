@@ -2165,8 +2165,6 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
