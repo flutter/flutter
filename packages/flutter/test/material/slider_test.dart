@@ -3530,7 +3530,7 @@ void main() {
     RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
-      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+      isNot(paints..path(color: theme.colorScheme.primary)..paragraph()),
     );
 
     final Offset sliderCenter = tester.getCenter(find.byType(Slider));
