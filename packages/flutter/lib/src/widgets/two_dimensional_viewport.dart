@@ -1243,7 +1243,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     RenderBox child, {
     required Offset layoutOffset,
   }) {
-    // This is only usable once we have a sizes
+    // This is only usable once we have sizes.
     assert(hasSize);
     assert(child.hasSize);
     final double xOffset;
