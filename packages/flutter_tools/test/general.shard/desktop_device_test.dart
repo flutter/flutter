@@ -301,7 +301,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Device devices that support impeller pass through the enable-impeller flag', () async {
+  testWithoutContext('Desktop devices that support impeller pass through the enable-impeller flag', () async {
     final Completer<void> exitCompleter = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
@@ -340,7 +340,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Device devices that do not support impeller ignore the enable-impeller flag', () async {
+  testWithoutContext('Desktop devices that do not support impeller ignore the enable-impeller flag', () async {
     final Completer<void> exitCompleter = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       FakeCommand(
