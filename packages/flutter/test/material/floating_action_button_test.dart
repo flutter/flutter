@@ -19,10 +19,6 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
-
-  //final ThemeData material3Theme = ThemeData.light().copyWith(useMaterial3: true);
-  //final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
-
   final ThemeData material3Theme = ThemeData(useMaterial3: true);
   final ThemeData material2Theme = ThemeData(useMaterial3: false);
 
