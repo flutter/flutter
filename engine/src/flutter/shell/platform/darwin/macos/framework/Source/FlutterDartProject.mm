@@ -59,6 +59,15 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
   return self;
 }
 
+- (BOOL)enableImpeller {
+  NSNumber* enableImpeller =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+  if (enableImpeller != nil) {
+    return enableImpeller.boolValue;
+  }
+  return NO;
+}
+
 - (NSString*)assetsPath {
   if (_assetsPath) {
     return _assetsPath;

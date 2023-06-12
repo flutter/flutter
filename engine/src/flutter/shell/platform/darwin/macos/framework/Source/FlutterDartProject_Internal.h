@@ -32,6 +32,11 @@
 @property(nonatomic, nullable) void (*rootIsolateCreateCallback)(void* _Nullable);
 
 /**
+ * Whether the Impeller rendering backend is enabled
+ */
+@property(nonatomic, readonly) BOOL enableImpeller;
+
+/**
  * Instead of looking up the assets and ICU data path in the application bundle, this initializer
  * allows callers to create a Dart project with custom locations specified for the both.
  */

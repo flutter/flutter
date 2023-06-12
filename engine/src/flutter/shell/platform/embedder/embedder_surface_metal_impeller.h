@@ -62,6 +62,9 @@ class EmbedderSurfaceMetalImpeller final : public EmbedderSurface,
   // |GPUSurfaceMetalDelegate|
   bool PresentTexture(GPUMTLTextureInfo texture) const override;
 
+  // |EmbedderSurface|
+  std::shared_ptr<impeller::Context> CreateImpellerContext() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceMetalImpeller);
 };
 
