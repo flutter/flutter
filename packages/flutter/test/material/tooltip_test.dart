@@ -1041,15 +1041,9 @@ void main() {
       ),
     );
 
-    // The tooltip overlay still on the tree and it will removed in the next frame.
-
-    // Dispatch the mouse in and out events before the overlay detached.
-    await gesture.moveTo(tester.getCenter(find.text(tooltipText)));
-    await gesture.moveTo(Offset.zero);
-    await tester.pumpAndSettle();
-
-    // Go without crashes.
-    await gesture.removePointer();
+    // The tooltip should be removed, including the overlay child.
+    expect(find.text(tooltipText), findsNothing);
+    expect(find.byTooltip(tooltipText), findsNothing);
   });
 
   testWidgetsWithLeakTracking('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
@@ -1433,35 +1427,6 @@ void main() {
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
-  });
-
-  testWidgetsWithLeakTracking('Tooltip overlay does not update', (WidgetTester tester) async {
-    Widget buildApp(String text) {
-      return MaterialApp(
-        home: Center(
-          child: Tooltip(
-            message: text,
-            child: Container(
-              width: 100.0,
-              height: 100.0,
-              color: Colors.green[500],
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp(tooltipText));
-    await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsOneWidget);
-    await tester.pumpWidget(buildApp('NEW'));
-    expect(find.text(tooltipText), findsOneWidget);
-    await tester.tapAt(const Offset(5.0, 5.0));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text(tooltipText), findsNothing);
-    await tester.longPress(find.byType(Tooltip));
-    expect(find.text(tooltipText), findsNothing);
   });
 
   testWidgetsWithLeakTracking('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
