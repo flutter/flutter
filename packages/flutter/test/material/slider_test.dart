@@ -3553,7 +3553,7 @@ void main() {
       valueIndicatorBox,
       isNot(paints..path(color: const Color(0xff000000))..paragraph()),
     );
-  }, variant: TargetPlatformVariant.desktop());
+  });
 
   testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
