@@ -419,6 +419,6 @@ public class FlutterAndroidComponentTest {
     }
 
     @Override
-    public void setFrameworkHandlesBack(boolean frameworkHandlesBacks) {}
+    public void setFrameworkHandlesBack(boolean frameworkHandlesBack) {}
   }
 }

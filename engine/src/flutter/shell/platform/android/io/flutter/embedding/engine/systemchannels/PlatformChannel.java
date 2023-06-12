@@ -138,8 +138,8 @@ public class PlatformChannel {
                 break;
               case "SystemNavigator.setFrameworkHandlesBack":
                 {
-                  boolean frameworkHandlesBacks = (boolean) arguments;
-                  platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBacks);
+                  boolean frameworkHandlesBack = (boolean) arguments;
+                  platformMessageHandler.setFrameworkHandlesBack(frameworkHandlesBack);
                   result.success(null);
                   break;
                 }
@@ -516,8 +516,14 @@ public class PlatformChannel {
      */
     void setSystemUiOverlayStyle(@NonNull SystemChromeStyle systemUiOverlayStyle);
 
-    /** The Flutter application would or would not like to handle navigation pop events itself. */
-    void setFrameworkHandlesBack(boolean frameworkHandlesBack);
+    /**
+     * The Flutter application would or would not like to handle navigation pop events itself.
+     *
+     * <p>Relevant for registering and unregistering the app's OnBackInvokedCallback for the
+     * Predictive Back feature, for example as in {@link
+     * io.flutter.embedding.android.FlutterActivity}.
+     */
+    default void setFrameworkHandlesBack(boolean frameworkHandlesBack) {}
 
     /**
      * The Flutter application would like to pop the top item off of the Android app's navigation
