@@ -95,14 +95,19 @@ class RenderSliverDecoration extends RenderProxySliver {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
       final Size childSize;
       final Offset scrollOffset;
+
+      final double cappedMainAxisExtent = child!.geometry!.scrollExtent == double.infinity
+        ? constraints.scrollOffset + constraints.viewportMainAxisExtent
+        : child!.geometry!.scrollExtent;
       switch (constraints.axis) {
         case Axis.vertical:
-          childSize = Size(constraints.crossAxisExtent, child!.geometry!.scrollExtent);
+          childSize = Size(constraints.crossAxisExtent, cappedMainAxisExtent);
           scrollOffset = Offset(0.0, -constraints.scrollOffset);
         case Axis.horizontal:
-          childSize = Size(child!.geometry!.scrollExtent, constraints.crossAxisExtent);
+          childSize = Size(cappedMainAxisExtent, constraints.crossAxisExtent);
           scrollOffset = Offset(-constraints.scrollOffset, 0.0);
       }
+      print(child!.geometry!.scrollExtent);
       final Offset childOffset = offset + childParentData.paintOffset;
       if (position == DecorationPosition.background) {
         _painter!.paint(context.canvas, childOffset + scrollOffset, configuration.copyWith(size: childSize));
