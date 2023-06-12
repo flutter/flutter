@@ -1,4 +1,4 @@
-Signature: 1b5aa1864a71192074c1edbab0b6f6e7
+Signature: 91a7383625bcb005f1f83444879b7b0a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -7492,7 +7492,6 @@ ORIGIN: ../../../third_party/skia/include/gpu/graphite/Recording.h + ../../../th
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/mtl/MtlGraphiteTypes.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/private/chromium/GrSlug.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/Slug.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrMockTypesPriv.h + ../../../third_party/skia/LICENSE
@@ -7714,7 +7713,6 @@ FILE: ../../../third_party/skia/include/gpu/graphite/Recording.h
 FILE: ../../../third_party/skia/include/gpu/graphite/TextureInfo.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlBackendContext.h
 FILE: ../../../third_party/skia/include/gpu/graphite/mtl/MtlGraphiteTypes.h
-FILE: ../../../third_party/skia/include/private/chromium/GrSlug.h
 FILE: ../../../third_party/skia/include/private/chromium/Slug.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrDawnTypesPriv.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrMockTypesPriv.h
@@ -8823,6 +8821,7 @@ ORIGIN: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp + ../../../thi
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLExtension.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLIRHelpers.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLSwitchCase.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/coordclampshader.cpp
 FILE: ../../../third_party/skia/gm/fontations.cpp
@@ -8857,6 +8856,7 @@ FILE: ../../../third_party/skia/src/shaders/SkGainmapShader.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLExtension.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLIRHelpers.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLModifiersDeclaration.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchCase.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2023 Google Inc.
 
