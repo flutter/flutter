@@ -806,7 +806,6 @@ class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
   final bool appliesToHostPlatform;
 }
 
-
 class NoOpDoctor implements Doctor {
   @override
   bool get canLaunchAnything => true;
