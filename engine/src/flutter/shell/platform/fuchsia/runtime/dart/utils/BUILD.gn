@@ -43,7 +43,6 @@ template("make_utils") {
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:async-loop-default",
              "$fuchsia_sdk_root/pkg:fdio",
-             "$fuchsia_sdk_root/pkg:memfs",
              "$fuchsia_sdk_root/pkg:sys_cpp",
              "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
              "$fuchsia_sdk_root/pkg:syslog",

@@ -194,7 +194,7 @@ bool DartComponentController::CreateAndBindNamespace() {
     }
 
     if (ns_entry.path() == kTmpPath) {
-      // /tmp is covered by the local memfs.
+      // /tmp is covered by a locally served virtual filesystem.
       continue;
     }
 

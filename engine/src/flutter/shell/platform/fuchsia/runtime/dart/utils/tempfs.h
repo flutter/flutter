@@ -15,13 +15,13 @@ namespace dart_utils {
 // Sets up /tmp for the dart_runner and flutter_runner.
 class RunnerTemp {
  public:
-  // Sets up a memfs bound to /tmp in the process-wide namespace that has the
-  // lifetime of this instance.
+  // Sets up a virtual filesystem bound to /tmp in the process-wide namespace
+  // that has the lifetime of this instance.
   RunnerTemp();
   ~RunnerTemp();
 
-  // Take the memfs mapped into the process-wide namespace for /tmp, and map it
-  // to /tmp in the given namespace.
+  // Take the virtual filesystem mapped into the process-wide namespace for
+  // /tmp, and map it to /tmp in the given namespace.
   static void SetupComponent(fdio_ns_t* ns);
 
  private:

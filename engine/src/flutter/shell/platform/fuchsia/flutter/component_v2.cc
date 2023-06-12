@@ -182,14 +182,14 @@ ComponentV2::ComponentV2(
     return;
   }
 
-  // Setup /tmp to be mapped to the process-local memfs.
+  // Setup /tmp to be mapped to a process-local virtual filesystem.
   dart_utils::RunnerTemp::SetupComponent(fdio_ns_.get());
 
   // ComponentStartInfo::ns (optional)
   if (start_info.has_ns()) {
     for (auto& entry : *start_info.mutable_ns()) {
-      // /tmp/ is mapped separately to the process-level memfs, so we ignore it
-      // here.
+      // /tmp/ is mapped separately to to a process-local virtual filesystem,
+      // so we ignore it here.
       const auto& path = entry.path();
       if (path == kTmpPath) {
         continue;
