@@ -3553,7 +3553,7 @@ void main() {
     // Value indicator is no longer visible.
     expect(
       valueIndicatorBox,
-      isNot(paints..path(color: const Color(0xff000000))..paragraph()),
+      isNot(paints..path(color: theme.colorScheme.primary)..paragraph()),
     );
   });
 
