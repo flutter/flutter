@@ -1315,7 +1315,7 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
 
 /// Encapsulates common aspects of platform view controllers.
 class DarwinPlatformViewController {
-  /// Cannot be private in order to be overridden, right?
+  /// Public default for subclasses to override.
   DarwinPlatformViewController(
     this.id,
     TextDirection layoutDirection,
