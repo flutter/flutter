@@ -2097,6 +2097,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
+  /// Returns a [TextSelection] that encompasses the word at the given
+  /// [TextPosition].
   @visibleForTesting
   TextSelection getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
