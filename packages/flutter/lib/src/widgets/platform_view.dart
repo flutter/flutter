@@ -760,8 +760,9 @@ abstract class _DarwinPlatformView<TController extends DarwinPlatformViewControl
 
   @override
   void updateRenderObject(BuildContext context, TRender renderObject) {
-    renderObject.viewController = controller;
-    renderObject.hitTestBehavior = hitTestBehavior;
+    renderObject
+      ..viewController = controller
+      ..hitTestBehavior = hitTestBehavior;
   }
 }
 
