@@ -302,14 +302,11 @@ void main() {
   });
 
   testWithoutContext('Desktop devices that support impeller pass through the enable-impeller flag', () async {
-    final Completer<void> exitCompleter = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>['debug'],
+      const FakeCommand(
+        command: <String>['debug'],
         exitCode: -1,
-        completer: exitCompleter,
-        outputFollowsExit: true,
-        environment: const <String, String>{
+        environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
           'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
@@ -322,13 +319,8 @@ void main() {
       processManager: processManager,
       supportsImpeller: true,
     );
-    unawaited(Future<void>(() {
-      exitCompleter.complete();
-    }));
-
 
     final FakeApplicationPackage package = FakeApplicationPackage();
-
     await device.startApp(
       package,
       prebuiltApplication: true,
@@ -341,14 +333,11 @@ void main() {
   });
 
   testWithoutContext('Desktop devices that do not support impeller ignore the enable-impeller flag', () async {
-    final Completer<void> exitCompleter = Completer<void>();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>['debug'],
+      const FakeCommand(
+        command: <String>['debug'],
         exitCode: -1,
-        completer: exitCompleter,
-        outputFollowsExit: true,
-        environment: const <String, String>{
+        environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
           'FLUTTER_ENGINE_SWITCH_2': 'enable-checked-mode=true',
           'FLUTTER_ENGINE_SWITCH_3': 'verify-entry-points=true',
@@ -359,13 +348,8 @@ void main() {
     final FakeDesktopDevice device = setUpDesktopDevice(
       processManager: processManager,
     );
-    unawaited(Future<void>(() {
-      exitCompleter.complete();
-    }));
-
 
     final FakeApplicationPackage package = FakeApplicationPackage();
-
     await device.startApp(
       package,
       prebuiltApplication: true,
