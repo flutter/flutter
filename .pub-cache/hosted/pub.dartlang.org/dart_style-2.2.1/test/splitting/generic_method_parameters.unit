@@ -1,0 +1,77 @@
+40 columns                              |
+>>> all fit on one line
+foo<A,B,C,D>() {}
+<<<
+foo<A, B, C, D>() {}
+>>> prefer to split between params even when they all fit on next line
+longFunctionName<First, Second, Third>() {}
+<<<
+longFunctionName<First, Second,
+    Third>() {}
+>>> split before first if needed
+longFunctionName<FirstTypeParameterIsLong, S>() {}
+<<<
+longFunctionName<
+    FirstTypeParameterIsLong, S>() {}
+>>> split in middle if fit in two lines
+longFunctionName<First, Second, Third, Fourth, Fifth, Sixth>() {}
+<<<
+longFunctionName<First, Second, Third,
+    Fourth, Fifth, Sixth>() {}
+>>> split one per line if they don't fit in two lines
+veryLongFunctionName<First, Second, Third, Fourth, Fifth, Sixth, Seventh>() {}
+<<<
+veryLongFunctionName<
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh>() {}
+>>> split both type and value arguments
+lengthyMethodName<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>(first, second, third, fourth, fifth, sixth, seventh, eighth) {}
+<<<
+lengthyMethodName<
+        First,
+        Second,
+        Third,
+        Fourth,
+        Fifth,
+        Sixth,
+        Seventh,
+        Eighth>(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth) {}
+>>> type parameters and => body
+longFunctionName<LongTypeParameterT, LongTypeParameterS>() => body;
+<<<
+longFunctionName<LongTypeParameterT,
+        LongTypeParameterS>() =>
+    body;
+>>> type parameters, value parameters, and => body
+longFunctionName<LongTypeParameterT, LongTypeParameterS>(longParameter1, longParameter2) => body;
+<<<
+longFunctionName<LongTypeParameterT,
+            LongTypeParameterS>(
+        longParameter1,
+        longParameter2) =>
+    body;
+>>> generic function typed parameter
+longFunctionName(String longParameterName<LongTypeParameter,
+AnotherTypeParam>(LongTypeParameter parameter, AnotherTypeParam another)) {;}
+<<<
+longFunctionName(
+    String longParameterName<
+            LongTypeParameter,
+            AnotherTypeParam>(
+        LongTypeParameter parameter,
+        AnotherTypeParam another)) {
+  ;
+}

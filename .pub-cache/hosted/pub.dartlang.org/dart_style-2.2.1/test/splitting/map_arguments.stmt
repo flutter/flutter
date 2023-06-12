@@ -1,0 +1,241 @@
+40 columns                              |
+>>> args before and after map forces nesting
+method(first,{key: value, otherKey: otherLongValue},third);
+<<<
+method(
+    first,
+    {
+      key: value,
+      otherKey: otherLongValue
+    },
+    third);
+>>> nothing but map args does not nest
+longFunctionName({key: value, otherKey: otherLongValue},
+{key: value, otherKey: otherLongValue}, {key: value, otherKey: otherLongValue});
+<<<
+longFunctionName({
+  key: value,
+  otherKey: otherLongValue
+}, {
+  key: value,
+  otherKey: otherLongValue
+}, {
+  key: value,
+  otherKey: otherLongValue
+});
+>>> trailing maps do not nest
+longFunctionName(argument, argument, argument, argument,
+{key: value, otherKey: otherLongValue}, {key: value, otherKey: otherLongValue});
+<<<
+longFunctionName(argument, argument,
+    argument, argument, {
+  key: value,
+  otherKey: otherLongValue
+}, {
+  key: value,
+  otherKey: otherLongValue
+});
+>>> leading maps do not nest
+longFunctionName({key: value, otherKey: otherLongValue},
+{key: value, otherKey: otherLongValue}, argument, argument, argument, argument);
+<<<
+longFunctionName({
+  key: value,
+  otherKey: otherLongValue
+}, {
+  key: value,
+  otherKey: otherLongValue
+}, argument, argument, argument,
+    argument);
+>>> arg between maps forces nesting
+longFunctionName({key: value, otherKey: otherLongValue}, argument,
+{key: value, otherKey: otherLongValue});
+<<<
+longFunctionName(
+    {
+      key: value,
+      otherKey: otherLongValue
+    },
+    argument,
+    {
+      key: value,
+      otherKey: otherLongValue
+    });
+>>> unsplit leading args
+longFunctionName(arg, arg, {key: value, otherKey: otherLongValue});
+<<<
+longFunctionName(arg, arg, {
+  key: value,
+  otherKey: otherLongValue
+});
+>>> split before leading args
+longFunctionName(argument, argument, argument, {key: value, otherKey: otherLongValue});
+<<<
+longFunctionName(
+    argument, argument, argument, {
+  key: value,
+  otherKey: otherLongValue
+});
+>>> split in middle of leading args
+longFunctionName(argument, argument, argument, argument,
+{key: value, otherKey: otherLongValue});
+<<<
+longFunctionName(argument, argument,
+    argument, argument, {
+  key: value,
+  otherKey: otherLongValue
+});
+>>> split before all leading args
+longFunctionName(argument, argument, argument, argument, argument, argument,
+{key: value, otherKey: otherLongValue});
+<<<
+longFunctionName(
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument, {
+  key: value,
+  otherKey: otherLongValue
+});
+>>> unsplit trailing args
+longFunctionName({key: value, otherKey: otherLongValue}, argument, argument);
+<<<
+longFunctionName({
+  key: value,
+  otherKey: otherLongValue
+}, argument, argument);
+>>> split before trailing args
+longFunctionName({key: value, otherKey: otherValue} /* very very long comment */,
+argument, argument);
+<<<
+longFunctionName({
+  key: value,
+  otherKey: otherValue
+} /* very very long comment */,
+    argument, argument);
+>>> split in middle of trailing args
+longFunctionName({key: value, otherKey: otherLongValue}, argument, argument, argument, argument);
+<<<
+longFunctionName({
+  key: value,
+  otherKey: otherLongValue
+}, argument, argument, argument,
+    argument);
+>>> split before all trailing args
+longFunctionName({key: value, otherKey: otherLongValue}, argument, argument, argument, argument,
+argument, argument, argument);
+<<<
+longFunctionName({
+  key: value,
+  otherKey: otherLongValue
+},
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument);
+>>> don't split leading maps
+longFunctionName({k: v}, {k: v2}, a);
+<<<
+longFunctionName({k: v}, {k: v2}, a);
+>>> split before all args including leading
+longFunctionName({k: v}, {k: v2}, argument);
+<<<
+longFunctionName(
+    {k: v}, {k: v2}, argument);
+>>> split before one leading arg
+longFunctionName({key: value}, {key: value}, argument);
+<<<
+longFunctionName({key: value},
+    {key: value}, argument);
+>>> split before all args including leading
+longFunctionName({k: v}, {key: value}, {key: longerValue}, argument, argument,
+argument, argument, argument, argument, argument);
+<<<
+longFunctionName(
+    {k: v},
+    {key: value},
+    {key: longerValue},
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument);
+>>> don't split trailing maps
+longFunctionName(a, {k: v}, {key: va});
+<<<
+longFunctionName(a, {k: v}, {key: va});
+>>> split before all args including trailing
+longFunctionName(argument, {k: v}, {key: va});
+<<<
+longFunctionName(
+    argument, {k: v}, {key: va});
+>>> split before one trailing arg
+longFunctionName(argument, {key: value}, {key: value});
+<<<
+longFunctionName(argument, {key: value},
+    {key: value});
+>>> split before all args including trailing
+longFunctionName(argument, argument, {k: v}, {key: value}, {key: longerValue});
+<<<
+longFunctionName(
+    argument,
+    argument,
+    {k: v},
+    {key: value},
+    {key: longerValue});
+>>> don't nest because of nested 1-arg fn
+outer(inner({key: value, otherKey: otherLongValue}));
+<<<
+outer(inner({
+  key: value,
+  otherKey: otherLongValue
+}));
+>>> do nest because of nested many-arg fn
+outer(argument, inner({key: value, otherKey: otherLongValue}));
+<<<
+outer(
+    argument,
+    inner({
+      key: value,
+      otherKey: otherLongValue
+    }));
+>>> don't nest because of nested 1-arg method call
+obj.outer(obj.inner({key: value, otherKey: otherLongValue}));
+<<<
+obj.outer(obj.inner({
+  key: value,
+  otherKey: otherLongValue
+}));
+>>> do nest because of nested many-arg method call
+obj.outer(argument, obj.inner({key: value, otherKey: otherLongValue}));
+<<<
+obj.outer(
+    argument,
+    obj.inner({
+      key: value,
+      otherKey: otherLongValue
+    }));
+>>> don't force trailing method chain to split
+function({key: value,}).method().method();
+<<<
+function({
+  key: value,
+}).method().method();
+>>> if method chain splits, split before first too
+function({key: value,}).method().method().method().method().method();
+<<<
+function({
+  key: value,
+})
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();

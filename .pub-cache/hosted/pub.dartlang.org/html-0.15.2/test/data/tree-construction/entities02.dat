@@ -1,0 +1,249 @@
+#data
+<div bar="ZZ&gt;YY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ>YY"
+
+#data
+<div bar="ZZ&"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&"
+
+#data
+<div bar='ZZ&'></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&"
+
+#data
+<div bar=ZZ&></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&"
+
+#data
+<div bar="ZZ&gt=YY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&gt=YY"
+
+#data
+<div bar="ZZ&gt0YY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&gt0YY"
+
+#data
+<div bar="ZZ&gt9YY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&gt9YY"
+
+#data
+<div bar="ZZ&gtaYY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&gtaYY"
+
+#data
+<div bar="ZZ&gtZYY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&gtZYY"
+
+#data
+<div bar="ZZ&gt YY"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ> YY"
+
+#data
+<div bar="ZZ&gt"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ>"
+
+#data
+<div bar='ZZ&gt'></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ>"
+
+#data
+<div bar=ZZ&gt></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ>"
+
+#data
+<div bar="ZZ&pound_id=23"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ£_id=23"
+
+#data
+<div bar="ZZ&prod_id=23"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&prod_id=23"
+
+#data
+<div bar="ZZ&pound;_id=23"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ£_id=23"
+
+#data
+<div bar="ZZ&prod;_id=23"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ∏_id=23"
+
+#data
+<div bar="ZZ&pound=23"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&pound=23"
+
+#data
+<div bar="ZZ&prod=23"></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       bar="ZZ&prod=23"
+
+#data
+<div>ZZ&pound_id=23</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "ZZ£_id=23"
+
+#data
+<div>ZZ&prod_id=23</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "ZZ&prod_id=23"
+
+#data
+<div>ZZ&pound;_id=23</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "ZZ£_id=23"
+
+#data
+<div>ZZ&prod;_id=23</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "ZZ∏_id=23"
+
+#data
+<div>ZZ&pound=23</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "ZZ£=23"
+
+#data
+<div>ZZ&prod=23</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "ZZ&prod=23"

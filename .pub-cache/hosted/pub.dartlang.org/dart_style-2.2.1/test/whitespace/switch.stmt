@@ -1,0 +1,191 @@
+40 columns                              |
+>>> require at least one newline between statements in a case
+switch (foo) {case 0:a();b();c();}
+<<<
+switch (foo) {
+  case 0:
+    a();
+    b();
+    c();
+}
+>>> allow an extra newline between statements in a case
+switch (foo) {case 0:
+  a();
+
+  b();
+  c();
+}
+<<<
+switch (foo) {
+  case 0:
+    a();
+
+    b();
+    c();
+}
+>>> collapse any other newlines in a case
+switch (foo) {case 0:
+
+
+  a();
+
+
+
+  b();
+
+
+
+  c();
+
+
+}
+<<<
+switch (foo) {
+  case 0:
+    a();
+
+    b();
+
+    c();
+}
+>>> require at least one newline between statements in a default
+switch (foo) {default:a();b();c();}
+<<<
+switch (foo) {
+  default:
+    a();
+    b();
+    c();
+}
+>>> allow an extra newline between statements in a default
+switch (foo) {default:
+  a();
+
+  b();
+  c();
+}
+<<<
+switch (foo) {
+  default:
+    a();
+
+    b();
+    c();
+}
+>>> collapse any other newlines in a default
+switch (foo) {default:
+
+
+  a();
+
+
+
+  b();
+
+
+
+  c();
+
+
+}
+<<<
+switch (foo) {
+  default:
+    a();
+
+    b();
+
+    c();
+}
+>>> require at least one newline between cases
+switch (foo) {case 0:case 1:case 2:body();}
+<<<
+switch (foo) {
+  case 0:
+  case 1:
+  case 2:
+    body();
+}
+>>> allow an extra newline between cases
+switch (foo) {case 0:
+
+  case 1:
+  case 2:body();
+}
+<<<
+switch (foo) {
+  case 0:
+
+  case 1:
+  case 2:
+    body();
+}
+>>> collapse any other newlines in a case
+switch (foo) {
+
+
+  case 0:
+
+
+  case 1:
+
+
+  case 2:
+
+
+    body();
+
+
+
+}
+<<<
+switch (foo) {
+  case 0:
+
+  case 1:
+
+  case 2:
+    body();
+}
+>>> indentation
+switch (fruit) {
+case "apple":
+print("delish");
+break;
+case "fig":
+print("bleh");
+break;
+}
+<<<
+switch (fruit) {
+  case "apple":
+    print("delish");
+    break;
+  case "fig":
+    print("bleh");
+    break;
+}
+>>> labeled cases
+switch (fruit) {
+  case "apple":
+    print("delish");
+    break;
+  label:case "fig":
+    print("bleh");
+    break;
+  other:default:
+    break;
+}
+<<<
+switch (fruit) {
+  case "apple":
+    print("delish");
+    break;
+  label:
+  case "fig":
+    print("bleh");
+    break;
+  other:
+  default:
+    break;
+}

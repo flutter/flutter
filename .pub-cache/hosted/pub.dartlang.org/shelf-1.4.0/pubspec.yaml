@@ -1,0 +1,20 @@
+name: shelf
+version: 1.4.0
+description: >
+  A model for web server middleware that encourages composition and easy reuse.
+repository: https://github.com/dart-lang/shelf/tree/master/pkgs/shelf
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  async: ^2.5.0
+  collection: ^1.15.0
+  http_parser: ^4.0.0
+  path: ^1.8.0
+  stack_trace: ^1.10.0
+  stream_channel: ^2.1.0
+
+dev_dependencies:
+  http: ^0.13.0
+  lints: ^2.0.0
+  test: ^1.16.0

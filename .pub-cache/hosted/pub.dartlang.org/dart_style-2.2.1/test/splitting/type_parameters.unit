@@ -1,0 +1,54 @@
+40 columns                              |
+>>> all fit on one line
+class Foo<A,B,C,D> {}
+<<<
+class Foo<A, B, C, D> {}
+>>> prefer to split between params even when they all fit on next line
+class LongClassName<First, Second, Third> {}
+<<<
+class LongClassName<First, Second,
+    Third> {}
+>>> split before first if needed
+class LongClassName<FirstTypeParameterIsLong, Second> {}
+<<<
+class LongClassName<
+    FirstTypeParameterIsLong, Second> {}
+>>> split in middle if fit in two lines
+class LongClassName<First, Second, Third, Fourth, Fifth, Sixth> {}
+<<<
+class LongClassName<First, Second,
+    Third, Fourth, Fifth, Sixth> {}
+>>> split one per line if they don't fit in two lines
+class LongClassName<First, Second, Third, Fourth, Fifth, Sixth, Seventh> {}
+<<<
+class LongClassName<
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh> {}
+>>> prefers to not split at type arguments
+class SomeClass<
+    TypeArgument> extends Base {}
+<<<
+class SomeClass<TypeArgument>
+    extends Base {}
+>>> generic function declaration
+foo<A,B,C,D>() {}
+<<<
+foo<A, B, C, D>() {}
+>>> generic method on class
+class Foo {
+  foo<A,B,C,D>() {}
+}
+<<<
+class Foo {
+  foo<A, B, C, D>() {}
+}
+>>> split type parameters
+class Foo extends GenericBaseClass<TypeParameter> {}
+<<<
+class Foo extends GenericBaseClass<
+    TypeParameter> {}

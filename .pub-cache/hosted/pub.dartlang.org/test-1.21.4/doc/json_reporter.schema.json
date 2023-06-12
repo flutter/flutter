@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "An event emitted by the test package's JSON reporter",
+
+  "definitions": {
+    "GroupEntry": {
+      "required": [
+        "id",
+        "suiteID",
+        "metadata",
+        "line",
+        "column",
+        "url"
+      ],
+      "properties": {
+        "id": {"type": "integer", "minimum": 0},
+        "suiteID": {"type": "integer", "minimum": 0},
+        "metadata": {"$ref": "#/definitions/Metadata"}
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "line": {"type": "integer", "minimum": 1},
+            "column": {"type": "integer", "minimum": 1},
+            "url": {"type": "string", "format": "uri"}
+          }
+        },
+        {
+          "properties": {
+            "line": {"type": "null"},
+            "column": {"type": "null"},
+            "url": {"type": "null"}
+          }
+        }
+      ]
+    },
+
+    "Test": {
+      "allOf": [{"$ref": "#/definitions/GroupEntry"}],
+      "required": [
+        "name",
+        "groupIDs"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "groupIDs": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+
+    "Suite": {
+      "required": ["id", "platform", "path"],
+      "properties": {
+        "id": {"type": "integer", "minimum": 0},
+        "platform": {
+          "oneOf": [{"type": "string"}, {"type": "null"}]
+        },
+        "path": {"type": "string"}
+      }
+    },
+
+    "Group": {
+      "allOf": [{"$ref": "#/definitions/GroupEntry"}],
+      "required": ["name"],
+      "properties": {
+        "parentID": {
+          "oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]
+        },
+        "name": {
+          "oneOf": [{"type": "string"}, {"type": "null"}]
+        },
+        "testCount": {"type": "integer", "minimum": 0}
+      }
+    },
+
+    "Metadata": {
+      "required": ["skip", "skipReason"],
+      "properties": {
+        "skip": {"type": "boolean"},
+        "skipReason": {
+          "oneOf": [{"type": "string"}, {"type": "null"}]
+        }
+      }
+    }
+  },
+
+  "required": ["type", "time"],
+  "properties": {
+    "time": {"type": "integer", "minimum": 0},
+    "type": {"type": "string"}
+  },
+
+  "oneOf": [
+    {
+      "title": "StartEvent",
+      "required": ["protocolVersion", "runnerVersion"],
+      "properties": {
+        "type": {"enum": ["start"]},
+        "pid": {"type": "integer", "minimum": 0},
+        "protocolVersion": {"type": "string", "pattern": "^0\\.1\\."},
+        "runnerVersion": {
+          "oneOf": [{"type": "string"}, {"type": "null"}]
+        }
+      }
+    },
+
+    {
+      "title": "TestStartEvent",
+      "required": ["test"],
+      "properties": {
+        "type": {"enum": ["testStart"]},
+        "test": {"$ref": "#/definitions/Test"}
+      }
+    },
+
+    {
+      "title": "AllSuitesEvent",
+      "required": ["count"],
+      "properties": {
+        "type": {"enum": ["allSuites"]},
+        "count": {"type": "integer", "minimum": 0}
+      }
+    },
+
+    {
+      "title": "SuiteEvent",
+      "required": ["suite"],
+      "properties": {
+        "type": {"enum": ["suite"]},
+        "suite": {"$ref": "#/definitions/Suite"}
+      }
+    },
+
+    {
+      "title": "DebugEvent",
+      "required": ["suiteID"],
+      "properties": {
+        "type": {"enum": ["debug"]},
+        "suiteID": {"type": "integer", "minimum": 0},
+        "observatory": {
+          "oneOf": [{"type": "string", "format": "uri"}, {"type": "null"}]
+        },
+        "remoteDebugger": {
+          "oneOf": [{"type": "string", "format": "uri"}, {"type": "null"}]
+        }
+      }
+    },
+
+    {
+      "title": "GroupEvent",
+      "required": ["group"],
+      "properties": {
+        "type": {"enum": ["group"]},
+        "group": {"$ref": "#/definitions/Group"}
+      }
+    },
+
+    {
+      "title": "MessageEvent",
+      "required": ["testID", "message", "type"],
+      "properties": {
+        "type": {"enum": ["print"]},
+        "testID": {"type": "integer", "minimum": 0},
+        "message": {"type": "string"},
+        "messageType": {"type": "string", "enum": ["print", "skip"]}
+      }
+    },
+
+    {
+      "title": "ErrorEvent",
+      "required": ["testID", "error", "stackTrace", "isFailure"],
+      "properties": {
+        "type": {"enum": ["error"]},
+        "testID": {"type": "integer", "minimum": 0},
+        "error": {"type": "string"},
+        "stackTrace": {"type": "string"},
+        "isFailure": {"type": "boolean"}
+      }
+    },
+
+    {
+      "title": "TestDoneEvent",
+      "required": ["testID", "result", "hidden", "skipped"],
+      "properties": {
+        "type": {"enum": ["testDone"]},
+        "testID": {"type": "integer", "minimum": 0},
+        "result": {"type": "string", "enum": ["success", "failure", "error"]},
+        "hidden": {"type": "boolean"},
+        "skipped": {"type": "boolean"}
+      }
+    },
+
+    {
+      "title": "DoneEvent",
+      "required": ["success"],
+      "properties": {
+        "type": {"enum": ["done"]},
+        "success": {"type": "boolean"}
+      }
+    },
+
+    {
+      "title": "FutureEvent",
+      "description":
+        "A placeholder event to allow new events to be added in the future.",
+      "properties": {
+        "type": {
+          "not": {
+            "enum": [
+              "start", "testStart", "allSuites", "suite", "group", "print",
+              "error", "testDone", "done", "debug"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

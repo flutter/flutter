@@ -1,0 +1,207 @@
+40 columns                              |
+>>> empty set
+var s = <int>  { };
+<<<
+var s = <int>{};
+>>> exactly 40 characters
+var s = {first, second, third, forth__};
+<<<
+var s = {first, second, third, forth__};
+>>>
+var s = {first, second, third, fourth, fifth, sixth};
+<<<
+var s = {
+  first,
+  second,
+  third,
+  fourth,
+  fifth,
+  sixth
+};
+>>> splits outer sets even if they fit
+var s = {a, {b, c}, d, {},
+    e, {f, {g, h} }  };
+<<<
+var s = {
+  a,
+  {b, c},
+  d,
+  {},
+  e,
+  {
+    f,
+    {g, h}
+  }
+};
+>>> split indirect outer
+var s = {a, function({b, inner})};
+<<<
+var s = {
+  a,
+  function({b, inner})
+};
+>>> empty literal does not force outer split
+var s = {a, <int>{}, b, [], c, () {}};
+<<<
+var s = {a, <int>{}, b, [], c, () {}};
+>>> nested split set
+var s = {first, 1, second, {third, fourth}, fifth, 5, nested, {sixth, seventh, eighth, nine,
+    tenth, eleventh}};
+<<<
+var s = {
+  first,
+  1,
+  second,
+  {third, fourth},
+  fifth,
+  5,
+  nested,
+  {
+    sixth,
+    seventh,
+    eighth,
+    nine,
+    tenth,
+    eleventh
+  }
+};
+>>> force multi-line because of contained block
+var s = {first, 1, fn, () {"fn";},third,fourth};
+<<<
+var s = {
+  first,
+  1,
+  fn,
+  () {
+    "fn";
+  },
+  third,
+  fourth
+};
+>>> containing comments
+var s = {first, one /* bang */, second, two};
+<<<
+var s = {
+  first,
+  one /* bang */,
+  second,
+  two
+};
+>>> const
+var set = const {"foo", "bar", "fuz", null};
+<<<
+var set = const {
+  "foo",
+  "bar",
+  "fuz",
+  null
+};
+>>> trailing comma forces split
+var set = {"foo", "bar" , };
+<<<
+var set = {
+  "foo",
+  "bar",
+};
+>>> trailing comma multiline
+var set = {"foo", "bar", "fuzzy", null , };
+<<<
+var set = {
+  "foo",
+  "bar",
+  "fuzzy",
+  null,
+};
+>>> preserve newlines in sets containing a line comment
+var set = {
+  // yeah
+  a,b,c,d,
+  e,f,g,h
+};
+<<<
+var set = {
+  // yeah
+  a, b, c, d,
+  e, f, g, h
+};
+>>> wrap between elements even when newlines are preserved
+var set = {
+  // yes
+  first, "value", second, "value", third, "value",
+
+  fourth, "value", fifth, "value", sixth, "value", seventh, "value"
+};
+<<<
+var set = {
+  // yes
+  first, "value", second, "value",
+  third, "value",
+
+  fourth, "value", fifth, "value",
+  sixth, "value", seventh, "value"
+};
+>>> ignore line comment after the "}"
+var set = {
+  a,b,c,
+  d
+} // comment
+;
+<<<
+var set = {a, b, c, d} // comment
+    ;
+>>> preserves one blank line between elements
+var set = {
+
+
+  element,
+
+
+
+  // comment
+  element,
+
+
+
+  element
+
+
+};
+<<<
+var set = {
+  element,
+
+  // comment
+  element,
+
+  element
+};
+>>> spread cascade
+var set = {1, ...thing..cascade()..another(), 4};
+<<<
+var set = {
+  1,
+  ...thing
+    ..cascade()
+    ..another(),
+  4
+};
+>>> spread lambda
+var set = {1, ...() { body; }, 4};
+<<<
+var set = {
+  1,
+  ...() {
+    body;
+  },
+  4
+};
+>>> spread immediately invoked lambda
+var set = {1, ...() sync* { yield thing; }(), 4};
+<<<
+var set = {
+  1,
+  ...() sync* {
+    yield thing;
+  }(),
+  4
+};

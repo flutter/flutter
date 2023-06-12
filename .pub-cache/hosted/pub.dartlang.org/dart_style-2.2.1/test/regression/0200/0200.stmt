@@ -1,0 +1,14 @@
+>>>
+final confirmationFuture = _dialogService.showConfirmationDialog(
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    new DialogSettings()
+  ..primaryButton = DialogSettings.BUTTON_CANCEL
+  ..okButtonText = 'OK'
+  ..cancelButtonText = 'Kittens');
+<<<
+final confirmationFuture = _dialogService.showConfirmationDialog(
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    new DialogSettings()
+      ..primaryButton = DialogSettings.BUTTON_CANCEL
+      ..okButtonText = 'OK'
+      ..cancelButtonText = 'Kittens');

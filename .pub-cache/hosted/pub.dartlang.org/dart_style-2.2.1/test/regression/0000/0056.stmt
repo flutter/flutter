@@ -1,0 +1,5 @@
+>>> (indent 8)
+        _sources[uri] = src = new _MockSdkSource(uri, 'library dart.${uri.path};');
+<<<
+        _sources[uri] =
+            src = new _MockSdkSource(uri, 'library dart.${uri.path};');

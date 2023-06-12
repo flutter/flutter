@@ -1,0 +1,23 @@
+name: vm_snapshot_analysis
+version: 0.7.2
+description: Utilities for analysing AOT snapshot size.
+repository: https://github.com/dart-lang/sdk/tree/main/pkg/vm_snapshot_analysis
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+executables:
+  snapshot_analysis: analyse
+
+dependencies:
+  args: ^2.0.0
+  collection: ^1.15.0
+  path: ^1.8.0
+
+# We use 'any' version constraints here as we get our package versions from
+# the dart-lang/sdk repo's DEPS file. Note that this is a special case; the
+# best practice for packages is to specify their compatible version ranges.
+# See also https://dart.dev/tools/pub/dependencies.
+dev_dependencies:
+  lints: any
+  test: any

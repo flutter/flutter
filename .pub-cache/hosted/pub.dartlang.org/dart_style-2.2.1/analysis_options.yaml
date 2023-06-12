@@ -1,0 +1,11 @@
+include: package:lints/recommended.yaml
+linter:
+  rules:
+    - avoid_dynamic_calls
+    - directives_ordering
+    - prefer_equal_for_default_values
+    - prefer_generic_function_type_aliases
+    - slash_for_doc_comments
+    - unawaited_futures
+    - unnecessary_const
+    - unnecessary_new

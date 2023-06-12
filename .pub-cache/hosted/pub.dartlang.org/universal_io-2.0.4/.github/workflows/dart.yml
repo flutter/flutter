@@ -1,0 +1,20 @@
+name: Dart CI
+
+on: [ push ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: google/dart:latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install dependencies
+        run: pub get
+
+      - name: Run tests
+        run: pub run test --platform vm --exclude-tags "browser"

@@ -1,0 +1,13 @@
+include: ../analysis_options.yaml
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors:
+    todo: error
+    include_file_not_found: ignore
+linter:
+  rules:
+    public_member_api_docs: false
+    avoid_print: false
+    use_key_in_widget_constructors: false

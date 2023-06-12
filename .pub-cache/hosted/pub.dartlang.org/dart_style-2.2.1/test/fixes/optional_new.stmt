@@ -1,0 +1,71 @@
+40 columns                              |
+>>>
+{
+  new A(new A.named());
+  new A<int>(new A<int>.named());
+  // Don't touch const.
+  const A();
+  const A.named();
+}
+<<<
+{
+  A(A.named());
+  A<int>(A<int>.named());
+  // Don't touch const.
+  const A();
+  const A.named();
+}
+>>> preserves block comments before
+/* a */    /* b */ new A();
+<<<
+/* a */ /* b */ A();
+>>> preserves block comments after
+new /* a */    /* b */A();
+<<<
+/* a */ /* b */ A();
+>>> preserves line comments before
+// a
+// b
+new A();
+<<<
+// a
+// b
+A();
+>>> preserves line comments after
+new // a
+// b
+A();
+<<<
+// a
+// b
+A();
+>>> merge surrounding comments
+{
+  /* a */ new /* b */ A();
+  /* a */ new // b
+  A();
+  // a
+  new /* b */ A();
+  // a
+  new // b
+  A();
+}
+<<<
+{
+  /* a */ /* b */ A();
+  /* a */ // b
+  A();
+  // a
+  /* b */ A();
+  // a
+  // b
+  A();
+}
+>>> handle already-removed keyword
+A<int>(A<int>.named());
+<<<
+A<int>(A<int>.named());
+>>> inside string interpolation
+"before ${new Foo()} after";
+<<<
+"before ${Foo()} after";

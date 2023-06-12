@@ -1,0 +1,85 @@
+>>>
+main() {
+  final args = [
+    if (_configuration.useBlobs) ...[
+      "--snapshot-kind=app-aot-blobs",
+      "--blobs_container_filename=$tempDir/out.aotsnapshot"
+    ] else if (_configuration.useElf) ...[
+      "--snapshot-kind=app-aot-elf",
+      "--elf=$tempDir/out.aotsnapshot"
+    ] else ...[
+      "--snapshot-kind=app-aot-assembly",
+      "--assembly=$tempDir/out.S"
+    ],
+    if (_isAndroid && _isArm) '--no-sim-use-hardfp',
+    if (_configuration.isMinified) '--obfuscate',
+    if (_configuration.useQemu) '--no-use-integer-division',
+    ..._replaceDartFiles(arguments, tempKernelFile(tempDir)),
+  ];
+
+  final args2 = [
+    if (_configuration.useBlobs) ...[
+      "--snapshot-kind=app-aot-blobs",
+      "--blobs_container_filename=$tempDir/out.aotsnapshot"
+    ] else if (_configuration.useElf) ...[
+      "--snapshot-kind=app-aot-elf",
+      "--elf=$tempDir/out.aotsnapshot"
+    ] else ...[
+      "--snapshot-kind=app-aot-assembly",
+      "--assembly=$tempDir/out.S"
+    ],
+    if (_isAndroid && _isArm)
+      '--no-sim-use-hardfp',
+    if (_configuration.isMinified)
+      '--obfuscate',
+    // The SIMARM precompiler assumes support for integer division, but the
+    // Qemu arm cpus do not support integer division.
+    if (_configuration.useQemu)
+      '--no-use-integer-division',
+    ..._replaceDartFiles(arguments, tempKernelFile(tempDir)),
+  ];
+
+  print(args);
+  print(args2);
+}
+<<<
+main() {
+  final args = [
+    if (_configuration.useBlobs) ...[
+      "--snapshot-kind=app-aot-blobs",
+      "--blobs_container_filename=$tempDir/out.aotsnapshot"
+    ] else if (_configuration.useElf) ...[
+      "--snapshot-kind=app-aot-elf",
+      "--elf=$tempDir/out.aotsnapshot"
+    ] else ...[
+      "--snapshot-kind=app-aot-assembly",
+      "--assembly=$tempDir/out.S"
+    ],
+    if (_isAndroid && _isArm) '--no-sim-use-hardfp',
+    if (_configuration.isMinified) '--obfuscate',
+    if (_configuration.useQemu) '--no-use-integer-division',
+    ..._replaceDartFiles(arguments, tempKernelFile(tempDir)),
+  ];
+
+  final args2 = [
+    if (_configuration.useBlobs) ...[
+      "--snapshot-kind=app-aot-blobs",
+      "--blobs_container_filename=$tempDir/out.aotsnapshot"
+    ] else if (_configuration.useElf) ...[
+      "--snapshot-kind=app-aot-elf",
+      "--elf=$tempDir/out.aotsnapshot"
+    ] else ...[
+      "--snapshot-kind=app-aot-assembly",
+      "--assembly=$tempDir/out.S"
+    ],
+    if (_isAndroid && _isArm) '--no-sim-use-hardfp',
+    if (_configuration.isMinified) '--obfuscate',
+    // The SIMARM precompiler assumes support for integer division, but the
+    // Qemu arm cpus do not support integer division.
+    if (_configuration.useQemu) '--no-use-integer-division',
+    ..._replaceDartFiles(arguments, tempKernelFile(tempDir)),
+  ];
+
+  print(args);
+  print(args2);
+}

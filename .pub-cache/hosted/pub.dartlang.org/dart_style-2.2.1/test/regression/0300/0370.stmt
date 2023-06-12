@@ -1,0 +1,75 @@
+>>>
+return environment.barback.getAssetById(id).then((result) {
+  return result;
+}).then((asset) => _serveAsset(request, asset)).catchError(
+    (error,
+        trace) {
+  if (error is! AssetNotFoundException) throw error;
+  return environment.barback
+      .getAssetById(id.addExtension("/index.html"))
+      .then((asset) {
+    if (request.url.path.endsWith('/')) return _serveAsset(request, asset);
+
+    // We only want to serve index.html if the URL explicitly ends in a
+    // slash. For other URLs, we redirect to one with the slash added to
+    // implicitly support that too. This follows Apache's behavior.
+    logRequest(request, "302 Redirect to ${request.url}/");
+    return new shelf.Response.found('${request.url}/');
+  }).catchError((newError, newTrace) {
+    // If we find neither the original file or the index, we should report
+    // the error about the original to the user.
+    throw newError is AssetNotFoundException ? error : newError;
+  });
+}).catchError(
+    (error,
+        trace) {
+  if (error is! AssetNotFoundException) {
+    trace = new Chain.forTrace(trace);
+    logRequest(request, "$error\n$trace");
+
+    addError(error, trace);
+    close();
+    return new shelf.Response.internalServerError();
+  }
+
+  addResult(new BarbackServerResult._failure(request.url, id, error));
+  return notFound(request, asset: id);
+});
+<<<
+return environment.barback
+    .getAssetById(id)
+    .then((result) {
+      return result;
+    })
+    .then((asset) => _serveAsset(request, asset))
+    .catchError((error, trace) {
+      if (error is! AssetNotFoundException) throw error;
+      return environment.barback
+          .getAssetById(id.addExtension("/index.html"))
+          .then((asset) {
+        if (request.url.path.endsWith('/')) return _serveAsset(request, asset);
+
+        // We only want to serve index.html if the URL explicitly ends in a
+        // slash. For other URLs, we redirect to one with the slash added to
+        // implicitly support that too. This follows Apache's behavior.
+        logRequest(request, "302 Redirect to ${request.url}/");
+        return new shelf.Response.found('${request.url}/');
+      }).catchError((newError, newTrace) {
+        // If we find neither the original file or the index, we should report
+        // the error about the original to the user.
+        throw newError is AssetNotFoundException ? error : newError;
+      });
+    })
+    .catchError((error, trace) {
+      if (error is! AssetNotFoundException) {
+        trace = new Chain.forTrace(trace);
+        logRequest(request, "$error\n$trace");
+
+        addError(error, trace);
+        close();
+        return new shelf.Response.internalServerError();
+      }
+
+      addResult(new BarbackServerResult._failure(request.url, id, error));
+      return notFound(request, asset: id);
+    });

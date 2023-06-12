@@ -1,0 +1,14 @@
+>>> (indent 2)
+  void incrementalAdd(Constraint c) {
+    int mark = newMark();
+    for (Constraint overridden = c.satisfy(mark);
+         overridden != null;
+         overridden = overridden.satisfy(mark));
+  }
+<<<
+  void incrementalAdd(Constraint c) {
+    int mark = newMark();
+    for (Constraint overridden = c.satisfy(mark);
+        overridden != null;
+        overridden = overridden.satisfy(mark));
+  }

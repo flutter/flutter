@@ -1,0 +1,14 @@
+>>>
+enum _ElementLifecycle {
+  initial,
+  active,
+  inactive,
+  defunct,
+}
+<<<
+enum _ElementLifecycle {
+  initial,
+  active,
+  inactive,
+  defunct,
+}

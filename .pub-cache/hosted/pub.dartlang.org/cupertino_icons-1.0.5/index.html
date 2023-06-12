@@ -1,0 +1,5136 @@
+<!DOCTYPE html>
+<!-- Copyright 2013 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+<html>
+<head>
+  <title>Cupertino Icons 1.0.0 Gallery</title>
+  <link href="css/icons.css" rel="stylesheet" type="text/css" />
+  <style>
+    {
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    body {
+      background: #fff;
+      color: #333;
+      font: 14px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+      margin: 0;
+    }
+    header {
+      border-bottom: 1px solid #eee;
+      margin-bottom: 20px;
+      overflow: hidden;
+      padding: 20px 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 21px;
+      font-weight: 400;
+      flex: 1;
+    }
+    .search-bar {
+      position: relative;
+    }
+    .search-bar>i {
+      position: absolute;
+      left: 7px;
+      top: 4px;
+      font-size: 22px;
+    }
+    .search-bar>input {
+      width: 200px;
+      outline: none;
+      font: 14px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 3px 5px 3px 30px;
+    }
+    .content .hidden {
+      display: none;
+    }
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 80%;
+    }
+    .icons {
+      overflow: hidden;
+    }
+    .content .icon-cell .cupertino-icons {
+      cursor: pointer;
+    }
+    .content {
+      padding-bottom: 250px;
+    }
+    .icons .icon-cell {
+      float: left;
+      width: calc(100% / 7);
+      text-align: center;
+      height: 100px;
+      margin-top: 30px;
+    }
+    @media (max-width: 1200px) {
+      .icons .icon-cell {
+        width: calc(100% / 5);
+      }
+    }
+    @media (max-width: 900px) {
+      .icons .icon-cell {
+        width: calc(100% / 4);
+      }
+    }
+    .icons .icon-name,
+    .icons .icon-size {
+      display: block;
+      font-size: 13.5px;
+      color: #666;
+      margin-top: 10px;
+      padding: 0px 10px;
+      word-break: break-all;
+    }
+    @media (max-width: 1200px) {
+      .icons .icon-name {
+        font-size: 12px;
+      }
+    }
+    @media (max-width: 900px) {
+      .icons .icon-name {
+        font-size: 11px;
+      }
+    }
+    .cupertino-icons.size-14 {
+      font-size: 14px;
+    }
+    .cupertino-icons.size-20 {
+      font-size: 20px;
+    }
+    .cupertino-icons.size-24 {
+      font-size: 24px;
+    }
+    .cupertino-icons.size-28 {
+      font-size: 28px;
+    }
+    .cupertino-icons.size-32 {
+      font-size: 32px;
+    }
+    .cupertino-icons.size-56 {
+      font-size: 56px;
+    }
+    .cupertino-icons.size-112 {
+      font-size: 112px;
+    }
+    .icon-preview {
+      box-shadow: 0px -10px 20px rgba(0,0,0,0.3);
+      background: #fff;
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      margin-left: -480px;
+      z-index: 100;
+      width: 960px;
+      display: none;
+    }
+    @media (max-width: 960px) {
+      .icon-preview {
+        left: 0;
+        width: 100%;
+        margin-left: 0;
+      }
+    }
+    .icon-preview .icons {
+      font-size: 0;
+      padding-bottom: 10px;
+    }
+    .icon-preview .icon-cell {
+      float: none;
+      display: inline-block;
+      margin: 0;
+      vertical-align: bottom;
+      height: auto;
+    }
+    .icon-preview .icon-preview-name {
+      font-size: 18px;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="center">
+    <header>
+      <h1>Cupertino Icons 1.0.0 Gallery</h1>
+      <div class="search-bar">
+        <i class="cupertino-icons">search</i>
+        <input placeholder="Search..." />
+      </div>
+    </header>
+    <div class="content">
+      <div class="icons">
+        <div class="icon-cell">
+  <i class="cupertino-icons size-28">airplane</i>
+  <span class="icon-name">airplane</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">alarm</i>
+  <span class="icon-name">alarm</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">alarm_fill</i>
+  <span class="icon-name">alarm_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">alt</i>
+  <span class="icon-name">alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ant</i>
+  <span class="icon-name">ant</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ant_circle</i>
+  <span class="icon-name">ant_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ant_circle_fill</i>
+  <span class="icon-name">ant_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ant_fill</i>
+  <span class="icon-name">ant_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">antenna_radiowaves_left_right</i>
+  <span class="icon-name">antenna_radiowaves_left_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">app</i>
+  <span class="icon-name">app</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">app_badge</i>
+  <span class="icon-name">app_badge</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">app_badge_fill</i>
+  <span class="icon-name">app_badge_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">app_fill</i>
+  <span class="icon-name">app_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">archivebox</i>
+  <span class="icon-name">archivebox</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">archivebox_fill</i>
+  <span class="icon-name">archivebox_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_2_circlepath</i>
+  <span class="icon-name">arrow_2_circlepath</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_2_circlepath_circle</i>
+  <span class="icon-name">arrow_2_circlepath_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_2_circlepath_circle_fill</i>
+  <span class="icon-name">arrow_2_circlepath_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_2_squarepath</i>
+  <span class="icon-name">arrow_2_squarepath</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_3_trianglepath</i>
+  <span class="icon-name">arrow_3_trianglepath</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_branch</i>
+  <span class="icon-name">arrow_branch</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_clockwise</i>
+  <span class="icon-name">arrow_clockwise</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_clockwise_circle</i>
+  <span class="icon-name">arrow_clockwise_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_clockwise_circle_fill</i>
+  <span class="icon-name">arrow_clockwise_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_counterclockwise</i>
+  <span class="icon-name">arrow_counterclockwise</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_counterclockwise_circle</i>
+  <span class="icon-name">arrow_counterclockwise_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_counterclockwise_circle_fill</i>
+  <span class="icon-name">arrow_counterclockwise_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down</i>
+  <span class="icon-name">arrow_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_circle</i>
+  <span class="icon-name">arrow_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_circle_fill</i>
+  <span class="icon-name">arrow_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_doc</i>
+  <span class="icon-name">arrow_down_doc</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_doc_fill</i>
+  <span class="icon-name">arrow_down_doc_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_left</i>
+  <span class="icon-name">arrow_down_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_left_circle</i>
+  <span class="icon-name">arrow_down_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_left_circle_fill</i>
+  <span class="icon-name">arrow_down_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_left_square</i>
+  <span class="icon-name">arrow_down_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_left_square_fill</i>
+  <span class="icon-name">arrow_down_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_right</i>
+  <span class="icon-name">arrow_down_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_right_arrow_up_left</i>
+  <span class="icon-name">arrow_down_right_arrow_up_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_right_circle</i>
+  <span class="icon-name">arrow_down_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_right_circle_fill</i>
+  <span class="icon-name">arrow_down_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_right_square</i>
+  <span class="icon-name">arrow_down_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_right_square_fill</i>
+  <span class="icon-name">arrow_down_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_square</i>
+  <span class="icon-name">arrow_down_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_square_fill</i>
+  <span class="icon-name">arrow_down_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_to_line</i>
+  <span class="icon-name">arrow_down_to_line</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_down_to_line_alt</i>
+  <span class="icon-name">arrow_down_to_line_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left</i>
+  <span class="icon-name">arrow_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_circle</i>
+  <span class="icon-name">arrow_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_circle_fill</i>
+  <span class="icon-name">arrow_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_right</i>
+  <span class="icon-name">arrow_left_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_right_circle</i>
+  <span class="icon-name">arrow_left_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_right_circle_fill</i>
+  <span class="icon-name">arrow_left_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_right_square</i>
+  <span class="icon-name">arrow_left_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_right_square_fill</i>
+  <span class="icon-name">arrow_left_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_square</i>
+  <span class="icon-name">arrow_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_square_fill</i>
+  <span class="icon-name">arrow_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_to_line</i>
+  <span class="icon-name">arrow_left_to_line</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_left_to_line_alt</i>
+  <span class="icon-name">arrow_left_to_line_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_merge</i>
+  <span class="icon-name">arrow_merge</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right</i>
+  <span class="icon-name">arrow_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_arrow_left</i>
+  <span class="icon-name">arrow_right_arrow_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_arrow_left_circle</i>
+  <span class="icon-name">arrow_right_arrow_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_arrow_left_circle_fill</i>
+  <span class="icon-name">arrow_right_arrow_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_arrow_left_square</i>
+  <span class="icon-name">arrow_right_arrow_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_arrow_left_square_fill</i>
+  <span class="icon-name">arrow_right_arrow_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_circle</i>
+  <span class="icon-name">arrow_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_circle_fill</i>
+  <span class="icon-name">arrow_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_square</i>
+  <span class="icon-name">arrow_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_square_fill</i>
+  <span class="icon-name">arrow_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_to_line</i>
+  <span class="icon-name">arrow_right_to_line</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_right_to_line_alt</i>
+  <span class="icon-name">arrow_right_to_line_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_swap</i>
+  <span class="icon-name">arrow_swap</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_down_left</i>
+  <span class="icon-name">arrow_turn_down_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_down_right</i>
+  <span class="icon-name">arrow_turn_down_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_left_down</i>
+  <span class="icon-name">arrow_turn_left_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_left_up</i>
+  <span class="icon-name">arrow_turn_left_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_right_down</i>
+  <span class="icon-name">arrow_turn_right_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_right_up</i>
+  <span class="icon-name">arrow_turn_right_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_up_left</i>
+  <span class="icon-name">arrow_turn_up_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_turn_up_right</i>
+  <span class="icon-name">arrow_turn_up_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up</i>
+  <span class="icon-name">arrow_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_arrow_down</i>
+  <span class="icon-name">arrow_up_arrow_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_arrow_down_circle</i>
+  <span class="icon-name">arrow_up_arrow_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_arrow_down_circle_fill</i>
+  <span class="icon-name">arrow_up_arrow_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_arrow_down_square</i>
+  <span class="icon-name">arrow_up_arrow_down_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_arrow_down_square_fill</i>
+  <span class="icon-name">arrow_up_arrow_down_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_bin</i>
+  <span class="icon-name">arrow_up_bin</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_bin_fill</i>
+  <span class="icon-name">arrow_up_bin_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_circle</i>
+  <span class="icon-name">arrow_up_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_circle_fill</i>
+  <span class="icon-name">arrow_up_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_doc</i>
+  <span class="icon-name">arrow_up_doc</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_doc_fill</i>
+  <span class="icon-name">arrow_up_doc_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_down</i>
+  <span class="icon-name">arrow_up_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_down_circle</i>
+  <span class="icon-name">arrow_up_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_down_circle_fill</i>
+  <span class="icon-name">arrow_up_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_down_square</i>
+  <span class="icon-name">arrow_up_down_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_down_square_fill</i>
+  <span class="icon-name">arrow_up_down_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_left</i>
+  <span class="icon-name">arrow_up_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_left_arrow_down_right</i>
+  <span class="icon-name">arrow_up_left_arrow_down_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_left_circle</i>
+  <span class="icon-name">arrow_up_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_left_circle_fill</i>
+  <span class="icon-name">arrow_up_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_left_square</i>
+  <span class="icon-name">arrow_up_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_left_square_fill</i>
+  <span class="icon-name">arrow_up_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right</i>
+  <span class="icon-name">arrow_up_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right_circle</i>
+  <span class="icon-name">arrow_up_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right_circle_fill</i>
+  <span class="icon-name">arrow_up_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right_diamond</i>
+  <span class="icon-name">arrow_up_right_diamond</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right_diamond_fill</i>
+  <span class="icon-name">arrow_up_right_diamond_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right_square</i>
+  <span class="icon-name">arrow_up_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_right_square_fill</i>
+  <span class="icon-name">arrow_up_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_square</i>
+  <span class="icon-name">arrow_up_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_square_fill</i>
+  <span class="icon-name">arrow_up_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_to_line</i>
+  <span class="icon-name">arrow_up_to_line</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_up_to_line_alt</i>
+  <span class="icon-name">arrow_up_to_line_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_down</i>
+  <span class="icon-name">arrow_uturn_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_down_circle</i>
+  <span class="icon-name">arrow_uturn_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_down_circle_fill</i>
+  <span class="icon-name">arrow_uturn_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_down_square</i>
+  <span class="icon-name">arrow_uturn_down_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_down_square_fill</i>
+  <span class="icon-name">arrow_uturn_down_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_left</i>
+  <span class="icon-name">arrow_uturn_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_left_circle</i>
+  <span class="icon-name">arrow_uturn_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_left_circle_fill</i>
+  <span class="icon-name">arrow_uturn_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_left_square</i>
+  <span class="icon-name">arrow_uturn_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_left_square_fill</i>
+  <span class="icon-name">arrow_uturn_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_right</i>
+  <span class="icon-name">arrow_uturn_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_right_circle</i>
+  <span class="icon-name">arrow_uturn_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_right_circle_fill</i>
+  <span class="icon-name">arrow_uturn_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_right_square</i>
+  <span class="icon-name">arrow_uturn_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_right_square_fill</i>
+  <span class="icon-name">arrow_uturn_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_up</i>
+  <span class="icon-name">arrow_uturn_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_up_circle</i>
+  <span class="icon-name">arrow_uturn_up_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_up_circle_fill</i>
+  <span class="icon-name">arrow_uturn_up_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_up_square</i>
+  <span class="icon-name">arrow_uturn_up_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrow_uturn_up_square_fill</i>
+  <span class="icon-name">arrow_uturn_up_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_left</i>
+  <span class="icon-name">arrowshape_turn_up_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_left_2</i>
+  <span class="icon-name">arrowshape_turn_up_left_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_left_2_fill</i>
+  <span class="icon-name">arrowshape_turn_up_left_2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_left_circle</i>
+  <span class="icon-name">arrowshape_turn_up_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_left_circle_fill</i>
+  <span class="icon-name">arrowshape_turn_up_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_left_fill</i>
+  <span class="icon-name">arrowshape_turn_up_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_right</i>
+  <span class="icon-name">arrowshape_turn_up_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_right_circle</i>
+  <span class="icon-name">arrowshape_turn_up_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_right_circle_fill</i>
+  <span class="icon-name">arrowshape_turn_up_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowshape_turn_up_right_fill</i>
+  <span class="icon-name">arrowshape_turn_up_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_down</i>
+  <span class="icon-name">arrowtriangle_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_down_circle</i>
+  <span class="icon-name">arrowtriangle_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_down_circle_fill</i>
+  <span class="icon-name">arrowtriangle_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_down_fill</i>
+  <span class="icon-name">arrowtriangle_down_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_down_square</i>
+  <span class="icon-name">arrowtriangle_down_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_down_square_fill</i>
+  <span class="icon-name">arrowtriangle_down_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_left</i>
+  <span class="icon-name">arrowtriangle_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_left_circle</i>
+  <span class="icon-name">arrowtriangle_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_left_circle_fill</i>
+  <span class="icon-name">arrowtriangle_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_left_fill</i>
+  <span class="icon-name">arrowtriangle_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_left_square</i>
+  <span class="icon-name">arrowtriangle_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_left_square_fill</i>
+  <span class="icon-name">arrowtriangle_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_right</i>
+  <span class="icon-name">arrowtriangle_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_right_circle</i>
+  <span class="icon-name">arrowtriangle_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_right_circle_fill</i>
+  <span class="icon-name">arrowtriangle_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_right_fill</i>
+  <span class="icon-name">arrowtriangle_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_right_square</i>
+  <span class="icon-name">arrowtriangle_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_right_square_fill</i>
+  <span class="icon-name">arrowtriangle_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_up</i>
+  <span class="icon-name">arrowtriangle_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_up_circle</i>
+  <span class="icon-name">arrowtriangle_up_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_up_circle_fill</i>
+  <span class="icon-name">arrowtriangle_up_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_up_fill</i>
+  <span class="icon-name">arrowtriangle_up_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_up_square</i>
+  <span class="icon-name">arrowtriangle_up_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">arrowtriangle_up_square_fill</i>
+  <span class="icon-name">arrowtriangle_up_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">asterisk_circle</i>
+  <span class="icon-name">asterisk_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">asterisk_circle_fill</i>
+  <span class="icon-name">asterisk_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">at</i>
+  <span class="icon-name">at</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">at_badge_minus</i>
+  <span class="icon-name">at_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">at_badge_plus</i>
+  <span class="icon-name">at_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">at_circle</i>
+  <span class="icon-name">at_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">at_circle_fill</i>
+  <span class="icon-name">at_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">backward</i>
+  <span class="icon-name">backward</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">backward_end</i>
+  <span class="icon-name">backward_end</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">backward_end_alt</i>
+  <span class="icon-name">backward_end_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">backward_end_alt_fill</i>
+  <span class="icon-name">backward_end_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">backward_end_fill</i>
+  <span class="icon-name">backward_end_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">backward_fill</i>
+  <span class="icon-name">backward_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">badge_plus_radiowaves_right</i>
+  <span class="icon-name">badge_plus_radiowaves_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bag</i>
+  <span class="icon-name">bag</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bag_badge_minus</i>
+  <span class="icon-name">bag_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bag_badge_plus</i>
+  <span class="icon-name">bag_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bag_fill</i>
+  <span class="icon-name">bag_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bag_fill_badge_minus</i>
+  <span class="icon-name">bag_fill_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bag_fill_badge_plus</i>
+  <span class="icon-name">bag_fill_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bandage</i>
+  <span class="icon-name">bandage</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bandage_fill</i>
+  <span class="icon-name">bandage_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">barcode</i>
+  <span class="icon-name">barcode</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">barcode_viewfinder</i>
+  <span class="icon-name">barcode_viewfinder</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bars</i>
+  <span class="icon-name">bars</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">battery_0</i>
+  <span class="icon-name">battery_0</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">battery_100</i>
+  <span class="icon-name">battery_100</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">battery_25</i>
+  <span class="icon-name">battery_25</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bed_double</i>
+  <span class="icon-name">bed_double</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bed_double_fill</i>
+  <span class="icon-name">bed_double_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bell</i>
+  <span class="icon-name">bell</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bell_circle</i>
+  <span class="icon-name">bell_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bell_circle_fill</i>
+  <span class="icon-name">bell_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bell_fill</i>
+  <span class="icon-name">bell_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bell_slash</i>
+  <span class="icon-name">bell_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bell_slash_fill</i>
+  <span class="icon-name">bell_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bin_xmark</i>
+  <span class="icon-name">bin_xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bin_xmark_fill</i>
+  <span class="icon-name">bin_xmark_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bitcoin</i>
+  <span class="icon-name">bitcoin</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bitcoin_circle</i>
+  <span class="icon-name">bitcoin_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bitcoin_circle_fill</i>
+  <span class="icon-name">bitcoin_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bluetooth</i>
+  <span class="icon-name">bluetooth</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bold</i>
+  <span class="icon-name">bold</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bold_italic_underline</i>
+  <span class="icon-name">bold_italic_underline</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bold_underline</i>
+  <span class="icon-name">bold_underline</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt</i>
+  <span class="icon-name">bolt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_badge_a</i>
+  <span class="icon-name">bolt_badge_a</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_badge_a_fill</i>
+  <span class="icon-name">bolt_badge_a_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_circle</i>
+  <span class="icon-name">bolt_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_circle_fill</i>
+  <span class="icon-name">bolt_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_fill</i>
+  <span class="icon-name">bolt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_horizontal</i>
+  <span class="icon-name">bolt_horizontal</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_horizontal_circle</i>
+  <span class="icon-name">bolt_horizontal_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_horizontal_circle_fill</i>
+  <span class="icon-name">bolt_horizontal_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_horizontal_fill</i>
+  <span class="icon-name">bolt_horizontal_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_slash</i>
+  <span class="icon-name">bolt_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bolt_slash_fill</i>
+  <span class="icon-name">bolt_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">book</i>
+  <span class="icon-name">book</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">book_circle</i>
+  <span class="icon-name">book_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">book_circle_fill</i>
+  <span class="icon-name">book_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">book_fill</i>
+  <span class="icon-name">book_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bookmark</i>
+  <span class="icon-name">bookmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bookmark_fill</i>
+  <span class="icon-name">bookmark_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">briefcase</i>
+  <span class="icon-name">briefcase</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">briefcase_fill</i>
+  <span class="icon-name">briefcase_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_left</i>
+  <span class="icon-name">bubble_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_left_bubble_right</i>
+  <span class="icon-name">bubble_left_bubble_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_left_bubble_right_fill</i>
+  <span class="icon-name">bubble_left_bubble_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_left_fill</i>
+  <span class="icon-name">bubble_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_middle_bottom</i>
+  <span class="icon-name">bubble_middle_bottom</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_middle_bottom_fill</i>
+  <span class="icon-name">bubble_middle_bottom_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_middle_top</i>
+  <span class="icon-name">bubble_middle_top</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_middle_top_fill</i>
+  <span class="icon-name">bubble_middle_top_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_right</i>
+  <span class="icon-name">bubble_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bubble_right_fill</i>
+  <span class="icon-name">bubble_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">building_2_fill</i>
+  <span class="icon-name">building_2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">burn</i>
+  <span class="icon-name">burn</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">burst</i>
+  <span class="icon-name">burst</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">burst_fill</i>
+  <span class="icon-name">burst_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">bus</i>
+  <span class="icon-name">bus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">calendar</i>
+  <span class="icon-name">calendar</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">calendar_badge_minus</i>
+  <span class="icon-name">calendar_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">calendar_badge_plus</i>
+  <span class="icon-name">calendar_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">calendar_circle</i>
+  <span class="icon-name">calendar_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">calendar_circle_fill</i>
+  <span class="icon-name">calendar_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">calendar_today</i>
+  <span class="icon-name">calendar_today</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera</i>
+  <span class="icon-name">camera</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_circle</i>
+  <span class="icon-name">camera_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_circle_fill</i>
+  <span class="icon-name">camera_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_fill</i>
+  <span class="icon-name">camera_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_on_rectangle</i>
+  <span class="icon-name">camera_on_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_on_rectangle_fill</i>
+  <span class="icon-name">camera_on_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_rotate</i>
+  <span class="icon-name">camera_rotate</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_rotate_fill</i>
+  <span class="icon-name">camera_rotate_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">camera_viewfinder</i>
+  <span class="icon-name">camera_viewfinder</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">capslock</i>
+  <span class="icon-name">capslock</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">capslock_fill</i>
+  <span class="icon-name">capslock_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">capsule</i>
+  <span class="icon-name">capsule</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">capsule_fill</i>
+  <span class="icon-name">capsule_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">captions_bubble</i>
+  <span class="icon-name">captions_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">captions_bubble_fill</i>
+  <span class="icon-name">captions_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">car</i>
+  <span class="icon-name">car</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">car_detailed</i>
+  <span class="icon-name">car_detailed</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">car_fill</i>
+  <span class="icon-name">car_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cart</i>
+  <span class="icon-name">cart</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cart_badge_minus</i>
+  <span class="icon-name">cart_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cart_badge_plus</i>
+  <span class="icon-name">cart_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cart_fill</i>
+  <span class="icon-name">cart_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cart_fill_badge_minus</i>
+  <span class="icon-name">cart_fill_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cart_fill_badge_plus</i>
+  <span class="icon-name">cart_fill_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar</i>
+  <span class="icon-name">chart_bar</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar_alt_fill</i>
+  <span class="icon-name">chart_bar_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar_circle</i>
+  <span class="icon-name">chart_bar_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar_circle_fill</i>
+  <span class="icon-name">chart_bar_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar_fill</i>
+  <span class="icon-name">chart_bar_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar_square</i>
+  <span class="icon-name">chart_bar_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_bar_square_fill</i>
+  <span class="icon-name">chart_bar_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_pie</i>
+  <span class="icon-name">chart_pie</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chart_pie_fill</i>
+  <span class="icon-name">chart_pie_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chat_bubble</i>
+  <span class="icon-name">chat_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chat_bubble_2</i>
+  <span class="icon-name">chat_bubble_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chat_bubble_2_fill</i>
+  <span class="icon-name">chat_bubble_2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chat_bubble_fill</i>
+  <span class="icon-name">chat_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chat_bubble_text</i>
+  <span class="icon-name">chat_bubble_text</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chat_bubble_text_fill</i>
+  <span class="icon-name">chat_bubble_text_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark</i>
+  <span class="icon-name">checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_alt</i>
+  <span class="icon-name">checkmark_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_alt_circle</i>
+  <span class="icon-name">checkmark_alt_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_alt_circle_fill</i>
+  <span class="icon-name">checkmark_alt_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_circle</i>
+  <span class="icon-name">checkmark_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_circle_fill</i>
+  <span class="icon-name">checkmark_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_rectangle</i>
+  <span class="icon-name">checkmark_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_rectangle_fill</i>
+  <span class="icon-name">checkmark_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_seal</i>
+  <span class="icon-name">checkmark_seal</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_seal_fill</i>
+  <span class="icon-name">checkmark_seal_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_shield</i>
+  <span class="icon-name">checkmark_shield</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_shield_fill</i>
+  <span class="icon-name">checkmark_shield_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_square</i>
+  <span class="icon-name">checkmark_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">checkmark_square_fill</i>
+  <span class="icon-name">checkmark_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_back</i>
+  <span class="icon-name">chevron_back</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_compact_down</i>
+  <span class="icon-name">chevron_compact_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_compact_left</i>
+  <span class="icon-name">chevron_compact_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_compact_right</i>
+  <span class="icon-name">chevron_compact_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_compact_up</i>
+  <span class="icon-name">chevron_compact_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_down</i>
+  <span class="icon-name">chevron_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_down_circle</i>
+  <span class="icon-name">chevron_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_down_circle_fill</i>
+  <span class="icon-name">chevron_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_down_square</i>
+  <span class="icon-name">chevron_down_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_down_square_fill</i>
+  <span class="icon-name">chevron_down_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_forward</i>
+  <span class="icon-name">chevron_forward</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left</i>
+  <span class="icon-name">chevron_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left_2</i>
+  <span class="icon-name">chevron_left_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left_circle</i>
+  <span class="icon-name">chevron_left_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left_circle_fill</i>
+  <span class="icon-name">chevron_left_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left_slash_chevron_right</i>
+  <span class="icon-name">chevron_left_slash_chevron_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left_square</i>
+  <span class="icon-name">chevron_left_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_left_square_fill</i>
+  <span class="icon-name">chevron_left_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_right</i>
+  <span class="icon-name">chevron_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_right_2</i>
+  <span class="icon-name">chevron_right_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_right_circle</i>
+  <span class="icon-name">chevron_right_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_right_circle_fill</i>
+  <span class="icon-name">chevron_right_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_right_square</i>
+  <span class="icon-name">chevron_right_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_right_square_fill</i>
+  <span class="icon-name">chevron_right_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_up</i>
+  <span class="icon-name">chevron_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_up_chevron_down</i>
+  <span class="icon-name">chevron_up_chevron_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_up_circle</i>
+  <span class="icon-name">chevron_up_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_up_circle_fill</i>
+  <span class="icon-name">chevron_up_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_up_square</i>
+  <span class="icon-name">chevron_up_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">chevron_up_square_fill</i>
+  <span class="icon-name">chevron_up_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle</i>
+  <span class="icon-name">circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_bottomthird_split</i>
+  <span class="icon-name">circle_bottomthird_split</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_fill</i>
+  <span class="icon-name">circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_grid_3x3</i>
+  <span class="icon-name">circle_grid_3x3</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_grid_3x3_fill</i>
+  <span class="icon-name">circle_grid_3x3_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_grid_hex</i>
+  <span class="icon-name">circle_grid_hex</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_grid_hex_fill</i>
+  <span class="icon-name">circle_grid_hex_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_lefthalf_fill</i>
+  <span class="icon-name">circle_lefthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">circle_righthalf_fill</i>
+  <span class="icon-name">circle_righthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">clear</i>
+  <span class="icon-name">clear</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">clear_fill</i>
+  <span class="icon-name">clear_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">clock</i>
+  <span class="icon-name">clock</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">clock_fill</i>
+  <span class="icon-name">clock_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud</i>
+  <span class="icon-name">cloud</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_bolt</i>
+  <span class="icon-name">cloud_bolt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_bolt_fill</i>
+  <span class="icon-name">cloud_bolt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_bolt_rain</i>
+  <span class="icon-name">cloud_bolt_rain</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_bolt_rain_fill</i>
+  <span class="icon-name">cloud_bolt_rain_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_download</i>
+  <span class="icon-name">cloud_download</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_download_fill</i>
+  <span class="icon-name">cloud_download_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_drizzle</i>
+  <span class="icon-name">cloud_drizzle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_drizzle_fill</i>
+  <span class="icon-name">cloud_drizzle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_fill</i>
+  <span class="icon-name">cloud_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_fog</i>
+  <span class="icon-name">cloud_fog</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_fog_fill</i>
+  <span class="icon-name">cloud_fog_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_hail</i>
+  <span class="icon-name">cloud_hail</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_hail_fill</i>
+  <span class="icon-name">cloud_hail_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_heavyrain</i>
+  <span class="icon-name">cloud_heavyrain</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_heavyrain_fill</i>
+  <span class="icon-name">cloud_heavyrain_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_moon</i>
+  <span class="icon-name">cloud_moon</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_moon_bolt</i>
+  <span class="icon-name">cloud_moon_bolt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_moon_bolt_fill</i>
+  <span class="icon-name">cloud_moon_bolt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_moon_fill</i>
+  <span class="icon-name">cloud_moon_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_moon_rain</i>
+  <span class="icon-name">cloud_moon_rain</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_moon_rain_fill</i>
+  <span class="icon-name">cloud_moon_rain_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_rain</i>
+  <span class="icon-name">cloud_rain</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_rain_fill</i>
+  <span class="icon-name">cloud_rain_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sleet</i>
+  <span class="icon-name">cloud_sleet</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sleet_fill</i>
+  <span class="icon-name">cloud_sleet_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_snow</i>
+  <span class="icon-name">cloud_snow</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_snow_fill</i>
+  <span class="icon-name">cloud_snow_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sun</i>
+  <span class="icon-name">cloud_sun</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sun_bolt</i>
+  <span class="icon-name">cloud_sun_bolt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sun_bolt_fill</i>
+  <span class="icon-name">cloud_sun_bolt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sun_fill</i>
+  <span class="icon-name">cloud_sun_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sun_rain</i>
+  <span class="icon-name">cloud_sun_rain</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_sun_rain_fill</i>
+  <span class="icon-name">cloud_sun_rain_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_upload</i>
+  <span class="icon-name">cloud_upload</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cloud_upload_fill</i>
+  <span class="icon-name">cloud_upload_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">color_filter</i>
+  <span class="icon-name">color_filter</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">color_filter_fill</i>
+  <span class="icon-name">color_filter_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">command</i>
+  <span class="icon-name">command</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">compass</i>
+  <span class="icon-name">compass</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">compass_fill</i>
+  <span class="icon-name">compass_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">control</i>
+  <span class="icon-name">control</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">creditcard</i>
+  <span class="icon-name">creditcard</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">creditcard_fill</i>
+  <span class="icon-name">creditcard_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">crop</i>
+  <span class="icon-name">crop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">crop_rotate</i>
+  <span class="icon-name">crop_rotate</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cube</i>
+  <span class="icon-name">cube</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cube_box</i>
+  <span class="icon-name">cube_box</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cube_box_fill</i>
+  <span class="icon-name">cube_box_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cube_fill</i>
+  <span class="icon-name">cube_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">cursor_rays</i>
+  <span class="icon-name">cursor_rays</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">decrease_indent</i>
+  <span class="icon-name">decrease_indent</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">decrease_quotelevel</i>
+  <span class="icon-name">decrease_quotelevel</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">delete_left</i>
+  <span class="icon-name">delete_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">delete_left_fill</i>
+  <span class="icon-name">delete_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">delete_right</i>
+  <span class="icon-name">delete_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">delete_right_fill</i>
+  <span class="icon-name">delete_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">desktopcomputer</i>
+  <span class="icon-name">desktopcomputer</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">device_desktop</i>
+  <span class="icon-name">device_desktop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">device_laptop</i>
+  <span class="icon-name">device_laptop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">device_phone_landscape</i>
+  <span class="icon-name">device_phone_landscape</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">device_phone_portrait</i>
+  <span class="icon-name">device_phone_portrait</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">dial</i>
+  <span class="icon-name">dial</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">dial_fill</i>
+  <span class="icon-name">dial_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">divide</i>
+  <span class="icon-name">divide</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">divide_circle</i>
+  <span class="icon-name">divide_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">divide_circle_fill</i>
+  <span class="icon-name">divide_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">divide_square</i>
+  <span class="icon-name">divide_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">divide_square_fill</i>
+  <span class="icon-name">divide_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc</i>
+  <span class="icon-name">doc</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_append</i>
+  <span class="icon-name">doc_append</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_chart</i>
+  <span class="icon-name">doc_chart</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_chart_fill</i>
+  <span class="icon-name">doc_chart_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_checkmark</i>
+  <span class="icon-name">doc_checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_checkmark_fill</i>
+  <span class="icon-name">doc_checkmark_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_circle</i>
+  <span class="icon-name">doc_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_circle_fill</i>
+  <span class="icon-name">doc_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_fill</i>
+  <span class="icon-name">doc_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_on_clipboard</i>
+  <span class="icon-name">doc_on_clipboard</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_on_clipboard_fill</i>
+  <span class="icon-name">doc_on_clipboard_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_on_doc</i>
+  <span class="icon-name">doc_on_doc</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_on_doc_fill</i>
+  <span class="icon-name">doc_on_doc_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_person</i>
+  <span class="icon-name">doc_person</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_person_fill</i>
+  <span class="icon-name">doc_person_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_plaintext</i>
+  <span class="icon-name">doc_plaintext</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_richtext</i>
+  <span class="icon-name">doc_richtext</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_text</i>
+  <span class="icon-name">doc_text</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_text_fill</i>
+  <span class="icon-name">doc_text_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_text_search</i>
+  <span class="icon-name">doc_text_search</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">doc_text_viewfinder</i>
+  <span class="icon-name">doc_text_viewfinder</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">dot_radiowaves_left_right</i>
+  <span class="icon-name">dot_radiowaves_left_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">dot_radiowaves_right</i>
+  <span class="icon-name">dot_radiowaves_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">dot_square</i>
+  <span class="icon-name">dot_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">dot_square_fill</i>
+  <span class="icon-name">dot_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">download_circle</i>
+  <span class="icon-name">download_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">download_circle_fill</i>
+  <span class="icon-name">download_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">drop</i>
+  <span class="icon-name">drop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">drop_fill</i>
+  <span class="icon-name">drop_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">drop_triangle</i>
+  <span class="icon-name">drop_triangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">drop_triangle_fill</i>
+  <span class="icon-name">drop_triangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ear</i>
+  <span class="icon-name">ear</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eject</i>
+  <span class="icon-name">eject</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eject_fill</i>
+  <span class="icon-name">eject_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipses_bubble</i>
+  <span class="icon-name">ellipses_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipses_bubble_fill</i>
+  <span class="icon-name">ellipses_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipsis</i>
+  <span class="icon-name">ellipsis</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipsis_circle</i>
+  <span class="icon-name">ellipsis_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipsis_circle_fill</i>
+  <span class="icon-name">ellipsis_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipsis_vertical</i>
+  <span class="icon-name">ellipsis_vertical</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipsis_vertical_circle</i>
+  <span class="icon-name">ellipsis_vertical_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ellipsis_vertical_circle_fill</i>
+  <span class="icon-name">ellipsis_vertical_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope</i>
+  <span class="icon-name">envelope</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_badge</i>
+  <span class="icon-name">envelope_badge</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_badge_fill</i>
+  <span class="icon-name">envelope_badge_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_circle</i>
+  <span class="icon-name">envelope_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_circle_fill</i>
+  <span class="icon-name">envelope_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_fill</i>
+  <span class="icon-name">envelope_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_open</i>
+  <span class="icon-name">envelope_open</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">envelope_open_fill</i>
+  <span class="icon-name">envelope_open_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">equal</i>
+  <span class="icon-name">equal</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">equal_circle</i>
+  <span class="icon-name">equal_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">equal_circle_fill</i>
+  <span class="icon-name">equal_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">equal_square</i>
+  <span class="icon-name">equal_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">equal_square_fill</i>
+  <span class="icon-name">equal_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">escape</i>
+  <span class="icon-name">escape</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark</i>
+  <span class="icon-name">exclamationmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_bubble</i>
+  <span class="icon-name">exclamationmark_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_bubble_fill</i>
+  <span class="icon-name">exclamationmark_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_circle</i>
+  <span class="icon-name">exclamationmark_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_circle_fill</i>
+  <span class="icon-name">exclamationmark_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_octagon</i>
+  <span class="icon-name">exclamationmark_octagon</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_octagon_fill</i>
+  <span class="icon-name">exclamationmark_octagon_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_shield</i>
+  <span class="icon-name">exclamationmark_shield</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_shield_fill</i>
+  <span class="icon-name">exclamationmark_shield_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_square</i>
+  <span class="icon-name">exclamationmark_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_square_fill</i>
+  <span class="icon-name">exclamationmark_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_triangle</i>
+  <span class="icon-name">exclamationmark_triangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">exclamationmark_triangle_fill</i>
+  <span class="icon-name">exclamationmark_triangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eye</i>
+  <span class="icon-name">eye</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eye_fill</i>
+  <span class="icon-name">eye_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eye_slash</i>
+  <span class="icon-name">eye_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eye_slash_fill</i>
+  <span class="icon-name">eye_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eyedropper</i>
+  <span class="icon-name">eyedropper</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eyedropper_full</i>
+  <span class="icon-name">eyedropper_full</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eyedropper_halffull</i>
+  <span class="icon-name">eyedropper_halffull</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">eyeglasses</i>
+  <span class="icon-name">eyeglasses</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">f_cursive</i>
+  <span class="icon-name">f_cursive</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">f_cursive_circle</i>
+  <span class="icon-name">f_cursive_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">f_cursive_circle_fill</i>
+  <span class="icon-name">f_cursive_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">film</i>
+  <span class="icon-name">film</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">film_fill</i>
+  <span class="icon-name">film_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flag</i>
+  <span class="icon-name">flag</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flag_circle</i>
+  <span class="icon-name">flag_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flag_circle_fill</i>
+  <span class="icon-name">flag_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flag_fill</i>
+  <span class="icon-name">flag_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flag_slash</i>
+  <span class="icon-name">flag_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flag_slash_fill</i>
+  <span class="icon-name">flag_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flame</i>
+  <span class="icon-name">flame</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flame_fill</i>
+  <span class="icon-name">flame_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">floppy_disk</i>
+  <span class="icon-name">floppy_disk</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flowchart</i>
+  <span class="icon-name">flowchart</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">flowchart_fill</i>
+  <span class="icon-name">flowchart_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder</i>
+  <span class="icon-name">folder</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_badge_minus</i>
+  <span class="icon-name">folder_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_badge_person_crop</i>
+  <span class="icon-name">folder_badge_person_crop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_badge_plus</i>
+  <span class="icon-name">folder_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_circle</i>
+  <span class="icon-name">folder_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_circle_fill</i>
+  <span class="icon-name">folder_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_fill</i>
+  <span class="icon-name">folder_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_fill_badge_minus</i>
+  <span class="icon-name">folder_fill_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_fill_badge_person_crop</i>
+  <span class="icon-name">folder_fill_badge_person_crop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">folder_fill_badge_plus</i>
+  <span class="icon-name">folder_fill_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">forward</i>
+  <span class="icon-name">forward</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">forward_end</i>
+  <span class="icon-name">forward_end</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">forward_end_alt</i>
+  <span class="icon-name">forward_end_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">forward_end_alt_fill</i>
+  <span class="icon-name">forward_end_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">forward_end_fill</i>
+  <span class="icon-name">forward_end_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">forward_fill</i>
+  <span class="icon-name">forward_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">function</i>
+  <span class="icon-name">function</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">fx</i>
+  <span class="icon-name">fx</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gamecontroller</i>
+  <span class="icon-name">gamecontroller</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gamecontroller_alt_fill</i>
+  <span class="icon-name">gamecontroller_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gamecontroller_fill</i>
+  <span class="icon-name">gamecontroller_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gauge</i>
+  <span class="icon-name">gauge</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gauge_badge_minus</i>
+  <span class="icon-name">gauge_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gauge_badge_plus</i>
+  <span class="icon-name">gauge_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gear</i>
+  <span class="icon-name">gear</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gear_alt</i>
+  <span class="icon-name">gear_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gear_alt_fill</i>
+  <span class="icon-name">gear_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gift</i>
+  <span class="icon-name">gift</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gift_alt</i>
+  <span class="icon-name">gift_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gift_alt_fill</i>
+  <span class="icon-name">gift_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gift_fill</i>
+  <span class="icon-name">gift_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">globe</i>
+  <span class="icon-name">globe</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward</i>
+  <span class="icon-name">gobackward</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_10</i>
+  <span class="icon-name">gobackward_10</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_15</i>
+  <span class="icon-name">gobackward_15</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_30</i>
+  <span class="icon-name">gobackward_30</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_45</i>
+  <span class="icon-name">gobackward_45</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_60</i>
+  <span class="icon-name">gobackward_60</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_75</i>
+  <span class="icon-name">gobackward_75</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_90</i>
+  <span class="icon-name">gobackward_90</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">gobackward_minus</i>
+  <span class="icon-name">gobackward_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward</i>
+  <span class="icon-name">goforward</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_10</i>
+  <span class="icon-name">goforward_10</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_15</i>
+  <span class="icon-name">goforward_15</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_30</i>
+  <span class="icon-name">goforward_30</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_45</i>
+  <span class="icon-name">goforward_45</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_60</i>
+  <span class="icon-name">goforward_60</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_75</i>
+  <span class="icon-name">goforward_75</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_90</i>
+  <span class="icon-name">goforward_90</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">goforward_plus</i>
+  <span class="icon-name">goforward_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">graph_circle</i>
+  <span class="icon-name">graph_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">graph_circle_fill</i>
+  <span class="icon-name">graph_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">graph_square</i>
+  <span class="icon-name">graph_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">graph_square_fill</i>
+  <span class="icon-name">graph_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">greaterthan</i>
+  <span class="icon-name">greaterthan</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">greaterthan_circle</i>
+  <span class="icon-name">greaterthan_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">greaterthan_circle_fill</i>
+  <span class="icon-name">greaterthan_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">greaterthan_square</i>
+  <span class="icon-name">greaterthan_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">greaterthan_square_fill</i>
+  <span class="icon-name">greaterthan_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">grid</i>
+  <span class="icon-name">grid</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">grid_circle</i>
+  <span class="icon-name">grid_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">grid_circle_fill</i>
+  <span class="icon-name">grid_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">guitars</i>
+  <span class="icon-name">guitars</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hammer</i>
+  <span class="icon-name">hammer</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hammer_fill</i>
+  <span class="icon-name">hammer_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_draw</i>
+  <span class="icon-name">hand_draw</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_draw_fill</i>
+  <span class="icon-name">hand_draw_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_point_left</i>
+  <span class="icon-name">hand_point_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_point_left_fill</i>
+  <span class="icon-name">hand_point_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_point_right</i>
+  <span class="icon-name">hand_point_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_point_right_fill</i>
+  <span class="icon-name">hand_point_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_raised</i>
+  <span class="icon-name">hand_raised</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_raised_fill</i>
+  <span class="icon-name">hand_raised_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_raised_slash</i>
+  <span class="icon-name">hand_raised_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_raised_slash_fill</i>
+  <span class="icon-name">hand_raised_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_thumbsdown</i>
+  <span class="icon-name">hand_thumbsdown</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_thumbsdown_fill</i>
+  <span class="icon-name">hand_thumbsdown_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_thumbsup</i>
+  <span class="icon-name">hand_thumbsup</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hand_thumbsup_fill</i>
+  <span class="icon-name">hand_thumbsup_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hare</i>
+  <span class="icon-name">hare</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hare_fill</i>
+  <span class="icon-name">hare_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">headphones</i>
+  <span class="icon-name">headphones</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart</i>
+  <span class="icon-name">heart</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_circle</i>
+  <span class="icon-name">heart_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_circle_fill</i>
+  <span class="icon-name">heart_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_fill</i>
+  <span class="icon-name">heart_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_slash</i>
+  <span class="icon-name">heart_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_slash_circle</i>
+  <span class="icon-name">heart_slash_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_slash_circle_fill</i>
+  <span class="icon-name">heart_slash_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">heart_slash_fill</i>
+  <span class="icon-name">heart_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">helm</i>
+  <span class="icon-name">helm</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hexagon</i>
+  <span class="icon-name">hexagon</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hexagon_fill</i>
+  <span class="icon-name">hexagon_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hifispeaker</i>
+  <span class="icon-name">hifispeaker</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hifispeaker_fill</i>
+  <span class="icon-name">hifispeaker_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hourglass</i>
+  <span class="icon-name">hourglass</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hourglass_bottomhalf_fill</i>
+  <span class="icon-name">hourglass_bottomhalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hourglass_tophalf_fill</i>
+  <span class="icon-name">hourglass_tophalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">house</i>
+  <span class="icon-name">house</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">house_alt</i>
+  <span class="icon-name">house_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">house_alt_fill</i>
+  <span class="icon-name">house_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">house_fill</i>
+  <span class="icon-name">house_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">hurricane</i>
+  <span class="icon-name">hurricane</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">increase_indent</i>
+  <span class="icon-name">increase_indent</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">increase_quotelevel</i>
+  <span class="icon-name">increase_quotelevel</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">infinite</i>
+  <span class="icon-name">infinite</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">info</i>
+  <span class="icon-name">info</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">info_circle</i>
+  <span class="icon-name">info_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">info_circle_fill</i>
+  <span class="icon-name">info_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">italic</i>
+  <span class="icon-name">italic</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">keyboard</i>
+  <span class="icon-name">keyboard</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">keyboard_chevron_compact_down</i>
+  <span class="icon-name">keyboard_chevron_compact_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lab_flask</i>
+  <span class="icon-name">lab_flask</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lab_flask_solid</i>
+  <span class="icon-name">lab_flask_solid</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">largecircle_fill_circle</i>
+  <span class="icon-name">largecircle_fill_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lasso</i>
+  <span class="icon-name">lasso</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">layers</i>
+  <span class="icon-name">layers</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">layers_alt</i>
+  <span class="icon-name">layers_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">layers_alt_fill</i>
+  <span class="icon-name">layers_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">layers_fill</i>
+  <span class="icon-name">layers_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">leaf_arrow_circlepath</i>
+  <span class="icon-name">leaf_arrow_circlepath</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lessthan</i>
+  <span class="icon-name">lessthan</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lessthan_circle</i>
+  <span class="icon-name">lessthan_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lessthan_circle_fill</i>
+  <span class="icon-name">lessthan_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lessthan_square</i>
+  <span class="icon-name">lessthan_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lessthan_square_fill</i>
+  <span class="icon-name">lessthan_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">light_max</i>
+  <span class="icon-name">light_max</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">light_min</i>
+  <span class="icon-name">light_min</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lightbulb</i>
+  <span class="icon-name">lightbulb</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lightbulb_fill</i>
+  <span class="icon-name">lightbulb_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lightbulb_slash</i>
+  <span class="icon-name">lightbulb_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lightbulb_slash_fill</i>
+  <span class="icon-name">lightbulb_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">line_horizontal_3</i>
+  <span class="icon-name">line_horizontal_3</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">line_horizontal_3_decrease</i>
+  <span class="icon-name">line_horizontal_3_decrease</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">line_horizontal_3_decrease_circle</i>
+  <span class="icon-name">line_horizontal_3_decrease_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">line_horizontal_3_decrease_circle_fill</i>
+  <span class="icon-name">line_horizontal_3_decrease_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">link</i>
+  <span class="icon-name">link</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">link_circle</i>
+  <span class="icon-name">link_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">link_circle_fill</i>
+  <span class="icon-name">link_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">list_bullet</i>
+  <span class="icon-name">list_bullet</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">list_bullet_below_rectangle</i>
+  <span class="icon-name">list_bullet_below_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">list_bullet_indent</i>
+  <span class="icon-name">list_bullet_indent</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">list_dash</i>
+  <span class="icon-name">list_dash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">list_number</i>
+  <span class="icon-name">list_number</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">list_number_rtl</i>
+  <span class="icon-name">list_number_rtl</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location</i>
+  <span class="icon-name">location</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_circle</i>
+  <span class="icon-name">location_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_circle_fill</i>
+  <span class="icon-name">location_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_fill</i>
+  <span class="icon-name">location_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_north</i>
+  <span class="icon-name">location_north</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_north_fill</i>
+  <span class="icon-name">location_north_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_north_line</i>
+  <span class="icon-name">location_north_line</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_north_line_fill</i>
+  <span class="icon-name">location_north_line_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_slash</i>
+  <span class="icon-name">location_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">location_slash_fill</i>
+  <span class="icon-name">location_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock</i>
+  <span class="icon-name">lock</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_circle</i>
+  <span class="icon-name">lock_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_circle_fill</i>
+  <span class="icon-name">lock_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_fill</i>
+  <span class="icon-name">lock_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_open</i>
+  <span class="icon-name">lock_open</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_open_fill</i>
+  <span class="icon-name">lock_open_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_rotation</i>
+  <span class="icon-name">lock_rotation</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_rotation_open</i>
+  <span class="icon-name">lock_rotation_open</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_shield</i>
+  <span class="icon-name">lock_shield</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_shield_fill</i>
+  <span class="icon-name">lock_shield_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_slash</i>
+  <span class="icon-name">lock_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">lock_slash_fill</i>
+  <span class="icon-name">lock_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">macwindow</i>
+  <span class="icon-name">macwindow</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">map</i>
+  <span class="icon-name">map</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">map_fill</i>
+  <span class="icon-name">map_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">map_pin</i>
+  <span class="icon-name">map_pin</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">map_pin_ellipse</i>
+  <span class="icon-name">map_pin_ellipse</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">map_pin_slash</i>
+  <span class="icon-name">map_pin_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">memories</i>
+  <span class="icon-name">memories</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">memories_badge_minus</i>
+  <span class="icon-name">memories_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">memories_badge_plus</i>
+  <span class="icon-name">memories_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">metronome</i>
+  <span class="icon-name">metronome</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">mic</i>
+  <span class="icon-name">mic</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">mic_circle</i>
+  <span class="icon-name">mic_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">mic_circle_fill</i>
+  <span class="icon-name">mic_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">mic_fill</i>
+  <span class="icon-name">mic_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">mic_slash</i>
+  <span class="icon-name">mic_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">mic_slash_fill</i>
+  <span class="icon-name">mic_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus</i>
+  <span class="icon-name">minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_circle</i>
+  <span class="icon-name">minus_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_circle_fill</i>
+  <span class="icon-name">minus_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_rectangle</i>
+  <span class="icon-name">minus_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_rectangle_fill</i>
+  <span class="icon-name">minus_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_slash_plus</i>
+  <span class="icon-name">minus_slash_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_square</i>
+  <span class="icon-name">minus_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">minus_square_fill</i>
+  <span class="icon-name">minus_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_dollar</i>
+  <span class="icon-name">money_dollar</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_dollar_circle</i>
+  <span class="icon-name">money_dollar_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_dollar_circle_fill</i>
+  <span class="icon-name">money_dollar_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_euro</i>
+  <span class="icon-name">money_euro</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_euro_circle</i>
+  <span class="icon-name">money_euro_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_euro_circle_fill</i>
+  <span class="icon-name">money_euro_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_pound</i>
+  <span class="icon-name">money_pound</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_pound_circle</i>
+  <span class="icon-name">money_pound_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_pound_circle_fill</i>
+  <span class="icon-name">money_pound_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_rubl</i>
+  <span class="icon-name">money_rubl</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_rubl_circle</i>
+  <span class="icon-name">money_rubl_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_rubl_circle_fill</i>
+  <span class="icon-name">money_rubl_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_yen</i>
+  <span class="icon-name">money_yen</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_yen_circle</i>
+  <span class="icon-name">money_yen_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">money_yen_circle_fill</i>
+  <span class="icon-name">money_yen_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon</i>
+  <span class="icon-name">moon</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_circle</i>
+  <span class="icon-name">moon_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_circle_fill</i>
+  <span class="icon-name">moon_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_fill</i>
+  <span class="icon-name">moon_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_stars</i>
+  <span class="icon-name">moon_stars</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_stars_fill</i>
+  <span class="icon-name">moon_stars_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_zzz</i>
+  <span class="icon-name">moon_zzz</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">moon_zzz_fill</i>
+  <span class="icon-name">moon_zzz_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">move</i>
+  <span class="icon-name">move</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">multiply</i>
+  <span class="icon-name">multiply</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">multiply_circle</i>
+  <span class="icon-name">multiply_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">multiply_circle_fill</i>
+  <span class="icon-name">multiply_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">multiply_square</i>
+  <span class="icon-name">multiply_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">multiply_square_fill</i>
+  <span class="icon-name">multiply_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_albums</i>
+  <span class="icon-name">music_albums</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_albums_fill</i>
+  <span class="icon-name">music_albums_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_house</i>
+  <span class="icon-name">music_house</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_house_fill</i>
+  <span class="icon-name">music_house_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_mic</i>
+  <span class="icon-name">music_mic</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_note</i>
+  <span class="icon-name">music_note</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_note_2</i>
+  <span class="icon-name">music_note_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">music_note_list</i>
+  <span class="icon-name">music_note_list</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">news</i>
+  <span class="icon-name">news</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">news_solid</i>
+  <span class="icon-name">news_solid</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">nosign</i>
+  <span class="icon-name">nosign</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">number</i>
+  <span class="icon-name">number</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">number_circle</i>
+  <span class="icon-name">number_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">number_circle_fill</i>
+  <span class="icon-name">number_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">number_square</i>
+  <span class="icon-name">number_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">number_square_fill</i>
+  <span class="icon-name">number_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">option</i>
+  <span class="icon-name">option</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paintbrush</i>
+  <span class="icon-name">paintbrush</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paintbrush_fill</i>
+  <span class="icon-name">paintbrush_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pano</i>
+  <span class="icon-name">pano</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pano_fill</i>
+  <span class="icon-name">pano_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paperclip</i>
+  <span class="icon-name">paperclip</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paperplane</i>
+  <span class="icon-name">paperplane</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paperplane_fill</i>
+  <span class="icon-name">paperplane_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paragraph</i>
+  <span class="icon-name">paragraph</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pause</i>
+  <span class="icon-name">pause</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pause_circle</i>
+  <span class="icon-name">pause_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pause_circle_fill</i>
+  <span class="icon-name">pause_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pause_fill</i>
+  <span class="icon-name">pause_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pause_rectangle</i>
+  <span class="icon-name">pause_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pause_rectangle_fill</i>
+  <span class="icon-name">pause_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">paw</i>
+  <span class="icon-name">paw</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pencil</i>
+  <span class="icon-name">pencil</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pencil_circle</i>
+  <span class="icon-name">pencil_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pencil_circle_fill</i>
+  <span class="icon-name">pencil_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pencil_ellipsis_rectangle</i>
+  <span class="icon-name">pencil_ellipsis_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pencil_outline</i>
+  <span class="icon-name">pencil_outline</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pencil_slash</i>
+  <span class="icon-name">pencil_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">percent</i>
+  <span class="icon-name">percent</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person</i>
+  <span class="icon-name">person</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_2</i>
+  <span class="icon-name">person_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_2_alt</i>
+  <span class="icon-name">person_2_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_2_fill</i>
+  <span class="icon-name">person_2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_2_square_stack</i>
+  <span class="icon-name">person_2_square_stack</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_2_square_stack_fill</i>
+  <span class="icon-name">person_2_square_stack_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_3</i>
+  <span class="icon-name">person_3</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_3_fill</i>
+  <span class="icon-name">person_3_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_alt</i>
+  <span class="icon-name">person_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_alt_circle</i>
+  <span class="icon-name">person_alt_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_alt_circle_fill</i>
+  <span class="icon-name">person_alt_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_badge_minus</i>
+  <span class="icon-name">person_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_badge_minus_fill</i>
+  <span class="icon-name">person_badge_minus_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_badge_plus</i>
+  <span class="icon-name">person_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_badge_plus_fill</i>
+  <span class="icon-name">person_badge_plus_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_circle</i>
+  <span class="icon-name">person_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_circle_fill</i>
+  <span class="icon-name">person_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle</i>
+  <span class="icon-name">person_crop_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_badge_checkmark</i>
+  <span class="icon-name">person_crop_circle_badge_checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_badge_exclam</i>
+  <span class="icon-name">person_crop_circle_badge_exclam</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_badge_minus</i>
+  <span class="icon-name">person_crop_circle_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_badge_plus</i>
+  <span class="icon-name">person_crop_circle_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_badge_xmark</i>
+  <span class="icon-name">person_crop_circle_badge_xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_fill</i>
+  <span class="icon-name">person_crop_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_fill_badge_checkmark</i>
+  <span class="icon-name">person_crop_circle_fill_badge_checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_fill_badge_exclam</i>
+  <span class="icon-name">person_crop_circle_fill_badge_exclam</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_fill_badge_minus</i>
+  <span class="icon-name">person_crop_circle_fill_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_fill_badge_plus</i>
+  <span class="icon-name">person_crop_circle_fill_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_circle_fill_badge_xmark</i>
+  <span class="icon-name">person_crop_circle_fill_badge_xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_rectangle</i>
+  <span class="icon-name">person_crop_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_rectangle_fill</i>
+  <span class="icon-name">person_crop_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_square</i>
+  <span class="icon-name">person_crop_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_crop_square_fill</i>
+  <span class="icon-name">person_crop_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">person_fill</i>
+  <span class="icon-name">person_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">personalhotspot</i>
+  <span class="icon-name">personalhotspot</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">perspective</i>
+  <span class="icon-name">perspective</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone</i>
+  <span class="icon-name">phone</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_arrow_down_left</i>
+  <span class="icon-name">phone_arrow_down_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_arrow_right</i>
+  <span class="icon-name">phone_arrow_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_arrow_up_right</i>
+  <span class="icon-name">phone_arrow_up_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_badge_plus</i>
+  <span class="icon-name">phone_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_circle</i>
+  <span class="icon-name">phone_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_circle_fill</i>
+  <span class="icon-name">phone_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_down</i>
+  <span class="icon-name">phone_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_down_circle</i>
+  <span class="icon-name">phone_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_down_circle_fill</i>
+  <span class="icon-name">phone_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_down_fill</i>
+  <span class="icon-name">phone_down_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_fill</i>
+  <span class="icon-name">phone_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_fill_arrow_down_left</i>
+  <span class="icon-name">phone_fill_arrow_down_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_fill_arrow_right</i>
+  <span class="icon-name">phone_fill_arrow_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_fill_arrow_up_right</i>
+  <span class="icon-name">phone_fill_arrow_up_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">phone_fill_badge_plus</i>
+  <span class="icon-name">phone_fill_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">photo</i>
+  <span class="icon-name">photo</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">photo_fill</i>
+  <span class="icon-name">photo_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">photo_fill_on_rectangle_fill</i>
+  <span class="icon-name">photo_fill_on_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">photo_on_rectangle</i>
+  <span class="icon-name">photo_on_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">piano</i>
+  <span class="icon-name">piano</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pin</i>
+  <span class="icon-name">pin</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pin_fill</i>
+  <span class="icon-name">pin_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pin_slash</i>
+  <span class="icon-name">pin_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">pin_slash_fill</i>
+  <span class="icon-name">pin_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">placemark</i>
+  <span class="icon-name">placemark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">placemark_fill</i>
+  <span class="icon-name">placemark_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">play</i>
+  <span class="icon-name">play</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">play_circle</i>
+  <span class="icon-name">play_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">play_circle_fill</i>
+  <span class="icon-name">play_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">play_fill</i>
+  <span class="icon-name">play_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">play_rectangle</i>
+  <span class="icon-name">play_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">play_rectangle_fill</i>
+  <span class="icon-name">play_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">playpause</i>
+  <span class="icon-name">playpause</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">playpause_fill</i>
+  <span class="icon-name">playpause_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus</i>
+  <span class="icon-name">plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_app</i>
+  <span class="icon-name">plus_app</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_app_fill</i>
+  <span class="icon-name">plus_app_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_bubble</i>
+  <span class="icon-name">plus_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_bubble_fill</i>
+  <span class="icon-name">plus_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_circle</i>
+  <span class="icon-name">plus_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_circle_fill</i>
+  <span class="icon-name">plus_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_rectangle</i>
+  <span class="icon-name">plus_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_rectangle_fill</i>
+  <span class="icon-name">plus_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_rectangle_fill_on_rectangle_fill</i>
+  <span class="icon-name">plus_rectangle_fill_on_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_rectangle_on_rectangle</i>
+  <span class="icon-name">plus_rectangle_on_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_slash_minus</i>
+  <span class="icon-name">plus_slash_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_square</i>
+  <span class="icon-name">plus_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_square_fill</i>
+  <span class="icon-name">plus_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_square_fill_on_square_fill</i>
+  <span class="icon-name">plus_square_fill_on_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plus_square_on_square</i>
+  <span class="icon-name">plus_square_on_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plusminus</i>
+  <span class="icon-name">plusminus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plusminus_circle</i>
+  <span class="icon-name">plusminus_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">plusminus_circle_fill</i>
+  <span class="icon-name">plusminus_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">power</i>
+  <span class="icon-name">power</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">printer</i>
+  <span class="icon-name">printer</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">printer_fill</i>
+  <span class="icon-name">printer_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">projective</i>
+  <span class="icon-name">projective</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">purchased</i>
+  <span class="icon-name">purchased</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">purchased_circle</i>
+  <span class="icon-name">purchased_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">purchased_circle_fill</i>
+  <span class="icon-name">purchased_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">qrcode</i>
+  <span class="icon-name">qrcode</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">qrcode_viewfinder</i>
+  <span class="icon-name">qrcode_viewfinder</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question</i>
+  <span class="icon-name">question</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question_circle</i>
+  <span class="icon-name">question_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question_circle_fill</i>
+  <span class="icon-name">question_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question_diamond</i>
+  <span class="icon-name">question_diamond</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question_diamond_fill</i>
+  <span class="icon-name">question_diamond_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question_square</i>
+  <span class="icon-name">question_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">question_square_fill</i>
+  <span class="icon-name">question_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">quote_bubble</i>
+  <span class="icon-name">quote_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">quote_bubble_fill</i>
+  <span class="icon-name">quote_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">radiowaves_left</i>
+  <span class="icon-name">radiowaves_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">radiowaves_right</i>
+  <span class="icon-name">radiowaves_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rays</i>
+  <span class="icon-name">rays</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">recordingtape</i>
+  <span class="icon-name">recordingtape</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle</i>
+  <span class="icon-name">rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_3_offgrid</i>
+  <span class="icon-name">rectangle_3_offgrid</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_3_offgrid_fill</i>
+  <span class="icon-name">rectangle_3_offgrid_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_arrow_up_right_arrow_down_left</i>
+  <span class="icon-name">rectangle_arrow_up_right_arrow_down_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_arrow_up_right_arrow_down_left_slash</i>
+  <span class="icon-name">rectangle_arrow_up_right_arrow_down_left_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_badge_checkmark</i>
+  <span class="icon-name">rectangle_badge_checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_badge_xmark</i>
+  <span class="icon-name">rectangle_badge_xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_compress_vertical</i>
+  <span class="icon-name">rectangle_compress_vertical</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_dock</i>
+  <span class="icon-name">rectangle_dock</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_expand_vertical</i>
+  <span class="icon-name">rectangle_expand_vertical</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_fill</i>
+  <span class="icon-name">rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_fill_badge_checkmark</i>
+  <span class="icon-name">rectangle_fill_badge_checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_fill_badge_xmark</i>
+  <span class="icon-name">rectangle_fill_badge_xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_fill_on_rectangle_angled_fill</i>
+  <span class="icon-name">rectangle_fill_on_rectangle_angled_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_fill_on_rectangle_fill</i>
+  <span class="icon-name">rectangle_fill_on_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_grid_1x2</i>
+  <span class="icon-name">rectangle_grid_1x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_grid_1x2_fill</i>
+  <span class="icon-name">rectangle_grid_1x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_grid_2x2</i>
+  <span class="icon-name">rectangle_grid_2x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_grid_2x2_fill</i>
+  <span class="icon-name">rectangle_grid_2x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_grid_3x2</i>
+  <span class="icon-name">rectangle_grid_3x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_grid_3x2_fill</i>
+  <span class="icon-name">rectangle_grid_3x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_on_rectangle</i>
+  <span class="icon-name">rectangle_on_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_on_rectangle_angled</i>
+  <span class="icon-name">rectangle_on_rectangle_angled</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_paperclip</i>
+  <span class="icon-name">rectangle_paperclip</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_split_3x1</i>
+  <span class="icon-name">rectangle_split_3x1</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_split_3x1_fill</i>
+  <span class="icon-name">rectangle_split_3x1_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_split_3x3</i>
+  <span class="icon-name">rectangle_split_3x3</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_split_3x3_fill</i>
+  <span class="icon-name">rectangle_split_3x3_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack</i>
+  <span class="icon-name">rectangle_stack</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_badge_minus</i>
+  <span class="icon-name">rectangle_stack_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_badge_person_crop</i>
+  <span class="icon-name">rectangle_stack_badge_person_crop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_badge_plus</i>
+  <span class="icon-name">rectangle_stack_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_fill</i>
+  <span class="icon-name">rectangle_stack_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_fill_badge_minus</i>
+  <span class="icon-name">rectangle_stack_fill_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_fill_badge_person_crop</i>
+  <span class="icon-name">rectangle_stack_fill_badge_person_crop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_fill_badge_plus</i>
+  <span class="icon-name">rectangle_stack_fill_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_person_crop</i>
+  <span class="icon-name">rectangle_stack_person_crop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rectangle_stack_person_crop_fill</i>
+  <span class="icon-name">rectangle_stack_person_crop_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">repeat</i>
+  <span class="icon-name">repeat</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">repeat_1</i>
+  <span class="icon-name">repeat_1</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">resize</i>
+  <span class="icon-name">resize</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">resize_h</i>
+  <span class="icon-name">resize_h</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">resize_v</i>
+  <span class="icon-name">resize_v</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">return_icon</i>
+  <span class="icon-name">return_icon</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rhombus</i>
+  <span class="icon-name">rhombus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rhombus_fill</i>
+  <span class="icon-name">rhombus_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rocket</i>
+  <span class="icon-name">rocket</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rocket_fill</i>
+  <span class="icon-name">rocket_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rosette</i>
+  <span class="icon-name">rosette</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rotate_left</i>
+  <span class="icon-name">rotate_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rotate_left_fill</i>
+  <span class="icon-name">rotate_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rotate_right</i>
+  <span class="icon-name">rotate_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">rotate_right_fill</i>
+  <span class="icon-name">rotate_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">scissors</i>
+  <span class="icon-name">scissors</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">scissors_alt</i>
+  <span class="icon-name">scissors_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">scope</i>
+  <span class="icon-name">scope</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">scribble</i>
+  <span class="icon-name">scribble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">search</i>
+  <span class="icon-name">search</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">search_circle</i>
+  <span class="icon-name">search_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">search_circle_fill</i>
+  <span class="icon-name">search_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">selection_pin_in_out</i>
+  <span class="icon-name">selection_pin_in_out</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shield</i>
+  <span class="icon-name">shield</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shield_fill</i>
+  <span class="icon-name">shield_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shield_lefthalf_fill</i>
+  <span class="icon-name">shield_lefthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shield_slash</i>
+  <span class="icon-name">shield_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shield_slash_fill</i>
+  <span class="icon-name">shield_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shift</i>
+  <span class="icon-name">shift</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shift_fill</i>
+  <span class="icon-name">shift_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">shuffle</i>
+  <span class="icon-name">shuffle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sidebar_left</i>
+  <span class="icon-name">sidebar_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sidebar_right</i>
+  <span class="icon-name">sidebar_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">signature</i>
+  <span class="icon-name">signature</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">skew</i>
+  <span class="icon-name">skew</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">slash_circle</i>
+  <span class="icon-name">slash_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">slash_circle_fill</i>
+  <span class="icon-name">slash_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">slider_horizontal_3</i>
+  <span class="icon-name">slider_horizontal_3</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">slider_horizontal_below_rectangle</i>
+  <span class="icon-name">slider_horizontal_below_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">slowmo</i>
+  <span class="icon-name">slowmo</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smallcircle_circle</i>
+  <span class="icon-name">smallcircle_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smallcircle_circle_fill</i>
+  <span class="icon-name">smallcircle_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smallcircle_fill_circle</i>
+  <span class="icon-name">smallcircle_fill_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smallcircle_fill_circle_fill</i>
+  <span class="icon-name">smallcircle_fill_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smiley</i>
+  <span class="icon-name">smiley</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smiley_fill</i>
+  <span class="icon-name">smiley_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smoke</i>
+  <span class="icon-name">smoke</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">smoke_fill</i>
+  <span class="icon-name">smoke_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">snow</i>
+  <span class="icon-name">snow</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sort_down</i>
+  <span class="icon-name">sort_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sort_down_circle</i>
+  <span class="icon-name">sort_down_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sort_down_circle_fill</i>
+  <span class="icon-name">sort_down_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sort_up</i>
+  <span class="icon-name">sort_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sort_up_circle</i>
+  <span class="icon-name">sort_up_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sort_up_circle_fill</i>
+  <span class="icon-name">sort_up_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sparkles</i>
+  <span class="icon-name">sparkles</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker</i>
+  <span class="icon-name">speaker</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_1</i>
+  <span class="icon-name">speaker_1</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_1_fill</i>
+  <span class="icon-name">speaker_1_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_2</i>
+  <span class="icon-name">speaker_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_2_fill</i>
+  <span class="icon-name">speaker_2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_3</i>
+  <span class="icon-name">speaker_3</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_3_fill</i>
+  <span class="icon-name">speaker_3_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_fill</i>
+  <span class="icon-name">speaker_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_slash</i>
+  <span class="icon-name">speaker_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_slash_fill</i>
+  <span class="icon-name">speaker_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_slash_fill_rtl</i>
+  <span class="icon-name">speaker_slash_fill_rtl</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_slash_rtl</i>
+  <span class="icon-name">speaker_slash_rtl</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_zzz</i>
+  <span class="icon-name">speaker_zzz</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_zzz_fill</i>
+  <span class="icon-name">speaker_zzz_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_zzz_fill_rtl</i>
+  <span class="icon-name">speaker_zzz_fill_rtl</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speaker_zzz_rtl</i>
+  <span class="icon-name">speaker_zzz_rtl</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">speedometer</i>
+  <span class="icon-name">speedometer</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sportscourt</i>
+  <span class="icon-name">sportscourt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sportscourt_fill</i>
+  <span class="icon-name">sportscourt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square</i>
+  <span class="icon-name">square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_down</i>
+  <span class="icon-name">square_arrow_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_down_fill</i>
+  <span class="icon-name">square_arrow_down_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_down_on_square</i>
+  <span class="icon-name">square_arrow_down_on_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_down_on_square_fill</i>
+  <span class="icon-name">square_arrow_down_on_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_left</i>
+  <span class="icon-name">square_arrow_left</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_left_fill</i>
+  <span class="icon-name">square_arrow_left_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_right</i>
+  <span class="icon-name">square_arrow_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_right_fill</i>
+  <span class="icon-name">square_arrow_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_up</i>
+  <span class="icon-name">square_arrow_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_up_fill</i>
+  <span class="icon-name">square_arrow_up_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_up_on_square</i>
+  <span class="icon-name">square_arrow_up_on_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_arrow_up_on_square_fill</i>
+  <span class="icon-name">square_arrow_up_on_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_favorites</i>
+  <span class="icon-name">square_favorites</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_favorites_alt</i>
+  <span class="icon-name">square_favorites_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_favorites_alt_fill</i>
+  <span class="icon-name">square_favorites_alt_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_favorites_fill</i>
+  <span class="icon-name">square_favorites_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_fill</i>
+  <span class="icon-name">square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_fill_line_vertical_square</i>
+  <span class="icon-name">square_fill_line_vertical_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_fill_line_vertical_square_fill</i>
+  <span class="icon-name">square_fill_line_vertical_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_fill_on_circle_fill</i>
+  <span class="icon-name">square_fill_on_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_fill_on_square_fill</i>
+  <span class="icon-name">square_fill_on_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_grid_2x2</i>
+  <span class="icon-name">square_grid_2x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_grid_2x2_fill</i>
+  <span class="icon-name">square_grid_2x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_grid_3x2</i>
+  <span class="icon-name">square_grid_3x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_grid_3x2_fill</i>
+  <span class="icon-name">square_grid_3x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_grid_4x3_fill</i>
+  <span class="icon-name">square_grid_4x3_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_lefthalf_fill</i>
+  <span class="icon-name">square_lefthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_line_vertical_square</i>
+  <span class="icon-name">square_line_vertical_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_line_vertical_square_fill</i>
+  <span class="icon-name">square_line_vertical_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_list</i>
+  <span class="icon-name">square_list</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_list_fill</i>
+  <span class="icon-name">square_list_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_on_circle</i>
+  <span class="icon-name">square_on_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_on_square</i>
+  <span class="icon-name">square_on_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_pencil</i>
+  <span class="icon-name">square_pencil</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_pencil_fill</i>
+  <span class="icon-name">square_pencil_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_righthalf_fill</i>
+  <span class="icon-name">square_righthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_split_1x2</i>
+  <span class="icon-name">square_split_1x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_split_1x2_fill</i>
+  <span class="icon-name">square_split_1x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_split_2x1</i>
+  <span class="icon-name">square_split_2x1</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_split_2x1_fill</i>
+  <span class="icon-name">square_split_2x1_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_split_2x2</i>
+  <span class="icon-name">square_split_2x2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_split_2x2_fill</i>
+  <span class="icon-name">square_split_2x2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack</i>
+  <span class="icon-name">square_stack</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_down_dottedline</i>
+  <span class="icon-name">square_stack_3d_down_dottedline</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_down_right</i>
+  <span class="icon-name">square_stack_3d_down_right</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_down_right_fill</i>
+  <span class="icon-name">square_stack_3d_down_right_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_up</i>
+  <span class="icon-name">square_stack_3d_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_up_fill</i>
+  <span class="icon-name">square_stack_3d_up_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_up_slash</i>
+  <span class="icon-name">square_stack_3d_up_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_3d_up_slash_fill</i>
+  <span class="icon-name">square_stack_3d_up_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">square_stack_fill</i>
+  <span class="icon-name">square_stack_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">squares_below_rectangle</i>
+  <span class="icon-name">squares_below_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star</i>
+  <span class="icon-name">star</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star_circle</i>
+  <span class="icon-name">star_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star_circle_fill</i>
+  <span class="icon-name">star_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star_fill</i>
+  <span class="icon-name">star_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star_lefthalf_fill</i>
+  <span class="icon-name">star_lefthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star_slash</i>
+  <span class="icon-name">star_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">star_slash_fill</i>
+  <span class="icon-name">star_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">staroflife</i>
+  <span class="icon-name">staroflife</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">staroflife_fill</i>
+  <span class="icon-name">staroflife_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">stop</i>
+  <span class="icon-name">stop</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">stop_circle</i>
+  <span class="icon-name">stop_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">stop_circle_fill</i>
+  <span class="icon-name">stop_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">stop_fill</i>
+  <span class="icon-name">stop_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">stopwatch</i>
+  <span class="icon-name">stopwatch</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">stopwatch_fill</i>
+  <span class="icon-name">stopwatch_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">strikethrough</i>
+  <span class="icon-name">strikethrough</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_club</i>
+  <span class="icon-name">suit_club</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_club_fill</i>
+  <span class="icon-name">suit_club_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_diamond</i>
+  <span class="icon-name">suit_diamond</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_diamond_fill</i>
+  <span class="icon-name">suit_diamond_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_heart</i>
+  <span class="icon-name">suit_heart</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_heart_fill</i>
+  <span class="icon-name">suit_heart_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_spade</i>
+  <span class="icon-name">suit_spade</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">suit_spade_fill</i>
+  <span class="icon-name">suit_spade_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sum</i>
+  <span class="icon-name">sum</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_dust</i>
+  <span class="icon-name">sun_dust</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_dust_fill</i>
+  <span class="icon-name">sun_dust_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_haze</i>
+  <span class="icon-name">sun_haze</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_haze_fill</i>
+  <span class="icon-name">sun_haze_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_max</i>
+  <span class="icon-name">sun_max</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_max_fill</i>
+  <span class="icon-name">sun_max_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_min</i>
+  <span class="icon-name">sun_min</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sun_min_fill</i>
+  <span class="icon-name">sun_min_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sunrise</i>
+  <span class="icon-name">sunrise</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sunrise_fill</i>
+  <span class="icon-name">sunrise_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sunset</i>
+  <span class="icon-name">sunset</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">sunset_fill</i>
+  <span class="icon-name">sunset_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">t_bubble</i>
+  <span class="icon-name">t_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">t_bubble_fill</i>
+  <span class="icon-name">t_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">table</i>
+  <span class="icon-name">table</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">table_badge_more</i>
+  <span class="icon-name">table_badge_more</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">table_badge_more_fill</i>
+  <span class="icon-name">table_badge_more_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">table_fill</i>
+  <span class="icon-name">table_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tag</i>
+  <span class="icon-name">tag</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tag_circle</i>
+  <span class="icon-name">tag_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tag_circle_fill</i>
+  <span class="icon-name">tag_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tag_fill</i>
+  <span class="icon-name">tag_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_aligncenter</i>
+  <span class="icon-name">text_aligncenter</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_alignleft</i>
+  <span class="icon-name">text_alignleft</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_alignright</i>
+  <span class="icon-name">text_alignright</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_append</i>
+  <span class="icon-name">text_append</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_badge_checkmark</i>
+  <span class="icon-name">text_badge_checkmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_badge_minus</i>
+  <span class="icon-name">text_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_badge_plus</i>
+  <span class="icon-name">text_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_badge_star</i>
+  <span class="icon-name">text_badge_star</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_badge_xmark</i>
+  <span class="icon-name">text_badge_xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_bubble</i>
+  <span class="icon-name">text_bubble</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_bubble_fill</i>
+  <span class="icon-name">text_bubble_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_cursor</i>
+  <span class="icon-name">text_cursor</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_insert</i>
+  <span class="icon-name">text_insert</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_justify</i>
+  <span class="icon-name">text_justify</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_justifyleft</i>
+  <span class="icon-name">text_justifyleft</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_justifyright</i>
+  <span class="icon-name">text_justifyright</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">text_quote</i>
+  <span class="icon-name">text_quote</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textbox</i>
+  <span class="icon-name">textbox</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat</i>
+  <span class="icon-name">textformat</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_123</i>
+  <span class="icon-name">textformat_123</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_abc</i>
+  <span class="icon-name">textformat_abc</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_abc_dottedunderline</i>
+  <span class="icon-name">textformat_abc_dottedunderline</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_alt</i>
+  <span class="icon-name">textformat_alt</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_size</i>
+  <span class="icon-name">textformat_size</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_subscript</i>
+  <span class="icon-name">textformat_subscript</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">textformat_superscript</i>
+  <span class="icon-name">textformat_superscript</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">thermometer</i>
+  <span class="icon-name">thermometer</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">thermometer_snowflake</i>
+  <span class="icon-name">thermometer_snowflake</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">thermometer_sun</i>
+  <span class="icon-name">thermometer_sun</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ticket</i>
+  <span class="icon-name">ticket</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">ticket_fill</i>
+  <span class="icon-name">ticket_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tickets</i>
+  <span class="icon-name">tickets</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tickets_fill</i>
+  <span class="icon-name">tickets_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">timelapse</i>
+  <span class="icon-name">timelapse</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">timer</i>
+  <span class="icon-name">timer</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">timer_fill</i>
+  <span class="icon-name">timer_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">today</i>
+  <span class="icon-name">today</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">today_fill</i>
+  <span class="icon-name">today_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tornado</i>
+  <span class="icon-name">tornado</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tortoise</i>
+  <span class="icon-name">tortoise</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tortoise_fill</i>
+  <span class="icon-name">tortoise_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">train_style_one</i>
+  <span class="icon-name">train_style_one</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">train_style_two</i>
+  <span class="icon-name">train_style_two</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tram_fill</i>
+  <span class="icon-name">tram_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">trash</i>
+  <span class="icon-name">trash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">trash_circle</i>
+  <span class="icon-name">trash_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">trash_circle_fill</i>
+  <span class="icon-name">trash_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">trash_fill</i>
+  <span class="icon-name">trash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">trash_slash</i>
+  <span class="icon-name">trash_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">trash_slash_fill</i>
+  <span class="icon-name">trash_slash_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray</i>
+  <span class="icon-name">tray</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_2</i>
+  <span class="icon-name">tray_2</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_2_fill</i>
+  <span class="icon-name">tray_2_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_arrow_down</i>
+  <span class="icon-name">tray_arrow_down</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_arrow_down_fill</i>
+  <span class="icon-name">tray_arrow_down_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_arrow_up</i>
+  <span class="icon-name">tray_arrow_up</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_arrow_up_fill</i>
+  <span class="icon-name">tray_arrow_up_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_fill</i>
+  <span class="icon-name">tray_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_full</i>
+  <span class="icon-name">tray_full</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tray_full_fill</i>
+  <span class="icon-name">tray_full_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tree</i>
+  <span class="icon-name">tree</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">triangle</i>
+  <span class="icon-name">triangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">triangle_fill</i>
+  <span class="icon-name">triangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">triangle_lefthalf_fill</i>
+  <span class="icon-name">triangle_lefthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">triangle_righthalf_fill</i>
+  <span class="icon-name">triangle_righthalf_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tropicalstorm</i>
+  <span class="icon-name">tropicalstorm</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tuningfork</i>
+  <span class="icon-name">tuningfork</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tv</i>
+  <span class="icon-name">tv</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tv_circle</i>
+  <span class="icon-name">tv_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tv_circle_fill</i>
+  <span class="icon-name">tv_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tv_fill</i>
+  <span class="icon-name">tv_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tv_music_note</i>
+  <span class="icon-name">tv_music_note</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">tv_music_note_fill</i>
+  <span class="icon-name">tv_music_note_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">uiwindow_split_2x1</i>
+  <span class="icon-name">uiwindow_split_2x1</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">umbrella</i>
+  <span class="icon-name">umbrella</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">umbrella_fill</i>
+  <span class="icon-name">umbrella_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">underline</i>
+  <span class="icon-name">underline</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">upload_circle</i>
+  <span class="icon-name">upload_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">upload_circle_fill</i>
+  <span class="icon-name">upload_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">videocam</i>
+  <span class="icon-name">videocam</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">videocam_circle</i>
+  <span class="icon-name">videocam_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">videocam_circle_fill</i>
+  <span class="icon-name">videocam_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">videocam_fill</i>
+  <span class="icon-name">videocam_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">view_2d</i>
+  <span class="icon-name">view_2d</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">view_3d</i>
+  <span class="icon-name">view_3d</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">viewfinder</i>
+  <span class="icon-name">viewfinder</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">viewfinder_circle</i>
+  <span class="icon-name">viewfinder_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">viewfinder_circle_fill</i>
+  <span class="icon-name">viewfinder_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wand_rays</i>
+  <span class="icon-name">wand_rays</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wand_rays_inverse</i>
+  <span class="icon-name">wand_rays_inverse</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wand_stars</i>
+  <span class="icon-name">wand_stars</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wand_stars_inverse</i>
+  <span class="icon-name">wand_stars_inverse</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform</i>
+  <span class="icon-name">waveform</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform_circle</i>
+  <span class="icon-name">waveform_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform_circle_fill</i>
+  <span class="icon-name">waveform_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform_path</i>
+  <span class="icon-name">waveform_path</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform_path_badge_minus</i>
+  <span class="icon-name">waveform_path_badge_minus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform_path_badge_plus</i>
+  <span class="icon-name">waveform_path_badge_plus</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">waveform_path_ecg</i>
+  <span class="icon-name">waveform_path_ecg</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wifi</i>
+  <span class="icon-name">wifi</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wifi_exclamationmark</i>
+  <span class="icon-name">wifi_exclamationmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wifi_slash</i>
+  <span class="icon-name">wifi_slash</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wind</i>
+  <span class="icon-name">wind</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wind_snow</i>
+  <span class="icon-name">wind_snow</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wrench</i>
+  <span class="icon-name">wrench</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">wrench_fill</i>
+  <span class="icon-name">wrench_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark</i>
+  <span class="icon-name">xmark</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_circle</i>
+  <span class="icon-name">xmark_circle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_circle_fill</i>
+  <span class="icon-name">xmark_circle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_octagon</i>
+  <span class="icon-name">xmark_octagon</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_octagon_fill</i>
+  <span class="icon-name">xmark_octagon_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_rectangle</i>
+  <span class="icon-name">xmark_rectangle</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_rectangle_fill</i>
+  <span class="icon-name">xmark_rectangle_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_seal</i>
+  <span class="icon-name">xmark_seal</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_seal_fill</i>
+  <span class="icon-name">xmark_seal_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_shield</i>
+  <span class="icon-name">xmark_shield</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_shield_fill</i>
+  <span class="icon-name">xmark_shield_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_square</i>
+  <span class="icon-name">xmark_square</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">xmark_square_fill</i>
+  <span class="icon-name">xmark_square_fill</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">zoom_in</i>
+  <span class="icon-name">zoom_in</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">zoom_out</i>
+  <span class="icon-name">zoom_out</span>
+</div>
+<div class="icon-cell">
+  <i class="cupertino-icons size-28">zzz</i>
+  <span class="icon-name">zzz</span>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="icon-preview">
+    <div class="icon-preview-name">Icon: <b>home</b></div>
+    <div class="icons">
+      <div class="icon-cell">
+        <div class="cupertino-icons size-14">home</div>
+        <div class="icon-size">14px</div>
+      </div>
+      <div class="icon-cell">
+        <div class="cupertino-icons size-20">home</div>
+        <div class="icon-size">20px</div>
+      </div>
+      <div class="icon-cell">
+        <div class="cupertino-icons size-24">home</div>
+        <div class="icon-size">24px</div>
+      </div>
+      <div class="icon-cell">
+        <div class="cupertino-icons size-28">home</div>
+        <div class="icon-size">28px</div>
+      </div>
+      <div class="icon-cell">
+        <div class="cupertino-icons size-32">home</div>
+        <div class="icon-size">32px</div>
+      </div>
+      <div class="icon-cell">
+        <div class="cupertino-icons size-56">home</div>
+        <div class="icon-size">56px</div>
+      </div>
+      <div class="icon-cell">
+        <div class="cupertino-icons size-112">home</div>
+        <div class="icon-size">112px</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var icons = document.querySelectorAll('.content .cupertino-icons');
+    var searchMap = {};
+    function showPreview(e) {
+      var icon = e.target.textContent;
+      var previewIcons = document.querySelectorAll('.icon-preview .cupertino-icons');
+      for (var j = 0; j < previewIcons.length; j++) {
+        previewIcons[j].textContent = icon;
+      }
+      document.querySelector('.icon-preview').style.display = 'block';
+      document.querySelector('.icon-preview-name b').textContent = icon;
+    }
+    function normalizeName(text) {
+      return text.toLowerCase().replace(/[^a-z]/, '');
+    }
+    for (var i = 0; i < icons.length; i++) {
+      icons[i].addEventListener('click', showPreview);
+      searchMap[normalizeName(icons[i].textContent)] = icons[i].parentElement;
+    }
+    var searchBar = document.querySelector('header .search-bar');
+    function search(e) {
+      for (var name in searchMap) {
+        if (searchMatches(e.target.value, name)) {
+          searchMap[name].classList.remove('hidden');
+        } else {
+          searchMap[name].classList.add('hidden');
+        }
+      }
+    }
+    searchBar.addEventListener('input', search);
+    function searchMatches(needle, haystack) {
+      if (needle === '') return true;
+      for (var word of needle.split(' ')) {
+        if (haystack.indexOf(normalizeName(word)) < 0) {
+          return false;
+        } 
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>

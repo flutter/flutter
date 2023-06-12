@@ -1,0 +1,13 @@
+name: lints
+version: 2.0.1
+description: >
+  Official Dart lint rules. Defines the 'core' and 'recommended' set of lints
+  suggested by the Dart team.
+repository: https://github.com/dart-lang/lints
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+# NOTE: Code is not allowed in this package. Do not add dependencies.
+# dependencies:
+# dev_dependencies:

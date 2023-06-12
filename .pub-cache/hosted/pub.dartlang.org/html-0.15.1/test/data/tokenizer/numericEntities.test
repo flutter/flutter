@@ -1,0 +1,1313 @@
+{"tests": [
+
+{"description": "Invalid numeric entity character U+0000",
+"input": "&#x0000;",
+"output": ["ParseError", ["Character", "\uFFFD"]]},
+
+{"description": "Invalid numeric entity character U+0001",
+"input": "&#x0001;",
+"output": ["ParseError", ["Character", "\u0001"]]},
+
+{"description": "Invalid numeric entity character U+0002",
+"input": "&#x0002;",
+"output": ["ParseError", ["Character", "\u0002"]]},
+
+{"description": "Invalid numeric entity character U+0003",
+"input": "&#x0003;",
+"output": ["ParseError", ["Character", "\u0003"]]},
+
+{"description": "Invalid numeric entity character U+0004",
+"input": "&#x0004;",
+"output": ["ParseError", ["Character", "\u0004"]]},
+
+{"description": "Invalid numeric entity character U+0005",
+"input": "&#x0005;",
+"output": ["ParseError", ["Character", "\u0005"]]},
+
+{"description": "Invalid numeric entity character U+0006",
+"input": "&#x0006;",
+"output": ["ParseError", ["Character", "\u0006"]]},
+
+{"description": "Invalid numeric entity character U+0007",
+"input": "&#x0007;",
+"output": ["ParseError", ["Character", "\u0007"]]},
+
+{"description": "Invalid numeric entity character U+0008",
+"input": "&#x0008;",
+"output": ["ParseError", ["Character", "\u0008"]]},
+
+{"description": "Invalid numeric entity character U+000B",
+"input": "&#x000b;",
+"output": ["ParseError", ["Character", "\u000b"]]},
+
+{"description": "Invalid numeric entity character U+000E",
+"input": "&#x000e;",
+"output": ["ParseError", ["Character", "\u000e"]]},
+
+{"description": "Invalid numeric entity character U+000F",
+"input": "&#x000f;",
+"output": ["ParseError", ["Character", "\u000f"]]},
+
+{"description": "Invalid numeric entity character U+0010",
+"input": "&#x0010;",
+"output": ["ParseError", ["Character", "\u0010"]]},
+
+{"description": "Invalid numeric entity character U+0011",
+"input": "&#x0011;",
+"output": ["ParseError", ["Character", "\u0011"]]},
+
+{"description": "Invalid numeric entity character U+0012",
+"input": "&#x0012;",
+"output": ["ParseError", ["Character", "\u0012"]]},
+
+{"description": "Invalid numeric entity character U+0013",
+"input": "&#x0013;",
+"output": ["ParseError", ["Character", "\u0013"]]},
+
+{"description": "Invalid numeric entity character U+0014",
+"input": "&#x0014;",
+"output": ["ParseError", ["Character", "\u0014"]]},
+
+{"description": "Invalid numeric entity character U+0015",
+"input": "&#x0015;",
+"output": ["ParseError", ["Character", "\u0015"]]},
+
+{"description": "Invalid numeric entity character U+0016",
+"input": "&#x0016;",
+"output": ["ParseError", ["Character", "\u0016"]]},
+
+{"description": "Invalid numeric entity character U+0017",
+"input": "&#x0017;",
+"output": ["ParseError", ["Character", "\u0017"]]},
+
+{"description": "Invalid numeric entity character U+0018",
+"input": "&#x0018;",
+"output": ["ParseError", ["Character", "\u0018"]]},
+
+{"description": "Invalid numeric entity character U+0019",
+"input": "&#x0019;",
+"output": ["ParseError", ["Character", "\u0019"]]},
+
+{"description": "Invalid numeric entity character U+001A",
+"input": "&#x001a;",
+"output": ["ParseError", ["Character", "\u001a"]]},
+
+{"description": "Invalid numeric entity character U+001B",
+"input": "&#x001b;",
+"output": ["ParseError", ["Character", "\u001b"]]},
+
+{"description": "Invalid numeric entity character U+001C",
+"input": "&#x001c;",
+"output": ["ParseError", ["Character", "\u001c"]]},
+
+{"description": "Invalid numeric entity character U+001D",
+"input": "&#x001d;",
+"output": ["ParseError", ["Character", "\u001d"]]},
+
+{"description": "Invalid numeric entity character U+001E",
+"input": "&#x001e;",
+"output": ["ParseError", ["Character", "\u001e"]]},
+
+{"description": "Invalid numeric entity character U+001F",
+"input": "&#x001f;",
+"output": ["ParseError", ["Character", "\u001f"]]},
+
+{"description": "Invalid numeric entity character U+007F",
+"input": "&#x007f;",
+"output": ["ParseError", ["Character", "\u007f"]]},
+
+{"description": "Invalid numeric entity character U+D800",
+"input": "&#xd800;",
+"output": ["ParseError", ["Character", "\uFFFD"]]},
+
+{"description": "Invalid numeric entity character U+DFFF",
+"input": "&#xdfff;",
+"output": ["ParseError", ["Character", "\uFFFD"]]},
+
+{"description": "Invalid numeric entity character U+FDD0",
+"input": "&#xfdd0;",
+"output": ["ParseError", ["Character", "\ufdd0"]]},
+
+{"description": "Invalid numeric entity character U+FDD1",
+"input": "&#xfdd1;",
+"output": ["ParseError", ["Character", "\ufdd1"]]},
+
+{"description": "Invalid numeric entity character U+FDD2",
+"input": "&#xfdd2;",
+"output": ["ParseError", ["Character", "\ufdd2"]]},
+
+{"description": "Invalid numeric entity character U+FDD3",
+"input": "&#xfdd3;",
+"output": ["ParseError", ["Character", "\ufdd3"]]},
+
+{"description": "Invalid numeric entity character U+FDD4",
+"input": "&#xfdd4;",
+"output": ["ParseError", ["Character", "\ufdd4"]]},
+
+{"description": "Invalid numeric entity character U+FDD5",
+"input": "&#xfdd5;",
+"output": ["ParseError", ["Character", "\ufdd5"]]},
+
+{"description": "Invalid numeric entity character U+FDD6",
+"input": "&#xfdd6;",
+"output": ["ParseError", ["Character", "\ufdd6"]]},
+
+{"description": "Invalid numeric entity character U+FDD7",
+"input": "&#xfdd7;",
+"output": ["ParseError", ["Character", "\ufdd7"]]},
+
+{"description": "Invalid numeric entity character U+FDD8",
+"input": "&#xfdd8;",
+"output": ["ParseError", ["Character", "\ufdd8"]]},
+
+{"description": "Invalid numeric entity character U+FDD9",
+"input": "&#xfdd9;",
+"output": ["ParseError", ["Character", "\ufdd9"]]},
+
+{"description": "Invalid numeric entity character U+FDDA",
+"input": "&#xfdda;",
+"output": ["ParseError", ["Character", "\ufdda"]]},
+
+{"description": "Invalid numeric entity character U+FDDB",
+"input": "&#xfddb;",
+"output": ["ParseError", ["Character", "\ufddb"]]},
+
+{"description": "Invalid numeric entity character U+FDDC",
+"input": "&#xfddc;",
+"output": ["ParseError", ["Character", "\ufddc"]]},
+
+{"description": "Invalid numeric entity character U+FDDD",
+"input": "&#xfddd;",
+"output": ["ParseError", ["Character", "\ufddd"]]},
+
+{"description": "Invalid numeric entity character U+FDDE",
+"input": "&#xfdde;",
+"output": ["ParseError", ["Character", "\ufdde"]]},
+
+{"description": "Invalid numeric entity character U+FDDF",
+"input": "&#xfddf;",
+"output": ["ParseError", ["Character", "\ufddf"]]},
+
+{"description": "Invalid numeric entity character U+FDE0",
+"input": "&#xfde0;",
+"output": ["ParseError", ["Character", "\ufde0"]]},
+
+{"description": "Invalid numeric entity character U+FDE1",
+"input": "&#xfde1;",
+"output": ["ParseError", ["Character", "\ufde1"]]},
+
+{"description": "Invalid numeric entity character U+FDE2",
+"input": "&#xfde2;",
+"output": ["ParseError", ["Character", "\ufde2"]]},
+
+{"description": "Invalid numeric entity character U+FDE3",
+"input": "&#xfde3;",
+"output": ["ParseError", ["Character", "\ufde3"]]},
+
+{"description": "Invalid numeric entity character U+FDE4",
+"input": "&#xfde4;",
+"output": ["ParseError", ["Character", "\ufde4"]]},
+
+{"description": "Invalid numeric entity character U+FDE5",
+"input": "&#xfde5;",
+"output": ["ParseError", ["Character", "\ufde5"]]},
+
+{"description": "Invalid numeric entity character U+FDE6",
+"input": "&#xfde6;",
+"output": ["ParseError", ["Character", "\ufde6"]]},
+
+{"description": "Invalid numeric entity character U+FDE7",
+"input": "&#xfde7;",
+"output": ["ParseError", ["Character", "\ufde7"]]},
+
+{"description": "Invalid numeric entity character U+FDE8",
+"input": "&#xfde8;",
+"output": ["ParseError", ["Character", "\ufde8"]]},
+
+{"description": "Invalid numeric entity character U+FDE9",
+"input": "&#xfde9;",
+"output": ["ParseError", ["Character", "\ufde9"]]},
+
+{"description": "Invalid numeric entity character U+FDEA",
+"input": "&#xfdea;",
+"output": ["ParseError", ["Character", "\ufdea"]]},
+
+{"description": "Invalid numeric entity character U+FDEB",
+"input": "&#xfdeb;",
+"output": ["ParseError", ["Character", "\ufdeb"]]},
+
+{"description": "Invalid numeric entity character U+FDEC",
+"input": "&#xfdec;",
+"output": ["ParseError", ["Character", "\ufdec"]]},
+
+{"description": "Invalid numeric entity character U+FDED",
+"input": "&#xfded;",
+"output": ["ParseError", ["Character", "\ufded"]]},
+
+{"description": "Invalid numeric entity character U+FDEE",
+"input": "&#xfdee;",
+"output": ["ParseError", ["Character", "\ufdee"]]},
+
+{"description": "Invalid numeric entity character U+FDEF",
+"input": "&#xfdef;",
+"output": ["ParseError", ["Character", "\ufdef"]]},
+
+{"description": "Invalid numeric entity character U+FFFE",
+"input": "&#xfffe;",
+"output": ["ParseError", ["Character", "\ufffe"]]},
+
+{"description": "Invalid numeric entity character U+FFFF",
+"input": "&#xffff;",
+"output": ["ParseError", ["Character", "\uffff"]]},
+
+{"description": "Invalid numeric entity character U+1FFFE",
+"input": "&#x1fffe;",
+"output": ["ParseError", ["Character", "\uD83F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+1FFFF",
+"input": "&#x1ffff;",
+"output": ["ParseError", ["Character", "\uD83F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+2FFFE",
+"input": "&#x2fffe;",
+"output": ["ParseError", ["Character", "\uD87F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+2FFFF",
+"input": "&#x2ffff;",
+"output": ["ParseError", ["Character", "\uD87F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+3FFFE",
+"input": "&#x3fffe;",
+"output": ["ParseError", ["Character", "\uD8BF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+3FFFF",
+"input": "&#x3ffff;",
+"output": ["ParseError", ["Character", "\uD8BF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+4FFFE",
+"input": "&#x4fffe;",
+"output": ["ParseError", ["Character", "\uD8FF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+4FFFF",
+"input": "&#x4ffff;",
+"output": ["ParseError", ["Character", "\uD8FF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+5FFFE",
+"input": "&#x5fffe;",
+"output": ["ParseError", ["Character", "\uD93F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+5FFFF",
+"input": "&#x5ffff;",
+"output": ["ParseError", ["Character", "\uD93F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+6FFFE",
+"input": "&#x6fffe;",
+"output": ["ParseError", ["Character", "\uD97F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+6FFFF",
+"input": "&#x6ffff;",
+"output": ["ParseError", ["Character", "\uD97F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+7FFFE",
+"input": "&#x7fffe;",
+"output": ["ParseError", ["Character", "\uD9BF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+7FFFF",
+"input": "&#x7ffff;",
+"output": ["ParseError", ["Character", "\uD9BF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+8FFFE",
+"input": "&#x8fffe;",
+"output": ["ParseError", ["Character", "\uD9FF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+8FFFF",
+"input": "&#x8ffff;",
+"output": ["ParseError", ["Character", "\uD9FF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+9FFFE",
+"input": "&#x9fffe;",
+"output": ["ParseError", ["Character", "\uDA3F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+9FFFF",
+"input": "&#x9ffff;",
+"output": ["ParseError", ["Character", "\uDA3F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+AFFFE",
+"input": "&#xafffe;",
+"output": ["ParseError", ["Character", "\uDA7F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+AFFFF",
+"input": "&#xaffff;",
+"output": ["ParseError", ["Character", "\uDA7F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+BFFFE",
+"input": "&#xbfffe;",
+"output": ["ParseError", ["Character", "\uDABF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+BFFFF",
+"input": "&#xbffff;",
+"output": ["ParseError", ["Character", "\uDABF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+CFFFE",
+"input": "&#xcfffe;",
+"output": ["ParseError", ["Character", "\uDAFF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+CFFFF",
+"input": "&#xcffff;",
+"output": ["ParseError", ["Character", "\uDAFF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+DFFFE",
+"input": "&#xdfffe;",
+"output": ["ParseError", ["Character", "\uDB3F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+DFFFF",
+"input": "&#xdffff;",
+"output": ["ParseError", ["Character", "\uDB3F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+EFFFE",
+"input": "&#xefffe;",
+"output": ["ParseError", ["Character", "\uDB7F\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+EFFFF",
+"input": "&#xeffff;",
+"output": ["ParseError", ["Character", "\uDB7F\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+FFFFE",
+"input": "&#xffffe;",
+"output": ["ParseError", ["Character", "\uDBBF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+FFFFF",
+"input": "&#xfffff;",
+"output": ["ParseError", ["Character", "\uDBBF\uDFFF"]]},
+
+{"description": "Invalid numeric entity character U+10FFFE",
+"input": "&#x10fffe;",
+"output": ["ParseError", ["Character", "\uDBFF\uDFFE"]]},
+
+{"description": "Invalid numeric entity character U+10FFFF",
+"input": "&#x10ffff;",
+"output": ["ParseError", ["Character", "\uDBFF\uDFFF"]]},
+
+{"description": "Valid numeric entity character U+0009",
+"input": "&#x0009;",
+"output": [["Character", "\u0009"]]},
+
+{"description": "Valid numeric entity character U+000A",
+"input": "&#x000a;",
+"output": [["Character", "\u000A"]]},
+
+{"description": "Valid numeric entity character U+0020",
+"input": "&#x0020;",
+"output": [["Character", "\u0020"]]},
+
+{"description": "Valid numeric entity character U+0021",
+"input": "&#x0021;",
+"output": [["Character", "\u0021"]]},
+
+{"description": "Valid numeric entity character U+0022",
+"input": "&#x0022;",
+"output": [["Character", "\u0022"]]},
+
+{"description": "Valid numeric entity character U+0023",
+"input": "&#x0023;",
+"output": [["Character", "\u0023"]]},
+
+{"description": "Valid numeric entity character U+0024",
+"input": "&#x0024;",
+"output": [["Character", "\u0024"]]},
+
+{"description": "Valid numeric entity character U+0025",
+"input": "&#x0025;",
+"output": [["Character", "\u0025"]]},
+
+{"description": "Valid numeric entity character U+0026",
+"input": "&#x0026;",
+"output": [["Character", "\u0026"]]},
+
+{"description": "Valid numeric entity character U+0027",
+"input": "&#x0027;",
+"output": [["Character", "\u0027"]]},
+
+{"description": "Valid numeric entity character U+0028",
+"input": "&#x0028;",
+"output": [["Character", "\u0028"]]},
+
+{"description": "Valid numeric entity character U+0029",
+"input": "&#x0029;",
+"output": [["Character", "\u0029"]]},
+
+{"description": "Valid numeric entity character U+002A",
+"input": "&#x002a;",
+"output": [["Character", "\u002A"]]},
+
+{"description": "Valid numeric entity character U+002B",
+"input": "&#x002b;",
+"output": [["Character", "\u002B"]]},
+
+{"description": "Valid numeric entity character U+002C",
+"input": "&#x002c;",
+"output": [["Character", "\u002C"]]},
+
+{"description": "Valid numeric entity character U+002D",
+"input": "&#x002d;",
+"output": [["Character", "\u002D"]]},
+
+{"description": "Valid numeric entity character U+002E",
+"input": "&#x002e;",
+"output": [["Character", "\u002E"]]},
+
+{"description": "Valid numeric entity character U+002F",
+"input": "&#x002f;",
+"output": [["Character", "\u002F"]]},
+
+{"description": "Valid numeric entity character U+0030",
+"input": "&#x0030;",
+"output": [["Character", "\u0030"]]},
+
+{"description": "Valid numeric entity character U+0031",
+"input": "&#x0031;",
+"output": [["Character", "\u0031"]]},
+
+{"description": "Valid numeric entity character U+0032",
+"input": "&#x0032;",
+"output": [["Character", "\u0032"]]},
+
+{"description": "Valid numeric entity character U+0033",
+"input": "&#x0033;",
+"output": [["Character", "\u0033"]]},
+
+{"description": "Valid numeric entity character U+0034",
+"input": "&#x0034;",
+"output": [["Character", "\u0034"]]},
+
+{"description": "Valid numeric entity character U+0035",
+"input": "&#x0035;",
+"output": [["Character", "\u0035"]]},
+
+{"description": "Valid numeric entity character U+0036",
+"input": "&#x0036;",
+"output": [["Character", "\u0036"]]},
+
+{"description": "Valid numeric entity character U+0037",
+"input": "&#x0037;",
+"output": [["Character", "\u0037"]]},
+
+{"description": "Valid numeric entity character U+0038",
+"input": "&#x0038;",
+"output": [["Character", "\u0038"]]},
+
+{"description": "Valid numeric entity character U+0039",
+"input": "&#x0039;",
+"output": [["Character", "\u0039"]]},
+
+{"description": "Valid numeric entity character U+003A",
+"input": "&#x003a;",
+"output": [["Character", "\u003A"]]},
+
+{"description": "Valid numeric entity character U+003B",
+"input": "&#x003b;",
+"output": [["Character", "\u003B"]]},
+
+{"description": "Valid numeric entity character U+003C",
+"input": "&#x003c;",
+"output": [["Character", "\u003C"]]},
+
+{"description": "Valid numeric entity character U+003D",
+"input": "&#x003d;",
+"output": [["Character", "\u003D"]]},
+
+{"description": "Valid numeric entity character U+003E",
+"input": "&#x003e;",
+"output": [["Character", "\u003E"]]},
+
+{"description": "Valid numeric entity character U+003F",
+"input": "&#x003f;",
+"output": [["Character", "\u003F"]]},
+
+{"description": "Valid numeric entity character U+0040",
+"input": "&#x0040;",
+"output": [["Character", "\u0040"]]},
+
+{"description": "Valid numeric entity character U+0041",
+"input": "&#x0041;",
+"output": [["Character", "\u0041"]]},
+
+{"description": "Valid numeric entity character U+0042",
+"input": "&#x0042;",
+"output": [["Character", "\u0042"]]},
+
+{"description": "Valid numeric entity character U+0043",
+"input": "&#x0043;",
+"output": [["Character", "\u0043"]]},
+
+{"description": "Valid numeric entity character U+0044",
+"input": "&#x0044;",
+"output": [["Character", "\u0044"]]},
+
+{"description": "Valid numeric entity character U+0045",
+"input": "&#x0045;",
+"output": [["Character", "\u0045"]]},
+
+{"description": "Valid numeric entity character U+0046",
+"input": "&#x0046;",
+"output": [["Character", "\u0046"]]},
+
+{"description": "Valid numeric entity character U+0047",
+"input": "&#x0047;",
+"output": [["Character", "\u0047"]]},
+
+{"description": "Valid numeric entity character U+0048",
+"input": "&#x0048;",
+"output": [["Character", "\u0048"]]},
+
+{"description": "Valid numeric entity character U+0049",
+"input": "&#x0049;",
+"output": [["Character", "\u0049"]]},
+
+{"description": "Valid numeric entity character U+004A",
+"input": "&#x004a;",
+"output": [["Character", "\u004A"]]},
+
+{"description": "Valid numeric entity character U+004B",
+"input": "&#x004b;",
+"output": [["Character", "\u004B"]]},
+
+{"description": "Valid numeric entity character U+004C",
+"input": "&#x004c;",
+"output": [["Character", "\u004C"]]},
+
+{"description": "Valid numeric entity character U+004D",
+"input": "&#x004d;",
+"output": [["Character", "\u004D"]]},
+
+{"description": "Valid numeric entity character U+004E",
+"input": "&#x004e;",
+"output": [["Character", "\u004E"]]},
+
+{"description": "Valid numeric entity character U+004F",
+"input": "&#x004f;",
+"output": [["Character", "\u004F"]]},
+
+{"description": "Valid numeric entity character U+0050",
+"input": "&#x0050;",
+"output": [["Character", "\u0050"]]},
+
+{"description": "Valid numeric entity character U+0051",
+"input": "&#x0051;",
+"output": [["Character", "\u0051"]]},
+
+{"description": "Valid numeric entity character U+0052",
+"input": "&#x0052;",
+"output": [["Character", "\u0052"]]},
+
+{"description": "Valid numeric entity character U+0053",
+"input": "&#x0053;",
+"output": [["Character", "\u0053"]]},
+
+{"description": "Valid numeric entity character U+0054",
+"input": "&#x0054;",
+"output": [["Character", "\u0054"]]},
+
+{"description": "Valid numeric entity character U+0055",
+"input": "&#x0055;",
+"output": [["Character", "\u0055"]]},
+
+{"description": "Valid numeric entity character U+0056",
+"input": "&#x0056;",
+"output": [["Character", "\u0056"]]},
+
+{"description": "Valid numeric entity character U+0057",
+"input": "&#x0057;",
+"output": [["Character", "\u0057"]]},
+
+{"description": "Valid numeric entity character U+0058",
+"input": "&#x0058;",
+"output": [["Character", "\u0058"]]},
+
+{"description": "Valid numeric entity character U+0059",
+"input": "&#x0059;",
+"output": [["Character", "\u0059"]]},
+
+{"description": "Valid numeric entity character U+005A",
+"input": "&#x005a;",
+"output": [["Character", "\u005A"]]},
+
+{"description": "Valid numeric entity character U+005B",
+"input": "&#x005b;",
+"output": [["Character", "\u005B"]]},
+
+{"description": "Valid numeric entity character U+005C",
+"input": "&#x005c;",
+"output": [["Character", "\u005C"]]},
+
+{"description": "Valid numeric entity character U+005D",
+"input": "&#x005d;",
+"output": [["Character", "\u005D"]]},
+
+{"description": "Valid numeric entity character U+005E",
+"input": "&#x005e;",
+"output": [["Character", "\u005E"]]},
+
+{"description": "Valid numeric entity character U+005F",
+"input": "&#x005f;",
+"output": [["Character", "\u005F"]]},
+
+{"description": "Valid numeric entity character U+0060",
+"input": "&#x0060;",
+"output": [["Character", "\u0060"]]},
+
+{"description": "Valid numeric entity character U+0061",
+"input": "&#x0061;",
+"output": [["Character", "\u0061"]]},
+
+{"description": "Valid numeric entity character U+0062",
+"input": "&#x0062;",
+"output": [["Character", "\u0062"]]},
+
+{"description": "Valid numeric entity character U+0063",
+"input": "&#x0063;",
+"output": [["Character", "\u0063"]]},
+
+{"description": "Valid numeric entity character U+0064",
+"input": "&#x0064;",
+"output": [["Character", "\u0064"]]},
+
+{"description": "Valid numeric entity character U+0065",
+"input": "&#x0065;",
+"output": [["Character", "\u0065"]]},
+
+{"description": "Valid numeric entity character U+0066",
+"input": "&#x0066;",
+"output": [["Character", "\u0066"]]},
+
+{"description": "Valid numeric entity character U+0067",
+"input": "&#x0067;",
+"output": [["Character", "\u0067"]]},
+
+{"description": "Valid numeric entity character U+0068",
+"input": "&#x0068;",
+"output": [["Character", "\u0068"]]},
+
+{"description": "Valid numeric entity character U+0069",
+"input": "&#x0069;",
+"output": [["Character", "\u0069"]]},
+
+{"description": "Valid numeric entity character U+006A",
+"input": "&#x006a;",
+"output": [["Character", "\u006A"]]},
+
+{"description": "Valid numeric entity character U+006B",
+"input": "&#x006b;",
+"output": [["Character", "\u006B"]]},
+
+{"description": "Valid numeric entity character U+006C",
+"input": "&#x006c;",
+"output": [["Character", "\u006C"]]},
+
+{"description": "Valid numeric entity character U+006D",
+"input": "&#x006d;",
+"output": [["Character", "\u006D"]]},
+
+{"description": "Valid numeric entity character U+006E",
+"input": "&#x006e;",
+"output": [["Character", "\u006E"]]},
+
+{"description": "Valid numeric entity character U+006F",
+"input": "&#x006f;",
+"output": [["Character", "\u006F"]]},
+
+{"description": "Valid numeric entity character U+0070",
+"input": "&#x0070;",
+"output": [["Character", "\u0070"]]},
+
+{"description": "Valid numeric entity character U+0071",
+"input": "&#x0071;",
+"output": [["Character", "\u0071"]]},
+
+{"description": "Valid numeric entity character U+0072",
+"input": "&#x0072;",
+"output": [["Character", "\u0072"]]},
+
+{"description": "Valid numeric entity character U+0073",
+"input": "&#x0073;",
+"output": [["Character", "\u0073"]]},
+
+{"description": "Valid numeric entity character U+0074",
+"input": "&#x0074;",
+"output": [["Character", "\u0074"]]},
+
+{"description": "Valid numeric entity character U+0075",
+"input": "&#x0075;",
+"output": [["Character", "\u0075"]]},
+
+{"description": "Valid numeric entity character U+0076",
+"input": "&#x0076;",
+"output": [["Character", "\u0076"]]},
+
+{"description": "Valid numeric entity character U+0077",
+"input": "&#x0077;",
+"output": [["Character", "\u0077"]]},
+
+{"description": "Valid numeric entity character U+0078",
+"input": "&#x0078;",
+"output": [["Character", "\u0078"]]},
+
+{"description": "Valid numeric entity character U+0079",
+"input": "&#x0079;",
+"output": [["Character", "\u0079"]]},
+
+{"description": "Valid numeric entity character U+007A",
+"input": "&#x007a;",
+"output": [["Character", "\u007A"]]},
+
+{"description": "Valid numeric entity character U+007B",
+"input": "&#x007b;",
+"output": [["Character", "\u007B"]]},
+
+{"description": "Valid numeric entity character U+007C",
+"input": "&#x007c;",
+"output": [["Character", "\u007C"]]},
+
+{"description": "Valid numeric entity character U+007D",
+"input": "&#x007d;",
+"output": [["Character", "\u007D"]]},
+
+{"description": "Valid numeric entity character U+007E",
+"input": "&#x007e;",
+"output": [["Character", "\u007E"]]},
+
+{"description": "Valid numeric entity character U+00A0",
+"input": "&#x00a0;",
+"output": [["Character", "\u00A0"]]},
+
+{"description": "Valid numeric entity character U+00A1",
+"input": "&#x00a1;",
+"output": [["Character", "\u00A1"]]},
+
+{"description": "Valid numeric entity character U+00A2",
+"input": "&#x00a2;",
+"output": [["Character", "\u00A2"]]},
+
+{"description": "Valid numeric entity character U+00A3",
+"input": "&#x00a3;",
+"output": [["Character", "\u00A3"]]},
+
+{"description": "Valid numeric entity character U+00A4",
+"input": "&#x00a4;",
+"output": [["Character", "\u00A4"]]},
+
+{"description": "Valid numeric entity character U+00A5",
+"input": "&#x00a5;",
+"output": [["Character", "\u00A5"]]},
+
+{"description": "Valid numeric entity character U+00A6",
+"input": "&#x00a6;",
+"output": [["Character", "\u00A6"]]},
+
+{"description": "Valid numeric entity character U+00A7",
+"input": "&#x00a7;",
+"output": [["Character", "\u00A7"]]},
+
+{"description": "Valid numeric entity character U+00A8",
+"input": "&#x00a8;",
+"output": [["Character", "\u00A8"]]},
+
+{"description": "Valid numeric entity character U+00A9",
+"input": "&#x00a9;",
+"output": [["Character", "\u00A9"]]},
+
+{"description": "Valid numeric entity character U+00AA",
+"input": "&#x00aa;",
+"output": [["Character", "\u00AA"]]},
+
+{"description": "Valid numeric entity character U+00AB",
+"input": "&#x00ab;",
+"output": [["Character", "\u00AB"]]},
+
+{"description": "Valid numeric entity character U+00AC",
+"input": "&#x00ac;",
+"output": [["Character", "\u00AC"]]},
+
+{"description": "Valid numeric entity character U+00AD",
+"input": "&#x00ad;",
+"output": [["Character", "\u00AD"]]},
+
+{"description": "Valid numeric entity character U+00AE",
+"input": "&#x00ae;",
+"output": [["Character", "\u00AE"]]},
+
+{"description": "Valid numeric entity character U+00AF",
+"input": "&#x00af;",
+"output": [["Character", "\u00AF"]]},
+
+{"description": "Valid numeric entity character U+00B0",
+"input": "&#x00b0;",
+"output": [["Character", "\u00B0"]]},
+
+{"description": "Valid numeric entity character U+00B1",
+"input": "&#x00b1;",
+"output": [["Character", "\u00B1"]]},
+
+{"description": "Valid numeric entity character U+00B2",
+"input": "&#x00b2;",
+"output": [["Character", "\u00B2"]]},
+
+{"description": "Valid numeric entity character U+00B3",
+"input": "&#x00b3;",
+"output": [["Character", "\u00B3"]]},
+
+{"description": "Valid numeric entity character U+00B4",
+"input": "&#x00b4;",
+"output": [["Character", "\u00B4"]]},
+
+{"description": "Valid numeric entity character U+00B5",
+"input": "&#x00b5;",
+"output": [["Character", "\u00B5"]]},
+
+{"description": "Valid numeric entity character U+00B6",
+"input": "&#x00b6;",
+"output": [["Character", "\u00B6"]]},
+
+{"description": "Valid numeric entity character U+00B7",
+"input": "&#x00b7;",
+"output": [["Character", "\u00B7"]]},
+
+{"description": "Valid numeric entity character U+00B8",
+"input": "&#x00b8;",
+"output": [["Character", "\u00B8"]]},
+
+{"description": "Valid numeric entity character U+00B9",
+"input": "&#x00b9;",
+"output": [["Character", "\u00B9"]]},
+
+{"description": "Valid numeric entity character U+00BA",
+"input": "&#x00ba;",
+"output": [["Character", "\u00BA"]]},
+
+{"description": "Valid numeric entity character U+00BB",
+"input": "&#x00bb;",
+"output": [["Character", "\u00BB"]]},
+
+{"description": "Valid numeric entity character U+00BC",
+"input": "&#x00bc;",
+"output": [["Character", "\u00BC"]]},
+
+{"description": "Valid numeric entity character U+00BD",
+"input": "&#x00bd;",
+"output": [["Character", "\u00BD"]]},
+
+{"description": "Valid numeric entity character U+00BE",
+"input": "&#x00be;",
+"output": [["Character", "\u00BE"]]},
+
+{"description": "Valid numeric entity character U+00BF",
+"input": "&#x00bf;",
+"output": [["Character", "\u00BF"]]},
+
+{"description": "Valid numeric entity character U+00C0",
+"input": "&#x00c0;",
+"output": [["Character", "\u00C0"]]},
+
+{"description": "Valid numeric entity character U+00C1",
+"input": "&#x00c1;",
+"output": [["Character", "\u00C1"]]},
+
+{"description": "Valid numeric entity character U+00C2",
+"input": "&#x00c2;",
+"output": [["Character", "\u00C2"]]},
+
+{"description": "Valid numeric entity character U+00C3",
+"input": "&#x00c3;",
+"output": [["Character", "\u00C3"]]},
+
+{"description": "Valid numeric entity character U+00C4",
+"input": "&#x00c4;",
+"output": [["Character", "\u00C4"]]},
+
+{"description": "Valid numeric entity character U+00C5",
+"input": "&#x00c5;",
+"output": [["Character", "\u00C5"]]},
+
+{"description": "Valid numeric entity character U+00C6",
+"input": "&#x00c6;",
+"output": [["Character", "\u00C6"]]},
+
+{"description": "Valid numeric entity character U+00C7",
+"input": "&#x00c7;",
+"output": [["Character", "\u00C7"]]},
+
+{"description": "Valid numeric entity character U+00C8",
+"input": "&#x00c8;",
+"output": [["Character", "\u00C8"]]},
+
+{"description": "Valid numeric entity character U+00C9",
+"input": "&#x00c9;",
+"output": [["Character", "\u00C9"]]},
+
+{"description": "Valid numeric entity character U+00CA",
+"input": "&#x00ca;",
+"output": [["Character", "\u00CA"]]},
+
+{"description": "Valid numeric entity character U+00CB",
+"input": "&#x00cb;",
+"output": [["Character", "\u00CB"]]},
+
+{"description": "Valid numeric entity character U+00CC",
+"input": "&#x00cc;",
+"output": [["Character", "\u00CC"]]},
+
+{"description": "Valid numeric entity character U+00CD",
+"input": "&#x00cd;",
+"output": [["Character", "\u00CD"]]},
+
+{"description": "Valid numeric entity character U+00CE",
+"input": "&#x00ce;",
+"output": [["Character", "\u00CE"]]},
+
+{"description": "Valid numeric entity character U+00CF",
+"input": "&#x00cf;",
+"output": [["Character", "\u00CF"]]},
+
+{"description": "Valid numeric entity character U+00D0",
+"input": "&#x00d0;",
+"output": [["Character", "\u00D0"]]},
+
+{"description": "Valid numeric entity character U+00D1",
+"input": "&#x00d1;",
+"output": [["Character", "\u00D1"]]},
+
+{"description": "Valid numeric entity character U+00D2",
+"input": "&#x00d2;",
+"output": [["Character", "\u00D2"]]},
+
+{"description": "Valid numeric entity character U+00D3",
+"input": "&#x00d3;",
+"output": [["Character", "\u00D3"]]},
+
+{"description": "Valid numeric entity character U+00D4",
+"input": "&#x00d4;",
+"output": [["Character", "\u00D4"]]},
+
+{"description": "Valid numeric entity character U+00D5",
+"input": "&#x00d5;",
+"output": [["Character", "\u00D5"]]},
+
+{"description": "Valid numeric entity character U+00D6",
+"input": "&#x00d6;",
+"output": [["Character", "\u00D6"]]},
+
+{"description": "Valid numeric entity character U+00D7",
+"input": "&#x00d7;",
+"output": [["Character", "\u00D7"]]},
+
+{"description": "Valid numeric entity character U+00D8",
+"input": "&#x00d8;",
+"output": [["Character", "\u00D8"]]},
+
+{"description": "Valid numeric entity character U+00D9",
+"input": "&#x00d9;",
+"output": [["Character", "\u00D9"]]},
+
+{"description": "Valid numeric entity character U+00DA",
+"input": "&#x00da;",
+"output": [["Character", "\u00DA"]]},
+
+{"description": "Valid numeric entity character U+00DB",
+"input": "&#x00db;",
+"output": [["Character", "\u00DB"]]},
+
+{"description": "Valid numeric entity character U+00DC",
+"input": "&#x00dc;",
+"output": [["Character", "\u00DC"]]},
+
+{"description": "Valid numeric entity character U+00DD",
+"input": "&#x00dd;",
+"output": [["Character", "\u00DD"]]},
+
+{"description": "Valid numeric entity character U+00DE",
+"input": "&#x00de;",
+"output": [["Character", "\u00DE"]]},
+
+{"description": "Valid numeric entity character U+00DF",
+"input": "&#x00df;",
+"output": [["Character", "\u00DF"]]},
+
+{"description": "Valid numeric entity character U+00E0",
+"input": "&#x00e0;",
+"output": [["Character", "\u00E0"]]},
+
+{"description": "Valid numeric entity character U+00E1",
+"input": "&#x00e1;",
+"output": [["Character", "\u00E1"]]},
+
+{"description": "Valid numeric entity character U+00E2",
+"input": "&#x00e2;",
+"output": [["Character", "\u00E2"]]},
+
+{"description": "Valid numeric entity character U+00E3",
+"input": "&#x00e3;",
+"output": [["Character", "\u00E3"]]},
+
+{"description": "Valid numeric entity character U+00E4",
+"input": "&#x00e4;",
+"output": [["Character", "\u00E4"]]},
+
+{"description": "Valid numeric entity character U+00E5",
+"input": "&#x00e5;",
+"output": [["Character", "\u00E5"]]},
+
+{"description": "Valid numeric entity character U+00E6",
+"input": "&#x00e6;",
+"output": [["Character", "\u00E6"]]},
+
+{"description": "Valid numeric entity character U+00E7",
+"input": "&#x00e7;",
+"output": [["Character", "\u00E7"]]},
+
+{"description": "Valid numeric entity character U+00E8",
+"input": "&#x00e8;",
+"output": [["Character", "\u00E8"]]},
+
+{"description": "Valid numeric entity character U+00E9",
+"input": "&#x00e9;",
+"output": [["Character", "\u00E9"]]},
+
+{"description": "Valid numeric entity character U+00EA",
+"input": "&#x00ea;",
+"output": [["Character", "\u00EA"]]},
+
+{"description": "Valid numeric entity character U+00EB",
+"input": "&#x00eb;",
+"output": [["Character", "\u00EB"]]},
+
+{"description": "Valid numeric entity character U+00EC",
+"input": "&#x00ec;",
+"output": [["Character", "\u00EC"]]},
+
+{"description": "Valid numeric entity character U+00ED",
+"input": "&#x00ed;",
+"output": [["Character", "\u00ED"]]},
+
+{"description": "Valid numeric entity character U+00EE",
+"input": "&#x00ee;",
+"output": [["Character", "\u00EE"]]},
+
+{"description": "Valid numeric entity character U+00EF",
+"input": "&#x00ef;",
+"output": [["Character", "\u00EF"]]},
+
+{"description": "Valid numeric entity character U+00F0",
+"input": "&#x00f0;",
+"output": [["Character", "\u00F0"]]},
+
+{"description": "Valid numeric entity character U+00F1",
+"input": "&#x00f1;",
+"output": [["Character", "\u00F1"]]},
+
+{"description": "Valid numeric entity character U+00F2",
+"input": "&#x00f2;",
+"output": [["Character", "\u00F2"]]},
+
+{"description": "Valid numeric entity character U+00F3",
+"input": "&#x00f3;",
+"output": [["Character", "\u00F3"]]},
+
+{"description": "Valid numeric entity character U+00F4",
+"input": "&#x00f4;",
+"output": [["Character", "\u00F4"]]},
+
+{"description": "Valid numeric entity character U+00F5",
+"input": "&#x00f5;",
+"output": [["Character", "\u00F5"]]},
+
+{"description": "Valid numeric entity character U+00F6",
+"input": "&#x00f6;",
+"output": [["Character", "\u00F6"]]},
+
+{"description": "Valid numeric entity character U+00F7",
+"input": "&#x00f7;",
+"output": [["Character", "\u00F7"]]},
+
+{"description": "Valid numeric entity character U+00F8",
+"input": "&#x00f8;",
+"output": [["Character", "\u00F8"]]},
+
+{"description": "Valid numeric entity character U+00F9",
+"input": "&#x00f9;",
+"output": [["Character", "\u00F9"]]},
+
+{"description": "Valid numeric entity character U+00FA",
+"input": "&#x00fa;",
+"output": [["Character", "\u00FA"]]},
+
+{"description": "Valid numeric entity character U+00FB",
+"input": "&#x00fb;",
+"output": [["Character", "\u00FB"]]},
+
+{"description": "Valid numeric entity character U+00FC",
+"input": "&#x00fc;",
+"output": [["Character", "\u00FC"]]},
+
+{"description": "Valid numeric entity character U+00FD",
+"input": "&#x00fd;",
+"output": [["Character", "\u00FD"]]},
+
+{"description": "Valid numeric entity character U+00FE",
+"input": "&#x00fe;",
+"output": [["Character", "\u00FE"]]},
+
+{"description": "Valid numeric entity character U+00FF",
+"input": "&#x00ff;",
+"output": [["Character", "\u00FF"]]},
+
+{"description": "Valid numeric entity character U+D7FF",
+"input": "&#xd7ff;",
+"output": [["Character", "\uD7FF"]]},
+
+{"description": "Valid numeric entity character U+E000",
+"input": "&#xe000;",
+"output": [["Character", "\uE000"]]},
+
+{"description": "Valid numeric entity character U+FDCF",
+"input": "&#xfdcf;",
+"output": [["Character", "\uFDCF"]]},
+
+{"description": "Valid numeric entity character U+FDF0",
+"input": "&#xfdf0;",
+"output": [["Character", "\uFDF0"]]},
+
+{"description": "Valid numeric entity character U+FFFD",
+"input": "&#xfffd;",
+"output": [["Character", "\uFFFD"]]},
+
+{"description": "Valid numeric entity character U+10000",
+"input": "&#x10000;",
+"output": [["Character", "\uD800\uDC00"]]},
+
+{"description": "Valid numeric entity character U+1FFFD",
+"input": "&#x1fffd;",
+"output": [["Character", "\uD83F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+20000",
+"input": "&#x20000;",
+"output": [["Character", "\uD840\uDC00"]]},
+
+{"description": "Valid numeric entity character U+2FFFD",
+"input": "&#x2fffd;",
+"output": [["Character", "\uD87F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+30000",
+"input": "&#x30000;",
+"output": [["Character", "\uD880\uDC00"]]},
+
+{"description": "Valid numeric entity character U+3FFFD",
+"input": "&#x3fffd;",
+"output": [["Character", "\uD8BF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+40000",
+"input": "&#x40000;",
+"output": [["Character", "\uD8C0\uDC00"]]},
+
+{"description": "Valid numeric entity character U+4FFFD",
+"input": "&#x4fffd;",
+"output": [["Character", "\uD8FF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+50000",
+"input": "&#x50000;",
+"output": [["Character", "\uD900\uDC00"]]},
+
+{"description": "Valid numeric entity character U+5FFFD",
+"input": "&#x5fffd;",
+"output": [["Character", "\uD93F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+60000",
+"input": "&#x60000;",
+"output": [["Character", "\uD940\uDC00"]]},
+
+{"description": "Valid numeric entity character U+6FFFD",
+"input": "&#x6fffd;",
+"output": [["Character", "\uD97F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+70000",
+"input": "&#x70000;",
+"output": [["Character", "\uD980\uDC00"]]},
+
+{"description": "Valid numeric entity character U+7FFFD",
+"input": "&#x7fffd;",
+"output": [["Character", "\uD9BF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+80000",
+"input": "&#x80000;",
+"output": [["Character", "\uD9C0\uDC00"]]},
+
+{"description": "Valid numeric entity character U+8FFFD",
+"input": "&#x8fffd;",
+"output": [["Character", "\uD9FF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+90000",
+"input": "&#x90000;",
+"output": [["Character", "\uDA00\uDC00"]]},
+
+{"description": "Valid numeric entity character U+9FFFD",
+"input": "&#x9fffd;",
+"output": [["Character", "\uDA3F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+A0000",
+"input": "&#xa0000;",
+"output": [["Character", "\uDA40\uDC00"]]},
+
+{"description": "Valid numeric entity character U+AFFFD",
+"input": "&#xafffd;",
+"output": [["Character", "\uDA7F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+B0000",
+"input": "&#xb0000;",
+"output": [["Character", "\uDA80\uDC00"]]},
+
+{"description": "Valid numeric entity character U+BFFFD",
+"input": "&#xbfffd;",
+"output": [["Character", "\uDABF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+C0000",
+"input": "&#xc0000;",
+"output": [["Character", "\uDAC0\uDC00"]]},
+
+{"description": "Valid numeric entity character U+CFFFD",
+"input": "&#xcfffd;",
+"output": [["Character", "\uDAFF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+D0000",
+"input": "&#xd0000;",
+"output": [["Character", "\uDB00\uDC00"]]},
+
+{"description": "Valid numeric entity character U+DFFFD",
+"input": "&#xdfffd;",
+"output": [["Character", "\uDB3F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+E0000",
+"input": "&#xe0000;",
+"output": [["Character", "\uDB40\uDC00"]]},
+
+{"description": "Valid numeric entity character U+EFFFD",
+"input": "&#xefffd;",
+"output": [["Character", "\uDB7F\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+F0000",
+"input": "&#xf0000;",
+"output": [["Character", "\uDB80\uDC00"]]},
+
+{"description": "Valid numeric entity character U+FFFFD",
+"input": "&#xffffd;",
+"output": [["Character", "\uDBBF\uDFFD"]]},
+
+{"description": "Valid numeric entity character U+100000",
+"input": "&#x100000;",
+"output": [["Character", "\uDBC0\uDC00"]]},
+
+{"description": "Valid numeric entity character U+10FFFD",
+"input": "&#x10fffd;",
+"output": [["Character", "\uDBFF\uDFFD"]]}
+
+]}
+
+

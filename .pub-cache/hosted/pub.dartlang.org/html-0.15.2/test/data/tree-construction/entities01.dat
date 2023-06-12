@@ -1,0 +1,603 @@
+#data
+FOO&gt;BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO>BAR"
+
+#data
+FOO&gtBAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO>BAR"
+
+#data
+FOO&gt BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO> BAR"
+
+#data
+FOO&gt;;;BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO>;;BAR"
+
+#data
+I'm &notit; I tell you
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "I'm ¬it; I tell you"
+
+#data
+I'm &notin; I tell you
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "I'm ∉ I tell you"
+
+#data
+FOO& BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO& BAR"
+
+#data
+FOO&<BAR>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO&"
+|     <bar>
+
+#data
+FOO&&&&gt;BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO&&&>BAR"
+
+#data
+FOO&#41;BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO)BAR"
+
+#data
+FOO&#x41;BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOABAR"
+
+#data
+FOO&#X41;BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOABAR"
+
+#data
+FOO&#BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO&#BAR"
+
+#data
+FOO&#ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO&#ZOO"
+
+#data
+FOO&#xBAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOºR"
+
+#data
+FOO&#xZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO&#xZOO"
+
+#data
+FOO&#XZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO&#XZOO"
+
+#data
+FOO&#41BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO)BAR"
+
+#data
+FOO&#x41BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO䆺R"
+
+#data
+FOO&#x41ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOAZOO"
+
+#data
+FOO&#x0000;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"
+
+#data
+FOO&#x0078;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOxZOO"
+
+#data
+FOO&#x0079;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOyZOO"
+
+#data
+FOO&#x0080;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO€ZOO"
+
+#data
+FOO&#x0081;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOZOO"
+
+#data
+FOO&#x0082;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO‚ZOO"
+
+#data
+FOO&#x0083;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOƒZOO"
+
+#data
+FOO&#x0084;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO„ZOO"
+
+#data
+FOO&#x0085;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO…ZOO"
+
+#data
+FOO&#x0086;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO†ZOO"
+
+#data
+FOO&#x0087;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO‡ZOO"
+
+#data
+FOO&#x0088;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOˆZOO"
+
+#data
+FOO&#x0089;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO‰ZOO"
+
+#data
+FOO&#x008A;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOŠZOO"
+
+#data
+FOO&#x008B;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO‹ZOO"
+
+#data
+FOO&#x008C;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOŒZOO"
+
+#data
+FOO&#x008D;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOZOO"
+
+#data
+FOO&#x008E;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOŽZOO"
+
+#data
+FOO&#x008F;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOZOO"
+
+#data
+FOO&#x0090;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOZOO"
+
+#data
+FOO&#x0091;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO‘ZOO"
+
+#data
+FOO&#x0092;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO’ZOO"
+
+#data
+FOO&#x0093;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO“ZOO"
+
+#data
+FOO&#x0094;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO”ZOO"
+
+#data
+FOO&#x0095;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO•ZOO"
+
+#data
+FOO&#x0096;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO–ZOO"
+
+#data
+FOO&#x0097;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO—ZOO"
+
+#data
+FOO&#x0098;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO˜ZOO"
+
+#data
+FOO&#x0099;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO™ZOO"
+
+#data
+FOO&#x009A;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOšZOO"
+
+#data
+FOO&#x009B;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO›ZOO"
+
+#data
+FOO&#x009C;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOœZOO"
+
+#data
+FOO&#x009D;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOZOO"
+
+#data
+FOO&#x009E;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOžZOO"
+
+#data
+FOO&#x009F;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOŸZOO"
+
+#data
+FOO&#x00A0;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO ZOO"
+
+#data
+FOO&#xD7FF;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO퟿ZOO"
+
+#data
+FOO&#xD800;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"
+
+#data
+FOO&#xD801;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"
+
+#data
+FOO&#xDFFE;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"
+
+#data
+FOO&#xDFFF;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"
+
+#data
+FOO&#xE000;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOOZOO"
+
+#data
+FOO&#x10FFFE;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO􏿾ZOO"
+
+#data
+FOO&#x1087D4;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO􈟔ZOO"
+
+#data
+FOO&#x10FFFF;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO􏿿ZOO"
+
+#data
+FOO&#x110000;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"
+
+#data
+FOO&#xFFFFFF;ZOO
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO�ZOO"

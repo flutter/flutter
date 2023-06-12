@@ -1,0 +1,42 @@
+>>> (indent 10)
+          statusBarWidgets.add(new Flexible(
+              flex: 0,
+              child: new GestureDetector(onTap: () {
+                setState(() {
+                  game.takeTrickUI();
+                });
+              },
+                  child: new Container(
+                      decoration: style.Box.liveBackground,
+                      padding: style.Spacing.smallPadding,
+                      child: new Text("Take Cards",
+                          style: style.Text.largeStyle)))));
+<<<
+          statusBarWidgets.add(new Flexible(
+              flex: 0,
+              child: new GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      game.takeTrickUI();
+                    });
+                  },
+                  child: new Container(
+                      decoration: style.Box.liveBackground,
+                      padding: style.Spacing.smallPadding,
+                      child: new Text("Take Cards",
+                          style: style.Text.largeStyle)))));
+>>> (indent 8)
+        statusBarWidgets
+            .add(new IconButton(icon: "action/swap_vert", onPressed: () {
+          setState(() {
+            _showSplitView = !_showSplitView;
+          });
+        }));
+<<<
+        statusBarWidgets.add(new IconButton(
+            icon: "action/swap_vert",
+            onPressed: () {
+              setState(() {
+                _showSplitView = !_showSplitView;
+              });
+            }));

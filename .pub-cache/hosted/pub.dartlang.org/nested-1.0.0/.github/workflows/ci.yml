@@ -1,0 +1,47 @@
+name: ci
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+  schedule:
+  - cron: "0 0 * * 0"
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      # Set up Flutter and add it to the path.
+      - name: Clone Flutter repository
+        uses: actions/checkout@v2
+        with:
+          repository: 'flutter/flutter'
+          ref: 'beta'
+          path: 'flutter'
+          fetch-depth: 0
+      - name: Add Flutter to the PATH for Unix
+        if: startsWith(matrix.os, 'macOS') || startsWith(matrix.os, 'ubuntu')
+        run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
+      - name: Add Flutter to the PATH for Windows
+        if: startsWith(matrix.os, 'windows')
+        run: echo "${env:GITHUB_WORKSPACE}\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Run Flutter doctor
+        run: flutter doctor -v
+
+      # Clone the google_fonts repository under `code`, to avoid conflicts with `flutter`.
+      - uses: actions/checkout@v2
+        with:
+          path: 'code'
+
+      # Analyze, check format, and run tests for the repository.
+      - run: flutter pub get
+        working-directory: code
+      - run: flutter analyze --fatal-infos
+        working-directory: code
+      - run: flutter format --set-exit-if-changed --dry-run .
+        working-directory: code
+      - run: flutter test
+        working-directory: code

@@ -1,0 +1,1237 @@
+#data
+<!doctype html><math><mn DefinitionUrl="foo">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mn>
+|         definitionURL="foo"
+
+#data
+<!doctype html><html></p><!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <!-- foo -->
+|   <head>
+|   <body>
+
+#data
+<!doctype html><head></head></p><!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <!-- foo -->
+|   <body>
+
+#data
+<!doctype html><body><p><pre>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <pre>
+
+#data
+<!doctype html><body><p><listing>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <listing>
+
+#data
+<!doctype html><p><plaintext>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <plaintext>
+
+#data
+<!doctype html><p><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <h1>
+
+#data
+<!doctype html><form><isindex>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <form>
+
+#data
+<!doctype html><isindex action="POST">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <form>
+|       action="POST"
+|       <hr>
+|       <label>
+|         "This is a searchable index. Enter search keywords: "
+|         <input>
+|           name="isindex"
+|       <hr>
+
+#data
+<!doctype html><isindex prompt="this is isindex">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <form>
+|       <hr>
+|       <label>
+|         "this is isindex"
+|         <input>
+|           name="isindex"
+|       <hr>
+
+#data
+<!doctype html><isindex type="hidden">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <form>
+|       <hr>
+|       <label>
+|         "This is a searchable index. Enter search keywords: "
+|         <input>
+|           name="isindex"
+|           type="hidden"
+|       <hr>
+
+#data
+<!doctype html><isindex name="foo">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <form>
+|       <hr>
+|       <label>
+|         "This is a searchable index. Enter search keywords: "
+|         <input>
+|           name="isindex"
+|       <hr>
+
+#data
+<!doctype html><ruby><p><rp>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <p>
+|       <rp>
+
+#data
+<!doctype html><ruby><div><span><rp>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <div>
+|         <span>
+|           <rp>
+
+#data
+<!doctype html><ruby><div><p><rp>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <div>
+|         <p>
+|         <rp>
+
+#data
+<!doctype html><ruby><p><rt>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <p>
+|       <rt>
+
+#data
+<!doctype html><ruby><div><span><rt>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <div>
+|         <span>
+|           <rt>
+
+#data
+<!doctype html><ruby><div><p><rt>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <div>
+|         <p>
+|         <rt>
+
+#data
+<!doctype html><math/><foo>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|     <foo>
+
+#data
+<!doctype html><svg/><foo>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|     <foo>
+
+#data
+<!doctype html><div></body><!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|   <!-- foo -->
+
+#data
+<!doctype html><h1><div><h3><span></h1>foo
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <h1>
+|       <div>
+|         <h3>
+|           <span>
+|         "foo"
+
+#data
+<!doctype html><p></h3>foo
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       "foo"
+
+#data
+<!doctype html><h3><li>abc</h2>foo
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <h3>
+|       <li>
+|         "abc"
+|     "foo"
+
+#data
+<!doctype html><table>abc<!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "abc"
+|     <table>
+|       <!-- foo -->
+
+#data
+<!doctype html><table>  <!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       "  "
+|       <!-- foo -->
+
+#data
+<!doctype html><table> b <!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     " b "
+|     <table>
+|       <!-- foo -->
+
+#data
+<!doctype html><select><option><option>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+|       <option>
+
+#data
+<!doctype html><select><option></optgroup>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+
+#data
+<!doctype html><select><option></optgroup>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+
+#data
+<!doctype html><p><math><mi><p><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|         <math mi>
+|           <p>
+|           <h1>
+
+#data
+<!doctype html><p><math><mo><p><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|         <math mo>
+|           <p>
+|           <h1>
+
+#data
+<!doctype html><p><math><mn><p><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|         <math mn>
+|           <p>
+|           <h1>
+
+#data
+<!doctype html><p><math><ms><p><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|         <math ms>
+|           <p>
+|           <h1>
+
+#data
+<!doctype html><p><math><mtext><p><h1>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|         <math mtext>
+|           <p>
+|           <h1>
+
+#data
+<!doctype html><frameset></noframes>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><html c=d><body></html><html a=b>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   a="b"
+|   c="d"
+|   <head>
+|   <body>
+
+#data
+<!doctype html><html c=d><frameset></frameset></html><html a=b>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   a="b"
+|   c="d"
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><html><frameset></frameset></html><!--foo-->
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+| <!-- foo -->
+
+#data
+<!doctype html><html><frameset></frameset></html>  
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|   "  "
+
+#data
+<!doctype html><html><frameset></frameset></html>abc
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><html><frameset></frameset></html><p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><html><frameset></frameset></html></p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<html><frameset></frameset></html><!doctype html>
+#errors
+#document
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><body><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!doctype html><p><frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+
+#data
+<!doctype html><p>a<frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       "a"
+
+#data
+<!doctype html><p> <frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+
+#data
+<!doctype html><pre><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <pre>
+
+#data
+<!doctype html><listing><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <listing>
+
+#data
+<!doctype html><li><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <li>
+
+#data
+<!doctype html><dd><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <dd>
+
+#data
+<!doctype html><dt><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <dt>
+
+#data
+<!doctype html><button><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <button>
+
+#data
+<!doctype html><applet><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <applet>
+
+#data
+<!doctype html><marquee><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <marquee>
+
+#data
+<!doctype html><object><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <object>
+
+#data
+<!doctype html><table><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+
+#data
+<!doctype html><area><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <area>
+
+#data
+<!doctype html><basefont><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <basefont>
+|   <frameset>
+
+#data
+<!doctype html><bgsound><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <bgsound>
+|   <frameset>
+
+#data
+<!doctype html><br><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <br>
+
+#data
+<!doctype html><embed><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <embed>
+
+#data
+<!doctype html><img><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <img>
+
+#data
+<!doctype html><input><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <input>
+
+#data
+<!doctype html><keygen><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <keygen>
+
+#data
+<!doctype html><wbr><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <wbr>
+
+#data
+<!doctype html><hr><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <hr>
+
+#data
+<!doctype html><textarea></textarea><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <textarea>
+
+#data
+<!doctype html><xmp></xmp><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <xmp>
+
+#data
+<!doctype html><iframe></iframe><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <iframe>
+
+#data
+<!doctype html><select></select><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+
+#data
+<!doctype html><svg></svg><frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+
+#data
+<!doctype html><math></math><frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+
+#data
+<!doctype html><svg><foreignObject><div> <frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+
+#data
+<!doctype html><svg>a</svg><frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "a"
+
+#data
+<!doctype html><svg> </svg><frameset><frame>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+
+#data
+<html>aaa<frameset></frameset>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "aaa"
+
+#data
+<html> a <frameset></frameset>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "a "
+
+#data
+<!doctype html><div><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><div><body><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <div>
+
+#data
+<!doctype html><p><math></p>a
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|     "a"
+
+#data
+<!doctype html><p><math><mn><span></p>a
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <math math>
+|         <math mn>
+|           <span>
+|             <p>
+|             "a"
+
+#data
+<!doctype html><math></html>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+
+#data
+<!doctype html><meta charset="ascii">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <meta>
+|       charset="ascii"
+|   <body>
+
+#data
+<!doctype html><meta http-equiv="content-type" content="text/html;charset=ascii">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <meta>
+|       content="text/html;charset=ascii"
+|       http-equiv="content-type"
+|   <body>
+
+#data
+<!doctype html><head><!--aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa--><meta charset="utf8">
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <!-- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -->
+|     <meta>
+|       charset="utf8"
+|   <body>
+
+#data
+<!doctype html><html a=b><head></head><html c=d>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   a="b"
+|   c="d"
+|   <head>
+|   <body>
+
+#data
+<!doctype html><image/>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <img>
+
+#data
+<!doctype html>a<i>b<table>c<b>d</i>e</b>f
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "a"
+|     <i>
+|       "bc"
+|       <b>
+|         "de"
+|       "f"
+|       <table>
+
+#data
+<!doctype html><table><i>a<b>b<div>c<a>d</i>e</b>f
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <i>
+|       "a"
+|       <b>
+|         "b"
+|     <b>
+|     <div>
+|       <b>
+|         <i>
+|           "c"
+|           <a>
+|             "d"
+|         <a>
+|           "e"
+|       <a>
+|         "f"
+|     <table>
+
+#data
+<!doctype html><i>a<b>b<div>c<a>d</i>e</b>f
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <i>
+|       "a"
+|       <b>
+|         "b"
+|     <b>
+|     <div>
+|       <b>
+|         <i>
+|           "c"
+|           <a>
+|             "d"
+|         <a>
+|           "e"
+|       <a>
+|         "f"
+
+#data
+<!doctype html><table><i>a<b>b<div>c</i>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <i>
+|       "a"
+|       <b>
+|         "b"
+|     <b>
+|       <div>
+|         <i>
+|           "c"
+|     <table>
+
+#data
+<!doctype html><table><i>a<b>b<div>c<a>d</i>e</b>f
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <i>
+|       "a"
+|       <b>
+|         "b"
+|     <b>
+|     <div>
+|       <b>
+|         <i>
+|           "c"
+|           <a>
+|             "d"
+|         <a>
+|           "e"
+|       <a>
+|         "f"
+|     <table>
+
+#data
+<!doctype html><table><i>a<div>b<tr>c<b>d</i>e
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <i>
+|       "a"
+|       <div>
+|         "b"
+|     <i>
+|       "c"
+|       <b>
+|         "d"
+|     <b>
+|       "e"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!doctype html><table><td><table><i>a<div>b<b>c</i>d
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <i>
+|               "a"
+|             <div>
+|               <i>
+|                 "b"
+|                 <b>
+|                   "c"
+|               <b>
+|                 "d"
+|             <table>
+
+#data
+<!doctype html><body><bgsound>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <bgsound>
+
+#data
+<!doctype html><body><basefont>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <basefont>
+
+#data
+<!doctype html><a><b></a><basefont>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|     <basefont>
+
+#data
+<!doctype html><a><b></a><bgsound>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|     <bgsound>
+
+#data
+<!doctype html><figcaption><article></figcaption>a
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <figcaption>
+|       <article>
+|     "a"
+
+#data
+<!doctype html><summary><article></summary>a
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <summary>
+|       <article>
+|     "a"
+
+#data
+<!doctype html><p><a><plaintext>b
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <a>
+|     <plaintext>
+|       <a>
+|         "b"
+
+#data
+<!DOCTYPE html><div>a<a></div>b<p>c</p>d
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "a"
+|       <a>
+|     <a>
+|       "b"
+|       <p>
+|         "c"
+|       "d"

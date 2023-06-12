@@ -1,0 +1,4 @@
+>>> (indent 4) (fix optional-new)
+    sink.write('FILE ACCESSED ${new DateTime.now()}\n');
+<<<
+    sink.write('FILE ACCESSED ${DateTime.now()}\n');

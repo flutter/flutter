@@ -1,0 +1,44 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - avoid_function_literals_in_foreach_calls
+    - avoid_private_typedef_functions
+    - avoid_renaming_method_parameters
+    - avoid_returning_null
+    - avoid_returning_null_for_future
+    - avoid_unused_constructor_parameters
+    - await_only_futures
+    - camel_case_types
+    - cancel_subscriptions
+    - comment_references
+    - constant_identifier_names
+    - control_flow_in_finally
+    - directives_ordering
+    - empty_statements
+    - hash_and_equals
+    - implementation_imports
+    - invariant_booleans
+    - iterable_contains_unrelated_type
+    - list_remove_unrelated_type
+    - literal_only_boolean_expressions
+    - no_adjacent_strings_in_list
+    - non_constant_identifier_names
+    - only_throw_errors
+    - overridden_fields
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_const_constructors
+    - prefer_initializing_formals
+    - prefer_typing_uninitialized_variables
+    - test_types_in_equals
+    - throw_in_finally
+    - type_annotate_public_apis
+    - unnecessary_await_in_return
+    - unnecessary_brace_in_string_interps
+    - unnecessary_getters_setters
+    - unnecessary_lambdas
+    - unnecessary_null_aware_assignments
+    - unnecessary_parenthesis
+    - unnecessary_statements

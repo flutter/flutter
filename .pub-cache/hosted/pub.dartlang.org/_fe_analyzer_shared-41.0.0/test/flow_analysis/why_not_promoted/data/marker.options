@@ -1,0 +1,2 @@
+cfe=pkg/front_end/test/id_tests/why_not_promoted_test.dart
+analyzer=pkg/analyzer/test/id_tests/why_not_promoted_test.dart

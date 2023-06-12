@@ -1,0 +1,218 @@
+40 columns                              |
+>>> many arguments
+method(first, second, third, fourth, fifth, sixth, seventh, eighth, ninth,
+    tenth, eleventh, twelfth);
+<<<
+method(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth,
+    ninth,
+    tenth,
+    eleventh,
+    twelfth);
+>>> wrap before first argument
+longFunctionIsLoooooooooooooong(argument, argument);
+<<<
+longFunctionIsLoooooooooooooong(
+    argument, argument);
+>>> wrap with just one argument
+print('a very very long string literal');
+<<<<
+print(
+    'a very very long string literal');
+>>>
+printNumbers(000000000000000000000, 111);
+<<<
+printNumbers(
+    000000000000000000000, 111);
+>>>
+function(firstArg * second, third * fourthAndLongest);
+<<<
+function(firstArg * second,
+    third * fourthAndLongest);
+>>> arguments, nested
+someFunctionOne(someArgument,
+someFunctionTwo(argument, argument, argument),
+someFunctionTwo(argument, argument, argument),
+someArgument, someArgument);
+<<<
+someFunctionOne(
+    someArgument,
+    someFunctionTwo(
+        argument, argument, argument),
+    someFunctionTwo(
+        argument, argument, argument),
+    someArgument,
+    someArgument);
+>>> force all arguments to split if an argument splits
+foo(a, b, inner(veryLongArgument, veryLongArgument), c);
+<<<
+foo(
+    a,
+    b,
+    inner(veryLongArgument,
+        veryLongArgument),
+    c);
+>>> do not force single-argument list to split if argument splits
+foo(inner(veryLongArgument, veryLongArgument));
+<<<
+foo(inner(veryLongArgument,
+    veryLongArgument));
+>>> do force named single-argument list to split if argument splits
+foo(named:inner(veryLongArgument, veryLongArgument));
+<<<
+foo(
+    named: inner(veryLongArgument,
+        veryLongArgument));
+>>> do not split empty argument list
+foo___________________________________();
+<<<
+foo___________________________________();
+>>> do split empty argument list if it contains a comment
+foo___________________________________(/* */);
+<<<
+foo___________________________________(
+    /* */);
+>>> keep positional and named on first line
+foo(arg, arg, foo: 1, bar: 2);
+<<<
+foo(arg, arg, foo: 1, bar: 2);
+>>> move just named to second line even though all fit on second
+reallyLongMethod(
+    argument, foo: first, bar: second);
+<<<
+reallyLongMethod(argument,
+    foo: first, bar: second);
+>>> split named and keep positional on first
+reallyLongMethod(argument, argument, foo: first, bar: second, baz: third);
+<<<
+reallyLongMethod(argument, argument,
+    foo: first,
+    bar: second,
+    baz: third);
+>>> only named arguments and move to second line
+reallyLongMethod(foo: first, bar: second, ba: third);
+<<<
+reallyLongMethod(
+    foo: first, bar: second, ba: third);
+>>> only named arguments and split
+reallyLongMethod(foo: first, bar: second, baz: third);
+<<<
+reallyLongMethod(
+    foo: first,
+    bar: second,
+    baz: third);
+>>> if split before first positional, split before first named too
+reallyLongMethodName(
+    first, second, third, a: 1, b: 1);
+<<<
+reallyLongMethodName(
+    first, second, third,
+    a: 1, b: 1);
+>>> if split before other positional, split before first named too
+reallyLongMethodName(first, second,
+    third, fourth, fif, s, a: 1, b: 1);
+<<<
+reallyLongMethodName(first, second,
+    third, fourth, fif, s,
+    a: 1, b: 1);
+>>> if positional args go one per line, named do too
+reallyLongMethod(first, second, third, fourth, fifth, sixth, seventh, eighth, a: 1, b: 2);
+<<<
+reallyLongMethod(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth,
+    a: 1,
+    b: 2);
+>>> avoid splitting before single positional argument
+someLongReceiver.veryLongMethod(argument);
+<<<
+someLongReceiver
+    .veryLongMethod(argument);
+>>> multiple nested collections
+method(function([veryLongElement, veryLongElement], [veryLongElement, veryLongElement]), argument);
+<<<
+method(
+    function([
+      veryLongElement,
+      veryLongElement
+    ], [
+      veryLongElement,
+      veryLongElement
+    ]),
+    argument);
+>>> trailing collections are not indented
+function(argument, argument, argument, argument,
+[element, element, element, element],
+{'key': value, 'other key': value, 'third key': value});
+<<<
+function(argument, argument, argument,
+    argument, [
+  element,
+  element,
+  element,
+  element
+], {
+  'key': value,
+  'other key': value,
+  'third key': value
+});
+>>> all trailing collections
+function([element, element, element, element], {'key': value, 'other key': value, 'third key': value});
+<<<
+function([
+  element,
+  element,
+  element,
+  element
+], {
+  'key': value,
+  'other key': value,
+  'third key': value
+});
+>>> non-collection non-preceding argument forces all collections to indent
+function([element, element, element, element], argument,
+{'key': value, 'other key': value, 'third key': value}, () {;});
+<<<
+function(
+    [
+      element,
+      element,
+      element,
+      element
+    ],
+    argument,
+    {
+      'key': value,
+      'other key': value,
+      'third key': value
+    }, () {
+  ;
+});
+>>> trailing comma
+fn(argument,argument  ,argument  ,  );
+<<<
+fn(
+  argument,
+  argument,
+  argument,
+);
+>>> trailing comma in named argument list
+fn(named: argument,another:argument,  );
+<<<
+fn(
+  named: argument,
+  another: argument,
+);

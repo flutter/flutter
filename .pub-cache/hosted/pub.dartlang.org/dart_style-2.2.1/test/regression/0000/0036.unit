@@ -1,0 +1,14 @@
+>>>
+String prologue(String locale) => """
+/**
+ * DO NOT EDIT. This is code generated via pkg/intl/generate_localized.dart
+ * This is a library that provides messages for a $locale locale. All the
+...
+""";
+<<<
+String prologue(String locale) => """
+/**
+ * DO NOT EDIT. This is code generated via pkg/intl/generate_localized.dart
+ * This is a library that provides messages for a $locale locale. All the
+...
+""";

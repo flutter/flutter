@@ -1,0 +1,23 @@
+targets:
+  $default:
+    builders:
+      build_web_compilers|entrypoint:
+        options:
+          dart2js_args:
+            - -O4 
+            - --csp
+        generate_for:
+          - web/background.dart
+      extension|client_js_copy_builder:
+        enabled: true
+      
+builders:
+  client_js_copy_builder:
+    import: "tool/copy_builder.dart"
+    builder_factories:
+        - copyBuilder
+    build_extensions:
+      web/background.dart.js:
+        - web/background.js
+    auto_apply: none
+    build_to: source

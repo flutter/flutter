@@ -1,0 +1,6 @@
+>>> (indent 2)
+  expect(Bidi.guardBracketInHtml(strWithRtl2),
+      equals("\u05d0 a <span dir=rtl>(asc:))</span>"));
+<<<
+  expect(Bidi.guardBracketInHtml(strWithRtl2),
+      equals("\u05d0 a <span dir=rtl>(asc:))</span>"));

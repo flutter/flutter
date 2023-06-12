@@ -1,0 +1,54 @@
+<project name="vm_service_lib" default="dist">
+  <target name="clean">
+    <delete dir="build"/>
+  </target>
+
+  <target name="init">
+    <mkdir dir="build"/>
+    <mkdir dir="dist"/>
+
+    <property environment="env"/>
+    <property file="version.properties" prefix="service"/>
+    <property name="build.id" value=""/>
+
+    <property
+        name="path"
+        value="third_party/gson/gson-2.2.4.jar;third_party/guava/guava-13.0.1.jar;third_party/weberknecht/weberknecht-0.1.5.jar"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- compile library source -->
+    <mkdir dir="build/classes"/>
+    <javac srcdir="src" destdir="build/classes" includeantruntime="false"
+        source="1.7" target="1.7"
+        classpath="${path}" debug="true"/>
+
+    <!-- compile tests -->
+    <mkdir dir="build/test"/>
+    <javac srcdir="test" destdir="build/test" includeantruntime="false"
+        classpath="${path};build/classes" debug="true"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <copy file="version.properties" todir="build/classes"/>
+    <jar destfile="build/vm_service_lib.jar" basedir="build/classes"/>
+    <jar destfile="build/vm_service_lib-src.jar" basedir="src"/>
+  </target>
+
+  <target name="test" depends="compile">
+    <java classname="org.dartlang.vm.service.VmServiceTest" fork="true" failonerror="true">
+      <arg value="${env.DART_SDK}"/>
+      <classpath>
+        <pathelement path="${path}"/>
+        <pathelement location="build/classes"/>
+        <pathelement location="build/test"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="dist" depends="jar,test">
+    <!-- copy and rename the library -->
+    <copy file="build/vm_service_lib.jar" tofile="dist/vm_service_lib-${service.version}${build.id}.jar"/>
+    <copy file="build/vm_service_lib-src.jar" tofile="dist/vm_service_lib-${service.version}${build.id}-src.jar"/>
+  </target>
+</project>

@@ -1,0 +1,66 @@
+name: assets_audio_player_example
+description: Demonstrates how to use the assets_audio_player plugin.
+publish_to: "none"
+version: 3.0.0
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_neumorphic: ^3.2.0
+  rxdart: ^0.27.0
+  # for local file test
+  dio: ^4.0.0-beta7
+  path_provider: ^2.0.1
+  http: ^0.13.0
+  provider: ^6.0.0
+  file: ^6.1.0
+  #flutter_html: ^2.2.1
+
+  # flutter_audio_recorder: ^0.5.5
+  flutter_audio_recorder:
+    git:
+      url: https://github.com/fayeed/flutter_audio_recorder
+      ref: sound-null-safety
+
+  # flutter_audio_query: ^0.3.5+6
+  flutter_audio_query:
+    git:
+      url: https://github.com/Mayb3Nots/flutter_audio_query
+      ref: master
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_web_compilers: ">=2.0.0 <3.0.0"
+  pedantic: ^1.11.0
+
+  # uncomment to use remote repos
+  # assets_audio_player: ^3.0.0
+  # assets_audio_player_web: ^3.0.0
+
+  # uncomment to match local repos
+  assets_audio_player:
+    path: ../
+  # assets_audio_player_web:
+  #  path: ../assets_audio_player_web
+
+# For information on the generic Dart part of this file, see the
+# following page: https://www.dartlang.org/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+  assets:
+    - assets/audios/
+    - assets/images/
+  fonts:
+    - family: AssetAudioPlayer
+      fonts:
+        - asset: fonts/AssetAudioPlayer.ttf

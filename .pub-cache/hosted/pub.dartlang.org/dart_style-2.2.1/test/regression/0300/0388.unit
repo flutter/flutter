@@ -1,0 +1,41 @@
+>>>
+class _SimpleNodeValidator {
+  factory _SimpleNodeValidator.allowImages(UriPolicy uriPolicy) {
+    return new _SimpleNodeValidator(uriPolicy,
+        allowedElements: const ['IMG'],
+        allowedAttributes: const [
+      'IMG::align',
+      'IMG::alt',
+      'IMG::border',
+      'IMG::height',
+      'IMG::hspace',
+      'IMG::ismap',
+      'IMG::name',
+      'IMG::usemap',
+      'IMG::vspace',
+      'IMG::width',
+    ],
+        allowedUriAttributes: const ['IMG::src',]);
+  }
+}
+<<<
+class _SimpleNodeValidator {
+  factory _SimpleNodeValidator.allowImages(UriPolicy uriPolicy) {
+    return new _SimpleNodeValidator(uriPolicy, allowedElements: const [
+      'IMG'
+    ], allowedAttributes: const [
+      'IMG::align',
+      'IMG::alt',
+      'IMG::border',
+      'IMG::height',
+      'IMG::hspace',
+      'IMG::ismap',
+      'IMG::name',
+      'IMG::usemap',
+      'IMG::vspace',
+      'IMG::width',
+    ], allowedUriAttributes: const [
+      'IMG::src',
+    ]);
+  }
+}

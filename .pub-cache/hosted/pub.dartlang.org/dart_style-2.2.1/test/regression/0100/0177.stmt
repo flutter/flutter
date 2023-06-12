@@ -1,0 +1,4 @@
+>>>
+List<int> l0 = /*info:InferredTypeLiteral*/[];
+<<<
+List<int> l0 = /*info:InferredTypeLiteral*/ [];

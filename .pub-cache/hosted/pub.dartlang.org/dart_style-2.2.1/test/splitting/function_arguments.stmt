@@ -1,0 +1,231 @@
+40 columns                              |
+>>> args before and after function do not force nesting
+method(first,() {fn;},third);
+<<<
+method(first, () {
+  fn;
+}, third);
+>>> nothing but function args does not nest
+longFunctionName(() {;}, () {;}, () {;});
+<<<
+longFunctionName(() {
+  ;
+}, () {
+  ;
+}, () {
+  ;
+});
+>>> trailing functions do not nest
+longFunctionName(argument, argument, argument, argument, () {;}, () {;});
+<<<
+longFunctionName(argument, argument,
+    argument, argument, () {
+  ;
+}, () {
+  ;
+});
+>>> leading functions do not nest
+longFunctionName(() {;}, () {;}, argument, argument, argument, argument);
+<<<
+longFunctionName(() {
+  ;
+}, () {
+  ;
+}, argument, argument, argument,
+    argument);
+>>> arg between functions forces nesting
+longFunctionName(() {;}, argument, () {;});
+<<<
+longFunctionName(
+    () {
+      ;
+    },
+    argument,
+    () {
+      ;
+    });
+>>> unsplit leading args
+longFunctionName(arg, arg, () {;}, () {;});
+<<<
+longFunctionName(arg, arg, () {
+  ;
+}, () {
+  ;
+});
+>>> split before leading args
+longFunctionName(argument, argument, argument, () {;}, () {;});
+<<<
+longFunctionName(
+    argument, argument, argument, () {
+  ;
+}, () {
+  ;
+});
+>>> split in middle of leading args
+longFunctionName(argument, argument, argument, argument, () {;}, () {;});
+<<<
+longFunctionName(argument, argument,
+    argument, argument, () {
+  ;
+}, () {
+  ;
+});
+>>> split before all leading args
+longFunctionName(argument, argument, argument, argument, argument, argument,
+() {;}, () {;});
+<<<
+longFunctionName(
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument, () {
+  ;
+}, () {
+  ;
+});
+>>> unsplit trailing args
+longFunctionName(() {;}, () {;}, argument, argument);
+<<<
+longFunctionName(() {
+  ;
+}, () {
+  ;
+}, argument, argument);
+>>> split before trailing args
+longFunctionName(() {;}, () {;} /* very very long comment */, argument, argument);
+<<<
+longFunctionName(() {
+  ;
+}, () {
+  ;
+} /* very very long comment */,
+    argument, argument);
+>>> split in middle of trailing args
+longFunctionName(() {;}, () {;}, argument, argument, argument, argument);
+<<<
+longFunctionName(() {
+  ;
+}, () {
+  ;
+}, argument, argument, argument,
+    argument);
+>>> split before all trailing args
+longFunctionName(() {;}, () {;}, argument, argument, argument, argument,
+argument, argument, argument);
+<<<
+longFunctionName(() {
+  ;
+}, () {
+  ;
+},
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument);
+>>> functions with named arguments
+longFunctionName(() {;}, a: () {;}, b: () {;});
+<<<
+longFunctionName(() {
+  ;
+}, a: () {
+  ;
+}, b: () {
+  ;
+});
+>>> do not nest because of nested 1-arg fn
+outer(inner(() {body;}));
+<<<
+outer(inner(() {
+  body;
+}));
+>>> do not nest because of nested many-arg fn
+outer(argument, inner(() {body;}));
+<<<
+outer(argument, inner(() {
+  body;
+}));
+>>> do not nest because of nested 1-arg method call
+obj.outer(a.b.c.fn(() {body;}));
+<<<
+obj.outer(a.b.c.fn(() {
+  body;
+}));
+>>> do not nest because of nested many-arg method call
+obj.outer(argument, a.b.c.fn(() {body;}));
+<<<
+obj.outer(argument, a.b.c.fn(() {
+  body;
+}));
+>>> do not force named args to split on positional function
+function(argument, () {;},
+    named: argument, another: argument);
+<<<
+function(argument, () {
+  ;
+}, named: argument, another: argument);
+>>> args before and after functions split independently
+longFunction(argument, argument, argument, argument, argument,
+() {;}, () {;}, argument, argument, argument, argument, argument);
+<<<
+longFunction(argument, argument,
+    argument, argument, argument, () {
+  ;
+}, () {
+  ;
+}, argument, argument, argument,
+    argument, argument);
+>>> all named args with leading non-function forces functions to indent
+longFunction(a: argument, b: () {;}, c: () {;});
+<<<
+longFunction(
+    a: argument,
+    b: () {
+      ;
+    },
+    c: () {
+      ;
+    });
+>>> all named args with trailing non-function forces functions to indent
+longFunction(a: () {;}, b: () {;}, c: argument);
+<<<
+longFunction(
+    a: () {
+      ;
+    },
+    b: () {
+      ;
+    },
+    c: argument);
+>>> no extra indent for expression function argument with trailing comma
+function(() => P(p,),a: () => [a,],);
+<<<
+function(
+  () => P(
+    p,
+  ),
+  a: () => [
+    a,
+  ],
+);
+>>> indents body if not block style
+function(() => inner(argument1, argument2, argument3),);
+<<<
+function(
+  () => inner(
+      argument1, argument2, argument3),
+);
+>>> split in expression function parameter list argument with trailing comma
+function((parameter1, parameter2, parameter3) => P(p,),);
+<<<
+function(
+  (parameter1, parameter2,
+          parameter3) =>
+      P(
+    p,
+  ),
+);

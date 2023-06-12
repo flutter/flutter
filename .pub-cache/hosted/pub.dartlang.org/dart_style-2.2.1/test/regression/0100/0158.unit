@@ -1,0 +1,43 @@
+>>>
+void foo() {
+  if(bar) {
+    if (baz) {
+      _sources[uri] = src = new _MockSdkSource(uri, 'library dart.${uri.path};');
+    }
+  }
+}
+<<<
+void foo() {
+  if (bar) {
+    if (baz) {
+      _sources[uri] =
+          src = new _MockSdkSource(uri, 'library dart.${uri.path};');
+    }
+  }
+}
+>>>
+class Foo {
+  static LibrarySummary parse(Map json) => new LibrarySummary(json[
+      'library_name'], json['messages'].map(MessageSummary.parse).toList(),
+      json['lines']);
+}
+<<<
+class Foo {
+  static LibrarySummary parse(Map json) => new LibrarySummary(
+      json['library_name'],
+      json['messages'].map(MessageSummary.parse).toList(),
+      json['lines']);
+}
+>>>
+class ResultSet {
+  factory ResultSet.fromJson(Map json) => new ResultSet(json['platform'], json[
+      'release'],
+      json['results'].map((result) => new Result.fromJson(result)).toList());
+}
+<<<
+class ResultSet {
+  factory ResultSet.fromJson(Map json) => new ResultSet(
+      json['platform'],
+      json['release'],
+      json['results'].map((result) => new Result.fromJson(result)).toList());
+}

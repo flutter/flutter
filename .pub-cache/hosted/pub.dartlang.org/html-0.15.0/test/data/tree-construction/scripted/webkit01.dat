@@ -1,0 +1,28 @@
+#data
+1<script>document.write("2")</script>3
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "1"
+|     <script>
+|       "document.write("2")"
+|     "23"
+
+#data
+1<script>document.write("<script>document.write('2')</scr"+ "ipt><script>document.write('3')</scr" + "ipt>")</script>4
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "1"
+|     <script>
+|       "document.write("<script>document.write('2')</scr"+ "ipt><script>document.write('3')</scr" + "ipt>")"
+|     <script>
+|       "document.write('2')"
+|     "2"
+|     <script>
+|       "document.write('3')"
+|     "34"

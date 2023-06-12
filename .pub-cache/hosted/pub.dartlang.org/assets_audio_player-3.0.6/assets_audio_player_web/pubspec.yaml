@@ -1,0 +1,74 @@
+name: assets_audio_player_web
+description: Web plugin for assets_audio_player, play music/audio stored in assets files directly from Flutter.
+version: 3.0.6
+#author: Florent Champigny <champigny.florent@gmail.com>
+homepage: https://github.com/florent37/Flutter-AssetsAudioPlayer
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  #flutter_web_howl: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic: ^1.11.1
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  plugin:
+    platforms:
+      android:
+        package: com.github.florent37.assets_audio_player_web
+        pluginClass: AssetsAudioPlayerWebPlugin
+      ios:
+        pluginClass: AssetsAudioPlayerWebPlugin
+      macos:
+        pluginClass: AssetsAudioPlayerWebPlugin
+      web:
+        pluginClass: AssetsAudioPlayerWebPlugin
+        fileName: web/assets_audio_player_web.dart
+
+  # To add assets to your plugin package, add an assets section, like this:
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+  #
+  # For details regarding assets in packages, see
+  # https://flutter.dev/assets-and-images/#from-packages
+  #
+  # An image asset can refer to one or more resolution-specific 'variants', see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+
+  # To add custom fonts to your plugin package, add a fonts section here,
+  # in this 'flutter' section. Each entry in this list should have a
+  # 'family' key with the font family name, and a 'fonts' key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts in packages, see
+  # https://flutter.dev/custom-fonts/#from-packages

@@ -1,0 +1,21 @@
+name: matcher
+version: 0.12.12
+description: >-
+  Support for specifying test expectations via an extensible Matcher class.
+  Also includes a number of built-in Matcher implementations for common cases.
+repository: https://github.com/dart-lang/matcher
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  stack_trace: ^1.10.0
+
+dev_dependencies:
+  lints: ^1.0.0
+  test: any
+  test_api: any
+  test_core: any
+
+dependency_overrides:
+  test_api: any

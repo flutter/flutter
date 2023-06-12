@@ -1,0 +1,32 @@
+# Defines a default set of lint rules enforced for
+# projects at Google. For details and rationale,
+# see https://github.com/dart-lang/pedantic#enabled-lints.
+include: package:lints/recommended.yaml
+
+analyzer:
+  # strong-mode:
+    #implicit-casts: false
+    # implicit-dynamic: false
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_slow_async_io
+    - cancel_subscriptions
+    - directives_ordering
+    - no_adjacent_strings_in_list
+    - omit_local_variable_types
+    - package_api_docs
+    - prefer_const_constructors
+    - prefer_single_quotes
+    - public_member_api_docs
+    - sort_child_properties_last
+    - test_types_in_equals
+    - throw_in_finally
+    - unawaited_futures
+    - unnecessary_null_aware_assignments
+    - unnecessary_statements
+    - unsafe_html
+    - use_full_hex_values_for_flutter_colors
+

@@ -1,0 +1,390 @@
+#data
+<!doctype html><body><title>X</title>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <title>
+|       "X"
+
+#data
+<!doctype html><table><title>X</title></table>
+#errors
+Line: 1 Col: 29 Unexpected start tag (title) in table context caused voodoo mode.
+Line: 1 Col: 38 Unexpected end tag (title) in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <title>
+|       "X"
+|     <table>
+
+#data
+<!doctype html><head></head><title>X</title>
+#errors
+Line: 1 Col: 35 Unexpected start tag (title) that can be in head. Moved.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <title>
+|       "X"
+|   <body>
+
+#data
+<!doctype html></head><title>X</title>
+#errors
+Line: 1 Col: 29 Unexpected start tag (title) that can be in head. Moved.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|     <title>
+|       "X"
+|   <body>
+
+#data
+<!doctype html><table><meta></table>
+#errors
+Line: 1 Col: 28 Unexpected start tag (meta) in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <meta>
+|     <table>
+
+#data
+<!doctype html><table>X<tr><td><table> <meta></table></table>
+#errors
+Line: 1 Col: 23 Unexpected non-space characters in table context caused voodoo mode.
+Line: 1 Col: 45 Unexpected start tag (meta) in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "X"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <meta>
+|             <table>
+|               " "
+
+#data
+<!doctype html><html> <head>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!doctype html> <head>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!doctype html><table><style> <tr>x </style> </table>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <style>
+|         " <tr>x "
+|       " "
+
+#data
+<!doctype html><table><TBODY><script> <tr>x </script> </table>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <script>
+|           " <tr>x "
+|         " "
+
+#data
+<!doctype html><p><applet><p>X</p></applet>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <applet>
+|         <p>
+|           "X"
+
+#data
+<!doctype html><listing>
+X</listing>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <listing>
+|       "X"
+
+#data
+<!doctype html><select><input>X
+#errors
+Line: 1 Col: 30 Unexpected input start tag in the select phase.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|     <input>
+|     "X"
+
+#data
+<!doctype html><select><select>X
+#errors
+Line: 1 Col: 31 Unexpected select start tag in the select phase treated as select end tag.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|     "X"
+
+#data
+<!doctype html><table><input type=hidDEN></table>
+#errors
+Line: 1 Col: 41 Unexpected input with type hidden in table context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <input>
+|         type="hidDEN"
+
+#data
+<!doctype html><table>X<input type=hidDEN></table>
+#errors
+Line: 1 Col: 23 Unexpected non-space characters in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "X"
+|     <table>
+|       <input>
+|         type="hidDEN"
+
+#data
+<!doctype html><table>  <input type=hidDEN></table>
+#errors
+Line: 1 Col: 43 Unexpected input with type hidden in table context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       "  "
+|       <input>
+|         type="hidDEN"
+
+#data
+<!doctype html><table>  <input type='hidDEN'></table>
+#errors
+Line: 1 Col: 45 Unexpected input with type hidden in table context.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       "  "
+|       <input>
+|         type="hidDEN"
+
+#data
+<!doctype html><table><input type=" hidden"><input type=hidDEN></table>
+#errors
+Line: 1 Col: 44 Unexpected start tag (input) in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <input>
+|       type=" hidden"
+|     <table>
+|       <input>
+|         type="hidDEN"
+
+#data
+<!doctype html><table><select>X<tr>
+#errors
+Line: 1 Col: 30 Unexpected start tag (select) in table context caused voodoo mode.
+Line: 1 Col: 35 Unexpected table element start tag (trs) in the select in table phase.
+Line: 1 Col: 35 Unexpected end of file. Expected table content.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       "X"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!doctype html><select>X</select>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       "X"
+
+#data
+<!DOCTYPE hTmL><html></html>
+#errors
+Line: 1 Col: 28 Unexpected end tag (html) after the (implied) root element.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!DOCTYPE HTML><html></html>
+#errors
+Line: 1 Col: 28 Unexpected end tag (html) after the (implied) root element.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+
+#data
+<body>X</body></body>
+#errors
+Line: 1 Col: 21 Unexpected end tag token (body) in the after body phase.
+Line: 1 Col: 21 Unexpected EOF in inner html mode.
+#document-fragment
+html
+#document
+| <head>
+| <body>
+|   "X"
+
+#data
+<div><p>a</x> b
+#errors
+Line: 1 Col: 5 Unexpected start tag (div). Expected DOCTYPE.
+Line: 1 Col: 13 Unexpected end tag (x). Ignored.
+Line: 1 Col: 15 Expected closing tag. Unexpected end of file.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <p>
+|         "a b"
+
+#data
+<table><tr><td><code></code> </table>
+#errors
+Line: 1 Col: 7 Unexpected start tag (table). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             <code>
+|             " "
+
+#data
+<table><b><tr><td>aaa</td></tr>bbb</table>ccc
+#errors
+XXX: Fix me
+#document
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|     <b>
+|       "bbb"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "aaa"
+|     <b>
+|       "ccc"
+
+#data
+A<table><tr> B</tr> B</table>
+#errors
+XXX: Fix me
+#document
+| <html>
+|   <head>
+|   <body>
+|     "A B B"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+A<table><tr> B</tr> </em>C</table>
+#errors
+XXX: Fix me
+#document
+| <html>
+|   <head>
+|   <body>
+|     "A BC"
+|     <table>
+|       <tbody>
+|         <tr>
+|         " "
+
+#data
+<select><keygen>
+#errors
+Not known
+#document
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|     <keygen>

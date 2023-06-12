@@ -1,0 +1,78 @@
+>>>
+_log(new LogEntry(error.transform, error.transform.primaryId, LogLevel.ERROR,
+    message, null), arg);
+<<<
+_log(
+    new LogEntry(error.transform, error.transform.primaryId, LogLevel.ERROR,
+        message, null),
+    arg);
+>>> (indent 4)
+    expect(date_format
+        .parsePattern("hh:mm:ss")
+        .map((x) => x.pattern)
+        .toList(), orderedEquals(["hh", ":", "mm", ":", "ss"]));
+<<<
+    expect(date_format.parsePattern("hh:mm:ss").map((x) => x.pattern).toList(),
+        orderedEquals(["hh", ":", "mm", ":", "ss"]));
+>>> (indent 4)
+    classElement.forEachInstanceField(
+        (ClassElement enclosingClass, VariableElement member) {
+      HInstruction value = fieldValues[member];
+      if (value == null) {
+        // Uninitialized native fields are pre-initialized by the native
+        // implementation.
+        assert(isNativeUpgradeFactory);
+      } else {
+        fields.add(member);
+        DartType type = localsHandler.substInContext(member.type);
+        constructorArguments.add(potentiallyCheckOrTrustType(value, type));
+      }
+    }, includeSuperAndInjectedMembers: true);
+<<<
+    classElement.forEachInstanceField(
+        (ClassElement enclosingClass, VariableElement member) {
+      HInstruction value = fieldValues[member];
+      if (value == null) {
+        // Uninitialized native fields are pre-initialized by the native
+        // implementation.
+        assert(isNativeUpgradeFactory);
+      } else {
+        fields.add(member);
+        DartType type = localsHandler.substInContext(member.type);
+        constructorArguments.add(potentiallyCheckOrTrustType(value, type));
+      }
+    }, includeSuperAndInjectedMembers: true);
+>>> (indent 6)
+      HLoopBlockInformation info = new HLoopBlockInformation(
+          HLoopBlockInformation.loopType(loop),
+          wrapExpressionGraph(initializerGraph),
+          wrapExpressionGraph(conditionExpression),
+          wrapStatementGraph(bodyGraph), wrapExpressionGraph(updateGraph),
+          conditionBlock.loopInformation.target,
+          conditionBlock.loopInformation.labels,
+          sourceFileLocationForBeginToken(loop),
+          sourceFileLocationForEndToken(loop));
+<<<
+      HLoopBlockInformation info = new HLoopBlockInformation(
+          HLoopBlockInformation.loopType(loop),
+          wrapExpressionGraph(initializerGraph),
+          wrapExpressionGraph(conditionExpression),
+          wrapStatementGraph(bodyGraph),
+          wrapExpressionGraph(updateGraph),
+          conditionBlock.loopInformation.target,
+          conditionBlock.loopInformation.labels,
+          sourceFileLocationForBeginToken(loop),
+          sourceFileLocationForEndToken(loop));
+>>> (indent 6)
+      handleSwitch(node, new NullJumpHandler(compiler), buildExpression,
+          node.cases, getConstants, (_) => false, // No case is default.
+          buildSwitchCase);
+<<<
+      handleSwitch(
+          node,
+          new NullJumpHandler(compiler),
+          buildExpression,
+          node.cases,
+          getConstants,
+          (_) => false, // No case is default.
+          buildSwitchCase);

@@ -1,0 +1,13 @@
+>>>
+{
+  fn(x) { ; }
+  items.forEach(fn);
+}
+<<<
+{
+  fn(x) {
+    ;
+  }
+
+  items.forEach(fn);
+}

@@ -1,0 +1,482 @@
+#data
+<!DOCTYPE html><body><svg attributeName='' attributeType='' baseFrequency='' baseProfile='' calcMode='' clipPathUnits='' contentScriptType='' contentStyleType='' diffuseConstant='' edgeMode='' externalResourcesRequired='' filterRes='' filterUnits='' glyphRef='' gradientTransform='' gradientUnits='' kernelMatrix='' kernelUnitLength='' keyPoints='' keySplines='' keyTimes='' lengthAdjust='' limitingConeAngle='' markerHeight='' markerUnits='' markerWidth='' maskContentUnits='' maskUnits='' numOctaves='' pathLength='' patternContentUnits='' patternTransform='' patternUnits='' pointsAtX='' pointsAtY='' pointsAtZ='' preserveAlpha='' preserveAspectRatio='' primitiveUnits='' refX='' refY='' repeatCount='' repeatDur='' requiredExtensions='' requiredFeatures='' specularConstant='' specularExponent='' spreadMethod='' startOffset='' stdDeviation='' stitchTiles='' surfaceScale='' systemLanguage='' tableValues='' targetX='' targetY='' textLength='' viewBox='' viewTarget='' xChannelSelector='' yChannelSelector='' zoomAndPan=''></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       attributeName=""
+|       attributeType=""
+|       baseFrequency=""
+|       baseProfile=""
+|       calcMode=""
+|       clipPathUnits=""
+|       contentScriptType=""
+|       contentStyleType=""
+|       diffuseConstant=""
+|       edgeMode=""
+|       externalResourcesRequired=""
+|       filterRes=""
+|       filterUnits=""
+|       glyphRef=""
+|       gradientTransform=""
+|       gradientUnits=""
+|       kernelMatrix=""
+|       kernelUnitLength=""
+|       keyPoints=""
+|       keySplines=""
+|       keyTimes=""
+|       lengthAdjust=""
+|       limitingConeAngle=""
+|       markerHeight=""
+|       markerUnits=""
+|       markerWidth=""
+|       maskContentUnits=""
+|       maskUnits=""
+|       numOctaves=""
+|       pathLength=""
+|       patternContentUnits=""
+|       patternTransform=""
+|       patternUnits=""
+|       pointsAtX=""
+|       pointsAtY=""
+|       pointsAtZ=""
+|       preserveAlpha=""
+|       preserveAspectRatio=""
+|       primitiveUnits=""
+|       refX=""
+|       refY=""
+|       repeatCount=""
+|       repeatDur=""
+|       requiredExtensions=""
+|       requiredFeatures=""
+|       specularConstant=""
+|       specularExponent=""
+|       spreadMethod=""
+|       startOffset=""
+|       stdDeviation=""
+|       stitchTiles=""
+|       surfaceScale=""
+|       systemLanguage=""
+|       tableValues=""
+|       targetX=""
+|       targetY=""
+|       textLength=""
+|       viewBox=""
+|       viewTarget=""
+|       xChannelSelector=""
+|       yChannelSelector=""
+|       zoomAndPan=""
+
+#data
+<!DOCTYPE html><BODY><SVG ATTRIBUTENAME='' ATTRIBUTETYPE='' BASEFREQUENCY='' BASEPROFILE='' CALCMODE='' CLIPPATHUNITS='' CONTENTSCRIPTTYPE='' CONTENTSTYLETYPE='' DIFFUSECONSTANT='' EDGEMODE='' EXTERNALRESOURCESREQUIRED='' FILTERRES='' FILTERUNITS='' GLYPHREF='' GRADIENTTRANSFORM='' GRADIENTUNITS='' KERNELMATRIX='' KERNELUNITLENGTH='' KEYPOINTS='' KEYSPLINES='' KEYTIMES='' LENGTHADJUST='' LIMITINGCONEANGLE='' MARKERHEIGHT='' MARKERUNITS='' MARKERWIDTH='' MASKCONTENTUNITS='' MASKUNITS='' NUMOCTAVES='' PATHLENGTH='' PATTERNCONTENTUNITS='' PATTERNTRANSFORM='' PATTERNUNITS='' POINTSATX='' POINTSATY='' POINTSATZ='' PRESERVEALPHA='' PRESERVEASPECTRATIO='' PRIMITIVEUNITS='' REFX='' REFY='' REPEATCOUNT='' REPEATDUR='' REQUIREDEXTENSIONS='' REQUIREDFEATURES='' SPECULARCONSTANT='' SPECULAREXPONENT='' SPREADMETHOD='' STARTOFFSET='' STDDEVIATION='' STITCHTILES='' SURFACESCALE='' SYSTEMLANGUAGE='' TABLEVALUES='' TARGETX='' TARGETY='' TEXTLENGTH='' VIEWBOX='' VIEWTARGET='' XCHANNELSELECTOR='' YCHANNELSELECTOR='' ZOOMANDPAN=''></SVG>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       attributeName=""
+|       attributeType=""
+|       baseFrequency=""
+|       baseProfile=""
+|       calcMode=""
+|       clipPathUnits=""
+|       contentScriptType=""
+|       contentStyleType=""
+|       diffuseConstant=""
+|       edgeMode=""
+|       externalResourcesRequired=""
+|       filterRes=""
+|       filterUnits=""
+|       glyphRef=""
+|       gradientTransform=""
+|       gradientUnits=""
+|       kernelMatrix=""
+|       kernelUnitLength=""
+|       keyPoints=""
+|       keySplines=""
+|       keyTimes=""
+|       lengthAdjust=""
+|       limitingConeAngle=""
+|       markerHeight=""
+|       markerUnits=""
+|       markerWidth=""
+|       maskContentUnits=""
+|       maskUnits=""
+|       numOctaves=""
+|       pathLength=""
+|       patternContentUnits=""
+|       patternTransform=""
+|       patternUnits=""
+|       pointsAtX=""
+|       pointsAtY=""
+|       pointsAtZ=""
+|       preserveAlpha=""
+|       preserveAspectRatio=""
+|       primitiveUnits=""
+|       refX=""
+|       refY=""
+|       repeatCount=""
+|       repeatDur=""
+|       requiredExtensions=""
+|       requiredFeatures=""
+|       specularConstant=""
+|       specularExponent=""
+|       spreadMethod=""
+|       startOffset=""
+|       stdDeviation=""
+|       stitchTiles=""
+|       surfaceScale=""
+|       systemLanguage=""
+|       tableValues=""
+|       targetX=""
+|       targetY=""
+|       textLength=""
+|       viewBox=""
+|       viewTarget=""
+|       xChannelSelector=""
+|       yChannelSelector=""
+|       zoomAndPan=""
+
+#data
+<!DOCTYPE html><body><svg attributename='' attributetype='' basefrequency='' baseprofile='' calcmode='' clippathunits='' contentscripttype='' contentstyletype='' diffuseconstant='' edgemode='' externalresourcesrequired='' filterres='' filterunits='' glyphref='' gradienttransform='' gradientunits='' kernelmatrix='' kernelunitlength='' keypoints='' keysplines='' keytimes='' lengthadjust='' limitingconeangle='' markerheight='' markerunits='' markerwidth='' maskcontentunits='' maskunits='' numoctaves='' pathlength='' patterncontentunits='' patterntransform='' patternunits='' pointsatx='' pointsaty='' pointsatz='' preservealpha='' preserveaspectratio='' primitiveunits='' refx='' refy='' repeatcount='' repeatdur='' requiredextensions='' requiredfeatures='' specularconstant='' specularexponent='' spreadmethod='' startoffset='' stddeviation='' stitchtiles='' surfacescale='' systemlanguage='' tablevalues='' targetx='' targety='' textlength='' viewbox='' viewtarget='' xchannelselector='' ychannelselector='' zoomandpan=''></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       attributeName=""
+|       attributeType=""
+|       baseFrequency=""
+|       baseProfile=""
+|       calcMode=""
+|       clipPathUnits=""
+|       contentScriptType=""
+|       contentStyleType=""
+|       diffuseConstant=""
+|       edgeMode=""
+|       externalResourcesRequired=""
+|       filterRes=""
+|       filterUnits=""
+|       glyphRef=""
+|       gradientTransform=""
+|       gradientUnits=""
+|       kernelMatrix=""
+|       kernelUnitLength=""
+|       keyPoints=""
+|       keySplines=""
+|       keyTimes=""
+|       lengthAdjust=""
+|       limitingConeAngle=""
+|       markerHeight=""
+|       markerUnits=""
+|       markerWidth=""
+|       maskContentUnits=""
+|       maskUnits=""
+|       numOctaves=""
+|       pathLength=""
+|       patternContentUnits=""
+|       patternTransform=""
+|       patternUnits=""
+|       pointsAtX=""
+|       pointsAtY=""
+|       pointsAtZ=""
+|       preserveAlpha=""
+|       preserveAspectRatio=""
+|       primitiveUnits=""
+|       refX=""
+|       refY=""
+|       repeatCount=""
+|       repeatDur=""
+|       requiredExtensions=""
+|       requiredFeatures=""
+|       specularConstant=""
+|       specularExponent=""
+|       spreadMethod=""
+|       startOffset=""
+|       stdDeviation=""
+|       stitchTiles=""
+|       surfaceScale=""
+|       systemLanguage=""
+|       tableValues=""
+|       targetX=""
+|       targetY=""
+|       textLength=""
+|       viewBox=""
+|       viewTarget=""
+|       xChannelSelector=""
+|       yChannelSelector=""
+|       zoomAndPan=""
+
+#data
+<!DOCTYPE html><body><math attributeName='' attributeType='' baseFrequency='' baseProfile='' calcMode='' clipPathUnits='' contentScriptType='' contentStyleType='' diffuseConstant='' edgeMode='' externalResourcesRequired='' filterRes='' filterUnits='' glyphRef='' gradientTransform='' gradientUnits='' kernelMatrix='' kernelUnitLength='' keyPoints='' keySplines='' keyTimes='' lengthAdjust='' limitingConeAngle='' markerHeight='' markerUnits='' markerWidth='' maskContentUnits='' maskUnits='' numOctaves='' pathLength='' patternContentUnits='' patternTransform='' patternUnits='' pointsAtX='' pointsAtY='' pointsAtZ='' preserveAlpha='' preserveAspectRatio='' primitiveUnits='' refX='' refY='' repeatCount='' repeatDur='' requiredExtensions='' requiredFeatures='' specularConstant='' specularExponent='' spreadMethod='' startOffset='' stdDeviation='' stitchTiles='' surfaceScale='' systemLanguage='' tableValues='' targetX='' targetY='' textLength='' viewBox='' viewTarget='' xChannelSelector='' yChannelSelector='' zoomAndPan=''></math>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       attributename=""
+|       attributetype=""
+|       basefrequency=""
+|       baseprofile=""
+|       calcmode=""
+|       clippathunits=""
+|       contentscripttype=""
+|       contentstyletype=""
+|       diffuseconstant=""
+|       edgemode=""
+|       externalresourcesrequired=""
+|       filterres=""
+|       filterunits=""
+|       glyphref=""
+|       gradienttransform=""
+|       gradientunits=""
+|       kernelmatrix=""
+|       kernelunitlength=""
+|       keypoints=""
+|       keysplines=""
+|       keytimes=""
+|       lengthadjust=""
+|       limitingconeangle=""
+|       markerheight=""
+|       markerunits=""
+|       markerwidth=""
+|       maskcontentunits=""
+|       maskunits=""
+|       numoctaves=""
+|       pathlength=""
+|       patterncontentunits=""
+|       patterntransform=""
+|       patternunits=""
+|       pointsatx=""
+|       pointsaty=""
+|       pointsatz=""
+|       preservealpha=""
+|       preserveaspectratio=""
+|       primitiveunits=""
+|       refx=""
+|       refy=""
+|       repeatcount=""
+|       repeatdur=""
+|       requiredextensions=""
+|       requiredfeatures=""
+|       specularconstant=""
+|       specularexponent=""
+|       spreadmethod=""
+|       startoffset=""
+|       stddeviation=""
+|       stitchtiles=""
+|       surfacescale=""
+|       systemlanguage=""
+|       tablevalues=""
+|       targetx=""
+|       targety=""
+|       textlength=""
+|       viewbox=""
+|       viewtarget=""
+|       xchannelselector=""
+|       ychannelselector=""
+|       zoomandpan=""
+
+#data
+<!DOCTYPE html><body><svg><altGlyph /><altGlyphDef /><altGlyphItem /><animateColor /><animateMotion /><animateTransform /><clipPath /><feBlend /><feColorMatrix /><feComponentTransfer /><feComposite /><feConvolveMatrix /><feDiffuseLighting /><feDisplacementMap /><feDistantLight /><feFlood /><feFuncA /><feFuncB /><feFuncG /><feFuncR /><feGaussianBlur /><feImage /><feMerge /><feMergeNode /><feMorphology /><feOffset /><fePointLight /><feSpecularLighting /><feSpotLight /><feTile /><feTurbulence /><foreignObject /><glyphRef /><linearGradient /><radialGradient /><textPath /></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg altGlyph>
+|       <svg altGlyphDef>
+|       <svg altGlyphItem>
+|       <svg animateColor>
+|       <svg animateMotion>
+|       <svg animateTransform>
+|       <svg clipPath>
+|       <svg feBlend>
+|       <svg feColorMatrix>
+|       <svg feComponentTransfer>
+|       <svg feComposite>
+|       <svg feConvolveMatrix>
+|       <svg feDiffuseLighting>
+|       <svg feDisplacementMap>
+|       <svg feDistantLight>
+|       <svg feFlood>
+|       <svg feFuncA>
+|       <svg feFuncB>
+|       <svg feFuncG>
+|       <svg feFuncR>
+|       <svg feGaussianBlur>
+|       <svg feImage>
+|       <svg feMerge>
+|       <svg feMergeNode>
+|       <svg feMorphology>
+|       <svg feOffset>
+|       <svg fePointLight>
+|       <svg feSpecularLighting>
+|       <svg feSpotLight>
+|       <svg feTile>
+|       <svg feTurbulence>
+|       <svg foreignObject>
+|       <svg glyphRef>
+|       <svg linearGradient>
+|       <svg radialGradient>
+|       <svg textPath>
+
+#data
+<!DOCTYPE html><body><svg><altglyph /><altglyphdef /><altglyphitem /><animatecolor /><animatemotion /><animatetransform /><clippath /><feblend /><fecolormatrix /><fecomponenttransfer /><fecomposite /><feconvolvematrix /><fediffuselighting /><fedisplacementmap /><fedistantlight /><feflood /><fefunca /><fefuncb /><fefuncg /><fefuncr /><fegaussianblur /><feimage /><femerge /><femergenode /><femorphology /><feoffset /><fepointlight /><fespecularlighting /><fespotlight /><fetile /><feturbulence /><foreignobject /><glyphref /><lineargradient /><radialgradient /><textpath /></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg altGlyph>
+|       <svg altGlyphDef>
+|       <svg altGlyphItem>
+|       <svg animateColor>
+|       <svg animateMotion>
+|       <svg animateTransform>
+|       <svg clipPath>
+|       <svg feBlend>
+|       <svg feColorMatrix>
+|       <svg feComponentTransfer>
+|       <svg feComposite>
+|       <svg feConvolveMatrix>
+|       <svg feDiffuseLighting>
+|       <svg feDisplacementMap>
+|       <svg feDistantLight>
+|       <svg feFlood>
+|       <svg feFuncA>
+|       <svg feFuncB>
+|       <svg feFuncG>
+|       <svg feFuncR>
+|       <svg feGaussianBlur>
+|       <svg feImage>
+|       <svg feMerge>
+|       <svg feMergeNode>
+|       <svg feMorphology>
+|       <svg feOffset>
+|       <svg fePointLight>
+|       <svg feSpecularLighting>
+|       <svg feSpotLight>
+|       <svg feTile>
+|       <svg feTurbulence>
+|       <svg foreignObject>
+|       <svg glyphRef>
+|       <svg linearGradient>
+|       <svg radialGradient>
+|       <svg textPath>
+
+#data
+<!DOCTYPE html><BODY><SVG><ALTGLYPH /><ALTGLYPHDEF /><ALTGLYPHITEM /><ANIMATECOLOR /><ANIMATEMOTION /><ANIMATETRANSFORM /><CLIPPATH /><FEBLEND /><FECOLORMATRIX /><FECOMPONENTTRANSFER /><FECOMPOSITE /><FECONVOLVEMATRIX /><FEDIFFUSELIGHTING /><FEDISPLACEMENTMAP /><FEDISTANTLIGHT /><FEFLOOD /><FEFUNCA /><FEFUNCB /><FEFUNCG /><FEFUNCR /><FEGAUSSIANBLUR /><FEIMAGE /><FEMERGE /><FEMERGENODE /><FEMORPHOLOGY /><FEOFFSET /><FEPOINTLIGHT /><FESPECULARLIGHTING /><FESPOTLIGHT /><FETILE /><FETURBULENCE /><FOREIGNOBJECT /><GLYPHREF /><LINEARGRADIENT /><RADIALGRADIENT /><TEXTPATH /></SVG>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg altGlyph>
+|       <svg altGlyphDef>
+|       <svg altGlyphItem>
+|       <svg animateColor>
+|       <svg animateMotion>
+|       <svg animateTransform>
+|       <svg clipPath>
+|       <svg feBlend>
+|       <svg feColorMatrix>
+|       <svg feComponentTransfer>
+|       <svg feComposite>
+|       <svg feConvolveMatrix>
+|       <svg feDiffuseLighting>
+|       <svg feDisplacementMap>
+|       <svg feDistantLight>
+|       <svg feFlood>
+|       <svg feFuncA>
+|       <svg feFuncB>
+|       <svg feFuncG>
+|       <svg feFuncR>
+|       <svg feGaussianBlur>
+|       <svg feImage>
+|       <svg feMerge>
+|       <svg feMergeNode>
+|       <svg feMorphology>
+|       <svg feOffset>
+|       <svg fePointLight>
+|       <svg feSpecularLighting>
+|       <svg feSpotLight>
+|       <svg feTile>
+|       <svg feTurbulence>
+|       <svg foreignObject>
+|       <svg glyphRef>
+|       <svg linearGradient>
+|       <svg radialGradient>
+|       <svg textPath>
+
+#data
+<!DOCTYPE html><body><math><altGlyph /><altGlyphDef /><altGlyphItem /><animateColor /><animateMotion /><animateTransform /><clipPath /><feBlend /><feColorMatrix /><feComponentTransfer /><feComposite /><feConvolveMatrix /><feDiffuseLighting /><feDisplacementMap /><feDistantLight /><feFlood /><feFuncA /><feFuncB /><feFuncG /><feFuncR /><feGaussianBlur /><feImage /><feMerge /><feMergeNode /><feMorphology /><feOffset /><fePointLight /><feSpecularLighting /><feSpotLight /><feTile /><feTurbulence /><foreignObject /><glyphRef /><linearGradient /><radialGradient /><textPath /></math>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math altglyph>
+|       <math altglyphdef>
+|       <math altglyphitem>
+|       <math animatecolor>
+|       <math animatemotion>
+|       <math animatetransform>
+|       <math clippath>
+|       <math feblend>
+|       <math fecolormatrix>
+|       <math fecomponenttransfer>
+|       <math fecomposite>
+|       <math feconvolvematrix>
+|       <math fediffuselighting>
+|       <math fedisplacementmap>
+|       <math fedistantlight>
+|       <math feflood>
+|       <math fefunca>
+|       <math fefuncb>
+|       <math fefuncg>
+|       <math fefuncr>
+|       <math fegaussianblur>
+|       <math feimage>
+|       <math femerge>
+|       <math femergenode>
+|       <math femorphology>
+|       <math feoffset>
+|       <math fepointlight>
+|       <math fespecularlighting>
+|       <math fespotlight>
+|       <math fetile>
+|       <math feturbulence>
+|       <math foreignobject>
+|       <math glyphref>
+|       <math lineargradient>
+|       <math radialgradient>
+|       <math textpath>
+
+#data
+<!DOCTYPE html><body><svg><solidColor /></svg>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg solidcolor>

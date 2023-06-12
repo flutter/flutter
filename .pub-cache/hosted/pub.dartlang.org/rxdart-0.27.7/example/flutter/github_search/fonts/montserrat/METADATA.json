@@ -1,0 +1,60 @@
+{
+  "name": "Montserrat",
+  "designer": "Julieta Ulanovsky",
+  "license": "OFL",
+  "visibility": "External",
+  "category": "Sans Serif",
+  "size": 14615,
+  "fonts": [
+    {
+      "name": "Montserrat",
+      "style": "normal",
+      "weight": 900,
+      "filename": "Montserrat-Black.ttf",
+      "postScriptName": "Montserrat-Black",
+      "fullName": "Montserrat Black",
+      "copyright": "Copyright \u00a9 2014 by Julieta Ulanovsky. All rights reserved."
+    },
+    {
+      "name": "Montserrat",
+      "style": "normal",
+      "weight": 700,
+      "filename": "Montserrat-Bold.ttf",
+      "postScriptName": "Montserrat-Bold",
+      "fullName": "Montserrat Bold",
+      "copyright": "Copyright \u00a9 2014 by Julieta Ulanovsky. All rights reserved."
+    },
+    {
+      "name": "Montserrat",
+      "style": "normal",
+      "weight": 300,
+      "filename": "Montserrat-Light.ttf",
+      "postScriptName": "Montserrat-Light",
+      "fullName": "Montserrat Light",
+      "copyright": "Copyright \u00a9 2014 by Julieta Ulanovsky. All rights reserved."
+    },
+    {
+      "name": "Montserrat",
+      "style": "normal",
+      "weight": 400,
+      "filename": "Montserrat-Regular.ttf",
+      "postScriptName": "Montserrat-Regular",
+      "fullName": "Montserrat",
+      "copyright": "Copyright \u00a9 2014 by Julieta Ulanovsky. All rights reserved."
+    },
+    {
+      "name": "Montserrat",
+      "style": "normal",
+      "weight": 100,
+      "filename": "Montserrat-Thin.ttf",
+      "postScriptName": "Montserrat-Hairline",
+      "fullName": "Montserrat Hairline",
+      "copyright": "Copyright \u00a9 2014 by Julieta Ulanovsky. All rights reserved."
+    }
+  ],
+  "subsets": [
+    "latin",
+    "menu"
+  ],
+  "dateAdded": "2011-12-13"
+}

@@ -1,0 +1,55 @@
+# https://dart.dev/guides/language/analysis-options
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_bool_literals_in_conditional_expressions
+    - avoid_catching_errors
+    - avoid_classes_with_only_static_members
+    - avoid_dynamic_calls
+    - avoid_private_typedef_functions
+    - avoid_redundant_argument_values
+    - avoid_returning_null
+    - avoid_returning_null_for_future
+    - avoid_returning_this
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
+    - cancel_subscriptions
+    - cascade_invocations
+    - comment_references
+    - directives_ordering
+    - join_return_with_assignment
+    - lines_longer_than_80_chars
+    - literal_only_boolean_expressions
+    - missing_whitespace_between_adjacent_strings
+    - no_adjacent_strings_in_list
+    - no_runtimeType_toString
+    - omit_local_variable_types
+    - only_throw_errors
+    - package_api_docs
+    - prefer_asserts_in_initializer_lists
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_expression_function_bodies
+    - prefer_relative_imports
+    - prefer_single_quotes
+    - sort_pub_dependencies
+    - test_types_in_equals
+    - throw_in_finally
+    - type_annotate_public_apis
+    - unawaited_futures
+    - unnecessary_await_in_return
+    - unnecessary_lambdas
+    - unnecessary_parenthesis
+    - unnecessary_statements
+    - use_if_null_to_convert_nulls_to_bools
+    - use_raw_strings
+    - use_string_buffers
+    - use_super_parameters

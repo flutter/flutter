@@ -1,0 +1,90 @@
+{
+    "tests": [
+        {
+            "description":"CR in bogus comment state",
+            "input":"<?\u000d",
+            "output":["ParseError", ["Comment", "?\u000a"]]
+        },
+        {
+            "description":"CRLF in bogus comment state",
+            "input":"<?\u000d\u000a",
+            "output":["ParseError", ["Comment", "?\u000a"]]
+        },
+        {
+            "description":"NUL in RCDATA and RAWTEXT",
+            "doubleEscaped":true,
+            "initialStates":["RCDATA state", "RAWTEXT state"],
+            "input":"\\u0000",
+            "output":["ParseError", ["Character", "\\uFFFD"]]
+        },
+        {
+            "description":"skip first BOM but not later ones",
+            "input":"\uFEFFfoo\uFEFFbar",
+            "output":[["Character", "foo\uFEFFbar"]]
+        },
+        {
+            "description":"Non BMP-charref in in RCDATA",
+            "initialStates":["RCDATA state"],
+            "input":"&NotEqualTilde;",
+            "output":[["Character", "\u2242\u0338"]]
+        },
+        {
+            "description":"Bad charref in in RCDATA",
+            "initialStates":["RCDATA state"],
+            "input":"&NotEqualTild;",
+            "output":["ParseError", ["Character", "&NotEqualTild;"]]
+        },
+        {
+            "description":"lowercase endtags in RCDATA and RAWTEXT",
+            "initialStates":["RCDATA state", "RAWTEXT state"],
+            "lastStartTag":"xmp",
+            "input":"</XMP>",
+            "output":[["EndTag","xmp"]]
+        },
+        {
+            "description":"bad endtag in RCDATA and RAWTEXT",
+            "initialStates":["RCDATA state", "RAWTEXT state"],
+            "lastStartTag":"xmp",
+            "input":"</ XMP>",
+            "output":[["Character","</ XMP>"]]
+        },
+        {
+            "description":"bad endtag in RCDATA and RAWTEXT",
+            "initialStates":["RCDATA state", "RAWTEXT state"],
+            "lastStartTag":"xmp",
+            "input":"</xm>",
+            "output":[["Character","</xm>"]]
+        },
+        {
+            "description":"bad endtag in RCDATA and RAWTEXT",
+            "initialStates":["RCDATA state", "RAWTEXT state"],
+            "lastStartTag":"xmp",
+            "input":"</xm ",
+            "output":[["Character","</xm "]]
+        },
+        {
+            "description":"bad endtag in RCDATA and RAWTEXT",
+            "initialStates":["RCDATA state", "RAWTEXT state"],
+            "lastStartTag":"xmp",
+            "input":"</xm/",
+            "output":[["Character","</xm/"]]
+        },
+        {
+            "description":"Non BMP-charref in attribute",
+            "input":"<p id=\"&NotEqualTilde;\">",
+            "output":[["StartTag", "p", {"id":"\u2242\u0338"}]]
+        },
+        {
+            "description":"--!NUL in comment ",
+            "doubleEscaped":true,
+            "input":"<!----!\\u0000-->",
+            "output":["ParseError", ["Comment", "--!\\uFFFD"]]
+        },
+        {
+            "description":"space EOF after doctype ",
+            "input":"<!DOCTYPE html ",
+            "output":["ParseError", ["DOCTYPE", "html", null, null , false]]
+        }
+
+    ]
+}

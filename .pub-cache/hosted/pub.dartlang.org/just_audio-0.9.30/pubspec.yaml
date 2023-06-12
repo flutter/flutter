@@ -1,0 +1,47 @@
+name: just_audio
+description: A feature-rich audio player for Flutter. Loop, clip and concatenate any sound from any source (asset/file/URL/stream) in a variety of audio formats with gapless playback.
+version: 0.9.30
+repository: https://github.com/ryanheise/just_audio/tree/minor/just_audio
+issue_tracker: https://github.com/ryanheise/just_audio/issues
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5"
+
+dependencies:
+  just_audio_platform_interface: ^4.2.0
+  # just_audio_platform_interface:
+  #   path: ../just_audio_platform_interface
+  just_audio_web: ^0.4.7
+  # just_audio_web:
+  #   path: ../just_audio_web
+  audio_session: ^0.1.10
+  rxdart: '>=0.26.0 <0.28.0'
+  path: ^1.8.0
+  path_provider: ^2.0.0
+  async: ^2.5.0
+  uuid: ^3.0.1
+  crypto: ^3.0.0
+  meta: ^1.3.0
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  plugin_platform_interface: ^2.0.0
+  flutter_lints: ^2.0.1
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.ryanheise.just_audio
+        pluginClass: JustAudioPlugin
+      ios:
+        pluginClass: JustAudioPlugin
+      macos:
+        pluginClass: JustAudioPlugin
+      web:
+        default_package: just_audio_web

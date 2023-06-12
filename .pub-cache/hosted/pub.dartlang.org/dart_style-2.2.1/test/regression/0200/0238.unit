@@ -1,0 +1,12 @@
+>>>
+class ObjectBenchmark extends ObservationBenchmarkBase {
+  ObjectBenchmark(int objectCount, int mutationCount, String config) : super(
+          'ObjectBenchmark:$objectCount:$mutationCount:$config', objectCount,
+          mutationCount, config);
+}
+<<<
+class ObjectBenchmark extends ObservationBenchmarkBase {
+  ObjectBenchmark(int objectCount, int mutationCount, String config)
+      : super('ObjectBenchmark:$objectCount:$mutationCount:$config',
+            objectCount, mutationCount, config);
+}

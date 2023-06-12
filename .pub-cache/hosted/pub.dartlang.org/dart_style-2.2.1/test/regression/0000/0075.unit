@@ -1,0 +1,26 @@
+>>>
+class AstComparator implements AstVisitor<bool> {
+  bool visitClassDeclaration(ClassDeclaration node) {
+    ClassDeclaration other = this._other as ClassDeclaration;
+    return _isEqualNodes(node.documentationComment, other.documentationComment) && _isEqualNodeLists(node.metadata, other.metadata) && _isEqualTokens(node.abstractKeyword, other.abstractKeyword) && _isEqualTokens(node.classKeyword, other.classKeyword) && _isEqualNodes(node.name, other.name) && _isEqualNodes(node.typeParameters, other.typeParameters) && _isEqualNodes(node.extendsClause, other.extendsClause) && _isEqualNodes(node.withClause, other.withClause) && _isEqualNodes(node.implementsClause, other.implementsClause) && _isEqualTokens(node.leftBracket, other.leftBracket) && _isEqualNodeLists(node.members, other.members) && _isEqualTokens(node.rightBracket, other.rightBracket);
+  }
+}
+<<<
+class AstComparator implements AstVisitor<bool> {
+  bool visitClassDeclaration(ClassDeclaration node) {
+    ClassDeclaration other = this._other as ClassDeclaration;
+    return _isEqualNodes(
+            node.documentationComment, other.documentationComment) &&
+        _isEqualNodeLists(node.metadata, other.metadata) &&
+        _isEqualTokens(node.abstractKeyword, other.abstractKeyword) &&
+        _isEqualTokens(node.classKeyword, other.classKeyword) &&
+        _isEqualNodes(node.name, other.name) &&
+        _isEqualNodes(node.typeParameters, other.typeParameters) &&
+        _isEqualNodes(node.extendsClause, other.extendsClause) &&
+        _isEqualNodes(node.withClause, other.withClause) &&
+        _isEqualNodes(node.implementsClause, other.implementsClause) &&
+        _isEqualTokens(node.leftBracket, other.leftBracket) &&
+        _isEqualNodeLists(node.members, other.members) &&
+        _isEqualTokens(node.rightBracket, other.rightBracket);
+  }
+}

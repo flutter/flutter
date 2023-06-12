@@ -1,0 +1,65 @@
+40 columns                              |
+>>> preserve unicode whitespace inside comments from trim from the end
+// control middle: ×09 end: ×09 ×09
+// control middle: ×0b end: ×0b ×0b
+// space middle: ×20 end: ×20 ×20
+// control middle: ×85 end: ×85 ×85
+<<<
+// control middle: ×09 end:
+// control middle: ×0b end:
+// space middle: ×20 end:
+// control middle: ×85 end:
+>>> preserve unicode whitespace inside comments from trim from the end
+// no-break space middle: ×a0 end: ×a0 ×a0
+// ogham space mark middle: ×1680 end: ×1680 ×1680
+// en quad middle: ×2000 end: ×2000 ×2000
+// em quad middle: ×2001 end: ×2001 ×2001
+// en space middle: ×2002 end: ×2002 ×2002
+// em space middle: ×2003 end: ×2003 ×2003
+<<<
+// no-break space middle: ×a0 end:
+// ogham space mark middle: ×1680 end:
+// en quad middle: ×2000 end:
+// em quad middle: ×2001 end:
+// en space middle: ×2002 end:
+// em space middle: ×2003 end:
+>>>
+// three-per-em space middle: ×2004 end: ×2004 ×2004
+// four-per-em space middle: ×2005 end: ×2005 ×2005
+// six-per-em space middle: ×2006 end: ×2006 ×2006
+// figure space middle: ×2007 end: ×2007 ×2007
+// punctuation space middle: ×2008 end: ×2008 ×2008
+// thin space middle: ×2009 end: ×2009 ×2009
+// hair space middle: ×200a end: ×200a ×200a
+<<<
+// three-per-em space middle: ×2004 end:
+// four-per-em space middle: ×2005 end:
+// six-per-em space middle: ×2006 end:
+// figure space middle: ×2007 end:
+// punctuation space middle: ×2008 end:
+// thin space middle: ×2009 end:
+// hair space middle: ×200a end:
+>>>
+// line separator middle: ×2028 end: ×2028 ×2028
+// paragraph separator middle: ×2029 end: ×2029 ×2029
+// narrow no-break space middle: ×202f end: ×202f ×202f
+// medium mathematical space middle: ×205f end: ×205f ×205f
+// ideographic space middle: ×3000 end: ×3000 ×3000
+// zero width no-break space middle: ×feff end: ×feff ×feff
+<<<
+// line separator middle: ×2028 end:
+// paragraph separator middle: ×2029 end:
+// narrow no-break space middle: ×202f end:
+// medium mathematical space middle: ×205f end:
+// ideographic space middle: ×3000 end:
+// zero width no-break space middle: ×feff end:
+>>> unicode line endings
+// line feed middle: ×0a // end: ×0a ×0a
+// form feed middle: ×0c // end: ×0c ×0c
+// carriage return middle: ×0d // end: ×0d ×0d
+<<<
+// line feed middle:
+// end:
+
+// form feed middle: ×0c // end:
+// carriage return middle: // end:

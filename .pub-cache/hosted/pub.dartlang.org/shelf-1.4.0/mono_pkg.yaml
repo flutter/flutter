@@ -1,0 +1,19 @@
+sdk:
+- pubspec
+- dev
+
+stages:
+- analyze_and_format:
+  - analyze: --fatal-infos .
+  - format:
+    sdk:
+    - dev
+- unit_test:
+  - test: --test-randomize-ordering-seed=random
+    os:
+    - linux
+    # TODO: Get tests passing on windows
+  - test: --test-randomize-ordering-seed=random -p chrome
+    os:
+    - linux
+    - windows

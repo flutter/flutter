@@ -1,0 +1,21 @@
+dart:
+- 2.14.0
+- dev
+
+stages:
+- analyze_and_format:
+  - group:
+    - format
+    - analyze: --fatal-infos .
+- unit_test:
+  - group:
+    - test: --test-randomize-ordering-seed=random
+    # TODO: Restore this https://github.com/dart-lang/build/issues/2841
+    # - command: test/flutter_test.sh
+    os:
+    - linux
+    - windows
+
+cache:
+  directories:
+  - .dart_tool/build

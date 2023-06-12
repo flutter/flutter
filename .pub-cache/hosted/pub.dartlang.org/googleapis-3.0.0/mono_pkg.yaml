@@ -1,0 +1,12 @@
+# See https://pub.dev/packages/mono_repo
+dart:
+- 2.12.0
+- dev
+
+stages:
+- analyze_and_format:
+  - group:
+    - dartfmt
+    - dartanalyzer: --fatal-infos .
+- unittest:
+  - test:

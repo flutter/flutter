@@ -1,0 +1,308 @@
+#data
+FOO<script>'Hello'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'Hello'"
+|     "BAR"
+
+#data
+FOO<script></script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|     "BAR"
+
+#data
+FOO<script></script >BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|     "BAR"
+
+#data
+FOO<script></script/>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|     "BAR"
+
+#data
+FOO<script></script/ >BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|     "BAR"
+
+#data
+FOO<script type="text/plain"></scriptx>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "</scriptx>BAR"
+
+#data
+FOO<script></script foo=">" dd>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|     "BAR"
+
+#data
+FOO<script>'<'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<'"
+|     "BAR"
+
+#data
+FOO<script>'<!'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!'"
+|     "BAR"
+
+#data
+FOO<script>'<!-'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!-'"
+|     "BAR"
+
+#data
+FOO<script>'<!--'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!--'"
+|     "BAR"
+
+#data
+FOO<script>'<!---'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!---'"
+|     "BAR"
+
+#data
+FOO<script>'<!-->'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!-->'"
+|     "BAR"
+
+#data
+FOO<script>'<!-->'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!-->'"
+|     "BAR"
+
+#data
+FOO<script>'<!-- potato'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!-- potato'"
+|     "BAR"
+
+#data
+FOO<script>'<!-- <sCrIpt'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!-- <sCrIpt'"
+|     "BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt>'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt>'</script>BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt> -'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt> -'</script>BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt> --'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt> --'</script>BAR"
+
+#data
+FOO<script>'<!-- <sCrIpt> -->'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       "'<!-- <sCrIpt> -->'"
+|     "BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt> --!>'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt> --!>'</script>BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt> -- >'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt> -- >'</script>BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt '</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt '</script>BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt/'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt/'</script>BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt\'</script>BAR
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt\'"
+|     "BAR"
+
+#data
+FOO<script type="text/plain">'<!-- <sCrIpt/'</script>BAR</script>QUX
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <script>
+|       type="text/plain"
+|       "'<!-- <sCrIpt/'</script>BAR"
+|     "QUX"

@@ -1,0 +1,22 @@
+name: webkit_inspection_protocol
+version: 1.1.0
+description: >
+  A client for the Chrome DevTools Protocol (previously called the Webkit
+  Inspection Protocol).
+repository: https://github.com/google/webkit_inspection_protocol.dart
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  logging: ^1.0.0
+
+dev_dependencies:
+  args: ^2.0.0
+  lints: ^2.0.0
+  shelf_static: ^1.0.0
+  shelf_web_socket: ^1.0.0
+  shelf: ^1.0.0
+  test: ^1.16.0
+  web_socket_channel: ^2.0.0 # used in example/
+  webdriver: ^3.0.0

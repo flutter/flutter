@@ -1,0 +1,24 @@
+name: example
+version: 1.0.0
+homepage: https://github.com/Solido/Flutter-BlurHash
+authors:
+  - Robert Felker <flutter@robbieone.com>
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  inview_notifier_list: ^1.0.0
+  google_fonts: ^1.0.0
+  flutter_blurhash:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

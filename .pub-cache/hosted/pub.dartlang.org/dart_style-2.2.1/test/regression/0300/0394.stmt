@@ -1,0 +1,26 @@
+>>>
+return $.Div(inner: [
+
+    $.Div(id: "container", inner: [
+        $.Canvas(width: maxD, height: maxD, clazz: "center", ref: canvas),
+        $.Form(clazz: "center", inner: [
+            $.Input(type: "range", max: 1000, value: seeds, onChange: onSliderChange)
+        ]),
+        $.Img(src: "math.png", width: "350px", height: "42px", clazz: "center")
+    ]),
+
+    $.Footer(inner: [
+        $.P(id: "notes", inner: "${seeds} seeds")
+    ]),
+]);
+<<<
+return $.Div(inner: [
+  $.Div(id: "container", inner: [
+    $.Canvas(width: maxD, height: maxD, clazz: "center", ref: canvas),
+    $.Form(clazz: "center", inner: [
+      $.Input(type: "range", max: 1000, value: seeds, onChange: onSliderChange)
+    ]),
+    $.Img(src: "math.png", width: "350px", height: "42px", clazz: "center")
+  ]),
+  $.Footer(inner: [$.P(id: "notes", inner: "${seeds} seeds")]),
+]);

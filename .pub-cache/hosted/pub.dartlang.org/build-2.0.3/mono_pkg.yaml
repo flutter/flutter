@@ -1,0 +1,19 @@
+dart:
+- 2.12.0
+- dev
+
+stages:
+- analyze_and_format:
+  - analyze: --fatal-infos .
+  - format:
+    dart:
+    - dev
+- unit_test:
+  - test: --test-randomize-ordering-seed=random
+    os:
+    - linux
+    - windows
+
+cache:
+  directories:
+  - .dart_tool/build

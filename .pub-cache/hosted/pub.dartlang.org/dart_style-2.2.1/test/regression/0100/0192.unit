@@ -1,0 +1,10 @@
+>>>
+class Foo {
+/// test
+  Foo();
+}
+<<<
+class Foo {
+  /// test
+  Foo();
+}

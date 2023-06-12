@@ -1,0 +1,6 @@
+>>>
+shadowRoot.querySelector("#slide-out")..onKeyDown.listen(_hideOnEsc)..onClick.listen(hide);
+<<<
+shadowRoot.querySelector("#slide-out")
+  ..onKeyDown.listen(_hideOnEsc)
+  ..onClick.listen(hide);

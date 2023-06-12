@@ -1,0 +1,47 @@
+>>> (indent 2)
+  verify(
+      "Caractères qui doivent être échapper, par exemple barres \\ "
+      "dollars \${ (les accolades sont ok), et xml/html réservés <& et "
+      "des citations \" "
+      "avec quelques paramètres ainsi 1, 2, et 3");
+<<<
+  verify("Caractères qui doivent être échapper, par exemple barres \\ "
+      "dollars \${ (les accolades sont ok), et xml/html réservés <& et "
+      "des citations \" "
+      "avec quelques paramètres ainsi 1, 2, et 3");
+>>> preserve newlines but not indent
+var map = {
+  "nestedMessage" : "{combinedGender,select, "
+    "other{"
+      "{number,plural, "
+        "=0{Personne n'avait allé à la {place}}"
+        "=1{{names} était allé à la {place}}"
+        "other{{names} étaient allés à la {place}}"
+      "}"
+    "}"
+    "female{"
+      "{number,plural, "
+        "=1{{names} était allée à la {place}}"
+        "other{{names} étaient allées à la {place}}"
+      "}"
+    "}"
+  "}",
+};
+<<<
+var map = {
+  "nestedMessage": "{combinedGender,select, "
+      "other{"
+      "{number,plural, "
+      "=0{Personne n'avait allé à la {place}}"
+      "=1{{names} était allé à la {place}}"
+      "other{{names} étaient allés à la {place}}"
+      "}"
+      "}"
+      "female{"
+      "{number,plural, "
+      "=1{{names} était allée à la {place}}"
+      "other{{names} étaient allées à la {place}}"
+      "}"
+      "}"
+      "}",
+};

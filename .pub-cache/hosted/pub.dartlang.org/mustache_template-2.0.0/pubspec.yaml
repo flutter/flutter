@@ -1,0 +1,10 @@
+name: mustache_template
+version: 2.0.0
+description: A mustache template library that supports dart2js and dart2native
+homepage: https://github.com/jonahwilliams/mustache
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dev_dependencies:
+  test: '^1.16.5'

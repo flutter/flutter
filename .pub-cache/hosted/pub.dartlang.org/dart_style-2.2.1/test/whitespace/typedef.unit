@@ -1,0 +1,53 @@
+40 columns                              |
+>>> old generic typedef syntax
+typedef Foo  <  T  ,S  >(T t,S s);
+<<<
+typedef Foo<T, S>(T t, S s);
+>>> non-generic in typedef
+typedef   SomeFunc=ReturnType  Function(int param,   double other);
+<<<
+typedef SomeFunc = ReturnType Function(
+    int param, double other);
+>>> generic in typedef
+typedef Generic = T Function<T>(T param, double other);
+<<<
+typedef Generic = T Function<T>(
+    T param, double other);
+>>> no return type
+typedef SomeFunc = Function();
+<<<
+typedef SomeFunc = Function();
+>>> nested
+typedef SomeFunc = Function(int first, Function(int first, bool second, String third) second, String third);
+<<<
+typedef SomeFunc = Function(
+    int first,
+    Function(int first, bool second,
+            String third)
+        second,
+    String third);
+>>> without param names
+typedef F = Function(int, bool, String);
+<<<
+typedef F = Function(int, bool, String);
+>>> generic
+typedef    Foo < A ,B>=Function ( A a,   B b );
+<<<
+typedef Foo<A, B> = Function(A a, B b);
+>>> generic function
+typedef    Foo  =Function  < A ,B  >   ( A a,B b );
+<<<
+typedef Foo = Function<A, B>(A a, B b);
+>>>
+typedef    Foo   =   Bar;
+<<<
+typedef Foo = Bar;
+>>> non-function typedef
+typedef   Json  =  Map <   String ,  Object  ? >   ;
+<<<
+typedef Json = Map<String, Object?>;
+>>> non-function generic typedef
+typedef   Hash  <  K  extends  List <  T > ,  V  >  =  Map < K ,  V >   ;
+<<<
+typedef Hash<K extends List<T>, V>
+    = Map<K, V>;

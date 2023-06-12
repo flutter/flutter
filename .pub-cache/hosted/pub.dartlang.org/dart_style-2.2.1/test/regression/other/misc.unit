@@ -1,0 +1,18 @@
+>>>
+main() {
+  addTask(
+      "publish",
+      createProcessTask("pub",
+          args: ["publish", "-f"], description: "Publishes a New Version"),
+      dependencies: [
+    "version"
+  ]);
+}
+<<<
+main() {
+  addTask(
+      "publish",
+      createProcessTask("pub",
+          args: ["publish", "-f"], description: "Publishes a New Version"),
+      dependencies: ["version"]);
+}

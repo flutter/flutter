@@ -1,0 +1,20 @@
+>>>
+abstract class Connection<TLookupResponse, TLookupRequest, TRunQueryResponse, TRunQueryRequest, TBeginTransactionResponse, TBeginTransactionRequest, TCommitResponse, TCommitRequest, TRollbackResponse, TRollbackRequest, TAllocateIdsResponse, TAllocateIdsRequest> {
+  // ...
+}
+<<<
+abstract class Connection<
+    TLookupResponse,
+    TLookupRequest,
+    TRunQueryResponse,
+    TRunQueryRequest,
+    TBeginTransactionResponse,
+    TBeginTransactionRequest,
+    TCommitResponse,
+    TCommitRequest,
+    TRollbackResponse,
+    TRollbackRequest,
+    TAllocateIdsResponse,
+    TAllocateIdsRequest> {
+  // ...
+}

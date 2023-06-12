@@ -1,0 +1,108 @@
+# Copied from flutter/flutter/master/examples/flutter_gallery/pubspec.yaml
+# Commit: 1bdf351.
+name: flutter_gallery
+dependencies:
+  collection: '>=1.9.1 <2.0.0'
+  intl: '>=0.14.0 <0.15.0'
+  string_scanner: ^1.0.0
+
+  flutter:
+    sdk: flutter
+
+  # Also update dev/benchmarks/complex_layout/pubspec.yaml
+  flutter_gallery_assets:
+    git:
+      url: https://flutter.googlesource.com/gallery-assets
+      ref: ef928550119411358b8b25e16aecde6ace513526
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - packages/flutter_gallery_assets/appbar_background.jpg
+    - packages/flutter_gallery_assets/appbar/appbar_background_layer0.png
+    - packages/flutter_gallery_assets/appbar/appbar_background_layer1.png
+    - packages/flutter_gallery_assets/appbar/appbar_background_layer2.png
+    - packages/flutter_gallery_assets/appbar/appbar_background_layer3.png
+    - packages/flutter_gallery_assets/appbar/appbar_background_layer4.png
+    - packages/flutter_gallery_assets/appbar/appbar_background_layer5.png
+    - packages/flutter_gallery_assets/pesto/avatar.jpg
+    - packages/flutter_gallery_assets/pesto/image10.jpg
+    - packages/flutter_gallery_assets/pesto/image11.jpg
+    - packages/flutter_gallery_assets/pesto/image12.jpg
+    - packages/flutter_gallery_assets/pesto/image13.jpg
+    - packages/flutter_gallery_assets/pesto/image1.jpg
+    - packages/flutter_gallery_assets/pesto/image2.jpg
+    - packages/flutter_gallery_assets/pesto/image3.jpg
+    - packages/flutter_gallery_assets/pesto/image4.jpg
+    - packages/flutter_gallery_assets/pesto/image5.jpg
+    - packages/flutter_gallery_assets/pesto/image6.jpg
+    - packages/flutter_gallery_assets/pesto/image7.jpg
+    - packages/flutter_gallery_assets/pesto/image8.jpg
+    - packages/flutter_gallery_assets/pesto/image9.jpg
+    - packages/flutter_gallery_assets/pesto/logo_small.png
+    - packages/flutter_gallery_assets/pesto/logo_medium.png
+    - packages/flutter_gallery_assets/pesto/fish.png
+    - packages/flutter_gallery_assets/pesto/healthy.png
+    - packages/flutter_gallery_assets/pesto/main.png
+    - packages/flutter_gallery_assets/pesto/meat.png
+    - packages/flutter_gallery_assets/pesto/quick.png
+    - packages/flutter_gallery_assets/pesto/spicy.png
+    - packages/flutter_gallery_assets/pesto/veggie.png
+    - packages/flutter_gallery_assets/about_logo.png
+    - packages/flutter_gallery_assets/ali_connors.jpg
+    - packages/flutter_gallery_assets/drawer_logo.png
+    - packages/flutter_gallery_assets/kangaroo_valley_safari.jpg
+    - packages/flutter_gallery_assets/top_10_australian_beaches.jpg
+    - packages/flutter_gallery_assets/landscape_0.jpg
+    - packages/flutter_gallery_assets/landscape_1.jpg
+    - packages/flutter_gallery_assets/landscape_2.jpg
+    - packages/flutter_gallery_assets/landscape_3.jpg
+    - packages/flutter_gallery_assets/landscape_4.jpg
+    - packages/flutter_gallery_assets/landscape_5.jpg
+    - packages/flutter_gallery_assets/landscape_6.jpg
+    - packages/flutter_gallery_assets/landscape_7.jpg
+    - packages/flutter_gallery_assets/landscape_8.jpg
+    - packages/flutter_gallery_assets/landscape_9.jpg
+    - packages/flutter_gallery_assets/landscape_10.jpg
+    - packages/flutter_gallery_assets/landscape_11.jpg
+    - packages/flutter_gallery_assets/shrine/products/backpack.png
+    - packages/flutter_gallery_assets/shrine/products/beachball.png
+    - packages/flutter_gallery_assets/shrine/products/binoculars.png
+    - packages/flutter_gallery_assets/shrine/products/brush.png
+    - packages/flutter_gallery_assets/shrine/products/chair.png
+    - packages/flutter_gallery_assets/shrine/products/chucks.png
+    - packages/flutter_gallery_assets/shrine/products/clock.png
+    - packages/flutter_gallery_assets/shrine/products/fish_bowl.png
+    - packages/flutter_gallery_assets/shrine/products/flippers.png
+    - packages/flutter_gallery_assets/shrine/products/green-shoes.png
+    - packages/flutter_gallery_assets/shrine/products/heels.png
+    - packages/flutter_gallery_assets/shrine/products/helmet.png
+    - packages/flutter_gallery_assets/shrine/products/lawn_chair.png
+    - packages/flutter_gallery_assets/shrine/products/lipstick.png
+    - packages/flutter_gallery_assets/shrine/products/popsicle.png
+    - packages/flutter_gallery_assets/shrine/products/radio.png
+    - packages/flutter_gallery_assets/shrine/products/sunnies.png
+    - packages/flutter_gallery_assets/shrine/products/surfboard.png
+    - packages/flutter_gallery_assets/shrine/products/teapot.png
+    - packages/flutter_gallery_assets/shrine/vendors/16c477b.jpg
+    - packages/flutter_gallery_assets/shrine/vendors/ali-connors.png
+    - packages/flutter_gallery_assets/shrine/vendors/peter-carlsson.png
+    - packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg
+    - packages/flutter_gallery_assets/shrine/vendors/zach.jpg
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Regular.ttf
+        - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-Medium.ttf
+          weight: 500
+        - asset: packages/flutter_gallery_assets/pesto/fonts/Raleway-SemiBold.ttf
+          weight: 600
+    - family: AbrilFatface
+      fonts:
+        - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf

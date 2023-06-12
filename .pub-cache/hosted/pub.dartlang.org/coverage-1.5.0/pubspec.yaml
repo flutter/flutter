@@ -1,0 +1,29 @@
+name: coverage
+version: 1.5.0
+description: Coverage data manipulation and formatting
+repository: https://github.com/dart-lang/coverage
+
+environment:
+  sdk: '>=2.15.0 <3.0.0'
+
+dependencies:
+  args: ^2.0.0
+  logging: ^1.0.0
+  package_config: ^2.0.0
+  path: ^1.8.0
+  source_maps: ^0.10.10
+  stack_trace: ^1.10.0
+  vm_service: ^9.0.0
+
+dev_dependencies:
+  build_runner: ^2.1.10
+  lints: ^1.0.0
+  mockito: ^5.1.0
+  test: ^1.16.0
+  test_descriptor: ^2.0.0
+  test_process: ^2.0.0
+
+executables:
+  collect_coverage:
+  format_coverage:
+  test_with_coverage:

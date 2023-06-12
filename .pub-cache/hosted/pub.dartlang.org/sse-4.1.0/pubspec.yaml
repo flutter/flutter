@@ -1,0 +1,24 @@
+name: sse
+version: 4.1.0
+homepage: https://github.com/dart-lang/sse
+description: >-
+  Provides client and server functionality for setting up bi-directional
+  communication through Server Sent Events (SSE) and corresponding POST
+  requests.
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  async: ^2.0.8
+  collection: ^1.0.0
+  logging: '>=0.11.3+2 <2.0.0'
+  pool: ^1.5.0
+  pedantic: ^1.4.0
+  stream_channel: '>=1.6.8 <3.0.0'
+  shelf: ^1.1.0
+
+dev_dependencies:
+  shelf_static: '>=0.2.8 <2.0.0'
+  test: ^1.5.3
+  webdriver: ^3.0.0

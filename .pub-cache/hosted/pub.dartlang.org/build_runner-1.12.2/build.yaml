@@ -1,0 +1,25 @@
+targets:
+  $default:
+    builders:
+      build_web_compilers:entrypoint:
+        options:
+          compiler: dart2js
+          dart2js_args:
+            - -O4
+        generate_for:
+          - web/graph_viz_main.dart
+          - web/hot_reload_client.dart
+      build_runner:client_js_copy_builder:
+        enabled: true
+builders:
+  client_js_copy_builder:
+    import: "tool/builders.dart"
+    builder_factories:
+        - copyCompiledJs
+    build_extensions:
+      web/graph_viz_main.dart.js:
+        - lib/src/server/graph_viz_main.dart.js
+      web/hot_reload_client.dart.js:
+        - lib/src/server/build_updates_client/hot_reload_client.dart.js
+    auto_apply: none
+    build_to: source

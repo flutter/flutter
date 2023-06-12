@@ -1,0 +1,68 @@
+>>>
+void main() {
+  useGeneratedCode(new StaticConfiguration(
+      checkedMode: false,
+      parents: {
+        smoke_0.A: smoke_1.PolymerElement,
+        smoke_0.B: smoke_0.A,
+        smoke_0.C: smoke_0.B,
+        smoke_0.D: smoke_0.B,
+        smoke_0.E: smoke_0.C,
+      },
+      declarations: {
+        smoke_0.A: {},
+        smoke_0.B: {},
+        smoke_0.C: {},
+        smoke_0.D: {},
+        smoke_0.E: {},
+      }));
+  new LogInjector().injectLogsFromUrl('sort_registration_test.html._buildLogs');
+  configureForDeployment([
+      () => Polymer.register('x-a', i0.A),
+      () => Polymer.register('x-b', i0.B),
+      () => Polymer.register('x-d', i0.D),
+      () => Polymer.register('x-c', i0.C),
+      () => Polymer.register('x-e', i0.E),
+    ]);
+  i0.main();
+}
+<<<
+void main() {
+  useGeneratedCode(new StaticConfiguration(checkedMode: false, parents: {
+    smoke_0.A: smoke_1.PolymerElement,
+    smoke_0.B: smoke_0.A,
+    smoke_0.C: smoke_0.B,
+    smoke_0.D: smoke_0.B,
+    smoke_0.E: smoke_0.C,
+  }, declarations: {
+    smoke_0.A: {},
+    smoke_0.B: {},
+    smoke_0.C: {},
+    smoke_0.D: {},
+    smoke_0.E: {},
+  }));
+  new LogInjector().injectLogsFromUrl('sort_registration_test.html._buildLogs');
+  configureForDeployment([
+    () => Polymer.register('x-a', i0.A),
+    () => Polymer.register('x-b', i0.B),
+    () => Polymer.register('x-d', i0.D),
+    () => Polymer.register('x-c', i0.C),
+    () => Polymer.register('x-e', i0.E),
+  ]);
+  i0.main();
+}
+>>> (indent 4)
+    final server = new DatastoreLocalDevServer('connect',
+        workingDirectory: path.join(
+            packageRoot().absolute.path, 'test/tmp_data'),
+        environment: <String, String>{
+            'JAVA': '/usr/lib/jvm/java-7-openjdk-amd64/bin/java'},
+        minUpTimeBeforeShutdown: new Duration(seconds: 0));
+<<<
+    final server = new DatastoreLocalDevServer('connect',
+        workingDirectory:
+            path.join(packageRoot().absolute.path, 'test/tmp_data'),
+        environment: <String, String>{
+          'JAVA': '/usr/lib/jvm/java-7-openjdk-amd64/bin/java'
+        },
+        minUpTimeBeforeShutdown: new Duration(seconds: 0));

@@ -1,0 +1,10 @@
+include: package:dart_flutter_team_lints/analysis_options.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true
+  errors:
+    lines_longer_than_80_chars: ignore
+    # https://github.com/dart-lang/linter/issues/1649
+    prefer_collection_literals: ignore

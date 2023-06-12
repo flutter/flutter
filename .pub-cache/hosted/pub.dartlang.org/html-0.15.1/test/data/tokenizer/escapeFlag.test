@@ -1,0 +1,33 @@
+{"tests": [
+
+{"description":"Commented close tag in RCDATA or RAWTEXT",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo<!--</xmp>--></xmp>",
+"output":[["Character", "foo<!--"], ["EndTag", "xmp"], ["Character", "-->"], ["EndTag", "xmp"]]},
+
+{"description":"Bogus comment in RCDATA or RAWTEXT",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo<!-->baz</xmp>",
+"output":[["Character", "foo<!-->baz"], ["EndTag", "xmp"]]},
+
+{"description":"End tag surrounded by bogus comment in RCDATA or RAWTEXT",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo<!--></xmp><!-->baz</xmp>",
+"output":[["Character", "foo<!-->"], ["EndTag", "xmp"], "ParseError", ["Comment", ""], ["Character", "baz"], ["EndTag", "xmp"]]},
+
+{"description":"Commented entities in RCDATA",
+"initialStates":["RCDATA state"],
+"lastStartTag":"xmp",
+"input":" &amp; <!-- &amp; --> &amp; </xmp>",
+"output":[["Character", " & <!-- & --> & "], ["EndTag", "xmp"]]},
+
+{"description":"Incorrect comment ending sequences in RCDATA or RAWTEXT",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo<!-- x --x>x-- >x--!>x--<></xmp>",
+"output":[["Character", "foo<!-- x --x>x-- >x--!>x--<>"], ["EndTag", "xmp"]]}
+
+]}

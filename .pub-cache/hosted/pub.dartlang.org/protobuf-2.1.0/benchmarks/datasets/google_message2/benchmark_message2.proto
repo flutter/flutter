@@ -1,0 +1,76 @@
+// Benchmark messages for proto2.
+
+syntax = "proto2";
+
+package benchmarks.proto2;
+option java_package = "com.google.protobuf.benchmarks";
+
+// This is the default, but we specify it here explicitly.
+option optimize_for = SPEED;
+
+option cc_enable_arenas = true;
+
+message GoogleMessage2 {
+  optional string field1 = 1;
+  optional int64 field3 = 3;
+  optional int64 field4 = 4;
+  optional int64 field30 = 30;
+  optional bool field75 = 75 [default = false];
+  optional string field6 = 6;
+  optional bytes field2 = 2;
+  optional int32 field21 = 21 [default = 0];
+  optional int32 field71 = 71;
+  optional float field25 = 25;
+  optional int32 field109 = 109 [default = 0];
+  optional int32 field210 = 210 [default = 0];
+  optional int32 field211 = 211 [default = 0];
+  optional int32 field212 = 212 [default = 0];
+  optional int32 field213 = 213 [default = 0];
+  optional int32 field216 = 216 [default = 0];
+  optional int32 field217 = 217 [default = 0];
+  optional int32 field218 = 218 [default = 0];
+  optional int32 field220 = 220 [default = 0];
+  optional int32 field221 = 221 [default = 0];
+  optional float field222 = 222 [default = 0.0];
+  optional int32 field63 = 63;
+
+  repeated group Group1 = 10 {
+    required float field11 = 11;
+    optional float field26 = 26;
+    optional string field12 = 12;
+    optional string field13 = 13;
+    repeated string field14 = 14;
+    required uint64 field15 = 15;
+    optional int32 field5 = 5;
+    optional string field27 = 27;
+    optional int32 field28 = 28;
+    optional string field29 = 29;
+    optional string field16 = 16;
+    repeated string field22 = 22;
+    repeated int32 field73 = 73;
+    optional int32 field20 = 20 [default = 0];
+    optional string field24 = 24;
+    optional GoogleMessage2GroupedMessage field31 = 31;
+  }
+  repeated string field128 = 128;
+  optional int64 field131 = 131;
+  repeated string field127 = 127;
+  optional int32 field129 = 129;
+  repeated int64 field130 = 130;
+  optional bool field205 = 205 [default = false];
+  optional bool field206 = 206 [default = false];
+}
+
+message GoogleMessage2GroupedMessage {
+  optional float field1 = 1;
+  optional float field2 = 2;
+  optional float field3 = 3 [default = 0.0];
+  optional bool field4 = 4;
+  optional bool field5 = 5;
+  optional bool field6 = 6 [default = true];
+  optional bool field7 = 7 [default = false];
+  optional float field8 = 8;
+  optional bool field9 = 9;
+  optional float field10 = 10;
+  optional int64 field11 = 11;
+}

@@ -1,0 +1,24 @@
+targets:
+  $default:
+    builders:
+      build_web_compilers|entrypoint:
+        options:
+          compiler: dart2js
+          dart2js_args:
+            - -O1
+            - --no-source-maps
+        generate_for:
+          - web/client.dart
+      dwds|client_js_copy_builder:
+        enabled: true
+
+builders:
+  client_js_copy_builder:
+    import: "tool/copy_builder.dart"
+    builder_factories:
+        - copyBuilder
+    build_extensions:
+      web/client.dart.js:
+        - lib/src/injected/client.js
+    auto_apply: none
+    build_to: source

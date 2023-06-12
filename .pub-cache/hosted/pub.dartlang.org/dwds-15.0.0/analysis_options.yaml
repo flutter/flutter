@@ -1,0 +1,13 @@
+# This file contains the analysis options used for code in the webdev
+# repository.
+
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+      # Ignore generated files
+    - "lib/data/*"
+
+linter:
+  rules:
+    - prefer_final_locals

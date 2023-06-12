@@ -1,0 +1,8 @@
+>>>
+String html = '''
+some long string that does not fit in one line along with the type
+''';
+<<<
+String html = '''
+some long string that does not fit in one line along with the type
+''';

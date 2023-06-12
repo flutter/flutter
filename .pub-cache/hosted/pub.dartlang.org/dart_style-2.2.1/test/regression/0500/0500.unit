@@ -1,0 +1,41 @@
+>>> (indent 2)
+  Decl immutableVariableDeclaration(
+          List<String> names, List<Expr> initializers) =>
+      (Environment env) {
+        assert(names.length == initializers.length);
+        for (int i = 0; i < names.length; ++i) {
+          env.initialize(names[i],
+              getter: (TopLevelBinding binding, ExprCont ek, ExprCont k) {
+            binding.getter = (TopLevelBinding _, ExprCont ek0, ExprCont k0) => ek0(
+                "Reading static variable '${binding.name}' during its initialization");
+            initializers[i](env, ek, (v) {
+              binding.getter =
+                  (TopLevelBinding _, ExprCont ek1, ExprCont k1) => k1(v);
+              return k(v);
+            });
+          },
+              setter: (value, ExprCont ek, ExprCont k) =>
+                  ek("NoSuchMethodError: method not found: '${names[i]}='"));
+        }
+      };
+<<<
+  Decl immutableVariableDeclaration(
+          List<String> names, List<Expr> initializers) =>
+      (Environment env) {
+        assert(names.length == initializers.length);
+        for (int i = 0; i < names.length; ++i) {
+          env.initialize(names[i],
+              getter: (TopLevelBinding binding, ExprCont ek, ExprCont k) {
+                binding.getter = (TopLevelBinding _, ExprCont ek0,
+                        ExprCont k0) =>
+                    ek0("Reading static variable '${binding.name}' during its initialization");
+                initializers[i](env, ek, (v) {
+                  binding.getter =
+                      (TopLevelBinding _, ExprCont ek1, ExprCont k1) => k1(v);
+                  return k(v);
+                });
+              },
+              setter: (value, ExprCont ek, ExprCont k) =>
+                  ek("NoSuchMethodError: method not found: '${names[i]}='"));
+        }
+      };

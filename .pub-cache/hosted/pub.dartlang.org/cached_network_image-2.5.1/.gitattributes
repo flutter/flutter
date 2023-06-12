@@ -1,0 +1,39 @@
+# This file is understood by git 1.7.2+.
+
+# Windows specific files should always be crlf on checkout
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Check out the following as ln always for osx/linux/cygwin
+*.sh text eol=lf
+
+# Opt in the following types to always normalize line endings
+# on checkin and always use native endings on checkout.
+*.config  text
+*.cs      text diff=csharp
+*.csproj  text
+*.md      text
+*.msbuild text
+*.nuspec  text
+*.pp      text
+*.ps1     text
+*.sln     text
+*.tt      text
+*.txt     text
+*.xaml    text
+*.xml     text
+
+# Binary files
+*.bmp     binary
+*.jpeg    binary
+*.jpg     binary
+*.nupkg   binary
+*.png     binary
+*.sdf     binary
+
+*.java linguist-language=Dart
+*.kt linguist-language=Dart
+*.swift linguist-language=Dart
+*.m linguist-language=Dart
+*.h linguist-language=Dart

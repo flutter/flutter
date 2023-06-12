@@ -1,0 +1,75 @@
+{"tests": [
+
+{"description":"PLAINTEXT content model flag",
+"initialStates":["PLAINTEXT state"],
+"lastStartTag":"plaintext",
+"input":"<head>&body;",
+"output":[["Character", "<head>&body;"]]},
+
+{"description":"End tag closing RCDATA or RAWTEXT",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xmp>",
+"output":[["Character", "foo"], ["EndTag", "xmp"]]},
+
+{"description":"End tag closing RCDATA or RAWTEXT (case-insensitivity)",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xMp>",
+"output":[["Character", "foo"], ["EndTag", "xmp"]]},
+
+{"description":"End tag closing RCDATA or RAWTEXT (ending with space)",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xmp ",
+"output":[["Character", "foo"], "ParseError"]},
+
+{"description":"End tag closing RCDATA or RAWTEXT (ending with EOF)",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xmp",
+"output":[["Character", "foo</xmp"]]},
+
+{"description":"End tag closing RCDATA or RAWTEXT (ending with slash)",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xmp/",
+"output":[["Character", "foo"], "ParseError"]},
+
+{"description":"End tag not closing RCDATA or RAWTEXT (ending with left-angle-bracket)",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xmp<",
+"output":[["Character", "foo</xmp<"]]},
+
+{"description":"End tag with incorrect name in RCDATA or RAWTEXT",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"</foo>bar</xmp>",
+"output":[["Character", "</foo>bar"], ["EndTag", "xmp"]]},
+
+{"description":"End tag with incorrect name in RCDATA or RAWTEXT (starting like correct name)",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"</foo>bar</xmpaar>",
+"output":[["Character", "</foo>bar</xmpaar>"]]},
+
+{"description":"End tag closing RCDATA or RAWTEXT, switching back to PCDATA",
+"initialStates":["RCDATA state", "RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"foo</xmp></baz>",
+"output":[["Character", "foo"], ["EndTag", "xmp"], ["EndTag", "baz"]]},
+
+{"description":"RAWTEXT w/ something looking like an entity",
+"initialStates":["RAWTEXT state"],
+"lastStartTag":"xmp",
+"input":"&foo;",
+"output":[["Character", "&foo;"]]},
+
+{"description":"RCDATA w/ an entity",
+"initialStates":["RCDATA state"],
+"lastStartTag":"textarea",
+"input":"&lt;",
+"output":[["Character", "<"]]}
+
+]}

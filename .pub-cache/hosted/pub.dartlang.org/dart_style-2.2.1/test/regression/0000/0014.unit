@@ -1,0 +1,19 @@
+>>> https://github.com/dart-lang/dart_style/issues/14
+class A {
+  final Map x;
+  A() : x = {
+        // comment
+        'foo': 1,
+        'bar': 2,
+      };
+}
+<<<
+class A {
+  final Map x;
+  A()
+      : x = {
+          // comment
+          'foo': 1,
+          'bar': 2,
+        };
+}

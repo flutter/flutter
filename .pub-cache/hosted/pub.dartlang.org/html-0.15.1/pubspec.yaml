@@ -1,0 +1,16 @@
+name: html
+version: 0.15.1
+description: APIs for parsing and manipulating HTML content outside the browser.
+repository: https://github.com/dart-lang/html
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  csslib: ^0.17.0
+  source_span: ^1.8.0
+
+dev_dependencies:
+  lints: ^1.0.0
+  path: ^1.8.0
+  test: ^1.16.0

@@ -1,0 +1,450 @@
+40 columns                              |
+>>> split in condition
+var list = [1, if (veryLongConditionExpression || anotherPart) 2];
+<<<
+var list = [
+  1,
+  if (veryLongConditionExpression ||
+      anotherPart)
+    2
+];
+>>> without else on one line
+var list = [1, if (c) 2, 3];
+<<<
+var list = [1, if (c) 2, 3];
+>>> with else on one line
+var list = [1, if (c) 2 else 2, 3];
+<<<
+var list = [1, if (c) 2 else 2, 3];
+>>> split collection before if
+var list = [if (c) somewhatLongThingHere];
+<<<
+var list = [
+  if (c) somewhatLongThingHere
+];
+>>> one line in multi-line
+var list = [veryLongThingThatForcesASplit, if (c) 2, 3];
+<<<
+var list = [
+  veryLongThingThatForcesASplit,
+  if (c) 2,
+  3
+];
+>>> one line in multi-line with else
+var list = [veryLongThingThatForcesASplit, if (c) 2 else 2, 3];
+<<<
+var list = [
+  veryLongThingThatForcesASplit,
+  if (c) 2 else 2,
+  3
+];
+>>> long then branch forces split
+var list = [1, if (condition) veryLongThingThatForcesASplit, 3];
+<<<
+var list = [
+  1,
+  if (condition)
+    veryLongThingThatForcesASplit,
+  3
+];
+>>> long then branch forces both to split
+var list = [1, if (condition) veryLongThingThatForcesASplit else 2, 3];
+<<<
+var list = [
+  1,
+  if (condition)
+    veryLongThingThatForcesASplit
+  else
+    2,
+  3
+];
+>>> long else branch forces both to split
+var list = [1, if (condition) 2 else veryLongThingThatForcesASplit, 3];
+<<<
+var list = [
+  1,
+  if (condition)
+    2
+  else
+    veryLongThingThatForcesASplit,
+  3
+];
+>>> split inside then
+var list = [1, if (condition) veryLongThingThatForcesASplit + anotherLongThing, 3];
+<<<
+var list = [
+  1,
+  if (condition)
+    veryLongThingThatForcesASplit +
+        anotherLongThing,
+  3
+];
+>>> split inside else
+var list = [1, if (condition) ok else veryLongThingThatForcesASplit + anotherLongThing, 3];
+<<<
+var list = [
+  1,
+  if (condition)
+    ok
+  else
+    veryLongThingThatForcesASplit +
+        anotherLongThing,
+  3
+];
+>>> trailing comma
+var list = [if (c) 2,];
+<<<
+var list = [
+  if (c) 2,
+];
+>>> spread list inside if stays on one line if it fits
+var list = [if (c) ...[1, 2]];
+<<<
+var list = [
+  if (c) ...[1, 2]
+];
+>>> spread list inside if formats like block if it splits
+var list = [if (c) ...[1, 2,]];
+<<<
+var list = [
+  if (c) ...[
+    1,
+    2,
+  ]
+];
+>>> both spreads split if then must
+var list = [if (c) ...[1, 2,] else ...[1, 2]];
+<<<
+var list = [
+  if (c) ...[
+    1,
+    2,
+  ] else ...[
+    1,
+    2
+  ]
+];
+>>> both spreads split if else must
+var list = [if (c) ...[1, 2] else ...[1, 2,]];
+<<<
+var list = [
+  if (c) ...[
+    1,
+    2
+  ] else ...[
+    1,
+    2,
+  ]
+];
+>>> a split collection that isn't spread wraps and indents
+var list = [if (c) [1,2,]];
+<<<
+var list = [
+  if (c)
+    [
+      1,
+      2,
+    ]
+];
+>>> a split collection that isn't spread wraps and indents
+var list = [if (c) [1,2,] else thing];
+<<<
+var list = [
+  if (c)
+    [
+      1,
+      2,
+    ]
+  else
+    thing
+];
+>>> a split collection that isn't spread wraps and indents
+var list = [if (c) thing else [1,2,]];
+<<<
+var list = [
+  if (c)
+    thing
+  else
+    [
+      1,
+      2,
+    ]
+];
+>>> lambda inside then
+var list = [if (c) () { body; }];
+<<<
+var list = [
+  if (c)
+    () {
+      body;
+    }
+];
+>>> lambda inside else
+var list = [if (c) thing else () { body; }];
+<<<
+var list = [
+  if (c)
+    thing
+  else
+    () {
+      body;
+    }
+];
+>>> split if child is if
+var list = [if (c) if (d) thing];
+<<<
+var list = [
+  if (c)
+    if (d) thing
+];
+>>> split if child is for
+var list = [
+  if (a) for (var b in c) thing
+];
+<<<
+var list = [
+  if (a)
+    for (var b in c) thing
+];
+>>> split collection before body
+var list = [if (c) longThingHereThatIsLong];
+<<<
+var list = [
+  if (c) longThingHereThatIsLong
+];
+>>> just split outer if
+var list = [if (condition) if (another) longThingHereThatIsLong];
+<<<
+var list = [
+  if (condition)
+    if (another) longThingHereThatIsLong
+];
+>>> nested list inside if element
+var list = [if (a) [b]];
+<<<
+var list = [
+  if (a) [b]
+];
+>>> nested spread list inside if element
+var list = [if (a) ...[b]];
+<<<
+var list = [
+  if (a) ...[b]
+];
+>>> nested if inside list
+var list = [if (a) [if (b) c]];
+<<<
+var list = [
+  if (a) [if (b) c]
+];
+>>> nested for inside list
+var l = [
+  if (a) [for (var b in c) d]
+];
+<<<
+var l = [
+  if (a) [for (var b in c) d]
+];
+>>> split inside condition
+var list = [if (veryLongCondition + thatNeedsToSplit) thing];
+<<<
+var list = [
+  if (veryLongCondition +
+      thatNeedsToSplit)
+    thing
+];
+>>> chained if-else
+var list = [if (condition1) thing1 else if (condition2) thing2];
+<<<
+var list = [
+  if (condition1)
+    thing1
+  else if (condition2)
+    thing2
+];
+>>> chained if-else with else at end
+var list = [if (condition1) thing1 else if (condition2) thing2 else thing3];
+<<<
+var list = [
+  if (condition1)
+    thing1
+  else if (condition2)
+    thing2
+  else
+    thing3
+];
+>>> long chained if-else
+var list = [if (condition1) thing1 else if (condition2) thing2 else if (condition3) thing3];
+<<<
+var list = [
+  if (condition1)
+    thing1
+  else if (condition2)
+    thing2
+  else if (condition3)
+    thing3
+];
+>>> long chained if-else with else at end
+var list = [if (condition1) thing1 else if (condition2) thing2 else if (condition3) thing3 else thing4];
+<<<
+var list = [
+  if (condition1)
+    thing1
+  else if (condition2)
+    thing2
+  else if (condition3)
+    thing3
+  else
+    thing4
+];
+>>> chained if-else with spread and unspread collections
+var list = [
+  if (condition1) ...[
+    spreadList
+  ] else if (condition2)
+    [notSpread]
+  else if (condition3)
+    thing1
+  else ...{
+    spreadSet
+  }
+];
+<<<
+var list = [
+  if (condition1) ...[
+    spreadList
+  ] else if (condition2)
+    [notSpread]
+  else if (condition3)
+    thing1
+  else ...{
+    spreadSet
+  }
+];
+>>> nested chained if-else
+var list = [
+  if (condition1)
+    if (condition2) a else b
+  else if (condition4)
+    if (condition5) c
+    else if (condition6) d else e
+  else if (condition7)
+    if (condition8) ...[f]
+    else if (condition9) [g] else ...{h}
+];
+<<<
+var list = [
+  if (condition1)
+    if (condition2) a else b
+  else if (condition4)
+    if (condition5)
+      c
+    else if (condition6)
+      d
+    else
+      e
+  else if (condition7)
+    if (condition8) ...[
+      f
+    ] else if (condition9)
+      [g]
+    else ...{
+      h
+    }
+];
+>>> empty then spread not treated like block
+var list = [
+  if (condition) ...[] else ...[a,]
+];
+<<<
+var list = [
+  if (condition)
+    ...[]
+  else ...[
+    a,
+  ]
+];
+>>> empty else spread not treated like block
+var list = [
+  if (condition) ...[a,] else ...[]
+];
+<<<
+var list = [
+  if (condition) ...[
+    a,
+  ] else
+    ...[]
+];
+>>> empty then spread does not split
+var list = [
+  if (condition) ...[] else veryLongIdentifier
+];
+<<<
+var list = [
+  if (condition)
+    ...[]
+  else
+    veryLongIdentifier
+];
+>>> empty else spread does not split
+var list = [
+  if (condition) veryLongIdentifier else ...[]
+];
+<<<
+var list = [
+  if (condition)
+    veryLongIdentifier
+  else
+    ...[]
+];
+>>> empty then spread with comment treated like block
+var list = [
+  if (condition) ...[// c
+  ] else ...[a,]
+];
+<<<
+var list = [
+  if (condition) ...[
+    // c
+  ] else ...[
+    a,
+  ]
+];
+>>> empty else spread with comment treated like block
+var list = [
+  if (condition) ...[a,] else ...[// c
+  ]
+];
+<<<
+var list = [
+  if (condition) ...[
+    a,
+  ] else ...[
+    // c
+  ]
+];
+>>> empty then spread with comment splits
+var list = [
+  if (condition) ...[// c
+  ] else veryLongIdentifier
+];
+<<<
+var list = [
+  if (condition) ...[
+    // c
+  ] else
+    veryLongIdentifier
+];
+>>> empty else spread with comment splits
+var list = [
+  if (condition) veryLongIdentifier else ...[// c
+  ]
+];
+<<<
+var list = [
+  if (condition)
+    veryLongIdentifier
+  else ...[
+    // c
+  ]
+];

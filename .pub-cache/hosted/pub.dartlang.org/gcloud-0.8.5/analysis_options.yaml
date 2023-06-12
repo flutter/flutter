@@ -1,0 +1,23 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+
+linter:
+  rules:
+    - await_only_futures
+    - camel_case_types
+    - cancel_subscriptions
+    - control_flow_in_finally
+    - directives_ordering
+    - empty_statements
+    - iterable_contains_unrelated_type
+    - list_remove_unrelated_type
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_relative_imports
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_brace_in_string_interps

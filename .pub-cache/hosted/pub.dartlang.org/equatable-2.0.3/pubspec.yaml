@@ -1,0 +1,17 @@
+name: equatable
+description: A Dart package that helps to implement value based equality without needing to explicitly override == and hashCode.
+version: 2.0.3
+repository: https://github.com/felangel/equatable
+issue_tracker: https://github.com/felangel/equatable/issues
+homepage: https://github.com/felangel/equatable
+documentation: https://github.com/felangel/equatable
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  collection: ^1.15.0
+  meta: ^1.3.0
+
+dev_dependencies:
+  test: ^1.16.0

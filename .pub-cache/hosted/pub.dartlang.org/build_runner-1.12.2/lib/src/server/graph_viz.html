@@ -1,0 +1,76 @@
+<!--
+Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
+-->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Asset Graph visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.css" rel="stylesheet"
+        type="text/css" />
+    <style type="text/css">
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .row {
+            flex: 1 auto;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .column {
+            flex: 1 auto;
+        }
+
+        .expand {
+            flex: 1 100%;
+        }
+
+        #details {
+            flex: 1 20%;
+        }
+
+        td {
+            vertical-align: top;
+        }
+
+        table {
+            width: 800px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div class="row">
+            <form id="searchform">
+                <label>AssetId:
+                    <input id="searchbox" type="search" incremental="">
+                </label>
+                <label>Filter inputs/outputs:
+                    <input type="search" id="filter" />
+                </label>
+                <input type="submit" value="submit" />
+            </form>
+        </div>
+        <div class="row expand">
+            <div id="graph" class="column expand"></div>
+            <div id="details" class="column">
+            </div>
+            <br />
+            <span id="wasOutput">
+        </div>
+    </div>
+    </div>
+    </div>
+    <script src="/packages/build_runner/src/server/graph_viz.js"></script>
+    <script src="/packages/build_runner/src/server/graph_viz_main.dart.js"></script>
+</body>
+
+</html>

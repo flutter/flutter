@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the operator == method from the UuidValue class, for the Dart programming language.">
+  <title>operator == method - UuidValue class - uuid library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../"
+      data-using-base-href="false">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <button id="sidenav-left-toggle" type="button">&nbsp;</button>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">uuid</a></li>
+    <li><a href="../../uuid/uuid-library.html">uuid</a></li>
+    <li><a href="../../uuid/UuidValue-class.html">UuidValue</a></li>
+    <li class="self-crumb">operator == method</li>
+  </ol>
+  <div class="self-name">operator ==</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<main>
+
+
+  <div id="dartdoc-main-content" class="main-content">
+      <div>
+<h1><span class="kind-method">operator ==</span> method 
+    <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<div>
+  <ol class="annotation-list">
+    <li>@<a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/override-constant.html">override</a></li>
+  </ol>
+</div>
+
+<span class="returntype"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/bool-class.html">bool</a></span>
+<span class="name ">operator ==</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span></li>
+</ol>)
+
+      <div class="features">override</div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>The equality operator.</p>
+<p>The default behavior for all <a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/Object-class.html">Object</a>s is to return true if and
+only if this object and <code>other</code> are the same object.</p>
+<p>Override this method to specify a different equality relation on
+a class. The overriding method must still be an equivalence relation.
+That is, it must be:</p>
+<ul>
+<li>
+<p>Total: It must return a boolean for all arguments. It should never throw.</p>
+</li>
+<li>
+<p>Reflexive: For all objects <code>o</code>, <code>o == o</code> must be true.</p>
+</li>
+<li>
+<p>Symmetric: For all objects <code>o1</code> and <code>o2</code>, <code>o1 == o2</code> and <code>o2 == o1</code> must
+either both be true, or both be false.</p>
+</li>
+<li>
+<p>Transitive: For all objects <code>o1</code>, <code>o2</code>, and <code>o3</code>, if <code>o1 == o2</code> and
+<code>o2 == o3</code> are true, then <code>o1 == o3</code> must be true.</p>
+</li>
+</ul>
+<p>The method should also be consistent over time,
+so whether two objects are equal should only change
+if at least one of the objects was modified.</p>
+<p>If a subclass overrides the equality operator, it should override
+the <a href="../../uuid/UuidValue/hashCode.html">hashCode</a> method as well to maintain consistency.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+bool operator ==(Object other) =&gt; other is UuidValue &amp;&amp; uuid == other.uuid;</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+  <li><a href="../../index.html">uuid</a></li>
+  <li><a href="../../uuid/uuid-library.html">uuid</a></li>
+  <li><a href="../../uuid/UuidValue-class.html">UuidValue</a></li>
+  <li class="self-crumb">operator == method</li>
+</ol>
+
+
+    <h5>UuidValue class</h5>
+    <ol>
+
+    <li class="section-title"><a href="../../uuid/UuidValue-class.html#constructors">Constructors</a></li>
+    <li><a href="../../uuid/UuidValue/UuidValue.html">UuidValue</a></li>
+    <li><a href="../../uuid/UuidValue/UuidValue.fromByteList.html">fromByteList</a></li>
+    <li><a href="../../uuid/UuidValue/UuidValue.fromList.html">fromList</a></li>
+
+
+    <li class="section-title">
+      <a href="../../uuid/UuidValue-class.html#instance-properties">Properties</a>
+    </li>
+    <li><a href="../../uuid/UuidValue/hashCode.html">hashCode</a></li>
+    <li class="inherited"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/Object/runtimeType.html">runtimeType</a></li>
+    <li><a href="../../uuid/UuidValue/uuid.html">uuid</a></li>
+
+    <li class="section-title"><a href="../../uuid/UuidValue-class.html#instance-methods">Methods</a></li>
+    <li><a href="../../uuid/UuidValue/equals.html">equals</a></li>
+    <li class="inherited"><a href="https://api.dart.dev/dev/2.16.0-124.0.dev/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+    <li><a href="../../uuid/UuidValue/toBytes.html">toBytes</a></li>
+    <li><a href="../../uuid/UuidValue/toString.html">toString</a></li>
+
+    <li class="section-title"><a href="../../uuid/UuidValue-class.html#operators">Operators</a></li>
+    <li><a href="../../uuid/UuidValue/operator_equals.html">operator ==</a></li>
+
+
+
+
+</ol>
+
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    uuid
+      3.0.6
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/script.js?v1"></script>
+
+
+
+</body>
+
+</html>
+

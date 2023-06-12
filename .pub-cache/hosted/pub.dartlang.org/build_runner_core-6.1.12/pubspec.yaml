@@ -1,0 +1,35 @@
+name: build_runner_core
+version: 6.1.12
+description: Core tools to write binaries that run builders.
+repository: https://github.com/dart-lang/build/tree/master/build_runner_core
+
+environment:
+  sdk: ">=2.11.99 <3.0.0"
+
+dependencies:
+  async: ">=1.13.3 <3.0.0"
+  build: "^2.0.0"
+  build_config: ">=0.4.7 <0.4.8"
+  build_resolvers: ^2.0.0
+  collection: ^1.14.0
+  convert: ">=2.0.1 <4.0.0"
+  crypto: ">=0.9.2 <4.0.0"
+  glob: ^2.0.0
+  graphs: ^1.0.0
+  logging: ">=0.11.2 <2.0.0"
+  meta: ^1.1.0
+  path: ^1.1.0
+  package_config: '>=1.9.0 <3.0.0'
+  pedantic: ^1.0.0
+  pool: ^1.0.0
+  timing: '>=0.1.1 <2.0.0'
+  watcher: '>=0.9.7 <2.0.0'
+  yaml: ">=2.1.11 <4.0.0"
+
+dev_dependencies:
+  build_test: ^1.0.0
+  test: ^1.0.0
+  test_descriptor: ^2.0.0
+  test_process: ^2.0.0
+  _test_common:
+    path: ../_test_common

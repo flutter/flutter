@@ -1,0 +1,594 @@
+#data
+Test
+#errors
+Line: 1 Col: 4 Unexpected non-space characters. Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|   <body>
+|     "Test"
+
+#data
+<div></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+
+#data
+<div>Test</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "Test"
+
+#data
+<di
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+
+#data
+<div>Hello</div>
+<script>
+console.log("PASS");
+</script>
+<div>Bye</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "Hello"
+|     "
+"
+|     <script>
+|       "
+console.log("PASS");
+"
+|     "
+"
+|     <div>
+|       "Bye"
+
+#data
+<div foo="bar">Hello</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       foo="bar"
+|       "Hello"
+
+#data
+<div>Hello</div>
+<script>
+console.log("FOO<span>BAR</span>BAZ");
+</script>
+<div>Bye</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       "Hello"
+|     "
+"
+|     <script>
+|       "
+console.log("FOO<span>BAR</span>BAZ");
+"
+|     "
+"
+|     <div>
+|       "Bye"
+
+#data
+<foo bar="baz"></foo><potato quack="duck"></potato>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|       bar="baz"
+|     <potato>
+|       quack="duck"
+
+#data
+<foo bar="baz"><potato quack="duck"></potato></foo>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|       bar="baz"
+|       <potato>
+|         quack="duck"
+
+#data
+<foo></foo bar="baz"><potato></potato quack="duck">
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|     <potato>
+
+#data
+</ tttt>
+#errors
+#document
+| <!--  tttt -->
+| <html>
+|   <head>
+|   <body>
+
+#data
+<div FOO ><img><img></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       foo=""
+|       <img>
+|       <img>
+
+#data
+<p>Test</p<p>Test2</p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       "TestTest2"
+
+#data
+<rdar://problem/6869687>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <rdar:>
+|       6869687=""
+|       problem=""
+
+#data
+<A>test< /A>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "test< /A>"
+
+#data
+&lt;
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "<"
+
+#data
+<body foo='bar'><body foo='baz' yo='mama'>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     foo="bar"
+|     yo="mama"
+
+#data
+<body></br foo="bar"></body>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <br>
+
+#data
+<bdy><br foo="bar"></body>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <bdy>
+|       <br>
+|         foo="bar"
+
+#data
+<body></body></br foo="bar">
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <br>
+
+#data
+<bdy></body><br foo="bar">
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <bdy>
+|       <br>
+|         foo="bar"
+
+#data
+<html><body></body></html><!-- Hi there -->
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+| <!--  Hi there  -->
+
+#data
+<html><body></body></html>x<!-- Hi there -->
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "x"
+|     <!--  Hi there  -->
+
+#data
+<html><body></body></html>x<!-- Hi there --></html><!-- Again -->
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "x"
+|     <!--  Hi there  -->
+| <!--  Again  -->
+
+#data
+<html><body></body></html>x<!-- Hi there --></body></html><!-- Again -->
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "x"
+|     <!--  Hi there  -->
+| <!--  Again  -->
+
+#data
+<html><body><ruby><div><rp>xx</rp></div></ruby></body></html>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <div>
+|         <rp>
+|           "xx"
+
+#data
+<html><body><ruby><div><rt>xx</rt></div></ruby></body></html>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <ruby>
+|       <div>
+|         <rt>
+|           "xx"
+
+#data
+<html><frameset><!--1--><noframes>A</noframes><!--2--></frameset><!--3--><noframes>B</noframes><!--4--></html><!--5--><noframes>C</noframes><!--6-->
+#errors
+#document
+| <html>
+|   <head>
+|   <frameset>
+|     <!-- 1 -->
+|     <noframes>
+|       "A"
+|     <!-- 2 -->
+|   <!-- 3 -->
+|   <noframes>
+|     "B"
+|   <!-- 4 -->
+|   <noframes>
+|     "C"
+| <!-- 5 -->
+| <!-- 6 -->
+
+#data
+<select><option>A<select><option>B<select><option>C<select><option>D<select><option>E<select><option>F<select><option>G<select>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <select>
+|       <option>
+|         "A"
+|     <option>
+|       "B"
+|       <select>
+|         <option>
+|           "C"
+|     <option>
+|       "D"
+|       <select>
+|         <option>
+|           "E"
+|     <option>
+|       "F"
+|       <select>
+|         <option>
+|           "G"
+
+#data
+<dd><dd><dt><dt><dd><li><li>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <dd>
+|     <dd>
+|     <dt>
+|     <dt>
+|     <dd>
+|       <li>
+|       <li>
+
+#data
+<div><b></div><div><nobr>a<nobr>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <b>
+|     <div>
+|       <b>
+|         <nobr>
+|           "a"
+|         <nobr>
+
+#data
+<head></head>
+<body></body>
+#errors
+#document
+| <html>
+|   <head>
+|   "
+"
+|   <body>
+
+#data
+<head></head> <style></style>ddd
+#errors
+#document
+| <html>
+|   <head>
+|     <style>
+|   " "
+|   <body>
+|     "ddd"
+
+#data
+<kbd><table></kbd><col><select><tr>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <kbd>
+|       <select>
+|       <table>
+|         <colgroup>
+|           <col>
+|         <tbody>
+|           <tr>
+
+#data
+<kbd><table></kbd><col><select><tr></table><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <kbd>
+|       <select>
+|       <table>
+|         <colgroup>
+|           <col>
+|         <tbody>
+|           <tr>
+|       <div>
+
+#data
+<a><li><style></style><title></title></a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|     <li>
+|       <a>
+|         <style>
+|         <title>
+
+#data
+<font></p><p><meta><title></title></font>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <font>
+|       <p>
+|     <p>
+|       <font>
+|         <meta>
+|         <title>
+
+#data
+<a><center><title></title><a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|     <center>
+|       <a>
+|         <title>
+|       <a>
+
+#data
+<svg><title><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg title>
+|         <div>
+
+#data
+<svg><title><rect><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg title>
+|         <rect>
+|           <div>
+
+#data
+<svg><title><svg><div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg title>
+|         <svg svg>
+|         <div>
+
+#data
+<img <="" FAIL>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <img>
+|       <=""
+|       fail=""
+
+#data
+<ul><li><div id='foo'/>A</li><li>B<div>C</div></li></ul>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <ul>
+|       <li>
+|         <div>
+|           id="foo"
+|           "A"
+|       <li>
+|         "B"
+|         <div>
+|           "C"
+
+#data
+<svg><em><desc></em>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|     <em>
+|       <desc>
+
+#data
+<svg><tfoot></mi><td>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg tfoot>
+|         <svg td>
+
+#data
+<math><mrow><mrow><mn>1</mn></mrow><mi>a</mi></mrow></math>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       <math mrow>
+|         <math mrow>
+|           <math mn>
+|             "1"
+|         <math mi>
+|           "a"
+
+#data
+<!doctype html><input type="hidden"><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <frameset>
+
+#data
+<!doctype html><input type="button"><frameset>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <input>
+|       type="button"

@@ -1,0 +1,46 @@
+>>>
+Method _main() => Method((b) => b
+  ..name = 'main'
+  ..modifier = MethodModifier.async
+  ..requiredParameters.add(Parameter((b) => b
+    ..name = 'args'
+    ..type = TypeReference((b) => b
+      ..symbol = 'List'
+      ..types.add(refer('String')))))
+  ..optionalParameters.add(Parameter((b) => b
+    ..name = 'sendPort'
+    ..type = refer('SendPort', 'dart:isolate')))
+  ..body = Block.of([
+    refer('run', 'package:build_runner/build_runner.dart')
+        .call([refer('args'), refer('_builders')])
+        .awaited
+        .assignVar('result')
+        .statement,
+    refer('sendPort')
+        .nullSafeProperty('send')
+        .call([refer('result')]).statement,
+    refer('exitCode', 'dart:io').assign(refer('result')).statement,
+  ]));
+<<<
+Method _main() => Method((b) => b
+  ..name = 'main'
+  ..modifier = MethodModifier.async
+  ..requiredParameters.add(Parameter((b) => b
+    ..name = 'args'
+    ..type = TypeReference((b) => b
+      ..symbol = 'List'
+      ..types.add(refer('String')))))
+  ..optionalParameters.add(Parameter((b) => b
+    ..name = 'sendPort'
+    ..type = refer('SendPort', 'dart:isolate')))
+  ..body = Block.of([
+    refer('run', 'package:build_runner/build_runner.dart')
+        .call([refer('args'), refer('_builders')])
+        .awaited
+        .assignVar('result')
+        .statement,
+    refer('sendPort')
+        .nullSafeProperty('send')
+        .call([refer('result')]).statement,
+    refer('exitCode', 'dart:io').assign(refer('result')).statement,
+  ]));

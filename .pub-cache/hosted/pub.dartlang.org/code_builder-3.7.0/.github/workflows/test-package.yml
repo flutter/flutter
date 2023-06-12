@@ -1,0 +1,72 @@
+name: Dart CI
+
+on:
+  # Run on PRs and pushes to the default branch.
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: "0 0 * * 0"
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  # Check code formatting and static analysis on a single OS (linux)
+  # against Dart dev and 2.7.0.
+  analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [dev]
+        version: [latest]
+        include:
+          - sdk: stable
+            version: 2.7.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cedx/setup-dart@v2 # TODO(dart-lang/setup-dart#3): use the official setup-dart action
+        with:
+          release-channel: ${{ matrix.sdk }}
+          version: ${{ matrix.version }}
+      - id: install
+        name: Install dependencies
+        run: pub get
+      - name: Check formatting
+        run: dartfmt --dry-run --set-exit-if-changed .
+        if: always() && steps.install.outcome == 'success'
+      - name: Analyze code
+        run: dartanalyzer --fatal-infos --fatal-warnings .
+        if: always() && steps.install.outcome == 'success'
+
+  # Run tests on a matrix consisting of two dimensions:
+  # 1. OS: ubuntu-latest, (macos-latest, windows-latest)
+  # 2. release channel: dev, 2.7.0
+  test:
+    needs: analyze
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Add macos-latest and/or windows-latest if relevant for this package.
+        os: [ubuntu-latest]
+        sdk: [dev]
+        version: [latest]
+        include:
+          - os: ubuntu-latest
+            sdk: stable
+            version: 2.7.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cedx/setup-dart@v2 # TODO(dart-lang/setup-dart#3): use the official setup-dart action
+        with:
+          release-channel: ${{ matrix.sdk }}
+          version: ${{ matrix.version }}
+      - id: install
+        name: Install dependencies
+        run: pub get
+      - name: Run VM tests
+        run: pub run test --platform vm
+        if: always() && steps.install.outcome == 'success'

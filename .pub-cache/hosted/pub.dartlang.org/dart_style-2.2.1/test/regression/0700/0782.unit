@@ -1,0 +1,48 @@
+>>>
+#!/usr/bin/env dart
+
+import 'dart:io';
+// More code...
+<<<
+#!/usr/bin/env dart
+
+import 'dart:io';
+// More code...
+>>>
+#!/usr/bin/env dart
+
+void main() {}
+<<<
+#!/usr/bin/env dart
+
+void main() {}
+>>>
+#!/usr/bin/env dart
+
+/// dartdoc comment.
+<<<
+#!/usr/bin/env dart
+
+/// dartdoc comment.
+>>>
+#!/usr/bin/env dart
+
+var someGlobal = 0;
+<<<
+#!/usr/bin/env dart
+
+var someGlobal = 0;
+>>>
+#!/usr/bin/env dart
+import 'dart:io';
+<<<
+#!/usr/bin/env dart
+
+import 'dart:io';
+>>>
+#!/usr/bin/env dart
+// Normal comment.
+<<<
+#!/usr/bin/env dart
+
+// Normal comment.

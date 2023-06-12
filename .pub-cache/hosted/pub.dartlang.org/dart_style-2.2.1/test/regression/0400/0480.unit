@@ -1,0 +1,27 @@
+>>>
+class XXXElement extends PolymerElement {
+  void attached() {
+    if (condition.containsKey('userUpdatingTest')) {
+      conditionType = TriggerValueType.userUpdatingConditionType;
+      if (condition['userUpdatingTest'].containsKey('userIsRole')) {
+        userUpdatingCriteriaSelectIndex = userValueTypeIndexFromName(condition[
+                'userUpdatingTest']['userIsRole']['user'].toString()) +
+            1;
+      }
+    }
+  }
+}
+<<<
+class XXXElement extends PolymerElement {
+  void attached() {
+    if (condition.containsKey('userUpdatingTest')) {
+      conditionType = TriggerValueType.userUpdatingConditionType;
+      if (condition['userUpdatingTest'].containsKey('userIsRole')) {
+        userUpdatingCriteriaSelectIndex = userValueTypeIndexFromName(
+                condition['userUpdatingTest']['userIsRole']['user']
+                    .toString()) +
+            1;
+      }
+    }
+  }
+}

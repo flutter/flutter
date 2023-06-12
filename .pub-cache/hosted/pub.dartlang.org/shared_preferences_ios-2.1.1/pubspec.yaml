@@ -1,0 +1,27 @@
+name: shared_preferences_ios
+description: iOS implementation of the shared_preferences plugin
+repository: https://github.com/flutter/plugins/tree/main/packages/shared_preferences/shared_preferences_ios
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+shared_preferences%22
+version: 2.1.1
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.8.0"
+
+flutter:
+  plugin:
+    implements: shared_preferences
+    platforms:
+      ios:
+        dartPluginClass: SharedPreferencesIOS
+        pluginClass: FLTSharedPreferencesPlugin
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences_platform_interface: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pigeon: ^1.0.16

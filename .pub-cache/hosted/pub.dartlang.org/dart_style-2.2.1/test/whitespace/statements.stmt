@@ -1,0 +1,35 @@
+40 columns                              |
+>>> multiple labels
+a: b:c:d:
+
+
+
+e:
+
+foo();
+<<<
+a:
+b:
+c:
+d:
+e:
+foo();
+>>> label in block
+{a:foo();}
+<<<
+{
+  a:
+  foo();
+}
+>>> late local variables
+{
+  late    final int i;
+  late   int i;
+  late   var i;
+}
+<<<
+{
+  late final int i;
+  late int i;
+  late var i;
+}

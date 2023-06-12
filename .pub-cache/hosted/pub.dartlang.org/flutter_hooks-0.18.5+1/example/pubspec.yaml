@@ -1,0 +1,28 @@
+name: flutter_hooks_gallery
+description: A new Flutter project.
+
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  built_collection: ^5.0.0
+  built_value: ^8.0.0
+  flutter:
+    sdk: flutter
+  flutter_hooks:
+    path: ../
+  http: ^0.13.4
+  provider: ^4.2.0
+  shared_preferences: ^2.0.0
+
+dev_dependencies:
+  build_runner: ^2.1.11
+  built_value_generator: ^8.3.3
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,11 @@
+>>>
+embeddedPlural2(n) => Intl.message(
+"${Intl.plural(n,
+zero: 'none', one: 'one', other: 'some')} plus some text.",
+name: 'embeddedPlural2', desc: 'An embedded plural', args: [n]);
+<<<
+embeddedPlural2(n) => Intl.message(
+    "${Intl.plural(n, zero: 'none', one: 'one', other: 'some')} plus some text.",
+    name: 'embeddedPlural2',
+    desc: 'An embedded plural',
+    args: [n]);

@@ -1,0 +1,49 @@
+name: assets_audio_player
+description: Play music/audio stored in assets files directly from Flutter & Network, Radio, LiveStream, Local files. Compatible with Android, iOS, web and macOS.
+version: 3.0.6
+
+#author: Florent Champigny <champigny.florent@gmail.com>
+homepage: https://github.com/florent37/Flutter-AssetsAudioPlayer
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  rxdart: ^0.27.3
+  uuid: ^3.0.5
+  http: ^0.13.4 # to download / cache network files
+  path_provider: ^2.0.8 # removed this because it cancel flutter/android/ios on pub.dev path_provider: ^1.6.10
+
+  # The design on https://flutter.dev/go/federated-plugins was to leave
+  # this constraint as 'any'. We cannot do it right now as it fails pub publish
+  # validation, so we set a ^ constraint.
+  # TODO(amirh): Revisit this (either update this part in the  design or the pub tool).
+  # https://github.com/flutter/flutter/issues/46264
+  # assets_audio_player_web: ^3.0.0-nullsafety.0
+  assets_audio_player_web: ^3.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic: ^1.11.1
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.github.florent37.assets_audio_player
+        pluginClass: AssetsAudioPlayerPlugin
+        mainClass: AssetsAudioPlayerPlugin
+      ios:
+        pluginClass: AssetsAudioPlayerPlugin
+      macos:
+        pluginClass: AssetsAudioPlayerPlugin
+      web:
+        default_package: assets_audio_player_web
+      # moved to assets_audio_player_web
+      # web:
+      #  pluginClass: AssetsAudioPlayerPlugin
+      #  fileName: assets_audio_player_web.dart

@@ -1,0 +1,21 @@
+name: example
+description: A new Flutter project.
+version: 1.0.0
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cached_network_image: ^2.2.0
+  octo_image:
+    path: ../
+  flutter_cache_manager: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

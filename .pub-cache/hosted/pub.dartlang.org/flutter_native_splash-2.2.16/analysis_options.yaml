@@ -1,0 +1,8 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_print: false
+    avoid_classes_with_only_static_members: false
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

@@ -1,0 +1,14 @@
+name: basic_pkg
+version: 1.0.0
+publish_to: none
+dependencies:
+  a: 2.0.0
+  b:
+    git: git://github.com/b/b.git
+  c:
+    path: pkg/c
+  d:
+    version: ^5.0.0
+    hosted:
+      name: d
+      url: http://your-package-server.com

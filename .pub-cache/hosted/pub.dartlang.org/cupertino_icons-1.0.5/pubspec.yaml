@@ -1,0 +1,15 @@
+name: cupertino_icons
+
+description: Default icons asset for Cupertino widgets based on Apple styled icons
+repository: https://github.com/flutter/packages/tree/main/third_party/packages/cupertino_icons
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+cupertino_icons%22
+version: 1.0.5
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+flutter:
+  fonts:
+    - family: CupertinoIcons
+      fonts:
+        - asset: assets/CupertinoIcons.ttf

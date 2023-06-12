@@ -1,0 +1,20 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+  errors:
+    todo: ignore
+    unused_import: error
+    unused_element: error
+    unused_local_variable: error
+    dead_code: error
+
+linter:
+  rules:
+    # comment_references # https://github.com/dart-lang/sdk/issues/39467
+    - depend_on_referenced_packages
+    - prefer_generic_function_type_aliases
+    - prefer_typing_uninitialized_variables
+    - unnecessary_const
+    - unnecessary_new

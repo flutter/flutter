@@ -1,0 +1,224 @@
+40 columns                              |
+>>> empty list
+[];
+<<<
+[];
+>>> exactly 40 characters
+[first, second, third, fourth, seventh];
+<<<
+[first, second, third, fourth, seventh];
+>>>
+[first, second, third, fourth, fifth, sixth];
+<<<
+[
+  first,
+  second,
+  third,
+  fourth,
+  fifth,
+  sixth
+];
+>>> splits outer lists even if they fit
+[[first], [], [
+    second,[third], fourth]  ];
+<<<
+[
+  [first],
+  [],
+  [
+    second,
+    [third],
+    fourth
+  ]
+];
+>>> split indirect outer
+[function([inner])];
+<<<
+[
+  function([inner])
+];
+>>> empty literal does not force outer split
+[[], {}, () {}];
+<<<
+[[], {}, () {}];
+>>> nested split list
+[first, [second, third, fourth], fifth, [sixth, seventh, eighth, nine, tenth,
+    eleventh]];
+<<<
+[
+  first,
+  [second, third, fourth],
+  fifth,
+  [
+    sixth,
+    seventh,
+    eighth,
+    nine,
+    tenth,
+    eleventh
+  ]
+];
+>>> force multi-line because of contained block
+[first, () {"fn";},third,fourth];
+<<<
+[
+  first,
+  () {
+    "fn";
+  },
+  third,
+  fourth
+];
+>>> spaces between items
+[1,2,3,4];
+<<<
+[1, 2, 3, 4];
+>>> trailing comma forces split
+[1 , ];
+<<<
+[
+  1,
+];
+>>> trailing comma multiline
+[first, second, third, fourth, fifth, sixth  , ];
+<<<
+[
+  first,
+  second,
+  third,
+  fourth,
+  fifth,
+  sixth,
+];
+>>> nested lists are forced to split
+[[[[[argument, argument, argument, argument]]]]];
+<<<
+[
+  [
+    [
+      [
+        [
+          argument,
+          argument,
+          argument,
+          argument
+        ]
+      ]
+    ]
+  ]
+];
+>>> preserve newlines in lists containing a line comment
+[
+  // yeah
+  a,b,c,
+  d,e,f,
+];
+<<<
+[
+  // yeah
+  a, b, c,
+  d, e, f,
+];
+>>> wrap between elements even when newlines are preserved
+[
+  // yes
+  longElement,longElement,longElement,longElement,
+  longElement,longElement,longElement,longElement,longElement,longElement,
+];
+<<<
+[
+  // yes
+  longElement, longElement, longElement,
+  longElement,
+  longElement, longElement, longElement,
+  longElement, longElement, longElement,
+];
+>>> ignore line comment after the "]"
+[
+  a,b,c,
+  d
+] // comment
+;
+<<<
+[a, b, c, d] // comment
+    ;
+>>> preserves one blank line between elements
+[
+
+
+  element,
+
+
+
+  // comment
+  element,
+
+
+
+  element
+
+
+];
+<<<
+[
+  element,
+
+  // comment
+  element,
+
+  element
+];
+>>> a spread list literal splits an outer list even if it fits
+var list = [1, ...[2, 3], 4];
+<<<
+var list = [
+  1,
+  ...[2, 3],
+  4
+];
+>>> spread empty list does not force outer split
+var list = [1, ...[], 4];
+<<<
+var list = [1, ...[], 4];
+>>> split inside spread expression
+var list = [1, ...some + very + long + spread + expression, 3];
+<<<
+var list = [
+  1,
+  ...some +
+      very +
+      long +
+      spread +
+      expression,
+  3
+];
+>>> spread cascade
+var list = [1, ...thing..cascade()..another(), 4];
+<<<
+var list = [
+  1,
+  ...thing
+    ..cascade()
+    ..another(),
+  4
+];
+>>> spread lambda
+var list = [1, ...() { body; }, 4];
+<<<
+var list = [
+  1,
+  ...() {
+    body;
+  },
+  4
+];
+>>> spread immediately invoked lambda
+var list = [1, ...() sync* { yield thing; }(), 4];
+<<<
+var list = [
+  1,
+  ...() sync* {
+    yield thing;
+  }(),
+  4
+];

@@ -1,0 +1,14 @@
+include: package:lints/recommended.yaml
+linter:
+  rules:
+    - avoid_dynamic_calls
+    - avoid_final_parameters
+    - avoid_print
+    - camel_case_types
+    - omit_local_variable_types
+    - prefer_function_declarations_over_variables
+    - prefer_relative_imports
+    - sort_constructors_first
+    - unnecessary_late
+    - unnecessary_statements
+    - use_super_parameters

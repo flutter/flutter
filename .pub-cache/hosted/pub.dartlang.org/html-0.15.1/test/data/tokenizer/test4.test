@@ -1,0 +1,336 @@
+{"tests": [
+
+{"description":"< in attribute name",
+"input":"<z/0  <>",
+"output":["ParseError", "ParseError", ["StartTag", "z", {"0": "", "<": ""}]]},
+
+{"description":"< in attribute value",
+"input":"<z x=<>",
+"output":["ParseError", ["StartTag", "z", {"x": "<"}]]},
+
+{"description":"= in unquoted attribute value",
+"input":"<z z=z=z>",
+"output":["ParseError", ["StartTag", "z", {"z": "z=z"}]]},
+
+{"description":"= attribute",
+"input":"<z =>",
+"output":["ParseError", ["StartTag", "z", {"=": ""}]]},
+
+{"description":"== attribute",
+"input":"<z ==>",
+"output":["ParseError", "ParseError", ["StartTag", "z", {"=": ""}]]},
+
+{"description":"=== attribute",
+"input":"<z ===>",
+"output":["ParseError", "ParseError", ["StartTag", "z", {"=": "="}]]},
+
+{"description":"==== attribute",
+"input":"<z ====>",
+"output":["ParseError", "ParseError", "ParseError", ["StartTag", "z", {"=": "=="}]]},
+
+{"description":"Allowed \" after ampersand in attribute value",
+"input":"<z z=\"&\">",
+"output":[["StartTag", "z", {"z": "&"}]]},
+
+{"description":"Non-allowed ' after ampersand in attribute value",
+"input":"<z z=\"&'\">",
+"output":["ParseError", ["StartTag", "z", {"z": "&'"}]]},
+
+{"description":"Allowed ' after ampersand in attribute value",
+"input":"<z z='&'>",
+"output":[["StartTag", "z", {"z": "&"}]]},
+
+{"description":"Non-allowed \" after ampersand in attribute value",
+"input":"<z z='&\"'>",
+"output":["ParseError", ["StartTag", "z", {"z": "&\""}]]},
+
+{"description":"Text after bogus character reference",
+"input":"<z z='&xlink_xmlns;'>bar<z>",
+"output":["ParseError",["StartTag","z",{"z":"&xlink_xmlns;"}],["Character","bar"],["StartTag","z",{}]]},
+
+{"description":"Text after hex character reference",
+"input":"<z z='&#x0020; foo'>bar<z>",
+"output":[["StartTag","z",{"z":"  foo"}],["Character","bar"],["StartTag","z",{}]]},
+
+{"description":"Attribute name starting with \"",
+"input":"<foo \"='bar'>",
+"output":["ParseError", ["StartTag", "foo", {"\"": "bar"}]]},
+
+{"description":"Attribute name starting with '",
+"input":"<foo '='bar'>",
+"output":["ParseError", ["StartTag", "foo", {"'": "bar"}]]},
+
+{"description":"Attribute name containing \"",
+"input":"<foo a\"b='bar'>",
+"output":["ParseError", ["StartTag", "foo", {"a\"b": "bar"}]]},
+
+{"description":"Attribute name containing '",
+"input":"<foo a'b='bar'>",
+"output":["ParseError", ["StartTag", "foo", {"a'b": "bar"}]]},
+
+{"description":"Unquoted attribute value containing '",
+"input":"<foo a=b'c>",
+"output":["ParseError", ["StartTag", "foo", {"a": "b'c"}]]},
+
+{"description":"Unquoted attribute value containing \"",
+"input":"<foo a=b\"c>",
+"output":["ParseError", ["StartTag", "foo", {"a": "b\"c"}]]},
+
+{"description":"Double-quoted attribute value not followed by whitespace",
+"input":"<foo a=\"b\"c>",
+"output":["ParseError", ["StartTag", "foo", {"a": "b", "c": ""}]]},
+
+{"description":"Single-quoted attribute value not followed by whitespace",
+"input":"<foo a='b'c>",
+"output":["ParseError", ["StartTag", "foo", {"a": "b", "c": ""}]]},
+
+{"description":"Quoted attribute followed by permitted /",
+"input":"<br a='b'/>",
+"output":[["StartTag","br",{"a":"b"},true]]},
+
+{"description":"Quoted attribute followed by non-permitted /",
+"input":"<bar a='b'/>",
+"output":[["StartTag","bar",{"a":"b"},true]]},
+
+{"description":"CR EOF after doctype name",
+"input":"<!doctype html \r",
+"output":["ParseError", ["DOCTYPE", "html", null, null, false]]},
+
+{"description":"CR EOF in tag name",
+"input":"<z\r",
+"output":["ParseError"]},
+
+{"description":"Slash EOF in tag name",
+"input":"<z/",
+"output":["ParseError"]},
+
+{"description":"Zero hex numeric entity",
+"input":"&#x0",
+"output":["ParseError", "ParseError", ["Character", "\uFFFD"]]},
+
+{"description":"Zero decimal numeric entity",
+"input":"&#0",
+"output":["ParseError", "ParseError", ["Character", "\uFFFD"]]},
+
+{"description":"Zero-prefixed hex numeric entity",
+"input":"&#x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041;",
+"output":[["Character", "A"]]},
+
+{"description":"Zero-prefixed decimal numeric entity",
+"input":"&#000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000065;",
+"output":[["Character", "A"]]},
+
+{"description":"Empty hex numeric entities",
+"input":"&#x &#X ",
+"output":["ParseError", ["Character", "&#x "], "ParseError", ["Character", "&#X "]]},
+
+{"description":"Empty decimal numeric entities",
+"input":"&# &#; ",
+"output":["ParseError", ["Character", "&# "], "ParseError", ["Character", "&#; "]]},
+
+{"description":"Non-BMP numeric entity",
+"input":"&#x10000;",
+"output":[["Character", "\uD800\uDC00"]]},
+
+{"description":"Maximum non-BMP numeric entity",
+"input":"&#X10FFFF;",
+"output":["ParseError", ["Character", "\uDBFF\uDFFF"]]},
+
+{"description":"Above maximum numeric entity",
+"input":"&#x110000;",
+"output":["ParseError", ["Character", "\uFFFD"]]},
+
+{"description":"32-bit hex numeric entity",
+"input":"&#x80000041;",
+"output":["ParseError", ["Character", "\uFFFD"]]},
+
+{"description":"33-bit hex numeric entity",
+"input":"&#x100000041;",
+"output":["ParseError", ["Character", "\uFFFD"]]},
+
+{"description":"33-bit decimal numeric entity",
+"input":"&#4294967361;",
+"output":["ParseError", ["Character", "\uFFFD"]]},
+
+{"description":"Surrogate code point edge cases",
+"input":"&#xD7FF;&#xD800;&#xD801;&#xDFFE;&#xDFFF;&#xE000;",
+"output":[["Character", "\uD7FF"], "ParseError", ["Character", "\uFFFD"], "ParseError", ["Character", "\uFFFD"], "ParseError", ["Character", "\uFFFD"], "ParseError", ["Character", "\uFFFD\uE000"]]},
+
+{"description":"Uppercase start tag name",
+"input":"<X>",
+"output":[["StartTag", "x", {}]]},
+
+{"description":"Uppercase end tag name",
+"input":"</X>",
+"output":[["EndTag", "x"]]},
+
+{"description":"Uppercase attribute name",
+"input":"<x X>",
+"output":[["StartTag", "x", { "x":"" }]]},
+
+{"description":"Tag/attribute name case edge values",
+"input":"<x@AZ[`az{ @AZ[`az{>",
+"output":[["StartTag", "x@az[`az{", { "@az[`az{":"" }]]},
+
+{"description":"Duplicate different-case attributes",
+"input":"<x x=1 x=2 X=3>",
+"output":["ParseError", "ParseError", ["StartTag", "x", { "x":"1" }]]},
+
+{"description":"Uppercase close tag attributes",
+"input":"</x X>",
+"output":["ParseError", ["EndTag", "x"]]},
+
+{"description":"Duplicate close tag attributes",
+"input":"</x x x>",
+"output":["ParseError", "ParseError", ["EndTag", "x"]]},
+
+{"description":"Permitted slash",
+"input":"<br/>",
+"output":[["StartTag","br",{},true]]},
+
+{"description":"Non-permitted slash",
+"input":"<xr/>",
+"output":[["StartTag","xr",{},true]]},
+
+{"description":"Permitted slash but in close tag",
+"input":"</br/>",
+"output":["ParseError", ["EndTag", "br"]]},
+
+{"description":"Doctype public case-sensitivity (1)",
+"input":"<!DoCtYpE HtMl PuBlIc \"AbC\" \"XyZ\">",
+"output":[["DOCTYPE", "html", "AbC", "XyZ", true]]},
+
+{"description":"Doctype public case-sensitivity (2)",
+"input":"<!dOcTyPe hTmL pUbLiC \"aBc\" \"xYz\">",
+"output":[["DOCTYPE", "html", "aBc", "xYz", true]]},
+
+{"description":"Doctype system case-sensitivity (1)",
+"input":"<!DoCtYpE HtMl SyStEm \"XyZ\">",
+"output":[["DOCTYPE", "html", null, "XyZ", true]]},
+
+{"description":"Doctype system case-sensitivity (2)",
+"input":"<!dOcTyPe hTmL sYsTeM \"xYz\">",
+"output":[["DOCTYPE", "html", null, "xYz", true]]},
+
+{"description":"U+0000 in lookahead region after non-matching character",
+"input":"<!doc>\u0000",
+"output":["ParseError", ["Comment", "doc"], "ParseError", ["Character", "\u0000"]],
+"ignoreErrorOrder":true},
+
+{"description":"U+0000 in lookahead region",
+"input":"<!doc\u0000",
+"output":["ParseError", ["Comment", "doc\uFFFD"]],
+"ignoreErrorOrder":true},
+
+{"description":"U+0080 in lookahead region",
+"input":"<!doc\u0080",
+"output":["ParseError", "ParseError", ["Comment", "doc\u0080"]],
+"ignoreErrorOrder":true},
+
+{"description":"U+FDD1 in lookahead region",
+"input":"<!doc\uFDD1",
+"output":["ParseError", "ParseError", ["Comment", "doc\uFDD1"]],
+"ignoreErrorOrder":true},
+
+{"description":"U+1FFFF in lookahead region",
+"input":"<!doc\uD83F\uDFFF",
+"output":["ParseError", "ParseError", ["Comment", "doc\uD83F\uDFFF"]],
+"ignoreErrorOrder":true},
+
+{"description":"CR followed by non-LF",
+"input":"\r?",
+"output":[["Character", "\n?"]]},
+
+{"description":"CR at EOF",
+"input":"\r",
+"output":[["Character", "\n"]]},
+
+{"description":"LF at EOF",
+"input":"\n",
+"output":[["Character", "\n"]]},
+
+{"description":"CR LF",
+"input":"\r\n",
+"output":[["Character", "\n"]]},
+
+{"description":"CR CR",
+"input":"\r\r",
+"output":[["Character", "\n\n"]]},
+
+{"description":"LF LF",
+"input":"\n\n",
+"output":[["Character", "\n\n"]]},
+
+{"description":"LF CR",
+"input":"\n\r",
+"output":[["Character", "\n\n"]]},
+
+{"description":"text CR CR CR text",
+"input":"text\r\r\rtext",
+"output":[["Character", "text\n\n\ntext"]]},
+
+{"description":"Doctype publik",
+"input":"<!DOCTYPE html PUBLIK \"AbC\" \"XyZ\">",
+"output":["ParseError", ["DOCTYPE", "html", null, null, false]]},
+
+{"description":"Doctype publi",
+"input":"<!DOCTYPE html PUBLI",
+"output":["ParseError", ["DOCTYPE", "html", null, null, false]]},
+
+{"description":"Doctype sistem",
+"input":"<!DOCTYPE html SISTEM \"AbC\">",
+"output":["ParseError", ["DOCTYPE", "html", null, null, false]]},
+
+{"description":"Doctype sys",
+"input":"<!DOCTYPE html SYS",
+"output":["ParseError", ["DOCTYPE", "html", null, null, false]]},
+
+{"description":"Doctype html x>text",
+"input":"<!DOCTYPE html x>text",
+"output":["ParseError", ["DOCTYPE", "html", null, null, false], ["Character", "text"]]},
+
+{"description":"Grave accent in unquoted attribute",
+"input":"<a a=aa`>",
+"output":["ParseError", ["StartTag", "a", {"a":"aa`"}]]},
+
+{"description":"EOF in tag name state ",
+"input":"<a",
+"output":["ParseError"]},
+
+{"description":"EOF in tag name state",
+"input":"<a",
+"output":["ParseError"]},
+
+{"description":"EOF in before attribute name state",
+"input":"<a ",
+"output":["ParseError"]},
+
+{"description":"EOF in attribute name state",
+"input":"<a a",
+"output":["ParseError"]},
+
+{"description":"EOF in after attribute name state",
+"input":"<a a ",
+"output":["ParseError"]},
+
+{"description":"EOF in before attribute value state",
+"input":"<a a =",
+"output":["ParseError"]},
+
+{"description":"EOF in attribute value (double quoted) state",
+"input":"<a a =\"a",
+"output":["ParseError"]},
+
+{"description":"EOF in attribute value (single quoted) state",
+"input":"<a a ='a",
+"output":["ParseError"]},
+
+{"description":"EOF in attribute value (unquoted) state",
+"input":"<a a =a",
+"output":["ParseError"]},
+
+{"description":"EOF in after attribute value state",
+"input":"<a a ='a'",
+"output":["ParseError"]}
+
+]}

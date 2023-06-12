@@ -1,0 +1,13 @@
+# See https://pub.dev/packages/mono_repo
+sdk:
+- 2.13.0
+- dev
+
+stages:
+- analyze_and_format:
+  - group:
+    - format
+    - analyze: --fatal-infos .
+- unittest:
+  - test: -p vm
+  - test: -p chrome

@@ -1,0 +1,191 @@
+#data
+<style> <!-- </style>x
+#errors
+Line: 1 Col: 7 Unexpected start tag (style). Expected DOCTYPE.
+Line: 1 Col: 22 Unexpected end of file. Expected end tag (style).
+#document
+| <html>
+|   <head>
+|     <style>
+|       " <!-- "
+|   <body>
+|     "x"
+
+#data
+<style> <!-- </style> --> </style>x
+#errors
+Line: 1 Col: 7 Unexpected start tag (style). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <style>
+|       " <!-- "
+|     " "
+|   <body>
+|     "--> x"
+
+#data
+<style> <!--> </style>x
+#errors
+Line: 1 Col: 7 Unexpected start tag (style). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <style>
+|       " <!--> "
+|   <body>
+|     "x"
+
+#data
+<style> <!---> </style>x
+#errors
+Line: 1 Col: 7 Unexpected start tag (style). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <style>
+|       " <!---> "
+|   <body>
+|     "x"
+
+#data
+<iframe> <!---> </iframe>x
+#errors
+Line: 1 Col: 8 Unexpected start tag (iframe). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <iframe>
+|       " <!---> "
+|     "x"
+
+#data
+<iframe> <!--- </iframe>->x</iframe> --> </iframe>x
+#errors
+Line: 1 Col: 8 Unexpected start tag (iframe). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <iframe>
+|       " <!--- "
+|     "->x --> x"
+
+#data
+<script> <!-- </script> --> </script>x
+#errors
+Line: 1 Col: 8 Unexpected start tag (script). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <script>
+|       " <!-- "
+|     " "
+|   <body>
+|     "--> x"
+
+#data
+<title> <!-- </title> --> </title>x
+#errors
+Line: 1 Col: 7 Unexpected start tag (title). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <title>
+|       " <!-- "
+|     " "
+|   <body>
+|     "--> x"
+
+#data
+<textarea> <!--- </textarea>->x</textarea> --> </textarea>x
+#errors
+Line: 1 Col: 10 Unexpected start tag (textarea). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <textarea>
+|       " <!--- "
+|     "->x --> x"
+
+#data
+<style> <!</-- </style>x
+#errors
+Line: 1 Col: 7 Unexpected start tag (style). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <style>
+|       " <!</-- "
+|   <body>
+|     "x"
+
+#data
+<p><xmp></xmp>
+#errors
+XXX: Unknown
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|     <xmp>
+
+#data
+<xmp> <!-- > --> </xmp>
+#errors
+Line: 1 Col: 5 Unexpected start tag (xmp). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <xmp>
+|       " <!-- > --> "
+
+#data
+<title>&amp;</title>
+#errors
+Line: 1 Col: 7 Unexpected start tag (title). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <title>
+|       "&"
+|   <body>
+
+#data
+<title><!--&amp;--></title>
+#errors
+Line: 1 Col: 7 Unexpected start tag (title). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <title>
+|       "<!--&-->"
+|   <body>
+
+#data
+<title><!--</title>
+#errors
+Line: 1 Col: 7 Unexpected start tag (title). Expected DOCTYPE.
+Line: 1 Col: 19 Unexpected end of file. Expected end tag (title).
+#document
+| <html>
+|   <head>
+|     <title>
+|       "<!--"
+|   <body>
+
+#data
+<noscript><!--</noscript>--></noscript>
+#errors
+Line: 1 Col: 10 Unexpected start tag (noscript). Expected DOCTYPE.
+#document
+| <html>
+|   <head>
+|     <noscript>
+|       "<!--"
+|   <body>
+|     "-->"

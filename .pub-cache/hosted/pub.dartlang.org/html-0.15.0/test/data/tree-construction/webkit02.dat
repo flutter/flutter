@@ -1,0 +1,94 @@
+#data
+<foo bar=qux/>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <foo>
+|       bar="qux/"
+
+#data
+<p id="status"><noscript><strong>A</strong></noscript><span>B</span></p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       id="status"
+|       <noscript>
+|         "<strong>A</strong>"
+|       <span>
+|         "B"
+
+#data
+<div><sarcasm><div></div></sarcasm></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <sarcasm>
+|         <div>
+
+#data
+<html><body><img src="" border="0" alt="><div>A</div></body></html>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+
+#data
+<table><td></tbody>A
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "A"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+
+#data
+<table><td></thead>A
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "A"
+
+#data
+<table><td></tfoot>A
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "A"
+
+#data
+<table><thead><td></tbody>A
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <table>
+|       <thead>
+|         <tr>
+|           <td>
+|             "A"

@@ -1,0 +1,97 @@
+40 columns                              |
+>>> trailing line comment after split
+someMethod(argument1, argument2, // comment
+argument3);
+<<<
+someMethod(
+    argument1,
+    argument2, // comment
+    argument3);
+>>> trailing line comment after non-split
+someMethod(argument1, argument2 // comment
+);
+<<<
+someMethod(
+    argument1, argument2 // comment
+    );
+>>> inside list literal
+['item' // comment
+];
+<<<
+[
+  'item' // comment
+];
+>>> inside argument list
+foo(1 /* bang */, 2);
+<<<
+foo(1 /* bang */, 2);
+>>> no space between "(" and ")" and block comment
+foo(   /* */  ) {}
+<<<
+foo(/* */) {}
+>>> space on left between block comment and ","
+foo(1,/* a */ 2 /* b */  , 3);
+<<<
+foo(1, /* a */ 2 /* b */, 3);
+>>> block comment after comma follows later arg
+foo(arg, /* comment */ arg, /* comment */ arg, /* comment */ arg, /* comment */ arg);
+<<<
+foo(
+    arg,
+    /* comment */ arg,
+    /* comment */ arg,
+    /* comment */ arg,
+    /* comment */ arg);
+>>> space between block comment and other tokens
+var/**/a/**/=/**/1/**/+/**/2;
+<<<
+var /**/ a /**/ = /**/ 1 /**/ + /**/ 2;
+>>> preserve space before comment in expression
+foo &&
+
+  // comment
+  bar;
+<<<
+foo &&
+
+    // comment
+    bar;
+>>> preserve comments before a sequence of operators
+1 /* a */ && 2 /* b */ && 3;
+<<<
+1 /* a */ && 2 /* b */ && 3;
+>>> no trailing space after operand preceding comment
+a
+  // comment
+  && b;
+<<<
+a
+    // comment
+    &&
+    b;
+>>> hard line caused by a comment before a nested line
+someFunction(//
+someExtremelyLongArgumentName).clamp();
+<<<
+someFunction(//
+        someExtremelyLongArgumentName)
+    .clamp();
+>>> line comment before binary operator
+{
+  // comment
+  1 + 2;
+}
+<<<
+{
+  // comment
+  1 + 2;
+}
+>>> force named args to split on line comment in positional
+function(argument, //
+    argument, named: argument, another: argument);
+<<<
+function(
+    argument, //
+    argument,
+    named: argument,
+    another: argument);

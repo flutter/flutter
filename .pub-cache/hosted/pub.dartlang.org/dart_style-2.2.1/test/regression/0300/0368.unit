@@ -1,0 +1,120 @@
+>>>
+class Compiler {
+  Compiler()
+      : this.options = options,
+        this.allowedLibraryCategories = getAllowedLibraryCategories(options),
+        super(
+            outputProvider: outputProvider,
+            enableTypeAssertions: hasOption(options, '--enable-checked-mode'),
+            enableUserAssertions: hasOption(options, '--enable-checked-mode'),
+            trustTypeAnnotations:
+                hasOption(options, '--trust-type-annotations'),
+            trustPrimitives:
+                hasOption(options, '--trust-primitives'),
+            enableMinification: hasOption(options, '--minify'),
+            preserveUris: hasOption(options, '--preserve-uris'),
+            enableNativeLiveTypeAnalysis:
+                !hasOption(options, '--disable-native-live-type-analysis'),
+            emitJavaScript: !(hasOption(options, '--output-type=dart') ||
+                              hasOption(options, '--output-type=dart-multi')),
+            dart2dartMultiFile: hasOption(options, '--output-type=dart-multi'),
+            generateSourceMap: !hasOption(options, '--no-source-maps'),
+            analyzeAllFlag: hasOption(options, '--analyze-all'),
+            analyzeOnly: hasOption(options, '--analyze-only'),
+            analyzeMain: hasOption(options, '--analyze-main'),
+            analyzeSignaturesOnly:
+                hasOption(options, '--analyze-signatures-only'),
+            strips: extractCsvOption(options, '--force-strip='),
+            enableConcreteTypeInference:
+                hasOption(options, '--enable-concrete-type-inference'),
+            disableTypeInferenceFlag:
+                hasOption(options, '--disable-type-inference'),
+            preserveComments: hasOption(options, '--preserve-comments'),
+            useCpsIr: hasOption(options, '--use-cps-ir'),
+            verbose: hasOption(options, '--verbose'),
+            sourceMapUri: extractUriOption(options, '--source-map='),
+            outputUri: extractUriOption(options, '--out='),
+            terseDiagnostics: hasOption(options, '--terse'),
+            deferredMapUri: extractUriOption(options, '--deferred-map='),
+            dumpInfo: hasOption(options, '--dump-info'),
+            buildId: extractStringOption(
+                options, '--build-id=',
+                "build number could not be determined"),
+            showPackageWarnings:
+                hasOption(options, '--show-package-warnings'),
+            useContentSecurityPolicy: hasOption(options, '--csp'),
+            hasIncrementalSupport:
+                forceIncrementalSupport ||
+                hasOption(options, '--incremental-support'),
+            suppressWarnings: hasOption(options, '--suppress-warnings'),
+            fatalWarnings: hasOption(options, '--fatal-warnings'),
+            enableExperimentalMirrors:
+                hasOption(options, '--enable-experimental-mirrors'),
+            generateCodeWithCompileTimeErrors:
+                hasOption(options, '--generate-code-with-compile-time-errors'),
+            testMode: hasOption(options, '--test-mode'),
+            allowNativeExtensions:
+                hasOption(options, '--allow-native-extensions'),
+            enableNullAwareOperators:
+                hasOption(options, '--enable-null-aware-operators')) {
+    ;
+  }
+}
+<<<
+class Compiler {
+  Compiler()
+      : this.options = options,
+        this.allowedLibraryCategories = getAllowedLibraryCategories(options),
+        super(
+            outputProvider: outputProvider,
+            enableTypeAssertions: hasOption(options, '--enable-checked-mode'),
+            enableUserAssertions: hasOption(options, '--enable-checked-mode'),
+            trustTypeAnnotations:
+                hasOption(options, '--trust-type-annotations'),
+            trustPrimitives: hasOption(options, '--trust-primitives'),
+            enableMinification: hasOption(options, '--minify'),
+            preserveUris: hasOption(options, '--preserve-uris'),
+            enableNativeLiveTypeAnalysis:
+                !hasOption(options, '--disable-native-live-type-analysis'),
+            emitJavaScript: !(hasOption(options, '--output-type=dart') ||
+                hasOption(options, '--output-type=dart-multi')),
+            dart2dartMultiFile: hasOption(options, '--output-type=dart-multi'),
+            generateSourceMap: !hasOption(options, '--no-source-maps'),
+            analyzeAllFlag: hasOption(options, '--analyze-all'),
+            analyzeOnly: hasOption(options, '--analyze-only'),
+            analyzeMain: hasOption(options, '--analyze-main'),
+            analyzeSignaturesOnly:
+                hasOption(options, '--analyze-signatures-only'),
+            strips: extractCsvOption(options, '--force-strip='),
+            enableConcreteTypeInference:
+                hasOption(options, '--enable-concrete-type-inference'),
+            disableTypeInferenceFlag:
+                hasOption(options, '--disable-type-inference'),
+            preserveComments: hasOption(options, '--preserve-comments'),
+            useCpsIr: hasOption(options, '--use-cps-ir'),
+            verbose: hasOption(options, '--verbose'),
+            sourceMapUri: extractUriOption(options, '--source-map='),
+            outputUri: extractUriOption(options, '--out='),
+            terseDiagnostics: hasOption(options, '--terse'),
+            deferredMapUri: extractUriOption(options, '--deferred-map='),
+            dumpInfo: hasOption(options, '--dump-info'),
+            buildId: extractStringOption(
+                options, '--build-id=', "build number could not be determined"),
+            showPackageWarnings: hasOption(options, '--show-package-warnings'),
+            useContentSecurityPolicy: hasOption(options, '--csp'),
+            hasIncrementalSupport: forceIncrementalSupport ||
+                hasOption(options, '--incremental-support'),
+            suppressWarnings: hasOption(options, '--suppress-warnings'),
+            fatalWarnings: hasOption(options, '--fatal-warnings'),
+            enableExperimentalMirrors:
+                hasOption(options, '--enable-experimental-mirrors'),
+            generateCodeWithCompileTimeErrors:
+                hasOption(options, '--generate-code-with-compile-time-errors'),
+            testMode: hasOption(options, '--test-mode'),
+            allowNativeExtensions:
+                hasOption(options, '--allow-native-extensions'),
+            enableNullAwareOperators:
+                hasOption(options, '--enable-null-aware-operators')) {
+    ;
+  }
+}

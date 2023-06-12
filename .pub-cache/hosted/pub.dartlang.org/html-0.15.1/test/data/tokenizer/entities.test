@@ -1,0 +1,283 @@
+{"tests": [
+
+{"description": "Undefined named entity in attribute value ending in semicolon and whose name starts with a known entity name.",
+"input":"<h a='&noti;'>",
+"output": ["ParseError", ["StartTag", "h", {"a": "&noti;"}]]},
+
+{"description": "Entity name followed by the equals sign in an attribute value.",
+"input":"<h a='&lang='>",
+"output": ["ParseError", ["StartTag", "h", {"a": "&lang="}]]},
+
+{"description": "CR as numeric entity",
+"input":"&#013;",
+"output": ["ParseError", ["Character", "\r"]]},
+
+{"description": "CR as hexadecimal numeric entity",
+"input":"&#x00D;",
+"output": ["ParseError", ["Character", "\r"]]},
+
+{"description": "Windows-1252 EURO SIGN numeric entity.",
+"input":"&#0128;",
+"output": ["ParseError", ["Character", "\u20AC"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR numeric entity.",
+"input":"&#0129;",
+"output": ["ParseError", ["Character", "\u0081"]]},
+
+{"description": "Windows-1252 SINGLE LOW-9 QUOTATION MARK numeric entity.",
+"input":"&#0130;",
+"output": ["ParseError", ["Character", "\u201A"]]},
+
+{"description": "Windows-1252 LATIN SMALL LETTER F WITH HOOK numeric entity.",
+"input":"&#0131;",
+"output": ["ParseError", ["Character", "\u0192"]]},
+
+{"description": "Windows-1252 DOUBLE LOW-9 QUOTATION MARK numeric entity.",
+"input":"&#0132;",
+"output": ["ParseError", ["Character", "\u201E"]]},
+
+{"description": "Windows-1252 HORIZONTAL ELLIPSIS numeric entity.",
+"input":"&#0133;",
+"output": ["ParseError", ["Character", "\u2026"]]},
+
+{"description": "Windows-1252 DAGGER numeric entity.",
+"input":"&#0134;",
+"output": ["ParseError", ["Character", "\u2020"]]},
+
+{"description": "Windows-1252 DOUBLE DAGGER numeric entity.",
+"input":"&#0135;",
+"output": ["ParseError", ["Character", "\u2021"]]},
+
+{"description": "Windows-1252 MODIFIER LETTER CIRCUMFLEX ACCENT numeric entity.",
+"input":"&#0136;",
+"output": ["ParseError", ["Character", "\u02C6"]]},
+
+{"description": "Windows-1252 PER MILLE SIGN numeric entity.",
+"input":"&#0137;",
+"output": ["ParseError", ["Character", "\u2030"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LETTER S WITH CARON numeric entity.",
+"input":"&#0138;",
+"output": ["ParseError", ["Character", "\u0160"]]},
+
+{"description": "Windows-1252 SINGLE LEFT-POINTING ANGLE QUOTATION MARK numeric entity.",
+"input":"&#0139;",
+"output": ["ParseError", ["Character", "\u2039"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LIGATURE OE numeric entity.",
+"input":"&#0140;",
+"output": ["ParseError", ["Character", "\u0152"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR numeric entity.",
+"input":"&#0141;",
+"output": ["ParseError", ["Character", "\u008D"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LETTER Z WITH CARON numeric entity.",
+"input":"&#0142;",
+"output": ["ParseError", ["Character", "\u017D"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR numeric entity.",
+"input":"&#0143;",
+"output": ["ParseError", ["Character", "\u008F"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR numeric entity.",
+"input":"&#0144;",
+"output": ["ParseError", ["Character", "\u0090"]]},
+
+{"description": "Windows-1252 LEFT SINGLE QUOTATION MARK numeric entity.",
+"input":"&#0145;",
+"output": ["ParseError", ["Character", "\u2018"]]},
+
+{"description": "Windows-1252 RIGHT SINGLE QUOTATION MARK numeric entity.",
+"input":"&#0146;",
+"output": ["ParseError", ["Character", "\u2019"]]},
+
+{"description": "Windows-1252 LEFT DOUBLE QUOTATION MARK numeric entity.",
+"input":"&#0147;",
+"output": ["ParseError", ["Character", "\u201C"]]},
+
+{"description": "Windows-1252 RIGHT DOUBLE QUOTATION MARK numeric entity.",
+"input":"&#0148;",
+"output": ["ParseError", ["Character", "\u201D"]]},
+
+{"description": "Windows-1252 BULLET numeric entity.",
+"input":"&#0149;",
+"output": ["ParseError", ["Character", "\u2022"]]},
+
+{"description": "Windows-1252 EN DASH numeric entity.",
+"input":"&#0150;",
+"output": ["ParseError", ["Character", "\u2013"]]},
+
+{"description": "Windows-1252 EM DASH numeric entity.",
+"input":"&#0151;",
+"output": ["ParseError", ["Character", "\u2014"]]},
+
+{"description": "Windows-1252 SMALL TILDE numeric entity.",
+"input":"&#0152;",
+"output": ["ParseError", ["Character", "\u02DC"]]},
+
+{"description": "Windows-1252 TRADE MARK SIGN numeric entity.",
+"input":"&#0153;",
+"output": ["ParseError", ["Character", "\u2122"]]},
+
+{"description": "Windows-1252 LATIN SMALL LETTER S WITH CARON numeric entity.",
+"input":"&#0154;",
+"output": ["ParseError", ["Character", "\u0161"]]},
+
+{"description": "Windows-1252 SINGLE RIGHT-POINTING ANGLE QUOTATION MARK numeric entity.",
+"input":"&#0155;",
+"output": ["ParseError", ["Character", "\u203A"]]},
+
+{"description": "Windows-1252 LATIN SMALL LIGATURE OE numeric entity.",
+"input":"&#0156;",
+"output": ["ParseError", ["Character", "\u0153"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR numeric entity.",
+"input":"&#0157;",
+"output": ["ParseError", ["Character", "\u009D"]]},
+
+{"description": "Windows-1252 EURO SIGN hexadecimal numeric entity.",
+"input":"&#x080;",
+"output": ["ParseError", ["Character", "\u20AC"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR hexadecimal numeric entity.",
+"input":"&#x081;",
+"output": ["ParseError", ["Character", "\u0081"]]},
+
+{"description": "Windows-1252 SINGLE LOW-9 QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x082;",
+"output": ["ParseError", ["Character", "\u201A"]]},
+
+{"description": "Windows-1252 LATIN SMALL LETTER F WITH HOOK hexadecimal numeric entity.",
+"input":"&#x083;",
+"output": ["ParseError", ["Character", "\u0192"]]},
+
+{"description": "Windows-1252 DOUBLE LOW-9 QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x084;",
+"output": ["ParseError", ["Character", "\u201E"]]},
+
+{"description": "Windows-1252 HORIZONTAL ELLIPSIS hexadecimal numeric entity.",
+"input":"&#x085;",
+"output": ["ParseError", ["Character", "\u2026"]]},
+
+{"description": "Windows-1252 DAGGER hexadecimal numeric entity.",
+"input":"&#x086;",
+"output": ["ParseError", ["Character", "\u2020"]]},
+
+{"description": "Windows-1252 DOUBLE DAGGER hexadecimal numeric entity.",
+"input":"&#x087;",
+"output": ["ParseError", ["Character", "\u2021"]]},
+
+{"description": "Windows-1252 MODIFIER LETTER CIRCUMFLEX ACCENT hexadecimal numeric entity.",
+"input":"&#x088;",
+"output": ["ParseError", ["Character", "\u02C6"]]},
+
+{"description": "Windows-1252 PER MILLE SIGN hexadecimal numeric entity.",
+"input":"&#x089;",
+"output": ["ParseError", ["Character", "\u2030"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LETTER S WITH CARON hexadecimal numeric entity.",
+"input":"&#x08A;",
+"output": ["ParseError", ["Character", "\u0160"]]},
+
+{"description": "Windows-1252 SINGLE LEFT-POINTING ANGLE QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x08B;",
+"output": ["ParseError", ["Character", "\u2039"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LIGATURE OE hexadecimal numeric entity.",
+"input":"&#x08C;",
+"output": ["ParseError", ["Character", "\u0152"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR hexadecimal numeric entity.",
+"input":"&#x08D;",
+"output": ["ParseError", ["Character", "\u008D"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LETTER Z WITH CARON hexadecimal numeric entity.",
+"input":"&#x08E;",
+"output": ["ParseError", ["Character", "\u017D"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR hexadecimal numeric entity.",
+"input":"&#x08F;",
+"output": ["ParseError", ["Character", "\u008F"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR hexadecimal numeric entity.",
+"input":"&#x090;",
+"output": ["ParseError", ["Character", "\u0090"]]},
+
+{"description": "Windows-1252 LEFT SINGLE QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x091;",
+"output": ["ParseError", ["Character", "\u2018"]]},
+
+{"description": "Windows-1252 RIGHT SINGLE QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x092;",
+"output": ["ParseError", ["Character", "\u2019"]]},
+
+{"description": "Windows-1252 LEFT DOUBLE QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x093;",
+"output": ["ParseError", ["Character", "\u201C"]]},
+
+{"description": "Windows-1252 RIGHT DOUBLE QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x094;",
+"output": ["ParseError", ["Character", "\u201D"]]},
+
+{"description": "Windows-1252 BULLET hexadecimal numeric entity.",
+"input":"&#x095;",
+"output": ["ParseError", ["Character", "\u2022"]]},
+
+{"description": "Windows-1252 EN DASH hexadecimal numeric entity.",
+"input":"&#x096;",
+"output": ["ParseError", ["Character", "\u2013"]]},
+
+{"description": "Windows-1252 EM DASH hexadecimal numeric entity.",
+"input":"&#x097;",
+"output": ["ParseError", ["Character", "\u2014"]]},
+
+{"description": "Windows-1252 SMALL TILDE hexadecimal numeric entity.",
+"input":"&#x098;",
+"output": ["ParseError", ["Character", "\u02DC"]]},
+
+{"description": "Windows-1252 TRADE MARK SIGN hexadecimal numeric entity.",
+"input":"&#x099;",
+"output": ["ParseError", ["Character", "\u2122"]]},
+
+{"description": "Windows-1252 LATIN SMALL LETTER S WITH CARON hexadecimal numeric entity.",
+"input":"&#x09A;",
+"output": ["ParseError", ["Character", "\u0161"]]},
+
+{"description": "Windows-1252 SINGLE RIGHT-POINTING ANGLE QUOTATION MARK hexadecimal numeric entity.",
+"input":"&#x09B;",
+"output": ["ParseError", ["Character", "\u203A"]]},
+
+{"description": "Windows-1252 LATIN SMALL LIGATURE OE hexadecimal numeric entity.",
+"input":"&#x09C;",
+"output": ["ParseError", ["Character", "\u0153"]]},
+
+{"description": "Windows-1252 REPLACEMENT CHAR hexadecimal numeric entity.",
+"input":"&#x09D;",
+"output": ["ParseError", ["Character", "\u009D"]]},
+
+{"description": "Windows-1252 LATIN SMALL LETTER Z WITH CARON hexadecimal numeric entity.",
+"input":"&#x09E;",
+"output": ["ParseError", ["Character", "\u017E"]]},
+
+{"description": "Windows-1252 LATIN CAPITAL LETTER Y WITH DIAERESIS hexadecimal numeric entity.",
+"input":"&#x09F;",
+"output": ["ParseError", ["Character", "\u0178"]]},
+
+{"description": "Decimal numeric entity followed by hex character a.",
+"input":"&#97a",
+"output": ["ParseError", ["Character", "aa"]]},
+
+{"description": "Decimal numeric entity followed by hex character A.",
+"input":"&#97A",
+"output": ["ParseError", ["Character", "aA"]]},
+
+{"description": "Decimal numeric entity followed by hex character f.",
+"input":"&#97f",
+"output": ["ParseError", ["Character", "af"]]},
+
+{"description": "Decimal numeric entity followed by hex character A.",
+"input":"&#97F",
+"output": ["ParseError", ["Character", "aF"]]}
+
+]}

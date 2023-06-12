@@ -1,0 +1,21 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    constant_identifier_names: ignore
+    non_constant_identifier_names: ignore
+    unused_element: error
+    unused_field: error
+    unused_local_variable: error
+  exclude:
+    - test/tests/res/**
+    - test/tests/out/**
+
+linter:
+  rules:
+    - avoid_print
+    - camel_case_types

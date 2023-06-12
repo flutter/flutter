@@ -1,0 +1,61 @@
+>>>
+foo() {
+  assert(argument != argument && (argument.isDynamic || argument.isSubTypeOf(argument, argument)));
+}
+<<<
+foo() {
+  assert(argument != argument &&
+      (argument.isDynamic || argument.isSubTypeOf(argument, argument)));
+}
+>>>
+foo() {
+  if (xxx) {
+    if (zzzzzzzzzzzzz != aaaaaaaa.bbbbbbbb && !cccccccccccc && ddddddddd.eeee == "fff") {
+      return true;
+    }
+
+    if (yyy) {
+      if (!ggggggggggg(p2.type, p1.type) && !(jjjj && hhhhhhhhhhhhhhhh(p2.type, p1.type))) return false;
+      if (!ggggggggggg(p2.type, p1.type) && !(jjjj && hhhhhhhhhhhhhhhh(p2.type, p1.type))) {
+        return false;
+      }
+    }
+  }
+}
+<<<
+foo() {
+  if (xxx) {
+    if (zzzzzzzzzzzzz != aaaaaaaa.bbbbbbbb &&
+        !cccccccccccc &&
+        ddddddddd.eeee == "fff") {
+      return true;
+    }
+
+    if (yyy) {
+      if (!ggggggggggg(p2.type, p1.type) &&
+          !(jjjj && hhhhhhhhhhhhhhhh(p2.type, p1.type))) return false;
+      if (!ggggggggggg(p2.type, p1.type) &&
+          !(jjjj && hhhhhhhhhhhhhhhh(p2.type, p1.type))) {
+        return false;
+      }
+    }
+  }
+}
+>>>
+assert(say('Bob', 'Howdy', 'smoke signal') ==
+'Bob says Howdy with a smoke signal');
+<<<
+assert(say('Bob', 'Howdy', 'smoke signal') ==
+    'Bob says Howdy with a smoke signal');
+>>>
+void main() {
+  var xxxxxxxYyyyyyyy = aaaabbb
+      ? CCCCCCCCCCCC.mmmmmmmmmmmmmmmmmm1(arg00000000000)
+      : CCCCCCCCCCCC.mmmmmmmmmmmmmmmmmm(arg1111111111111);
+}
+<<<
+void main() {
+  var xxxxxxxYyyyyyyy = aaaabbb
+      ? CCCCCCCCCCCC.mmmmmmmmmmmmmmmmmm1(arg00000000000)
+      : CCCCCCCCCCCC.mmmmmmmmmmmmmmmmmm(arg1111111111111);
+}

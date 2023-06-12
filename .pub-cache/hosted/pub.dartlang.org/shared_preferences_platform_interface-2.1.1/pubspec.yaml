@@ -1,0 +1,18 @@
+name: shared_preferences_platform_interface
+description: A common platform interface for the shared_preferences plugin.
+repository: https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_platform_interface
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+shared_preferences%22
+version: 2.1.1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

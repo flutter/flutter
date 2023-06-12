@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      "|_built_value":
+
+builders:
+  _built_value:
+    target: ":code_builder"
+    import: "tool/src/builder.dart"
+    builder_factories:
+      - "builtValueBuilder"
+    build_extensions:
+      ".dart": [".g.dart"]
+    build_to: "source"

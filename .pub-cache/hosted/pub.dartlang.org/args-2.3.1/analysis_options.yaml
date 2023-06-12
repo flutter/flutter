@@ -1,0 +1,32 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - avoid_null_checks_in_equality_operators
+    - avoid_unused_constructor_parameters
+    - await_only_futures
+    - camel_case_types
+    - cancel_subscriptions
+    - comment_references
+    - constant_identifier_names
+    - control_flow_in_finally
+    - directives_ordering
+    - empty_statements
+    - hash_and_equals
+    - implementation_imports
+    - iterable_contains_unrelated_type
+    - library_names
+    - library_prefixes
+    - list_remove_unrelated_type
+    - non_constant_identifier_names
+    - overridden_fields
+    - package_api_docs
+    - package_names
+    - package_prefixed_library_names
+    - prefer_final_fields
+    - prefer_generic_function_type_aliases
+    - prefer_typing_uninitialized_variables
+    - test_types_in_equals
+    - throw_in_finally
+    - unnecessary_brace_in_string_interps
+    - unrelated_type_equality_checks

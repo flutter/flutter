@@ -1,0 +1,12 @@
+name: example
+version: 0.0.1
+description: >
+  Example, not for publishing.
+homepage: https://github.com/google/built_collection.dart
+
+environment:
+  sdk: '>=2.9.0-18.0 <3.0.0'
+
+dependency_overrides:
+  built_collection:
+    path: ..

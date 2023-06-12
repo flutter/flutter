@@ -1,0 +1,1280 @@
+syntax = "proto2";
+
+import "datasets/google_message3/benchmark_message3_2.proto";
+import "datasets/google_message3/benchmark_message3_3.proto";
+import "datasets/google_message3/benchmark_message3_5.proto";
+import "datasets/google_message3/benchmark_message3_7.proto";
+import "datasets/google_message3/benchmark_message3_8.proto";
+package benchmarks.google_message3;
+
+option cc_enable_arenas = true;
+option java_package = "com.google.protobuf.benchmarks";
+
+message Message34390 {
+  repeated .benchmarks.google_message3.Message34387 field34452 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message34390 field34453 = 92144610;
+  }
+}
+
+message Message34624 {
+  optional .benchmarks.google_message3.Message34621 field34683 = 1;
+  optional .benchmarks.google_message3.Message34621 field34684 = 2;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message34624 field34685 = 18178548;
+  }
+}
+
+message Message34791 {
+  optional fixed64 field34793 = 1;
+  repeated group Message34792 = 2 {
+    required string field34808 = 3;
+    optional string field34809 = 4;
+  }
+  optional int32 field34795 = 5;
+  optional int32 field34796 = 6;
+  optional int32 field34797 = 7;
+  optional int32 field34798 = 8;
+  optional int32 field34799 = 9;
+  optional int32 field34800 = 10;
+  optional bool field34801 = 11;
+  optional float field34802 = 12;
+  optional int32 field34803 = 13;
+  optional string field34804 = 14;
+  optional int64 field34805 = 15;
+  repeated fixed64 field34806 = 17 [packed = true];
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message34791 field34807 = 6330340;
+  }
+}
+
+message Message35483 {
+  optional int32 field35499 = 1;
+  optional string field35500 = 2;
+  optional string field35501 = 3;
+  optional string field35502 = 4;
+  repeated .benchmarks.google_message3.Message35476 field35503 = 5;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field35504 = 6;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message35483 field35505 = 7913554;
+  }
+}
+
+message Message35807 {
+  optional int32 field35810 = 1;
+  optional int32 field35811 = 2;
+  optional int32 field35812 = 3;
+  optional int32 field35813 = 4;
+  optional int32 field35814 = 5;
+  optional int32 field35815 = 6;
+  optional int32 field35816 = 7;
+  optional int32 field35817 = 8;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message35807 field35818 = 3803299;
+  }
+}
+
+message Message37487 {
+  optional bytes field37501 = 2;
+  optional bool field37502 = 3;
+}
+
+message Message13062 {
+  optional int64 field13075 = 1;
+  optional string field13076 = 2;
+  optional int32 field13077 = 3;
+  optional string field13078 = 4;
+  optional int32 field13079 = 5;
+}
+
+message Message952 {
+  repeated .benchmarks.google_message3.Message949 field963 = 1;
+}
+
+message Message36876 {
+  optional .benchmarks.google_message3.Message2356 field36980 = 1;
+  repeated group Message36877 = 111 {
+    required string field37044 = 112;
+    optional int32 field37045 = 113;
+    optional bytes field37046 = 114;
+    optional int32 field37047 = 115;
+    optional int32 field37048 = 157;
+  }
+  repeated group Message36878 = 168 {
+  }
+  repeated group Message36879 = 55 {
+    required string field37050 = 56;
+    optional int32 field37051 = 69;
+  }
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field36984 = 78;
+  optional group Message36880 = 137 {
+  }
+  optional uint64 field36986 = 59;
+  optional bytes field36987 = 121;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field36988 = 2;
+  optional .benchmarks.google_message3.Message7029 field36989 = 118;
+  optional .benchmarks.google_message3.Message35573 field36990 = 11;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field36991 = 21;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field36992 = 22;
+  optional float field36993 = 13;
+  optional int32 field36994 = 20;
+  optional bool field36995 = 51;
+  optional bool field36996 = 57;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field36997 = 100;
+  optional int32 field36998 = 47;
+  optional int32 field36999 = 48;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37000 = 68;
+  repeated group Message36881 = 23 {
+  }
+  optional .benchmarks.google_message3.Message4144 field37002 = 125;
+  repeated group Message36882 = 35 {
+  }
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37004 = 49;
+  optional .benchmarks.google_message3.Message18921 field37005 = 52;
+  optional .benchmarks.google_message3.Message36858 field37006 = 46;
+  optional .benchmarks.google_message3.Message18831 field37007 = 54;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37008 = 58;
+  optional .benchmarks.google_message3.Message18283 field37009 = 10;
+  optional string field37010 = 44;
+  optional string field37011 = 103;
+  optional .benchmarks.google_message3.Message0 field37012 = 43;
+  optional .benchmarks.google_message3.Message0 field37013 = 143;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37014 = 53;
+  optional .benchmarks.google_message3.Message36869 field37015 = 15;
+  optional group Message36883 = 3 {
+  }
+  repeated group Message36884 = 16 {
+  }
+  repeated group Message36885 = 27 {
+  }
+  optional group Message36886 = 32 {
+  }
+  repeated .benchmarks.google_message3.UnusedEnum field37020 = 71;
+  repeated int32 field37021 = 70;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37022 = 66;
+  optional .benchmarks.google_message3.Message13090 field37023 = 67;
+  optional group Message36887 = 62 {
+  }
+  repeated .benchmarks.google_message3.Message10155 field37025 = 50;
+  repeated .benchmarks.google_message3.Message11874 field37026 = 151;
+  optional string field37027 = 12;
+  optional int64 field37028 = 72;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37029 = 73;
+  optional .benchmarks.google_message3.Message35546 field37030 = 108;
+  optional group Message36888 = 74 {
+    optional uint64 field37089 = 75;
+    optional bool field37090 = 76;
+    optional uint64 field37091 = 165;
+    optional double field37092 = 166;
+    optional uint64 field37093 = 109;
+    optional bytes field37094 = 122;
+  }
+  repeated .benchmarks.google_message3.Message19255 field37032 = 104;
+  optional .benchmarks.google_message3.Message33968 field37033 = 105;
+  optional bool field37034 = 106;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field37035 = 107;
+  optional .benchmarks.google_message3.Message6644 field37036 = 110;
+  optional bytes field37037 = 133;
+  optional group Message36889 = 116 {
+    optional int64 field37095 = 117;
+    optional string field37096 = 145;
+    optional int32 field37097 = 123;
+    optional bool field37098 = 163;
+    optional int32 field37099 = 164;
+    optional int32 field37100 = 149;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field37101 = 129;
+    optional .benchmarks.google_message3.Message13174 field37102 = 124;
+    optional .benchmarks.google_message3.Message13169 field37103 = 128;
+    optional uint64 field37104 = 132;
+    repeated .benchmarks.google_message3.Enum36890 field37105 = 131;
+    optional bool field37106 = 134;
+    optional bool field37107 = 140;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field37108 = 135;
+    optional float field37109 = 136;
+    optional float field37110 = 156;
+    optional bool field37111 = 142;
+    optional int64 field37112 = 167;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field37113 = 146;
+    optional bool field37114 = 148;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field37115 = 154;
+    optional .benchmarks.google_message3.UnusedEnum field37116 = 158;
+    repeated .benchmarks.google_message3.UnusedEnum field37117 = 159;
+    optional int32 field37118 = 160;
+    repeated string field37119 = 161;
+  }
+  repeated group Message36910 = 119 {
+  }
+  optional group Message36911 = 126 {
+    optional .benchmarks.google_message3.UnusedEmptyMessage field37121 = 127;
+    optional .benchmarks.google_message3.Message35538 field37122 = 130;
+    optional .benchmarks.google_message3.Message35540 field37123 = 144;
+    optional .benchmarks.google_message3.Message35542 field37124 = 150;
+  }
+  optional group Message36912 = 152 {
+    optional .benchmarks.google_message3.Message3901 field37125 = 153;
+    optional .benchmarks.google_message3.Message3901 field37126 = 162;
+  }
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37042 = 155;
+}
+
+message Message1328 {
+}
+
+message Message6850 {
+}
+
+message Message6863 {
+  optional .benchmarks.google_message3.Enum6858 field6931 = 1;
+  optional .benchmarks.google_message3.Enum6858 field6932 = 2;
+  optional .benchmarks.google_message3.UnusedEnum field6933 = 36;
+  optional bool field6934 = 27;
+  optional .benchmarks.google_message3.Message6773 field6935 = 26;
+  optional int32 field6936 = 30;
+  optional int32 field6937 = 37;
+  optional .benchmarks.google_message3.Enum6815 field6938 = 31;
+  optional string field6939 = 3;
+  optional int32 field6940 = 4;
+  optional .benchmarks.google_message3.Enum6822 field6941 = 15;
+  optional bool field6942 = 10;
+  optional bool field6943 = 17;
+  optional float field6944 = 18;
+  optional float field6945 = 19;
+  optional int32 field6946 = 5;
+  optional int32 field6947 = 6;
+  optional bool field6948 = 7;
+  optional int32 field6949 = 12;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field6950 = 8;
+  optional uint64 field6951 = 9;
+  optional string field6952 = 11;
+  optional bytes field6953 = 13;
+  optional int32 field6954 = 14;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field6955 = 16;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field6956 = 22;
+  optional .benchmarks.google_message3.Message3886 field6957 = 38;
+  optional string field6958 = 20;
+  optional uint32 field6959 = 21;
+  optional .benchmarks.google_message3.Message6743 field6960 = 23;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field6961 = 29;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field6962 = 33;
+  optional bool field6963 = 34;
+}
+
+message Message6871 {
+}
+
+message Message7547 {
+  required bytes field7549 = 1;
+  required int32 field7550 = 2;
+}
+
+message Message7648 {
+  optional string field7669 = 1;
+  optional int32 field7670 = 2;
+  optional int32 field7671 = 3;
+  optional int32 field7672 = 4;
+  optional int32 field7673 = 5;
+  optional int32 field7674 = 6;
+  optional float field7675 = 7;
+  optional bool field7676 = 8;
+  optional bool field7677 = 9;
+  optional bool field7678 = 10;
+  optional bool field7679 = 11;
+  optional bool field7680 = 12;
+}
+
+message Message7865 {
+}
+
+message Message7928 {
+  optional string field7940 = 1;
+  optional int64 field7941 = 2;
+}
+
+message Message7919 {
+  optional fixed64 field7931 = 1;
+  optional int64 field7932 = 2;
+  optional bytes field7933 = 3;
+}
+
+message Message7920 {
+  optional int64 field7934 = 1;
+  optional int64 field7935 = 2;
+}
+
+message Message7921 {
+  optional int32 field7936 = 1;
+  optional int64 field7937 = 2;
+  optional float field7938 = 3;
+  optional .benchmarks.google_message3.UnusedEnum field7939 = 4;
+}
+
+message Message8511 {
+  optional .benchmarks.google_message3.Message8224 field8539 = 1;
+  optional string field8540 = 2;
+  optional bool field8541 = 3;
+  optional int64 field8542 = 4;
+  optional string field8543 = 5;
+}
+
+message Message8512 {
+  optional .benchmarks.google_message3.Message8301 field8544 = 1;
+  optional .benchmarks.google_message3.Message8302 field8545 = 2;
+  optional string field8546 = 3;
+  optional bool field8547 = 4;
+  optional int64 field8548 = 5;
+  optional string field8549 = 6;
+}
+
+message Message8513 {
+  repeated .benchmarks.google_message3.Message8392 field8550 = 1;
+  optional string field8551 = 2;
+  optional bool field8552 = 3;
+  optional string field8553 = 4;
+}
+
+message Message8514 {
+  optional string field8554 = 1;
+  optional int64 field8555 = 2;
+  optional bool field8556 = 3;
+  repeated .benchmarks.google_message3.Message8130 field8557 = 4;
+  optional string field8558 = 5;
+}
+
+message Message8515 {
+  optional .benchmarks.google_message3.Message8479 field8559 = 1;
+  optional .benchmarks.google_message3.Message8478 field8560 = 2;
+  optional string field8561 = 3;
+}
+
+message Message10320 {
+  optional .benchmarks.google_message3.Enum10335 field10347 = 1;
+  repeated .benchmarks.google_message3.Message10319 field10348 = 2;
+  optional int32 field10349 = 3;
+  optional int32 field10350 = 4;
+  optional int32 field10351 = 5;
+  optional int32 field10352 = 6;
+  optional .benchmarks.google_message3.Enum10337 field10353 = 7;
+}
+
+message Message10321 {
+  optional int32 field10354 = 1;
+  optional int32 field10355 = 2;
+  optional uint64 field10356 = 3;
+}
+
+message Message10322 {
+  optional .benchmarks.google_message3.Message4016 field10357 = 1;
+  optional bool field10358 = 2;
+  optional bool field10359 = 3;
+}
+
+message Message11988 {
+  optional string field12021 = 1;
+  optional string field12022 = 2;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field12023 = 3;
+  optional .benchmarks.google_message3.Message10155 field12024 = 4;
+}
+
+message Message12668 {
+  repeated .benchmarks.google_message3.Message12669 field12677 = 1;
+  optional int32 field12678 = 2;
+  optional int32 field12679 = 3;
+  optional int32 field12680 = 4;
+}
+
+message Message12825 {
+  repeated .benchmarks.google_message3.Message12818 field12862 = 1;
+  optional int32 field12863 = 2;
+  optional .benchmarks.google_message3.Message12819 field12864 = 3;
+  optional .benchmarks.google_message3.Message12820 field12865 = 4;
+  optional int32 field12866 = 5;
+  repeated .benchmarks.google_message3.Message12821 field12867 = 6;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field12868 = 7;
+}
+
+message Message16478 {
+  repeated .benchmarks.google_message3.Message16479 field16481 = 1;
+  optional bool field16482 = 3;
+  optional int32 field16483 = 2;
+}
+
+message Message16552 {
+  optional fixed64 field16565 = 1;
+  optional int32 field16566 = 2;
+  optional .benchmarks.google_message3.Enum16553 field16567 = 3;
+}
+
+message Message16660 {
+  optional string field16668 = 1;
+  optional string field16669 = 2;
+  optional int32 field16670 = 3;
+}
+
+message Message16727 {
+  required .benchmarks.google_message3.Enum16728 field16782 = 1;
+  required string field16783 = 2;
+  optional string field16784 = 3;
+  optional int32 field16785 = 23;
+  required string field16786 = 4;
+  optional string field16787 = 5;
+  optional string field16788 = 6;
+  required .benchmarks.google_message3.Enum16732 field16789 = 7;
+  optional string field16790 = 8;
+  optional string field16791 = 9;
+  optional string field16792 = 10;
+  optional .benchmarks.google_message3.Enum16738 field16793 = 11;
+  optional int32 field16794 = 12;
+  repeated .benchmarks.google_message3.Message16722 field16795 = 13;
+  optional bool field16796 = 19;
+  optional bool field16797 = 24;
+  optional string field16798 = 14;
+  optional int64 field16799 = 15;
+  optional bool field16800 = 16;
+  optional string field16801 = 17;
+  optional .benchmarks.google_message3.Enum16698 field16802 = 18;
+  optional .benchmarks.google_message3.Message16724 field16803 = 20;
+  optional bool field16804 = 22;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field16805 = 25;
+  extensions 1000 to 536870911;
+}
+
+message Message16725 {
+  optional .benchmarks.google_message3.Enum16728 field16774 = 1;
+  repeated string field16775 = 2;
+}
+
+message Message17726 {
+  optional string field17801 = 1;
+  repeated string field17802 = 2;
+  optional string field17803 = 3;
+  repeated string field17804 = 4;
+  optional string field17805 = 5;
+  repeated string field17806 = 6;
+  optional string field17807 = 7;
+  optional string field17808 = 8;
+  repeated string field17809 = 15;
+  repeated string field17810 = 16;
+  repeated string field17811 = 17;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17812 = 18;
+  optional string field17813 = 9;
+  optional string field17814 = 10;
+  optional string field17815 = 11;
+  optional string field17816 = 12;
+  optional string field17817 = 13;
+  optional string field17818 = 14;
+  optional string field17819 = 19;
+  repeated .benchmarks.google_message3.Message17728 field17820 = 20;
+  repeated .benchmarks.google_message3.Message17728 field17821 = 21;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17822 = 30;
+}
+
+message Message17782 {
+  optional string field18153 = 1;
+  optional string field18154 = 2;
+}
+
+message Message17783 {
+  optional string field18155 = 1;
+  optional string field18156 = 2;
+  optional string field18157 = 3;
+  repeated group Message17784 = 4 {
+    optional string field18162 = 5;
+    optional string field18163 = 6;
+    optional string field18164 = 7;
+    repeated string field18165 = 8;
+    optional string field18166 = 17;
+    optional string field18167 = 18;
+  }
+  repeated group Message17785 = 9 {
+    optional string field18168 = 10;
+    optional string field18169 = 11;
+    optional .benchmarks.google_message3.Message17783 field18170 = 12;
+    optional string field18171 = 13;
+    optional string field18172 = 14;
+    repeated string field18173 = 15;
+  }
+  repeated string field18160 = 16;
+}
+
+message Message16945 {
+  optional string field16946 = 1;
+  optional string field16947 = 2;
+  optional string field16948 = 3;
+  optional string field16949 = 4;
+  optional string field16950 = 5;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field16951 = 872;
+  repeated .benchmarks.google_message3.Message0 field16952 = 16;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16953 = 54;
+  repeated .benchmarks.google_message3.Message0 field16954 = 55;
+  repeated string field16955 = 58;
+  repeated string field16956 = 59;
+  repeated string field16957 = 62;
+  repeated string field16958 = 37;
+  repeated string field16959 = 18;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16960 = 38;
+  repeated .benchmarks.google_message3.Message0 field16961 = 67;
+  repeated .benchmarks.google_message3.Message0 field16962 = 130;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16963 = 136;
+  repeated string field16964 = 138;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16965 = 156;
+  repeated string field16966 = 139;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16967 = 126;
+  repeated string field16968 = 152;
+  repeated .benchmarks.google_message3.Message0 field16969 = 183;
+  repeated string field16970 = 168;
+  repeated string field16971 = 212;
+  repeated string field16972 = 213;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16973 = 189;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16974 = 190;
+  repeated string field16975 = 191;
+  repeated string field16976 = 192;
+  repeated .benchmarks.google_message3.Message0 field16977 = 193;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16978 = 194;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16979 = 195;
+  repeated int32 field16980 = 196;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16981 = 95;
+  repeated string field16982 = 96;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16983 = 97;
+  repeated string field16984 = 1086;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16985 = 98;
+  repeated string field16986 = 99;
+  repeated string field16987 = 100;
+  repeated string field16988 = 48;
+  optional string field16989 = 22;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16990 = 51;
+  repeated string field16991 = 81;
+  repeated string field16992 = 85;
+  repeated string field16993 = 169;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field16994 = 260;
+  optional int32 field16995 = 198;
+  optional int32 field16996 = 204;
+  optional string field16997 = 1087;
+  repeated string field16998 = 197;
+  repeated string field16999 = 206;
+  optional string field17000 = 211;
+  repeated string field17001 = 205;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17002 = 68;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17003 = 69;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17004 = 70;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17005 = 71;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17006 = 72;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17007 = 19;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17008 = 24;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field17009 = 23;
+  repeated .benchmarks.google_message3.Message0 field17010 = 131;
+  repeated string field17011 = 133;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17012 = 142;
+  repeated string field17013 = 143;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field17014 = 153;
+  repeated .benchmarks.google_message3.Message0 field17015 = 170;
+  repeated string field17016 = 171;
+  repeated string field17017 = 172;
+  repeated string field17018 = 173;
+  repeated string field17019 = 174;
+  repeated string field17020 = 175;
+  repeated string field17021 = 186;
+  repeated string field17022 = 101;
+  repeated .benchmarks.google_message3.Message0 field17023 = 102;
+  repeated string field17024 = 274;
+  extensions 17 to 17;
+  extensions 21 to 21;
+  extensions 25 to 25;
+  extensions 27 to 27;
+  extensions 29 to 29;
+  extensions 30 to 30;
+  extensions 31 to 31;
+  extensions 32 to 32;
+  extensions 33 to 33;
+  extensions 34 to 34;
+  extensions 35 to 35;
+  extensions 36 to 36;
+  extensions 39 to 39;
+  extensions 40 to 40;
+  extensions 41 to 41;
+  extensions 42 to 42;
+  extensions 43 to 43;
+  extensions 44 to 44;
+  extensions 45 to 45;
+  extensions 46 to 46;
+  extensions 47 to 47;
+  extensions 49 to 49;
+  extensions 50 to 50;
+  extensions 52 to 52;
+  extensions 53 to 53;
+  extensions 56 to 56;
+  extensions 57 to 57;
+  extensions 60 to 60;
+  extensions 61 to 61;
+  extensions 63 to 63;
+  extensions 64 to 64;
+  extensions 65 to 65;
+  extensions 66 to 66;
+  extensions 73 to 73;
+  extensions 74 to 74;
+  extensions 75 to 75;
+  extensions 76 to 76;
+  extensions 77 to 77;
+  extensions 78 to 78;
+  extensions 79 to 79;
+  extensions 80 to 80;
+  extensions 82 to 82;
+  extensions 83 to 83;
+  extensions 84 to 84;
+  extensions 86 to 86;
+  extensions 87 to 87;
+  extensions 88 to 88;
+  extensions 89 to 89;
+  extensions 90 to 90;
+  extensions 91 to 91;
+  extensions 92 to 92;
+  extensions 93 to 93;
+  extensions 94 to 94;
+  extensions 103 to 103;
+  extensions 104 to 104;
+  extensions 105 to 105;
+  extensions 106 to 106;
+  extensions 107 to 107;
+  extensions 108 to 108;
+  extensions 109 to 109;
+  extensions 110 to 110;
+  extensions 111 to 111;
+  extensions 112 to 112;
+  extensions 113 to 113;
+  extensions 114 to 114;
+  extensions 115 to 115;
+  extensions 116 to 116;
+  extensions 117 to 117;
+  extensions 118 to 118;
+  extensions 119 to 119;
+  extensions 120 to 120;
+  extensions 121 to 121;
+  extensions 122 to 122;
+  extensions 123 to 123;
+  extensions 124 to 124;
+  extensions 125 to 125;
+  extensions 127 to 127;
+  extensions 128 to 128;
+  extensions 129 to 129;
+  extensions 132 to 132;
+  extensions 134 to 134;
+  extensions 135 to 135;
+  extensions 137 to 137;
+  extensions 140 to 140;
+  extensions 141 to 141;
+  extensions 144 to 144;
+  extensions 145 to 145;
+  extensions 146 to 146;
+  extensions 147 to 147;
+  extensions 148 to 148;
+  extensions 149 to 149;
+  extensions 150 to 150;
+  extensions 151 to 151;
+  extensions 154 to 154;
+  extensions 155 to 155;
+  extensions 157 to 157;
+  extensions 158 to 158;
+  extensions 159 to 159;
+  extensions 160 to 160;
+  extensions 161 to 161;
+  extensions 162 to 162;
+  extensions 163 to 163;
+  extensions 164 to 164;
+  extensions 165 to 165;
+  extensions 166 to 166;
+  extensions 167 to 167;
+  extensions 176 to 176;
+  extensions 177 to 177;
+  extensions 178 to 178;
+  extensions 179 to 179;
+  extensions 180 to 180;
+  extensions 181 to 181;
+  extensions 182 to 182;
+  extensions 184 to 184;
+  extensions 185 to 185;
+  extensions 187 to 187;
+  extensions 188 to 188;
+  extensions 199 to 199;
+  extensions 200 to 200;
+  extensions 201 to 201;
+  extensions 202 to 202;
+  extensions 203 to 203;
+  extensions 207 to 207;
+  extensions 208 to 208;
+  extensions 209 to 209;
+  extensions 210 to 210;
+  extensions 214 to 214;
+  extensions 215 to 215;
+  extensions 216 to 216;
+  extensions 217 to 217;
+  extensions 218 to 218;
+  extensions 219 to 219;
+  extensions 220 to 220;
+  extensions 221 to 221;
+  extensions 222 to 222;
+  extensions 223 to 223;
+  extensions 224 to 224;
+  extensions 225 to 225;
+  extensions 226 to 226;
+  extensions 227 to 227;
+  extensions 228 to 228;
+  extensions 229 to 229;
+  extensions 230 to 230;
+  extensions 231 to 231;
+  extensions 232 to 232;
+  extensions 233 to 233;
+  extensions 234 to 234;
+  extensions 235 to 235;
+  extensions 236 to 236;
+  extensions 237 to 237;
+  extensions 238 to 238;
+  extensions 239 to 239;
+  extensions 240 to 240;
+  extensions 241 to 241;
+  extensions 242 to 242;
+  extensions 243 to 243;
+  extensions 244 to 244;
+  extensions 245 to 245;
+  extensions 246 to 246;
+  extensions 247 to 247;
+  extensions 248 to 248;
+  extensions 249 to 249;
+  extensions 250 to 250;
+  extensions 251 to 251;
+  extensions 252 to 252;
+  extensions 253 to 253;
+  extensions 254 to 254;
+  extensions 255 to 255;
+  extensions 256 to 256;
+  extensions 257 to 257;
+  extensions 258 to 258;
+  extensions 259 to 259;
+  extensions 261 to 261;
+  extensions 262 to 262;
+  extensions 263 to 263;
+  extensions 264 to 264;
+  extensions 265 to 265;
+  extensions 266 to 266;
+  extensions 267 to 267;
+  extensions 268 to 268;
+  extensions 269 to 269;
+  extensions 270 to 270;
+  extensions 271 to 271;
+  extensions 272 to 272;
+  extensions 273 to 273;
+  extensions 275 to 275;
+  extensions 276 to 276;
+  extensions 277 to 277;
+  extensions 278 to 278;
+  extensions 279 to 279;
+  extensions 280 to 280;
+  extensions 281 to 281;
+  extensions 282 to 282;
+  extensions 283 to 283;
+  extensions 284 to 284;
+  extensions 285 to 285;
+  extensions 286 to 286;
+  extensions 290 to 290;
+  extensions 291 to 291;
+  extensions 292 to 292;
+  extensions 293 to 293;
+  extensions 294 to 294;
+  extensions 295 to 295;
+  extensions 296 to 296;
+  extensions 297 to 297;
+  extensions 298 to 298;
+  extensions 299 to 299;
+  extensions 300 to 300;
+  extensions 301 to 301;
+  extensions 302 to 302;
+  extensions 303 to 303;
+  extensions 304 to 304;
+  extensions 305 to 305;
+  extensions 306 to 306;
+  extensions 307 to 307;
+  extensions 308 to 308;
+  extensions 309 to 309;
+  extensions 310 to 310;
+  extensions 311 to 311;
+  extensions 312 to 312;
+  extensions 313 to 313;
+  extensions 314 to 314;
+  extensions 315 to 315;
+  extensions 316 to 316;
+  extensions 317 to 317;
+  extensions 318 to 318;
+  extensions 319 to 319;
+  extensions 320 to 320;
+  extensions 321 to 321;
+  extensions 322 to 322;
+  extensions 323 to 323;
+  extensions 324 to 324;
+  extensions 325 to 325;
+  extensions 326 to 326;
+  extensions 327 to 327;
+  extensions 328 to 328;
+  extensions 329 to 329;
+  extensions 330 to 330;
+  extensions 331 to 331;
+  extensions 332 to 332;
+  extensions 333 to 333;
+  extensions 334 to 334;
+  extensions 335 to 335;
+  extensions 336 to 336;
+  extensions 337 to 337;
+  extensions 338 to 338;
+  extensions 339 to 339;
+  extensions 340 to 340;
+  extensions 341 to 341;
+  extensions 342 to 342;
+  extensions 343 to 343;
+  extensions 344 to 344;
+  extensions 345 to 345;
+  extensions 346 to 346;
+  extensions 347 to 347;
+  extensions 348 to 348;
+  extensions 349 to 349;
+  extensions 350 to 350;
+  extensions 351 to 351;
+  extensions 352 to 352;
+  extensions 353 to 353;
+  extensions 354 to 354;
+  extensions 355 to 355;
+  extensions 356 to 356;
+  extensions 357 to 357;
+  extensions 358 to 358;
+  extensions 359 to 359;
+  extensions 360 to 360;
+  extensions 361 to 361;
+  extensions 362 to 362;
+  extensions 363 to 363;
+  extensions 364 to 364;
+  extensions 365 to 365;
+  extensions 366 to 366;
+  extensions 367 to 367;
+  extensions 368 to 368;
+  extensions 369 to 369;
+  extensions 370 to 370;
+  extensions 371 to 371;
+  extensions 372 to 372;
+  extensions 373 to 373;
+  extensions 374 to 374;
+  extensions 375 to 375;
+  extensions 376 to 376;
+  extensions 377 to 377;
+  extensions 378 to 378;
+  extensions 379 to 379;
+  extensions 380 to 380;
+  extensions 381 to 381;
+  extensions 382 to 382;
+  extensions 383 to 383;
+  extensions 384 to 384;
+  extensions 385 to 385;
+  extensions 386 to 386;
+  extensions 387 to 387;
+  extensions 388 to 388;
+  extensions 389 to 389;
+  extensions 390 to 390;
+  extensions 391 to 391;
+  extensions 392 to 392;
+  extensions 393 to 393;
+  extensions 394 to 394;
+  extensions 395 to 395;
+  extensions 396 to 396;
+  extensions 397 to 397;
+  extensions 398 to 398;
+  extensions 399 to 399;
+  extensions 400 to 400;
+  extensions 401 to 401;
+  extensions 402 to 402;
+  extensions 403 to 403;
+  extensions 404 to 404;
+  extensions 405 to 405;
+  extensions 406 to 406;
+  extensions 407 to 407;
+  extensions 408 to 408;
+  extensions 409 to 409;
+  extensions 410 to 410;
+  extensions 411 to 411;
+  extensions 412 to 412;
+  extensions 413 to 413;
+  extensions 414 to 414;
+  extensions 415 to 415;
+  extensions 416 to 416;
+  extensions 417 to 417;
+  extensions 418 to 418;
+  extensions 419 to 419;
+  extensions 420 to 420;
+  extensions 421 to 421;
+  extensions 422 to 422;
+  extensions 423 to 423;
+  extensions 424 to 424;
+  extensions 425 to 425;
+  extensions 426 to 426;
+  extensions 427 to 427;
+  extensions 428 to 428;
+  extensions 429 to 429;
+  extensions 430 to 430;
+  extensions 431 to 431;
+  extensions 432 to 432;
+  extensions 433 to 433;
+  extensions 434 to 434;
+  extensions 435 to 435;
+  extensions 436 to 436;
+  extensions 437 to 437;
+  extensions 438 to 438;
+  extensions 439 to 439;
+  extensions 440 to 440;
+  extensions 441 to 441;
+  extensions 442 to 442;
+  extensions 443 to 443;
+  extensions 444 to 444;
+  extensions 445 to 445;
+  extensions 446 to 446;
+  extensions 447 to 447;
+  extensions 448 to 448;
+  extensions 449 to 449;
+  extensions 450 to 450;
+  extensions 451 to 451;
+  extensions 452 to 452;
+  extensions 453 to 453;
+  extensions 454 to 454;
+  extensions 455 to 455;
+  extensions 456 to 456;
+  extensions 457 to 457;
+  extensions 458 to 458;
+  extensions 459 to 459;
+  extensions 460 to 460;
+  extensions 461 to 461;
+  extensions 462 to 462;
+  extensions 463 to 463;
+  extensions 464 to 464;
+  extensions 465 to 465;
+  extensions 466 to 466;
+  extensions 467 to 467;
+  extensions 468 to 468;
+  extensions 469 to 469;
+  extensions 470 to 470;
+  extensions 471 to 471;
+  extensions 472 to 472;
+  extensions 473 to 473;
+  extensions 474 to 474;
+  extensions 509 to 509;
+  extensions 511 to 511;
+  extensions 512 to 512;
+  extensions 513 to 513;
+  extensions 514 to 514;
+  extensions 515 to 515;
+  extensions 516 to 516;
+  extensions 517 to 517;
+  extensions 518 to 518;
+  extensions 519 to 519;
+  extensions 520 to 520;
+  extensions 521 to 521;
+  extensions 522 to 522;
+  extensions 523 to 523;
+  extensions 524 to 524;
+  extensions 525 to 525;
+  extensions 526 to 526;
+  extensions 527 to 527;
+  extensions 528 to 528;
+  extensions 529 to 529;
+  extensions 530 to 530;
+  extensions 531 to 531;
+  extensions 532 to 532;
+  extensions 533 to 533;
+  extensions 534 to 534;
+  extensions 535 to 535;
+  extensions 536 to 536;
+  extensions 537 to 537;
+  extensions 538 to 538;
+  extensions 539 to 539;
+  extensions 540 to 540;
+  extensions 541 to 541;
+  extensions 542 to 542;
+  extensions 543 to 543;
+  extensions 544 to 544;
+  extensions 545 to 545;
+  extensions 546 to 546;
+  extensions 547 to 547;
+  extensions 548 to 548;
+  extensions 549 to 549;
+  extensions 550 to 550;
+  extensions 551 to 551;
+  extensions 552 to 552;
+  extensions 553 to 553;
+  extensions 554 to 554;
+  extensions 555 to 555;
+  extensions 556 to 556;
+  extensions 557 to 557;
+  extensions 558 to 558;
+  extensions 559 to 559;
+  extensions 560 to 560;
+  extensions 561 to 561;
+  extensions 562 to 562;
+  extensions 563 to 563;
+  extensions 564 to 564;
+  extensions 565 to 565;
+  extensions 566 to 566;
+  extensions 567 to 567;
+  extensions 568 to 568;
+  extensions 569 to 569;
+  extensions 570 to 570;
+  extensions 571 to 571;
+  extensions 572 to 572;
+  extensions 573 to 573;
+  extensions 574 to 574;
+  extensions 575 to 575;
+  extensions 576 to 576;
+  extensions 577 to 577;
+  extensions 578 to 578;
+  extensions 579 to 579;
+  extensions 580 to 580;
+  extensions 581 to 581;
+  extensions 582 to 582;
+  extensions 583 to 583;
+  extensions 584 to 584;
+  extensions 585 to 585;
+  extensions 586 to 586;
+  extensions 587 to 587;
+  extensions 588 to 588;
+  extensions 589 to 589;
+  extensions 590 to 590;
+  extensions 604 to 604;
+  extensions 605 to 605;
+  extensions 606 to 606;
+  extensions 607 to 607;
+  extensions 608 to 608;
+  extensions 609 to 609;
+  extensions 610 to 610;
+  extensions 611 to 611;
+  extensions 612 to 612;
+  extensions 613 to 613;
+  extensions 614 to 614;
+  extensions 615 to 615;
+  extensions 616 to 616;
+  extensions 617 to 617;
+  extensions 618 to 618;
+  extensions 619 to 619;
+  extensions 620 to 620;
+  extensions 621 to 621;
+  extensions 622 to 622;
+  extensions 623 to 623;
+  extensions 624 to 624;
+  extensions 625 to 625;
+  extensions 626 to 626;
+  extensions 627 to 627;
+  extensions 628 to 628;
+  extensions 629 to 629;
+  extensions 813 to 813;
+  extensions 814 to 814;
+  extensions 815 to 815;
+  extensions 816 to 816;
+  extensions 817 to 817;
+  extensions 818 to 818;
+  extensions 819 to 819;
+  extensions 820 to 820;
+  extensions 821 to 821;
+  extensions 822 to 822;
+  extensions 823 to 823;
+  extensions 824 to 824;
+  extensions 827 to 827;
+  extensions 828 to 828;
+  extensions 829 to 829;
+  extensions 830 to 830;
+  extensions 831 to 831;
+  extensions 832 to 832;
+  extensions 833 to 833;
+  extensions 834 to 834;
+  extensions 835 to 835;
+  extensions 836 to 836;
+  extensions 837 to 837;
+  extensions 838 to 838;
+  extensions 839 to 839;
+  extensions 840 to 840;
+  extensions 841 to 841;
+  extensions 842 to 842;
+  extensions 843 to 843;
+  extensions 844 to 844;
+  extensions 845 to 845;
+  extensions 846 to 846;
+  extensions 847 to 847;
+  extensions 848 to 848;
+  extensions 849 to 849;
+  extensions 850 to 850;
+  extensions 851 to 851;
+  extensions 852 to 852;
+  extensions 853 to 853;
+  extensions 854 to 854;
+  extensions 855 to 855;
+  extensions 856 to 856;
+  extensions 857 to 857;
+  extensions 858 to 858;
+  extensions 859 to 859;
+  extensions 860 to 860;
+  extensions 861 to 861;
+  extensions 862 to 862;
+  extensions 863 to 863;
+  extensions 864 to 864;
+  extensions 865 to 865;
+  extensions 866 to 866;
+  extensions 867 to 867;
+  extensions 868 to 868;
+  extensions 869 to 869;
+  extensions 870 to 870;
+  extensions 871 to 871;
+  extensions 880 to 880;
+  extensions 881 to 881;
+  extensions 882 to 882;
+  extensions 883 to 883;
+  extensions 884 to 884;
+  extensions 885 to 885;
+  extensions 886 to 886;
+  extensions 887 to 887;
+  extensions 888 to 888;
+  extensions 890 to 890;
+  extensions 891 to 891;
+  extensions 892 to 892;
+  extensions 912 to 912;
+  extensions 914 to 914;
+  extensions 915 to 915;
+  extensions 916 to 916;
+  extensions 917 to 917;
+  extensions 918 to 918;
+  extensions 919 to 919;
+  extensions 920 to 920;
+  extensions 921 to 921;
+  extensions 922 to 922;
+  extensions 923 to 923;
+  extensions 924 to 924;
+  extensions 925 to 925;
+  extensions 926 to 926;
+  extensions 927 to 927;
+  extensions 928 to 928;
+  extensions 929 to 929;
+  extensions 930 to 930;
+  extensions 931 to 931;
+  extensions 932 to 932;
+  extensions 933 to 933;
+  extensions 934 to 934;
+  extensions 935 to 935;
+  extensions 936 to 936;
+  extensions 937 to 937;
+  extensions 938 to 938;
+  extensions 939 to 939;
+  extensions 940 to 940;
+  extensions 941 to 941;
+  extensions 942 to 942;
+  extensions 943 to 943;
+  extensions 944 to 944;
+  extensions 945 to 945;
+  extensions 946 to 946;
+  extensions 947 to 947;
+  extensions 949 to 949;
+  extensions 950 to 950;
+  extensions 951 to 951;
+  extensions 952 to 952;
+  extensions 954 to 954;
+  extensions 955 to 955;
+  extensions 956 to 956;
+  extensions 957 to 957;
+  extensions 958 to 958;
+  extensions 959 to 959;
+  extensions 960 to 960;
+  extensions 961 to 961;
+  extensions 962 to 962;
+  extensions 963 to 963;
+  extensions 964 to 964;
+  extensions 965 to 965;
+  extensions 966 to 966;
+  extensions 967 to 967;
+  extensions 968 to 968;
+  extensions 969 to 969;
+  extensions 970 to 970;
+  extensions 971 to 971;
+  extensions 972 to 972;
+  extensions 973 to 973;
+  extensions 974 to 974;
+  extensions 975 to 975;
+  extensions 976 to 976;
+  extensions 977 to 977;
+  extensions 978 to 978;
+  extensions 979 to 979;
+  extensions 980 to 980;
+  extensions 981 to 981;
+  extensions 982 to 982;
+  extensions 983 to 983;
+  extensions 984 to 984;
+  extensions 985 to 985;
+  extensions 987 to 987;
+  extensions 988 to 988;
+  extensions 1000 to 1000;
+  extensions 1001 to 1001;
+  extensions 1002 to 1002;
+  extensions 1003 to 1003;
+  extensions 1004 to 1004;
+  extensions 1005 to 1005;
+  extensions 1006 to 1006;
+  extensions 1007 to 1007;
+  extensions 1008 to 1008;
+  extensions 1009 to 1009;
+  extensions 1010 to 1010;
+  extensions 1011 to 1011;
+  extensions 1012 to 1012;
+  extensions 1013 to 1013;
+  extensions 1014 to 1014;
+  extensions 1015 to 1015;
+  extensions 1016 to 1016;
+  extensions 1017 to 1017;
+  extensions 1018 to 1018;
+  extensions 1019 to 1019;
+  extensions 1020 to 1020;
+  extensions 1021 to 1021;
+  extensions 1022 to 1022;
+  extensions 1023 to 1023;
+  extensions 1024 to 1024;
+  extensions 1025 to 1025;
+  extensions 1026 to 1026;
+  extensions 1027 to 1027;
+  extensions 1028 to 1028;
+  extensions 1029 to 1029;
+  extensions 1030 to 1030;
+  extensions 1031 to 1031;
+  extensions 1032 to 1032;
+  extensions 1033 to 1033;
+  extensions 1034 to 1034;
+  extensions 1035 to 1035;
+  extensions 1036 to 1036;
+  extensions 1037 to 1037;
+  extensions 1038 to 1038;
+  extensions 1039 to 1039;
+  extensions 1040 to 1040;
+  extensions 1041 to 1041;
+  extensions 1042 to 1042;
+  extensions 1043 to 1043;
+  extensions 1044 to 1044;
+  extensions 1045 to 1045;
+  extensions 1046 to 1046;
+  extensions 1047 to 1047;
+  extensions 1048 to 1048;
+  extensions 1049 to 1049;
+  extensions 1050 to 1050;
+  extensions 1051 to 1051;
+  extensions 1052 to 1052;
+  extensions 1053 to 1053;
+  extensions 1054 to 1054;
+  extensions 1055 to 1055;
+  extensions 1056 to 1056;
+  extensions 1057 to 1057;
+  extensions 1058 to 1058;
+  extensions 1079 to 1079;
+  extensions 1080 to 1080;
+  extensions 1081 to 1081;
+  extensions 1082 to 1082;
+  extensions 1083 to 1083;
+  extensions 1084 to 1084;
+  extensions 1085 to 1085;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message16945 field17025 = 22068132;
+  }
+}
+

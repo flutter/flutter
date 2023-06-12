@@ -1,0 +1,20 @@
+name: freezed_annotation
+description: >
+  Annotations for the freezed code-generator.
+  This package does nothing without freezed too.
+version: 2.2.0
+repository: https://github.com/rrousselGit/freezed
+issue_tracker: https://github.com/rrousselGit/freezed/issues
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+
+dependencies:
+  collection: ^1.15.0
+  json_annotation: ^4.6.0
+  meta: ^1.7.0
+
+dev_dependencies:
+  build_runner: ^2.2.0
+  json_serializable: ^6.3.2
+  test: ^1.21.0

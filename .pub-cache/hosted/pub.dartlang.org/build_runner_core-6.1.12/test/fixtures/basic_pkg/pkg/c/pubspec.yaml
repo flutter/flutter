@@ -1,0 +1,4 @@
+name: c
+version: 4.0.0
+dependencies:
+  basic_pkg: ^1.0.0

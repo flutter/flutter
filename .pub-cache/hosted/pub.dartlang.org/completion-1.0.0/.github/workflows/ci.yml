@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+  - cron: "0 0 * * 0"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [ 2.12.0, dev ]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: ${{ matrix.sdk }}
+    - run: dart pub get
+    - run: dart format --output=none --set-exit-if-changed .
+    - run: dart analyze --fatal-infos
+    - run: dart test

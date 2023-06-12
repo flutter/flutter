@@ -1,0 +1,109 @@
+40 columns                              |
+>>> indented line comment (dartbug.com/16383)
+var set = <int>{
+  // comment
+};
+<<<
+var set = <int>{
+  // comment
+};
+>>> line comment on opening line
+var set = <int>{ // comment
+};
+<<<
+var set = <int>{
+  // comment
+};
+>>> indented block comment
+var set = <int>{
+  /* comment */
+};
+<<<
+var set = <int>{
+  /* comment */
+};
+>>> block comment with trailing newline
+var set = <int>{/* comment */
+};
+<<<
+var set = <int>{
+  /* comment */
+};
+>>> block comment with leading newline
+var set = <int>{
+  /* comment */};
+<<<
+var set = <int>{
+  /* comment */
+};
+>>> inline block comment
+var set = <int>{  /* comment */  };
+<<<
+var set = <int>{/* comment */};
+>>> multiple comments on opening line
+var set = <int>{ /* first */ // second
+};
+<<<
+var set = <int>{
+  /* first */ // second
+};
+>>> multiple inline block comments
+var set = <int>{  /* 1 */   /* 2 */   /* 3 */  };
+<<<
+var set = <int>{
+  /* 1 */ /* 2 */ /* 3 */
+};
+>>> multiline trailing block comment
+var set = <int>{  /* comment
+*/  };
+<<<
+var set = <int>{
+  /* comment
+*/
+};
+>>> line comment between items
+var set = {'a', 'b', // comment
+  'c', 'd'};
+<<<
+var set = {
+  'a', 'b', // comment
+  'c', 'd'
+};
+>>> line comments after last item
+var set = {'a', 'b' // 1
+  // 2
+};
+<<<
+var set = {
+  'a', 'b' // 1
+  // 2
+};
+>>> line comments after trailing comma
+var set = {'a', 'b', // 1
+  // 2
+};
+<<<
+var set = {
+  'a', 'b', // 1
+  // 2
+};
+>>> inside set literal
+var set = {
+  // comment
+  'foo'};
+<<<
+var set = {
+  // comment
+  'foo'
+};
+>>> remove blank line before beginning of body
+var set = <int>{
+
+
+
+  // comment
+};
+<<<
+var set = <int>{
+  // comment
+};

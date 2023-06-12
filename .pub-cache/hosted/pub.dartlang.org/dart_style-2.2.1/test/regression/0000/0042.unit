@@ -1,0 +1,11 @@
+40 columns                              |
+>>>
+import 'dart:io' show Alphabet, Bookings, Calendar, Dentist, Elephant;
+<<<
+import 'dart:io'
+    show
+        Alphabet,
+        Bookings,
+        Calendar,
+        Dentist,
+        Elephant;

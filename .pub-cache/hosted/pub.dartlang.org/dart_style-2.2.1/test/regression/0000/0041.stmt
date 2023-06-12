@@ -1,0 +1,5 @@
+>>> (indent 8)
+return new Serialization.blank()..namedObjects['Node'] =reflect(new Node('')).type;
+<<<
+        return new Serialization.blank()
+          ..namedObjects['Node'] = reflect(new Node('')).type;

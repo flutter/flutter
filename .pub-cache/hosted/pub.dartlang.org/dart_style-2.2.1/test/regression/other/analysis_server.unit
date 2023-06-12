@@ -1,0 +1,281 @@
+>>> (indent 2)
+  main() {
+    List<Future<List<LocationImpl>>> nodeFutures =
+        <Future<List<LocationImpl>>>[];
+  }
+<<<
+  main() {
+    List<Future<List<LocationImpl>>> nodeFutures =
+        <Future<List<LocationImpl>>>[];
+  }
+>>>
+class CachingPubPackageMapProvider {
+  CachingPubPackageMapProvider(ResourceProvider resourceProvider,
+      DirectoryBasedDartSdk sdk, [RunPubList runPubList, this._writeFile])
+      : super(resourceProvider, sdk, runPubList) {
+    ;
+  }
+}
+<<<
+class CachingPubPackageMapProvider {
+  CachingPubPackageMapProvider(
+      ResourceProvider resourceProvider, DirectoryBasedDartSdk sdk,
+      [RunPubList runPubList, this._writeFile])
+      : super(resourceProvider, sdk, runPubList) {
+    ;
+  }
+}
+>>>
+class Foo {
+  bool selectionIncludesNonWhitespaceOutsideNode(SourceRange selection,
+      AstNode node) => _selectionIncludesNonWhitespaceOutsideRange(
+           selection, SourceRangeFactory.rangeNode(node));
+}
+<<<
+class Foo {
+  bool selectionIncludesNonWhitespaceOutsideNode(
+          SourceRange selection, AstNode node) =>
+      _selectionIncludesNonWhitespaceOutsideRange(
+          selection, SourceRangeFactory.rangeNode(node));
+}
+>>> (indent 2)
+  void _writeCompletionPerformanceList(StringBuffer buffer) {
+    buffer.write('''
+      <p><strong>First (ms)</strong> - the number of milliseconds
+        from when completion received the request until the first notification
+        with completion results was queued for sending back to the client.
+      <p><strong>Complete (ms)</strong> - the number of milliseconds
+        from when completion received the request until the final notification
+        with completion results was queued for sending back to the client.
+      <p><strong># Notifications</strong> - the total number of notifications
+        sent to the client with completion results for this request.
+      <p><strong># Suggestions</strong> - the number of suggestions
+        sent to the client in the first notification, followed by a comma,
+        followed by the number of suggestions send to the client
+        in the last notification. If there is only one notification,
+        then there will be only one number in this column.''');
+  }
+<<<
+  void _writeCompletionPerformanceList(StringBuffer buffer) {
+    buffer.write('''
+      <p><strong>First (ms)</strong> - the number of milliseconds
+        from when completion received the request until the first notification
+        with completion results was queued for sending back to the client.
+      <p><strong>Complete (ms)</strong> - the number of milliseconds
+        from when completion received the request until the final notification
+        with completion results was queued for sending back to the client.
+      <p><strong># Notifications</strong> - the total number of notifications
+        sent to the client with completion results for this request.
+      <p><strong># Suggestions</strong> - the number of suggestions
+        sent to the client in the first notification, followed by a comma,
+        followed by the number of suggestions send to the client
+        in the last notification. If there is only one notification,
+        then there will be only one number in this column.''');
+  }
+>>>
+final ListResultDescriptor<AnalysisError> HINTS =
+    new ListResultDescriptor<AnalysisError>(
+        'HINT_ERRORS', AnalysisError.NO_ERRORS);
+<<<
+final ListResultDescriptor<AnalysisError> HINTS =
+    new ListResultDescriptor<AnalysisError>(
+        'HINT_ERRORS', AnalysisError.NO_ERRORS);
+>>> (indent 2)
+  makeMatcher() {
+    docComment(toHtmlVisitor.collectHtml(() {
+      toHtmlVisitor.p(() {
+        toHtmlVisitor.write(context);
+      });
+    }));
+  }
+<<<
+  makeMatcher() {
+    docComment(toHtmlVisitor.collectHtml(() {
+      toHtmlVisitor.p(() {
+        toHtmlVisitor.write(context);
+      });
+    }));
+  }
+>>> (indent 6)
+      main() {
+        files = jsonDecoder._decodeMap(jsonPath + ".files", json["files"],
+            valueDecoder: (String jsonPath, Object json) =>
+                jsonDecoder._decodeUnion(
+                    jsonPath,
+                    json,
+                    "type",
+                    {
+              "add": (String jsonPath, Object json) =>
+                  new AddContentOverlay.fromJson(jsonDecoder, jsonPath, json),
+              "change": (String jsonPath, Object json) =>
+                  new ChangeContentOverlay.fromJson(
+                      jsonDecoder, jsonPath, json),
+              "remove": (String jsonPath, Object json) =>
+                  new RemoveContentOverlay.fromJson(jsonDecoder, jsonPath, json)
+            }));
+      }
+<<<
+      main() {
+        files = jsonDecoder._decodeMap(jsonPath + ".files", json["files"],
+            valueDecoder: (String jsonPath, Object json) =>
+                jsonDecoder._decodeUnion(jsonPath, json, "type", {
+                  "add": (String jsonPath, Object json) =>
+                      new AddContentOverlay.fromJson(
+                          jsonDecoder, jsonPath, json),
+                  "change": (String jsonPath, Object json) =>
+                      new ChangeContentOverlay.fromJson(
+                          jsonDecoder, jsonPath, json),
+                  "remove": (String jsonPath, Object json) =>
+                      new RemoveContentOverlay.fromJson(
+                          jsonDecoder, jsonPath, json)
+                }));
+      }
+>>> (indent 2)
+  main() {
+    fieldInitializationCode.add(collectCode(() {
+          writeln(
+              '_$streamName = new StreamController<$className>(sync: true);');
+          writeln('$streamName = _$streamName.stream.asBroadcastStream();');
+        }));
+  }
+<<<
+  main() {
+    fieldInitializationCode.add(collectCode(() {
+      writeln('_$streamName = new StreamController<$className>(sync: true);');
+      writeln('$streamName = _$streamName.stream.asBroadcastStream();');
+    }));
+  }
+>>> (indent 2)
+  main() {
+    return context.getContents(source).data.substring(
+        replacementOffset, offset);
+  }
+<<<
+  main() {
+    return context
+        .getContents(source)
+        .data
+        .substring(replacementOffset, offset);
+  }
+>>> (indent 2)
+  main() {
+    contextsChangedRaw(new ContextsChangedEvent(
+        added: event.added.length > 0 ? [mockContext] : [],
+        changed: event.changed.length > 0 ? [mockContext] : [],
+        removed: event.removed.length > 0 ? [mockContext] : []));
+  }
+<<<
+  main() {
+    contextsChangedRaw(new ContextsChangedEvent(
+        added: event.added.length > 0 ? [mockContext] : [],
+        changed: event.changed.length > 0 ? [mockContext] : [],
+        removed: event.removed.length > 0 ? [mockContext] : []));
+  }
+>>> (indent 2)
+  void emitEmptyObjectClass(String className, ImpliedType impliedType) {
+    docComment(toHtmlVisitor.collectHtml(() {
+          toHtmlVisitor.p(() {
+            toHtmlVisitor.write(impliedType.humanReadableName);
+          });
+        }));
+  }
+<<<
+  void emitEmptyObjectClass(String className, ImpliedType impliedType) {
+    docComment(toHtmlVisitor.collectHtml(() {
+      toHtmlVisitor.p(() {
+        toHtmlVisitor.write(impliedType.humanReadableName);
+      });
+    }));
+  }
+>>> (indent 2)
+  main() {
+    manager.setRoots(<String>[
+      projPath
+    ], <String>[], <String, String>{});
+  }
+<<<
+  main() {
+    manager.setRoots(<String>[projPath], <String>[], <String, String>{});
+  }
+>>> (indent 2)
+  main() {
+    server.setAnalysisRoots('0', [
+      '/foo',
+      '/bar'
+    ], [], {});
+    return pumpEventQueue(40).then((_) {
+      expect(server.statusAnalyzing, isFalse);
+    });
+  }
+<<<
+  main() {
+    server.setAnalysisRoots('0', ['/foo', '/bar'], [], {});
+    return pumpEventQueue(40).then((_) {
+      expect(server.statusAnalyzing, isFalse);
+    });
+  }
+>>> (indent 2)
+  main() {
+    return withBuilder(new DartIrBuilder(
+        DART_CONSTANT_SYSTEM,
+        element,
+        // TODO(johnniwinther): Support closure variables.
+        new Set<dart2js.Local>()), () {
+      irBuilder.buildFunctionHeader(
+          constructor.parameters.map(converter.convertElement));
+      // Visit the body directly to avoid processing the signature as
+      // expressions.
+      // Call to allow for `body == null` in case of synthesized constructors.
+      build(body);
+      return irBuilder.makeConstructorDefinition(const [], const []);
+    });
+  }
+<<<
+  main() {
+    return withBuilder(
+        new DartIrBuilder(
+            DART_CONSTANT_SYSTEM,
+            element,
+            // TODO(johnniwinther): Support closure variables.
+            new Set<dart2js.Local>()), () {
+      irBuilder.buildFunctionHeader(
+          constructor.parameters.map(converter.convertElement));
+      // Visit the body directly to avoid processing the signature as
+      // expressions.
+      // Call to allow for `body == null` in case of synthesized constructors.
+      build(body);
+      return irBuilder.makeConstructorDefinition(const [], const []);
+    });
+  }
+>>> (indent 4)
+    Element expectedElement = (declarations[0] as TopLevelVariableDeclaration)
+            .variables
+            .variables[0]
+        .name
+        .staticElement;
+<<<
+    Element expectedElement = (declarations[0] as TopLevelVariableDeclaration)
+        .variables
+        .variables[0]
+        .name
+        .staticElement;
+>>>
+main() {
+  addTestFile('''
+    library libA;
+    part "${convertPathForImport('/testA.dart')}";
+    import "dart:math";
+    /// The [^]
+    main(aaa, bbb) {}
+    ''');
+}
+<<<
+main() {
+  addTestFile('''
+    library libA;
+    part "${convertPathForImport('/testA.dart')}";
+    import "dart:math";
+    /// The [^]
+    main(aaa, bbb) {}
+    ''');
+}

@@ -1,0 +1,221 @@
+#data
+<svg><![CDATA[foo]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "foo"
+
+#data
+<math><![CDATA[foo]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>
+|       "foo"
+
+#data
+<div><![CDATA[foo]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <!-- [CDATA[foo]] -->
+
+#data
+<svg><![CDATA[foo
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "foo"
+
+#data
+<svg><![CDATA[foo
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "foo"
+
+#data
+<svg><![CDATA[
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<svg><![CDATA[]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<svg><![CDATA[]] >]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "]] >"
+
+#data
+<svg><![CDATA[]] >]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "]] >"
+
+#data
+<svg><![CDATA[]]
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "]]"
+
+#data
+<svg><![CDATA[]
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "]"
+
+#data
+<svg><![CDATA[]>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "]>a"
+
+#data
+<svg><foreignObject><div><![CDATA[foo]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       <svg foreignObject>
+|         <div>
+|           <!-- [CDATA[foo]] -->
+
+#data
+<svg><![CDATA[<svg>]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<svg>"
+
+#data
+<svg><![CDATA[</svg>a]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "</svg>a"
+
+#data
+<svg><![CDATA[<svg>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<svg>a"
+
+#data
+<svg><![CDATA[</svg>a
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "</svg>a"
+
+#data
+<svg><![CDATA[<svg>]]><path>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<svg>"
+|       <svg path>
+
+#data
+<svg><![CDATA[<svg>]]></path>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<svg>"
+
+#data
+<svg><![CDATA[<svg>]]><!--path-->
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<svg>"
+|       <!-- path -->
+
+#data
+<svg><![CDATA[<svg>]]>path
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<svg>path"
+
+#data
+<svg><![CDATA[<!--svg-->]]>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+|       "<!--svg-->"

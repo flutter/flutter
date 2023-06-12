@@ -1,0 +1,12 @@
+>>>
+String type = status == 'OK'
+    ? 'notices'
+    : status == 'NO' ? 'warnings' : status == 'BAD' ? 'errors' : '';
+<<<
+String type = status == 'OK'
+    ? 'notices'
+    : status == 'NO'
+        ? 'warnings'
+        : status == 'BAD'
+            ? 'errors'
+            : '';

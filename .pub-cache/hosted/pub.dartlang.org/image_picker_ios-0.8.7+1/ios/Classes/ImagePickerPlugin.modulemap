@@ -1,0 +1,14 @@
+framework module image_picker_ios {
+  umbrella header "image_picker_ios-umbrella.h"
+
+  export *
+  module * { export * }
+
+  explicit module Test {
+    header "FLTImagePickerPlugin_Test.h"
+    header "FLTImagePickerImageUtil.h"
+    header "FLTImagePickerMetaDataUtil.h"
+    header "FLTImagePickerPhotoAssetUtil.h"
+    header "FLTPHPickerSaveImageToPathOperation.h"
+  }
+}

@@ -1,0 +1,24 @@
+{"tests" : [
+{"description": "Unicode surrogate (emoji)",
+"input": "\uD83D\uDC3C",
+"output":[["Character", "\uD83D\uDC3C"]]},
+
+{"description": "Unicode surrogate (emoji) prefixed by characters",
+"input": "before\uD83D\uDC3C",
+"output":[["Character", "before\uD83D\uDC3C"]]},
+
+{"description": "Unicode surrogate (emoji) suffixed by characters",
+"input": "\uD83D\uDC3Cafter",
+"output":[["Character", "\uD83D\uDC3Cafter"]]},
+
+{"description":"Quoted attribute with surrogate unicode content",
+"generateSpans": true,
+"input":"<a href='\uD83D\uDC3C'/>",
+"output":[["StartTag","a",{"href":"\uD83D\uDC3C"},true,0,14]]},
+
+{"description":"Surrogate unicode content followed by attribute",
+"generateSpans": true,
+"input":"\uD83D\uDC3C<a href='b'/>",
+"output":[["Character", "\uD83D\uDC3C", 0, 2],["StartTag","a",{"href":"b"},true,2,15]]}
+]
+}

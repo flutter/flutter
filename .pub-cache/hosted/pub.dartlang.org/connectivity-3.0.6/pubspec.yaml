@@ -1,0 +1,39 @@
+name: connectivity
+description: Flutter plugin for discovering the state of the network (WiFi &
+  mobile/cellular) connectivity on Android and iOS.
+homepage: https://github.com/flutter/plugins/tree/master/packages/connectivity/connectivity
+version: 3.0.6
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: io.flutter.plugins.connectivity
+        pluginClass: ConnectivityPlugin
+      ios:
+        pluginClass: FLTConnectivityPlugin
+      macos:
+        default_package: connectivity_macos
+      web:
+        default_package: connectivity_for_web
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: ^1.3.0
+  connectivity_platform_interface: ^2.0.0
+  connectivity_macos: ^0.2.0
+  connectivity_for_web: ^0.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.0
+  pedantic: ^1.10.0
+  test: ^1.16.3
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5"

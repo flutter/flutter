@@ -1,0 +1,20 @@
+targets:
+  $default:
+    sources:
+      include:
+        - lib/**
+        - android/app/src/main/**
+        # Some default includes that aren't really used here but will prevent
+        # false-negative warnings:
+        - $package$
+        - lib/$lib$
+      exclude:
+        - '**/.*/**'
+        - '**/build/**'
+        - 'android/app/src/main/res/**'
+    builders:
+      code_excerpter|code_excerpter:
+        enabled: true
+        generate_for:
+          - '**/*.dart'
+          - android/**/*.xml

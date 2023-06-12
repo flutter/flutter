@@ -1,0 +1,24 @@
+>>>
+Foo barBaz() => new Quux({
+  'alpha.beta.gamma': [
+    new Zuul({'yarrr': Abracadabra.OPEN_SESAME,}, {
+      'toil': {'trouble': {'fireBurn': {'cauldronBubble': EYE_OF_NEWT,}}}
+    })
+  ]
+});
+<<<
+Foo barBaz() => new Quux({
+      'alpha.beta.gamma': [
+        new Zuul({
+          'yarrr': Abracadabra.OPEN_SESAME,
+        }, {
+          'toil': {
+            'trouble': {
+              'fireBurn': {
+                'cauldronBubble': EYE_OF_NEWT,
+              }
+            }
+          }
+        })
+      ]
+    });

@@ -1,0 +1,17 @@
+dart:
+- dev
+
+stages:
+- analyze_and_format:
+  - group:
+    - dartfmt: sdk
+    - dartanalyzer: --fatal-infos --fatal-warnings .
+- unit_test:
+  - test: --test-randomize-ordering-seed=random
+    os:
+    - linux
+    - windows
+
+cache:
+  directories:
+    - .dart_tool/build

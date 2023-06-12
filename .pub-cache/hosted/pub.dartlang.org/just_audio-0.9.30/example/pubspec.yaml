@@ -1,0 +1,41 @@
+name: just_audio_example
+description: Demonstrates how to use the just_audio plugin.
+publish_to: 'none'
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  audio_session: ^0.1.10
+  rxdart: '^0.27.0'
+  just_audio_mpv: ^0.1.4
+  just_audio_windows: ^0.1.0
+  # Other platform implementations below:
+  # just_audio_libwinmedia: ^0.0.4
+  just_audio:
+    path: ../
+
+# Uncomment when testing platform interface changes.
+# dependency_overrides:
+#   just_audio_platform_interface:
+#     path: ../../just_audio_platform_interface
+#   just_audio_web:
+#     path: ../../just_audio_web
+
+dev_dependencies:
+  # TODO: uncomment these dependencies when they have nullsafe versions.
+  # flutter_driver:
+  #   sdk: flutter
+  flutter_test:
+    sdk: flutter
+  # integration_test: ^1.0.1
+  test: ^1.16.4
+  flutter_lints: ^2.0.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - audio/

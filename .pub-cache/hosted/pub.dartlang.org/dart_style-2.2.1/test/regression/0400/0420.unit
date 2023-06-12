@@ -1,0 +1,35 @@
+>>>
+createSomeObject(String s, Int64 id,
+    {Map<String, Int64> mapFromStringToInt64}) => null;
+
+main() {
+  void group() {
+    void initialize() {
+      final SOME_SUPER_LONG_CONST = 'Foo';
+      var objects = [
+        createSomeObject(SOME_SUPER_LONG_CONST, new Int64(1), mapFromStringToInt64:
+            {'ONE': new Int64(1), 'TWO': new Int64(2), 'THREE': new Int64(3)}),
+      ];
+    }
+  }
+}
+<<<
+createSomeObject(String s, Int64 id,
+        {Map<String, Int64> mapFromStringToInt64}) =>
+    null;
+
+main() {
+  void group() {
+    void initialize() {
+      final SOME_SUPER_LONG_CONST = 'Foo';
+      var objects = [
+        createSomeObject(SOME_SUPER_LONG_CONST, new Int64(1),
+            mapFromStringToInt64: {
+              'ONE': new Int64(1),
+              'TWO': new Int64(2),
+              'THREE': new Int64(3)
+            }),
+      ];
+    }
+  }
+}

@@ -1,0 +1,107 @@
+40 columns                              |
+>>> indented line comment (dartbug.com/16383)
+var map = {
+  // comment
+};
+<<<
+var map = {
+  // comment
+};
+>>> line comment on opening line
+var map = { // comment
+};
+<<<
+var map = {
+  // comment
+};
+>>> indented block comment
+var map = {
+  /* comment */
+};
+<<<
+var map = {
+  /* comment */
+};
+>>> block comment with trailing newline
+var map = {/* comment */
+};
+<<<
+var map = {
+  /* comment */
+};
+>>> block comment with leading newline
+var map = {
+  /* comment */};
+<<<
+var map = {
+  /* comment */
+};
+>>> inline block comment
+var map = {  /* comment */  };
+<<<
+var map = {/* comment */};
+>>> multiple comments on opening line
+var map = { /* first */ // second
+};
+<<<
+var map = {
+  /* first */ // second
+};
+>>> multiple inline block comments
+var map = {  /* 1 */   /* 2 */   /* 3 */  };
+<<<
+var map = {/* 1 */ /* 2 */ /* 3 */};
+>>> multiline trailing block comment
+var map = {  /* comment
+*/  };
+<<<
+var map = {
+  /* comment
+*/
+};
+>>> line comment between items
+var map = {'a': 'b', // comment
+  'c': 'd'};
+<<<
+var map = {
+  'a': 'b', // comment
+  'c': 'd'
+};
+>>> line comments after last item
+var map = {'a': 'b' // 1
+  // 2
+};
+<<<
+var map = {
+  'a': 'b' // 1
+  // 2
+};
+>>> line comments after trailing comma
+var map = {'a': 'b', // 1
+  // 2
+};
+<<<
+var map = {
+  'a': 'b', // 1
+  // 2
+};
+>>> inside map literal
+var map = {
+  // comment
+  'foo': 1};
+<<<
+var map = {
+  // comment
+  'foo': 1
+};
+>>> remove blank line before beginning of body
+var map = {
+
+
+
+  // comment
+};
+<<<
+var map = {
+  // comment
+};

@@ -1,0 +1,6 @@
+name: with_dev_deps
+version: 1.0.0
+dependencies:
+  a: 2.0.0
+dev_dependencies:
+  b: 3.0.0

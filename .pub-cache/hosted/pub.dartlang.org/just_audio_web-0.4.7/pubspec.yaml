@@ -1,0 +1,27 @@
+name: just_audio_web
+description: Web platform implementation of just_audio. This implementation is endorsed and therefore doesn't require a direct dependency.
+homepage: https://github.com/ryanheise/just_audio/tree/master/just_audio_web
+version: 0.4.7
+
+flutter:
+  plugin:
+    platforms:
+      web:
+        pluginClass: JustAudioPlugin
+        fileName: just_audio_web.dart
+
+dependencies:
+  just_audio_platform_interface: ^4.1.0
+  # just_audio_platform_interface:
+  #   path: ../just_audio_platform_interface
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+dev_dependencies:
+  pedantic: ^1.10.0
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5"

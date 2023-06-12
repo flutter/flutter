@@ -1,0 +1,75 @@
+include: all_lint_rules.yaml
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors:
+    # Otherwise cause the import of all_lint_rules to warn because of some rules conflicts.
+    # We explicitly enabled even conflicting rules and are fixing the conflict
+    # in this file
+    included_file_warning: ignore
+linter:
+  rules:
+    # Personal preference. I don't find it more readable
+    cascade_invocations: false
+
+    # Conflicts with `prefer_single_quotes`
+    # Single quotes are easier to type and don't compromise on readability.
+    prefer_double_quotes: false
+
+    # Conflicts with `omit_local_variable_types` and other rules.
+    # As per Dart guidelines, we want to avoid unnecessary types to make the code
+    # more readable.
+    # See https://dart.dev/guides/language/effective-dart/design#avoid-type-annotating-initialized-local-variables
+    always_specify_types: false
+
+    # Incompatible with `prefer_final_locals`
+    # Having immutable local variables makes larger functions more predictible
+    # so we will use `prefer_final_locals` instead.
+    unnecessary_final: false
+
+    # Not quite suitable for Flutter, which may have a `build` method with a single
+    # return, but that return is still complex enough that a "body" is worth it.
+    prefer_expression_function_bodies: false
+
+    # Conflicts with the convention used by flutter, which puts `Key key`
+    # and `@required Widget child` last.
+    always_put_required_named_parameters_first: false
+
+    # This project doesn't use Flutter-style todos
+    flutter_style_todos: false
+
+    # There are situations where we voluntarily want to catch everything,
+    # especially as a library.
+    avoid_catches_without_on_clauses: false
+
+    # Boring as it sometimes force a line of 81 characters to be split in two.
+    # As long as we try to respect that 80 characters limit, going slightly
+    # above is fine.
+    lines_longer_than_80_chars: false
+
+    # Conflicts with disabling `implicit-dynamic`
+    avoid_annotating_with_dynamic: false
+
+    # conflicts with `prefer_relative_imports`
+    always_use_package_imports: false
+
+    # Disabled for now until we have NNBD as it otherwise conflicts with `missing_return`
+    no_default_cases: false
+
+    # False positive, null checks don't need a message
+    prefer_asserts_with_message: false
+
+    # Cumbersome with `context.select`
+    avoid_types_on_closure_parameters: false
+
+    # Too many false positive (builders)
+    diagnostic_describe_all_properties: false
+
+    # false positives (setter-like functions)
+    avoid_positional_boolean_parameters: false
+
+    # Does not apply to providers
+    prefer_const_constructors_in_immutables: false

@@ -1,0 +1,20 @@
+>>>
+pluralThatFailsParsing(noOfThings) => Intl.plural(noOfThings,
+    one: "1 thing:",
+    other: "$noOfThings things:",
+    name: "pluralThatFailsParsing",
+    args: [noOfThings],
+    desc: "How many things are there?");
+<<<
+pluralThatFailsParsing(noOfThings) => Intl.plural(noOfThings,
+    one: "1 thing:",
+    other: "$noOfThings things:",
+    name: "pluralThatFailsParsing",
+    args: [noOfThings],
+    desc: "How many things are there?");
+>>> (indent 2)
+  parser.addOption("output-dir", defaultsTo: '.',
+      callback: (value) => targetDir = value);
+<<<
+  parser.addOption("output-dir",
+      defaultsTo: '.', callback: (value) => targetDir = value);

@@ -1,0 +1,73 @@
+group 'io.flutter.plugins.googlemobileads'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 31
+
+    defaultConfig {
+        minSdkVersion 19
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+    dependencies {
+      api 'com.google.android.gms:play-services-ads:21.3.0'
+      implementation 'androidx.lifecycle:lifecycle-process:2.2.0'
+      implementation 'com.google.errorprone:error_prone_annotations:2.16'
+      testImplementation 'junit:junit:4.12'
+      testImplementation 'org.hamcrest:hamcrest:2.2'
+      testImplementation 'org.mockito:mockito-inline:3.9.0'
+      testImplementation 'org.robolectric:robolectric:4.4'
+      testImplementation 'androidx.test:core:1.3.0'
+    }
+  testOptions {
+    unitTests {
+      includeAndroidResources = true
+    }
+  }
+}
+
+afterEvaluate {
+    def containsEmbeddingDependencies = false
+    for (def configuration : configurations.all) {
+        for (def dependency : configuration.dependencies) {
+            if (dependency.group == 'io.flutter' &&
+                    dependency.name.startsWith('flutter_embedding') &&
+                    dependency.isTransitive())
+            {
+                containsEmbeddingDependencies = true
+                break
+            }
+        }
+    }
+    if (!containsEmbeddingDependencies) {
+        android {
+            dependencies {
+                def lifecycle_version = "1.1.1"
+                compileOnly "android.arch.lifecycle:runtime:$lifecycle_version"
+                compileOnly "android.arch.lifecycle:common:$lifecycle_version"
+                compileOnly "android.arch.lifecycle:common-java8:$lifecycle_version"
+            }
+        }
+    }
+}

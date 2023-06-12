@@ -1,0 +1,132 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+    font-size: 20px;
+}
+
+p {
+    font-size: 16px;
+}
+
+code {
+    font-size: 16px;
+}
+
+img {
+    padding: 12px;
+}
+
+iframe {
+    border: 0pt none;
+    height: 100%;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+}
+
+.flex-row {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.flex-column {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.material-button {
+    background-color: #2196f3;
+    border-radius: 4px;
+    border: none;
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    height: 36px;
+    line-height: 36px;
+    margin: 12px;
+    min-width: 64px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 16px;
+    position: relative;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    transition: box-shadow 0.2s;
+    vertical-align: middle;
+}
+
+.material-button::-moz-focus-inner {
+    border: none;
+}
+
+.material-button::before {
+    background-color: #ffffff;
+    bottom: 0;
+    content: "";
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: opacity 0.2s;
+}
+
+.material-button::after {
+    background-color: #ffffff;
+    border-radius: 50%;
+    content: "";
+    height: 32px;
+    left: 50%;
+    opacity: 0;
+    padding: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity 1s, transform 0.5s;
+    width: 32px;
+}
+
+.material-button:hover,
+.material-button:focus {
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.material-button:hover::before {
+    opacity: 0.08;
+}
+
+.material-button:focus::before {
+    opacity: 0.24;
+}
+
+.material-button:hover:focus::before {
+    opacity: 0.3;
+}
+
+.material-button:active {
+    box-shadow: 0 5px 5px -3px #4D000000, 0 8px 10px 1px #4D000000, 0 3px 14px 2px #4D000000;
+}
+
+.material-button:active::after {
+    opacity: 0.32;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0s;
+}
+
+.material-button:disabled {
+    background-color: #d3d3d3;
+    color: #696969;
+    box-shadow: none;
+    cursor: initial;
+}

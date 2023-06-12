@@ -1,0 +1,12 @@
+>>>
+class ListResultDescriptor {
+  factory ListResultDescriptor(String name, List<E> defaultValue,
+      {ResultCachingPolicy<
+          List<E>> cachingPolicy}) = ListResultDescriptorImpl<E>;
+}
+<<<
+class ListResultDescriptor {
+  factory ListResultDescriptor(String name, List<E> defaultValue,
+          {ResultCachingPolicy<List<E>> cachingPolicy}) =
+      ListResultDescriptorImpl<E>;
+}

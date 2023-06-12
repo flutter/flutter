@@ -1,0 +1,10 @@
+>>>
+for (; i < words.length; i++) {
+  buffer.write(' ');
+  buffer.write(words[i]);
+}
+<<<
+for (; i < words.length; i++) {
+  buffer.write(' ');
+  buffer.write(words[i]);
+}

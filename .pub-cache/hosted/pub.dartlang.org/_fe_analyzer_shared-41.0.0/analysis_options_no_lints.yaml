@@ -1,0 +1,22 @@
+# Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+analyzer:
+  errors:
+    # Allow having TODOs in the code
+    todo: ignore
+  exclude:
+    - test/constants/data/**
+    - test/constants/data_2/**
+    - test/flow_analysis/assigned_variables/data/**
+    - test/flow_analysis/definite_assignment/data/**
+    - test/flow_analysis/definite_unassignment/data/**
+    - test/flow_analysis/nullability/data/**
+    - test/flow_analysis/reachability/data/**
+    - test/flow_analysis/type_promotion/data/**
+    - test/flow_analysis/why_not_promoted/data/**
+    - test/inference/inferred_type_arguments/data/**
+    - test/inference/inferred_variable_types/data/**
+    - test/inheritance/data/**
+    - test/macros/api/**

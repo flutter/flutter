@@ -1,0 +1,183 @@
+40 columns                              |
+>>> split collection before for
+var list = [for (a in b) somewhatLongThingHere];
+<<<
+var list = [
+  for (a in b) somewhatLongThingHere
+];
+>>> one line in multi-line
+var list = [veryLongThingThatForcesASplit, for (a in b) 2, 3];
+<<<
+var list = [
+  veryLongThingThatForcesASplit,
+  for (a in b) 2,
+  3
+];
+>>> long body forces split
+var list = [1, for (a in b) veryLongThingThatForcesASplit, 3];
+<<<
+var list = [
+  1,
+  for (a in b)
+    veryLongThingThatForcesASplit,
+  3
+];
+>>> split inside body
+var list = [1, for (a in b) veryLongThingThatForcesASplit + anotherLongThing, 3];
+<<<
+var list = [
+  1,
+  for (a in b)
+    veryLongThingThatForcesASplit +
+        anotherLongThing,
+  3
+];
+>>> trailing comma
+var list = [for (a in b) 2,];
+<<<
+var list = [
+  for (a in b) 2,
+];
+>>> spread list inside for stays on one line if it fits
+var list = [for (a in b) ...[1, 2]];
+<<<
+var list = [
+  for (a in b) ...[1, 2]
+];
+>>> spread list inside for formats like block if it splits
+var list = [for (a in b) ...[1, 2,]];
+<<<
+var list = [
+  for (a in b) ...[
+    1,
+    2,
+  ]
+];
+>>> a split collection that isn't spread wraps and indents
+var list = [for (a in b) [1,2,]];
+<<<
+var list = [
+  for (a in b)
+    [
+      1,
+      2,
+    ]
+];
+>>> lambda inside body
+var list = [for (a in b) () { body; }];
+<<<
+var list = [
+  for (a in b)
+    () {
+      body;
+    }
+];
+>>> split if child is for
+var l = [for (a in b) for (c in d) t];
+<<<
+var l = [
+  for (a in b)
+    for (c in d) t
+];
+>>> split if child is if
+var list = [
+  for (var a in b) if (c) d
+];
+<<<
+var list = [
+  for (var a in b)
+    if (c) d
+];
+>>> split collection before body
+var list = [for (a in b) longThingThatIsLong];
+<<<
+var list = [
+  for (a in b) longThingThatIsLong
+];
+>>> just split outer for
+var list = [for (a in b) for (c in d) longThingThatIsLong];
+<<<
+var list = [
+  for (a in b)
+    for (c in d) longThingThatIsLong
+];
+>>> nested list inside for element
+var list = [for (var a in b) [c]];
+<<<
+var list = [
+  for (var a in b) [c]
+];
+>>> nested spread list inside for element
+var list = [for (var a in b) ...[c]];
+<<<
+var list = [
+  for (var a in b) ...[c]
+];
+>>> nested if inside list
+var l = [for (var a in b) [if (c) d]];
+<<<
+var l = [
+  for (var a in b) [if (c) d]
+];
+>>> nested for inside list
+var l = [for (a in b) [for (c in d) e]];
+<<<
+var l = [
+  for (a in b) [for (c in d) e]
+];
+>>> split in for-in type
+var list = [for (LongGenericTypeName<TypeArg, AnotherTypeArgument> a in b) body];
+<<<
+var list = [
+  for (LongGenericTypeName<TypeArg,
+      AnotherTypeArgument> a in b)
+    body
+];
+>>> split in for-in expression
+var list = [for (a in sequenceExpression + thatDoesNotFit) body];
+<<<
+var list = [
+  for (a in sequenceExpression +
+      thatDoesNotFit)
+    body
+];
+>>> split in for var type
+var list = [for (LongGenericTypeName<TypeArg, AnotherTypeArgument> a = 0; a < 1; a++) body];
+<<<
+var list = [
+  for (LongGenericTypeName<TypeArg,
+          AnotherTypeArgument> a = 0;
+      a < 1;
+      a++)
+    body
+];
+>>> split in for initializer
+var list = [for (a = initializerExpression + thatDoesNotFit; a < 1; a++) body];
+<<<
+var list = [
+  for (a = initializerExpression +
+          thatDoesNotFit;
+      a < 1;
+      a++)
+    body
+];
+>>> split in for condition
+var list = [for (a = b; conditionExpression + thatDoesNotFit; a++) body];
+<<<
+var list = [
+  for (a = b;
+      conditionExpression +
+          thatDoesNotFit;
+      a++)
+    body
+];
+>>> split in for increment
+var list = [for (a = b; a < 1; incrementExpression + thatDoesNotFit) body];
+<<<
+var list = [
+  for (a = b;
+      a < 1;
+      incrementExpression +
+          thatDoesNotFit)
+    body
+];

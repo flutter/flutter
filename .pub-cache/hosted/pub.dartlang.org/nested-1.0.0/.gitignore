@@ -1,0 +1,14 @@
+# Files and directories created by pub
+.dart_tool/
+android/
+ios/
+.packages
+# Remove the following pattern if you wish to check in your lock file
+pubspec.lock
+
+# Conventional directory for build outputs
+build/
+coverage/
+
+# Directory created by dartdoc
+doc/api/

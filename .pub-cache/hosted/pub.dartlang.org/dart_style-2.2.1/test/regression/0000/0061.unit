@@ -1,0 +1,24 @@
+>>>
+class Foo extends Bar {
+  qux(n) {
+    // Do some stuff
+    if (x != null && x.y == n.z
+        // and some other stuff.
+        && n.parent.x != y) {
+      // <snip>
+    }
+  }
+}
+<<<
+class Foo extends Bar {
+  qux(n) {
+    // Do some stuff
+    if (x != null &&
+        x.y == n.z
+        // and some other stuff.
+        &&
+        n.parent.x != y) {
+      // <snip>
+    }
+  }
+}

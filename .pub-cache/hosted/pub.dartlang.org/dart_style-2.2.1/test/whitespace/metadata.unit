@@ -1,0 +1,408 @@
+40 columns                              |
+>>> force newline before directives
+@deprecated library foo;
+
+@deprecated import 'dart:io';
+
+@deprecated export 'dart:io';
+<<<
+@deprecated
+library foo;
+
+@deprecated
+import 'dart:io';
+
+@deprecated
+export 'dart:io';
+>>> metadata on part
+@foo part "part.dart";
+<<<
+@foo
+part "part.dart";
+>>> metadata on part of
+@foo part of bar;
+<<<
+@foo
+part of bar;
+>>> preserve a blank line before the first directive
+@foo
+
+import 'foo.dart';
+
+@bar
+
+import 'bar.dart';
+<<<
+@foo
+
+import 'foo.dart';
+
+@bar
+import 'bar.dart';
+>>> force newline before types
+@meta class X {}
+
+@meta class Y = X with Z;
+
+@meta typedef void X(y);
+<<<
+@meta
+class X {}
+
+@meta
+class Y = X with Z;
+
+@meta
+typedef void X(y);
+>>> force newline before variable declarations
+foo() {
+  @meta var a;
+
+  @meta
+  var b;
+
+  @a @b
+
+
+  var c;
+}
+<<<
+foo() {
+  @meta
+  var a;
+
+  @meta
+  var b;
+
+  @a
+  @b
+  var c;
+}
+>>> force newline before function
+@meta foo() {}
+<<<
+@meta
+foo() {}
+>>> multiple annotations before function get their own line
+@meta @another foo() {}
+<<<
+@meta
+@another
+foo() {}
+>>> force newline before member
+class X {
+  @meta   var _x;
+  @meta       X.y();
+  @meta   factory X(x) => null;
+  @meta  int x() => null;
+}
+<<<
+class X {
+  @meta
+  var _x;
+  @meta
+  X.y();
+  @meta
+  factory X(x) => null;
+  @meta
+  int x() => null;
+}
+>>> multiple annotations before members get own line
+class X {
+  @meta @another  var _x;
+  @meta @another       X.y();
+  @meta @another  factory X(x) => null;
+  @meta @another  int x() => null;
+}
+<<<
+class X {
+  @meta
+  @another
+  var _x;
+  @meta
+  @another
+  X.y();
+  @meta
+  @another
+  factory X(x) => null;
+  @meta
+  @another
+  int x() => null;
+}
+>>> collapse newlines between annotations
+@a
+
+
+@b
+
+
+
+@c
+
+
+class A {}
+<<<
+@a
+@b
+@c
+class A {}
+>>> multiple top-level annotations always get their own line
+@a @b class A {}
+<<<
+@a
+@b
+class A {}
+>>> parameter annotations are inline
+foo(
+
+@a
+
+@b
+
+param) {}
+<<<
+foo(@a @b param) {}
+>>> type parameter annotations are inline
+class Foo<
+
+@a
+
+@b
+
+T> {}
+<<<
+class Foo<@a @b T> {}
+>>> comment after metadata
+@DomName('DatabaseCallback')
+@Experimental() // deprecated
+typedef void DatabaseCallback(database);
+<<<
+@DomName('DatabaseCallback')
+@Experimental() // deprecated
+typedef void DatabaseCallback(database);
+>>> comment between metadata
+@DomName('DatabaseCallback') // deprecated
+  @Experimental()
+      typedef void DatabaseCallback(database);
+<<<
+@DomName(
+    'DatabaseCallback') // deprecated
+@Experimental()
+typedef void DatabaseCallback(database);
+>>> metadata on top-level variables
+@DomName('DatabaseCallback')
+@Experimental()
+var variable;
+<<<
+@DomName('DatabaseCallback')
+@Experimental()
+var variable;
+>>> metadata on parameters
+main(@foo @bar param) {}
+<<<
+main(@foo @bar param) {}
+>>> metadata on initializing formal
+class Foo {
+  Foo(@bar this.field);
+}
+<<<
+class Foo {
+  Foo(@bar this.field);
+}
+>>> metadata on function-typed formal parameter
+withReturnType(@foo @bar int fn(@foo param)) {}
+withoutReturnType(@foo @bar fn(@foo param)) {}
+<<<
+withReturnType(
+    @foo @bar int fn(@foo param)) {}
+withoutReturnType(
+    @foo @bar fn(@foo param)) {}
+>>> metadata on default formal parameter
+positional([@foo bar]) {}
+named({@foo bar}) {}
+<<<
+positional([@foo bar]) {}
+named({@foo bar}) {}
+>>> split between metadata and parameter indents
+function(@Annotation @VeryLongMetadataAnnotation longParameter) {}
+<<<
+function(
+    @Annotation
+    @VeryLongMetadataAnnotation
+        longParameter) {}
+>>> unsplit with trailing commas
+function(@Annotation longParameter,@Annotation @Other longParameter2,) {}
+<<<
+function(
+  @Annotation longParameter,
+  @Annotation @Other longParameter2,
+) {}
+>>> split with trailing commas
+function(@Annotation longParameter,@Annotation @Other @Third longParameter2,) {}
+<<<
+function(
+  @Annotation longParameter,
+  @Annotation
+  @Other
+  @Third
+      longParameter2,
+) {}
+>>> keep "covariant" with parameter
+class A { function(@Annotation @VeryLongMetadataAnnotation covariant longParameter) {} }
+<<<
+class A {
+  function(
+      @Annotation
+      @VeryLongMetadataAnnotation
+          covariant longParameter) {}
+}
+>>> keep "required" with parameter
+class A { function({@Annotation @VeryLongMetadataAnnotation required longParameter}) {} }
+<<<
+class A {
+  function(
+      {@Annotation
+      @VeryLongMetadataAnnotation
+          required longParameter}) {}
+}
+>>> metadata on function typedef
+@foo typedef Fn = Function();
+<<<
+@foo
+typedef Fn = Function();
+>>> metadata on non-function typedef
+@foo typedef Hash< @a  K, @b  (  1  )  V  >  =  Map < K ,  V >   ;
+<<<
+@foo
+typedef Hash<@a K, @b(1) V> = Map<K, V>;
+>>> single metadata on for-in loop variable
+main() {
+  for (   @a    var i in list) {;}
+}
+<<<
+main() {
+  for (@a var i in list) {
+    ;
+  }
+}
+>>> multiple metadata on for-in loop variable
+main() {
+  for (   @a  @b    var i in list) {;}
+}
+<<<
+main() {
+  for (@a @b var i in list) {
+    ;
+  }
+}
+>>> long metadata on for-in loop variable
+main() {
+  for (@Annotation @VeryLongMetadataAnnotation(1, 2) var i in veryLong.iterator + expression) {;}
+}
+<<<
+main() {
+  for (@Annotation
+      @VeryLongMetadataAnnotation(1, 2)
+      var i in veryLong.iterator +
+          expression) {
+    ;
+  }
+}
+>>> metadata on enum cases
+enum Foo { a, @meta b, @meta1 @meta2 c}
+<<<
+enum Foo {
+  a,
+  @meta
+  b,
+  @meta1
+  @meta2
+  c
+}
+>>> preserve blank line before enum case with metadata
+enum Foo { a,
+
+@meta b}
+<<<
+enum Foo {
+  a,
+
+  @meta
+  b
+}
+>>> metadata on mixin
+@meta   mixin M {}
+<<<
+@meta
+mixin M {}
+>>> metadata on extension
+@meta extension A on B {}
+<<<
+@meta
+extension A on B {}
+>>> metadata on late declarations
+@meta late int a;
+class B {
+  @meta late int c;
+  method() {
+    @meta late int d;
+  }
+}
+<<<
+@meta
+late int a;
+
+class B {
+  @meta
+  late int c;
+  method() {
+    @meta
+    late int d;
+  }
+}
+>>> on external variable
+@meta  external var x;
+<<<
+@meta
+external var x;
+>>> on external field
+class C {
+  @meta  external static   var  x;
+  @meta  external var x;
+}
+<<<
+class C {
+  @meta
+  external static var x;
+  @meta
+  external var x;
+}
+>>> on abstract field
+class C {
+  @meta  abstract var x;
+}
+<<<
+class C {
+  @meta
+  abstract var x;
+}
+>>> annotation with type arguments
+@A<int,String>()int x;
+<<<
+@A<int, String>()
+int x;
+>>>
+@prefix.A<int,String>()int x;
+<<<
+@prefix.A<int, String>()
+int x;
+>>>
+@A<int,String>.constructor()int x;
+<<<
+@A<int, String>.constructor()
+int x;
+>>>
+@prefix.A<int,String>.constructor()int x;
+<<<
+@prefix.A<int, String>.constructor()
+int x;

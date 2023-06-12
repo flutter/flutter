@@ -1,0 +1,13 @@
+# Copyright (c) 2022, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+name: command_runner_example
+version: 1.0.0
+description: An example of using CommandRunner
+publish_to: 'none'
+environment:
+  sdk: '>=2.14.0 <3.0.0'
+dependencies:
+  args:
+    path: ../..

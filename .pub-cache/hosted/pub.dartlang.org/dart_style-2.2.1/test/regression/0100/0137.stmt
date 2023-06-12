@@ -1,0 +1,26 @@
+>>> (indent 2)
+  Iterable<DeclarationMirror> _sortedLibraryDeclarations(LibraryMirror lib) =>
+      lib.declarations.values
+          .where((d) => d is ClassMirror || d is MethodMirror)
+          .toList()
+    ..sort((a, b) {
+      if (a.runtimeType == b.runtimeType) {
+        return _declarationName(a).compareTo(_declarationName(b));
+      }
+      if (a is MethodMirror && b is ClassMirror) return -1;
+      if (a is ClassMirror && b is MethodMirror) return 1;
+      return 0;
+    });
+<<<
+  Iterable<DeclarationMirror> _sortedLibraryDeclarations(LibraryMirror lib) =>
+      lib.declarations.values
+          .where((d) => d is ClassMirror || d is MethodMirror)
+          .toList()
+        ..sort((a, b) {
+          if (a.runtimeType == b.runtimeType) {
+            return _declarationName(a).compareTo(_declarationName(b));
+          }
+          if (a is MethodMirror && b is ClassMirror) return -1;
+          if (a is ClassMirror && b is MethodMirror) return 1;
+          return 0;
+        });

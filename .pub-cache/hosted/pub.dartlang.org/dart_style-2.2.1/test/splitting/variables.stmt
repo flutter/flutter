@@ -1,0 +1,81 @@
+40 columns                              |
+>>> long name with no initializer
+var thisIsReallyQuiteAVeryLongVariableName;
+<<<
+var thisIsReallyQuiteAVeryLongVariableName;
+>>> initializer doesn't fit one line, wrap inside, keep name
+var result = myFunction(argument * argument, argument * argument);
+<<<
+var result = myFunction(
+    argument * argument,
+    argument * argument);
+>>> initializer doesn't fit one line, wrap inside, keep name
+var result = myFunction(argument, argument, argument, argument);
+<<<
+var result = myFunction(argument,
+    argument, argument, argument);
+>>> initializer fits one line
+var variableName = veryLongInitializerName;
+<<<
+var variableName =
+    veryLongInitializerName;
+>>> initializer doesn't fit one line, cannot be split
+var variableName = thisIsReallyQuiteAVeryLongVariableName;
+<<<
+var variableName =
+    thisIsReallyQuiteAVeryLongVariableName;
+>>> long function call initializer
+var variableName = functionName(first, second);
+<<<
+var variableName =
+    functionName(first, second);
+>>> long binary expression initializer
+int variableName = argument * argument + argument;
+<<<
+int variableName =
+    argument * argument + argument;
+>>> lots of variables with no initializers
+var variableA, variableB, variableC, variableD;
+<<<
+var variableA,
+    variableB,
+    variableC,
+    variableD;
+>>> multiple variables stay on one line if they fit
+var x = 3, y = 4;
+<<<
+var x = 3, y = 4;
+>>>
+var x = 2, y;
+<<<
+var x = 2, y;
+>>> multiple variables can stay on one line if there are no initializers
+var x, y, z;
+<<<
+var x, y, z;
+>>> multiple variables all split if they don't fit on one line
+var x = initializer, y = initializer, z = initializer;
+<<<
+var x = initializer,
+    y = initializer,
+    z = initializer;
+>>> initializers get extra indentation if there are multiple variables
+var xVeryLongVariable = longishInitializer,
+    xVeryLongVariable = longishInitializer;
+<<<
+var xVeryLongVariable =
+        longishInitializer,
+    xVeryLongVariable =
+        longishInitializer;
+>>> dartbug.com/16379
+var x = new XXXXXXXXXXXXXXXXXXXXXXXXXXXXX();
+<<<
+var x =
+    new XXXXXXXXXXXXXXXXXXXXXXXXXXXXX();
+>>> nest blocks when variables split
+SomeType a = () {;}, b;
+<<<
+SomeType a = () {
+      ;
+    },
+    b;

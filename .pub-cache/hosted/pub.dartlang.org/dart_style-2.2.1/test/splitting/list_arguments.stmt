@@ -1,0 +1,454 @@
+40 columns                              |
+>>> args before and after list forces nesting
+method(first,[element, element, element, element],third);
+<<<
+method(
+    first,
+    [
+      element,
+      element,
+      element,
+      element
+    ],
+    third);
+>>> nothing but list args does not nest
+longFunctionName([element, element, element, element], [element, element, element, element], [element, element, element, element]);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+], [
+  element,
+  element,
+  element,
+  element
+], [
+  element,
+  element,
+  element,
+  element
+]);
+>>> trailing lists do not nest
+longFunctionName(argument, argument, argument, argument, [element, element, element, element], [element, element, element, element]);
+<<<
+longFunctionName(argument, argument,
+    argument, argument, [
+  element,
+  element,
+  element,
+  element
+], [
+  element,
+  element,
+  element,
+  element
+]);
+>>> leading lists do not nest
+longFunctionName([element, element, element, element], [element, element, element, element], argument, argument, argument, argument);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+], [
+  element,
+  element,
+  element,
+  element
+], argument, argument, argument,
+    argument);
+>>> arg between lists forces nesting
+longFunctionName([element, element, element, element], argument, [element, element, element, element]);
+<<<
+longFunctionName(
+    [
+      element,
+      element,
+      element,
+      element
+    ],
+    argument,
+    [
+      element,
+      element,
+      element,
+      element
+    ]);
+>>> unsplit leading args
+longFunctionName(arg, arg, [element, element, element, element]);
+<<<
+longFunctionName(arg, arg, [
+  element,
+  element,
+  element,
+  element
+]);
+>>> split before leading args
+longFunctionName(argument, argument, argument, [element, element, element, element]);
+<<<
+longFunctionName(
+    argument, argument, argument, [
+  element,
+  element,
+  element,
+  element
+]);
+>>> split in middle of leading args
+longFunctionName(argument, argument, argument, argument, [element, element, element, element]);
+<<<
+longFunctionName(argument, argument,
+    argument, argument, [
+  element,
+  element,
+  element,
+  element
+]);
+>>> split before all leading args
+longFunctionName(argument, argument, argument, argument, argument, argument,
+[element, element, element, element]);
+<<<
+longFunctionName(
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument, [
+  element,
+  element,
+  element,
+  element
+]);
+>>> unsplit trailing args
+longFunctionName([element, element, element, element], argument, argument);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+], argument, argument);
+>>> split before trailing args
+longFunctionName([element, element, element, element] /* very very long comment */,
+argument, argument);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+] /* very very long comment */,
+    argument, argument);
+>>> split in middle of trailing args
+longFunctionName([element, element, element, element], argument, argument, argument, argument);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+], argument, argument, argument,
+    argument);
+>>> split before all trailing args
+longFunctionName([element, element, element, element], argument, argument, argument, argument,
+argument, argument, argument);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+],
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument);
+>>> don't split leading lists
+longFunctionName([e, e], [e, e, e], a);
+<<<
+longFunctionName([e, e], [e, e, e], a);
+>>> split before all args including leading
+longFunctionName([e, e], [e, e, e], argument);
+<<<
+longFunctionName(
+    [e, e], [e, e, e], argument);
+>>> split before one leading arg
+longFunctionName([elem, elem], [elem, elem], argument);
+<<<
+longFunctionName([elem, elem],
+    [elem, elem], argument);
+>>> split before all args including leading
+longFunctionName([elem], [elem, elem], [elem, elem, elem], argument, argument,
+argument, argument, argument, argument, argument);
+<<<
+longFunctionName(
+    [elem],
+    [elem, elem],
+    [elem, elem, elem],
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument,
+    argument);
+>>> don't split trailing lists
+longFunctionName(a, [e, e], [e, e, e]);
+<<<
+longFunctionName(a, [e, e], [e, e, e]);
+>>> split before all args including trailing
+longFunctionName(argument, [e, e], [e, e, e]);
+<<<
+longFunctionName(
+    argument, [e, e], [e, e, e]);
+>>> split before one trailing arg
+longFunctionName(argument, [elem, elem], [elem, elem]);
+<<<
+longFunctionName(argument, [elem, elem],
+    [elem, elem]);
+>>> split before all args including trailing
+longFunctionName(argument, argument, [elem], [elem, elem], [elem, elem, elem]);
+<<<
+longFunctionName(
+    argument,
+    argument,
+    [elem],
+    [elem, elem],
+    [elem, elem, elem]);
+>>> named args before and after list forces nesting
+method(a:first,b:[element, element, element, element],c:third);
+<<<
+method(
+    a: first,
+    b: [
+      element,
+      element,
+      element,
+      element
+    ],
+    c: third);
+>>> nothing but named list args does not nest
+longFunctionName(a: [element, element, element, element],
+b: [element, element, element, element], c: [element, element, element, element]);
+<<<
+longFunctionName(a: [
+  element,
+  element,
+  element,
+  element
+], b: [
+  element,
+  element,
+  element,
+  element
+], c: [
+  element,
+  element,
+  element,
+  element
+]);
+>>> some named list args does not nest
+longFunctionName([element, element, element, element],
+a: [element, element, element, element], b: [element, element, element, element]);
+<<<
+longFunctionName([
+  element,
+  element,
+  element,
+  element
+], a: [
+  element,
+  element,
+  element,
+  element
+], b: [
+  element,
+  element,
+  element,
+  element
+]);
+>>> allow leading non-collection to not split
+longFunctionName(a: arg, b: arg,
+c: [element, element, element, element], d: [element, element, element, element]);
+<<<
+longFunctionName(a: arg, b: arg, c: [
+  element,
+  element,
+  element,
+  element
+], d: [
+  element,
+  element,
+  element,
+  element
+]);
+>>> don't allow splitting before first arg while splitting collections
+longFunctionName(
+    a: argument, b: argument, c: [
+  element,
+  element,
+  element,
+  element
+], d: [
+  element,
+  element,
+  element,
+  element
+]);
+<<<
+longFunctionName(
+    a: argument,
+    b: argument,
+    c: [
+      element,
+      element,
+      element,
+      element
+    ],
+    d: [
+      element,
+      element,
+      element,
+      element
+    ]);
+>>> trailing named arguments that do not split
+longFunctionName(a: [element, element, element, element],
+b: [element, element, element, element], c: argument, d: argument);
+<<<
+longFunctionName(a: [
+  element,
+  element,
+  element,
+  element
+], b: [
+  element,
+  element,
+  element,
+  element
+], c: argument, d: argument);
+>>> trailing named arguments that do split
+longFunctionName(a: [element, element, element, element],
+b: [element, element, element, element], c: argument, d: argument, e: argument);
+<<<
+longFunctionName(
+    a: [
+      element,
+      element,
+      element,
+      element
+    ],
+    b: [
+      element,
+      element,
+      element,
+      element
+    ],
+    c: argument,
+    d: argument,
+    e: argument);
+>>> leading named arguments
+longFunctionName(name1: [element, element], name2: [element, element], name3: argument, name4: argument);
+<<<
+longFunctionName(
+    name1: [element, element],
+    name2: [element, element],
+    name3: argument,
+    name4: argument);
+>>> don't nest because of nested 1-arg fn
+outer(inner([element, element, element, element]));
+<<<
+outer(inner([
+  element,
+  element,
+  element,
+  element
+]));
+>>> do nest because of nested many-arg fn
+outer(argument, inner([element, element, element, element]));
+<<<
+outer(
+    argument,
+    inner([
+      element,
+      element,
+      element,
+      element
+    ]));
+>>> don't nest because of nested 1-arg method call
+obj.outer(obj.inner([element, element, element, element]));
+<<<
+obj.outer(obj.inner([
+  element,
+  element,
+  element,
+  element
+]));
+>>> do nest because of nested many-arg method call
+obj.outer(argument, obj.inner([element, element, element, element]));
+<<<
+obj.outer(
+    argument,
+    obj.inner([
+      element,
+      element,
+      element,
+      element
+    ]));
+>>> leading positional collections indent if their args split
+function([[element]],
+[[element]], argument, // comment
+argument);
+<<<
+function(
+    [
+      [element]
+    ],
+    [
+      [element]
+    ],
+    argument, // comment
+    argument);
+>>> trailing positional collections indent if their args split
+function(argument, // comment
+argument, [[element]], [[element]]);
+<<<
+function(
+    argument, // comment
+    argument,
+    [
+      [element]
+    ],
+    [
+      [element]
+    ]);
+>>> comment before collection
+function(argument, // comment
+[[element]]);
+<<<
+function(argument, // comment
+    [
+      [element]
+    ]);
+>>> don't force trailing method chain to split
+function([argument,]).method().method();
+<<<
+function([
+  argument,
+]).method().method();
+>>> if method chain splits, split before first too
+function([argument,]).method().method().method().method().method();
+<<<
+function([
+  argument,
+])
+    .method()
+    .method()
+    .method()
+    .method()
+    .method();

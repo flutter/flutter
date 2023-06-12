@@ -1,0 +1,13 @@
+>>>
+class VeryInterestingThing {
+  factory VeryInterestingThing.fromJson(
+        mylibrarythathasalongname.JsonData jsonData) => new VeryInterestingThing(
+        otherlibrary.InterestingState.fromJson(jsonData.encodedState));
+}
+<<<
+class VeryInterestingThing {
+  factory VeryInterestingThing.fromJson(
+          mylibrarythathasalongname.JsonData jsonData) =>
+      new VeryInterestingThing(
+          otherlibrary.InterestingState.fromJson(jsonData.encodedState));
+}

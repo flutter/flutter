@@ -1,0 +1,17 @@
+name: js
+version: 0.6.5
+description: Annotations to create static Dart interfaces for JavaScript APIs.
+repository: https://github.com/dart-lang/sdk/tree/main/pkg/js
+
+environment:
+  sdk: ">=2.16.0-100.0.dev <3.0.0"
+
+dependencies:
+  meta: ^1.7.0
+
+# We use 'any' version constraints here as we get our package versions from
+# the dart-lang/sdk repo's DEPS file. Note that this is a special case; the
+# best practice for packages is to specify their compatible version ranges.
+# See also https://dart.dev/tools/pub/dependencies.
+dev_dependencies:
+  lints: any

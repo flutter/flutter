@@ -1,0 +1,37 @@
+>>>
+void main() {
+  test("synchronized files are up-to-date", () {
+    ({
+      'lib/src/visitor/async_evaluate.dart': 'lib/src/visitor/evaluate.dart',
+      'lib/src/async_environment.dart': 'lib/src/environment.dart'
+    })
+        .forEach((sourcePath, targetPath) {
+      var source = new File(sourcePath).readAsStringSync();
+      var target = new File(targetPath).readAsStringSync();
+
+      var hash = sha1.convert(utf8.encode(source));
+      if (!target.contains("Checksum: $hash")) {
+        fail("$targetPath is out-of-date.\n"
+            "Run pub run grinder to update it.");
+      }
+    });
+  });
+}
+<<<
+void main() {
+  test("synchronized files are up-to-date", () {
+    ({
+      'lib/src/visitor/async_evaluate.dart': 'lib/src/visitor/evaluate.dart',
+      'lib/src/async_environment.dart': 'lib/src/environment.dart'
+    }).forEach((sourcePath, targetPath) {
+      var source = new File(sourcePath).readAsStringSync();
+      var target = new File(targetPath).readAsStringSync();
+
+      var hash = sha1.convert(utf8.encode(source));
+      if (!target.contains("Checksum: $hash")) {
+        fail("$targetPath is out-of-date.\n"
+            "Run pub run grinder to update it.");
+      }
+    });
+  });
+}

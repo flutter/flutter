@@ -1,0 +1,50 @@
+#  Copyright 2021 Google LLC
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+name: google_mobile_ads
+version: 2.3.0
+description: Flutter plugin for Google Mobile Ads, supporting
+  banner, interstitial (full-screen),  rewarded and native ads
+repository: https://github.com/googleads/googleads-mobile-flutter/tree/main/packages/google_mobile_ads
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: io.flutter.plugins.googlemobileads
+        pluginClass: GoogleMobileAdsPlugin
+      ios:
+        pluginClass: FLTGoogleMobileAdsPlugin
+
+dependencies:
+  meta: ^1.0.4
+  flutter:
+    sdk: flutter
+  visibility_detector: ^0.3.3
+
+dev_dependencies:
+  pedantic: ^1.11.0
+  e2e: ^0.7.0
+  flutter_driver:
+    sdk: flutter
+  mockito: ^5.0.0-0
+  build_runner: ^2.1.10
+  flutter_test:
+    sdk: flutter
+  flutter_plugin_tools: ^0.8.5
+
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.5"

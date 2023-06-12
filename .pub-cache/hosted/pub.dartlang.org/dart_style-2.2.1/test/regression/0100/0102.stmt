@@ -1,0 +1,12 @@
+>>> (indent 6)
+      isTwoWay = !isEvent && bindings.isWhole && (isCustomTag ||
+          tag == 'input' && (name == 'value' || name =='checked') ||
+          tag == 'select' && (name == 'selectedindex' || name == 'value') ||
+          tag == 'textarea' && name == 'value');
+<<<
+      isTwoWay = !isEvent &&
+          bindings.isWhole &&
+          (isCustomTag ||
+              tag == 'input' && (name == 'value' || name == 'checked') ||
+              tag == 'select' && (name == 'selectedindex' || name == 'value') ||
+              tag == 'textarea' && name == 'value');

@@ -1,0 +1,25 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false
+  errors: 
+    todo: ignore
+    
+linter:
+  rules:
+    # Some additional lints we want to enforce
+    cascade_invocations: true
+    directives_ordering: true
+    omit_local_variable_types: true
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    prefer_interpolation_to_compose_strings: true
+    prefer_relative_imports: true
+    sort_unnamed_constructors_first: true
+    unnecessary_lambdas: true
+    unnecessary_null_aware_assignments: true
+    unnecessary_parenthesis: true

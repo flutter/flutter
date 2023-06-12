@@ -1,0 +1,9 @@
+40 columns                              |
+>>> part of with uri that fits
+part of "uri.dart";
+<<<
+part of "uri.dart";
+>>> part of with uri does not split on long line
+part of "very_very_very_very_long_uri.dart";
+<<<
+part of "very_very_very_very_long_uri.dart";

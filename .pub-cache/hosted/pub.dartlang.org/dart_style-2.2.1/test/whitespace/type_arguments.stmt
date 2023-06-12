@@ -1,0 +1,25 @@
+40 columns                              |
+>>> no spaces around braces
+new Foo<  T >();
+<<<
+new Foo<T>();
+>>> space between names
+new Foo<  A,B,   C,D>();
+<<<
+new Foo<A, B, C, D>();
+>>> void as a class type argument
+new Foo<   void,void    Function()>();
+<<<
+new Foo<void, void Function()>();
+>>> void as a generic method type argument
+list.map<   void,void    Function()>();
+<<<
+list.map<void, void Function()>();
+>>> named constructor with implicit "new"
+C <  int  ,float>  .named(42);
+<<<
+C<int, float>.named(42);
+>>> nullable type argument
+Map<  int  ?  , List<String  ?  > ? >();
+<<<
+Map<int?, List<String?>?>();

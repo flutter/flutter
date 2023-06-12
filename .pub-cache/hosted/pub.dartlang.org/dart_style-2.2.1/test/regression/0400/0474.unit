@@ -1,0 +1,678 @@
+>>>
+Map<String, MethodTrampoline> methodTable_Parser = <String, MethodTrampoline>{
+  'parseCompilationUnit_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseCompilationUnit(arg0)),
+  'parseDirectives_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseDirectives(arg0)),
+  'parseExpression_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseExpression(arg0)),
+  'parseStatement_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseStatement(arg0)),
+  'parseStatements_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseStatements(arg0)),
+  'parseAnnotation_0':
+      new MethodTrampoline(0, (Parser target) => target.parseAnnotation()),
+  'parseArgument_0':
+      new MethodTrampoline(0, (Parser target) => target.parseArgument()),
+  'parseArgumentList_0':
+      new MethodTrampoline(0, (Parser target) => target.parseArgumentList()),
+  'parseBitwiseOrExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseBitwiseOrExpression()),
+  'parseBlock_0':
+      new MethodTrampoline(0, (Parser target) => target.parseBlock()),
+  'parseClassMember_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseClassMember(arg0)),
+  'parseCompilationUnit_0': new MethodTrampoline(
+      0, (Parser target) => target.parseCompilationUnit2()),
+  'parseConditionalExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseConditionalExpression()),
+  'parseConstructorName_0':
+      new MethodTrampoline(0, (Parser target) => target.parseConstructorName()),
+  'parseExpression_0':
+      new MethodTrampoline(0, (Parser target) => target.parseExpression2()),
+  'parseExpressionWithoutCascade_0': new MethodTrampoline(
+      0, (Parser target) => target.parseExpressionWithoutCascade()),
+  'parseExtendsClause_0':
+      new MethodTrampoline(0, (Parser target) => target.parseExtendsClause()),
+  'parseFormalParameterList_0': new MethodTrampoline(
+      0, (Parser target) => target.parseFormalParameterList()),
+  'parseFunctionExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseFunctionExpression()),
+  'parseImplementsClause_0': new MethodTrampoline(
+      0, (Parser target) => target.parseImplementsClause()),
+  'parseLabel_0':
+      new MethodTrampoline(0, (Parser target) => target.parseLabel()),
+  'parseLibraryIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target.parseLibraryIdentifier()),
+  'parseLogicalOrExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseLogicalOrExpression()),
+  'parseMapLiteralEntry_0':
+      new MethodTrampoline(0, (Parser target) => target.parseMapLiteralEntry()),
+  'parseNormalFormalParameter_0': new MethodTrampoline(
+      0, (Parser target) => target.parseNormalFormalParameter()),
+  'parsePrefixedIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target.parsePrefixedIdentifier()),
+  'parseReturnType_0':
+      new MethodTrampoline(0, (Parser target) => target.parseReturnType()),
+  'parseSimpleIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target.parseSimpleIdentifier()),
+  'parseStatement_0':
+      new MethodTrampoline(0, (Parser target) => target.parseStatement2()),
+  'parseStringLiteral_0':
+      new MethodTrampoline(0, (Parser target) => target.parseStringLiteral()),
+  'parseTypeArgumentList_0': new MethodTrampoline(
+      0, (Parser target) => target.parseTypeArgumentList()),
+  'parseTypeName_0':
+      new MethodTrampoline(0, (Parser target) => target.parseTypeName()),
+  'parseTypeParameter_0':
+      new MethodTrampoline(0, (Parser target) => target.parseTypeParameter()),
+  'parseTypeParameterList_0': new MethodTrampoline(
+      0, (Parser target) => target.parseTypeParameterList()),
+  'parseWithClause_0':
+      new MethodTrampoline(0, (Parser target) => target.parseWithClause()),
+  'advance_0': new MethodTrampoline(0, (Parser target) => target._advance()),
+  'appendScalarValue_5': new MethodTrampoline(
+      5,
+      (Parser target, arg0, arg1, arg2, arg3, arg4) =>
+          target._appendScalarValue(arg0, arg1, arg2, arg3, arg4)),
+  'computeStringValue_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._computeStringValue(arg0, arg1, arg2)),
+  'convertToFunctionDeclaration_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._convertToFunctionDeclaration(arg0)),
+  'couldBeStartOfCompilationUnitMember_0': new MethodTrampoline(
+      0, (Parser target) => target._couldBeStartOfCompilationUnitMember()),
+  'createSyntheticIdentifier_0':
+      new MethodTrampoline(0, (Parser target) => target._createSyntheticIdentifier()),
+  'createSyntheticKeyword_1': new MethodTrampoline(1, (Parser target, arg0) => target._createSyntheticKeyword(arg0)),
+  'createSyntheticStringLiteral_0': new MethodTrampoline(0, (Parser target) => target._createSyntheticStringLiteral()),
+  'createSyntheticToken_1': new MethodTrampoline(1, (Parser target, arg0) => target._createSyntheticToken(arg0)),
+  'ensureAssignable_1': new MethodTrampoline(1, (Parser target, arg0) => target._ensureAssignable(arg0)),
+  'expect_1': new MethodTrampoline(1, (Parser target, arg0) => target._expect(arg0)),
+  'expectGt_0': new MethodTrampoline(0, (Parser target) => target._expectGt()),
+  'expectKeyword_1': new MethodTrampoline(1, (Parser target, arg0) => target._expectKeyword(arg0)),
+  'expectSemicolon_0': new MethodTrampoline(0, (Parser target) => target._expectSemicolon()),
+  'findRange_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._findRange(arg0, arg1)),
+  'getCodeBlockRanges_1': new MethodTrampoline(1, (Parser target, arg0) => target._getCodeBlockRanges(arg0)),
+  'getEndToken_1': new MethodTrampoline(1, (Parser target, arg0) => target._getEndToken(arg0)),
+  'injectToken_1': new MethodTrampoline(1, (Parser target, arg0) => target._injectToken(arg0)),
+  'isFunctionDeclaration_0': new MethodTrampoline(0, (Parser target) => target._isFunctionDeclaration()),
+  'isFunctionExpression_1': new MethodTrampoline(1, (Parser target, arg0) => target._isFunctionExpression(arg0)),
+  'isHexDigit_1': new MethodTrampoline(1, (Parser target, arg0) => target._isHexDigit(arg0)),
+  'isInitializedVariableDeclaration_0': new MethodTrampoline(0, (Parser target) => target._isInitializedVariableDeclaration()),
+  'isLinkText_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._isLinkText(arg0, arg1)),
+  'isOperator_1': new MethodTrampoline(1, (Parser target, arg0) => target._isOperator(arg0)),
+  'isSwitchMember_0': new MethodTrampoline(0, (Parser target) => target._isSwitchMember()),
+  'isTypedIdentifier_1': new MethodTrampoline(1, (Parser target, arg0) => target._isTypedIdentifier(arg0)),
+  'lockErrorListener_0': new MethodTrampoline(0, (Parser target) => target._lockErrorListener()),
+  'matches_1': new MethodTrampoline(1, (Parser target, arg0) => target._matches(arg0)),
+  'matchesGt_0': new MethodTrampoline(0, (Parser target) => target._matchesGt()),
+  'matchesIdentifier_0': new MethodTrampoline(0, (Parser target) => target._matchesIdentifier()),
+  'matchesKeyword_1': new MethodTrampoline(1, (Parser target, arg0) => target._matchesKeyword(arg0)),
+  'matchesString_1': new MethodTrampoline(1, (Parser target, arg0) => target._matchesString(arg0)),
+  'optional_1': new MethodTrampoline(1, (Parser target, arg0) => target._optional(arg0)),
+  'parseAdditiveExpression_0': new MethodTrampoline(0, (Parser target) => target._parseAdditiveExpression()),
+  'parseAssertStatement_0': new MethodTrampoline(0, (Parser target) => target._parseAssertStatement()),
+  'parseAssignableExpression_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseAssignableExpression(arg0)),
+  'parseAssignableSelector_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseAssignableSelector(arg0, arg1)),
+  'parseAwaitExpression_0': new MethodTrampoline(0, (Parser target) => target._parseAwaitExpression()),
+  'parseBitwiseAndExpression_0': new MethodTrampoline(0, (Parser target) => target._parseBitwiseAndExpression()),
+  'parseBitwiseXorExpression_0': new MethodTrampoline(0, (Parser target) => target._parseBitwiseXorExpression()),
+  'parseBreakStatement_0': new MethodTrampoline(0, (Parser target) => target._parseBreakStatement()),
+  'parseCascadeSection_0': new MethodTrampoline(0, (Parser target) => target._parseCascadeSection()),
+  'parseClassDeclaration_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseClassDeclaration(arg0, arg1)),
+  'parseClassMembers_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseClassMembers(arg0, arg1)),
+  'parseClassTypeAlias_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._parseClassTypeAlias(arg0, arg1, arg2)),
+  'parseCombinator_0': new MethodTrampoline(0, (Parser target) => target.parseCombinator()),
+  'parseCombinators_0': new MethodTrampoline(0, (Parser target) => target._parseCombinators()),
+  'parseCommentAndMetadata_0': new MethodTrampoline(0, (Parser target) => target._parseCommentAndMetadata()),
+  'parseCommentReference_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseCommentReference(arg0, arg1)),
+  'parseCommentReferences_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseCommentReferences(arg0)),
+  'parseCompilationUnitMember_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseCompilationUnitMember(arg0)),
+  'parseConstExpression_0': new MethodTrampoline(0, (Parser target) => target._parseConstExpression()),
+  'parseConstructor_8': new MethodTrampoline(8, (Parser target, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) => target._parseConstructor(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)),
+  'parseConstructorFieldInitializer_0': new MethodTrampoline(0, (Parser target) => target._parseConstructorFieldInitializer()),
+  'parseContinueStatement_0': new MethodTrampoline(0, (Parser target) => target._parseContinueStatement()),
+  'parseDirective_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseDirective(arg0)),
+  'parseDirectives_0': new MethodTrampoline(0, (Parser target) => target._parseDirectives()),
+  'parseDocumentationComment_0': new MethodTrampoline(0, (Parser target) => target._parseDocumentationComment()),
+  'parseDoStatement_0': new MethodTrampoline(0, (Parser target) => target._parseDoStatement()),
+  'parseEmptyStatement_0': new MethodTrampoline(0, (Parser target) => target._parseEmptyStatement()),
+  'parseEnumConstantDeclaration_0': new MethodTrampoline(0, (Parser target) => target._parseEnumConstantDeclaration()),
+  'parseEnumDeclaration_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseEnumDeclaration(arg0)),
+  'parseEqualityExpression_0': new MethodTrampoline(0, (Parser target) => target._parseEqualityExpression()),
+  'parseExportDirective_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseExportDirective(arg0)),
+  'parseExpressionList_0': new MethodTrampoline(0, (Parser target) => target._parseExpressionList()),
+  'parseFinalConstVarOrType_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseFinalConstVarOrType(arg0)),
+  'parseFormalParameter_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseFormalParameter(arg0)),
+  'parseForStatement_0': new MethodTrampoline(0, (Parser target) => target._parseForStatement()),
+  'parseFunctionBody_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._parseFunctionBody(arg0, arg1, arg2)),
+  'parseFunctionDeclaration_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._parseFunctionDeclaration(arg0, arg1, arg2)),
+  'parseFunctionDeclarationStatement_0': new MethodTrampoline(0, (Parser target) => target._parseFunctionDeclarationStatement()),
+  'parseFunctionDeclarationStatementAfterReturnType_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseFunctionDeclarationStatementAfterReturnType(arg0, arg1)),
+  'parseFunctionTypeAlias_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseFunctionTypeAlias(arg0, arg1)),
+  'parseGetter_4': new MethodTrampoline(4, (Parser target, arg0, arg1, arg2, arg3) => target._parseGetter(arg0, arg1, arg2, arg3)),
+  'parseIdentifierList_0': new MethodTrampoline(0, (Parser target) => target._parseIdentifierList()),
+  'parseIfStatement_0': new MethodTrampoline(0, (Parser target) => target._parseIfStatement()),
+  'parseImportDirective_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseImportDirective(arg0)),
+  'parseInitializedIdentifierList_4': new MethodTrampoline(4, (Parser target, arg0, arg1, arg2, arg3) => target._parseInitializedIdentifierList(arg0, arg1, arg2, arg3)),
+  'parseInstanceCreationExpression_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseInstanceCreationExpression(arg0)),
+  'parseLibraryDirective_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseLibraryDirective(arg0)),
+  'parseLibraryName_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseLibraryName(arg0, arg1)),
+  'parseListLiteral_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseListLiteral(arg0, arg1)),
+  'parseListOrMapLiteral_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseListOrMapLiteral(arg0)),
+  'parseLogicalAndExpression_0': new MethodTrampoline(0, (Parser target) => target._parseLogicalAndExpression()),
+  'parseMapLiteral_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._parseMapLiteral(arg0, arg1)),
+  'parseMethodDeclarationAfterParameters_7': new MethodTrampoline(7, (Parser target, arg0, arg1, arg2, arg3, arg4, arg5, arg6) => target._parseMethodDeclarationAfterParameters(arg0, arg1, arg2, arg3, arg4, arg5, arg6)),
+  'parseMethodDeclarationAfterReturnType_4': new MethodTrampoline(4, (Parser target, arg0, arg1, arg2, arg3) => target._parseMethodDeclarationAfterReturnType(arg0, arg1, arg2, arg3)),
+  'parseModifiers_0': new MethodTrampoline(0, (Parser target) => target._parseModifiers()),
+  'parseMultiplicativeExpression_0': new MethodTrampoline(0, (Parser target) => target._parseMultiplicativeExpression()),
+  'parseNativeClause_0': new MethodTrampoline(0, (Parser target) => target._parseNativeClause()),
+  'parseNewExpression_0': new MethodTrampoline(0, (Parser target) => target._parseNewExpression()),
+  'parseNonLabeledStatement_0': new MethodTrampoline(0, (Parser target) => target._parseNonLabeledStatement()),
+  'parseOperator_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._parseOperator(arg0, arg1, arg2)),
+  'parseOptionalReturnType_0': new MethodTrampoline(0, (Parser target) => target._parseOptionalReturnType()),
+  'parsePartDirective_1': new MethodTrampoline(1, (Parser target, arg0) => target._parsePartDirective(arg0)),
+  'parsePostfixExpression_0': new MethodTrampoline(0, (Parser target) => target._parsePostfixExpression()),
+  'parsePrimaryExpression_0': new MethodTrampoline(0, (Parser target) => target._parsePrimaryExpression()),
+  'parseRedirectingConstructorInvocation_0': new MethodTrampoline(0, (Parser target) => target._parseRedirectingConstructorInvocation()),
+  'parseRelationalExpression_0': new MethodTrampoline(0, (Parser target) => target._parseRelationalExpression()),
+  'parseRethrowExpression_0': new MethodTrampoline(0, (Parser target) => target._parseRethrowExpression()),
+  'parseReturnStatement_0': new MethodTrampoline(0, (Parser target) => target._parseReturnStatement()),
+  'parseSetter_4': new MethodTrampoline(4, (Parser target, arg0, arg1, arg2, arg3) => target._parseSetter(arg0, arg1, arg2, arg3)),
+  'parseShiftExpression_0': new MethodTrampoline(0, (Parser target) => target._parseShiftExpression()),
+  'parseStatementList_0': new MethodTrampoline(0, (Parser target) => target._parseStatementList()),
+  'parseStringInterpolation_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseStringInterpolation(arg0)),
+  'parseSuperConstructorInvocation_0': new MethodTrampoline(0, (Parser target) => target._parseSuperConstructorInvocation()),
+  'parseSwitchStatement_0': new MethodTrampoline(0, (Parser target) => target._parseSwitchStatement()),
+  'parseSymbolLiteral_0': new MethodTrampoline(0, (Parser target) => target._parseSymbolLiteral()),
+  'parseThrowExpression_0': new MethodTrampoline(0, (Parser target) => target._parseThrowExpression()),
+  'parseThrowExpressionWithoutCascade_0': new MethodTrampoline(0, (Parser target) => target._parseThrowExpressionWithoutCascade()),
+  'parseTryStatement_0': new MethodTrampoline(0, (Parser target) => target._parseTryStatement()),
+  'parseTypeAlias_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseTypeAlias(arg0)),
+  'parseUnaryExpression_0': new MethodTrampoline(0, (Parser target) => target._parseUnaryExpression()),
+  'parseVariableDeclaration_0': new MethodTrampoline(0, (Parser target) => target._parseVariableDeclaration()),
+  'parseVariableDeclarationListAfterMetadata_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseVariableDeclarationListAfterMetadata(arg0)),
+  'parseVariableDeclarationListAfterType_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._parseVariableDeclarationListAfterType(arg0, arg1, arg2)),
+  'parseVariableDeclarationStatementAfterMetadata_1': new MethodTrampoline(1, (Parser target, arg0) => target._parseVariableDeclarationStatementAfterMetadata(arg0)),
+  'parseVariableDeclarationStatementAfterType_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._parseVariableDeclarationStatementAfterType(arg0, arg1, arg2)),
+  'parseWhileStatement_0': new MethodTrampoline(0, (Parser target) => target._parseWhileStatement()),
+  'parseYieldStatement_0': new MethodTrampoline(0, (Parser target) => target._parseYieldStatement()),
+  'peek_0': new MethodTrampoline(0, (Parser target) => target._peek()),
+  'peekAt_1': new MethodTrampoline(1, (Parser target, arg0) => target._peekAt(arg0)),
+  'reportError_1': new MethodTrampoline(1, (Parser target, arg0) => target._reportError(arg0)),
+  'reportErrorForCurrentToken_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._reportErrorForCurrentToken(arg0, arg1)),
+  'reportErrorForNode_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._reportErrorForNode(arg0, arg1, arg2)),
+  'reportErrorForToken_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._reportErrorForToken(arg0, arg1, arg2)),
+  'skipBlock_0': new MethodTrampoline(0, (Parser target) => target._skipBlock()),
+  'skipFinalConstVarOrType_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipFinalConstVarOrType(arg0)),
+  'skipFormalParameterList_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipFormalParameterList(arg0)),
+  'skipPastMatchingToken_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipPastMatchingToken(arg0)),
+  'skipPrefixedIdentifier_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipPrefixedIdentifier(arg0)),
+  'skipReturnType_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipReturnType(arg0)),
+  'skipSimpleIdentifier_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipSimpleIdentifier(arg0)),
+  'skipStringInterpolation_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipStringInterpolation(arg0)),
+  'skipStringLiteral_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipStringLiteral(arg0)),
+  'skipTypeArgumentList_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipTypeArgumentList(arg0)),
+  'skipTypeName_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipTypeName(arg0)),
+  'skipTypeParameterList_1': new MethodTrampoline(1, (Parser target, arg0) => target._skipTypeParameterList(arg0)),
+  'tokenMatches_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._tokenMatches(arg0, arg1)),
+  'tokenMatchesIdentifier_1': new MethodTrampoline(1, (Parser target, arg0) => target._tokenMatchesIdentifier(arg0)),
+  'tokenMatchesKeyword_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._tokenMatchesKeyword(arg0, arg1)),
+  'tokenMatchesString_2': new MethodTrampoline(2, (Parser target, arg0, arg1) => target._tokenMatchesString(arg0, arg1)),
+  'translateCharacter_3': new MethodTrampoline(3, (Parser target, arg0, arg1, arg2) => target._translateCharacter(arg0, arg1, arg2)),
+  'unlockErrorListener_0': new MethodTrampoline(0, (Parser target) => target._unlockErrorListener()),
+  'validateFormalParameterList_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateFormalParameterList(arg0)),
+  'validateModifiersForClass_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForClass(arg0)),
+  'validateModifiersForConstructor_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForConstructor(arg0)),
+  'validateModifiersForEnum_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForEnum(arg0)),
+  'validateModifiersForField_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForField(arg0)),
+  'validateModifiersForFunctionDeclarationStatement_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForFunctionDeclarationStatement(arg0)),
+  'validateModifiersForGetterOrSetterOrMethod_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForGetterOrSetterOrMethod(arg0)),
+  'validateModifiersForOperator_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForOperator(arg0)),
+  'validateModifiersForTopLevelDeclaration_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForTopLevelDeclaration(arg0)),
+  'validateModifiersForTopLevelFunction_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForTopLevelFunction(arg0)),
+  'validateModifiersForTopLevelVariable_1': new MethodTrampoline(1, (Parser target, arg0) => target._validateModifiersForTopLevelVariable(arg0)),
+  'validateModifiersForTypedef_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateModifiersForTypedef(arg0)),
+};
+<<<
+Map<String, MethodTrampoline> methodTable_Parser = <String, MethodTrampoline>{
+  'parseCompilationUnit_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseCompilationUnit(arg0)),
+  'parseDirectives_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseDirectives(arg0)),
+  'parseExpression_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseExpression(arg0)),
+  'parseStatement_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseStatement(arg0)),
+  'parseStatements_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseStatements(arg0)),
+  'parseAnnotation_0':
+      new MethodTrampoline(0, (Parser target) => target.parseAnnotation()),
+  'parseArgument_0':
+      new MethodTrampoline(0, (Parser target) => target.parseArgument()),
+  'parseArgumentList_0':
+      new MethodTrampoline(0, (Parser target) => target.parseArgumentList()),
+  'parseBitwiseOrExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseBitwiseOrExpression()),
+  'parseBlock_0':
+      new MethodTrampoline(0, (Parser target) => target.parseBlock()),
+  'parseClassMember_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target.parseClassMember(arg0)),
+  'parseCompilationUnit_0': new MethodTrampoline(
+      0, (Parser target) => target.parseCompilationUnit2()),
+  'parseConditionalExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseConditionalExpression()),
+  'parseConstructorName_0':
+      new MethodTrampoline(0, (Parser target) => target.parseConstructorName()),
+  'parseExpression_0':
+      new MethodTrampoline(0, (Parser target) => target.parseExpression2()),
+  'parseExpressionWithoutCascade_0': new MethodTrampoline(
+      0, (Parser target) => target.parseExpressionWithoutCascade()),
+  'parseExtendsClause_0':
+      new MethodTrampoline(0, (Parser target) => target.parseExtendsClause()),
+  'parseFormalParameterList_0': new MethodTrampoline(
+      0, (Parser target) => target.parseFormalParameterList()),
+  'parseFunctionExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseFunctionExpression()),
+  'parseImplementsClause_0': new MethodTrampoline(
+      0, (Parser target) => target.parseImplementsClause()),
+  'parseLabel_0':
+      new MethodTrampoline(0, (Parser target) => target.parseLabel()),
+  'parseLibraryIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target.parseLibraryIdentifier()),
+  'parseLogicalOrExpression_0': new MethodTrampoline(
+      0, (Parser target) => target.parseLogicalOrExpression()),
+  'parseMapLiteralEntry_0':
+      new MethodTrampoline(0, (Parser target) => target.parseMapLiteralEntry()),
+  'parseNormalFormalParameter_0': new MethodTrampoline(
+      0, (Parser target) => target.parseNormalFormalParameter()),
+  'parsePrefixedIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target.parsePrefixedIdentifier()),
+  'parseReturnType_0':
+      new MethodTrampoline(0, (Parser target) => target.parseReturnType()),
+  'parseSimpleIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target.parseSimpleIdentifier()),
+  'parseStatement_0':
+      new MethodTrampoline(0, (Parser target) => target.parseStatement2()),
+  'parseStringLiteral_0':
+      new MethodTrampoline(0, (Parser target) => target.parseStringLiteral()),
+  'parseTypeArgumentList_0': new MethodTrampoline(
+      0, (Parser target) => target.parseTypeArgumentList()),
+  'parseTypeName_0':
+      new MethodTrampoline(0, (Parser target) => target.parseTypeName()),
+  'parseTypeParameter_0':
+      new MethodTrampoline(0, (Parser target) => target.parseTypeParameter()),
+  'parseTypeParameterList_0': new MethodTrampoline(
+      0, (Parser target) => target.parseTypeParameterList()),
+  'parseWithClause_0':
+      new MethodTrampoline(0, (Parser target) => target.parseWithClause()),
+  'advance_0': new MethodTrampoline(0, (Parser target) => target._advance()),
+  'appendScalarValue_5': new MethodTrampoline(
+      5,
+      (Parser target, arg0, arg1, arg2, arg3, arg4) =>
+          target._appendScalarValue(arg0, arg1, arg2, arg3, arg4)),
+  'computeStringValue_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._computeStringValue(arg0, arg1, arg2)),
+  'convertToFunctionDeclaration_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._convertToFunctionDeclaration(arg0)),
+  'couldBeStartOfCompilationUnitMember_0': new MethodTrampoline(
+      0, (Parser target) => target._couldBeStartOfCompilationUnitMember()),
+  'createSyntheticIdentifier_0': new MethodTrampoline(
+      0, (Parser target) => target._createSyntheticIdentifier()),
+  'createSyntheticKeyword_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._createSyntheticKeyword(arg0)),
+  'createSyntheticStringLiteral_0': new MethodTrampoline(
+      0, (Parser target) => target._createSyntheticStringLiteral()),
+  'createSyntheticToken_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._createSyntheticToken(arg0)),
+  'ensureAssignable_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._ensureAssignable(arg0)),
+  'expect_1':
+      new MethodTrampoline(1, (Parser target, arg0) => target._expect(arg0)),
+  'expectGt_0': new MethodTrampoline(0, (Parser target) => target._expectGt()),
+  'expectKeyword_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._expectKeyword(arg0)),
+  'expectSemicolon_0':
+      new MethodTrampoline(0, (Parser target) => target._expectSemicolon()),
+  'findRange_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._findRange(arg0, arg1)),
+  'getCodeBlockRanges_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._getCodeBlockRanges(arg0)),
+  'getEndToken_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._getEndToken(arg0)),
+  'injectToken_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._injectToken(arg0)),
+  'isFunctionDeclaration_0': new MethodTrampoline(
+      0, (Parser target) => target._isFunctionDeclaration()),
+  'isFunctionExpression_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._isFunctionExpression(arg0)),
+  'isHexDigit_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._isHexDigit(arg0)),
+  'isInitializedVariableDeclaration_0': new MethodTrampoline(
+      0, (Parser target) => target._isInitializedVariableDeclaration()),
+  'isLinkText_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._isLinkText(arg0, arg1)),
+  'isOperator_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._isOperator(arg0)),
+  'isSwitchMember_0':
+      new MethodTrampoline(0, (Parser target) => target._isSwitchMember()),
+  'isTypedIdentifier_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._isTypedIdentifier(arg0)),
+  'lockErrorListener_0':
+      new MethodTrampoline(0, (Parser target) => target._lockErrorListener()),
+  'matches_1':
+      new MethodTrampoline(1, (Parser target, arg0) => target._matches(arg0)),
+  'matchesGt_0':
+      new MethodTrampoline(0, (Parser target) => target._matchesGt()),
+  'matchesIdentifier_0':
+      new MethodTrampoline(0, (Parser target) => target._matchesIdentifier()),
+  'matchesKeyword_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._matchesKeyword(arg0)),
+  'matchesString_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._matchesString(arg0)),
+  'optional_1':
+      new MethodTrampoline(1, (Parser target, arg0) => target._optional(arg0)),
+  'parseAdditiveExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseAdditiveExpression()),
+  'parseAssertStatement_0': new MethodTrampoline(
+      0, (Parser target) => target._parseAssertStatement()),
+  'parseAssignableExpression_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseAssignableExpression(arg0)),
+  'parseAssignableSelector_2': new MethodTrampoline(
+      2,
+      (Parser target, arg0, arg1) =>
+          target._parseAssignableSelector(arg0, arg1)),
+  'parseAwaitExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseAwaitExpression()),
+  'parseBitwiseAndExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseBitwiseAndExpression()),
+  'parseBitwiseXorExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseBitwiseXorExpression()),
+  'parseBreakStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseBreakStatement()),
+  'parseCascadeSection_0':
+      new MethodTrampoline(0, (Parser target) => target._parseCascadeSection()),
+  'parseClassDeclaration_2': new MethodTrampoline(2,
+      (Parser target, arg0, arg1) => target._parseClassDeclaration(arg0, arg1)),
+  'parseClassMembers_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._parseClassMembers(arg0, arg1)),
+  'parseClassTypeAlias_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._parseClassTypeAlias(arg0, arg1, arg2)),
+  'parseCombinator_0':
+      new MethodTrampoline(0, (Parser target) => target.parseCombinator()),
+  'parseCombinators_0':
+      new MethodTrampoline(0, (Parser target) => target._parseCombinators()),
+  'parseCommentAndMetadata_0': new MethodTrampoline(
+      0, (Parser target) => target._parseCommentAndMetadata()),
+  'parseCommentReference_2': new MethodTrampoline(2,
+      (Parser target, arg0, arg1) => target._parseCommentReference(arg0, arg1)),
+  'parseCommentReferences_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseCommentReferences(arg0)),
+  'parseCompilationUnitMember_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseCompilationUnitMember(arg0)),
+  'parseConstExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseConstExpression()),
+  'parseConstructor_8': new MethodTrampoline(
+      8,
+      (Parser target, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) => target
+          ._parseConstructor(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)),
+  'parseConstructorFieldInitializer_0': new MethodTrampoline(
+      0, (Parser target) => target._parseConstructorFieldInitializer()),
+  'parseContinueStatement_0': new MethodTrampoline(
+      0, (Parser target) => target._parseContinueStatement()),
+  'parseDirective_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseDirective(arg0)),
+  'parseDirectives_0':
+      new MethodTrampoline(0, (Parser target) => target._parseDirectives()),
+  'parseDocumentationComment_0': new MethodTrampoline(
+      0, (Parser target) => target._parseDocumentationComment()),
+  'parseDoStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseDoStatement()),
+  'parseEmptyStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseEmptyStatement()),
+  'parseEnumConstantDeclaration_0': new MethodTrampoline(
+      0, (Parser target) => target._parseEnumConstantDeclaration()),
+  'parseEnumDeclaration_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseEnumDeclaration(arg0)),
+  'parseEqualityExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseEqualityExpression()),
+  'parseExportDirective_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseExportDirective(arg0)),
+  'parseExpressionList_0':
+      new MethodTrampoline(0, (Parser target) => target._parseExpressionList()),
+  'parseFinalConstVarOrType_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseFinalConstVarOrType(arg0)),
+  'parseFormalParameter_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseFormalParameter(arg0)),
+  'parseForStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseForStatement()),
+  'parseFunctionBody_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._parseFunctionBody(arg0, arg1, arg2)),
+  'parseFunctionDeclaration_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._parseFunctionDeclaration(arg0, arg1, arg2)),
+  'parseFunctionDeclarationStatement_0': new MethodTrampoline(
+      0, (Parser target) => target._parseFunctionDeclarationStatement()),
+  'parseFunctionDeclarationStatementAfterReturnType_2': new MethodTrampoline(
+      2,
+      (Parser target, arg0, arg1) =>
+          target._parseFunctionDeclarationStatementAfterReturnType(arg0, arg1)),
+  'parseFunctionTypeAlias_2': new MethodTrampoline(
+      2,
+      (Parser target, arg0, arg1) =>
+          target._parseFunctionTypeAlias(arg0, arg1)),
+  'parseGetter_4': new MethodTrampoline(
+      4,
+      (Parser target, arg0, arg1, arg2, arg3) =>
+          target._parseGetter(arg0, arg1, arg2, arg3)),
+  'parseIdentifierList_0':
+      new MethodTrampoline(0, (Parser target) => target._parseIdentifierList()),
+  'parseIfStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseIfStatement()),
+  'parseImportDirective_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseImportDirective(arg0)),
+  'parseInitializedIdentifierList_4': new MethodTrampoline(
+      4,
+      (Parser target, arg0, arg1, arg2, arg3) =>
+          target._parseInitializedIdentifierList(arg0, arg1, arg2, arg3)),
+  'parseInstanceCreationExpression_1': new MethodTrampoline(1,
+      (Parser target, arg0) => target._parseInstanceCreationExpression(arg0)),
+  'parseLibraryDirective_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseLibraryDirective(arg0)),
+  'parseLibraryName_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._parseLibraryName(arg0, arg1)),
+  'parseListLiteral_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._parseListLiteral(arg0, arg1)),
+  'parseListOrMapLiteral_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseListOrMapLiteral(arg0)),
+  'parseLogicalAndExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseLogicalAndExpression()),
+  'parseMapLiteral_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._parseMapLiteral(arg0, arg1)),
+  'parseMethodDeclarationAfterParameters_7': new MethodTrampoline(
+      7,
+      (Parser target, arg0, arg1, arg2, arg3, arg4, arg5, arg6) =>
+          target._parseMethodDeclarationAfterParameters(
+              arg0, arg1, arg2, arg3, arg4, arg5, arg6)),
+  'parseMethodDeclarationAfterReturnType_4': new MethodTrampoline(
+      4,
+      (Parser target, arg0, arg1, arg2, arg3) => target
+          ._parseMethodDeclarationAfterReturnType(arg0, arg1, arg2, arg3)),
+  'parseModifiers_0':
+      new MethodTrampoline(0, (Parser target) => target._parseModifiers()),
+  'parseMultiplicativeExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseMultiplicativeExpression()),
+  'parseNativeClause_0':
+      new MethodTrampoline(0, (Parser target) => target._parseNativeClause()),
+  'parseNewExpression_0':
+      new MethodTrampoline(0, (Parser target) => target._parseNewExpression()),
+  'parseNonLabeledStatement_0': new MethodTrampoline(
+      0, (Parser target) => target._parseNonLabeledStatement()),
+  'parseOperator_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._parseOperator(arg0, arg1, arg2)),
+  'parseOptionalReturnType_0': new MethodTrampoline(
+      0, (Parser target) => target._parseOptionalReturnType()),
+  'parsePartDirective_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parsePartDirective(arg0)),
+  'parsePostfixExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parsePostfixExpression()),
+  'parsePrimaryExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parsePrimaryExpression()),
+  'parseRedirectingConstructorInvocation_0': new MethodTrampoline(
+      0, (Parser target) => target._parseRedirectingConstructorInvocation()),
+  'parseRelationalExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseRelationalExpression()),
+  'parseRethrowExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseRethrowExpression()),
+  'parseReturnStatement_0': new MethodTrampoline(
+      0, (Parser target) => target._parseReturnStatement()),
+  'parseSetter_4': new MethodTrampoline(
+      4,
+      (Parser target, arg0, arg1, arg2, arg3) =>
+          target._parseSetter(arg0, arg1, arg2, arg3)),
+  'parseShiftExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseShiftExpression()),
+  'parseStatementList_0':
+      new MethodTrampoline(0, (Parser target) => target._parseStatementList()),
+  'parseStringInterpolation_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseStringInterpolation(arg0)),
+  'parseSuperConstructorInvocation_0': new MethodTrampoline(
+      0, (Parser target) => target._parseSuperConstructorInvocation()),
+  'parseSwitchStatement_0': new MethodTrampoline(
+      0, (Parser target) => target._parseSwitchStatement()),
+  'parseSymbolLiteral_0':
+      new MethodTrampoline(0, (Parser target) => target._parseSymbolLiteral()),
+  'parseThrowExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseThrowExpression()),
+  'parseThrowExpressionWithoutCascade_0': new MethodTrampoline(
+      0, (Parser target) => target._parseThrowExpressionWithoutCascade()),
+  'parseTryStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseTryStatement()),
+  'parseTypeAlias_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._parseTypeAlias(arg0)),
+  'parseUnaryExpression_0': new MethodTrampoline(
+      0, (Parser target) => target._parseUnaryExpression()),
+  'parseVariableDeclaration_0': new MethodTrampoline(
+      0, (Parser target) => target._parseVariableDeclaration()),
+  'parseVariableDeclarationListAfterMetadata_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._parseVariableDeclarationListAfterMetadata(arg0)),
+  'parseVariableDeclarationListAfterType_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._parseVariableDeclarationListAfterType(arg0, arg1, arg2)),
+  'parseVariableDeclarationStatementAfterMetadata_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._parseVariableDeclarationStatementAfterMetadata(arg0)),
+  'parseVariableDeclarationStatementAfterType_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._parseVariableDeclarationStatementAfterType(arg0, arg1, arg2)),
+  'parseWhileStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseWhileStatement()),
+  'parseYieldStatement_0':
+      new MethodTrampoline(0, (Parser target) => target._parseYieldStatement()),
+  'peek_0': new MethodTrampoline(0, (Parser target) => target._peek()),
+  'peekAt_1':
+      new MethodTrampoline(1, (Parser target, arg0) => target._peekAt(arg0)),
+  'reportError_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._reportError(arg0)),
+  'reportErrorForCurrentToken_2': new MethodTrampoline(
+      2,
+      (Parser target, arg0, arg1) =>
+          target._reportErrorForCurrentToken(arg0, arg1)),
+  'reportErrorForNode_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._reportErrorForNode(arg0, arg1, arg2)),
+  'reportErrorForToken_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._reportErrorForToken(arg0, arg1, arg2)),
+  'skipBlock_0':
+      new MethodTrampoline(0, (Parser target) => target._skipBlock()),
+  'skipFinalConstVarOrType_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipFinalConstVarOrType(arg0)),
+  'skipFormalParameterList_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipFormalParameterList(arg0)),
+  'skipPastMatchingToken_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipPastMatchingToken(arg0)),
+  'skipPrefixedIdentifier_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipPrefixedIdentifier(arg0)),
+  'skipReturnType_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipReturnType(arg0)),
+  'skipSimpleIdentifier_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipSimpleIdentifier(arg0)),
+  'skipStringInterpolation_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipStringInterpolation(arg0)),
+  'skipStringLiteral_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipStringLiteral(arg0)),
+  'skipTypeArgumentList_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipTypeArgumentList(arg0)),
+  'skipTypeName_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipTypeName(arg0)),
+  'skipTypeParameterList_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._skipTypeParameterList(arg0)),
+  'tokenMatches_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._tokenMatches(arg0, arg1)),
+  'tokenMatchesIdentifier_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._tokenMatchesIdentifier(arg0)),
+  'tokenMatchesKeyword_2': new MethodTrampoline(2,
+      (Parser target, arg0, arg1) => target._tokenMatchesKeyword(arg0, arg1)),
+  'tokenMatchesString_2': new MethodTrampoline(
+      2, (Parser target, arg0, arg1) => target._tokenMatchesString(arg0, arg1)),
+  'translateCharacter_3': new MethodTrampoline(
+      3,
+      (Parser target, arg0, arg1, arg2) =>
+          target._translateCharacter(arg0, arg1, arg2)),
+  'unlockErrorListener_0':
+      new MethodTrampoline(0, (Parser target) => target._unlockErrorListener()),
+  'validateFormalParameterList_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateFormalParameterList(arg0)),
+  'validateModifiersForClass_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateModifiersForClass(arg0)),
+  'validateModifiersForConstructor_1': new MethodTrampoline(1,
+      (Parser target, arg0) => target._validateModifiersForConstructor(arg0)),
+  'validateModifiersForEnum_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateModifiersForEnum(arg0)),
+  'validateModifiersForField_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateModifiersForField(arg0)),
+  'validateModifiersForFunctionDeclarationStatement_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._validateModifiersForFunctionDeclarationStatement(arg0)),
+  'validateModifiersForGetterOrSetterOrMethod_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._validateModifiersForGetterOrSetterOrMethod(arg0)),
+  'validateModifiersForOperator_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateModifiersForOperator(arg0)),
+  'validateModifiersForTopLevelDeclaration_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._validateModifiersForTopLevelDeclaration(arg0)),
+  'validateModifiersForTopLevelFunction_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._validateModifiersForTopLevelFunction(arg0)),
+  'validateModifiersForTopLevelVariable_1': new MethodTrampoline(
+      1,
+      (Parser target, arg0) =>
+          target._validateModifiersForTopLevelVariable(arg0)),
+  'validateModifiersForTypedef_1': new MethodTrampoline(
+      1, (Parser target, arg0) => target._validateModifiersForTypedef(arg0)),
+};

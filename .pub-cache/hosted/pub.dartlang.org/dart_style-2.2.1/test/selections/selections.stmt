@@ -1,0 +1,81 @@
+40 columns                              |
+>>> start at beginning
+‹123›45;
+<<<
+‹123›45;
+>>> start at end
+12345;‹›
+<<<
+12345;‹›
+>>> zero length
+123‹›45;
+<<<
+123‹›45;
+>>> length at end
+12‹345;›
+<<<
+12‹345;›
+>>> unchanged
+f‹oo(a, b›, c);
+<<<
+f‹oo(a, b›, c);
+>>> includes added whitespace
+a+f‹irst+se›cond;
+<<<
+a + f‹irst + se›cond;
+>>> inside comment
+foo(   /* ‹ */  bar/*›*/);
+<<<
+foo(/* ‹ */ bar /*›*/);
+>>> in beginning of multi-line string literal
+  """f‹irs›t
+second""";
+<<<
+"""f‹irs›t
+second""";
+>>> in middle of multi-line string literal
+    """first
+se‹cond
+thi›rd
+fourth""";
+<<<
+"""first
+se‹cond
+thi›rd
+fourth""";
+>>> in end of multi-line string literal
+  """first
+sec‹ond"""  ;›
+<<<
+"""first
+sec‹ond""";›
+>>> in string interpolation
+foo(  "$fi‹rst",  "$sec›ond" );
+<<<
+foo("$fi‹rst", "$sec›ond");
+>>> in moved comment
+someMethod(argument /* long com‹ment that wraps */, other /* last com›ment */);
+<<<
+someMethod(
+    argument /* long com‹ment that wraps */,
+    other /* last com›ment */);
+>>> before comments
+1  ‹  /* */ +  ›  /* */ 2;
+<<<
+1 ‹/* */ +› /* */ 2;
+>>> after comments
+1/* */  ‹  +/* */  ›   2;
+<<<
+1 /* */ ‹+ /* */› 2;
+>>> between adjacent comments
+1/* */  ‹  /* */ › /* */ +  2;
+<<<
+1 /* */ ‹/* */› /* */ + 2;
+>>> only whitespace in zero space selected
+foo(  ‹  ›  argument);
+<<<
+foo(‹›argument);
+>>> only whitespace in space selected
+foo(argument,  ‹  ›  argument);
+<<<
+foo(argument, ‹›argument);

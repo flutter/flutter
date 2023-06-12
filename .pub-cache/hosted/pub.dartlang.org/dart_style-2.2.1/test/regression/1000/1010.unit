@@ -1,0 +1,42 @@
+>>>
+class Foo {
+  Foo({
+    required int x,
+  })   : assert(x != 0),
+        assert(x != -1);
+}
+<<<
+class Foo {
+  Foo({
+    required int x,
+  })  : assert(x != 0),
+        assert(x != -1);
+}
+>>>
+class Foo {
+  Foo({
+    int x,
+  })   : assert(x != 0),
+        assert(x != -1);
+}
+<<<
+class Foo {
+  Foo({
+    int x,
+  })  : assert(x != 0),
+        assert(x != -1);
+}
+>>>
+class Foo {
+  Foo([
+    int x,
+  ])   : assert(x != 0),
+        assert(x != -1);
+}
+<<<
+class Foo {
+  Foo([
+    int x,
+  ])  : assert(x != 0),
+        assert(x != -1);
+}

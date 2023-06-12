@@ -1,0 +1,5 @@
+>>> (indent 4)
+    for (int i = 0; i < variables.length; ++i) performance.updateVariable(variables[i]);
+<<<
+    for (int i = 0; i < variables.length; ++i)
+      performance.updateVariable(variables[i]);

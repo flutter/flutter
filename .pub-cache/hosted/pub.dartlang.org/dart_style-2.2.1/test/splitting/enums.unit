@@ -1,0 +1,19 @@
+40 columns                              |
+>>> multiple lines
+enum Primate{BONOBO,CHIMP,GORILLA,ORANGUTAN}
+<<<
+enum Primate {
+  BONOBO,
+  CHIMP,
+  GORILLA,
+  ORANGUTAN
+}
+>>> multiple lines trailing comma
+enum Primate{BONOBO,CHIMP,GORILLA,ORANGUTAN,}
+<<<
+enum Primate {
+  BONOBO,
+  CHIMP,
+  GORILLA,
+  ORANGUTAN,
+}

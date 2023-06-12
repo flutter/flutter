@@ -1,0 +1,258 @@
+40 columns                              |
+>>> do not indent adjacent strings if other args are not strings
+function(
+    notString,
+    "adjacent"
+    "string");
+<<<
+function(
+    notString,
+    "adjacent"
+    "string");
+>>> do not indent adjacent strings if other args are not strings
+function(
+    notString,
+    "adjacent"
+    "string",);
+<<<
+function(
+  notString,
+  "adjacent"
+  "string",
+);
+>>> do indent adjacent strings if other arg is string
+function(
+    "string",
+    notString,
+    "adjacent"
+    "string");
+<<<
+function(
+    "string",
+    notString,
+    "adjacent"
+        "string");
+>>> do indent adjacent strings if other arg is string
+function(
+    "string",
+    notString,
+    "adjacent"
+    "string",);
+<<<
+function(
+  "string",
+  notString,
+  "adjacent"
+      "string",
+);
+>>> do indent adjacent strings if other arg is string interpolation
+function(
+    "${str}${ing}",
+    notString,
+    "adjacent"
+    "string");
+<<<
+function(
+    "${str}${ing}",
+    notString,
+    "adjacent"
+        "string");
+>>> do indent adjacent strings if other arg is adjacent string
+function(
+    "adjacent"
+    "string",
+    notString,
+    "adjacent"
+    "string");
+<<<
+function(
+    "adjacent"
+        "string",
+    notString,
+    "adjacent"
+        "string");
+>>> always indent adjacent strings in list
+var list = [
+  "adjacent"
+  "string",
+  "another"
+  "adjacent"
+  "string"
+];
+<<<
+var list = [
+  "adjacent"
+      "string",
+  "another"
+      "adjacent"
+      "string"
+];
+>>> always indent adjacent strings in map key
+var map = {
+  "adjacent"
+  "string": value,
+  "another"
+  "adjacent"
+  "string": value
+};
+<<<
+var map = {
+  "adjacent"
+      "string": value,
+  "another"
+      "adjacent"
+      "string": value
+};
+>>> always indent adjacent strings in map value
+var map = {
+  key: "adjacent"
+  "string",
+  key: "another"
+  "adjacent"
+  "string"
+};
+<<<
+var map = {
+  key: "adjacent"
+      "string",
+  key: "another"
+      "adjacent"
+      "string"
+};
+>>> always indent adjacent strings in set
+var set = {
+  "adjacent"
+  "string",
+  "another"
+  "adjacent"
+  "string"
+};
+<<<
+var set = {
+  "adjacent"
+      "string",
+  "another"
+      "adjacent"
+      "string"
+};
+>>> don't indent in => body
+main() => "adjacent"
+"string"
+"another";
+<<<
+main() => "adjacent"
+    "string"
+    "another";
+>>> don't indent in long => body
+main() => "very very very very long adjacent"
+"string"
+"another";
+<<<
+main() =>
+    "very very very very long adjacent"
+    "string"
+    "another";
+>>> don't indent in => lambda
+function(
+  (parameter) => "string"
+  "adjacent",
+  (parameter) => "long long long long string"
+  "adjacent",
+  another);
+<<<
+function(
+    (parameter) => "string"
+        "adjacent",
+    (parameter) =>
+        "long long long long string"
+        "adjacent",
+    another);
+>>> indent in then branch of ?:
+var string = c ? "adjacent"
+"string" : "other";
+<<<
+var string = c
+    ? "adjacent"
+        "string"
+    : "other";
+>>> indent in else branch of ?:
+var string = c ? "other" : "adjacent"
+"string";
+<<<
+var string = c
+    ? "other"
+    : "adjacent"
+        "string";
+>>> don't indent in initializer
+var longVariableName = "very long adjacent"
+"string";
+<<<
+var longVariableName =
+    "very long adjacent"
+    "string";
+>>> don't indent assignment in statement position
+long.receiver.expression = "very long adjacent"
+"string";
+<<<
+long.receiver.expression =
+    "very long adjacent"
+    "string";
+>>> string interpolation counts as a string
+function(
+    "adjacent"
+    "string",
+    "${str}${ing}");
+<<<
+function(
+    "adjacent"
+        "string",
+    "${str}${ing}");
+>>> another adjacent string counts as a string
+function(
+    "adjacent"
+    "string",
+    "another"
+    "adjacent");
+<<<
+function(
+    "adjacent"
+        "string",
+    "another"
+        "adjacent");
+>>> do not indent adjacent strings in assert if other args are not strings
+assert(
+    condition,
+    "adjacent"
+    "string");
+<<<
+assert(
+    condition,
+    "adjacent"
+    "string");
+>>> don't need extra indentation inside named arguments
+function(named: "adjacent"
+"string",
+another: "adjacent"
+"string"
+"more");
+<<<
+function(
+    named: "adjacent"
+        "string",
+    another: "adjacent"
+        "string"
+        "more");
+>>> don't need extra indentation inside named arguments
+function(named: "adjacent"
+"string",
+another: "adjacent"
+"string"
+"more",);
+<<<
+function(
+  named: "adjacent"
+      "string",
+  another: "adjacent"
+      "string"
+      "more",
+);

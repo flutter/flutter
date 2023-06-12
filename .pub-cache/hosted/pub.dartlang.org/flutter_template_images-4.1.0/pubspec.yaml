@@ -1,0 +1,8 @@
+name: flutter_template_images
+description: Image files for use in flutter_tools templates without adding binary files to flutter/flutter.
+repository: https://github.com/flutter/packages/tree/main/packages/flutter_template_images
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+flutter_template_images%22
+version: 4.1.0
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"

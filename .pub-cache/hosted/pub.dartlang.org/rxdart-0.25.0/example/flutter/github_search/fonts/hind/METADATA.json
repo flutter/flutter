@@ -1,0 +1,62 @@
+{
+  "name": "Hind",
+  "designer": "Indian Type Foundry",
+  "license": "OFL",
+  "visibility": "External",
+  "category": "Sans Serif",
+  "size": 79589,
+  "fonts": [
+    {
+      "name": "Hind",
+      "style": "normal",
+      "weight": 700,
+      "filename": "Hind-Bold.ttf",
+      "postScriptName": "Hind-Bold",
+      "fullName": "Hind Bold",
+      "copyright": "Copyright (c) 2014 Indian Type Foundry (info@indiantypefoundry.com)"
+    },
+    {
+      "name": "Hind",
+      "style": "normal",
+      "weight": 300,
+      "filename": "Hind-Light.ttf",
+      "postScriptName": "Hind-Light",
+      "fullName": "Hind Light",
+      "copyright": "Copyright (c) 2014 Indian Type Foundry (info@indiantypefoundry.com)"
+    },
+    {
+      "name": "Hind",
+      "style": "normal",
+      "weight": 500,
+      "filename": "Hind-Medium.ttf",
+      "postScriptName": "Hind-Medium",
+      "fullName": "Hind Medium",
+      "copyright": "Copyright (c) 2014 Indian Type Foundry (info@indiantypefoundry.com)"
+    },
+    {
+      "name": "Hind",
+      "style": "normal",
+      "weight": 400,
+      "filename": "Hind-Regular.ttf",
+      "postScriptName": "Hind-Regular",
+      "fullName": "Hind Regular",
+      "copyright": "Copyright (c) 2014 Indian Type Foundry (info@indiantypefoundry.com)"
+    },
+    {
+      "name": "Hind",
+      "style": "normal",
+      "weight": 600,
+      "filename": "Hind-Semibold.ttf",
+      "postScriptName": "Hind-Semibold",
+      "fullName": "Hind Semibold",
+      "copyright": "Copyright (c) 2014 Indian Type Foundry (info@indiantypefoundry.com)"
+    }
+  ],
+  "subsets": [
+    "latin",
+    "latin-ext",
+    "devanagari",
+    "menu"
+  ],
+  "dateAdded": "2014-06-25"
+}

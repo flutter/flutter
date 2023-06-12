@@ -1,0 +1,98 @@
+40 columns                              |
+>>> many parameters
+Function(first, second, third, fourth, fifth, sixth, seventh, eighth, ninth,
+    tenth, eleventh, twelfth) f;
+<<<
+Function(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth,
+    ninth,
+    tenth,
+    eleventh,
+    twelfth) f;
+>>> parameters fit but ) does not
+Function(int firstArgume, int argumentTo) f;
+<<<
+Function(
+    int firstArgume, int argumentTo) f;
+>>> keep mandatory and positional on same line
+Function(param, [foo, bar]) f;
+<<<
+Function(param, [foo, bar]) f;
+>>> keep mandatory and named on same line
+Function(param, {T foo, T bar}) f;
+<<<
+Function(param, {T foo, T bar}) f;
+>>> move just optional positional to second line even though all fit on second
+Function(parameter, [int foo, String bar]) f;
+<<<
+Function(parameter,
+    [int foo, String bar]) f;
+>>> move just named to second line even though all fit on second
+Function(parameter, {int foo, String bar}) f;
+<<<
+Function(parameter,
+    {int foo, String bar}) f;
+>>> avoid splitting in function type parameters
+Function(parameter1, void printFn(param1, param2)) f;
+<<<
+Function(parameter1,
+    void printFn(param1, param2)) f;
+>>> allow splitting in function type parameters
+Function(v callback(parameter1, parameter2, parameter3, parameter4)) f;
+<<<
+Function(
+    v callback(parameter1, parameter2,
+        parameter3, parameter4)) f;
+>>> split optional onto one per line if they don't fit on one line
+Function([parameter1, parameter2, parameter3]) f;
+<<<
+Function(
+    [parameter1,
+    parameter2,
+    parameter3]) f;
+>>> split between type and name
+Function(VerylongParameterType parameterName) f;
+<<<
+Function(
+    VerylongParameterType
+        parameterName) f;
+>>> split in function type and on variable name
+Function(VeryVeryVeryVeryLongParameterType) veryLongVariableName;
+<<<
+Function(
+        VeryVeryVeryVeryLongParameterType)
+    veryLongVariableName;
+>>> split in nested function type forces outer split
+Function(int, String, Function(parameter1, parameter2, parameter3)) f;
+<<<
+Function(
+    int,
+    String,
+    Function(parameter1, parameter2,
+        parameter3)) f;
+>>> split in type arguments and variable
+Function<Parameter1, Parameter2, Parameter3>() veryVeryLongVariableName;
+<<<
+Function<Parameter1, Parameter2,
+        Parameter3>()
+    veryVeryLongVariableName;
+>>> split after return type
+GenericClass<Parameter1, Parameter2> Function() f;
+<<<
+GenericClass<Parameter1, Parameter2>
+    Function() f;
+>>> chained return types
+Function<Argument>(String) Function<Argument>(num) Function<Argument>(int) Function<Argument>(bool) longVariable;
+<<<
+Function<Argument>(String)
+                Function<Argument>(num)
+            Function<Argument>(int)
+        Function<Argument>(bool)
+    longVariable;

@@ -1,0 +1,5 @@
+40 columns                              |
+>>> empty body
+while (true);
+<<<
+while (true);

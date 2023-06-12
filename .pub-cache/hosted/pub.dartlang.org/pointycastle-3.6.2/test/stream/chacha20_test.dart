@@ -1,0 +1,158 @@
+// See file LICENSE for more information.
+
+library test.stream.chacha20_test;
+
+import 'dart:typed_data';
+
+import 'package:pointycastle/pointycastle.dart';
+import 'package:pointycastle/stream/chacha20.dart';
+import 'package:test/test.dart';
+
+import '../test/src/helpers.dart';
+
+int i = 0;
+
+void main() {
+  var set1v00 =
+      'FBB87FBB8395E05DAA3B1D683C422046F913985C2AD9B23CFC06C1D8D04FF213D44A7A7CDB84929F915420A8A3DC58BF0F7ECB4B1F167BB1A5E6153FDAF4493D';
+
+  var set1v0192 =
+      'D9485D55B8B82D792ED1EEA8E93E9BC1E2834AD0D9B11F3477F6E106A2F6A5F2EA8244D5B925B8050EAB038F58D4DF577FAFD1B89359DAE508B2B10CBD6B488E';
+
+  var set1v0256 =
+      '08661A35D6F02D3D9ACA8087F421F7C8A42579047D6955D937925BA21396DDD474B1FC4ACCDCAA33025B4BCE817A4FBF3E5D07D151D7E6FE04934ED466BA4779';
+
+  var set1v0448 =
+      'A7E16DD38BA48CCB130E5BE9740CE359D631E91600F85C8A5D0785A612D1D98790780ACDDC26B69AB106CCF6D866411D10637483DBF08CC5591FD8B3C87A3AE0';
+
+  var set1v90 =
+      'A276339F99316A913885A0A4BE870F0691E72B00F1B3F2239F714FE81E88E00CBBE52B4EBBE1EA15894E29658C4CB145E6F89EE4ABB045A78514482CE75AFB7C';
+
+  var set1v9192 =
+      '0DFB9BD4F87F68DE54FBC1C6428FDEB063E997BE8490C9B7A4694025D6EBA2B15FE429DB82A7CAE6AAB22918E8D004496FB6291467B5AE81D4E85E81D8795EBB';
+
+  var set1v9256 =
+      '546F5BB315E7F71A46E56D4580F90889639A2BA528F757CF3B048738BA141AF3B31607CB21561BAD94721048930364F4B1227CFEB7CDECBA881FB44903550E68';
+
+  var set1v9448 =
+      '6F813586E76691305A0CF048C0D8586DC89460207D8B230CD172398AA33D19E92D24883C3A9B0BB7CD8C6B2668DB142E37A97948A7A01498A21110297984CD20';
+
+  // ChaCha12
+  var chacha12Set1v00 =
+      '36CF0D56E9F7FBF287BC5460D95FBA94AA6CBF17D74E7C784DDCF7E0E882DDAE3B5A58243EF32B79A04575A8E2C2B73DC64A52AA15B9F88305A8F0CA0B5A1A25';
+
+  var chacha12Set1v0192 =
+      '83496792AB68FEC75ADB16D3044420A4A00A6E9ADC41C3A63DBBF317A8258C85A9BC08B4F76B413A4837324AEDF8BC2A67D53C9AB9E1C5BC5F379D48DF9AF730';
+
+  var chacha12Set1v0256 =
+      'BAA28ED593690FD760ADA07C95E3B8884B4B64E488CA7A2D9BDC262243AB9251394C5037E255F8BCCDCD31306C508FFBC9E0161380F7911FCB137D46D9269250';
+
+  var chacha12Set1v0448 =
+      'B7ECFB6AE0B51915762FE1FD03A14D0C9E54DA5DC76EB16EBA5313BC535DE63DC72D7F9F1874E301E99C8531819F4E3775793F6A5D19C717FA5C78A39EB804A6';
+
+  // ChaCha8
+  var chacha8Set1v00 =
+      'BEB1E81E0F747E43EE51922B3E87FB38D0163907B4ED49336032AB78B67C24579FE28F751BD3703E51D876C017FAA43589E63593E03355A7D57B2366F30047C5';
+
+  var chacha8Set1v0192 =
+      '33B8B7CA8F8E89F0095ACE75A379C651FD6BDD55703C90672E44C6BAB6AACDD87C976A87FD264B906E749429284134C238E3B88CF74A68245B860D119A8BDF43';
+
+  var chacha8Set1v0256 =
+      'F7CA95BF08688BD3BE8A27724210F9DC16F32AF974FBFB09E9F757C577A245ABF35F824B70A4C02CB4A8D7191FA8A5AD6A84568743844703D353B7F00A8601F4';
+
+  var chacha8Set1v0448 =
+      '7B4117E8BFFD595CD8482270B08920FBC9B97794E1809E07BB271BF07C8610034C38DBA6ECA04E5474F399A284CBF6E27F70142E604D0977797DE5B58B6B25E0';
+
+  chachaTest1(
+      20,
+      ParametersWithIV(
+          KeyParameter(
+              createUint8ListFromHexString('80000000000000000000000000000000')),
+          createUint8ListFromHexString('0000000000000000')),
+      set1v00,
+      set1v0192,
+      set1v0256,
+      set1v0448);
+  chachaTest1(
+      20,
+      ParametersWithIV(
+          KeyParameter(
+              createUint8ListFromHexString('00400000000000000000000000000000')),
+          createUint8ListFromHexString('0000000000000000')),
+      set1v90,
+      set1v9192,
+      set1v9256,
+      set1v9448);
+  chachaTest1(
+      12,
+      ParametersWithIV(
+          KeyParameter(
+              createUint8ListFromHexString('80000000000000000000000000000000')),
+          createUint8ListFromHexString('0000000000000000')),
+      chacha12Set1v00,
+      chacha12Set1v0192,
+      chacha12Set1v0256,
+      chacha12Set1v0448);
+  chachaTest1(
+      8,
+      ParametersWithIV(
+          KeyParameter(
+              createUint8ListFromHexString('80000000000000000000000000000000')),
+          createUint8ListFromHexString('0000000000000000')),
+      chacha8Set1v00,
+      chacha8Set1v0192,
+      chacha8Set1v0256,
+      chacha8Set1v0448);
+}
+
+void chachaTest1(int rounds, CipherParameters params, String v0, String v192,
+    String v256, String v448) {
+  test('ChaCha Test #${++i}', () {
+    StreamCipher chaCha = ChaCha20Engine.fromRounds(rounds);
+    var buf = Uint8List(64);
+
+    chaCha.init(true, params);
+
+    var zeroes = createUint8ListFromHexString(
+        '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000');
+
+    for (var i = 0; i != 7; i++) {
+      chaCha.processBytes(zeroes, 0, 64, buf, 0);
+      switch (i) {
+        case 0:
+          if (!areEqual(buf, createUint8ListFromHexString(v0))) {
+            throw ArgumentError();
+          }
+          break;
+        case 3:
+          if (!areEqual(buf, createUint8ListFromHexString(v192))) {
+            throw ArgumentError();
+          }
+          break;
+        case 4:
+          if (!areEqual(buf, createUint8ListFromHexString(v256))) {
+            throw ArgumentError();
+          }
+          break;
+        default:
+        // ignore
+      }
+    }
+
+    for (var i = 0; i != 64; i++) {
+      buf[i] = chaCha.returnByte(zeroes[i]);
+    }
+
+    if (!areEqual(buf, createUint8ListFromHexString(v448))) {
+      throw ArgumentError();
+    }
+  });
+}
+
+bool areEqual(Uint8List a, Uint8List b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}

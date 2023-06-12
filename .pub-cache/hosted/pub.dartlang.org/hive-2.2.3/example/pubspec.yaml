@@ -1,0 +1,17 @@
+name: example
+
+dependencies:
+  hive: any
+
+dev_dependencies:
+  hive_generator: any
+  build_runner: any
+
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+
+dependency_overrides:
+  hive:
+    path: ../
+  hive_generator:
+    path: ../../hive_generator

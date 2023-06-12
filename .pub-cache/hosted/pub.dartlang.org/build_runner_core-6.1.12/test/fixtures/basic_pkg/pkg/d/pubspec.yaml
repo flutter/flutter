@@ -1,0 +1,4 @@
+name: d
+version: 5.0.0
+dependencies:
+  c: ^4.0.0

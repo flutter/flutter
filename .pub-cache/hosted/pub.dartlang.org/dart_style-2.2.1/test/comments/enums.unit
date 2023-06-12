@@ -1,0 +1,54 @@
+40 columns                              |
+>>> line comments
+enum A {
+  // comment
+  B,
+
+  // comment
+  C
+
+  // comment
+}
+<<<
+enum A {
+  // comment
+  B,
+
+  // comment
+  C
+
+  // comment
+}
+>>> block comments
+enum A {
+  /* comment */
+  B,
+
+  /* comment */
+  C
+
+  /* comment */
+}
+<<<
+enum A {
+  /* comment */
+  B,
+
+  /* comment */
+  C
+
+  /* comment */
+}
+>>> remove blank line before beginning of body
+enum A {
+
+
+
+  // comment
+  B
+}
+<<<
+enum A {
+  // comment
+  B
+}

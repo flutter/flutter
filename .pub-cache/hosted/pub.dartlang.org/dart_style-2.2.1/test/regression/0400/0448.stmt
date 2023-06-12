@@ -1,0 +1,34 @@
+>>> (indent 6)
+      if (t == 0.0)
+        value = begin;
+      else if (t == 1.0)
+        value = end;
+      else
+        value = lerp(t);
+<<<
+      if (t == 0.0)
+        value = begin;
+      else if (t == 1.0)
+        value = end;
+      else
+        value = lerp(t);
+>>> (indent 4)
+    if (direction == AnimationDirection.forward ||
+        reverseCurve == null) return curve;
+<<<
+    if (direction == AnimationDirection.forward || reverseCurve == null)
+      return curve;
+>>> (indent 6)
+      if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
+        destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
+      else
+        destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
+<<<
+      if (outputSize.width / outputSize.height >
+          sourceSize.width / sourceSize.height)
+        destinationSize = new Size(
+            sourceSize.width * outputSize.height / sourceSize.height,
+            outputSize.height);
+      else
+        destinationSize = new Size(outputSize.width,
+            sourceSize.height * outputSize.width / sourceSize.width);

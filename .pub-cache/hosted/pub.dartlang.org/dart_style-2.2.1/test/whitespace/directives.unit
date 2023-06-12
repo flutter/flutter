@@ -1,0 +1,64 @@
+40 columns                              |
+>>> require at least one newline between directives
+import 'a.dart';import 'b.dart';export 'c.dart';
+<<<
+import 'a.dart';
+import 'b.dart';
+export 'c.dart';
+>>> allow an extra newline between directives
+import 'a.dart';
+
+import 'b.dart';
+export 'c.dart';
+<<<
+import 'a.dart';
+
+import 'b.dart';
+export 'c.dart';
+>>> collapse any other newlines
+import 'a.dart';
+
+
+import 'b.dart';
+
+
+
+
+export 'c.dart';
+<<<
+import 'a.dart';
+
+import 'b.dart';
+
+export 'c.dart';
+>>> deferred
+import 'a.dart'
+deferred
+as
+a;
+<<<
+import 'a.dart' deferred as a;
+>>> part of
+part of foo;
+<<<
+part of foo;
+>>> long part of does not wrap
+part of some_very_long_library_name_that_wraps;
+<<<
+part of some_very_long_library_name_that_wraps;
+>>> no spaces between library identifiers
+library    a .  b   . c;
+<<<
+library a.b.c;
+>>> configuration
+import'a'if(b  . c . d)'e';
+<<<
+import 'a' if (b.c.d) 'e';
+>>> configuration
+export'a'if(b  . c=='d'   )'e';
+<<<
+export 'a' if (b.c == 'd') 'e';
+>>> part-of with uri
+part   of'uri.dart'     ;
+<<<
+part of 'uri.dart';

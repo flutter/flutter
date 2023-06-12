@@ -1,0 +1,196 @@
+40 columns                              |
+>>> Single initializers can be on one line
+class Foo extends Bar {
+  final int b;
+  Foo(int a, this.b) : super(a);
+}
+<<<
+class Foo extends Bar {
+  final int b;
+  Foo(int a, this.b) : super(a);
+}
+>>> (or not)
+class Foo extends Bar {
+  final int b;
+  Foo(int a, this.b): super(aLongIdentifier);
+}
+<<<
+class Foo extends Bar {
+  final int b;
+  Foo(int a, this.b)
+      : super(aLongIdentifier);
+}
+>>> Multiple initializers are one per line
+class Foo extends Bar {
+  final int b;
+  Foo(int a, int b) : super(a), this.b = b == null ? 0 : b;
+}
+<<<
+class Foo extends Bar {
+  final int b;
+  Foo(int a, int b)
+      : super(a),
+        this.b = b == null ? 0 : b;
+}
+>>> try to keep constructor call together
+var longIdentifier = new Thing(
+    argument, argument);
+<<<
+var longIdentifier =
+    new Thing(argument, argument);
+>>> splits before ":" if the parameter list does not fit on one line
+class Foo {
+  Foo(int longArg1, int longArg2, int longArg3) : this._(longArg1);
+}
+<<<
+class Foo {
+  Foo(int longArg1, int longArg2,
+      int longArg3)
+      : this._(longArg1);
+}
+>>> indent parameters more if body is a wrapped =>
+class Foo {
+  Foo(firstArgument, secondArgument, third) => "very long body that must wrap";
+}
+<<<
+class Foo {
+  Foo(firstArgument, secondArgument,
+          third) =>
+      "very long body that must wrap";
+}
+>>> wrap initializers past the ":"
+class Foo {
+  Foo(parameter)
+      : initializer = function(argument, argument),
+        initializer2 = function(argument, argument);
+}
+<<<
+class Foo {
+  Foo(parameter)
+      : initializer = function(
+            argument, argument),
+        initializer2 = function(
+            argument, argument);
+}
+>>> split at "=" in initializer
+class Foo {
+  Foo() : initializer =function(argument, arg);
+}
+<<<
+class Foo {
+  Foo()
+      : initializer =
+            function(argument, arg);
+}
+>>> assert in initializer list, short
+class Foo {
+  Foo() : assert(1), assert(2);
+}
+<<<
+class Foo {
+  Foo()
+      : assert(1),
+        assert(2);
+}
+>>> assert in initializer list, long
+class Foo {
+  Foo() : assert(function(argument, argument, argument)), assert(function(argument, function(argument, argument, argument), argument));
+}
+<<<
+class Foo {
+  Foo()
+      : assert(function(argument,
+            argument, argument)),
+        assert(function(
+            argument,
+            function(argument, argument,
+                argument),
+            argument));
+}
+>>> split assert with trailing comma
+class Foo {
+  Foo() : assert(condition,);
+}
+<<<
+class Foo {
+  Foo()
+      : assert(
+          condition,
+        );
+}
+>>> split assert with trailing comma and message
+class Foo {
+  Foo() : assert(condition, "some message",);
+}
+<<<
+class Foo {
+  Foo()
+      : assert(
+          condition,
+          "some message",
+        );
+}
+>>> trailing commas and initializer lists
+class A {
+  A(a,):super();
+}
+<<<
+class A {
+  A(
+    a,
+  ) : super();
+}
+>>>
+class A {
+  A({a,}):super();
+}
+<<<
+class A {
+  A({
+    a,
+  }) : super();
+}
+>>>
+class A {
+  A(a,):b=1,super();
+}
+<<<
+class A {
+  A(
+    a,
+  )   : b = 1,
+        super();
+}
+>>> extra space after ":" to line up with later initializers
+class A {
+  A({a,}):b=1,super(){;}
+}
+<<<
+class A {
+  A({
+    a,
+  })  : b = 1,
+        super() {
+    ;
+  }
+}
+>>> no extra space on a single initializer, even if it splits
+class A {
+  A(a,):parameter = "some very very long param";
+}
+<<<
+class A {
+  A(
+    a,
+  ) : parameter =
+            "some very very long param";
+}
+>>> split at name if necessary
+main() {
+  new VeryLongClassName.veryLongNamedConstructor();
+}
+<<<
+main() {
+  new VeryLongClassName
+      .veryLongNamedConstructor();
+}

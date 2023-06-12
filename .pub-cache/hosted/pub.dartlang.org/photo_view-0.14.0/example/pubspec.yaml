@@ -1,0 +1,36 @@
+name: photo_view_example
+description: Example of how to use Photo View
+publish_to: "none"
+version: 1.0.1
+
+environment:
+  sdk: ">=2.12.0"
+
+dependencies:
+  flutter_svg: ^0.21.0-nullsafety.0
+  photo_view:
+    path: ../
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/neat.gif
+    - assets/large-image.jpg
+    - assets/small-image.jpg
+    - assets/gallery1.jpg
+    - assets/gallery2.jpg
+    - assets/gallery3.jpg
+    - assets/firefox.svg
+
+  fonts:
+    - family: PTSans
+      fonts:
+        - asset: assets/fonts/ptasans-regular.ttf
+        - asset: assets/fonts/ptasans-bold.ttf
+          weight: 700

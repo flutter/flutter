@@ -1,0 +1,98 @@
+40 columns                              |
+>>> long parameters list, this.field
+class Foo {
+  Foo(this.first, this.second, this.third, this.fourth);
+}
+<<<
+class Foo {
+  Foo(this.first, this.second,
+      this.third, this.fourth);
+}
+>>> indent parameters more if body is a wrapped =>
+method(int firstArgument, int argumentTwo) => "very long body that must wrap";
+<<<
+method(int firstArgument,
+        int argumentTwo) =>
+    "very long body that must wrap";
+>>> split before "covariant"
+class A {
+  longMethod(covariant parameterNameHere) {}
+}
+<<<
+class A {
+  longMethod(
+      covariant parameterNameHere) {}
+}
+>>> split before "covariant" with multiple parameters
+class A {
+  longMethod(covariant first, second, covariant int third(parameter), fourth) {}
+}
+<<<
+class A {
+  longMethod(
+      covariant first,
+      second,
+      covariant int third(parameter),
+      fourth) {}
+}
+>>> never split after "covariant" (at least for now)
+class A {
+  longMethod(covariant int veryLongParameterNameWow) {}
+}
+<<<
+class A {
+  longMethod(
+      covariant int
+          veryLongParameterNameWow) {}
+}
+>>> split before "required"
+class A {
+  longMethod({required parameterNameHere}) {}
+}
+<<<
+class A {
+  longMethod(
+      {required parameterNameHere}) {}
+}
+>>> split before "required" with multiple parameters
+class A {
+  longMethod({required first, second, required int third(parameter), fourth}) {}
+}
+<<<
+class A {
+  longMethod(
+      {required first,
+      second,
+      required int third(parameter),
+      fourth}) {}
+}
+>>> never split after "required" (at least for now)
+class A {
+  longMethod({required int veryLongParameterNameWow}) {}
+}
+<<<
+class A {
+  longMethod(
+      {required int
+          veryLongParameterNameWow}) {}
+}
+>>> don't split between "required" and "covariant"
+class A {
+  longMethod({required covariant int veryLongParameterNameWow}) {}
+}
+<<<
+class A {
+  longMethod(
+      {required covariant int
+          veryLongParameterNameWow}) {}
+}
+>>> split between field type and name
+class Foo {
+  Foo(VerylongParameterType this.parameterName) {}
+}
+<<<
+class Foo {
+  Foo(
+      VerylongParameterType
+          this.parameterName) {}
+}

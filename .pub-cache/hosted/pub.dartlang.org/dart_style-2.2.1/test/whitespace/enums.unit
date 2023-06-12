@@ -1,0 +1,53 @@
+40 columns                              |
+>>> single
+enum Unity {one}
+<<<
+enum Unity { one }
+>>> single line
+enum Primate{bonobo,chimp,gorilla}
+<<<
+enum Primate { bonobo, chimp, gorilla }
+>>> trailing comma always splits
+enum Primate{bonobo,chimp,}
+<<<
+enum Primate {
+  bonobo,
+  chimp,
+}
+>>> metadata
+@Awesome @Fierce("really")
+enum Primate{bonobo,chimp,gorilla}
+<<<
+@Awesome
+@Fierce("really")
+enum Primate { bonobo, chimp, gorilla }
+>>> preserve one blank line between enums
+enum Primate {
+
+
+  bonobo,
+
+
+  chimp,
+
+
+
+  gorilla
+
+}
+<<<
+enum Primate {
+  bonobo,
+
+  chimp,
+
+  gorilla
+}
+>>> do not preserve single newline
+enum Primate {
+  bonobo,
+  chimp,
+  gorilla
+}
+<<<
+enum Primate { bonobo, chimp, gorilla }

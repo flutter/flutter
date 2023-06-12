@@ -1,0 +1,61 @@
+>>> (indent 4)
+    main() {
+      it('should expose traverse locals', () {
+        expect(parser('a.b').bind({
+          'a': {'b': 6}
+        }, ContextLocals.wrapper)({
+          'a': {'b': 1}
+        }))
+            .toEqual(1);
+      });
+    }
+<<<
+    main() {
+      it('should expose traverse locals', () {
+        expect(parser('a.b').bind({
+          'a': {'b': 6}
+        }, ContextLocals.wrapper)({
+          'a': {'b': 1}
+        })).toEqual(1);
+      });
+    }
+>>>
+@Component(
+    selector: 'io-controller',
+    template: r'<content></content>',
+    map: const {
+      'attr': '@attr',
+      'expr': '<=>expr',
+      'once': '=>!exprOnce',
+      'ondone': '&onDone',
+      'on-optional': '&onOptional'
+    })
+class IoControllerComponent implements ScopeAware {}
+<<<
+@Component(
+    selector: 'io-controller',
+    template: r'<content></content>',
+    map: const {
+      'attr': '@attr',
+      'expr': '<=>expr',
+      'once': '=>!exprOnce',
+      'ondone': '&onDone',
+      'on-optional': '&onOptional'
+    })
+class IoControllerComponent implements ScopeAware {}
+>>> (indent 4)
+    main() {
+      expect(matcher.match(
+              CssSelector.parse("someOtherTag.someOtherClass[someOtherAttr]")[
+                  0],
+              selectableCollector))
+          .toEqual(false);
+    }
+<<<
+    main() {
+      expect(matcher.match(
+              CssSelector.parse(
+                  "someOtherTag.someOtherClass[someOtherAttr]")[0],
+              selectableCollector))
+          .toEqual(false);
+    }

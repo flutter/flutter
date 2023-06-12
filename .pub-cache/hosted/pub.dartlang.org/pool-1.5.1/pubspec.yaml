@@ -1,0 +1,18 @@
+name: pool
+version: 1.5.1
+description: >-
+  Manage a finite pool of resources.
+  Useful for controlling concurrent file system or network requests.
+repository: https://github.com/dart-lang/pool
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  async: ^2.5.0
+  stack_trace: ^1.10.0
+
+dev_dependencies:
+  fake_async: ^1.2.0
+  lints: ^1.0.0
+  test: ^1.16.0

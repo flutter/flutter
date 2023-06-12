@@ -1,0 +1,14 @@
+name: multicast_dns
+description: Dart package for performing mDNS queries (e.g. Bonjour, Avahi).
+repository: https://github.com/flutter/packages/tree/main/packages/multicast_dns
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+multicast_dns%22
+version: 0.3.2+1
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+
+dependencies:
+  meta: ^1.3.0
+
+dev_dependencies:
+  test: "^1.16.5"

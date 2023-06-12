@@ -1,0 +1,17 @@
+name: smooth_page_indicator
+description: Customizable animated page indicator with a set of built-in effects.
+version: 1.0.0+2
+homepage: https://github.com/Milad-Akarie/smooth_page_indicator
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic:

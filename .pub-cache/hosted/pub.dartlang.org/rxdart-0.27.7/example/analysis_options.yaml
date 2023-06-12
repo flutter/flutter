@@ -1,0 +1,4 @@
+include: package:lints/recommended.yaml
+analyzer:
+  exclude:
+    - 'flutter/**'

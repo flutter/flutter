@@ -1,0 +1,10 @@
+# Names should be added to this file with this pattern:
+#
+# For individuals:
+#   Name <email address>
+#
+# For organizations:
+#   Organization <fnmatch pattern>
+#
+Google Inc. <*@google.com>
+Anton Astashov <anton.astashov@gmail.com>

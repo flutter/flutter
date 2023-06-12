@@ -1,0 +1,16 @@
+>>>
+void fn() {
+  List<String> a;
+  // NOTICE THE TYPE PARAMETER
+  a.fold<int>(0, (memo, s) {
+    return max(memo, s.length);
+  });
+}
+<<<
+void fn() {
+  List<String> a;
+  // NOTICE THE TYPE PARAMETER
+  a.fold<int>(0, (memo, s) {
+    return max(memo, s.length);
+  });
+}

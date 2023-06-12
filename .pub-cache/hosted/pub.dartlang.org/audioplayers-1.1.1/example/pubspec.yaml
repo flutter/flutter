@@ -1,0 +1,28 @@
+name: audioplayers_example
+description: Demonstrates how to use the audioplayers plugin.
+publish_to: none
+
+dependencies:
+  audioplayers: ^1.1.1
+  file_picker: ^5.0.1
+  flutter:
+    sdk: flutter
+  http: ^0.13.1
+  path_provider: ^2.0.11
+  path_provider_macos: ^2.0.6
+  provider: 5.0.0
+
+dev_dependencies:
+  flame_lint: 0.1.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.5.0"

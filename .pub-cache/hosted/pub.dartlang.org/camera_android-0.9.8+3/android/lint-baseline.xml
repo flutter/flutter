@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 3.5.0" client="gradle" variant="debug" version="3.5.0">
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (boundaries.getWidth() > 0 &amp;&amp; boundaries.getHeight() > 0);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegionUtils.java"
+            line="73"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (x >= 0 &amp;&amp; x &lt;= 1);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegionUtils.java"
+            line="74"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (y >= 0 &amp;&amp; y &lt;= 1);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegionUtils.java"
+            line="75"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (maxBoundaries == null || maxBoundaries.getWidth() > 0);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegions.java"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (maxBoundaries == null || maxBoundaries.getHeight() > 0);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegions.java"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (x >= 0 &amp;&amp; x &lt;= 1);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegions.java"
+            line="50"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="Assert"
+        message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
+        errorLine1="    assert (y >= 0 &amp;&amp; y &lt;= 1);"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraRegions.java"
+            line="51"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="SwitchIntDef"
+        message="Switch statement on an `int` with known associated constant missing case `Configuration.ORIENTATION_SQUARE`, `Configuration.ORIENTATION_UNDEFINED`"
+        errorLine1="    switch (orientation) {"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/DeviceOrientationManager.java"
+            line="143"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="SwitchIntDef"
+        message="Switch statement on an `int` with known associated constant missing case `Configuration.ORIENTATION_SQUARE`, `Configuration.ORIENTATION_UNDEFINED`"
+        errorLine1="    switch (orientation) {"
+        errorLine2="    ~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/features/sensororientation/DeviceOrientationManager.java"
+            line="264"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; SDK_INT is never &lt; 21"
+        errorLine1="    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP) {"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/camera/CameraPlugin.java"
+            line="102"
+            column="9"/>
+    </issue>
+
+</issues>

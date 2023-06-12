@@ -1,0 +1,71 @@
+40 columns                              |
+>>> all fit on one line
+method<A,B,C,D>();
+<<<
+method<A, B, C, D>();
+>>> prefer to split between args even when they all fit on next line
+lengthyMethodName<First, Second, Third>();
+<<<
+lengthyMethodName<First, Second,
+    Third>();
+>>> split before first if needed
+lengthyMethodName<FirstTypeArgumentIsLong, Second>();
+<<<
+lengthyMethodName<
+    FirstTypeArgumentIsLong, Second>();
+>>> split in middle if fit in two lines
+lengthyMethodName<First, Second, Third, Fourth, Fifth, Sixth, Seventh>();
+<<<
+lengthyMethodName<First, Second, Third,
+    Fourth, Fifth, Sixth, Seventh>();
+>>> split one per line if they don't fit in two lines
+lengthyMethodName<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>();
+<<<
+lengthyMethodName<
+    First,
+    Second,
+    Third,
+    Fourth,
+    Fifth,
+    Sixth,
+    Seventh,
+    Eighth>();
+>>> prefers to not split at type arguments
+lengthyMethodName<
+    TypeArgument>(valueArgument);
+<<<
+lengthyMethodName<TypeArgument>(
+    valueArgument);
+>>> split both type and value arguments
+lengthyMethodName<First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth>(first, second, third, fourth, fifth, sixth, seventh, eighth);
+<<<
+lengthyMethodName<
+        First,
+        Second,
+        Third,
+        Fourth,
+        Fifth,
+        Sixth,
+        Seventh,
+        Eighth>(
+    first,
+    second,
+    third,
+    fourth,
+    fifth,
+    sixth,
+    seventh,
+    eighth);
+>>> in method chain
+receiver.method<First, Second, Third, Fourth, Fifth>
+    (first, second, third, fourth, fifth)
+.method<First, Second, Third, Fourth, Fifth>
+    (first, second, third, fourth, fifth);
+<<<
+receiver
+    .method<First, Second, Third,
+            Fourth, Fifth>(first,
+        second, third, fourth, fifth)
+    .method<First, Second, Third,
+            Fourth, Fifth>(first,
+        second, third, fourth, fifth);

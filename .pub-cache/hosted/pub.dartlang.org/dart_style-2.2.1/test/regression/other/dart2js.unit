@@ -1,0 +1,45 @@
+>>> (indent 4) preemption follows constraints
+    main() {
+      assert(invariant(node, identical(name, '+') ||
+          identical(name, '=') ||
+          identical(name, '-') ||
+          identical(name, '*') ||
+          identical(name, '/') ||
+          identical(name, '%') ||
+          identical(name, '~/') ||
+          identical(name, '|') ||
+          identical(name, '&') ||
+          identical(name, '^') ||
+          identical(name, '~') ||
+          identical(name, '<<') ||
+          identical(name, '>>') ||
+          identical(name, '<') ||
+          identical(name, '>') ||
+          identical(name, '<=') ||
+          identical(name, '>=') ||
+          identical(name, '[]'), message: 'Unexpected operator $name'));
+    }
+<<<
+    main() {
+      assert(invariant(
+          node,
+          identical(name, '+') ||
+              identical(name, '=') ||
+              identical(name, '-') ||
+              identical(name, '*') ||
+              identical(name, '/') ||
+              identical(name, '%') ||
+              identical(name, '~/') ||
+              identical(name, '|') ||
+              identical(name, '&') ||
+              identical(name, '^') ||
+              identical(name, '~') ||
+              identical(name, '<<') ||
+              identical(name, '>>') ||
+              identical(name, '<') ||
+              identical(name, '>') ||
+              identical(name, '<=') ||
+              identical(name, '>=') ||
+              identical(name, '[]'),
+          message: 'Unexpected operator $name'));
+    }

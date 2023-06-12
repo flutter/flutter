@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="xyz.luan.audioplayers"
+    android:versionCode="1"
+    android:versionName="0.1.0" />

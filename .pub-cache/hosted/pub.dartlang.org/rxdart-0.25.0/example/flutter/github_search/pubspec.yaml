@@ -1,0 +1,45 @@
+name: github_search
+description: A new flutter project.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  rxdart:
+    path: ../../../
+  http: "^0.11.3+16"
+
+dev_dependencies:
+  mockito: 3.0.0
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://www.dartlang.org/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section here, in
+  # this "flutter" section, as in:
+  # assets:
+  #  - images/a_dot_burr.jpeg
+  #  - images/a_dot_ham.jpeg
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/montserrat/Montserrat-Bold.ttf
+        - asset: fonts/montserrat/Montserrat-Regular.ttf
+    - family: Hind
+      fonts:
+        - asset: fonts/hind/Hind-Regular.ttf

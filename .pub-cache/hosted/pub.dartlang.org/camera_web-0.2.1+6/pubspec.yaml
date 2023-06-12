@@ -1,0 +1,29 @@
+name: camera_web
+description: A Flutter plugin for getting information about and controlling the camera on Web.
+repository: https://github.com/flutter/plugins/tree/main/packages/camera/camera_web
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+camera%22
+version: 0.2.1+6
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.8.0"
+
+flutter:
+  plugin:
+    implements: camera
+    platforms:
+      web:
+        pluginClass: CameraPlugin
+        fileName: camera_web.dart
+
+dependencies:
+  camera_platform_interface: ^2.1.0
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  stream_transform: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

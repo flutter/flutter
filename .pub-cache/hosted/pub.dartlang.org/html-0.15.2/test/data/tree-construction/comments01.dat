@@ -1,0 +1,135 @@
+#data
+FOO<!-- BAR -->BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  BAR  -->
+|     "BAZ"
+
+#data
+FOO<!-- BAR --!>BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  BAR  -->
+|     "BAZ"
+
+#data
+FOO<!-- BAR --   >BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  BAR --   >BAZ -->
+
+#data
+FOO<!-- BAR -- <QUX> -- MUX -->BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  BAR -- <QUX> -- MUX  -->
+|     "BAZ"
+
+#data
+FOO<!-- BAR -- <QUX> -- MUX --!>BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  BAR -- <QUX> -- MUX  -->
+|     "BAZ"
+
+#data
+FOO<!-- BAR -- <QUX> -- MUX -- >BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  BAR -- <QUX> -- MUX -- >BAZ -->
+
+#data
+FOO<!---->BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  -->
+|     "BAZ"
+
+#data
+FOO<!--->BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  -->
+|     "BAZ"
+
+#data
+FOO<!-->BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!--  -->
+|     "BAZ"
+
+#data
+<?xml version="1.0">Hi
+#errors
+#document
+| <!-- ?xml version="1.0" -->
+| <html>
+|   <head>
+|   <body>
+|     "Hi"
+
+#data
+<?xml version="1.0">
+#errors
+#document
+| <!-- ?xml version="1.0" -->
+| <html>
+|   <head>
+|   <body>
+
+#data
+<?xml version
+#errors
+#document
+| <!-- ?xml version -->
+| <html>
+|   <head>
+|   <body>
+
+#data
+FOO<!----->BAZ
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "FOO"
+|     <!-- - -->
+|     "BAZ"

@@ -1,0 +1,4 @@
+ - [Basic usage](https://github.com/google/built_value.dart/blob/master/example/lib/example.dart)
+ - [Client and server](https://github.com/google/built_value.dart/tree/master/chat_example)
+ - [End to end tests](https://github.com/google/built_value.dart/tree/master/end_to_end_test)
+ - [API documentation](https://pub.dev/documentation/built_value/latest/)

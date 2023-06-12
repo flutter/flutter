@@ -1,0 +1,534 @@
+syntax = "proto2";
+
+import "datasets/google_message3/benchmark_message3_1.proto";
+import "datasets/google_message3/benchmark_message3_2.proto";
+import "datasets/google_message3/benchmark_message3_3.proto";
+import "datasets/google_message3/benchmark_message3_4.proto";
+import "datasets/google_message3/benchmark_message3_5.proto";
+import "datasets/google_message3/benchmark_message3_7.proto";
+import "datasets/google_message3/benchmark_message3_8.proto";
+package benchmarks.google_message3;
+
+option cc_enable_arenas = true;
+option java_package = "com.google.protobuf.benchmarks";
+
+message GoogleMessage3 {
+  optional .benchmarks.google_message3.Message37487 field37519 = 2;
+  optional .benchmarks.google_message3.Message36876 field37520 = 3;
+  optional .benchmarks.google_message3.Message13062 field37521 = 4;
+  optional .benchmarks.google_message3.Message952 field37522 = 5;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37523 = 6;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37524 = 7;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37525 = 8;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37526 = 9;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37527 = 10;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37528 = 11;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37529 = 12;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37530 = 13;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37531 = 14;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37532 = 15;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field37533 = 16;
+}
+
+message Message1327 {
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field1369 = 1;
+  repeated .benchmarks.google_message3.Message1328 field1370 = 3;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field1371 = 5;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field1372 = 6;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message1327 field1373 = 23104162;
+  }
+}
+
+message Message3672 {
+  optional .benchmarks.google_message3.Enum3476 field3727 = 1;
+  optional int32 field3728 = 11;
+  optional int32 field3729 = 2;
+  repeated group Message3673 = 3 {
+    required .benchmarks.google_message3.Enum3476 field3738 = 4;
+    required int32 field3739 = 5;
+  }
+  repeated group Message3674 = 6 {
+    required .benchmarks.google_message3.Enum3476 field3740 = 7;
+    required int32 field3741 = 8;
+  }
+  optional bool field3732 = 9;
+  optional int32 field3733 = 10;
+  optional .benchmarks.google_message3.Enum3476 field3734 = 20;
+  optional int32 field3735 = 21;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field3736 = 50;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message3672 field3737 = 3144435;
+  }
+}
+
+message Message3804 {
+  required int64 field3818 = 1;
+  required bool field3819 = 2;
+  repeated .benchmarks.google_message3.Enum3805 field3820 = 4;
+  optional int32 field3821 = 5;
+  optional bool field3822 = 6;
+  optional int64 field3823 = 7;
+  optional .benchmarks.google_message3.Enum3783 field3824 = 8;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message3804 field3825 = 59241828;
+  }
+}
+
+message Message6849 {
+  repeated .benchmarks.google_message3.Message6850 field6910 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message6849 field6911 = 107558455;
+  }
+}
+
+message Message6866 {
+  repeated .benchmarks.google_message3.Message6863 field6973 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message6866 field6974 = 22259060;
+  }
+}
+
+message Message6870 {
+  repeated .benchmarks.google_message3.Message6871 field6991 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message6870 field6992 = 90034652;
+  }
+}
+
+message Message7651 {
+  optional string field7685 = 1;
+  optional int64 field7686 = 2;
+  optional int64 field7687 = 3;
+  optional int64 field7688 = 4;
+  optional int32 field7689 = 5;
+  optional int32 field7690 = 6;
+  optional int32 field7691 = 7;
+  optional int32 field7692 = 8;
+  optional int32 field7693 = 9;
+  optional int32 field7694 = 10;
+  optional int32 field7695 = 11;
+  optional int32 field7696 = 12;
+  optional int32 field7697 = 13;
+  optional int32 field7698 = 14;
+  optional int32 field7699 = 15;
+  optional int32 field7700 = 16;
+  optional int32 field7701 = 17;
+  optional int32 field7702 = 18;
+  optional bool field7703 = 19;
+  repeated int32 field7704 = 20;
+  repeated int32 field7705 = 21;
+  repeated string field7706 = 22;
+  repeated string field7707 = 23;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field7708 = 24;
+  optional int32 field7709 = 25;
+  optional int32 field7710 = 26;
+  optional int32 field7711 = 27;
+  optional int32 field7712 = 43;
+  optional int32 field7713 = 28;
+  optional int32 field7714 = 29;
+  repeated .benchmarks.google_message3.Message7547 field7715 = 30;
+  repeated .benchmarks.google_message3.Message7547 field7716 = 31;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field7717 = 32;
+  repeated string field7718 = 33;
+  repeated string field7719 = 34;
+  repeated .benchmarks.google_message3.Message7648 field7720 = 35;
+  optional bool field7721 = 36;
+  optional bool field7722 = 37;
+  optional bool field7723 = 38;
+  optional bool field7724 = 39;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field7725 = 40;
+  optional .benchmarks.google_message3.UnusedEnum field7726 = 41;
+  optional .benchmarks.google_message3.Enum7654 field7727 = 42;
+  optional string field7728 = 44;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field7729 = 45;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message7651 field7730 = 55876009;
+  }
+}
+
+message Message7864 {
+  optional string field7866 = 1;
+  optional string field7867 = 2;
+  repeated .benchmarks.google_message3.Message7865 field7868 = 5;
+  repeated .benchmarks.google_message3.Message7865 field7869 = 6;
+  repeated .benchmarks.google_message3.Message7865 field7870 = 7;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field7871 = 8;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message7864 field7872 = 44542730;
+  }
+}
+
+message Message7929 {
+  optional int64 field7942 = 1;
+  optional int64 field7943 = 4;
+  optional int64 field7944 = 5;
+  optional int64 field7945 = 12;
+  optional int64 field7946 = 13;
+  optional int64 field7947 = 18;
+  optional int64 field7948 = 6;
+  optional int64 field7949 = 7;
+  repeated .benchmarks.google_message3.Message7919 field7950 = 8;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field7951 = 20;
+  repeated .benchmarks.google_message3.Message7920 field7952 = 14;
+  repeated .benchmarks.google_message3.Message7921 field7953 = 15;
+  repeated .benchmarks.google_message3.Message7928 field7954 = 17;
+  optional int64 field7955 = 19;
+  optional bool field7956 = 2;
+  optional int64 field7957 = 3;
+  optional int64 field7958 = 9;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field7959 = 10;
+  repeated bytes field7960 = 11;
+  optional int64 field7961 = 16;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message7929 field7962 = 53392238;
+  }
+}
+
+message Message8508 {
+  repeated .benchmarks.google_message3.Message8511 field8517 = 8;
+  repeated .benchmarks.google_message3.Message8512 field8518 = 9;
+  repeated .benchmarks.google_message3.Message8513 field8519 = 11;
+  optional bool field8520 = 13;
+  optional .benchmarks.google_message3.Message8514 field8521 = 14;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field8522 = 15;
+  repeated .benchmarks.google_message3.Message8515 field8523 = 16;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field8524 = 17;
+  optional int64 field8525 = 1;
+  optional float field8526 = 2;
+  optional int64 field8527 = 3;
+  optional int64 field8528 = 4;
+  optional int32 field8529 = 5;
+  optional bytes field8530 = 6;
+  repeated bytes field8531 = 7;
+  optional bool field8532 = 10;
+  optional bytes field8533 = 12;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message8508 field8534 = 3811804;
+  }
+}
+
+message Message9122 {
+  optional float field9132 = 1;
+  optional float field9133 = 2;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message9122 field9134 = 120398939;
+  }
+}
+
+message Message10177 {
+  repeated .benchmarks.google_message3.Message10155 field10270 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message10177 field10271 = 26801105;
+  }
+}
+
+message Message10278 {
+  repeated int32 field10286 = 1 [packed = true];
+  repeated int32 field10287 = 2 [packed = true];
+  optional int32 field10288 = 3;
+  extend .benchmarks.google_message3.Message10155 {
+    optional .benchmarks.google_message3.Message10278 field10289 = 29374161;
+  }
+}
+
+message Message10323 {
+  repeated .benchmarks.google_message3.Message10320 field10360 = 1;
+  extend .benchmarks.google_message3.Message10155 {
+    optional .benchmarks.google_message3.Message10323 field10361 = 27922524;
+  }
+}
+
+message Message10324 {
+  repeated .benchmarks.google_message3.Message10322 field10362 = 1;
+  optional .benchmarks.google_message3.Message10321 field10363 = 2;
+  extend .benchmarks.google_message3.Message10155 {
+    optional .benchmarks.google_message3.Message10324 field10364 = 27832297;
+  }
+}
+
+message Message11990 {
+  repeated .benchmarks.google_message3.Message11988 field12030 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message11990 field12031 = 21265426;
+  }
+}
+
+message Message12691 {
+  optional string field12713 = 1;
+  optional int32 field12714 = 2;
+  optional .benchmarks.google_message3.Message12668 field12715 = 3;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message12691 field12716 = 28426536;
+  }
+}
+
+message Message12870 {
+  required int32 field12879 = 1;
+  optional int32 field12880 = 7;
+  required int32 field12881 = 2;
+  optional uint64 field12882 = 3;
+  optional string field12883 = 2001;
+  optional fixed64 field12884 = 4;
+  repeated fixed64 field12885 = 14;
+  optional int32 field12886 = 9;
+  optional int64 field12887 = 18;
+  repeated .benchmarks.google_message3.Message12870 field12888 = 8;
+  optional int32 field12889 = 5;
+  optional uint64 field12890 = 6;
+  optional int32 field12891 = 10;
+  optional int32 field12892 = 11;
+  optional double field12893 = 12;
+  optional .benchmarks.google_message3.Message12825 field12894 = 13;
+  optional double field12895 = 15;
+  optional string field12896 = 16;
+  optional .benchmarks.google_message3.Enum12871 field12897 = 17;
+  optional int32 field12898 = 19;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message12870 field12899 = 5447656;
+  }
+}
+
+message Message13154 {
+  required float field13164 = 1;
+  required float field13165 = 2;
+  extend .benchmarks.google_message3.Message13145 {
+    optional .benchmarks.google_message3.Message13154 field13166 = 47301086;
+  }
+}
+
+message Message16507 {
+  optional bool field16510 = 3;
+  optional bool field16511 = 4;
+  optional bool field16512 = 14;
+  repeated string field16513 = 5;
+  repeated string field16514 = 6;
+  optional string field16515 = 8;
+  repeated int32 field16516 = 9;
+  repeated int32 field16517 = 10;
+  optional int32 field16518 = 7;
+  optional string field16519 = 15;
+  repeated string field16520 = 11;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16521 = 27;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16522 = 22;
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field16523 = 28;
+  optional string field16524 = 18;
+  optional int32 field16525 = 19;
+  optional int32 field16526 = 20;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field16527 = 23;
+  optional bool field16528 = 24;
+  repeated string field16529 = 25;
+  optional double field16530 = 26;
+  optional .benchmarks.google_message3.Message16478 field16531 = 30;
+  optional bool field16532 = 31;
+  optional string field16533 = 32;
+  optional bool field16534 = 33;
+  optional bool field16535 = 35;
+  optional bool field16536 = 36;
+  optional bool field16537 = 37;
+  optional bool field16538 = 38;
+  optional bool field16539 = 39;
+  optional bool field16540 = 40;
+  repeated string field16541 = 41;
+  extensions 21 to 21;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message16507 field16542 = 5569941;
+  }
+}
+
+message Message16564 {
+  repeated .benchmarks.google_message3.Message16552 field16568 = 1;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message16564 field16569 = 25830030;
+  }
+}
+
+message Message16661 {
+  repeated .benchmarks.google_message3.Message16660 field16671 = 1;
+  repeated uint64 field16672 = 2;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message16661 field16673 = 31274398;
+  }
+}
+
+message Message16746 {
+  repeated .benchmarks.google_message3.Message16727 field16806 = 1;
+  optional bool field16807 = 2;
+  optional bool field16808 = 3;
+  repeated .benchmarks.google_message3.Message16725 field16809 = 4;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message16746 field16810 = 28406765;
+  }
+}
+
+message Message17786 {
+  repeated group Message17787 = 1 {
+    required int32 field18177 = 2;
+    required int32 field18178 = 3;
+    optional .benchmarks.google_message3.Message17783 field18179 = 4;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18180 = 5;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18181 = 6;
+    repeated .benchmarks.google_message3.UnusedEmptyMessage field18182 = 8;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18183 = 9;
+    optional .benchmarks.google_message3.Message17726 field18184 = 10;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18185 = 11;
+    optional .benchmarks.google_message3.Message16945 field18186 = 102;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18187 = 12;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18188 = 13;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18189 = 7;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18190 = 100;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18191 = 101;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18192 = 14;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18193 = 19;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18194 = 22;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18195 = 24;
+    optional .benchmarks.google_message3.Enum16925 field18196 = 21;
+    optional bool field18197 = 18;
+    repeated .benchmarks.google_message3.UnusedEnum field18198 = 23;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field18199 = 15;
+    optional string field18200 = 16;
+    optional string field18201 = 17;
+    optional bool field18202 = 99;
+  }
+  repeated .benchmarks.google_message3.Message17782 field18175 = 20;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message17786 field18176 = 11823055;
+  }
+}
+
+message Message22857 {
+  repeated .benchmarks.google_message3.Message22853 field22874 = 1;
+  extend .benchmarks.google_message3.Message10155 {
+    optional .benchmarks.google_message3.Message22857 field22875 = 67799715;
+  }
+}
+
+message Message24404 {
+  repeated group Message24405 = 1 {
+    required int32 field24686 = 2;
+    required int32 field24687 = 3;
+    optional .benchmarks.google_message3.Message24317 field24688 = 4;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24689 = 5;
+    optional .benchmarks.google_message3.Message24376 field24690 = 6;
+    optional .benchmarks.google_message3.Message24345 field24691 = 7;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24692 = 8;
+    optional .benchmarks.google_message3.Message24379 field24693 = 9;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24694 = 10;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24695 = 11;
+    optional .benchmarks.google_message3.Message24391 field24696 = 12;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24697 = 13;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24698 = 14;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24699 = 22;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24700 = 23;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24701 = 25;
+    optional .benchmarks.google_message3.Enum16925 field24702 = 18;
+    optional float field24703 = 20;
+    optional bool field24704 = 19;
+    repeated .benchmarks.google_message3.Enum16891 field24705 = 24;
+    optional .benchmarks.google_message3.UnusedEmptyMessage field24706 = 15;
+    optional string field24707 = 16;
+    optional string field24708 = 17;
+    optional float field24709 = 21;
+    optional bool field24710 = 26;
+    optional .benchmarks.google_message3.UnusedEnum field24711 = 27;
+    optional bool field24712 = 28;
+    optional .benchmarks.google_message3.UnusedEnum field24713 = 29;
+    optional bool field24714 = 31;
+    optional bool field24715 = 99;
+    optional int64 field24716 = 32;
+  }
+  optional .benchmarks.google_message3.Message24403 field24684 = 30;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message24404 field24685 = 9129287;
+  }
+}
+
+message Message27300 {
+  repeated .benchmarks.google_message3.UnusedEmptyMessage field27302 = 1;
+  optional string field27303 = 2;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message27300 field27304 = 24956467;
+  }
+}
+
+message Message27453 {
+  optional string field27459 = 15;
+  repeated string field27460 = 1;
+  repeated float field27461 = 6;
+  repeated int32 field27462 = 27;
+  repeated int32 field27463 = 28;
+  repeated .benchmarks.google_message3.Message27454 field27464 = 24;
+  repeated string field27465 = 2;
+  repeated float field27466 = 7;
+  repeated string field27467 = 22;
+  repeated string field27468 = 23;
+  optional string field27469 = 26;
+  repeated .benchmarks.google_message3.Message27357 field27470 = 8;
+  optional .benchmarks.google_message3.Message27360 field27471 = 16;
+  optional string field27472 = 25;
+  optional string field27473 = 11;
+  optional bool field27474 = 13;
+  optional bool field27475 = 14;
+  optional bool field27476 = 17;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field27477 = 12;
+  optional bool field27478 = 34268945;
+  optional bool field27479 = 20;
+  optional string field27480 = 21;
+  optional .benchmarks.google_message3.UnusedEmptyMessage field27481 = 10;
+  extend .benchmarks.google_message3.Message0 {
+    optional .benchmarks.google_message3.Message27453 field27482 = 8086204;
+  }
+}
+
+extend .benchmarks.google_message3.Message16945 {
+  optional string field17026 = 472;
+  repeated string field17027 = 818;
+  optional .benchmarks.google_message3.Message0 field17031 = 215;
+  repeated .benchmarks.google_message3.Message0 field17032 = 292;
+  repeated .benchmarks.google_message3.Message0 field17038 = 234;
+  repeated .benchmarks.google_message3.Message0 field17039 = 235;
+  optional .benchmarks.google_message3.Message0 field17042 = 246;
+  optional string field17043 = 224;
+  optional string field17044 = 225;
+  repeated string field17048 = 63;
+  repeated string field17049 = 64;
+  repeated .benchmarks.google_message3.Message0 field17052 = 233;
+  repeated .benchmarks.google_message3.Message0 field17053 = 66;
+  repeated string field17056 = 275;
+  optional string field17057 = 226;
+  repeated .benchmarks.google_message3.Message0 field17060 = 27;
+  repeated string field17073 = 75;
+  repeated .benchmarks.google_message3.Message0 field17076 = 77;
+  repeated string field17078 = 296;
+  repeated .benchmarks.google_message3.Message0 field17082 = 160;
+  repeated .benchmarks.google_message3.Message0 field17091 = 585;
+  repeated .benchmarks.google_message3.Message0 field17098 = 987;
+  repeated .benchmarks.google_message3.Message0 field17101 = 157;
+  repeated string field17102 = 158;
+  repeated string field17107 = 166;
+  repeated string field17133 = 567;
+  repeated string field17134 = 572;
+  repeated string field17160 = 49;
+  repeated string field17168 = 32;
+  repeated string field17170 = 34;
+  repeated .benchmarks.google_message3.Message0 field17172 = 509;
+  repeated string field17174 = 39;
+  repeated .benchmarks.google_message3.Message0 field17175 = 40;
+  repeated .benchmarks.google_message3.Message0 field17178 = 511;
+  repeated .benchmarks.google_message3.Message0 field17185 = 50;
+  repeated int32 field17207 = 1081;
+  repeated .benchmarks.google_message3.Message0 field17238 = 184;
+  repeated .benchmarks.google_message3.Message0 field17289 = 177;
+  repeated .benchmarks.google_message3.Message0 field17290 = 178;
+  repeated .benchmarks.google_message3.Message0 field17296 = 474;
+  repeated string field17298 = 44;
+  repeated .benchmarks.google_message3.Message0 field17301 = 47;
+  optional .benchmarks.google_message3.Message0 field17412 = 21;
+  repeated .benchmarks.google_message3.Message0 field17438 = 132;
+  repeated .benchmarks.google_message3.Message0 field17458 = 512;
+  repeated string field17460 = 560;
+  repeated string field17466 = 552;
+  repeated .benchmarks.google_message3.Message0 field17617 = 1080;
+  repeated int32 field17618 = 1084;
+}
+

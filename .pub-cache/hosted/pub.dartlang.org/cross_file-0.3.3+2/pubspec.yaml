@@ -1,0 +1,16 @@
+name: cross_file
+description: An abstraction to allow working with files across multiple platforms.
+repository: https://github.com/flutter/packages/tree/main/packages/cross_file
+issue_tracker: https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22p%3A+cross_file%22
+version: 0.3.3+2
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  js: ^0.6.3
+  meta: ^1.3.0
+
+dev_dependencies:
+  path: ^1.8.1
+  test: ^1.21.1

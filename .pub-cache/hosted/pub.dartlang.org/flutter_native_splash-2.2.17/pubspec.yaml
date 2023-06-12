@@ -1,0 +1,58 @@
+name: flutter_native_splash
+description: Customize Flutter's default white native splash screen with
+  background color and splash image. Supports dark mode, full screen, and more.
+version: 2.2.17
+repository: https://github.com/jonbhanson/flutter_native_splash
+issue_tracker: https://github.com/jonbhanson/flutter_native_splash/issues
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+  flutter: ">=2.5.0"
+
+dependencies:
+  args: ^2.3.1
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  js: ^0.6.4
+  html: ^0.15.1
+  image: ^4.0.10
+  meta: ^1.8.0
+  path: ^1.8.2
+  universal_io: ^2.0.4
+  xml: ^6.1.0
+  yaml: ^3.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.1
+
+screenshots:
+  - description: 'Examples of the splash screen on iOS.'
+    path: splash_demo.webp
+  - description: 'Examples of the splash screen on iOS in dark mode.'
+    path: splash_demo_dark.webp
+
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The 'pluginClass' specifies the class (in Java, Kotlin, Swift, Objective-C, etc.)
+  # which should be registered in the plugin registry. This is required for
+  # using method channels.
+  # The Android 'package' specifies package in which the registered class is.
+  # This is required for using method channels on Android.
+  # The 'ffiPlugin' specifies that native code should be built and bundled.
+  # This is required for using `dart:ffi`.
+  # All these are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  plugin:
+    platforms:
+      android:
+        package: net.jonhanson.flutter_native_splash
+        pluginClass: FlutterNativeSplashPlugin
+      ios:
+        pluginClass: FlutterNativeSplashPlugin
+      web:
+        pluginClass: FlutterNativeSplashWeb
+        fileName: flutter_native_splash_web.dart

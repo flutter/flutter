@@ -1,0 +1,84 @@
+40 columns                              |
+>>> DO place spaces around in, and after each ; in a loop.
+for (var i = 0;i<100;i++) {
+  print(i);
+}
+<<<
+for (var i = 0; i < 100; i++) {
+  print(i);
+}
+>>> empty clauses
+for(;;);
+<<<
+for (;;);
+>>> empty initializer clause
+for (  ;   foo; bar) {}
+<<<
+for (; foo; bar) {}
+>>> whitespace
+for (var    file  in  files   ) {
+  print(file);
+}
+<<<
+for (var file in files) {
+  print(file);
+}
+>>> for-in with type
+for (Foo foo in bar.foos) {
+  print(foo);
+}
+<<<
+for (Foo foo in bar.foos) {
+  print(foo);
+}
+>>> for-in with final and type
+for (final Foo foo in bar.foos) {
+  print(foo);
+}
+<<<
+for (final Foo foo in bar.foos) {
+  print(foo);
+}
+>>> for-in with just final
+for (final foo in bar.foos) {
+  print(foo);
+}
+<<<
+for (final foo in bar.foos) {
+  print(foo);
+}
+>>>
+for (var a=0; a<100; ++a) { print(a); }
+<<<
+for (var a = 0; a < 100; ++a) {
+  print(a);
+}
+>>>
+for(
+var a=0;
+a<100;
+++a)
+{
+print(a);
+}
+<<<
+for (var a = 0; a < 100; ++a) {
+  print(a);
+}
+>>>
+for (x in xs) {
+  print(x);
+}
+<<<
+for (x in xs) {
+  print(x);
+}
+>>> async
+foo() async {
+  await    for(x in y) {
+  }
+}
+<<<
+foo() async {
+  await for (x in y) {}
+}

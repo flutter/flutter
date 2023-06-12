@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="5" by="lint 4.1.0" client="gradle" variant="debug" version="4.1.0">
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="          commitAsync(preferences.edit().putBoolean(key, (boolean) call.argument(&quot;value&quot;)), result);"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="66"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="          commitAsync(preferences.edit().putString(key, DOUBLE_PREFIX + doubleValueStr), result);"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="71"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="                preferences"
+        errorLine2="                ^">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="78"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="            commitAsync(preferences.edit().putLong(key, number.longValue()), result);"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="84"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="          commitAsync(preferences.edit().putString(key, value), result);"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="96"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="              preferences.edit().putString(key, LIST_IDENTIFIER + encodeList(list)), result);"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="101"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="CommitPrefEdits"
+        message="`SharedPreferences.edit()` without a corresponding `commit()` or `apply()` call"
+        errorLine1="          commitAsync(preferences.edit().remove(key), result);"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/io/flutter/plugins/sharedpreferences/MethodCallHandlerImpl.java"
+            line="111"
+            column="23"/>
+    </issue>
+
+</issues>

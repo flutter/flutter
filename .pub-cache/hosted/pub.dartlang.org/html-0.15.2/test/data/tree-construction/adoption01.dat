@@ -1,0 +1,194 @@
+#data
+<a><p></a></p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|     <p>
+|       <a>
+
+#data
+<a>1<p>2</a>3</p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "1"
+|     <p>
+|       <a>
+|         "2"
+|       "3"
+
+#data
+<a>1<button>2</a>3</button>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "1"
+|     <button>
+|       <a>
+|         "2"
+|       "3"
+
+#data
+<a>1<b>2</a>3</b>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "1"
+|       <b>
+|         "2"
+|     <b>
+|       "3"
+
+#data
+<a>1<div>2<div>3</a>4</div>5</div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "1"
+|     <div>
+|       <a>
+|         "2"
+|       <div>
+|         <a>
+|           "3"
+|         "4"
+|       "5"
+
+#data
+<table><a>1<p>2</a>3</p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "1"
+|     <p>
+|       <a>
+|         "2"
+|       "3"
+|     <table>
+
+#data
+<b><b><a><p></a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <b>
+|         <a>
+|         <p>
+|           <a>
+
+#data
+<b><a><b><p></a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|       <a>
+|         <b>
+|       <b>
+|         <p>
+|           <a>
+
+#data
+<a><b><b><p></a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <b>
+|         <b>
+|     <b>
+|       <b>
+|         <p>
+|           <a>
+
+#data
+<p>1<s id="A">2<b id="B">3</p>4</s>5</b>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       "1"
+|       <s>
+|         id="A"
+|         "2"
+|         <b>
+|           id="B"
+|           "3"
+|     <s>
+|       id="A"
+|       <b>
+|         id="B"
+|         "4"
+|     <b>
+|       id="B"
+|       "5"
+
+#data
+<table><a>1<td>2</td>3</table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       "1"
+|     <a>
+|       "3"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "2"
+
+#data
+<table>A<td>B</td>C</table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "AC"
+|     <table>
+|       <tbody>
+|         <tr>
+|           <td>
+|             "B"
+
+#data
+<a><svg><tr><input></a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       <svg svg>
+|         <svg tr>
+|           <svg input>

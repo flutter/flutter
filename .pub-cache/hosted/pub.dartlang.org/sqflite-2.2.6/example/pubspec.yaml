@@ -1,0 +1,53 @@
+name: sqflite_example
+description: Demonstrates how to use the sqflite plugin and perform some tests.
+publish_to: none
+version: '0.4.0'
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+  path: any
+  collection: any
+  flutter:
+    sdk: flutter
+  sqflite:
+  sqflite_common:
+  synchronized:
+  matcher:
+  meta:
+dev_dependencies:
+  flutter_lints:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  test:
+  process_run: '>=0.11.0+2'
+  pub_semver: 
+
+# For information on the generic Dart part of this file, see the
+# following page: https://www.dartlang.org/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section here, in
+  # this "flutter" section, as in:
+  # assets:
+  #  - images/a_dot_burr.jpeg
+  #  - images/a_dot_ham.jpeg
+  assets:
+    - assets/example.db
+    - assets/issue_64.db
+
+dependency_overrides:
+  sqflite:
+    path: ../
+  sqflite_common:
+    path: ../../sqflite_common

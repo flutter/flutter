@@ -1,0 +1,120 @@
+40 columns                              |
+>>> indentation
+extension A on B {
+z() => 0;
+inc(int x) => ++x;
+foo(int x) {
+if (x == 0) {
+return true;
+}}}
+<<<
+extension A on B {
+  z() => 0;
+  inc(int x) => ++x;
+  foo(int x) {
+    if (x == 0) {
+      return true;
+    }
+  }
+}
+>>> trailing space inside body
+extension A on B {
+  }
+<<<
+extension A on B {}
+>>> leading space before "extension"
+  extension A on B {
+}
+<<<
+extension A on B {}
+>>>
+extension A on B  { int meaningOfLife() => 42; }
+<<<
+extension A on B {
+  int meaningOfLife() => 42;
+}
+>>>
+extension     A      on      B    {
+  }
+<<<
+extension A on B {}
+>>>
+extension A on B{z() => 0;inc(int x) => ++x;}
+<<<
+extension A on B {
+  z() => 0;
+  inc(int x) => ++x;
+}
+>>> eats newlines
+extension
+
+A
+
+
+on
+
+
+B
+
+
+
+{}
+<<<
+extension A on B {}
+>>> require blank line after non-empty block-bodied members
+extension A on B {
+b() {;} c() => null; get d {;} get e => null; set f(value) {;
+} set g(value) => null;}
+<<<
+extension A on B {
+  b() {
+    ;
+  }
+
+  c() => null;
+  get d {
+    ;
+  }
+
+  get e => null;
+  set f(value) {
+    ;
+  }
+
+  set g(value) => null;
+}
+>>> no required blank line after empty block-bodied members
+extension A on B {
+b() {} c() => null; get d {} get e => null; set f(value) {
+} set g(value) => null;}
+<<<
+extension A on B {
+  b() {}
+  c() => null;
+  get d {}
+  get e => null;
+  set f(value) {}
+  set g(value) => null;
+}
+>>> blank line before and after extension
+var x = 1;
+extension A on B {}
+var y = 2;
+<<<
+var x = 1;
+
+extension A on B {}
+
+var y = 2;
+>>> generic extension
+extension   A    <  T  ,  S > on B{}
+<<<
+extension A<T, S> on B {}
+>>> unnamed extension
+extension    on   B{}
+<<<
+extension on B {}
+>>> unnamed generic extension
+extension   <  T  ,  S  >    on   B{}
+<<<
+extension<T, S> on B {}

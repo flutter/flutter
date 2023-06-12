@@ -1,0 +1,34 @@
+name: example
+description: A new Flutter project.
+publish_to: none
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.10.2 <3.0.0"
+
+dependencies:
+  baseflow_plugin_template:
+    git:
+      url: git://github.com/Baseflow/baseflow_plugin_template.git
+      ref: v1.0.0
+  cupertino_icons: ^1.0.2
+  flutter:
+    sdk: flutter
+  flutter_cache_manager:
+    path: ../
+  url_launcher: ^5.4.11
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.4
+
+
+# The following section is specific to Flutter.
+flutter:
+  uses-material-design: true
+
+  assets:
+    - packages/baseflow_plugin_template/logo.png
+    - packages/baseflow_plugin_template/poweredByBaseflow.png

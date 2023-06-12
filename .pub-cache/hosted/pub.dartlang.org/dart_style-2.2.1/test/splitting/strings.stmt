@@ -1,0 +1,244 @@
+40 columns                              |
+>>> long single-line
+"this string is longer than forty characters";
+<<<
+"this string is longer than forty characters";
+>>> short one line multi-line
+"""not too long""";
+<<<
+"""not too long""";
+>>> multi-line with short lines
+"""
+not too long
+or this one
+""";
+<<<
+"""
+not too long
+or this one
+""";
+>>> multi-line with long lines
+"""
+this string is longer than forty characters
+this one is also is longer than forty characters
+""";
+<<<
+"""
+this string is longer than forty characters
+this one is also is longer than forty characters
+""";
+>>> only indent the first line of multiline strings
+{
+"""
+multiline
+""";
+}
+<<<
+{
+  """
+multiline
+""";
+}
+>>> do not wrap the first line if not needed
+someMethod("""first line fits in here
+more stuff down here too that is long
+""");
+<<<
+someMethod("""first line fits in here
+more stuff down here too that is long
+""");
+>>> wrap first line if needed
+someMethod("""first line does not fits here
+""");
+<<<
+someMethod(
+    """first line does not fits here
+""");
+>>> format multiline as a block with a leading argument
+someMethod("foo", """
+  some
+  text
+""");
+<<<
+someMethod("foo", """
+  some
+  text
+""");
+>>> format multiline as a block with a trailing argument
+someMethod("""
+  some
+  text
+""", "foo");
+<<<
+someMethod("""
+  some
+  text
+""", "foo");
+>>> format multiline as a block with leading and trailing arguments
+someMethod(
+  "foo",
+  """
+  some
+  text
+  """,
+  "foo");
+<<<
+someMethod(
+    "foo",
+    """
+  some
+  text
+  """,
+    "foo");
+>>> format multiple multilines as blocks
+someMethod("""
+  some
+  text
+""", """
+  some
+  more
+""", """
+  even more
+""");
+<<<
+someMethod("""
+  some
+  text
+""", """
+  some
+  more
+""", """
+  even more
+""");
+>>> format multilines with other blocks as blocks
+someMethod("""
+  some
+  text
+""", () {
+  some;
+  function;
+}, [
+  "some",
+  "collection",
+  "with",
+  "many",
+  "elements"
+]);
+<<<
+someMethod("""
+  some
+  text
+""", () {
+  some;
+  function;
+}, [
+  "some",
+  "collection",
+  "with",
+  "many",
+  "elements"
+]);
+>>> interpolation is not split even when line is too long
+someMethod("some text that is pretty long ${    interpolate +
+a + thing   } more text");
+<<<
+someMethod(
+    "some text that is pretty long ${interpolate + a + thing} more text");
+>>> multi-line string interpolation does not split
+someMethod("foo", """
+  some text that is pretty long
+  some more text that is pretty long ${    interpolate + a + thing   } more text
+""");
+<<<
+someMethod("foo", """
+  some text that is pretty long
+  some more text that is pretty long ${interpolate + a + thing} more text
+""");
+>>> nested interpolation is not split
+someMethod("some text that is ${pretty +  'long ${    interpolate +
+a + thing   } more'} text", "another arg");
+<<<
+someMethod(
+    "some text that is ${pretty + 'long ${interpolate + a + thing} more'} text",
+    "another arg");
+>>> hard splits are split in interpolation
+someMethod("before ${(){statement();statement();statement();}} after");
+<<<
+someMethod("before ${() {
+  statement();
+  statement();
+  statement();
+}} after");
+>>> collections split in interpolation if needed
+method(
+"b ${[1, 2, 3, 4, 5, 6]} a",
+"before ${[first, second, third, fourth, {fifth: sixth}]} after");
+<<<
+method(
+    "b ${[1, 2, 3, 4, 5, 6]} a",
+    "before ${[
+      first,
+      second,
+      third,
+      fourth,
+      {fifth: sixth}
+    ]} after");
+>>> nested multiline strings are not merged in interpolation
+"before ${"""a
+b"""} ${aft
++
+er}";
+<<<
+"before ${"""a
+b"""} ${aft + er}";
+>>> multiply-nested interpolation
+'''a
+${b +
+"""c
+${d
++ '''e
+f'''
++
+g}
+h"""
++ i}
+j ${k
++
+l}''';
+<<<
+'''a
+${b + """c
+${d + '''e
+f''' + g}
+h""" + i}
+j ${k + l}''';
+>>> nested interpolation inside function
+"before ${ () { a(); """b
+c"""; d(); }} after";
+<<<
+"before ${() {
+  a();
+  """b
+c""";
+  d();
+}} after";
+>>> comment inside interpolation
+"before ${// comment
+a
++
+b
++  // another
+c} after";
+<<<
+"before ${ // comment
+    a + b + // another
+        c} after";
+>>>
+function(
+  "long string long string ${interpolated + interpolated} long string",
+  longLongLongLongObject.longLongLongLongMethod());
+<<<
+function(
+    "long string long string ${interpolated + interpolated} long string",
+    longLongLongLongObject
+        .longLongLongLongMethod());

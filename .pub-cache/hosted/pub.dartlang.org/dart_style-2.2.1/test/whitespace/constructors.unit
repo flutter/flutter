@@ -1,0 +1,71 @@
+40 columns                              |
+>>> empty body
+class A {
+  A();
+}
+<<<
+class A {
+  A();
+}
+>>> redirecting factory constructor
+class A {
+  const factory A() = B;
+}
+<<<
+class A {
+  const factory A() = B;
+}
+>>> initializing formals
+class A {
+  int _a;
+  A(this._a);
+}
+<<<
+class A {
+  int _a;
+  A(this._a);
+}
+>>> constructor initialization list
+class X {
+  var x, y;
+  X() : x = 1, y = 2;
+}
+<<<
+class X {
+  var x, y;
+  X()
+      : x = 1,
+        y = 2;
+}
+>>> DO format constructor initialization lists with each field on its own line.
+class MyClass {
+  MyClass() : first = "some value", second = "another",
+        third = "last";
+}
+<<<
+class MyClass {
+  MyClass()
+      : first = "some value",
+        second = "another",
+        third = "last";
+}
+>>> DO format constructor initialization lists with each field on its own line.
+class MyClass {
+  MyClass(first, second) : super(first, second);
+  MyClass(first, second) : this(first, second);
+}
+<<<
+class MyClass {
+  MyClass(first, second)
+      : super(first, second);
+  MyClass(first, second)
+      : this(first, second);
+}
+>>> handle a comma after function typed initializing formals
+class Foo {
+  Foo(this.bar(), baz);
+}
+<<<
+class Foo {
+  Foo(this.bar(), baz);
+}

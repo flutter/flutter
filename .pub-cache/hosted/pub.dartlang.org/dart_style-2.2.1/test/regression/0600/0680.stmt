@@ -1,0 +1,22 @@
+>>> (indent 4)
+    if (receiver != null &&
+        receiver is! ThisExpression &&
+        interfaceMember is Procedure &&
+        interfaceMember
+            .isGenericContravariant) {} else if (identical(interfaceMember,
+        'call')) {} else if (interfaceMember == null) {} else if (interfaceMember
+            is Procedure &&
+        interfaceMember.isGenericContravariant) {
+      return MethodContravarianceCheckKind.checkMethodReturn;
+    }
+<<<
+    if (receiver != null &&
+        receiver is! ThisExpression &&
+        interfaceMember is Procedure &&
+        interfaceMember.isGenericContravariant) {
+    } else if (identical(interfaceMember, 'call')) {
+    } else if (interfaceMember == null) {
+    } else if (interfaceMember is Procedure &&
+        interfaceMember.isGenericContravariant) {
+      return MethodContravarianceCheckKind.checkMethodReturn;
+    }

@@ -1,0 +1,18 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "macro_api_test",
+      "rootUri": "../../../../_fe_analyzer_shared/test/macros/api/"
+    },
+    {
+      "name": "meta",
+      "rootUri": "../../../../meta/",
+      "packageUri": "lib/"
+    },
+    {
+      "name": "_fe_analyzer_shared",
+      "rootUri": "../../../../_fe_analyzer_shared/lib/"
+    }
+  ]
+}

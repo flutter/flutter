@@ -1,0 +1,6 @@
+# See https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md#arguments
+override_platforms:
+  chrome:
+    settings:
+      executable: chrome
+      arguments: --no-sandbox

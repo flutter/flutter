@@ -1,0 +1,8 @@
+builders:
+  hive_generator:
+    import: "package:hive_generator/hive_generator.dart"
+    builder_factories: ["getBuilder"]
+    build_extensions: {".dart": ["hive_generator.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

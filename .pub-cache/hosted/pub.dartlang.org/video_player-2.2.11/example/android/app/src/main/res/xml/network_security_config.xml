@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">www.sample-videos.com</domain>
+        <domain includeSubdomains="true">184.72.239.149</domain>
+    </domain-config>
+</network-security-config>

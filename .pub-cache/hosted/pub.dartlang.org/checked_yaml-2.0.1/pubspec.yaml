@@ -1,0 +1,27 @@
+name: checked_yaml
+version: 2.0.1
+
+description: >-
+  Generate more helpful exceptions when decoding YAML documents using
+  package:json_serializable and package:yaml.
+repository: https://github.com/google/json_serializable.dart/tree/master/checked_yaml
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+
+dependencies:
+  json_annotation: ^4.0.0
+  source_span: ^1.8.0
+  yaml: ^3.0.0
+
+dev_dependencies:
+  build_runner: ^1.0.0
+  build_verify: ^1.1.0
+  json_serializable: ^4.0.0
+  path: ^1.0.0
+  test: ^1.16.0
+  test_process: ^2.0.0
+
+#dependency_overrides:
+#  # Need to update dependencies on these packages
+#  build_config: ^0.4.4
+#  pubspec_parse: ^0.1.5

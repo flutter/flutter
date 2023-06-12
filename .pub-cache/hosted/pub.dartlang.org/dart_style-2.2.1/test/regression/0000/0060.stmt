@@ -1,0 +1,10 @@
+>>>
+var paths = new Directory(inputDir).listSync()
+     .where((f) => f is File).map((f) => f.path)
+     .where((p) => p.endsWith('.dart') && filePattern.hasMatch(p));
+<<<
+var paths = new Directory(inputDir)
+    .listSync()
+    .where((f) => f is File)
+    .map((f) => f.path)
+    .where((p) => p.endsWith('.dart') && filePattern.hasMatch(p));

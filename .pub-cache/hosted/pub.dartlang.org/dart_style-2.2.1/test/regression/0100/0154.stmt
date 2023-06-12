@@ -1,0 +1,9 @@
+>>>
+foo() async {
+  await for(var x in y) {
+  }
+}
+<<<
+foo() async {
+  await for (var x in y) {}
+}

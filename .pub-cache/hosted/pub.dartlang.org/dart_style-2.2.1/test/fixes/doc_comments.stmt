@@ -1,0 +1,195 @@
+40 columns                              |
+>>> single line comment
+/** doc */ m() {}
+<<<
+/// doc
+m() {}
+>>> multiline comment
+/**
+ * multiline comment
+ * line 1
+ */
+m() {}
+<<<
+/// multiline comment
+/// line 1
+m() {}
+>>> multiline comment without star
+/**
+   multiline comment without star
+   line 1
+ */
+m() {}
+<<<
+/// multiline comment without star
+/// line 1
+m() {}
+>>> strange indent
+   /**
+  * strange indent
+    * line 1
+  */
+m() {}
+<<<
+/// strange indent
+/// line 1
+m() {}
+>>> comment on first line
+/** comment on first line
+* line 1
+*/
+m() {}
+<<<
+/// comment on first line
+/// line 1
+m() {}
+>>> empty comment
+/** */
+m() {}
+<<<
+///
+m() {}
+>>> empty multiline comment
+/**
+ */
+m() {}
+<<<
+///
+m() {}
+>>> multiline comment with sample
+/**
+ * multiline comment with sample
+ *
+ *     var a;
+ */
+m() {}
+<<<
+/// multiline comment with sample
+///
+///     var a;
+m() {}
+>>> single line comment with "**/" as close
+/** doc **/ m() {}
+<<<
+/// doc
+m() {}
+>>> multiline comment with "**/" as close
+/**
+ * multiline comment
+ * line 1
+ **/
+m() {}
+<<<
+/// multiline comment
+/// line 1
+m() {}
+>>> does not touch longer strings of "*"
+/******* not a doc comment **/
+m() {}
+<<<
+/******* not a doc comment **/
+m() {}
+>>> does not touch "/**/"
+/**/
+m() {}
+<<<
+/**/
+m() {}
+>>> does not touch "/***/"
+/***/
+m() {}
+<<<
+/***/
+m() {}
+>>> long box of "*"
+/*******
+ * STUFF
+ *******/
+m() {}
+<<<
+/*******
+ * STUFF
+ *******/
+m() {}
+>>> nested comment
+/**
+ * Floo the grumshack.
+ *
+ * Example:
+ * ```dart
+ * /** Doc comment */
+ * var grumshack = getGrumshack();
+ * /* Do the floo */
+ * grumshack.floo();
+ * ```
+*/
+m() {}
+<<<
+/// Floo the grumshack.
+///
+/// Example:
+/// ```dart
+/// /** Doc comment */
+/// var grumshack = getGrumshack();
+/// /* Do the floo */
+/// grumshack.floo();
+/// ```
+m() {}
+>>>
+/** Does a [foo](http://example.org/*example*/doc). **/
+m() {}
+<<<
+/// Does a [foo](http://example.org/*example*/doc).
+m() {}
+>>>
+/** Does a [foo](http://example.org/*example*/doc). */
+m() {}
+<<<
+/// Does a [foo](http://example.org/*example*/doc).
+m() {}
+>>> non-leading "*"
+/**
+ * Thing.
+ Another * thing.
+*/
+m() {}
+<<<
+/// Thing.
+/// Another * thing.
+m() {}
+>>> missing "*" but indented (#821)
+/**
+This is an ugly dartdoc comment that contains a code block.
+
+    class Foo {
+      final int x;
+      Foo(this.x);
+    }
+
+The formatting gets messed up by `dart format --fix-doc-comments`.
+*/
+m() {}
+<<<
+/// This is an ugly dartdoc comment that contains a code block.
+///
+///     class Foo {
+///       final int x;
+///       Foo(this.x);
+///     }
+///
+/// The formatting gets messed up by `dart format --fix-doc-comments`.
+m() {}
+>>> strip leading indentation shared by all lines
+/**    4
+   3
+  *     5
+ *  2
+       7 */
+m() {}
+<<<
+///   4
+///  3
+///    5
+/// 2
+///      7
+m() {}

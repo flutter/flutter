@@ -1,0 +1,208 @@
+#data
+<!DOCTYPE html><p><b><i><u></p> <p>X
+#errors
+Line: 1 Col: 31 Unexpected end tag (p). Ignored.
+Line: 1 Col: 36 Expected closing tag. Unexpected end of file.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <b>
+|         <i>
+|           <u>
+|     <b>
+|       <i>
+|         <u>
+|           " "
+|           <p>
+|             "X"
+
+#data
+<p><b><i><u></p>
+<p>X
+#errors
+Line: 1 Col: 3 Unexpected start tag (p). Expected DOCTYPE.
+Line: 1 Col: 16 Unexpected end tag (p). Ignored.
+Line: 2 Col: 4 Expected closing tag. Unexpected end of file.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <b>
+|         <i>
+|           <u>
+|     <b>
+|       <i>
+|         <u>
+|           "
+"
+|           <p>
+|             "X"
+
+#data
+<!doctype html></html> <head>
+#errors
+Line: 1 Col: 22 Unexpected end tag (html) after the (implied) root element.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     " "
+
+#data
+<!doctype html></body><meta>
+#errors
+Line: 1 Col: 22 Unexpected end tag (body) after the (implied) root element.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <meta>
+
+#data
+<html></html><!-- foo -->
+#errors
+Line: 1 Col: 6 Unexpected start tag (html). Expected DOCTYPE.
+Line: 1 Col: 13 Unexpected end tag (html) after the (implied) root element.
+#document
+| <html>
+|   <head>
+|   <body>
+| <!--  foo  -->
+
+#data
+<!doctype html></body><title>X</title>
+#errors
+Line: 1 Col: 22 Unexpected end tag (body) after the (implied) root element.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <title>
+|       "X"
+
+#data
+<!doctype html><table> X<meta></table>
+#errors
+Line: 1 Col: 24 Unexpected non-space characters in table context caused voodoo mode.
+Line: 1 Col: 30 Unexpected start tag (meta) in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     " X"
+|     <meta>
+|     <table>
+
+#data
+<!doctype html><table> x</table>
+#errors
+Line: 1 Col: 24 Unexpected non-space characters in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     " x"
+|     <table>
+
+#data
+<!doctype html><table> x </table>
+#errors
+Line: 1 Col: 25 Unexpected non-space characters in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     " x "
+|     <table>
+
+#data
+<!doctype html><table><tr> x</table>
+#errors
+Line: 1 Col: 28 Unexpected non-space characters in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     " x"
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<!doctype html><table>X<style> <tr>x </style> </table>
+#errors
+Line: 1 Col: 23 Unexpected non-space characters in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     "X"
+|     <table>
+|       <style>
+|         " <tr>x "
+|       " "
+
+#data
+<!doctype html><div><table><a>foo</a> <tr><td>bar</td> </tr></table></div>
+#errors
+Line: 1 Col: 30 Unexpected start tag (a) in table context caused voodoo mode.
+Line: 1 Col: 37 Unexpected end tag (a) in table context caused voodoo mode.
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       <a>
+|         "foo"
+|       <table>
+|         " "
+|         <tbody>
+|           <tr>
+|             <td>
+|               "bar"
+|             " "
+
+#data
+<frame></frame></frame><frameset><frame><frameset><frame></frameset><noframes></frameset><noframes>
+#errors
+6: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+13: Stray start tag “frame”.
+21: Stray end tag “frame”.
+29: Stray end tag “frame”.
+39: “frameset” start tag after “body” already open.
+105: End of file seen inside an [R]CDATA element.
+105: End of file seen and there were open elements.
+XXX: These errors are wrong, please fix me!
+#document
+| <html>
+|   <head>
+|   <frameset>
+|     <frame>
+|     <frameset>
+|       <frame>
+|     <noframes>
+|       "</frameset><noframes>"
+
+#data
+<!DOCTYPE html><object></html>
+#errors
+1: Expected closing tag. Unexpected end of file
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <object>

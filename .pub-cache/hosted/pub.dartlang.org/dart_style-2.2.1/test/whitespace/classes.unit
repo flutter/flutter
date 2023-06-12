@@ -1,0 +1,159 @@
+40 columns                              |
+>>> indentation
+class A {
+var z;
+inc(int x) => ++x;
+foo(int x) {
+if (x == 0) {
+return true;
+}}}
+<<<
+class A {
+  var z;
+  inc(int x) => ++x;
+  foo(int x) {
+    if (x == 0) {
+      return true;
+    }
+  }
+}
+>>> trailing space inside body
+class A {
+  }
+<<<
+class A {}
+>>> leading space before "class"
+  class A {
+}
+<<<
+class A {}
+>>>
+class A  { int meaningOfLife() => 42; }
+<<<
+class A {
+  int meaningOfLife() => 42;
+}
+>>>
+class      A  {
+  }
+<<<
+class A {}
+>>>
+class A{var z;inc(int x) => ++x;}
+<<<
+class A {
+  var z;
+  inc(int x) => ++x;
+}
+>>> eats newlines
+abstract
+
+class
+
+
+A{}
+<<<
+abstract class A {}
+>>> native class
+class A extends B
+native
+"Zapp" {
+}
+<<<
+class A extends B native "Zapp" {}
+>>> require blank line after non-empty block-bodied members
+class Foo {
+var a = 1; b() {;} c() => null; get d {;} get e => null; set f(value) {;
+} set g(value) => null; var h = 1;}
+<<<
+class Foo {
+  var a = 1;
+  b() {
+    ;
+  }
+
+  c() => null;
+  get d {
+    ;
+  }
+
+  get e => null;
+  set f(value) {
+    ;
+  }
+
+  set g(value) => null;
+  var h = 1;
+}
+>>> no required blank line after empty block-bodied members
+class Foo {
+var a = 1; b() {} c() => null; get d {} get e => null; set f(value) {
+} set g(value) => null; var h = 1;}
+<<<
+class Foo {
+  var a = 1;
+  b() {}
+  c() => null;
+  get d {}
+  get e => null;
+  set f(value) {}
+  set g(value) => null;
+  var h = 1;
+}
+>>>
+class Foo {
+ covariant    var bar;
+  covariant    int baz;
+@wat  covariant    int zoop;
+}
+<<<
+class Foo {
+  covariant var bar;
+  covariant int baz;
+  @wat
+  covariant int zoop;
+}
+>>> blank line before and after class
+var x = 1;
+class A {}
+var y = 2;
+<<<
+var x = 1;
+
+class A {}
+
+var y = 2;
+>>> late fields
+class Foo {
+static    late    final int i;
+static    late   int i;
+static    late   var i;
+covariant    late   var i;
+covariant    late   int i;
+    late    final int i;
+    late   int i;
+    late   var i;
+}
+<<<
+class Foo {
+  static late final int i;
+  static late int i;
+  static late var i;
+  covariant late var i;
+  covariant late int i;
+  late final int i;
+  late int i;
+  late var i;
+}
+>>> abstract fields
+class Foo {
+abstract  covariant     var  a  , b   ;
+    abstract    final   int   c;
+  abstract   int i;
+}
+<<<
+class Foo {
+  abstract covariant var a, b;
+  abstract final int c;
+  abstract int i;
+}

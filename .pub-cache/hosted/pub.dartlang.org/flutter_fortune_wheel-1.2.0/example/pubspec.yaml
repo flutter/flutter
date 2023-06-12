@@ -1,0 +1,29 @@
+name: flutter_fortune_wheel_example
+version: 1.0.0
+
+publish_to: "none"
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  auto_route: ^3.1.0
+  flutter_hooks: ^0.18.1
+  flutter_fortune_wheel:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  auto_route_generator: 3.1.0
+  build_runner: 2.1.5
+  effective_dart: ^1.3.2
+
+flutter:
+  uses-material-design: true

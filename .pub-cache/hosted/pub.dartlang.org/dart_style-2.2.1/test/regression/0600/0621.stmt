@@ -1,0 +1,8 @@
+>>>
+var x = (f as dynamic)<int>(40, 2);
+<<<
+var x = (f as dynamic)<int>(40, 2);
+>>>
+var y = (f as dynamic)<String>('hi', '!');
+<<<
+var y = (f as dynamic)<String>('hi', '!');

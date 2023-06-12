@@ -1,0 +1,33 @@
+name: url_launcher_example
+description: Demonstrates how to use the url_launcher plugin.
+publish_to: none
+
+environment:
+  sdk: ">=2.14.0 <3.0.0"
+  flutter: ">=2.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path: ^1.8.0
+  url_launcher:
+    # When depending on this package from a real application you should use:
+    #   url_launcher: ^x.y.z
+    # See https://dart.dev/tools/pub/dependencies#version-constraints
+    # The example app is bundled with the plugin so we use a path dependency on
+    # the parent directory to use the current plugin's version.
+    path: ../
+
+dev_dependencies:
+  build_runner: ^2.1.10
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mockito: ^5.0.0
+  plugin_platform_interface: ^2.0.0
+
+flutter:
+  uses-material-design: true

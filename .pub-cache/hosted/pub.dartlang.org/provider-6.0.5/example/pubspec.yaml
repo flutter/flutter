@@ -1,0 +1,24 @@
+name: example
+publish_to: "none"
+
+environment:
+  sdk: ">=2.12.0-0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider:
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  test: ^1.15.7
+
+dependency_overrides:
+  provider:
+    path: ../
+
+flutter:
+  uses-material-design: true

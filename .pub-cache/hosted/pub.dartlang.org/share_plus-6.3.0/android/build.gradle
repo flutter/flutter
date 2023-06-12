@@ -1,0 +1,43 @@
+group 'dev.fluttercommunity.plus.share'
+version '1.0-SNAPSHOT'
+
+buildscript {
+  ext.kotlin_version = '1.7.20'
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'com.android.tools.build:gradle:7.3.1'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+
+rootProject.allprojects {
+  repositories {
+    google()
+    mavenCentral()
+  }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 33
+
+  defaultConfig {
+    minSdkVersion 16
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+  }
+  lintOptions {
+    disable 'InvalidPackage'
+  }
+
+  dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.annotation:annotation:1.5.0'
+  }
+}

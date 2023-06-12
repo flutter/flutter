@@ -1,0 +1,19 @@
+>>> (indent 2)
+  inputStream
+    .transform(utf8.decoder)
+    .transform(new LineSplitter())
+    .listen(
+      (String line) {
+        print('Got ${line.length} characters from stream');
+      },
+      onDone: () { print('file is now closed'); },
+      onError: (e) { print(e.toString()); });
+<<<
+  inputStream.transform(utf8.decoder).transform(new LineSplitter()).listen(
+      (String line) {
+    print('Got ${line.length} characters from stream');
+  }, onDone: () {
+    print('file is now closed');
+  }, onError: (e) {
+    print(e.toString());
+  });

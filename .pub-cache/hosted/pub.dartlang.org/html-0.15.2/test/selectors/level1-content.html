@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html id="html" lang="en">
+<head id="head">
+	<meta id="meta" charset="UTF-8">
+	<title id="title">Selectors-API Test Suite: HTML with Selectors Level 2 using TestHarness: Test Document</title>
+
+	<!-- Links for :link and :visited pseudo-class test -->
+	<link id="pseudo-link-link1" href="">
+	<link id="pseudo-link-link2" href="http://example.org/">
+	<link id="pseudo-link-link3">
+	<style>
+	@namespace ns "http://www.w3.org/1999/xhtml";
+	 /* Declare the namespace prefix used in tests. This declaration should not be used by the API. */
+	</style>
+</head>
+<body id="body">
+<div id="root">
+	<div id="target"></div>
+
+	<div id="universal">
+		<p id="universal-p1">Universal selector tests inside element with <code id="universal-code1">id="universal"</code>.</p>
+		<hr id="universal-hr1">
+		<pre id="universal-pre1">Some preformatted text with some <span id="universal-span1">embedded code</span></pre>
+		<p id="universal-p2">This is a normal link: <a id="universal-a1" href="http://www.w3.org/">W3C</a></p>
+		<address id="universal-address1">Some more nested elements <code id="universal-code2"><a href="#" id="universal-a2">code hyperlink</a></code></address>
+	</div>
+
+	<div id="attr-presence">
+		<div class="attr-presence-div1" id="attr-presence-div1" align="center"></div>
+		<div class="attr-presence-div2" id="attr-presence-div2" align=""></div>
+		<div class="attr-presence-div3" id="attr-presence-div3" valign="center"></div>
+		<div class="attr-presence-div4" id="attr-presence-div4" alignv="center"></div>
+		<p id="attr-presence-p1"><a  id="attr-presence-a1" tItLe=""></a><span id="attr-presence-span1" TITLE="attr-presence-span1"></span></p>
+		<pre id="attr-presence-pre1" data-attr-presence="pre1"></pre>
+		<blockquote id="attr-presence-blockquote1" data-attr-presence="blockquote1"></blockquote>
+		<ul id="attr-presence-ul1" data-中文=""></ul>
+
+		<select id="attr-presence-select1">
+			<option id="attr-presence-select1-option1">A</option>
+			<option id="attr-presence-select1-option2">B</option>
+			<option id="attr-presence-select1-option3">C</option>
+			<option id="attr-presence-select1-option4">D</option>
+		</select>
+		<select id="attr-presence-select2">
+			<option id="attr-presence-select2-option1">A</option>
+			<option id="attr-presence-select2-option2">B</option>
+			<option id="attr-presence-select2-option3">C</option>
+			<option id="attr-presence-select2-option4" selected="selected">D</option>
+		</select>
+		<select id="attr-presence-select3" multiple="multiple">
+			<option id="attr-presence-select3-option1">A</option>
+			<option id="attr-presence-select3-option2" selected="">B</option>
+			<option id="attr-presence-select3-option3" selected="selected">C</option>
+			<option id="attr-presence-select3-option4">D</option>
+		</select>
+	</div>
+
+	<div id="attr-value">
+		<div id="attr-value-div1" align="center"></div>
+	    <div id="attr-value-div2" align=""></div>
+	    <div id="attr-value-div3" data-attr-value="&#xE9;"></div>
+	    <div id="attr-value-div4" data-attr-value_foo="&#xE9;"></div>
+
+		<form id="attr-value-form1">
+			<input id="attr-value-input1" type="text">
+			<input id="attr-value-input2" type="password">
+			<input id="attr-value-input3" type="hidden">
+			<input id="attr-value-input4" type="radio">
+			<input id="attr-value-input5" type="checkbox">
+			<input id="attr-value-input6" type="radio">
+			<input id="attr-value-input7" type="text">
+			<input id="attr-value-input8" type="hidden">
+			<input id="attr-value-input9" type="radio">
+		</form>
+
+		<div id="attr-value-div5" data-attr-value="中文"></div>
+	</div>
+
+	<div id="attr-whitespace">
+		<div id="attr-whitespace-div1" class="foo div1 bar"></div>
+	    <div id="attr-whitespace-div2" class=""></div>
+	    <div id="attr-whitespace-div3" class="foo div3 bar"></div>
+
+	    <div id="attr-whitespace-div4" data-attr-whitespace="foo &#xE9; bar"></div>
+	    <div id="attr-whitespace-div5" data-attr-whitespace_foo="&#xE9; foo"></div>
+
+		<a id="attr-whitespace-a1" rel="next bookmark"></a>
+		<a id="attr-whitespace-a2" rel="tag nofollow"></a>
+		<a id="attr-whitespace-a3" rel="tag bookmark"></a>
+		<a id="attr-whitespace-a4" rel="book mark"></a> <!-- Intentional space in "book mark" -->
+		<a id="attr-whitespace-a5" rel="nofollow"></a>
+		<a id="attr-whitespace-a6" rev="bookmark nofollow"></a>
+		<a id="attr-whitespace-a7" rel="prev next tag alternate nofollow author help icon noreferrer prefetch search stylesheet tag"></a>
+		
+		<p id="attr-whitespace-p1" title="Chinese 中文 characters"></p>
+	</div>
+
+	<div id="attr-hyphen">
+		<div id="attr-hyphen-div1"></div>
+	    <div id="attr-hyphen-div2" lang="fr"></div>
+	    <div id="attr-hyphen-div3" lang="en-AU"></div>
+	    <div id="attr-hyphen-div4" lang="es"></div>
+	</div>
+
+	<div id="attr-begins">
+		<a id="attr-begins-a1" href="http://www.example.org"></a>
+		<a id="attr-begins-a2" href="http://example.org/"></a>
+		<a id="attr-begins-a3" href="http://www.example.com/"></a>
+
+	    <div id="attr-begins-div1" lang="fr"></div>
+	    <div id="attr-begins-div2" lang="en-AU"></div>
+	    <div id="attr-begins-div3" lang="es"></div>
+	    <div id="attr-begins-div4" lang="en-US"></div>
+	    <div id="attr-begins-div5" lang="en"></div>
+
+		<p id="attr-begins-p1" class=" apple"></p> <!-- Intentional space in class value " apple". -->
+	</div>
+
+	<div id="attr-ends">
+		<a id="attr-ends-a1" href="http://www.example.org"></a>
+		<a id="attr-ends-a2" href="http://example.org/"></a>
+		<a id="attr-ends-a3" href="http://www.example.org"></a>
+
+	    <div id="attr-ends-div1" lang="fr"></div>
+	    <div id="attr-ends-div2" lang="de-CH"></div>
+	    <div id="attr-ends-div3" lang="es"></div>
+	    <div id="attr-ends-div4" lang="fr-CH"></div>
+
+		<p id="attr-ends-p1" class="apple "></p> <!-- Intentional space in class value "apple ". -->
+	</div>
+
+	<div id="attr-contains">
+		<a id="attr-contains-a1" href="http://www.example.org"></a>
+		<a id="attr-contains-a2" href="http://example.org/"></a>
+		<a id="attr-contains-a3" href="http://www.example.com/"></a>
+
+	    <div id="attr-contains-div1" lang="fr"></div>
+	    <div id="attr-contains-div2" lang="en-AU"></div>
+	    <div id="attr-contains-div3" lang="de-CH"></div>
+	    <div id="attr-contains-div4" lang="es"></div>
+	    <div id="attr-contains-div5" lang="fr-CH"></div>
+	    <div id="attr-contains-div6" lang="en-US"></div>
+
+		<p id="attr-contains-p1" class=" apple banana orange "></p>
+	</div>
+
+	<div id="pseudo-nth">
+		<table id="pseudo-nth-table1">
+			<tr id="pseudo-nth-tr1"><td id="pseudo-nth-td1"></td><td id="pseudo-nth-td2"></td><td id="pseudo-nth-td3"></td><td id="pseudo-nth-td4"></td><td id="pseudo-nth--td5"></td><td id="pseudo-nth-td6"></td></tr>
+			<tr id="pseudo-nth-tr2"><td id="pseudo-nth-td7"></td><td id="pseudo-nth-td8"></td><td id="pseudo-nth-td9"></td><td id="pseudo-nth-td10"></td><td id="pseudo-nth-td11"></td><td id="pseudo-nth-td12"></td></tr>
+			<tr id="pseudo-nth-tr3"><td id="pseudo-nth-td13"></td><td id="pseudo-nth-td14"></td><td id="pseudo-nth-td15"></td><td id="pseudo-nth-td16"></td><td id="pseudo-nth-td17"></td><td id="pseudo-nth-td18"></td></tr>
+		</table>
+		
+		<ol id="pseudo-nth-ol1">
+			<li id="pseudo-nth-li1"></li>
+			<li id="pseudo-nth-li2"></li>
+			<li id="pseudo-nth-li3"></li>
+			<li id="pseudo-nth-li4"></li>
+			<li id="pseudo-nth-li5"></li>
+			<li id="pseudo-nth-li6"></li>
+			<li id="pseudo-nth-li7"></li>
+			<li id="pseudo-nth-li8"></li>
+			<li id="pseudo-nth-li9"></li>
+			<li id="pseudo-nth-li10"></li>
+			<li id="pseudo-nth-li11"></li>
+			<li id="pseudo-nth-li12"></li>
+		</ol>
+
+		<p id="pseudo-nth-p1">
+			<span id="pseudo-nth-span1">span1</span>
+			<em id="pseudo-nth-em1">em1</em>
+			<!-- comment node-->
+			<em id="pseudo-nth-em2">em2</em>
+			<span id="pseudo-nth-span2">span2</span>
+			<strong id="pseudo-nth-strong1">strong1</strong>
+			<em id="pseudo-nth-em3">em3</em>
+			<span id="pseudo-nth-span3">span3</span>
+			<span id="pseudo-nth-span4">span4</span>
+			<strong id="pseudo-nth-strong2">strong2</strong>
+			<em id="pseudo-nth-em4">em4</em>
+		</p>
+	</div>
+
+	<div id="pseudo-first-child">
+		<div id="pseudo-first-child-div1"></div>
+		<div id="pseudo-first-child-div2"></div>
+		<div id="pseudo-first-child-div3"></div>
+
+		<p id="pseudo-first-child-p1"><span id="pseudo-first-child-span1"></span><span id="pseudo-first-child-span2"></span></p>
+		<p id="pseudo-first-child-p2"><span id="pseudo-first-child-span3"></span><span id="pseudo-first-child-span4"></span></p>
+		<p id="pseudo-first-child-p3"><span id="pseudo-first-child-span5"></span><span id="pseudo-first-child-span6"></span></p>
+	</div>
+
+	<div id="pseudo-last-child">
+		<p id="pseudo-last-child-p1"><span id="pseudo-last-child-span1"></span><span id="pseudo-last-child-span2"></span></p>
+		<p id="pseudo-last-child-p2"><span id="pseudo-last-child-span3"></span><span id="pseudo-last-child-span4"></span></p>
+		<p id="pseudo-last-child-p3"><span id="pseudo-last-child-span5"></span><span id="pseudo-last-child-span6"></span></p>
+
+		<div id="pseudo-last-child-div1"></div>
+		<div id="pseudo-last-child-div2"></div>
+		<div id="pseudo-last-child-div3"></div>
+	</div>
+
+	<div id="pseudo-only">
+		<p id="pseudo-only-p1">
+			<span id="pseudo-only-span1"></span>
+		</p>
+		<p id="pseudo-only-p2">
+			<span id="pseudo-only-span2"></span>
+			<span id="pseudo-only-span3"></span>
+		</p>
+		<p id="pseudo-only-p3">
+			<span id="pseudo-only-span4"></span>
+			<em id="pseudo-only-em1"></em>
+			<span id="pseudo-only-span5"></span>
+		</p>
+	</div>>
+
+	<div id="pseudo-empty">
+		<p id="pseudo-empty-p1"></p>
+		<p id="pseudo-empty-p2"><!-- comment node --></p>
+		<p id="pseudo-empty-p3"> </p>
+		<p id="pseudo-empty-p4">Text node</p>
+		<p id="pseudo-empty-p5"><span id="pseudo-empty-span1"></span></p>
+	</div>
+
+	<div id="pseudo-link">
+		<a id="pseudo-link-a1" href="">with href</a>
+		<a id="pseudo-link-a2" href="http://example.org/">with href</a>
+		<a id="pseudo-link-a3">without href</a>
+		<map name="pseudo-link-map1" id="pseudo-link-map1">
+			<area id="pseudo-link-area1" href="">
+			<area id="pseudo-link-area2">
+		</map>
+	</div>
+
+	<div id="pseudo-lang">
+		<div id="pseudo-lang-div1"></div>
+	    <div id="pseudo-lang-div2" lang="fr"></div>
+	    <div id="pseudo-lang-div3" lang="en-AU"></div>
+	    <div id="pseudo-lang-div4" lang="es"></div>
+	</div>
+
+	<div id="pseudo-ui">
+		<input id="pseudo-ui-input1" type="text">
+		<input id="pseudo-ui-input2" type="password">
+		<input id="pseudo-ui-input3" type="radio">
+		<input id="pseudo-ui-input4" type="radio" checked="checked">
+		<input id="pseudo-ui-input5" type="checkbox">
+		<input id="pseudo-ui-input6" type="checkbox" checked="checked">
+		<input id="pseudo-ui-input7" type="submit">
+		<input id="pseudo-ui-input8" type="button">
+		<input id="pseudo-ui-input9" type="hidden">
+		<textarea id="pseudo-ui-textarea1"></textarea>
+		<button id="pseudo-ui-button1">Enabled</button>
+
+		<input id="pseudo-ui-input10" disabled="disabled" type="text">
+		<input id="pseudo-ui-input11" disabled="disabled" type="password">
+		<input id="pseudo-ui-input12" disabled="disabled" type="radio">
+		<input id="pseudo-ui-input13" disabled="disabled" type="radio" checked="checked">
+		<input id="pseudo-ui-input14" disabled="disabled" type="checkbox">
+		<input id="pseudo-ui-input15" disabled="disabled" type="checkbox" checked="checked">
+		<input id="pseudo-ui-input16" disabled="disabled" type="submit">
+		<input id="pseudo-ui-input17" disabled="disabled" type="button">
+		<input id="pseudo-ui-input18" disabled="disabled" type="hidden">
+		<textarea id="pseudo-ui-textarea2" disabled="disabled"></textarea>
+		<button id="pseudo-ui-button2" disabled="disabled">Disabled</button>
+	</div>
+
+	<div id="not">
+		<div id="not-div1"></div>
+		<div id="not-div2"></div>
+		<div id="not-div3"></div>
+
+		<p id="not-p1"><span id="not-span1"></span><em id="not-em1"></em></p>
+		<p id="not-p2"><span id="not-span2"></span><em id="not-em2"></em></p>
+		<p id="not-p3"><span id="not-span3"></span><em id="not-em3"></em></p>
+	</div>
+
+	<div id="pseudo-element">All pseudo-element tests</div>
+
+	<div id="class">
+		<p id="class-p1" class="foo class-p bar"></p>
+		<p id="class-p2" class="class-p foo bar"></p>
+		<p id="class-p3" class="foo bar class-p"></p>
+
+		<!-- All permutations of the classes should match -->
+		<div id="class-div1" class="apple orange banana"></div>
+		<div id="class-div2" class="apple banana orange"></div>
+		<p id="class-p4" class="orange apple banana"></p>
+		<div id="class-div3" class="orange banana apple"></div>
+		<p id="class-p6" class="banana apple orange"></p>
+		<div id="class-div4" class="banana orange apple"></div>
+		<div id="class-div5" class="apple orange"></div>
+		<div id="class-div6" class="apple banana"></div>
+		<div id="class-div7" class="orange banana"></div>
+
+		<span id="class-span1" class="台北Táiběi 台北"></span>
+		<span id="class-span2" class="台北"></span>
+
+		<span id="class-span3" class="foo:bar"></span>
+		<span id="class-span4" class="test.foo[5]bar"></span>
+	</div>
+
+	<div id="id">
+		<div id="id-div1"></div>
+		<div id="id-div2"></div>
+
+		<ul id="id-ul1">
+			<li id="id-li-duplicate"></li>
+			<li id="id-li-duplicate"></li>
+			<li id="id-li-duplicate"></li>
+			<li id="id-li-duplicate"></li>
+		</ul>
+
+		<span id="台北Táiběi"></span>
+		<span id="台北"></span>
+
+		<span id="#foo:bar"></span>
+		<span id="test.foo[5]bar"></span>
+	</div>
+
+	<div id="descendant">
+		<div id="descendant-div1" class="descendant-div1">
+			<div id="descendant-div2" class="descendant-div2">
+				<div id="descendant-div3" class="descendant-div3">
+				</div>				
+			</div>
+		</div>
+		<div id="descendant-div4" class="descendant-div4"></div>
+	</div>
+
+	<div id="child">
+		<div id="child-div1" class="child-div1">
+			<div id="child-div2" class="child-div2">
+				<div id="child-div3" class="child-div3">
+				</div>				
+			</div>
+		</div>
+		<div id="child-div4" class="child-div4"></div>
+	</div>
+
+	<div id="adjacent">
+		<div id="adjacent-div1" class="adjacent-div1"></div>
+		<div id="adjacent-div2" class="adjacent-div2">
+			<div id="adjacent-div3" class="adjacent-div3"></div>
+		</div>
+		<div id="adjacent-div4" class="adjacent-div4">
+			<p id="adjacent-p1" class="adjacent-p1"></p>
+			<div id="adjacent-div5" class="adjacent-div5"></div>
+		</div>
+		<div id="adjacent-div6" class="adjacent-div6"></div>
+		<p id="adjacent-p2" class="adjacent-p2"></p>
+		<p id="adjacent-p3" class="adjacent-p3"></p>
+	</div>
+
+	<div id="sibling">
+		<div id="sibling-div1" class="sibling-div"></div>
+		<div id="sibling-div2" class="sibling-div">
+			<div id="sibling-div3" class="sibling-div"></div>
+		</div>
+		<div id="sibling-div4" class="sibling-div">
+			<p id="sibling-p1" class="sibling-p"></p>
+			<div id="sibling-div5" class="sibling-div"></div>
+		</div>
+		<div id="sibling-div6" class="sibling-div"></div>
+		<p id="sibling-p2" class="sibling-p"></p>
+		<p id="sibling-p3" class="sibling-p"></p>
+	</div>
+
+	<div id="group">
+		<em id="group-em1"></em>
+		<strong id="group-strong1"></strong>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+name: nested
+description: >-
+  A Flutter Widget which helps nest multiple widgets without
+  needing to manually nest them.
+version: 1.0.0
+repository: https://github.com/rrousselGit/nested
+
+environment:
+  sdk: ">=2.12.0-0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

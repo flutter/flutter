@@ -1,0 +1,9 @@
+Contents of this folder are ported from
+https://github.com/w3c/web-platform-tests/tree/master/selectors-api
+
+It is based on commit 96c61ac7c21f7f37526d1c03c4c6087734524130
+
+The original code is covered by the dual-licensing approach described in:
+
+    http://www.w3.org/Consortium/Legal/2008/04-testsuite-copyright.html
+    

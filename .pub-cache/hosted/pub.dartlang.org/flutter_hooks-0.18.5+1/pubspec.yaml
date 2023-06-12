@@ -1,0 +1,19 @@
+name: flutter_hooks
+description: A flutter implementation of React hooks. It adds a new kind of widget with enhanced code reuse.
+homepage: https://github.com/rrousselGit/flutter_hooks
+repository: https://github.com/rrousselGit/flutter_hooks/tree/master/packages/flutter_hooks
+issue_tracker: https://github.com/rrousselGit/flutter_hooks/issues
+version: 0.18.5+1
+
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.0.16

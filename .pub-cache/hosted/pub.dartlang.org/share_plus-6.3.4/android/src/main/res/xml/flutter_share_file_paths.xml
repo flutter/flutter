@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Used in conjunction with the provider declared in AndroidManifest.xml -->
+  <cache-path name="cache" path="share_plus/" />
+</paths>

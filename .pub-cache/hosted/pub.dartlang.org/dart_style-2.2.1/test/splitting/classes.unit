@@ -1,0 +1,131 @@
+40 columns                              |
+>>>
+class SomeClass extends BaseClass implements Interface {}
+<<<
+class SomeClass extends BaseClass
+    implements Interface {}
+>>>
+class AVeryLongSomeClass extends BaseClass implements I {}
+<<<
+class AVeryLongSomeClass
+    extends BaseClass implements I {}
+>>>
+class AVeryLongSomeClass extends BaseClass implements Interface {}
+<<<
+class AVeryLongSomeClass
+    extends BaseClass
+    implements Interface {}
+>>>
+class SomeClass extends BaseClass with Mixin {}
+<<<
+class SomeClass extends BaseClass
+    with Mixin {}
+>>> class alias
+class SomeClass = BaseClass with LongMixinName;
+<<<
+class SomeClass = BaseClass
+    with LongMixinName;
+>>> keep extends on same line
+class A extends B {}
+<<<
+class A extends B {}
+>>> keep implements on same line
+class A implements B {}
+<<<
+class A implements B {}
+>>> keep with on same line
+class A extends B with C {}
+<<<
+class A extends B with C {}
+>>> keep all on same line
+class A extends B with C implements D {}
+<<<
+class A extends B with C implements D {}
+>>> move extends to next line
+class SomeClass extends VeryLongBaseClass {}
+<<<
+class SomeClass
+    extends VeryLongBaseClass {}
+>>> move implements to next line
+class SomeClass implements VeryLongBaseClass {}
+<<<
+class SomeClass
+    implements VeryLongBaseClass {}
+>>> move all implements to next line
+class SomeClass implements Interface, AnotherOne {}
+<<<
+class SomeClass
+    implements Interface, AnotherOne {}
+>>> one interface per line
+class SomeClass implements Interface, Another, Third {}
+<<<
+class SomeClass
+    implements
+        Interface,
+        Another,
+        Third {}
+>>> move with to next line
+class SomeClass extends A with VeryLongMixin {}
+<<<
+class SomeClass extends A
+    with VeryLongMixin {}
+>>> move all mixins to next line
+class SomeClass extends A with Mixin, AnotherOne {}
+<<<
+class SomeClass extends A
+    with Mixin, AnotherOne {}
+>>> one mixin per line
+class SomeClass extends A with Mixin, Another, Third, Fourth {}
+<<<
+class SomeClass extends A
+    with
+        Mixin,
+        Another,
+        Third,
+        Fourth {}
+>>> multiline mixin with single-line interface
+class SomeClass extends A with Mixin, Another, Third, Fourth, Fifth implements Interface {}
+<<<
+class SomeClass extends A
+    with
+        Mixin,
+        Another,
+        Third,
+        Fourth,
+        Fifth
+    implements Interface {}
+>>> single-line mixin with multiline interface
+class SomeClass extends A with Mixin implements Interface, Another, Third {}
+<<<
+class SomeClass extends A
+    with Mixin
+    implements
+        Interface,
+        Another,
+        Third {}
+>>> multiline mixin with multiline interface
+class SomeClass extends A with Mixin, Another, Third, Fourth, Fifth implements Interface, Another, Third {}
+<<<
+class SomeClass extends A
+    with
+        Mixin,
+        Another,
+        Third,
+        Fourth,
+        Fifth
+    implements
+        Interface,
+        Another,
+        Third {}
+>>> double line mixin with double line interface
+class SomeClass extends A with Mixin, Another implements Interface, Another {}
+<<<
+class SomeClass extends A
+    with Mixin, Another
+    implements Interface, Another {}
+>>> force implements to split even if it would fit after with
+class SomeVeryLongClass extends A with Mixin implements Interface {}
+<<<
+class SomeVeryLongClass extends A
+    with Mixin
+    implements Interface {}

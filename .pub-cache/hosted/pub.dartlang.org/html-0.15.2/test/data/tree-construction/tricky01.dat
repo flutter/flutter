@@ -1,0 +1,261 @@
+#data
+<b><p>Bold </b> Not bold</p>
+Also not bold.
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <b>
+|     <p>
+|       <b>
+|         "Bold "
+|       " Not bold"
+|     "
+Also not bold."
+
+#data
+<html>
+<font color=red><i>Italic and Red<p>Italic and Red </font> Just italic.</p> Italic only.</i> Plain
+<p>I should not be red. <font color=red>Red. <i>Italic and red.</p>
+<p>Italic and red. </i> Red.</font> I should not be red.</p>
+<b>Bold <i>Bold and italic</b> Only Italic </i> Plain
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <font>
+|       color="red"
+|       <i>
+|         "Italic and Red"
+|     <i>
+|       <p>
+|         <font>
+|           color="red"
+|           "Italic and Red "
+|         " Just italic."
+|       " Italic only."
+|     " Plain
+"
+|     <p>
+|       "I should not be red. "
+|       <font>
+|         color="red"
+|         "Red. "
+|         <i>
+|           "Italic and red."
+|     <font>
+|       color="red"
+|       <i>
+|         "
+"
+|     <p>
+|       <font>
+|         color="red"
+|         <i>
+|           "Italic and red. "
+|         " Red."
+|       " I should not be red."
+|     "
+"
+|     <b>
+|       "Bold "
+|       <i>
+|         "Bold and italic"
+|     <i>
+|       " Only Italic "
+|     " Plain"
+
+#data
+<html><body>
+<p><font size="7">First paragraph.</p>
+<p>Second paragraph.</p></font>
+<b><p><i>Bold and Italic</b> Italic</p>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "
+"
+|     <p>
+|       <font>
+|         size="7"
+|         "First paragraph."
+|     <font>
+|       size="7"
+|       "
+"
+|       <p>
+|         "Second paragraph."
+|     "
+"
+|     <b>
+|     <p>
+|       <b>
+|         <i>
+|           "Bold and Italic"
+|       <i>
+|         " Italic"
+
+#data
+<html>
+<dl>
+<dt><b>Boo
+<dd>Goo?
+</dl>
+</html>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <dl>
+|       "
+"
+|       <dt>
+|         <b>
+|           "Boo
+"
+|       <dd>
+|         <b>
+|           "Goo?
+"
+|     <b>
+|       "
+"
+
+#data
+<html><body>
+<label><a><div>Hello<div>World</div></a></label>  
+</body></html>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "
+"
+|     <label>
+|       <a>
+|       <div>
+|         <a>
+|           "Hello"
+|           <div>
+|             "World"
+|         "  
+"
+
+#data
+<table><center> <font>a</center> <img> <tr><td> </td> </tr> </table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <center>
+|       " "
+|       <font>
+|         "a"
+|     <font>
+|       <img>
+|       " "
+|     <table>
+|       " "
+|       <tbody>
+|         <tr>
+|           <td>
+|             " "
+|           " "
+|         " "
+
+#data
+<table><tr><p><a><p>You should see this text.
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <a>
+|     <p>
+|       <a>
+|         "You should see this text."
+|     <table>
+|       <tbody>
+|         <tr>
+
+#data
+<TABLE>
+<TR>
+<CENTER><CENTER><TD></TD></TR><TR>
+<FONT>
+<TABLE><tr></tr></TABLE>
+</P>
+<a></font><font></a>
+This page contains an insanely badly-nested tag sequence.
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <center>
+|       <center>
+|     <font>
+|       "
+"
+|     <table>
+|       "
+"
+|       <tbody>
+|         <tr>
+|           "
+"
+|           <td>
+|         <tr>
+|           "
+"
+|     <table>
+|       <tbody>
+|         <tr>
+|     <font>
+|       "
+"
+|       <p>
+|       "
+"
+|       <a>
+|     <a>
+|       <font>
+|     <font>
+|       "
+This page contains an insanely badly-nested tag sequence."
+
+#data
+<html>
+<body>
+<b><nobr><div>This text is in a div inside a nobr</nobr>More text that should not be in the nobr, i.e., the
+nobr should have closed the div inside it implicitly. </b><pre>A pre tag outside everything else.</pre>
+</body>
+</html>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "
+"
+|     <b>
+|       <nobr>
+|     <div>
+|       <b>
+|         <nobr>
+|           "This text is in a div inside a nobr"
+|         "More text that should not be in the nobr, i.e., the
+nobr should have closed the div inside it implicitly. "
+|       <pre>
+|         "A pre tag outside everything else."
+|       "
+
+"

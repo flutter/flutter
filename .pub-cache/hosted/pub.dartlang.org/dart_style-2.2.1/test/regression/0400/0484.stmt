@@ -1,0 +1,29 @@
+>>>
+var list = [
+  // comment
+  function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3), function(a: 1, b: 2, c: 3),
+];
+<<<
+var list = [
+  // comment
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+  function(a: 1, b: 2, c: 3),
+];

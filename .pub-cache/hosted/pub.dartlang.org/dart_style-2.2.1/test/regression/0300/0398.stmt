@@ -1,0 +1,11 @@
+>>> (indent 4)
+    children.add(new DrawerHeader(children: [
+        new Flex([avatar, username],
+            justifyContent: FlexJustifyContent.center,
+            direction: FlexDirection.vertical)]));
+<<<
+    children.add(new DrawerHeader(children: [
+      new Flex([avatar, username],
+          justifyContent: FlexJustifyContent.center,
+          direction: FlexDirection.vertical)
+    ]));

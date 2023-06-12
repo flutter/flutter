@@ -1,0 +1,115 @@
+>>>
+final ArgParser argParser = StrongModeOptions.addArguments(new ArgParser()
+  ..addFlag('sdk-check',
+      abbr: 's', help: 'Typecheck sdk libs', defaultsTo: false)
+  ..addFlag('mock-sdk',
+      abbr: 'm', help: 'Use a mock Dart SDK', defaultsTo: false)
+
+  // input/output options
+  ..addOption('out', abbr: 'o', help: 'Output directory', defaultsTo: null)
+  ..addOption('dart-sdk', help: 'Dart SDK Path', defaultsTo: null)
+  ..addOption('dump-src-to', help: 'Dump dart src code', defaultsTo: null)
+  ..addOption('package-root',
+      abbr: 'p',
+      help: 'Package root to resolve "package:" imports',
+      defaultsTo: 'packages/')
+  ..addOption('url-mapping',
+      help: '--url-mapping=libraryUri,/path/to/library.dart uses library.dart\n'
+      'as the source for an import of of "libraryUri".',
+      allowMultiple: true,
+      splitCommas: false)
+  ..addFlag('use-multi-package',
+      help: 'Whether to use the multi-package resolver for "package:" imports',
+      defaultsTo: false)
+  ..addOption('package-paths',
+      help: 'if using the multi-package resolver, the list of directories to\n'
+      'look for packages in.', defaultsTo: '')
+  ..addOption('resources',
+      help: 'Additional resources to serve', defaultsTo: '')
+  ..addFlag('source-maps',
+      help: 'Whether to emit source map files', defaultsTo: true)
+  ..addOption('runtime-dir',
+      help: 'Where to find dev_compiler\'s runtime files', defaultsTo: null)
+
+  // general options
+  ..addFlag('help', abbr: 'h', help: 'Display this message')
+  ..addFlag('server', help: 'Run as a development server.', defaultsTo: false)
+  ..addFlag('hashing',
+      help: 'Enable hash-based file caching.', defaultsTo: null)
+  ..addFlag('widget',
+      help: 'Serve embedded widget with static errors and warnings.',
+      defaultsTo: true)
+  ..addOption('host',
+      help: 'Host name or address to serve files from, e.g. --host=0.0.0.0\n'
+      'to listen on all interfaces (used only when --serve is on)',
+      defaultsTo: 'localhost')
+  ..addOption('port',
+      help: 'Port to serve files from (used only when --serve is on)',
+      defaultsTo: '8080')
+  ..addFlag('force-compile',
+      help: 'Compile code with static errors', defaultsTo: false)
+  ..addOption('log', abbr: 'l', help: 'Logging level (defaults to severe)')
+  ..addFlag('dump-info',
+      abbr: 'i', help: 'Dump summary information', defaultsTo: null)
+  ..addOption('dump-info-file',
+      abbr: 'f',
+      help: 'Dump info json file (requires dump-info)',
+      defaultsTo: null));
+<<<
+final ArgParser argParser = StrongModeOptions.addArguments(new ArgParser()
+  ..addFlag('sdk-check',
+      abbr: 's', help: 'Typecheck sdk libs', defaultsTo: false)
+  ..addFlag('mock-sdk',
+      abbr: 'm', help: 'Use a mock Dart SDK', defaultsTo: false)
+
+  // input/output options
+  ..addOption('out', abbr: 'o', help: 'Output directory', defaultsTo: null)
+  ..addOption('dart-sdk', help: 'Dart SDK Path', defaultsTo: null)
+  ..addOption('dump-src-to', help: 'Dump dart src code', defaultsTo: null)
+  ..addOption('package-root',
+      abbr: 'p',
+      help: 'Package root to resolve "package:" imports',
+      defaultsTo: 'packages/')
+  ..addOption('url-mapping',
+      help: '--url-mapping=libraryUri,/path/to/library.dart uses library.dart\n'
+          'as the source for an import of of "libraryUri".',
+      allowMultiple: true,
+      splitCommas: false)
+  ..addFlag('use-multi-package',
+      help: 'Whether to use the multi-package resolver for "package:" imports',
+      defaultsTo: false)
+  ..addOption('package-paths',
+      help: 'if using the multi-package resolver, the list of directories to\n'
+          'look for packages in.',
+      defaultsTo: '')
+  ..addOption('resources',
+      help: 'Additional resources to serve', defaultsTo: '')
+  ..addFlag('source-maps',
+      help: 'Whether to emit source map files', defaultsTo: true)
+  ..addOption('runtime-dir',
+      help: 'Where to find dev_compiler\'s runtime files', defaultsTo: null)
+
+  // general options
+  ..addFlag('help', abbr: 'h', help: 'Display this message')
+  ..addFlag('server', help: 'Run as a development server.', defaultsTo: false)
+  ..addFlag('hashing',
+      help: 'Enable hash-based file caching.', defaultsTo: null)
+  ..addFlag('widget',
+      help: 'Serve embedded widget with static errors and warnings.',
+      defaultsTo: true)
+  ..addOption('host',
+      help: 'Host name or address to serve files from, e.g. --host=0.0.0.0\n'
+          'to listen on all interfaces (used only when --serve is on)',
+      defaultsTo: 'localhost')
+  ..addOption('port',
+      help: 'Port to serve files from (used only when --serve is on)',
+      defaultsTo: '8080')
+  ..addFlag('force-compile',
+      help: 'Compile code with static errors', defaultsTo: false)
+  ..addOption('log', abbr: 'l', help: 'Logging level (defaults to severe)')
+  ..addFlag('dump-info',
+      abbr: 'i', help: 'Dump summary information', defaultsTo: null)
+  ..addOption('dump-info-file',
+      abbr: 'f',
+      help: 'Dump info json file (requires dump-info)',
+      defaultsTo: null));

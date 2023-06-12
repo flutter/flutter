@@ -1,0 +1,39 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="io.flutter.plugins.urllauncherexample">
+
+  <!-- The INTERNET permission is required for development. Specifically,
+       flutter needs it to communicate with the running application
+       to allow setting breakpoints, to provide hot reload, etc.
+  -->
+  <uses-permission android:name="android.permission.INTERNET"/>
+
+  <!-- Provide required visibility configuration for API level 30 and above -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:scheme="https" />
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.DIAL" />
+      <data android:scheme="tel" />
+    </intent>
+  </queries>
+
+  <application
+    android:icon="@mipmap/ic_launcher"
+    android:label="url_launcher_example">
+    <activity
+      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
+      android:hardwareAccelerated="true"
+      android:name="io.flutter.embedding.android.FlutterActivity"
+      android:theme="@android:style/Theme.Black.NoTitleBar"
+      android:windowSoftInputMode="adjustResize">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    <meta-data android:name="flutterEmbedding" android:value="2"/>
+  </application>
+
+</manifest>

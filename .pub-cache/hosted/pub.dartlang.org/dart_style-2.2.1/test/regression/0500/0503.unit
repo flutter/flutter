@@ -1,0 +1,17 @@
+>>>
+class Foo {
+  Stream<
+      api
+          .ReallySuperExtremelyLooooooongTypeName> veryExtremelyLoooongMethodName(
+      String parameter, int parameter2, String thirdParameter) {
+    ;
+  }
+}
+<<<
+class Foo {
+  Stream<api.ReallySuperExtremelyLooooooongTypeName>
+      veryExtremelyLoooongMethodName(
+          String parameter, int parameter2, String thirdParameter) {
+    ;
+  }
+}

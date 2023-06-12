@@ -1,0 +1,20 @@
+include: package:pedantic/analysis_options.yaml
+analyzer:
+  errors:
+    argument_type_not_assignable: ignore
+    extends_non_class: ignore
+    implements_non_class: ignore
+    non_type_as_type_argument: ignore
+    override_on_non_overriding_method: ignore
+    undefined_annotation: ignore
+    undefined_class: ignore
+    undefined_function: ignore
+    undefined_identifier: ignore
+    undefined_method: ignore
+    undefined_named_parameter: ignore
+    undefined_super_method: ignore
+    uri_does_not_exist: ignore
+    type_test_with_undefined_name: ignore
+linter:
+  rules:
+    - unnecessary_new

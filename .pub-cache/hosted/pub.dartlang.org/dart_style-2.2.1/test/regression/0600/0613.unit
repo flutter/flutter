@@ -1,0 +1,4 @@
+>>>
+void takeIdentityFunction(T id<T>(T x)) {}
+<<<
+void takeIdentityFunction(T id<T>(T x)) {}

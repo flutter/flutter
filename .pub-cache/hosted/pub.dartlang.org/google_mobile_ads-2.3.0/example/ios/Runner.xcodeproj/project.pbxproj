@@ -1,0 +1,867 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 52;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		5C7E63AC163134A326635FC7 /* libPods-google_mobile_ads_exampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B4B811D89E676EBD37E2E206 /* libPods-google_mobile_ads_exampleTests.a */; };
+		8FB13CDD248F07D90011A72F /* FLTGoogleMobileAdsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FB13CDC248F07D90011A72F /* FLTGoogleMobileAdsTest.m */; };
+		8FB13CE22498136E0011A72F /* FLTGoogleMobileAdsReaderWriterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FB13CE12498136E0011A72F /* FLTGoogleMobileAdsReaderWriterTest.m */; };
+		8FC897F52411A9F100415930 /* NativeAdView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8FC897F42411A9F100415930 /* NativeAdView.xib */; };
+		978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */; };
+		97C146F31CF9000F007C117D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
+		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
+		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
+		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		9E1BEA7429148DD000315C59 /* FLTAdUtilTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E1BEA7329148DD000315C59 /* FLTAdUtilTest.m */; };
+		9E4163BB26CCE99400220C78 /* FLTAppOpenAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E4163BA26CCE99300220C78 /* FLTAppOpenAdTest.m */; };
+		9E5A534926AA235D00B9438D /* FLTAdUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E5A534826AA235D00B9438D /* FLTAdUtil.m */; };
+		9E60902C27A9E7BE003D5BAB /* FLTRewardedInterstitialAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E60902B27A9E7BE003D5BAB /* FLTRewardedInterstitialAdTest.m */; };
+		9E79684A271FF40900E06158 /* FLTAdRequestTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E796848271FF40900E06158 /* FLTAdRequestTest.m */; };
+		9E79684B271FF40900E06158 /* FLTGAMAdRequestTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E796849271FF40900E06158 /* FLTGAMAdRequestTest.m */; };
+		9E7A912E2825E14C005FD19A /* FLTUserMessagingPlatformReaderWriterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7A912C2825E14C005FD19A /* FLTUserMessagingPlatformReaderWriterTest.m */; };
+		9E7A912F2825E14C005FD19A /* FLTUserMessagingPlatformManagerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7A912D2825E14C005FD19A /* FLTUserMessagingPlatformManagerTest.m */; };
+		9E7B9D8F273206F800C6A6AB /* FLTAppStateNotifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B9D8E273206F800C6A6AB /* FLTAppStateNotifier.m */; };
+		9EA7213725BB6517008D57E3 /* GoogleMobileAds.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EA7213525BB6464008D57E3 /* GoogleMobileAds.xcframework */; };
+		9EA7474E2637CD6800E0B0E4 /* FLTBannerAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA7474C2637CD6800E0B0E4 /* FLTBannerAdTest.m */; };
+		9EA7474F2637CD6800E0B0E4 /* FLTGAMBannerAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA7474D2637CD6800E0B0E4 /* FLTGAMBannerAdTest.m */; };
+		9EA747532637EC7000E0B0E4 /* FLTGamInterstitialAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA747512637EC7000E0B0E4 /* FLTGamInterstitialAdTest.m */; };
+		9EA747542637EC7000E0B0E4 /* FLTInterstitialAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EA747522637EC7000E0B0E4 /* FLTInterstitialAdTest.m */; };
+		9EAB4721286A4C73004456D0 /* FLTNSString.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EAB471F286A4C73004456D0 /* FLTNSString.m */; };
+		9EB9FE53280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB9FE51280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.m */; };
+		9EB9FE56280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EB9FE55280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.m */; };
+		9EB9FE59280F86D100DDBB4F /* UserMessagingPlatform.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EB9FE57280F853D00DDBB4F /* UserMessagingPlatform.xcframework */; };
+		9EDE65D626F9300000783049 /* FLTFluidGAMBannerAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EDE65D526F9300000783049 /* FLTFluidGAMBannerAdTest.m */; };
+		9EF1F00025F8351A0017A440 /* FLTGoogleMobileAdsPluginMethodCallsTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF1EFFF25F8351A0017A440 /* FLTGoogleMobileAdsPluginMethodCallsTest.m */; };
+		9EF4E70026392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F326392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.h */; };
+		9EF4E70126392B230007E4FE /* FLTAd_Internal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F426392B230007E4FE /* FLTAd_Internal.m */; };
+		9EF4E70226392B230007E4FE /* FLTConstants.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F526392B230007E4FE /* FLTConstants.h */; };
+		9EF4E70326392B230007E4FE /* FLTMobileAds_Internal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F626392B230007E4FE /* FLTMobileAds_Internal.m */; };
+		9EF4E70426392B230007E4FE /* FLTGoogleMobileAdsPlugin.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F726392B230007E4FE /* FLTGoogleMobileAdsPlugin.h */; };
+		9EF4E70526392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F826392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.h */; };
+		9EF4E70626392B230007E4FE /* FLTAdInstanceManager_Internal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6F926392B230007E4FE /* FLTAdInstanceManager_Internal.m */; };
+		9EF4E70726392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6FA26392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.m */; };
+		9EF4E70826392B230007E4FE /* FLTAd_Internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6FB26392B230007E4FE /* FLTAd_Internal.h */; };
+		9EF4E70926392B230007E4FE /* FLTGoogleMobileAdsPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6FC26392B230007E4FE /* FLTGoogleMobileAdsPlugin.m */; };
+		9EF4E70A26392B230007E4FE /* FLTAdInstanceManager_Internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6FD26392B230007E4FE /* FLTAdInstanceManager_Internal.h */; };
+		9EF4E70B26392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6FE26392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.m */; };
+		9EF4E70C26392B230007E4FE /* FLTMobileAds_Internal.h in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E6FF26392B230007E4FE /* FLTMobileAds_Internal.h */; };
+		9EF4E7102639410D0007E4FE /* FLTRewardedAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E70F2639410D0007E4FE /* FLTRewardedAdTest.m */; };
+		9EF4E7142639D4B30007E4FE /* FLTNativeAdTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9EF4E7132639D4B30007E4FE /* FLTNativeAdTest.m */; };
+		BEF5C9D9BC96688454A0E3B0 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F14CED182CC13194D568B4C4 /* Pods_Runner.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8FB13CD7248F07B80011A72F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
+			remoteInfo = Runner;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
+		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		41FDEFDDDE2EF7FC7A8F36B5 /* Pods-google_mobile_ads_exampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-google_mobile_ads_exampleTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-google_mobile_ads_exampleTests/Pods-google_mobile_ads_exampleTests.release.xcconfig"; sourceTree = "<group>"; };
+		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		8FB13CD2248F07B80011A72F /* google_mobile_ads_exampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = google_mobile_ads_exampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8FB13CD6248F07B80011A72F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8FB13CDC248F07D90011A72F /* FLTGoogleMobileAdsTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTGoogleMobileAdsTest.m; path = ../../../ios/Tests/FLTGoogleMobileAdsTest.m; sourceTree = "<group>"; };
+		8FB13CE12498136E0011A72F /* FLTGoogleMobileAdsReaderWriterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTGoogleMobileAdsReaderWriterTest.m; path = ../../../ios/Tests/FLTGoogleMobileAdsReaderWriterTest.m; sourceTree = "<group>"; };
+		8FC897F42411A9F100415930 /* NativeAdView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NativeAdView.xib; sourceTree = "<group>"; };
+		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
+		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
+		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		97C146F21CF9000F007C117D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9E1BEA7329148DD000315C59 /* FLTAdUtilTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTAdUtilTest.m; path = ../../../ios/Tests/FLTAdUtilTest.m; sourceTree = "<group>"; };
+		9E4163BA26CCE99300220C78 /* FLTAppOpenAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTAppOpenAdTest.m; path = ../../../ios/Tests/FLTAppOpenAdTest.m; sourceTree = "<group>"; };
+		9E5A534726AA235D00B9438D /* FLTAdUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLTAdUtil.h; path = ../../ios/Classes/FLTAdUtil.h; sourceTree = "<group>"; };
+		9E5A534826AA235D00B9438D /* FLTAdUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTAdUtil.m; path = ../../ios/Classes/FLTAdUtil.m; sourceTree = "<group>"; };
+		9E60902B27A9E7BE003D5BAB /* FLTRewardedInterstitialAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTRewardedInterstitialAdTest.m; path = ../../../ios/Tests/FLTRewardedInterstitialAdTest.m; sourceTree = "<group>"; };
+		9E79682A271D415600E06158 /* FLTMediationNetworkExtrasProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLTMediationNetworkExtrasProvider.h; path = ../../ios/Classes/FLTMediationNetworkExtrasProvider.h; sourceTree = "<group>"; };
+		9E796848271FF40900E06158 /* FLTAdRequestTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTAdRequestTest.m; path = ../../../ios/Tests/FLTAdRequestTest.m; sourceTree = "<group>"; };
+		9E796849271FF40900E06158 /* FLTGAMAdRequestTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTGAMAdRequestTest.m; path = ../../../ios/Tests/FLTGAMAdRequestTest.m; sourceTree = "<group>"; };
+		9E7A912C2825E14C005FD19A /* FLTUserMessagingPlatformReaderWriterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTUserMessagingPlatformReaderWriterTest.m; path = ../../../ios/Tests/UserMessagingPlatform/FLTUserMessagingPlatformReaderWriterTest.m; sourceTree = "<group>"; };
+		9E7A912D2825E14C005FD19A /* FLTUserMessagingPlatformManagerTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTUserMessagingPlatformManagerTest.m; path = ../../../ios/Tests/UserMessagingPlatform/FLTUserMessagingPlatformManagerTest.m; sourceTree = "<group>"; };
+		9E7B9D8D273206F800C6A6AB /* FLTAppStateNotifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLTAppStateNotifier.h; path = ../../ios/Classes/FLTAppStateNotifier.h; sourceTree = "<group>"; };
+		9E7B9D8E273206F800C6A6AB /* FLTAppStateNotifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTAppStateNotifier.m; path = ../../ios/Classes/FLTAppStateNotifier.m; sourceTree = "<group>"; };
+		9EA7213525BB6464008D57E3 /* GoogleMobileAds.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = GoogleMobileAds.xcframework; path = "Pods/Google-Mobile-Ads-SDK/Frameworks/GoogleMobileAdsFramework-Current/GoogleMobileAds.xcframework"; sourceTree = "<group>"; };
+		9EA7474C2637CD6800E0B0E4 /* FLTBannerAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTBannerAdTest.m; path = ../../../ios/Tests/FLTBannerAdTest.m; sourceTree = "<group>"; };
+		9EA7474D2637CD6800E0B0E4 /* FLTGAMBannerAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTGAMBannerAdTest.m; path = ../../../ios/Tests/FLTGAMBannerAdTest.m; sourceTree = "<group>"; };
+		9EA747512637EC7000E0B0E4 /* FLTGamInterstitialAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTGamInterstitialAdTest.m; path = ../../../ios/Tests/FLTGamInterstitialAdTest.m; sourceTree = "<group>"; };
+		9EA747522637EC7000E0B0E4 /* FLTInterstitialAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTInterstitialAdTest.m; path = ../../../ios/Tests/FLTInterstitialAdTest.m; sourceTree = "<group>"; };
+		9EAB471F286A4C73004456D0 /* FLTNSString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTNSString.m; path = ../../ios/Classes/FLTNSString.m; sourceTree = "<group>"; };
+		9EAB4720286A4C73004456D0 /* FLTNSString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLTNSString.h; path = ../../ios/Classes/FLTNSString.h; sourceTree = "<group>"; };
+		9EB9FE51280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLTUserMessagingPlatformManager.m; sourceTree = "<group>"; };
+		9EB9FE52280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLTUserMessagingPlatformManager.h; sourceTree = "<group>"; };
+		9EB9FE54280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FLTUserMessagingPlatformReaderWriter.h; sourceTree = "<group>"; };
+		9EB9FE55280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FLTUserMessagingPlatformReaderWriter.m; sourceTree = "<group>"; };
+		9EB9FE57280F853D00DDBB4F /* UserMessagingPlatform.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = UserMessagingPlatform.xcframework; path = Pods/GoogleUserMessagingPlatform/Frameworks/Release/UserMessagingPlatform.xcframework; sourceTree = "<group>"; };
+		9EDE65D526F9300000783049 /* FLTFluidGAMBannerAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTFluidGAMBannerAdTest.m; path = ../../../ios/Tests/FLTFluidGAMBannerAdTest.m; sourceTree = "<group>"; };
+		9EF1EFFF25F8351A0017A440 /* FLTGoogleMobileAdsPluginMethodCallsTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTGoogleMobileAdsPluginMethodCallsTest.m; path = ../../../ios/Tests/FLTGoogleMobileAdsPluginMethodCallsTest.m; sourceTree = "<group>"; };
+		9EF4E6F326392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTGoogleMobileAdsCollection_Internal.h; path = ../../ios/Classes/FLTGoogleMobileAdsCollection_Internal.h; sourceTree = "<group>"; };
+		9EF4E6F426392B230007E4FE /* FLTAd_Internal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FLTAd_Internal.m; path = ../../ios/Classes/FLTAd_Internal.m; sourceTree = "<group>"; };
+		9EF4E6F526392B230007E4FE /* FLTConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTConstants.h; path = ../../ios/Classes/FLTConstants.h; sourceTree = "<group>"; };
+		9EF4E6F626392B230007E4FE /* FLTMobileAds_Internal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FLTMobileAds_Internal.m; path = ../../ios/Classes/FLTMobileAds_Internal.m; sourceTree = "<group>"; };
+		9EF4E6F726392B230007E4FE /* FLTGoogleMobileAdsPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTGoogleMobileAdsPlugin.h; path = ../../ios/Classes/FLTGoogleMobileAdsPlugin.h; sourceTree = "<group>"; };
+		9EF4E6F826392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTGoogleMobileAdsReaderWriter_Internal.h; path = ../../ios/Classes/FLTGoogleMobileAdsReaderWriter_Internal.h; sourceTree = "<group>"; };
+		9EF4E6F926392B230007E4FE /* FLTAdInstanceManager_Internal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FLTAdInstanceManager_Internal.m; path = ../../ios/Classes/FLTAdInstanceManager_Internal.m; sourceTree = "<group>"; };
+		9EF4E6FA26392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FLTGoogleMobileAdsReaderWriter_Internal.m; path = ../../ios/Classes/FLTGoogleMobileAdsReaderWriter_Internal.m; sourceTree = "<group>"; };
+		9EF4E6FB26392B230007E4FE /* FLTAd_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTAd_Internal.h; path = ../../ios/Classes/FLTAd_Internal.h; sourceTree = "<group>"; };
+		9EF4E6FC26392B230007E4FE /* FLTGoogleMobileAdsPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FLTGoogleMobileAdsPlugin.m; path = ../../ios/Classes/FLTGoogleMobileAdsPlugin.m; sourceTree = "<group>"; };
+		9EF4E6FD26392B230007E4FE /* FLTAdInstanceManager_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTAdInstanceManager_Internal.h; path = ../../ios/Classes/FLTAdInstanceManager_Internal.h; sourceTree = "<group>"; };
+		9EF4E6FE26392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = FLTGoogleMobileAdsCollection_Internal.m; path = ../../ios/Classes/FLTGoogleMobileAdsCollection_Internal.m; sourceTree = "<group>"; };
+		9EF4E6FF26392B230007E4FE /* FLTMobileAds_Internal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FLTMobileAds_Internal.h; path = ../../ios/Classes/FLTMobileAds_Internal.h; sourceTree = "<group>"; };
+		9EF4E70F2639410D0007E4FE /* FLTRewardedAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTRewardedAdTest.m; path = ../../../ios/Tests/FLTRewardedAdTest.m; sourceTree = "<group>"; };
+		9EF4E7132639D4B30007E4FE /* FLTNativeAdTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLTNativeAdTest.m; path = ../../../ios/Tests/FLTNativeAdTest.m; sourceTree = "<group>"; };
+		B4B811D89E676EBD37E2E206 /* libPods-google_mobile_ads_exampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-google_mobile_ads_exampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0B22AB9B287C9F711EAAF48 /* Pods-google_mobile_ads_exampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-google_mobile_ads_exampleTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-google_mobile_ads_exampleTests/Pods-google_mobile_ads_exampleTests.debug.xcconfig"; sourceTree = "<group>"; };
+		CE82265EF05E2A9632B25E60 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		F14CED182CC13194D568B4C4 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F74051031B69F8124E38352E /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8FB13CCF248F07B80011A72F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9EB9FE59280F86D100DDBB4F /* UserMessagingPlatform.xcframework in Frameworks */,
+				9EA7213725BB6517008D57E3 /* GoogleMobileAds.xcframework in Frameworks */,
+				5C7E63AC163134A326635FC7 /* libPods-google_mobile_ads_exampleTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		97C146EB1CF9000F007C117D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BEF5C9D9BC96688454A0E3B0 /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07A52D07C2C05D9527204891 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				CE82265EF05E2A9632B25E60 /* Pods-Runner.debug.xcconfig */,
+				F74051031B69F8124E38352E /* Pods-Runner.release.xcconfig */,
+				C0B22AB9B287C9F711EAAF48 /* Pods-google_mobile_ads_exampleTests.debug.xcconfig */,
+				41FDEFDDDE2EF7FC7A8F36B5 /* Pods-google_mobile_ads_exampleTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		5B6AAA352BAC85BF7DD68C46 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9EB9FE57280F853D00DDBB4F /* UserMessagingPlatform.xcframework */,
+				9EA7213525BB6464008D57E3 /* GoogleMobileAds.xcframework */,
+				B4B811D89E676EBD37E2E206 /* libPods-google_mobile_ads_exampleTests.a */,
+				F14CED182CC13194D568B4C4 /* Pods_Runner.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8FB13CD3248F07B80011A72F /* google_mobile_ads_exampleTests */ = {
+			isa = PBXGroup;
+			children = (
+				9E1BEA7329148DD000315C59 /* FLTAdUtilTest.m */,
+				9E7A912B2825E131005FD19A /* UserMessagingPlatform */,
+				9E60902B27A9E7BE003D5BAB /* FLTRewardedInterstitialAdTest.m */,
+				9E796848271FF40900E06158 /* FLTAdRequestTest.m */,
+				9E796849271FF40900E06158 /* FLTGAMAdRequestTest.m */,
+				9EDE65D526F9300000783049 /* FLTFluidGAMBannerAdTest.m */,
+				9E4163BA26CCE99300220C78 /* FLTAppOpenAdTest.m */,
+				9EF4E7132639D4B30007E4FE /* FLTNativeAdTest.m */,
+				9EF4E70F2639410D0007E4FE /* FLTRewardedAdTest.m */,
+				9EA747512637EC7000E0B0E4 /* FLTGamInterstitialAdTest.m */,
+				9EA747522637EC7000E0B0E4 /* FLTInterstitialAdTest.m */,
+				9EA7474C2637CD6800E0B0E4 /* FLTBannerAdTest.m */,
+				9EA7474D2637CD6800E0B0E4 /* FLTGAMBannerAdTest.m */,
+				9EF1EFFF25F8351A0017A440 /* FLTGoogleMobileAdsPluginMethodCallsTest.m */,
+				8FB13CE12498136E0011A72F /* FLTGoogleMobileAdsReaderWriterTest.m */,
+				8FB13CDC248F07D90011A72F /* FLTGoogleMobileAdsTest.m */,
+				8FB13CD6248F07B80011A72F /* Info.plist */,
+			);
+			path = google_mobile_ads_exampleTests;
+			sourceTree = "<group>";
+		};
+		9740EEB11CF90186004384FC /* Flutter */ = {
+			isa = PBXGroup;
+			children = (
+				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
+				9740EEB21CF90195004384FC /* Debug.xcconfig */,
+				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
+				9740EEB31CF90195004384FC /* Generated.xcconfig */,
+			);
+			name = Flutter;
+			sourceTree = "<group>";
+		};
+		97C146E51CF9000F007C117D = {
+			isa = PBXGroup;
+			children = (
+				9EB9FE50280F6CA200DDBB4F /* UserMessagingPlatform */,
+				9EAB4720286A4C73004456D0 /* FLTNSString.h */,
+				9EAB471F286A4C73004456D0 /* FLTNSString.m */,
+				9E79682A271D415600E06158 /* FLTMediationNetworkExtrasProvider.h */,
+				9E7B9D8D273206F800C6A6AB /* FLTAppStateNotifier.h */,
+				9E7B9D8E273206F800C6A6AB /* FLTAppStateNotifier.m */,
+				9E5A534726AA235D00B9438D /* FLTAdUtil.h */,
+				9E5A534826AA235D00B9438D /* FLTAdUtil.m */,
+				9EF4E6FB26392B230007E4FE /* FLTAd_Internal.h */,
+				9EF4E6F426392B230007E4FE /* FLTAd_Internal.m */,
+				9EF4E6FD26392B230007E4FE /* FLTAdInstanceManager_Internal.h */,
+				9EF4E6F926392B230007E4FE /* FLTAdInstanceManager_Internal.m */,
+				9EF4E6F526392B230007E4FE /* FLTConstants.h */,
+				9EF4E6F326392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.h */,
+				9EF4E6FE26392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.m */,
+				9EF4E6F726392B230007E4FE /* FLTGoogleMobileAdsPlugin.h */,
+				9EF4E6FC26392B230007E4FE /* FLTGoogleMobileAdsPlugin.m */,
+				9EF4E6F826392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.h */,
+				9EF4E6FA26392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.m */,
+				9EF4E6FF26392B230007E4FE /* FLTMobileAds_Internal.h */,
+				9EF4E6F626392B230007E4FE /* FLTMobileAds_Internal.m */,
+				9740EEB11CF90186004384FC /* Flutter */,
+				97C146F01CF9000F007C117D /* Runner */,
+				8FB13CD3248F07B80011A72F /* google_mobile_ads_exampleTests */,
+				97C146EF1CF9000F007C117D /* Products */,
+				07A52D07C2C05D9527204891 /* Pods */,
+				5B6AAA352BAC85BF7DD68C46 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		97C146EF1CF9000F007C117D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				97C146EE1CF9000F007C117D /* Runner.app */,
+				8FB13CD2248F07B80011A72F /* google_mobile_ads_exampleTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		97C146F01CF9000F007C117D /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				8FC897F42411A9F100415930 /* NativeAdView.xib */,
+				7AFFD8ED1D35381100E5BB4D /* AppDelegate.h */,
+				7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */,
+				97C146FA1CF9000F007C117D /* Main.storyboard */,
+				97C146FD1CF9000F007C117D /* Assets.xcassets */,
+				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
+				97C147021CF9000F007C117D /* Info.plist */,
+				97C146F11CF9000F007C117D /* Supporting Files */,
+				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
+				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
+			);
+			path = Runner;
+			sourceTree = "<group>";
+		};
+		97C146F11CF9000F007C117D /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				97C146F21CF9000F007C117D /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9E7A912B2825E131005FD19A /* UserMessagingPlatform */ = {
+			isa = PBXGroup;
+			children = (
+				9E7A912D2825E14C005FD19A /* FLTUserMessagingPlatformManagerTest.m */,
+				9E7A912C2825E14C005FD19A /* FLTUserMessagingPlatformReaderWriterTest.m */,
+			);
+			name = UserMessagingPlatform;
+			sourceTree = "<group>";
+		};
+		9EB9FE50280F6CA200DDBB4F /* UserMessagingPlatform */ = {
+			isa = PBXGroup;
+			children = (
+				9EB9FE54280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.h */,
+				9EB9FE55280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.m */,
+				9EB9FE51280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.m */,
+				9EB9FE52280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.h */,
+			);
+			name = UserMessagingPlatform;
+			path = ../../ios/Classes/UserMessagingPlatform;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8FB13CD1248F07B80011A72F /* google_mobile_ads_exampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8FB13CDB248F07B80011A72F /* Build configuration list for PBXNativeTarget "google_mobile_ads_exampleTests" */;
+			buildPhases = (
+				89AD8E00A7365C448495871F /* [CP] Check Pods Manifest.lock */,
+				8FB13CCE248F07B80011A72F /* Sources */,
+				8FB13CCF248F07B80011A72F /* Frameworks */,
+				8FB13CD0248F07B80011A72F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8FB13CD8248F07B80011A72F /* PBXTargetDependency */,
+			);
+			name = google_mobile_ads_exampleTests;
+			productName = google_mobile_ads_exampleTests;
+			productReference = 8FB13CD2248F07B80011A72F /* google_mobile_ads_exampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		97C146ED1CF9000F007C117D /* Runner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
+			buildPhases = (
+				2C1A4E9A6849F7CC6B679EA5 /* [CP] Check Pods Manifest.lock */,
+				9740EEB61CF901F6004384FC /* Run Script */,
+				97C146EA1CF9000F007C117D /* Sources */,
+				97C146EB1CF9000F007C117D /* Frameworks */,
+				97C146EC1CF9000F007C117D /* Resources */,
+				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
+				9B1D271C636A5312CBEA6ED3 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Runner;
+			productName = Runner;
+			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		97C146E61CF9000F007C117D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1300;
+				ORGANIZATIONNAME = "The Chromium Authors";
+				TargetAttributes = {
+					8FB13CD1248F07B80011A72F = {
+						CreatedOnToolsVersion = 11.4;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 97C146ED1CF9000F007C117D;
+					};
+					97C146ED1CF9000F007C117D = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				en,
+				Base,
+			);
+			mainGroup = 97C146E51CF9000F007C117D;
+			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				97C146ED1CF9000F007C117D /* Runner */,
+				8FB13CD1248F07B80011A72F /* google_mobile_ads_exampleTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8FB13CD0248F07B80011A72F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		97C146EC1CF9000F007C117D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
+				8FC897F52411A9F100415930 /* NativeAdView.xib in Resources */,
+				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
+				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
+				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2C1A4E9A6849F7CC6B679EA5 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Thin Binary";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed\n/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin\n";
+		};
+		89AD8E00A7365C448495871F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-google_mobile_ads_exampleTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n";
+		};
+		9B1D271C636A5312CBEA6ED3 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8FB13CCE248F07B80011A72F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9EF4E70026392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.h in Sources */,
+				9E5A534926AA235D00B9438D /* FLTAdUtil.m in Sources */,
+				9EF4E70126392B230007E4FE /* FLTAd_Internal.m in Sources */,
+				9EF4E70226392B230007E4FE /* FLTConstants.h in Sources */,
+				9EF4E70326392B230007E4FE /* FLTMobileAds_Internal.m in Sources */,
+				9EF4E70426392B230007E4FE /* FLTGoogleMobileAdsPlugin.h in Sources */,
+				9EF4E7102639410D0007E4FE /* FLTRewardedAdTest.m in Sources */,
+				9EF4E70526392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.h in Sources */,
+				9E7A912F2825E14C005FD19A /* FLTUserMessagingPlatformManagerTest.m in Sources */,
+				9EF4E70626392B230007E4FE /* FLTAdInstanceManager_Internal.m in Sources */,
+				9E1BEA7429148DD000315C59 /* FLTAdUtilTest.m in Sources */,
+				9EB9FE56280F6F2100DDBB4F /* FLTUserMessagingPlatformReaderWriter.m in Sources */,
+				9EF4E70726392B230007E4FE /* FLTGoogleMobileAdsReaderWriter_Internal.m in Sources */,
+				9E7B9D8F273206F800C6A6AB /* FLTAppStateNotifier.m in Sources */,
+				9EF4E70826392B230007E4FE /* FLTAd_Internal.h in Sources */,
+				9E4163BB26CCE99400220C78 /* FLTAppOpenAdTest.m in Sources */,
+				9EF4E70926392B230007E4FE /* FLTGoogleMobileAdsPlugin.m in Sources */,
+				9EF4E70A26392B230007E4FE /* FLTAdInstanceManager_Internal.h in Sources */,
+				9EDE65D626F9300000783049 /* FLTFluidGAMBannerAdTest.m in Sources */,
+				9EF4E70B26392B230007E4FE /* FLTGoogleMobileAdsCollection_Internal.m in Sources */,
+				9EF4E70C26392B230007E4FE /* FLTMobileAds_Internal.h in Sources */,
+				9E79684B271FF40900E06158 /* FLTGAMAdRequestTest.m in Sources */,
+				9E79684A271FF40900E06158 /* FLTAdRequestTest.m in Sources */,
+				9EA7474F2637CD6800E0B0E4 /* FLTGAMBannerAdTest.m in Sources */,
+				8FB13CDD248F07D90011A72F /* FLTGoogleMobileAdsTest.m in Sources */,
+				9EF4E7142639D4B30007E4FE /* FLTNativeAdTest.m in Sources */,
+				9EA7474E2637CD6800E0B0E4 /* FLTBannerAdTest.m in Sources */,
+				8FB13CE22498136E0011A72F /* FLTGoogleMobileAdsReaderWriterTest.m in Sources */,
+				9EB9FE53280F6CA200DDBB4F /* FLTUserMessagingPlatformManager.m in Sources */,
+				9EAB4721286A4C73004456D0 /* FLTNSString.m in Sources */,
+				9EA747542637EC7000E0B0E4 /* FLTInterstitialAdTest.m in Sources */,
+				9EF1F00025F8351A0017A440 /* FLTGoogleMobileAdsPluginMethodCallsTest.m in Sources */,
+				9E7A912E2825E14C005FD19A /* FLTUserMessagingPlatformReaderWriterTest.m in Sources */,
+				9E60902C27A9E7BE003D5BAB /* FLTRewardedInterstitialAdTest.m in Sources */,
+				9EA747532637EC7000E0B0E4 /* FLTGamInterstitialAdTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		97C146EA1CF9000F007C117D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				978B8F6F1D3862AE00F588F7 /* AppDelegate.m in Sources */,
+				97C146F31CF9000F007C117D /* main.m in Sources */,
+				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8FB13CD8248F07B80011A72F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 97C146ED1CF9000F007C117D /* Runner */;
+			targetProxy = 8FB13CD7248F07B80011A72F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				97C146FB1CF9000F007C117D /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				97C147001CF9000F007C117D /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		8FB13CD9248F07B80011A72F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C0B22AB9B287C9F711EAAF48 /* Pods-google_mobile_ads_exampleTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = google_mobile_ads_exampleTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.flutter.plugins.google-mobile-ads-exampleTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/Runner";
+			};
+			name = Debug;
+		};
+		8FB13CDA248F07B80011A72F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 41FDEFDDDE2EF7FC7A8F36B5 /* Pods-google_mobile_ads_exampleTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = google_mobile_ads_exampleTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.flutter.plugins.google-mobile-ads-exampleTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/Runner";
+			};
+			name = Release;
+		};
+		97C147031CF9000F007C117D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		97C147041CF9000F007C117D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		97C147061CF9000F007C117D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = CSTR6SUWN9;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.plugins.googleMobileAdsExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		97C147071CF9000F007C117D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = CSTR6SUWN9;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.plugins.googleMobileAdsExample;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8FB13CDB248F07B80011A72F /* Build configuration list for PBXNativeTarget "google_mobile_ads_exampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8FB13CD9248F07B80011A72F /* Debug */,
+				8FB13CDA248F07B80011A72F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97C147031CF9000F007C117D /* Debug */,
+				97C147041CF9000F007C117D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				97C147061CF9000F007C117D /* Debug */,
+				97C147071CF9000F007C117D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 97C146E61CF9000F007C117D /* Project object */;
+}

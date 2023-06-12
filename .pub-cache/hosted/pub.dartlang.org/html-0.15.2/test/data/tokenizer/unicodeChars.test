@@ -1,0 +1,1295 @@
+{"tests": [
+
+{"description": "Invalid Unicode character U+0001",
+"input": "\u0001",
+"output": ["ParseError", ["Character", "\u0001"]]},
+
+{"description": "Invalid Unicode character U+0002",
+"input": "\u0002",
+"output": ["ParseError", ["Character", "\u0002"]]},
+
+{"description": "Invalid Unicode character U+0003",
+"input": "\u0003",
+"output": ["ParseError", ["Character", "\u0003"]]},
+
+{"description": "Invalid Unicode character U+0004",
+"input": "\u0004",
+"output": ["ParseError", ["Character", "\u0004"]]},
+
+{"description": "Invalid Unicode character U+0005",
+"input": "\u0005",
+"output": ["ParseError", ["Character", "\u0005"]]},
+
+{"description": "Invalid Unicode character U+0006",
+"input": "\u0006",
+"output": ["ParseError", ["Character", "\u0006"]]},
+
+{"description": "Invalid Unicode character U+0007",
+"input": "\u0007",
+"output": ["ParseError", ["Character", "\u0007"]]},
+
+{"description": "Invalid Unicode character U+0008",
+"input": "\u0008",
+"output": ["ParseError", ["Character", "\u0008"]]},
+
+{"description": "Invalid Unicode character U+000B",
+"input": "\u000B",
+"output": ["ParseError", ["Character", "\u000B"]]},
+
+{"description": "Invalid Unicode character U+000E",
+"input": "\u000E",
+"output": ["ParseError", ["Character", "\u000E"]]},
+
+{"description": "Invalid Unicode character U+000F",
+"input": "\u000F",
+"output": ["ParseError", ["Character", "\u000F"]]},
+
+{"description": "Invalid Unicode character U+0010",
+"input": "\u0010",
+"output": ["ParseError", ["Character", "\u0010"]]},
+
+{"description": "Invalid Unicode character U+0011",
+"input": "\u0011",
+"output": ["ParseError", ["Character", "\u0011"]]},
+
+{"description": "Invalid Unicode character U+0012",
+"input": "\u0012",
+"output": ["ParseError", ["Character", "\u0012"]]},
+
+{"description": "Invalid Unicode character U+0013",
+"input": "\u0013",
+"output": ["ParseError", ["Character", "\u0013"]]},
+
+{"description": "Invalid Unicode character U+0014",
+"input": "\u0014",
+"output": ["ParseError", ["Character", "\u0014"]]},
+
+{"description": "Invalid Unicode character U+0015",
+"input": "\u0015",
+"output": ["ParseError", ["Character", "\u0015"]]},
+
+{"description": "Invalid Unicode character U+0016",
+"input": "\u0016",
+"output": ["ParseError", ["Character", "\u0016"]]},
+
+{"description": "Invalid Unicode character U+0017",
+"input": "\u0017",
+"output": ["ParseError", ["Character", "\u0017"]]},
+
+{"description": "Invalid Unicode character U+0018",
+"input": "\u0018",
+"output": ["ParseError", ["Character", "\u0018"]]},
+
+{"description": "Invalid Unicode character U+0019",
+"input": "\u0019",
+"output": ["ParseError", ["Character", "\u0019"]]},
+
+{"description": "Invalid Unicode character U+001A",
+"input": "\u001A",
+"output": ["ParseError", ["Character", "\u001A"]]},
+
+{"description": "Invalid Unicode character U+001B",
+"input": "\u001B",
+"output": ["ParseError", ["Character", "\u001B"]]},
+
+{"description": "Invalid Unicode character U+001C",
+"input": "\u001C",
+"output": ["ParseError", ["Character", "\u001C"]]},
+
+{"description": "Invalid Unicode character U+001D",
+"input": "\u001D",
+"output": ["ParseError", ["Character", "\u001D"]]},
+
+{"description": "Invalid Unicode character U+001E",
+"input": "\u001E",
+"output": ["ParseError", ["Character", "\u001E"]]},
+
+{"description": "Invalid Unicode character U+001F",
+"input": "\u001F",
+"output": ["ParseError", ["Character", "\u001F"]]},
+
+{"description": "Invalid Unicode character U+007F",
+"input": "\u007F",
+"output": ["ParseError", ["Character", "\u007F"]]},
+
+{"description": "Invalid Unicode character U+FDD0",
+"input": "\uFDD0",
+"output": ["ParseError", ["Character", "\uFDD0"]]},
+
+{"description": "Invalid Unicode character U+FDD1",
+"input": "\uFDD1",
+"output": ["ParseError", ["Character", "\uFDD1"]]},
+
+{"description": "Invalid Unicode character U+FDD2",
+"input": "\uFDD2",
+"output": ["ParseError", ["Character", "\uFDD2"]]},
+
+{"description": "Invalid Unicode character U+FDD3",
+"input": "\uFDD3",
+"output": ["ParseError", ["Character", "\uFDD3"]]},
+
+{"description": "Invalid Unicode character U+FDD4",
+"input": "\uFDD4",
+"output": ["ParseError", ["Character", "\uFDD4"]]},
+
+{"description": "Invalid Unicode character U+FDD5",
+"input": "\uFDD5",
+"output": ["ParseError", ["Character", "\uFDD5"]]},
+
+{"description": "Invalid Unicode character U+FDD6",
+"input": "\uFDD6",
+"output": ["ParseError", ["Character", "\uFDD6"]]},
+
+{"description": "Invalid Unicode character U+FDD7",
+"input": "\uFDD7",
+"output": ["ParseError", ["Character", "\uFDD7"]]},
+
+{"description": "Invalid Unicode character U+FDD8",
+"input": "\uFDD8",
+"output": ["ParseError", ["Character", "\uFDD8"]]},
+
+{"description": "Invalid Unicode character U+FDD9",
+"input": "\uFDD9",
+"output": ["ParseError", ["Character", "\uFDD9"]]},
+
+{"description": "Invalid Unicode character U+FDDA",
+"input": "\uFDDA",
+"output": ["ParseError", ["Character", "\uFDDA"]]},
+
+{"description": "Invalid Unicode character U+FDDB",
+"input": "\uFDDB",
+"output": ["ParseError", ["Character", "\uFDDB"]]},
+
+{"description": "Invalid Unicode character U+FDDC",
+"input": "\uFDDC",
+"output": ["ParseError", ["Character", "\uFDDC"]]},
+
+{"description": "Invalid Unicode character U+FDDD",
+"input": "\uFDDD",
+"output": ["ParseError", ["Character", "\uFDDD"]]},
+
+{"description": "Invalid Unicode character U+FDDE",
+"input": "\uFDDE",
+"output": ["ParseError", ["Character", "\uFDDE"]]},
+
+{"description": "Invalid Unicode character U+FDDF",
+"input": "\uFDDF",
+"output": ["ParseError", ["Character", "\uFDDF"]]},
+
+{"description": "Invalid Unicode character U+FDE0",
+"input": "\uFDE0",
+"output": ["ParseError", ["Character", "\uFDE0"]]},
+
+{"description": "Invalid Unicode character U+FDE1",
+"input": "\uFDE1",
+"output": ["ParseError", ["Character", "\uFDE1"]]},
+
+{"description": "Invalid Unicode character U+FDE2",
+"input": "\uFDE2",
+"output": ["ParseError", ["Character", "\uFDE2"]]},
+
+{"description": "Invalid Unicode character U+FDE3",
+"input": "\uFDE3",
+"output": ["ParseError", ["Character", "\uFDE3"]]},
+
+{"description": "Invalid Unicode character U+FDE4",
+"input": "\uFDE4",
+"output": ["ParseError", ["Character", "\uFDE4"]]},
+
+{"description": "Invalid Unicode character U+FDE5",
+"input": "\uFDE5",
+"output": ["ParseError", ["Character", "\uFDE5"]]},
+
+{"description": "Invalid Unicode character U+FDE6",
+"input": "\uFDE6",
+"output": ["ParseError", ["Character", "\uFDE6"]]},
+
+{"description": "Invalid Unicode character U+FDE7",
+"input": "\uFDE7",
+"output": ["ParseError", ["Character", "\uFDE7"]]},
+
+{"description": "Invalid Unicode character U+FDE8",
+"input": "\uFDE8",
+"output": ["ParseError", ["Character", "\uFDE8"]]},
+
+{"description": "Invalid Unicode character U+FDE9",
+"input": "\uFDE9",
+"output": ["ParseError", ["Character", "\uFDE9"]]},
+
+{"description": "Invalid Unicode character U+FDEA",
+"input": "\uFDEA",
+"output": ["ParseError", ["Character", "\uFDEA"]]},
+
+{"description": "Invalid Unicode character U+FDEB",
+"input": "\uFDEB",
+"output": ["ParseError", ["Character", "\uFDEB"]]},
+
+{"description": "Invalid Unicode character U+FDEC",
+"input": "\uFDEC",
+"output": ["ParseError", ["Character", "\uFDEC"]]},
+
+{"description": "Invalid Unicode character U+FDED",
+"input": "\uFDED",
+"output": ["ParseError", ["Character", "\uFDED"]]},
+
+{"description": "Invalid Unicode character U+FDEE",
+"input": "\uFDEE",
+"output": ["ParseError", ["Character", "\uFDEE"]]},
+
+{"description": "Invalid Unicode character U+FDEF",
+"input": "\uFDEF",
+"output": ["ParseError", ["Character", "\uFDEF"]]},
+
+{"description": "Invalid Unicode character U+FFFE",
+"input": "\uFFFE",
+"output": ["ParseError", ["Character", "\uFFFE"]]},
+
+{"description": "Invalid Unicode character U+FFFF",
+"input": "\uFFFF",
+"output": ["ParseError", ["Character", "\uFFFF"]]},
+
+{"description": "Invalid Unicode character U+1FFFE",
+"input": "\uD83F\uDFFE",
+"output": ["ParseError", ["Character", "\uD83F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+1FFFF",
+"input": "\uD83F\uDFFF",
+"output": ["ParseError", ["Character", "\uD83F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+2FFFE",
+"input": "\uD87F\uDFFE",
+"output": ["ParseError", ["Character", "\uD87F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+2FFFF",
+"input": "\uD87F\uDFFF",
+"output": ["ParseError", ["Character", "\uD87F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+3FFFE",
+"input": "\uD8BF\uDFFE",
+"output": ["ParseError", ["Character", "\uD8BF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+3FFFF",
+"input": "\uD8BF\uDFFF",
+"output": ["ParseError", ["Character", "\uD8BF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+4FFFE",
+"input": "\uD8FF\uDFFE",
+"output": ["ParseError", ["Character", "\uD8FF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+4FFFF",
+"input": "\uD8FF\uDFFF",
+"output": ["ParseError", ["Character", "\uD8FF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+5FFFE",
+"input": "\uD93F\uDFFE",
+"output": ["ParseError", ["Character", "\uD93F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+5FFFF",
+"input": "\uD93F\uDFFF",
+"output": ["ParseError", ["Character", "\uD93F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+6FFFE",
+"input": "\uD97F\uDFFE",
+"output": ["ParseError", ["Character", "\uD97F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+6FFFF",
+"input": "\uD97F\uDFFF",
+"output": ["ParseError", ["Character", "\uD97F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+7FFFE",
+"input": "\uD9BF\uDFFE",
+"output": ["ParseError", ["Character", "\uD9BF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+7FFFF",
+"input": "\uD9BF\uDFFF",
+"output": ["ParseError", ["Character", "\uD9BF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+8FFFE",
+"input": "\uD9FF\uDFFE",
+"output": ["ParseError", ["Character", "\uD9FF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+8FFFF",
+"input": "\uD9FF\uDFFF",
+"output": ["ParseError", ["Character", "\uD9FF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+9FFFE",
+"input": "\uDA3F\uDFFE",
+"output": ["ParseError", ["Character", "\uDA3F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+9FFFF",
+"input": "\uDA3F\uDFFF",
+"output": ["ParseError", ["Character", "\uDA3F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+AFFFE",
+"input": "\uDA7F\uDFFE",
+"output": ["ParseError", ["Character", "\uDA7F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+AFFFF",
+"input": "\uDA7F\uDFFF",
+"output": ["ParseError", ["Character", "\uDA7F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+BFFFE",
+"input": "\uDABF\uDFFE",
+"output": ["ParseError", ["Character", "\uDABF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+BFFFF",
+"input": "\uDABF\uDFFF",
+"output": ["ParseError", ["Character", "\uDABF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+CFFFE",
+"input": "\uDAFF\uDFFE",
+"output": ["ParseError", ["Character", "\uDAFF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+CFFFF",
+"input": "\uDAFF\uDFFF",
+"output": ["ParseError", ["Character", "\uDAFF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+DFFFE",
+"input": "\uDB3F\uDFFE",
+"output": ["ParseError", ["Character", "\uDB3F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+DFFFF",
+"input": "\uDB3F\uDFFF",
+"output": ["ParseError", ["Character", "\uDB3F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+EFFFE",
+"input": "\uDB7F\uDFFE",
+"output": ["ParseError", ["Character", "\uDB7F\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+EFFFF",
+"input": "\uDB7F\uDFFF",
+"output": ["ParseError", ["Character", "\uDB7F\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+FFFFE",
+"input": "\uDBBF\uDFFE",
+"output": ["ParseError", ["Character", "\uDBBF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+FFFFF",
+"input": "\uDBBF\uDFFF",
+"output": ["ParseError", ["Character", "\uDBBF\uDFFF"]]},
+
+{"description": "Invalid Unicode character U+10FFFE",
+"input": "\uDBFF\uDFFE",
+"output": ["ParseError", ["Character", "\uDBFF\uDFFE"]]},
+
+{"description": "Invalid Unicode character U+10FFFF",
+"input": "\uDBFF\uDFFF",
+"output": ["ParseError", ["Character", "\uDBFF\uDFFF"]]},
+
+{"description": "Valid Unicode character U+0009",
+"input": "\u0009",
+"output": [["Character", "\u0009"]]},
+
+{"description": "Valid Unicode character U+000A",
+"input": "\u000A",
+"output": [["Character", "\u000A"]]},
+
+{"description": "Valid Unicode character U+0020",
+"input": "\u0020",
+"output": [["Character", "\u0020"]]},
+
+{"description": "Valid Unicode character U+0021",
+"input": "\u0021",
+"output": [["Character", "\u0021"]]},
+
+{"description": "Valid Unicode character U+0022",
+"input": "\u0022",
+"output": [["Character", "\u0022"]]},
+
+{"description": "Valid Unicode character U+0023",
+"input": "\u0023",
+"output": [["Character", "\u0023"]]},
+
+{"description": "Valid Unicode character U+0024",
+"input": "\u0024",
+"output": [["Character", "\u0024"]]},
+
+{"description": "Valid Unicode character U+0025",
+"input": "\u0025",
+"output": [["Character", "\u0025"]]},
+
+{"description": "Valid Unicode character U+0026",
+"input": "\u0026",
+"output": [["Character", "\u0026"]]},
+
+{"description": "Valid Unicode character U+0027",
+"input": "\u0027",
+"output": [["Character", "\u0027"]]},
+
+{"description": "Valid Unicode character U+0028",
+"input": "\u0028",
+"output": [["Character", "\u0028"]]},
+
+{"description": "Valid Unicode character U+0029",
+"input": "\u0029",
+"output": [["Character", "\u0029"]]},
+
+{"description": "Valid Unicode character U+002A",
+"input": "\u002A",
+"output": [["Character", "\u002A"]]},
+
+{"description": "Valid Unicode character U+002B",
+"input": "\u002B",
+"output": [["Character", "\u002B"]]},
+
+{"description": "Valid Unicode character U+002C",
+"input": "\u002C",
+"output": [["Character", "\u002C"]]},
+
+{"description": "Valid Unicode character U+002D",
+"input": "\u002D",
+"output": [["Character", "\u002D"]]},
+
+{"description": "Valid Unicode character U+002E",
+"input": "\u002E",
+"output": [["Character", "\u002E"]]},
+
+{"description": "Valid Unicode character U+002F",
+"input": "\u002F",
+"output": [["Character", "\u002F"]]},
+
+{"description": "Valid Unicode character U+0030",
+"input": "\u0030",
+"output": [["Character", "\u0030"]]},
+
+{"description": "Valid Unicode character U+0031",
+"input": "\u0031",
+"output": [["Character", "\u0031"]]},
+
+{"description": "Valid Unicode character U+0032",
+"input": "\u0032",
+"output": [["Character", "\u0032"]]},
+
+{"description": "Valid Unicode character U+0033",
+"input": "\u0033",
+"output": [["Character", "\u0033"]]},
+
+{"description": "Valid Unicode character U+0034",
+"input": "\u0034",
+"output": [["Character", "\u0034"]]},
+
+{"description": "Valid Unicode character U+0035",
+"input": "\u0035",
+"output": [["Character", "\u0035"]]},
+
+{"description": "Valid Unicode character U+0036",
+"input": "\u0036",
+"output": [["Character", "\u0036"]]},
+
+{"description": "Valid Unicode character U+0037",
+"input": "\u0037",
+"output": [["Character", "\u0037"]]},
+
+{"description": "Valid Unicode character U+0038",
+"input": "\u0038",
+"output": [["Character", "\u0038"]]},
+
+{"description": "Valid Unicode character U+0039",
+"input": "\u0039",
+"output": [["Character", "\u0039"]]},
+
+{"description": "Valid Unicode character U+003A",
+"input": "\u003A",
+"output": [["Character", "\u003A"]]},
+
+{"description": "Valid Unicode character U+003B",
+"input": "\u003B",
+"output": [["Character", "\u003B"]]},
+
+{"description": "Valid Unicode character U+003D",
+"input": "\u003D",
+"output": [["Character", "\u003D"]]},
+
+{"description": "Valid Unicode character U+003E",
+"input": "\u003E",
+"output": [["Character", "\u003E"]]},
+
+{"description": "Valid Unicode character U+003F",
+"input": "\u003F",
+"output": [["Character", "\u003F"]]},
+
+{"description": "Valid Unicode character U+0040",
+"input": "\u0040",
+"output": [["Character", "\u0040"]]},
+
+{"description": "Valid Unicode character U+0041",
+"input": "\u0041",
+"output": [["Character", "\u0041"]]},
+
+{"description": "Valid Unicode character U+0042",
+"input": "\u0042",
+"output": [["Character", "\u0042"]]},
+
+{"description": "Valid Unicode character U+0043",
+"input": "\u0043",
+"output": [["Character", "\u0043"]]},
+
+{"description": "Valid Unicode character U+0044",
+"input": "\u0044",
+"output": [["Character", "\u0044"]]},
+
+{"description": "Valid Unicode character U+0045",
+"input": "\u0045",
+"output": [["Character", "\u0045"]]},
+
+{"description": "Valid Unicode character U+0046",
+"input": "\u0046",
+"output": [["Character", "\u0046"]]},
+
+{"description": "Valid Unicode character U+0047",
+"input": "\u0047",
+"output": [["Character", "\u0047"]]},
+
+{"description": "Valid Unicode character U+0048",
+"input": "\u0048",
+"output": [["Character", "\u0048"]]},
+
+{"description": "Valid Unicode character U+0049",
+"input": "\u0049",
+"output": [["Character", "\u0049"]]},
+
+{"description": "Valid Unicode character U+004A",
+"input": "\u004A",
+"output": [["Character", "\u004A"]]},
+
+{"description": "Valid Unicode character U+004B",
+"input": "\u004B",
+"output": [["Character", "\u004B"]]},
+
+{"description": "Valid Unicode character U+004C",
+"input": "\u004C",
+"output": [["Character", "\u004C"]]},
+
+{"description": "Valid Unicode character U+004D",
+"input": "\u004D",
+"output": [["Character", "\u004D"]]},
+
+{"description": "Valid Unicode character U+004E",
+"input": "\u004E",
+"output": [["Character", "\u004E"]]},
+
+{"description": "Valid Unicode character U+004F",
+"input": "\u004F",
+"output": [["Character", "\u004F"]]},
+
+{"description": "Valid Unicode character U+0050",
+"input": "\u0050",
+"output": [["Character", "\u0050"]]},
+
+{"description": "Valid Unicode character U+0051",
+"input": "\u0051",
+"output": [["Character", "\u0051"]]},
+
+{"description": "Valid Unicode character U+0052",
+"input": "\u0052",
+"output": [["Character", "\u0052"]]},
+
+{"description": "Valid Unicode character U+0053",
+"input": "\u0053",
+"output": [["Character", "\u0053"]]},
+
+{"description": "Valid Unicode character U+0054",
+"input": "\u0054",
+"output": [["Character", "\u0054"]]},
+
+{"description": "Valid Unicode character U+0055",
+"input": "\u0055",
+"output": [["Character", "\u0055"]]},
+
+{"description": "Valid Unicode character U+0056",
+"input": "\u0056",
+"output": [["Character", "\u0056"]]},
+
+{"description": "Valid Unicode character U+0057",
+"input": "\u0057",
+"output": [["Character", "\u0057"]]},
+
+{"description": "Valid Unicode character U+0058",
+"input": "\u0058",
+"output": [["Character", "\u0058"]]},
+
+{"description": "Valid Unicode character U+0059",
+"input": "\u0059",
+"output": [["Character", "\u0059"]]},
+
+{"description": "Valid Unicode character U+005A",
+"input": "\u005A",
+"output": [["Character", "\u005A"]]},
+
+{"description": "Valid Unicode character U+005B",
+"input": "\u005B",
+"output": [["Character", "\u005B"]]},
+
+{"description": "Valid Unicode character U+005C",
+"input": "\u005C",
+"output": [["Character", "\u005C"]]},
+
+{"description": "Valid Unicode character U+005D",
+"input": "\u005D",
+"output": [["Character", "\u005D"]]},
+
+{"description": "Valid Unicode character U+005E",
+"input": "\u005E",
+"output": [["Character", "\u005E"]]},
+
+{"description": "Valid Unicode character U+005F",
+"input": "\u005F",
+"output": [["Character", "\u005F"]]},
+
+{"description": "Valid Unicode character U+0060",
+"input": "\u0060",
+"output": [["Character", "\u0060"]]},
+
+{"description": "Valid Unicode character U+0061",
+"input": "\u0061",
+"output": [["Character", "\u0061"]]},
+
+{"description": "Valid Unicode character U+0062",
+"input": "\u0062",
+"output": [["Character", "\u0062"]]},
+
+{"description": "Valid Unicode character U+0063",
+"input": "\u0063",
+"output": [["Character", "\u0063"]]},
+
+{"description": "Valid Unicode character U+0064",
+"input": "\u0064",
+"output": [["Character", "\u0064"]]},
+
+{"description": "Valid Unicode character U+0065",
+"input": "\u0065",
+"output": [["Character", "\u0065"]]},
+
+{"description": "Valid Unicode character U+0066",
+"input": "\u0066",
+"output": [["Character", "\u0066"]]},
+
+{"description": "Valid Unicode character U+0067",
+"input": "\u0067",
+"output": [["Character", "\u0067"]]},
+
+{"description": "Valid Unicode character U+0068",
+"input": "\u0068",
+"output": [["Character", "\u0068"]]},
+
+{"description": "Valid Unicode character U+0069",
+"input": "\u0069",
+"output": [["Character", "\u0069"]]},
+
+{"description": "Valid Unicode character U+006A",
+"input": "\u006A",
+"output": [["Character", "\u006A"]]},
+
+{"description": "Valid Unicode character U+006B",
+"input": "\u006B",
+"output": [["Character", "\u006B"]]},
+
+{"description": "Valid Unicode character U+006C",
+"input": "\u006C",
+"output": [["Character", "\u006C"]]},
+
+{"description": "Valid Unicode character U+006D",
+"input": "\u006D",
+"output": [["Character", "\u006D"]]},
+
+{"description": "Valid Unicode character U+006E",
+"input": "\u006E",
+"output": [["Character", "\u006E"]]},
+
+{"description": "Valid Unicode character U+006F",
+"input": "\u006F",
+"output": [["Character", "\u006F"]]},
+
+{"description": "Valid Unicode character U+0070",
+"input": "\u0070",
+"output": [["Character", "\u0070"]]},
+
+{"description": "Valid Unicode character U+0071",
+"input": "\u0071",
+"output": [["Character", "\u0071"]]},
+
+{"description": "Valid Unicode character U+0072",
+"input": "\u0072",
+"output": [["Character", "\u0072"]]},
+
+{"description": "Valid Unicode character U+0073",
+"input": "\u0073",
+"output": [["Character", "\u0073"]]},
+
+{"description": "Valid Unicode character U+0074",
+"input": "\u0074",
+"output": [["Character", "\u0074"]]},
+
+{"description": "Valid Unicode character U+0075",
+"input": "\u0075",
+"output": [["Character", "\u0075"]]},
+
+{"description": "Valid Unicode character U+0076",
+"input": "\u0076",
+"output": [["Character", "\u0076"]]},
+
+{"description": "Valid Unicode character U+0077",
+"input": "\u0077",
+"output": [["Character", "\u0077"]]},
+
+{"description": "Valid Unicode character U+0078",
+"input": "\u0078",
+"output": [["Character", "\u0078"]]},
+
+{"description": "Valid Unicode character U+0079",
+"input": "\u0079",
+"output": [["Character", "\u0079"]]},
+
+{"description": "Valid Unicode character U+007A",
+"input": "\u007A",
+"output": [["Character", "\u007A"]]},
+
+{"description": "Valid Unicode character U+007B",
+"input": "\u007B",
+"output": [["Character", "\u007B"]]},
+
+{"description": "Valid Unicode character U+007C",
+"input": "\u007C",
+"output": [["Character", "\u007C"]]},
+
+{"description": "Valid Unicode character U+007D",
+"input": "\u007D",
+"output": [["Character", "\u007D"]]},
+
+{"description": "Valid Unicode character U+007E",
+"input": "\u007E",
+"output": [["Character", "\u007E"]]},
+
+{"description": "Valid Unicode character U+00A0",
+"input": "\u00A0",
+"output": [["Character", "\u00A0"]]},
+
+{"description": "Valid Unicode character U+00A1",
+"input": "\u00A1",
+"output": [["Character", "\u00A1"]]},
+
+{"description": "Valid Unicode character U+00A2",
+"input": "\u00A2",
+"output": [["Character", "\u00A2"]]},
+
+{"description": "Valid Unicode character U+00A3",
+"input": "\u00A3",
+"output": [["Character", "\u00A3"]]},
+
+{"description": "Valid Unicode character U+00A4",
+"input": "\u00A4",
+"output": [["Character", "\u00A4"]]},
+
+{"description": "Valid Unicode character U+00A5",
+"input": "\u00A5",
+"output": [["Character", "\u00A5"]]},
+
+{"description": "Valid Unicode character U+00A6",
+"input": "\u00A6",
+"output": [["Character", "\u00A6"]]},
+
+{"description": "Valid Unicode character U+00A7",
+"input": "\u00A7",
+"output": [["Character", "\u00A7"]]},
+
+{"description": "Valid Unicode character U+00A8",
+"input": "\u00A8",
+"output": [["Character", "\u00A8"]]},
+
+{"description": "Valid Unicode character U+00A9",
+"input": "\u00A9",
+"output": [["Character", "\u00A9"]]},
+
+{"description": "Valid Unicode character U+00AA",
+"input": "\u00AA",
+"output": [["Character", "\u00AA"]]},
+
+{"description": "Valid Unicode character U+00AB",
+"input": "\u00AB",
+"output": [["Character", "\u00AB"]]},
+
+{"description": "Valid Unicode character U+00AC",
+"input": "\u00AC",
+"output": [["Character", "\u00AC"]]},
+
+{"description": "Valid Unicode character U+00AD",
+"input": "\u00AD",
+"output": [["Character", "\u00AD"]]},
+
+{"description": "Valid Unicode character U+00AE",
+"input": "\u00AE",
+"output": [["Character", "\u00AE"]]},
+
+{"description": "Valid Unicode character U+00AF",
+"input": "\u00AF",
+"output": [["Character", "\u00AF"]]},
+
+{"description": "Valid Unicode character U+00B0",
+"input": "\u00B0",
+"output": [["Character", "\u00B0"]]},
+
+{"description": "Valid Unicode character U+00B1",
+"input": "\u00B1",
+"output": [["Character", "\u00B1"]]},
+
+{"description": "Valid Unicode character U+00B2",
+"input": "\u00B2",
+"output": [["Character", "\u00B2"]]},
+
+{"description": "Valid Unicode character U+00B3",
+"input": "\u00B3",
+"output": [["Character", "\u00B3"]]},
+
+{"description": "Valid Unicode character U+00B4",
+"input": "\u00B4",
+"output": [["Character", "\u00B4"]]},
+
+{"description": "Valid Unicode character U+00B5",
+"input": "\u00B5",
+"output": [["Character", "\u00B5"]]},
+
+{"description": "Valid Unicode character U+00B6",
+"input": "\u00B6",
+"output": [["Character", "\u00B6"]]},
+
+{"description": "Valid Unicode character U+00B7",
+"input": "\u00B7",
+"output": [["Character", "\u00B7"]]},
+
+{"description": "Valid Unicode character U+00B8",
+"input": "\u00B8",
+"output": [["Character", "\u00B8"]]},
+
+{"description": "Valid Unicode character U+00B9",
+"input": "\u00B9",
+"output": [["Character", "\u00B9"]]},
+
+{"description": "Valid Unicode character U+00BA",
+"input": "\u00BA",
+"output": [["Character", "\u00BA"]]},
+
+{"description": "Valid Unicode character U+00BB",
+"input": "\u00BB",
+"output": [["Character", "\u00BB"]]},
+
+{"description": "Valid Unicode character U+00BC",
+"input": "\u00BC",
+"output": [["Character", "\u00BC"]]},
+
+{"description": "Valid Unicode character U+00BD",
+"input": "\u00BD",
+"output": [["Character", "\u00BD"]]},
+
+{"description": "Valid Unicode character U+00BE",
+"input": "\u00BE",
+"output": [["Character", "\u00BE"]]},
+
+{"description": "Valid Unicode character U+00BF",
+"input": "\u00BF",
+"output": [["Character", "\u00BF"]]},
+
+{"description": "Valid Unicode character U+00C0",
+"input": "\u00C0",
+"output": [["Character", "\u00C0"]]},
+
+{"description": "Valid Unicode character U+00C1",
+"input": "\u00C1",
+"output": [["Character", "\u00C1"]]},
+
+{"description": "Valid Unicode character U+00C2",
+"input": "\u00C2",
+"output": [["Character", "\u00C2"]]},
+
+{"description": "Valid Unicode character U+00C3",
+"input": "\u00C3",
+"output": [["Character", "\u00C3"]]},
+
+{"description": "Valid Unicode character U+00C4",
+"input": "\u00C4",
+"output": [["Character", "\u00C4"]]},
+
+{"description": "Valid Unicode character U+00C5",
+"input": "\u00C5",
+"output": [["Character", "\u00C5"]]},
+
+{"description": "Valid Unicode character U+00C6",
+"input": "\u00C6",
+"output": [["Character", "\u00C6"]]},
+
+{"description": "Valid Unicode character U+00C7",
+"input": "\u00C7",
+"output": [["Character", "\u00C7"]]},
+
+{"description": "Valid Unicode character U+00C8",
+"input": "\u00C8",
+"output": [["Character", "\u00C8"]]},
+
+{"description": "Valid Unicode character U+00C9",
+"input": "\u00C9",
+"output": [["Character", "\u00C9"]]},
+
+{"description": "Valid Unicode character U+00CA",
+"input": "\u00CA",
+"output": [["Character", "\u00CA"]]},
+
+{"description": "Valid Unicode character U+00CB",
+"input": "\u00CB",
+"output": [["Character", "\u00CB"]]},
+
+{"description": "Valid Unicode character U+00CC",
+"input": "\u00CC",
+"output": [["Character", "\u00CC"]]},
+
+{"description": "Valid Unicode character U+00CD",
+"input": "\u00CD",
+"output": [["Character", "\u00CD"]]},
+
+{"description": "Valid Unicode character U+00CE",
+"input": "\u00CE",
+"output": [["Character", "\u00CE"]]},
+
+{"description": "Valid Unicode character U+00CF",
+"input": "\u00CF",
+"output": [["Character", "\u00CF"]]},
+
+{"description": "Valid Unicode character U+00D0",
+"input": "\u00D0",
+"output": [["Character", "\u00D0"]]},
+
+{"description": "Valid Unicode character U+00D1",
+"input": "\u00D1",
+"output": [["Character", "\u00D1"]]},
+
+{"description": "Valid Unicode character U+00D2",
+"input": "\u00D2",
+"output": [["Character", "\u00D2"]]},
+
+{"description": "Valid Unicode character U+00D3",
+"input": "\u00D3",
+"output": [["Character", "\u00D3"]]},
+
+{"description": "Valid Unicode character U+00D4",
+"input": "\u00D4",
+"output": [["Character", "\u00D4"]]},
+
+{"description": "Valid Unicode character U+00D5",
+"input": "\u00D5",
+"output": [["Character", "\u00D5"]]},
+
+{"description": "Valid Unicode character U+00D6",
+"input": "\u00D6",
+"output": [["Character", "\u00D6"]]},
+
+{"description": "Valid Unicode character U+00D7",
+"input": "\u00D7",
+"output": [["Character", "\u00D7"]]},
+
+{"description": "Valid Unicode character U+00D8",
+"input": "\u00D8",
+"output": [["Character", "\u00D8"]]},
+
+{"description": "Valid Unicode character U+00D9",
+"input": "\u00D9",
+"output": [["Character", "\u00D9"]]},
+
+{"description": "Valid Unicode character U+00DA",
+"input": "\u00DA",
+"output": [["Character", "\u00DA"]]},
+
+{"description": "Valid Unicode character U+00DB",
+"input": "\u00DB",
+"output": [["Character", "\u00DB"]]},
+
+{"description": "Valid Unicode character U+00DC",
+"input": "\u00DC",
+"output": [["Character", "\u00DC"]]},
+
+{"description": "Valid Unicode character U+00DD",
+"input": "\u00DD",
+"output": [["Character", "\u00DD"]]},
+
+{"description": "Valid Unicode character U+00DE",
+"input": "\u00DE",
+"output": [["Character", "\u00DE"]]},
+
+{"description": "Valid Unicode character U+00DF",
+"input": "\u00DF",
+"output": [["Character", "\u00DF"]]},
+
+{"description": "Valid Unicode character U+00E0",
+"input": "\u00E0",
+"output": [["Character", "\u00E0"]]},
+
+{"description": "Valid Unicode character U+00E1",
+"input": "\u00E1",
+"output": [["Character", "\u00E1"]]},
+
+{"description": "Valid Unicode character U+00E2",
+"input": "\u00E2",
+"output": [["Character", "\u00E2"]]},
+
+{"description": "Valid Unicode character U+00E3",
+"input": "\u00E3",
+"output": [["Character", "\u00E3"]]},
+
+{"description": "Valid Unicode character U+00E4",
+"input": "\u00E4",
+"output": [["Character", "\u00E4"]]},
+
+{"description": "Valid Unicode character U+00E5",
+"input": "\u00E5",
+"output": [["Character", "\u00E5"]]},
+
+{"description": "Valid Unicode character U+00E6",
+"input": "\u00E6",
+"output": [["Character", "\u00E6"]]},
+
+{"description": "Valid Unicode character U+00E7",
+"input": "\u00E7",
+"output": [["Character", "\u00E7"]]},
+
+{"description": "Valid Unicode character U+00E8",
+"input": "\u00E8",
+"output": [["Character", "\u00E8"]]},
+
+{"description": "Valid Unicode character U+00E9",
+"input": "\u00E9",
+"output": [["Character", "\u00E9"]]},
+
+{"description": "Valid Unicode character U+00EA",
+"input": "\u00EA",
+"output": [["Character", "\u00EA"]]},
+
+{"description": "Valid Unicode character U+00EB",
+"input": "\u00EB",
+"output": [["Character", "\u00EB"]]},
+
+{"description": "Valid Unicode character U+00EC",
+"input": "\u00EC",
+"output": [["Character", "\u00EC"]]},
+
+{"description": "Valid Unicode character U+00ED",
+"input": "\u00ED",
+"output": [["Character", "\u00ED"]]},
+
+{"description": "Valid Unicode character U+00EE",
+"input": "\u00EE",
+"output": [["Character", "\u00EE"]]},
+
+{"description": "Valid Unicode character U+00EF",
+"input": "\u00EF",
+"output": [["Character", "\u00EF"]]},
+
+{"description": "Valid Unicode character U+00F0",
+"input": "\u00F0",
+"output": [["Character", "\u00F0"]]},
+
+{"description": "Valid Unicode character U+00F1",
+"input": "\u00F1",
+"output": [["Character", "\u00F1"]]},
+
+{"description": "Valid Unicode character U+00F2",
+"input": "\u00F2",
+"output": [["Character", "\u00F2"]]},
+
+{"description": "Valid Unicode character U+00F3",
+"input": "\u00F3",
+"output": [["Character", "\u00F3"]]},
+
+{"description": "Valid Unicode character U+00F4",
+"input": "\u00F4",
+"output": [["Character", "\u00F4"]]},
+
+{"description": "Valid Unicode character U+00F5",
+"input": "\u00F5",
+"output": [["Character", "\u00F5"]]},
+
+{"description": "Valid Unicode character U+00F6",
+"input": "\u00F6",
+"output": [["Character", "\u00F6"]]},
+
+{"description": "Valid Unicode character U+00F7",
+"input": "\u00F7",
+"output": [["Character", "\u00F7"]]},
+
+{"description": "Valid Unicode character U+00F8",
+"input": "\u00F8",
+"output": [["Character", "\u00F8"]]},
+
+{"description": "Valid Unicode character U+00F9",
+"input": "\u00F9",
+"output": [["Character", "\u00F9"]]},
+
+{"description": "Valid Unicode character U+00FA",
+"input": "\u00FA",
+"output": [["Character", "\u00FA"]]},
+
+{"description": "Valid Unicode character U+00FB",
+"input": "\u00FB",
+"output": [["Character", "\u00FB"]]},
+
+{"description": "Valid Unicode character U+00FC",
+"input": "\u00FC",
+"output": [["Character", "\u00FC"]]},
+
+{"description": "Valid Unicode character U+00FD",
+"input": "\u00FD",
+"output": [["Character", "\u00FD"]]},
+
+{"description": "Valid Unicode character U+00FE",
+"input": "\u00FE",
+"output": [["Character", "\u00FE"]]},
+
+{"description": "Valid Unicode character U+00FF",
+"input": "\u00FF",
+"output": [["Character", "\u00FF"]]},
+
+{"description": "Valid Unicode character U+D7FF",
+"input": "\uD7FF",
+"output": [["Character", "\uD7FF"]]},
+
+{"description": "Valid Unicode character U+E000",
+"input": "\uE000",
+"output": [["Character", "\uE000"]]},
+
+{"description": "Valid Unicode character U+FDCF",
+"input": "\uFDCF",
+"output": [["Character", "\uFDCF"]]},
+
+{"description": "Valid Unicode character U+FDF0",
+"input": "\uFDF0",
+"output": [["Character", "\uFDF0"]]},
+
+{"description": "Valid Unicode character U+FFFD",
+"input": "\uFFFD",
+"output": [["Character", "\uFFFD"]]},
+
+{"description": "Valid Unicode character U+10000",
+"input": "\uD800\uDC00",
+"output": [["Character", "\uD800\uDC00"]]},
+
+{"description": "Valid Unicode character U+1FFFD",
+"input": "\uD83F\uDFFD",
+"output": [["Character", "\uD83F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+20000",
+"input": "\uD840\uDC00",
+"output": [["Character", "\uD840\uDC00"]]},
+
+{"description": "Valid Unicode character U+2FFFD",
+"input": "\uD87F\uDFFD",
+"output": [["Character", "\uD87F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+30000",
+"input": "\uD880\uDC00",
+"output": [["Character", "\uD880\uDC00"]]},
+
+{"description": "Valid Unicode character U+3FFFD",
+"input": "\uD8BF\uDFFD",
+"output": [["Character", "\uD8BF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+40000",
+"input": "\uD8C0\uDC00",
+"output": [["Character", "\uD8C0\uDC00"]]},
+
+{"description": "Valid Unicode character U+4FFFD",
+"input": "\uD8FF\uDFFD",
+"output": [["Character", "\uD8FF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+50000",
+"input": "\uD900\uDC00",
+"output": [["Character", "\uD900\uDC00"]]},
+
+{"description": "Valid Unicode character U+5FFFD",
+"input": "\uD93F\uDFFD",
+"output": [["Character", "\uD93F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+60000",
+"input": "\uD940\uDC00",
+"output": [["Character", "\uD940\uDC00"]]},
+
+{"description": "Valid Unicode character U+6FFFD",
+"input": "\uD97F\uDFFD",
+"output": [["Character", "\uD97F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+70000",
+"input": "\uD980\uDC00",
+"output": [["Character", "\uD980\uDC00"]]},
+
+{"description": "Valid Unicode character U+7FFFD",
+"input": "\uD9BF\uDFFD",
+"output": [["Character", "\uD9BF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+80000",
+"input": "\uD9C0\uDC00",
+"output": [["Character", "\uD9C0\uDC00"]]},
+
+{"description": "Valid Unicode character U+8FFFD",
+"input": "\uD9FF\uDFFD",
+"output": [["Character", "\uD9FF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+90000",
+"input": "\uDA00\uDC00",
+"output": [["Character", "\uDA00\uDC00"]]},
+
+{"description": "Valid Unicode character U+9FFFD",
+"input": "\uDA3F\uDFFD",
+"output": [["Character", "\uDA3F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+A0000",
+"input": "\uDA40\uDC00",
+"output": [["Character", "\uDA40\uDC00"]]},
+
+{"description": "Valid Unicode character U+AFFFD",
+"input": "\uDA7F\uDFFD",
+"output": [["Character", "\uDA7F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+B0000",
+"input": "\uDA80\uDC00",
+"output": [["Character", "\uDA80\uDC00"]]},
+
+{"description": "Valid Unicode character U+BFFFD",
+"input": "\uDABF\uDFFD",
+"output": [["Character", "\uDABF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+C0000",
+"input": "\uDAC0\uDC00",
+"output": [["Character", "\uDAC0\uDC00"]]},
+
+{"description": "Valid Unicode character U+CFFFD",
+"input": "\uDAFF\uDFFD",
+"output": [["Character", "\uDAFF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+D0000",
+"input": "\uDB00\uDC00",
+"output": [["Character", "\uDB00\uDC00"]]},
+
+{"description": "Valid Unicode character U+DFFFD",
+"input": "\uDB3F\uDFFD",
+"output": [["Character", "\uDB3F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+E0000",
+"input": "\uDB40\uDC00",
+"output": [["Character", "\uDB40\uDC00"]]},
+
+{"description": "Valid Unicode character U+EFFFD",
+"input": "\uDB7F\uDFFD",
+"output": [["Character", "\uDB7F\uDFFD"]]},
+
+{"description": "Valid Unicode character U+F0000",
+"input": "\uDB80\uDC00",
+"output": [["Character", "\uDB80\uDC00"]]},
+
+{"description": "Valid Unicode character U+FFFFD",
+"input": "\uDBBF\uDFFD",
+"output": [["Character", "\uDBBF\uDFFD"]]},
+
+{"description": "Valid Unicode character U+100000",
+"input": "\uDBC0\uDC00",
+"output": [["Character", "\uDBC0\uDC00"]]},
+
+{"description": "Valid Unicode character U+10FFFD",
+"input": "\uDBFF\uDFFD",
+"output": [["Character", "\uDBFF\uDFFD"]]}
+
+]}

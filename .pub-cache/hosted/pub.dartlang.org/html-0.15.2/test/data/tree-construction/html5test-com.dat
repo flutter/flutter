@@ -1,0 +1,246 @@
+#data
+<div<div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div<div>
+
+#data
+<div foo<bar=''>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       foo<bar=""
+
+#data
+<div foo=`bar`>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       foo="`bar`"
+
+#data
+<div \"foo=''>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+|       \"foo=""
+
+#data
+<a href='\nbar'></a>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|       href="\nbar"
+
+#data
+<!DOCTYPE html>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+
+#data
+&lang;&rang;
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "⟨⟩"
+
+#data
+&apos;
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "'"
+
+#data
+&ImaginaryI;
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "ⅈ"
+
+#data
+&Kopf;
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "𝕂"
+
+#data
+&notinva;
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     "∉"
+
+#data
+<?import namespace="foo" implementation="#bar">
+#errors
+#document
+| <!-- ?import namespace="foo" implementation="#bar" -->
+| <html>
+|   <head>
+|   <body>
+
+#data
+<!--foo--bar-->
+#errors
+#document
+| <!-- foo--bar -->
+| <html>
+|   <head>
+|   <body>
+
+#data
+<![CDATA[x]]>
+#errors
+#document
+| <!-- [CDATA[x]] -->
+| <html>
+|   <head>
+|   <body>
+
+#data
+<textarea><!--</textarea>--></textarea>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <textarea>
+|       "<!--"
+|     "-->"
+
+#data
+<textarea><!--</textarea>-->
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <textarea>
+|       "<!--"
+|     "-->"
+
+#data
+<style><!--</style>--></style>
+#errors
+#document
+| <html>
+|   <head>
+|     <style>
+|       "<!--"
+|   <body>
+|     "-->"
+
+#data
+<style><!--</style>-->
+#errors
+#document
+| <html>
+|   <head>
+|     <style>
+|       "<!--"
+|   <body>
+|     "-->"
+
+#data
+<ul><li>A </li> <li>B</li></ul>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <ul>
+|       <li>
+|         "A "
+|       " "
+|       <li>
+|         "B"
+
+#data
+<table><form><input type=hidden><input></form><div></div></table>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <input>
+|     <div>
+|     <table>
+|       <form>
+|       <input>
+|         type="hidden"
+
+#data
+<i>A<b>B<p></i>C</b>D
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <i>
+|       "A"
+|       <b>
+|         "B"
+|     <b>
+|     <p>
+|       <b>
+|         <i>
+|         "C"
+|       "D"
+
+#data
+<div></div>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <div>
+
+#data
+<svg></svg>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <svg svg>
+
+#data
+<math></math>
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <math math>

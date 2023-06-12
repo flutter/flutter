@@ -1,0 +1,181 @@
+40 columns                              |
+>>> space-separated adjacent strings are not split if they fit
+var name = new Symbol("the first string" "the second");
+<<<
+var name = new Symbol(
+    "the first string" "the second");
+>>> space-separated adjacent strings are split if they don't fit
+var name = new Symbol("the first very long string" "the second very longstring");
+<<<
+var name = new Symbol(
+    "the first very long string"
+    "the second very longstring");
+>>> adjacent string lines all split together;
+var text = "first" "second" "third" "fourth" "fifth";
+<<<
+var text = "first"
+    "second"
+    "third"
+    "fourth"
+    "fifth";
+>>> preserve one newline between adjacent strings
+var name = "the first string"
+"the second string"
+
+
+
+"the third string";
+<<<
+var name = "the first string"
+    "the second string"
+    "the third string";
+>>> conditions, same operator
+if (identifier || identifier || identifier || identifier) {
+}
+<<<
+if (identifier ||
+    identifier ||
+    identifier ||
+    identifier) {}
+>>> conditions, different operators
+if (identifier && identifier || identifier
+                && identifier) {
+}
+<<<
+if (identifier && identifier ||
+    identifier && identifier) {}
+>>> split conditional because condition doesn't fit
+var kind = longElement != otherLongElement ? longArgument : arg;
+<<<
+var kind =
+    longElement != otherLongElement
+        ? longArgument
+        : arg;
+>>> split conditional because condition splits
+var kind = longElement != otherReallyLongElement ? longArgument : arg;
+<<<
+var kind = longElement !=
+        otherReallyLongElement
+    ? longArgument
+    : arg;
+>>> split conditional because then doesn't fit
+var kind = element != null ? longArgument : arg;
+<<<
+var kind = element != null
+    ? longArgument
+    : arg;
+>>> split conditional because else doesn't fit
+var kind = element != null ? argument : secondArgumentThatIsReallyLong;
+<<<
+var kind = element != null
+    ? argument
+    : secondArgumentThatIsReallyLong;
+>>> split all conditionals when nested
+var kind = a ? b ? c : d : e;
+<<<
+var kind = a
+    ? b
+        ? c
+        : d
+    : e;
+>>> split all conditionals when nested
+var kind = a ? b : c ? d : e;
+<<<
+var kind = a
+    ? b
+    : c
+        ? d
+        : e;
+>>> don't split conditionals when indirectly nested
+var kind = a ? b : (c ? d : e);
+<<<
+var kind = a ? b : (c ? d : e);
+>>> split operator chain around block
+first + second + () {body;} + third + fourth;
+<<<
+first +
+    second +
+    () {
+      body;
+    } +
+    third +
+    fourth;
+>>> indent previous line farther because later line is nested deeper
+someFunction(someExtremelyLongArgumentName).clamp();
+<<<
+someFunction(
+        someExtremelyLongArgumentName)
+    .clamp();
+>>> wrap inside parenthesized
+(someVerylongIdentifier * someVerylongIdentifier);
+<<<
+(someVerylongIdentifier *
+    someVerylongIdentifier);
+>>> same operator inside parenthesized is treated independently
+(identifier * (identifier * identifier) * identifier);
+<<<
+(identifier *
+    (identifier * identifier) *
+    identifier);
+>>> nested parenthesized are indented more
+(identifier * (verylongIdentifier * verylongIdentifier) * identifier);
+<<<
+(identifier *
+    (verylongIdentifier *
+        verylongIdentifier) *
+    identifier);
+>>> conditional operands are nested
+identifier ? identifier ? someParticularlyLongOperand : someParticularlyLongOperand : identifier ? someParticularlyLongOperand : someParticularlyLongOperand;
+<<<
+identifier
+    ? identifier
+        ? someParticularlyLongOperand
+        : someParticularlyLongOperand
+    : identifier
+        ? someParticularlyLongOperand
+        : someParticularlyLongOperand;
+>>> index expressions can split after "["
+verylongIdentifier[someParticularlyLongArgument];
+<<<
+verylongIdentifier[
+    someParticularlyLongArgument];
+>>> index arguments nest
+verylongIdentifier[someParticularlyLongArgument[someParticularlyLongArgument]];
+<<<
+verylongIdentifier[
+    someParticularlyLongArgument[
+        someParticularlyLongArgument]];
+>>> successive index arguments
+identifier[longArgument][longArgument][longArgument][longArgument][longArgument];
+<<<
+identifier[longArgument][longArgument]
+        [longArgument][longArgument]
+    [longArgument];
+>>> null-aware indexes
+identifier?[longArgument][longArgument]?[longArgument][longArgument]?[longArgument];
+<<<
+identifier?[longArgument][longArgument]
+        ?[longArgument][longArgument]
+    ?[longArgument];
+>>> is
+verylongIdentifier.property is LongTypeName;
+<<<
+verylongIdentifier.property
+    is LongTypeName;
+>>> as
+verylongIdentifier.property as LongTypeName;
+<<<
+verylongIdentifier.property
+    as LongTypeName;
+>>> null coalescing operator
+identifier&&identifier&&identifier&&identifier;
+<<<
+identifier &&
+    identifier &&
+    identifier &&
+    identifier;
+>>> "." in named constructor
+new VeryLongClassName.veryLongNamedConstructor();
+<<<
+new VeryLongClassName
+    .veryLongNamedConstructor();

@@ -1,0 +1,3 @@
+# See https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md
+tags:
+  ff: # tests that run on Firefox. Others tests are assumed to run on Chrome

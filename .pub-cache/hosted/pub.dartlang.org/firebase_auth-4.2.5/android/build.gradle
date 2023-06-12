@@ -1,0 +1,58 @@
+group 'io.flutter.plugins.firebase.auth'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.4'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+def firebaseCoreProject = findProject(':firebase_core')
+if (firebaseCoreProject == null) {
+    throw new GradleException('Could not find the firebase_core FlutterFire plugin, have you added it as a dependency in your pubspec?')
+} else if (!firebaseCoreProject.properties['FirebaseSDKVersion']) {
+    throw new GradleException('A newer version of the firebase_core FlutterFire plugin is required, please update your firebase_core pubspec dependency.')
+}
+
+def getRootProjectExtOrCoreProperty(name, firebaseCoreProject) {
+    if (!rootProject.ext.has('FlutterFire')) return firebaseCoreProject.properties[name]
+    if (!rootProject.ext.get('FlutterFire')[name]) return firebaseCoreProject.properties[name]
+    return rootProject.ext.get('FlutterFire').get(name)
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 31
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        minSdkVersion 16
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+    dependencies {
+        api firebaseCoreProject
+        implementation platform("com.google.firebase:firebase-bom:${getRootProjectExtOrCoreProperty("FirebaseSDKVersion", firebaseCoreProject)}")
+        implementation 'com.google.firebase:firebase-auth'
+        implementation 'androidx.annotation:annotation:1.1.0'
+    }
+}
+
+apply from: file("./user-agent.gradle")

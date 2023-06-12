@@ -1,0 +1,4 @@
+name: a
+version: 2.0.0
+dev_dependencies:
+  c: 4.0.0

@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.github.florent37.assets_audio_player">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <application>
+        <receiver
+            android:name=".notification.NotificationActionReceiver"
+            android:exported="true" />
+        <receiver
+            android:name=".notification.CustomMediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".notification.NotificationService"
+            android:enabled="true"
+            android:exported="true">
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+            -->
+        </service>
+
+    </application>
+
+</manifest>

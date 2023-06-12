@@ -1,0 +1,14 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    - avoid_dynamic_calls
+
+    # Errors
+    - test_types_in_equals
+    - throw_in_finally
+
+    # Style
+    - avoid_private_typedef_functions
+    - directives_ordering
+    - only_throw_errors

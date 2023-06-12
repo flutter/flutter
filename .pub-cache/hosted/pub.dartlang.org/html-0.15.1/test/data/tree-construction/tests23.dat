@@ -1,0 +1,155 @@
+#data
+<p><font size=4><font color=red><font size=4><font size=4><font size=4><font size=4><font size=4><font color=red><p>X
+#errors
+3: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+116: Unclosed elements.
+117: End of file seen and there were open elements.
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           color="red"
+|           <font>
+|             size="4"
+|             <font>
+|               size="4"
+|               <font>
+|                 size="4"
+|                 <font>
+|                   size="4"
+|                   <font>
+|                     size="4"
+|                     <font>
+|                       color="red"
+|     <p>
+|       <font>
+|         color="red"
+|         <font>
+|           size="4"
+|           <font>
+|             size="4"
+|             <font>
+|               size="4"
+|               <font>
+|                 color="red"
+|                 "X"
+
+#data
+<p><font size=4><font size=4><font size=4><font size=4><p>X
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           size="4"
+|           <font>
+|             size="4"
+|             <font>
+|               size="4"
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           size="4"
+|           <font>
+|             size="4"
+|             "X"
+
+#data
+<p><font size=4><font size=4><font size=4><font size="5"><font size=4><p>X
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           size="4"
+|           <font>
+|             size="4"
+|             <font>
+|               size="5"
+|               <font>
+|                 size="4"
+|     <p>
+|       <font>
+|         size="4"
+|         <font>
+|           size="4"
+|           <font>
+|             size="5"
+|             <font>
+|               size="4"
+|               "X"
+
+#data
+<p><font size=4 id=a><font size=4 id=b><font size=4><font size=4><p>X
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <font>
+|         id="a"
+|         size="4"
+|         <font>
+|           id="b"
+|           size="4"
+|           <font>
+|             size="4"
+|             <font>
+|               size="4"
+|     <p>
+|       <font>
+|         id="a"
+|         size="4"
+|         <font>
+|           id="b"
+|           size="4"
+|           <font>
+|             size="4"
+|             <font>
+|               size="4"
+|               "X"
+
+#data
+<p><b id=a><b id=a><b id=a><b><object><b id=a><b id=a>X</object><p>Y
+#errors
+#document
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <b>
+|         id="a"
+|         <b>
+|           id="a"
+|           <b>
+|             id="a"
+|             <b>
+|               <object>
+|                 <b>
+|                   id="a"
+|                   <b>
+|                     id="a"
+|                     "X"
+|     <p>
+|       <b>
+|         id="a"
+|         <b>
+|           id="a"
+|           <b>
+|             id="a"
+|             <b>
+|               "Y"

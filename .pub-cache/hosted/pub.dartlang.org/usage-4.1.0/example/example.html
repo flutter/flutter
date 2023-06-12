@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<!-- Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
+     for details. All rights reserved. Use of this source code is governed by a
+     BSD-style license that can be found in the LICENSE file. -->
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usage Web Example</title>
+    <style>
+			body {
+			  display: flex;
+			  flex-direction: column;
+			  margin: 15px;
+			  color: #555;
+			}
+
+			.row {
+			  margin-top: 1em;
+			}
+    </style>
+  </head>
+
+  <body>
+    <h3>Usage library example</h3>
+
+    <input id="ua" type="text" value="UA-55029513-1">
+
+    <div class="row">
+      <button id="foo">Fire 'foo' event</button>
+
+      <button id="bar">Fire 'bar' event</button>
+
+      <button id="page">Change page</button>
+    </div>
+
+    <script defer src="example.dart.js"></script>
+  </body>
+</html>

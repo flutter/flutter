@@ -1,0 +1,22 @@
+name: sqflite_common
+homepage: https://github.com/tekartik/sqflite/tree/master/sqflite_common
+description: Dart wrapper on SQLite, a self-contained, high-reliability, embedded, SQL database engine.
+version: 2.4.0+2
+funding:
+  - https://github.com/sponsors/alextekartik
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+  synchronized: '>=3.0.0 <5.0.0'
+  path: '>=1.8.0 <3.0.0'
+  meta: '>=1.3.0 <3.0.0'
+
+dev_dependencies:
+  lints: '>=1.0.0'
+  process_run: '>=0.12.0'
+  http: '>=0.13.0'
+  test: '>=1.16.2'
+  test_api: '>=0.2.19'
+  pub_semver: '>=2.0.0'

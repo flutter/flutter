@@ -1,0 +1,89 @@
+40 columns                              |
+>>> split type parameters
+typedef G = T Function<TypeOne, TypeTwo, TypeThree>();
+<<<
+typedef G = T Function<TypeOne, TypeTwo,
+    TypeThree>();
+>>> split all type parameters
+typedef G = T Function<TypeOne, TypeTwo, TypeThree, TypeFour, TypeFive, TypeSix>();
+<<<
+typedef G = T Function<
+    TypeOne,
+    TypeTwo,
+    TypeThree,
+    TypeFour,
+    TypeFive,
+    TypeSix>();
+>>> split type and value parameters
+typedef G = T Function<TypeOne, TypeTwo, TypeThree>(TypeOne one, TypeTwo two, TypeThree three);
+<<<
+typedef G = T Function<TypeOne, TypeTwo,
+        TypeThree>(TypeOne one,
+    TypeTwo two, TypeThree three);
+>>> generic typedef parameters on one line
+typedef Foo<T, S> = Function();
+<<<
+typedef Foo<T, S> = Function();
+>>> generic typedef parameters that split
+typedef LongfunctionType<First, Second, Third, Fourth, Fifth, Sixth> = Function(First first, Second second, Third third, Fourth fourth);
+<<<
+typedef LongfunctionType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = Function(
+        First first,
+        Second second,
+        Third third,
+        Fourth fourth);
+>>> both type parameter lists split
+typedef LongfunctionType<First, Second, Third, Fourth, Fifth, Sixth> = Function<Seventh>(First first, Second second, Third third, Fourth fourth);
+<<<
+typedef LongfunctionType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = Function<Seventh>(
+        First first,
+        Second second,
+        Third third,
+        Fourth fourth);
+>>> all three parameter lists split
+typedef LongfunctionType<First, Second, Third, Fourth, Fifth, Sixth> = Function<Seventh, Eighth, Ninth, Tenth, Eleventh, Twelfth, Thirteenth>(First first, Second second, Third third, Fourth fourth);
+<<<
+typedef LongfunctionType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = Function<
+            Seventh,
+            Eighth,
+            Ninth,
+            Tenth,
+            Eleventh,
+            Twelfth,
+            Thirteenth>(
+        First first,
+        Second second,
+        Third third,
+        Fourth fourth);
+>>> non-function split type parameters
+typedef G = SomeType<TypeOne, TypeTwo, TypeThree>;
+<<<
+typedef G = SomeType<TypeOne, TypeTwo,
+    TypeThree>;
+>>> non-function split all type parameters
+typedef G = SomeType<TypeOne, TypeTwo, TypeThree, TypeFour, TypeFive, TypeSix>;
+<<<
+typedef G = SomeType<
+    TypeOne,
+    TypeTwo,
+    TypeThree,
+    TypeFour,
+    TypeFive,
+    TypeSix>;
+>>> non-function generic typedef parameters on one line
+typedef Foo<T, S> = SomeType;
+<<<
+typedef Foo<T, S> = SomeType;
+>>> non-function generic typedef parameters that split
+typedef LongGenericType<First, Second, Third, Fourth, Fifth, Sixth> = AnotherType<First, Second, Third, Fourth>;
+<<<
+typedef LongGenericType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = AnotherType<First, Second, Third,
+        Fourth>;

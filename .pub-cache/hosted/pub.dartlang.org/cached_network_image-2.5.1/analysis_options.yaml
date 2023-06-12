@@ -1,0 +1,21 @@
+include: package:pedantic/analysis_options.1.9.0.yaml
+linter:
+  rules:
+    - public_member_api_docs
+
+analyzer:
+  exclude:
+    # Ignore generated files
+    - '**/*.g.dart'
+    - 'lib/src/generated/*.dart'
+  errors:
+    dead_code: warning
+    invalid_assignment: warning
+    invalid_override_of_non_virtual_member: error
+    missing_required_param: error
+    missing_return: error
+    todo: info
+    undefined_function: ignore # TODO: Remove when https://github.com/flutter/flutter/issues/52899 is solved
+    unused_import: warning
+    unused_local_variable: warning
+    

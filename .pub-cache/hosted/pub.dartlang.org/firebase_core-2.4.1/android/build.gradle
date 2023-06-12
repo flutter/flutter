@@ -1,0 +1,45 @@
+group 'io.flutter.plugins.firebase.core'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.4'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+def getRootProjectExtOrDefaultProperty(name) {
+    if (!rootProject.ext.has("FlutterFire")) return project.properties[name]
+    if (!rootProject.ext.get("FlutterFire")[name]) return project.properties[name]
+    return rootProject.ext.get("FlutterFire").get(name)
+}
+
+android {
+    compileSdkVersion 31
+
+    defaultConfig {
+        minSdkVersion 16
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+    dependencies {
+        implementation platform("com.google.firebase:firebase-bom:${getRootProjectExtOrDefaultProperty("FirebaseSDKVersion")}")
+        implementation "com.google.firebase:firebase-common"
+
+        implementation 'androidx.annotation:annotation:1.1.0'
+    }
+}
+
+apply from: file("./user-agent.gradle")

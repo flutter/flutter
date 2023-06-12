@@ -1,0 +1,28 @@
+name: intl
+version: 0.17.0
+homepage: https://github.com/dart-lang/intl
+description: >-
+  Contains code to deal with internationalized/localized messages, date and
+  number formatting and parsing, bi-directional text, and other
+  internationalization issues.
+
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+
+dependencies:
+  clock: ^1.1.0
+  path: ^1.8.0
+
+dev_dependencies:
+  ffi: any
+  fixnum: '>=0.9.0 <0.11.0'
+  js: ^0.6.3-nullsafety
+  test: ^1.16.0-nullsafety.4
+
+dependency_overrides:
+  ffi:
+    git:
+      url: https://github.com/dart-lang/ffi
+      ref: null_safety
+  fixnum:
+    git: https://github.com/dart-lang/fixnum

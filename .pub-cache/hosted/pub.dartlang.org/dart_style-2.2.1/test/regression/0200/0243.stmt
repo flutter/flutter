@@ -1,0 +1,26 @@
+>>> (indent 4)
+    return new Container(
+        key: 'ChatApp',
+        children: [
+          new Container(
+              key: 'Content',
+              style: _content_style,
+              children: appChildren)]);
+<<<
+    return new Container(key: 'ChatApp', children: [
+      new Container(
+          key: 'Content', style: _content_style, children: appChildren)
+    ]);
+>>> (indent 10)
+          return new Container(
+              key: 'ChatApp',
+              children: [
+                new Container(
+                    key: 'Content',
+                    style: _content_style,
+                    children: appChildren)]);
+<<<
+          return new Container(key: 'ChatApp', children: [
+            new Container(
+                key: 'Content', style: _content_style, children: appChildren)
+          ]);

@@ -1,0 +1,17 @@
+dart:
+- dev
+
+stages:
+- analyze_and_format:
+  - group:
+    - dartfmt: sdk
+    - dartanalyzer: --fatal-infos --fatal-warnings .
+- unit_test:
+  - test: -x integration --test-randomize-ordering-seed=random
+- e2e_test:
+  # TODO: enable stack trace chaining https://github.com/dart-lang/build/issues/2894
+  - test: -t integration --total-shards 5 --shard-index 0 --test-randomize-ordering-seed=random --no-chain-stack-traces
+  - test: -t integration --total-shards 5 --shard-index 1 --test-randomize-ordering-seed=random --no-chain-stack-traces
+  - test: -t integration --total-shards 5 --shard-index 2 --test-randomize-ordering-seed=random --no-chain-stack-traces
+  - test: -t integration --total-shards 5 --shard-index 3 --test-randomize-ordering-seed=random --no-chain-stack-traces
+  - test: -t integration --total-shards 5 --shard-index 4 --test-randomize-ordering-seed=random --no-chain-stack-traces

@@ -1,0 +1,18 @@
+>>>
+const Vendor _trevor = Vendor(
+    name: 'Trevor’s shop',
+    avatarAsset: 'people/square/trevor.png',
+    avatarAssetPackage: _kGalleryAssetsPackage,
+    description:
+        'Trevor makes great stuff for awesome people like you. Super cool and extra '
+            'awesome all of his shop’s goods are handmade with love. Custom orders are '
+            'available upon request if you need something extra special.');
+<<<
+const Vendor _trevor = Vendor(
+    name: 'Trevor’s shop',
+    avatarAsset: 'people/square/trevor.png',
+    avatarAssetPackage: _kGalleryAssetsPackage,
+    description:
+        'Trevor makes great stuff for awesome people like you. Super cool and extra '
+        'awesome all of his shop’s goods are handmade with love. Custom orders are '
+        'available upon request if you need something extra special.');

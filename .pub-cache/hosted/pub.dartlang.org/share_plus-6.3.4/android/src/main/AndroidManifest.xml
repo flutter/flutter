@@ -1,0 +1,23 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="dev.fluttercommunity.plus.share">
+    <application>
+      <!-- Declares a provider which allows us to store files to share in
+           '.../caches/share_plus' and grant the receiving action access -->
+      <provider
+        android:name="dev.fluttercommunity.plus.share.ShareFileProvider"
+        android:authorities="${applicationId}.flutter.share_provider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+          android:name="android.support.FILE_PROVIDER_PATHS"
+          android:resource="@xml/flutter_share_file_paths"/>
+      </provider>
+      <!-- This manifest declared broadcast receiver allows us to use an explicit
+           Intent when creating a PendingItent to be informed of the user's choice -->
+      <receiver android:name=".SharePlusPendingIntent" android:exported="false">
+        <intent-filter>
+          <action android:name="EXTRA_CHOSEN_COMPONENT" />
+        </intent-filter>
+      </receiver>
+    </application>
+</manifest>

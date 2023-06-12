@@ -1,0 +1,2 @@
+dartdoc:
+  exclude: ["photo_view_image_wrapper", "photo_view_scale_boundaries", "photo_view_scale_state", "photo_view_utils", "photo_view_scale_boundary"]

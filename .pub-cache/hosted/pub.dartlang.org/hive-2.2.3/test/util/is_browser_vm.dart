@@ -1,0 +1,1 @@
+const isBrowser = false;

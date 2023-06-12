@@ -1,0 +1,47 @@
+# To run tests for datastore, the following index.yaml must be declared for
+# the project using:
+#         $ gcloud --project "$GCLOUD_E2E_TEST_PROJECT" datastore indexes create test/index.yaml
+indexes:
+# Needed by tests in: test/db/e2e/db_test_impl.dart
+- kind: User
+  ancestor: no
+  properties:
+  - name: name
+    direction: asc
+  - name: nickname
+    direction: desc
+- kind: User
+  ancestor: no
+  properties:
+  - name: name
+    direction: desc
+  - name: nickname
+    direction: desc
+- kind: User
+  ancestor: no
+  properties:
+  - name: name
+    direction: desc
+  - name: nickname
+    direction: asc
+- kind: User
+  ancestor: no
+  properties:
+  - name: language
+    direction: asc
+  - name: name
+    direction: asc
+# Needed by tests in: test/datastore/e2e/datastore_test_impl.dart
+- kind: TestQueryKind
+  ancestor: no
+  properties:
+  - name: indexedProp
+    direction: asc
+  - name: blobPropertyIndexed
+    direction: asc
+- kind: TestQueryKind
+  ancestor: no
+  properties:
+  - name: listproperty
+  - name: test_property
+    direction: desc

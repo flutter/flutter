@@ -1,0 +1,9 @@
+include: package:flutter_lints/flutter.yaml
+linter:
+  rules:
+    - prefer_final_locals
+    - prefer_relative_imports
+    - always_declare_return_types # https://github.com/dart-lang/lints#migrating-from-packagepedantic
+    - prefer_single_quotes # https://github.com/dart-lang/lints#migrating-from-packagepedantic
+    - unawaited_futures # https://github.com/dart-lang/lints#migrating-from-packagepedantic
+    - unsafe_html # https://github.com/dart-lang/lints#migrating-from-packagepedantic

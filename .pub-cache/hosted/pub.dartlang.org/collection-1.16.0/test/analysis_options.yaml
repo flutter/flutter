@@ -1,0 +1,6 @@
+include: ../analysis_options.yaml
+
+# Turn off the avoid_dynamic_calls lint for the test/ directory.
+analyzer:
+  errors:
+    avoid_dynamic_calls: ignore

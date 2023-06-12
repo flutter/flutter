@@ -1,0 +1,149 @@
+40 columns                              |
+>>>
+obj..method();
+<<<
+obj.method();
+>>>
+obj..getter;
+<<<
+obj.getter;
+>>>
+obj..setter = 3;
+<<<
+obj.setter = 3;
+>>>
+obj..[subscript] = 3;
+<<<
+obj[subscript] = 3;
+>>>
+obj?..[subscript] = 3;
+<<<
+obj?[subscript] = 3;
+>>>
+obj..index[subscript] = 3;
+<<<
+obj.index[subscript] = 3;
+>>>
+obj..index?[subscript] = 3;
+<<<
+obj.index?[subscript] = 3;
+>>> targets that don't need parentheses
+{
+  null..method();
+  123..method();
+  true..method();
+  "str"..method();
+  "str$interp"..method();
+  [1]..method();
+  () {}..method();
+
+  this..method();
+  new C()..method();
+  const C()..method();
+  foo()..method();
+  foo.bar()..method();
+  foo?.bar()..method();
+  super.foo()..method();
+}
+<<<
+{
+  null.method();
+  123.method();
+  true.method();
+  "str".method();
+  "str$interp".method();
+  [1].method();
+  () {}.method();
+
+  this.method();
+  new C().method();
+  const C().method();
+  foo().method();
+  foo.bar().method();
+  foo?.bar().method();
+  super.foo().method();
+}
+>>> targets that do need parentheses
+{
+  a as C..method();
+  a is C..method();
+  c ? a : b..method();
+  a ?? b..method();
+  a && b..method();
+  a || b..method();
+  a == b..method();
+  a != b..method();
+  a < b..method();
+  a > b..method();
+  a <= b..method();
+  a >= b..method();
+  a ^ b..method();
+  a | b..method();
+  a << b..method();
+  a >> b..method();
+  a + b..method();
+  a - b..method();
+  a * b..method();
+  a / b..method();
+  a ~/ b..method();
+  -a..method();
+  !a..method();
+  ~a..method();
+  a++..method();
+  a--..method();
+
+  foo() async {
+    await a..method();
+  }
+}
+<<<
+{
+  (a as C).method();
+  (a is C).method();
+  (c ? a : b).method();
+  (a ?? b).method();
+  (a && b).method();
+  (a || b).method();
+  (a == b).method();
+  (a != b).method();
+  (a < b).method();
+  (a > b).method();
+  (a <= b).method();
+  (a >= b).method();
+  (a ^ b).method();
+  (a | b).method();
+  (a << b).method();
+  (a >> b).method();
+  (a + b).method();
+  (a - b).method();
+  (a * b).method();
+  (a / b).method();
+  (a ~/ b).method();
+  (-a).method();
+  (!a).method();
+  (~a).method();
+  (a++).method();
+  (a--).method();
+
+  foo() async {
+    (await a).method();
+  }
+}
+>>> unaffected expressions
+{
+  foo..bar()..method();
+  a = b..method();
+  a += b..method();
+  () => a..method();
+  throw a..method();
+}
+<<<
+{
+  foo
+    ..bar()
+    ..method();
+  a = b..method();
+  a += b..method();
+  () => a..method();
+  throw a..method();
+}

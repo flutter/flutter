@@ -1,0 +1,13 @@
+#data
+<button><p></button><button></button>
+#info
+Regression test for https://github.com/dart-lang/html/issues/122
+#errors
+Errors are currently untested: https://github.com/dart-lang/html/issues/127
+#document
+| <html>
+|   <head>
+|   <body>
+|     <button>
+|       <p>
+|     <button>

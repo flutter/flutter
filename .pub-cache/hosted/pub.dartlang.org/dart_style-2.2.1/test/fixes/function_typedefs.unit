@@ -1,0 +1,271 @@
+40 columns                              |
+>>>
+typedef void A();
+<<<
+typedef A = void Function();
+>>>
+typedef void A(String name);
+<<<
+typedef A = void Function(String name);
+>>>
+typedef bool A(int count);
+<<<
+typedef A = bool Function(int count);
+>>>
+typedef void A<T>();
+<<<
+typedef A<T> = void Function();
+>>>
+typedef void A<T>(T x);
+<<<
+typedef A<T> = void Function(T x);
+>>>
+typedef void A<T>(x);
+<<<
+typedef A<T> = void Function(dynamic x);
+>>>
+typedef V A<K, V>();
+<<<
+typedef A<K, V> = V Function();
+>>>
+typedef V A<K, V>(K key);
+<<<
+typedef A<K, V> = V Function(K key);
+>>>
+typedef K A<K, V>(V value);
+<<<
+typedef A<K, V> = K Function(V value);
+>>>
+typedef F<T> = void Function(T);
+<<<
+typedef F<T> = void Function(T);
+>>>
+@meta typedef void X(y);
+<<<
+@meta
+typedef X = void Function(dynamic y);
+>>> split type parameters
+typedef G = T Function<TypeOne, TypeTwo, TypeThree>();
+<<<
+typedef G = T Function<TypeOne, TypeTwo,
+    TypeThree>();
+>>> split all type parameters
+typedef G = T Function<TypeOne, TypeTwo, TypeThree, TypeFour, TypeFive, TypeSix>();
+<<<
+typedef G = T Function<
+    TypeOne,
+    TypeTwo,
+    TypeThree,
+    TypeFour,
+    TypeFive,
+    TypeSix>();
+>>> split type and value parameters
+typedef G = T Function<TypeOne, TypeTwo, TypeThree>(TypeOne one, TypeTwo two, TypeThree three);
+<<<
+typedef G = T Function<TypeOne, TypeTwo,
+        TypeThree>(TypeOne one,
+    TypeTwo two, TypeThree three);
+>>> generic typedef parameters on one line
+typedef Foo<T, S> = Function();
+<<<
+typedef Foo<T, S> = Function();
+>>> generic typedef parameters that split
+typedef LongfunctionType<First, Second, Third, Fourth, Fifth, Sixth> = Function(First first, Second second, Third third, Fourth fourth);
+<<<
+typedef LongfunctionType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = Function(
+        First first,
+        Second second,
+        Third third,
+        Fourth fourth);
+>>> both type parameter lists split
+typedef LongfunctionType<First, Second, Third, Fourth, Fifth, Sixth> = Function<Seventh>(First first, Second second, Third third, Fourth fourth);
+<<<
+typedef LongfunctionType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = Function<Seventh>(
+        First first,
+        Second second,
+        Third third,
+        Fourth fourth);
+>>> all three parameter lists split
+typedef LongfunctionType<First, Second, Third, Fourth, Fifth, Sixth> = Function<Seventh, Eighth, Ninth, Tenth, Eleventh, Twelfth, Thirteenth>(First first, Second second, Third third, Fourth fourth);
+<<<
+typedef LongfunctionType<First, Second,
+        Third, Fourth, Fifth, Sixth>
+    = Function<
+            Seventh,
+            Eighth,
+            Ninth,
+            Tenth,
+            Eleventh,
+            Twelfth,
+            Thirteenth>(
+        First first,
+        Second second,
+        Third third,
+        Fourth fourth);
+>>> old generic typedef syntax
+typedef Foo  <  T  ,S  >(T t,S s);
+<<<
+typedef Foo<T, S> = Function(T t, S s);
+>>> non-generic in typedef
+typedef   SomeFunc=ReturnType  Function(int param,   double other);
+<<<
+typedef SomeFunc = ReturnType Function(
+    int param, double other);
+>>> generic in typedef
+typedef Generic = T Function<T>(T param, double other);
+<<<
+typedef Generic = T Function<T>(
+    T param, double other);
+>>> no return type
+typedef SomeFunc = Function();
+<<<
+typedef SomeFunc = Function();
+>>> nested
+typedef SomeFunc = Function(int first, Function(int first, bool second, String third) second, String third);
+<<<
+typedef SomeFunc = Function(
+    int first,
+    Function(int first, bool second,
+            String third)
+        second,
+    String third);
+>>> without param names
+typedef F = Function(int, bool, String);
+<<<
+typedef F = Function(int, bool, String);
+>>> generic
+typedef    Foo < A ,B>=Function ( A a,   B b );
+<<<
+typedef Foo<A, B> = Function(A a, B b);
+>>> generic function
+typedef    Foo  =Function  < A ,B  >   ( A a,B b );
+<<<
+typedef Foo = Function<A, B>(A a, B b);
+>>> simple typedef
+typedef int Foo(int x);
+<<<
+typedef Foo = int Function(int x);
+>>> generic typedef
+typedef S Foo<S extends num>(S x);
+<<<
+typedef Foo<S extends num> = S Function(
+    S x);
+>>> named argument
+typedef int Foo({x});
+<<<
+typedef Foo = int Function({dynamic x});
+>>> optional positional argument
+typedef int Foo([x]);
+<<<
+typedef Foo = int Function([dynamic x]);
+>>> metadata and keywords
+typedef int Foo(@meta v1, final v2, var v3, /*c*/ v4);
+<<<
+typedef Foo = int Function(
+    @meta dynamic v1,
+    final dynamic v2,
+    dynamic v3,
+    /*c*/ dynamic v4);
+>>> metadata and keywords optional positional
+typedef int Foo([@meta v1, final v2, var v3, /*c*/ v4]);
+<<<
+typedef Foo = int Function(
+    [@meta dynamic v1,
+    final dynamic v2,
+    dynamic v3,
+    /*c*/ dynamic v4]);
+>>> metadata and keywords named
+typedef int Foo({@meta v1, final v2, var v3, /*c*/ v4});
+<<<
+typedef Foo = int Function(
+    {@meta dynamic v1,
+    final dynamic v2,
+    dynamic v3,
+    /*c*/ dynamic v4});
+>>> function argument
+typedef int Foo(int callback(int x));
+<<<
+typedef Foo = int Function(
+    int Function(int x) callback);
+>>> nested Function type
+typedef int Foo(int cb(int Function(int) cb2));
+<<<
+typedef Foo = int Function(
+    int Function(int Function(int) cb2)
+        cb);
+>>> nested generic function
+typedef T Foo<T>(T cb<S>(T cb2(S x)));
+<<<
+typedef Foo<T> = T Function(
+    T Function<S>(T Function(S x) cb2)
+        cb);
+>>> new-style function type unchanged
+typedef int Foo(int Function(int) cb);
+<<<
+typedef Foo = int Function(
+    int Function(int) cb);
+>>> don't change correct typedef
+typedef Foo = int Function(int);
+<<<
+typedef Foo = int Function(int);
+>>> simple typedef, no types
+typedef Foo(x);
+<<<
+typedef Foo = Function(dynamic x);
+>>> nested function types, no types
+typedef Foo(foo(x));
+<<<
+typedef Foo = Function(
+    Function(dynamic x) foo);
+>>> block comments in typedef
+typedef/*0*/void/*1*/Foo/*2*/<T>/*3*/(/*4*/T/*5*/foo(/*6*/x));
+<<<
+typedef /*1*/ Foo /*2*/ <T>
+    = /*0*/ void Function /*3*/ (
+        /*4*/ T Function(
+            /*6*/ dynamic x) /*5*/ foo);
+>>> eol comments in typedef
+typedef//0
+void//1
+Foo//2
+<T>//3
+(//4
+T//5
+foo(//6
+x));
+<<<
+typedef //1
+    Foo //2
+    <T>
+    = //0
+    void Function //3
+    (
+        //4
+        T Function(
+                //6
+                dynamic x) //5
+            foo);
+>>> nullable old style function-typed formal
+typedef Foo(foo()?);
+<<<
+typedef Foo = Function(Function()? foo);
+>>> required parameters
+typedef Foo({required a, required b()});
+<<<
+typedef Foo = Function(
+    {required dynamic a,
+    required Function() b});
+>>> issue #826
+typedef void MyFunction(var parameter);
+<<<
+typedef MyFunction = void Function(
+    dynamic parameter);
+>>> issue #826 with comment
+typedef void MyFunction(/* comment */ var parameter);
+<<<
+typedef MyFunction = void Function(
+    /* comment */ dynamic parameter);

@@ -1,0 +1,23 @@
+# This file is used by dartdoc when generating API documentation for Flutter.
+dartdoc:
+  errors:
+    # Default errors of dartdoc:
+    - duplicate-file
+    - invalid-parameter
+    - tool-error
+    - unresolved-export
+    # Warnings that are elevated to errors:
+    - ambiguous-doc-reference
+    - ambiguous-reexport
+    #- broken-link
+    - category-order-gives-missing-package-name
+    - ignored-canonical-for
+    #- missing-from-search-index
+    - no-canonical-found
+    - no-library-level-docs
+    - not-implemented
+    - orphaned-file
+    - reexported-private-api-across-packages
+    - unknown-file
+    - unknown-macro
+    - unresolved-doc-reference

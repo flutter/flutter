@@ -1,0 +1,42 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  strong-mode:
+    implicit-casts: false
+
+linter:
+  rules:
+    - avoid_catching_errors
+    - avoid_dynamic_calls
+    - avoid_private_typedef_functions
+    - avoid_returning_null
+    - avoid_unused_constructor_parameters
+    - cancel_subscriptions
+    - cascade_invocations
+    - comment_references
+    - directives_ordering
+    - invariant_booleans
+    - join_return_with_assignment
+    - lines_longer_than_80_chars
+    - missing_whitespace_between_adjacent_strings
+    - no_adjacent_strings_in_list
+    - no_runtimeType_toString
+    - only_throw_errors
+    - package_api_docs
+    - prefer_asserts_in_initializer_lists
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_expression_function_bodies
+    - prefer_interpolation_to_compose_strings
+    - prefer_relative_imports
+    - sort_pub_dependencies
+    - test_types_in_equals
+    - throw_in_finally
+    - type_annotate_public_apis
+    - unnecessary_lambdas
+    - unnecessary_null_aware_assignments
+    - unnecessary_parenthesis
+    - unnecessary_raw_strings
+    - unnecessary_statements
+    - use_is_even_rather_than_modulo
+    - use_string_buffers
