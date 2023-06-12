@@ -1947,13 +1947,13 @@ void main() {
     // ListTile default text colors.
     await tester.pumpWidget(buildFrame());
     final RenderParagraph leading = _getTextRenderObject(tester, 'leading');
-    expect(leading.text.style!.color, theme.textTheme.labelSmall!.color);
+    expect(leading.text.style!.color, theme.colorScheme.onSurfaceVariant);
     final RenderParagraph title = _getTextRenderObject(tester, 'title');
-    expect(title.text.style!.color, theme.textTheme.bodyLarge!.color);
+    expect(title.text.style!.color, theme.colorScheme.onSurface);
     final RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-    expect(subtitle.text.style!.color, theme.textTheme.bodyMedium!.color);
+    expect(subtitle.text.style!.color, theme.colorScheme.onSurfaceVariant);
     final RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
-    expect(trailing.text.style!.color, theme.textTheme.labelSmall!.color);
+    expect(trailing.text.style!.color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('Default ListTile debugFillProperties', (WidgetTester tester) async {
