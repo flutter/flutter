@@ -272,6 +272,44 @@ void main() {
       strokeWidth: 1.0,
     ));
   });
+
+  testWidgets('SliverDecoration works with SliverMainAxisGroup', (WidgetTester tester) async {
+    const Key key = Key('SliverDecoration with border');
+    const Color black = Color(0xFF000000);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 100,
+          width: 300,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverDecoration(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: const SliverMainAxisGroup(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(0.5, 0.5) & const Size(299, 199),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+  });
 }
 
 class TestDecoration extends Decoration {
