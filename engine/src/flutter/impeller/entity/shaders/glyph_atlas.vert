@@ -20,9 +20,9 @@ in vec4 atlas_glyph_bounds;
 in vec4 glyph_bounds;
 
 in vec2 unit_position;
-in vec2 glyph_position;
+in highp vec2 glyph_position;
 
-out vec2 v_uv;
+out highp vec2 v_uv;
 
 mat4 basis(mat4 m) {
   return mat4(m[0][0], m[0][1], m[0][2], 0.0,  //
