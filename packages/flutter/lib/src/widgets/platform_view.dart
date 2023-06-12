@@ -661,7 +661,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
 
   Future<void> _createNewUiKitView() async {
     final int id = platformViewsRegistry.getNextPlatformViewId();
-    final TController controller = await obtainNewViewController(
+    final TController controller = await createNewViewController(
       id
     );
     if (!mounted) {
@@ -675,7 +675,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
     });
   }
 
-  Future<TController> obtainNewViewController(int id);
+  Future<TController> createNewViewController(int id);
 
   void _onFocusChange(bool isFocused, TController controller) {
     if (!isFocused) {
@@ -693,7 +693,7 @@ abstract class _DarwinViewState<TPlatformView extends _DarwinView, TController e
 
 class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, RenderUiKitView, _UiKitPlatformView> {
   @override
-  Future<UiKitViewController> obtainNewViewController(int id) async {
+  Future<UiKitViewController> createNewViewController(int id) async {
     return PlatformViewsService.initUiKitView(
       id: id,
       viewType: widget.viewType,
@@ -759,6 +759,7 @@ abstract class _DarwinPlatformView<TController extends DarwinPlatformViewControl
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   @override
+  @mustCallSuper
   void updateRenderObject(BuildContext context, TRender renderObject) {
     renderObject
       ..viewController = controller
@@ -783,7 +784,6 @@ class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, Render
     super.updateRenderObject(context, renderObject);
     renderObject.updateGestureRecognizers(gestureRecognizers);
   }
-  
 }
 
 /// The parameters used to create a [PlatformViewController].
