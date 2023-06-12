@@ -1269,7 +1269,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // [assembleSemanticsNode] invocations.
   LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
 
-  /// Returns a list of rects that bound the given selection.
+  /// Returns a list of rects that bound the given selection, and the text
+  /// direction. The text direction is used by the engine to calculate
+  /// the closest position to a given point.
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
   List<TextBox> getBoxesForSelection(TextSelection selection) {
@@ -2459,7 +2461,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
 
     _textPainter.paint(context.canvas, effectiveOffset);
-    paintInlineChildren(context, offset);
+    paintInlineChildren(context, effectiveOffset);
 
     if (foregroundChild != null) {
       context.paintChild(foregroundChild, offset);
