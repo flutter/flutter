@@ -269,7 +269,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
   }
 }
 
-/// Superclass for common fucntionality of platform view RenderBoxes
+/// Superclass for common functionality of platform view RenderBoxes
 class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends RenderBox {
   /// Creates a render object for a platform view.
   ///
