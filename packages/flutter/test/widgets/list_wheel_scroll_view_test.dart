@@ -1644,7 +1644,7 @@ void main() {
     });
 
     testWidgets('ListWheelScrollView does not crash and does not allow taps on children that were laid out, but not painted', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/12649
+      // Regression test for https://github.com/flutter/flutter/issues/126491
 
       final FixedExtentScrollController controller = FixedExtentScrollController();
       final List<int> children = List<int>.generate(100, (int index) => index);
