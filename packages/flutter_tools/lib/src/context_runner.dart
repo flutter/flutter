@@ -88,6 +88,7 @@ Future<T> runInContext<T>(
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidBuilder: () => AndroidGradleBuilder(
+        java: globals.java,
         logger: globals.logger,
         processManager: globals.processManager,
         fileSystem: globals.fs,
@@ -101,22 +102,18 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         userMessages: globals.userMessages,
         processManager: globals.processManager,
-        androidStudio: globals.androidStudio,
         java: globals.java,
         androidSdk: globals.androidSdk,
         logger: globals.logger,
-        fileSystem: globals.fs,
         stdio: globals.stdio,
       ),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
       AndroidValidator: () => AndroidValidator(
-        androidStudio: globals.androidStudio,
+        java: globals.java,
         androidSdk: globals.androidSdk,
-        fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
-        processManager: globals.processManager,
         userMessages: globals.userMessages,
       ),
       AndroidWorkflow: () => AndroidWorkflow(
@@ -256,6 +253,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
       ),
       Java: () => Java.find(
+        config: globals.config,
         androidStudio: globals.androidStudio,
         logger: globals.logger,
         fileSystem: globals.fs,

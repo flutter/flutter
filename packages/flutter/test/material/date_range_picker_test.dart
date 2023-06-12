@@ -132,7 +132,10 @@ void main() {
       final Offset entryButtonBottomLeft = tester.getBottomLeft(
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
-      expect(saveButtonBottomLeft.dx, 800 - 89.0);
+      expect(
+        saveButtonBottomLeft.dx,
+        const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
+      );
       expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
       expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
