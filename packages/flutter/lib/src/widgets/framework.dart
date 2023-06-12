@@ -4036,7 +4036,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(child._parent == this);
     void visit(Element element) {
-      element._updateSlot(newSlot);
+      element.updateSlot(newSlot);
       final Element? descendant = element.renderObjectAttachingChild;
       if (descendant != null) {
         visit(descendant);
@@ -4045,7 +4045,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     visit(child);
   }
 
-  void _updateSlot(Object? newSlot) {
+  /// Called by [updateSlotForChild] when the framework needs to change the slot
+  /// that this [Element] occupies in its ancestor.
+  @protected
+  @mustCallSuper
+  void updateSlot(Object? newSlot) {
     assert(_lifecycleState == _ElementLifecycle.active);
     assert(_parent != null);
     assert(_parent!._lifecycleState == _ElementLifecycle.active);
@@ -6293,10 +6297,10 @@ abstract class RenderObjectElement extends Element {
   }
 
   @override
-  void _updateSlot(Object? newSlot) {
+  void updateSlot(Object? newSlot) {
     final Object? oldSlot = slot;
     assert(oldSlot != newSlot);
-    super._updateSlot(newSlot);
+    super.updateSlot(newSlot);
     assert(slot == newSlot);
     assert(_ancestorRenderObjectElement == _findAncestorRenderObjectElement());
     _ancestorRenderObjectElement?.moveRenderObjectChild(renderObject, oldSlot, slot);
@@ -6684,8 +6688,8 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
   }
 
   @override
-  void _updateSlot(Object? newSlot) {
-    super._updateSlot(newSlot);
+  void updateSlot(Object? newSlot) {
+    super.updateSlot(newSlot);
     assert(_debugCheckMustNotAttachRenderObjectToAncestor());
   }
 

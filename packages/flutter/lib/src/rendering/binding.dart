@@ -605,8 +605,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     await endOfFrame;
   }
 
-  late final int _implicitViewId = platformDispatcher.implicitView!.viewId;
-
   @override
   void hitTestInView(HitTestResult result, Offset position, int viewId) {
     _viewIdToRenderView[viewId]?.hitTest(result, position: position);

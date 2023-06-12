@@ -454,7 +454,12 @@ class _MultiChildComponentElement extends Element {
     assert(_debugAssertChildren());
   }
 
-  // TODO(goderbauer): Should be checking this in _updateSlot as well.
+  @override
+  void updateSlot(Object? newSlot) {
+    super.updateSlot(newSlot);
+    assert(_debugCheckMustAttachRenderObject(newSlot));
+  }
+
   bool _debugCheckMustAttachRenderObject(Object? slot) {
     // Check only applies in the ViewCollection configuration.
     if (!kDebugMode || (widget as _MultiChildComponentWidget)._child != null) {
