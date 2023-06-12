@@ -11,7 +11,7 @@ uniform FragInfo {
 }
 frag_info;
 
-in vec2 v_uv;
+in highp vec2 v_uv;
 
 out f16vec4 frag_color;
 
