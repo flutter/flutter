@@ -12,8 +12,8 @@
 #include <lib/async-loop/default.h>
 #include <lib/async/cpp/task.h>
 #include <lib/fdio/namespace.h>
-#include <lib/memfs/memfs.h>
 #include <lib/syslog/global.h>
+#include <lib/vfs/cpp/pseudo_dir.h>
 #include <zircon/errors.h>
 #include <zircon/status.h>
 #include <zircon/syscalls.h>
@@ -23,7 +23,6 @@
 namespace {
 
 constexpr char kTmpPath[] = "/tmp";
-[[maybe_unused]] constexpr size_t kMaxTmpPages = 1024;
 
 }  // namespace
 
@@ -38,31 +37,45 @@ RunnerTemp::RunnerTemp()
 
 RunnerTemp::~RunnerTemp() = default;
 
+static vfs::PseudoDir tmp_dir;
+
 void RunnerTemp::Start() {
-  std::promise<void> finished;
+  std::promise<zx_status_t> finished;
   async::PostTask(loop_->dispatcher(), [this, &finished]() {
-#if defined(DART_PRODUCT)
-    zx_status_t status = memfs_install_at_with_page_limit(
-        loop_->dispatcher(), kMaxTmpPages, kTmpPath);
-#else
-    memfs_filesystem_t* fs;
-    // Hot reload uses /tmp to hold the updated dills and assets so do not
-    // impose any size limitation in non product runners.
-    zx_status_t status = memfs_install_at(loop_->dispatcher(), kTmpPath, &fs);
-#endif
-    finished.set_value();
-    if (status != ZX_OK) {
-      FX_LOGF(ERROR, LOG_TAG, "Failed to install a /tmp memfs: %s",
-              zx_status_get_string(status));
-      return;
-    }
+    finished.set_value([this]() {
+      zx::channel client, server;
+      if (zx_status_t status = zx::channel::create(0, &client, &server);
+          status != ZX_OK) {
+        return status;
+      }
+      if (zx_status_t status =
+              tmp_dir.Serve(fuchsia::io::OpenFlags::RIGHT_READABLE |
+                                fuchsia::io::OpenFlags::RIGHT_WRITABLE |
+                                fuchsia::io::OpenFlags::DIRECTORY,
+                            std::move(server), loop_->dispatcher());
+          status != ZX_OK) {
+        return status;
+      }
+      fdio_ns_t* ns;
+      if (zx_status_t status = fdio_ns_get_installed(&ns); status != ZX_OK) {
+        return status;
+      }
+      if (zx_status_t status = fdio_ns_bind(ns, kTmpPath, client.release());
+          status != ZX_OK) {
+        return status;
+      }
+      return ZX_OK;
+    }());
   });
-  finished.get_future().wait();
+  if (zx_status_t status = finished.get_future().get(); status != ZX_OK) {
+    FX_LOGF(ERROR, LOG_TAG, "Failed to install a /tmp virtual filesystem: %s",
+            zx_status_get_string(status));
+  }
 }
 
 void RunnerTemp::SetupComponent(fdio_ns_t* ns) {
   // TODO(zra): Should isolates share a /tmp file system within a process, or
-  // should isolates each get their own private memfs for /tmp? For now,
+  // should isolates each get their own private file system for /tmp? For now,
   // sharing the process-wide /tmp simplifies hot reload since the hot reload
   // devfs requires sharing between the service isolate and the app isolates.
   zx_status_t status;
