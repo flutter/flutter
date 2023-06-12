@@ -49,6 +49,8 @@ static vk::AttachmentDescription CreateAttachmentDescription(
 
   if (desc.storage_mode == StorageMode::kDeviceTransient) {
     store_action = StoreAction::kDontCare;
+  } else if (resolve_texture) {
+    store_action = StoreAction::kStore;
   }
 
   const auto attachment_desc =
@@ -93,9 +95,8 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
                                 vk::ImageLayout::eColorAttachmentOptimal};
     attachments.emplace_back(CreateAttachmentDescription(color));
     if (color.resolve_texture) {
-      resolve_refs[bind_point] =
-          vk::AttachmentReference{static_cast<uint32_t>(attachments.size()),
-                                  vk::ImageLayout::eColorAttachmentOptimal};
+      resolve_refs[bind_point] = vk::AttachmentReference{
+          static_cast<uint32_t>(attachments.size()), vk::ImageLayout::eGeneral};
       attachments.emplace_back(CreateAttachmentDescription(color, true));
     }
   }

@@ -466,7 +466,7 @@ constexpr vk::AttachmentDescription CreateAttachmentDescription(
   switch (kind) {
     case AttachmentKind::kColor:
       vk_attachment.initialLayout = current_layout;
-      vk_attachment.finalLayout = vk::ImageLayout::eColorAttachmentOptimal;
+      vk_attachment.finalLayout = vk::ImageLayout::eGeneral;
       break;
     case AttachmentKind::kDepth:
     case AttachmentKind::kStencil:
