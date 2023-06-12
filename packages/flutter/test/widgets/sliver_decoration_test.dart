@@ -310,6 +310,49 @@ void main() {
       strokeWidth: 1.0,
     ));
   });
+
+  testWidgets('SliverDecoration draws only up to the bottom cache when sliver has infinite scroll extent', (WidgetTester tester) async {
+    const Key key = Key('SliverDecoration with border');
+    const Color black = Color(0xFF000000);
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          height: 100,
+          width: 300,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              SliverDecoration(
+                key: key,
+                decoration: BoxDecoration(border: Border.all()),
+                sliver: SliverList.builder(
+                  itemBuilder: (BuildContext context, int index) => const SizedBox(height: 100),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(0.5, 0.5) & const Size(299, 349),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+    controller.jumpTo(200);
+    await tester.pumpAndSettle();
+    // Note that the bottom edge is of the rect is the same as above.
+    expect(find.byKey(key), paints..rect(
+      rect: const Offset(0.5, -199.5) & const Size(299, 549),
+      color: black,
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+    ));
+  });
 }
 
 class TestDecoration extends Decoration {

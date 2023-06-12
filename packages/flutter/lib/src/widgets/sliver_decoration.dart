@@ -14,6 +14,11 @@ import 'image.dart';
 /// Unlike [DecoratedBox], this widget expects its child to be a sliver, and
 /// must be placed in a widget that expects a sliver.
 ///
+/// If the child sliver has infinite [SliverGeometry.scrollExtent], then we only
+/// draw the decoration down to the bottom [SliverGeometry.cacheExtent], and
+/// the developer is expected to ensure that the bottom border does not creep
+/// above the top of the bottom cache.
+///
 /// Commonly used with [BoxDecoration].
 ///
 /// The [child] is not clipped. To clip a child to the shape of a particular
