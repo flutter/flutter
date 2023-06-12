@@ -36,6 +36,7 @@ Widget buildInputDecorator({
   ),
 }) {
   return MaterialApp(
+    theme: ThemeData(useMaterial3: false),
     home: Material(
       child: Builder(
         builder: (BuildContext context) {
@@ -787,6 +788,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -837,6 +839,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -888,6 +891,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -939,6 +943,7 @@ void main() {
         final TextEditingController controller = TextEditingController();
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
+            theme: ThemeData(useMaterial3: false),
             home: Material(
               child: Directionality(
                 textDirection: TextDirection.ltr,
@@ -5714,6 +5719,7 @@ void main() {
     late StateSetter setState;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
