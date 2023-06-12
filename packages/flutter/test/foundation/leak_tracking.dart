@@ -5,9 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 import 'package:meta/meta.dart';
 
-export 'package:leak_tracker/leak_tracker.dart' show LeakTrackingTestConfig, StackTraceCollectionConfig;
+export 'package:leak_tracker/leak_tracker.dart' show LeakDiagnosticConfig, LeakTrackingTestConfig;
 
 /// Set of objects, that does not hold the objects from garbage collection.
 ///
@@ -117,7 +118,7 @@ Future<void> _withFlutterLeakTracking(
       Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
-        stackTraceCollectionConfig: config.stackTraceCollectionConfig,
+        leakDiagnosticConfig: config.leakDiagnosticConfig,
         shouldThrowOnLeaks: false,
       );
 
