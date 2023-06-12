@@ -3544,7 +3544,7 @@ void main() {
     valueIndicatorBox = tester.renderObject(find.byType(Overlay));
     expect(
       valueIndicatorBox,
-      paints..path(color: const Color(0xff000000))..paragraph(),
+      paints..path(color: theme.colorScheme.primary)..paragraph(),
     );
 
     // Wait for the value indicator to disappear.
