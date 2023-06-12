@@ -1558,6 +1558,29 @@ FLUTTER_ASSERT_ARC
       ((FlutterTextPosition*)[inputView closestPositionToPoint:point withinRange:range]).affinity);
 }
 
+- (void)testClosestPositionToPointWithPartialSelectionRects {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[ [FlutterTextSelectionRect
+                                   selectionRectWithRect:CGRectMake(0, 0, 100, 100)
+                                                position:0U] ]];
+  // Asking with a position at the end of selection rects should give you the trailing edge of
+  // the last rect.
+  XCTAssertTrue(CGRectEqualToRect(
+      [inputView caretRectForPosition:[FlutterTextPosition
+                                          positionWithIndex:1
+                                                   affinity:UITextStorageDirectionForward]],
+      CGRectMake(100, 0, 0, 100)));
+  // Asking with a position beyond the end of selection rects should return CGRectZero without
+  // crashing.
+  XCTAssertTrue(CGRectEqualToRect(
+      [inputView caretRectForPosition:[FlutterTextPosition
+                                          positionWithIndex:2
+                                                   affinity:UITextStorageDirectionForward]],
+      CGRectZero));
+}
+
 #pragma mark - Floating Cursor - Tests
 
 - (void)testFloatingCursorDoesNotThrow {

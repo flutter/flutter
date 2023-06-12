@@ -1658,25 +1658,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return CGRectZero;
 }
 
-- (BOOL)isRTLAtPosition:(NSUInteger)position {
-  // _selectionRects is sorted by position already.
-  // We can use binary search.
-  NSInteger min = 0;
-  NSInteger max = [_selectionRects count];
-  while (min <= max) {
-    const NSUInteger mid = min + (max - min) / 2;
-    FlutterTextSelectionRect* rect = _selectionRects[mid];
-    if (rect.position > position) {
-      max = mid - 1;
-    } else if (rect.position == position) {
-      return rect.isRTL;
-    } else {
-      min = mid + 1;
-    }
-  }
-  return NO;
-}
-
 - (CGRect)caretRectForPosition:(UITextPosition*)position {
   NSInteger index = ((FlutterTextPosition*)position).index;
   UITextStorageDirection affinity = ((FlutterTextPosition*)position).affinity;
@@ -1699,7 +1680,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     CGRect characterAfterCaret = rects[0].rect;
     // Return a zero-width rectangle along the upstream edge of the character after the caret
     // position.
-    if ([self isRTLAtPosition:index]) {
+    if ([rects[0] isKindOfClass:[FlutterTextSelectionRect class]] &&
+        ((FlutterTextSelectionRect*)rects[0]).isRTL) {
       return CGRectMake(characterAfterCaret.origin.x + characterAfterCaret.size.width,
                         characterAfterCaret.origin.y, 0, characterAfterCaret.size.height);
     } else {
@@ -1712,7 +1694,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     CGRect characterAfterCaret = rects[1].rect;
     // Return a zero-width rectangle along the upstream edge of the character after the caret
     // position.
-    if ([self isRTLAtPosition:index]) {
+    if ([rects[1] isKindOfClass:[FlutterTextSelectionRect class]] &&
+        ((FlutterTextSelectionRect*)rects[1]).isRTL) {
       return CGRectMake(characterAfterCaret.origin.x + characterAfterCaret.size.width,
                         characterAfterCaret.origin.y, 0, characterAfterCaret.size.height);
     } else {
@@ -1727,7 +1710,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   // For both cases, return a zero-width rectangle along the downstream edge of the character
   // before the caret position.
   CGRect characterBeforeCaret = rects[0].rect;
-  if ([self isRTLAtPosition:index - 1]) {
+  if ([rects[0] isKindOfClass:[FlutterTextSelectionRect class]] &&
+      ((FlutterTextSelectionRect*)rects[0]).isRTL) {
     return CGRectMake(characterBeforeCaret.origin.x, characterBeforeCaret.origin.y, 0,
                       characterBeforeCaret.size.height);
   } else {
