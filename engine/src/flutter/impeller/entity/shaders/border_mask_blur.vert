@@ -11,7 +11,7 @@ uniform FrameInfo {
 }
 frame_info;
 
-in vec2 position;
+in highp vec2 position;
 in highp vec2 texture_coords;
 
 out highp vec2 v_texture_coords;

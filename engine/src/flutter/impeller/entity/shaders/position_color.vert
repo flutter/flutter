@@ -10,7 +10,7 @@ uniform FrameInfo {
 }
 frame_info;
 
-in vec2 position;
+in highp vec2 position;
 in vec4 color;
 
 out vec4 v_color;
