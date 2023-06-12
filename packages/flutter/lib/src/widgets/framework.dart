@@ -6693,7 +6693,6 @@ abstract class RenderTreeRootElement extends RenderObjectElement {
     assert(_debugCheckMustNotAttachRenderObjectToAncestor());
   }
 
-  ///
   bool _debugCheckMustNotAttachRenderObjectToAncestor() {
     if (!kDebugMode) {
       return true;
