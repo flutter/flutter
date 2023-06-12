@@ -300,6 +300,82 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('Device devices that support impeller pass through the enable-impeller flag', () async {
+    final Completer<void> exitCompleter = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        exitCode: -1,
+        completer: exitCompleter,
+        outputFollowsExit: true,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+      supportsImpeller: true,
+    );
+    unawaited(Future<void>(() {
+      exitCompleter.complete();
+    }));
+
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
+
+  testWithoutContext('Device devices that do not support impeller ignore the enable-impeller flag', () async {
+    final Completer<void> exitCompleter = Completer<void>();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['debug'],
+        exitCode: -1,
+        completer: exitCompleter,
+        outputFollowsExit: true,
+        environment: const <String, String>{
+          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_3': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '3'
+        }
+      ),
+    ]);
+    final FakeDesktopDevice device = setUpDesktopDevice(
+      processManager: processManager,
+    );
+    unawaited(Future<void>(() {
+      exitCompleter.complete();
+    }));
+
+
+    final FakeApplicationPackage package = FakeApplicationPackage();
+
+    await device.startApp(
+      package,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+        enableImpeller: ImpellerStatus.enabled,
+        dartEntrypointArgs: <String>[],
+      ),
+    );
+  });
 }
 
 FakeDesktopDevice setUpDesktopDevice({
@@ -308,6 +384,7 @@ FakeDesktopDevice setUpDesktopDevice({
   ProcessManager? processManager,
   OperatingSystemUtils? operatingSystemUtils,
   bool nullExecutablePathForDevice = false,
+  bool supportsImpeller = false,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -315,6 +392,7 @@ FakeDesktopDevice setUpDesktopDevice({
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
+    supportsImpeller: supportsImpeller,
   );
 }
 
@@ -326,6 +404,7 @@ class FakeDesktopDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
+    this.supportsImpeller = false,
   }) : super(
       'dummy',
       platformType: PlatformType.linux,
@@ -343,6 +422,9 @@ class FakeDesktopDevice extends DesktopDevice {
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
+
+  @override
+  final bool supportsImpeller;
 
   @override
   String get name => 'dummy';
