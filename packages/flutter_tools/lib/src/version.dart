@@ -555,6 +555,7 @@ class _FlutterVersionGit extends FlutterVersion {
   String get frameworkCommitDate => _gitCommitDate(lenient: true, workingDirectory: flutterRoot);
 
   String? _repositoryUrl;
+  @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
       final String gitChannel = _runGit(

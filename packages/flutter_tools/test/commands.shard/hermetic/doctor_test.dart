@@ -779,6 +779,7 @@ void main() {
           ..createSync(recursive: true);
       devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "123"}');
       fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['which', 'java']),
         FakeCommand(command: <String>['chmod', '755', '/path/to/flutter/bin/cache/artifacts']),
       ]);
       final List<DoctorValidator> validators = DoctorValidatorsProvider.test(

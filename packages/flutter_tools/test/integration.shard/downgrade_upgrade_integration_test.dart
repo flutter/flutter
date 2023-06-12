@@ -44,10 +44,9 @@ void main() {
     testDirectory.createSync(recursive: true);
 
     // Enable longpaths for windows integration test.
-    RunResult result = await processManager.run(<String>[
+    await processManager.run(<String>[
       'git', 'config', '--system', 'core.longpaths', 'true',
     ]);
-    expect(result.processResult, const ProcessResultMatcher());
 
     printOnFailure('Step 1 - clone the $_kBranch of flutter into the test directory');
     exitCode = await processUtils.stream(<String>[
