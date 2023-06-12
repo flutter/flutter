@@ -11,7 +11,7 @@
 #include "flutter/display_list/display_list.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkPromiseImageTexture.h"
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContextThreadSafeProxy.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 
