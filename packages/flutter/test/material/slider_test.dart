@@ -3509,8 +3509,10 @@ void main() {
 
   testWidgets('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+    final ThemeData theme = ThemeData(useMaterial3: true);
     const double currentValue = 0.5;
     await tester.pumpWidget(MaterialApp(
+      theme: theme,
       home: Material(
         child: Center(
           child: Slider(
