@@ -481,6 +481,13 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   // The first argument of argv is required to be the executable name.
   std::vector<const char*> argv = {[self.executableName UTF8String]};
   std::vector<std::string> switches = self.switches;
+
+  // Enable Impeller only if specifically asked for from the project or cmdline arguments.
+  if (_project.enableImpeller ||
+      std::find(switches.begin(), switches.end(), "--enable-impeller=true") != switches.end()) {
+    switches.push_back("--enable-impeller=true");
+  }
+
   std::transform(switches.begin(), switches.end(), std::back_inserter(argv),
                  [](const std::string& arg) -> const char* { return arg.c_str(); });
 
