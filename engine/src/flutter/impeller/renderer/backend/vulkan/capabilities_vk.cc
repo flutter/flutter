@@ -138,12 +138,13 @@ CapabilitiesVK::GetRequiredInstanceExtensions() const {
     }
     required.push_back("VK_EXT_debug_utils");
 
-    if (!HasExtension("VK_EXT_validation_features")) {
-      VALIDATION_LOG << "Requested validations but could not find the "
+    if (HasExtension("VK_EXT_validation_features")) {
+      // It's valid to not have `VK_EXT_validation_features` available.  That's
+      // the case when using AGI as a frame debugger.
+      FML_DLOG(INFO) << "Requested validations but could not find the "
                         "VK_EXT_validation_features extension.";
-      return std::nullopt;
+      required.push_back("VK_EXT_validation_features");
     }
-    required.push_back("VK_EXT_validation_features");
   }
 
   return required;
