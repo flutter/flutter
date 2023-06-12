@@ -988,6 +988,7 @@
 ../../../third_party/angle/include/GLX/.clang-format
 ../../../third_party/angle/include/KHR/.clang-format
 ../../../third_party/angle/include/WGL/.clang-format
+../../../third_party/angle/include/platform/autogen/.clang-format
 ../../../third_party/angle/include/platform/gen_features.py
 ../../../third_party/angle/infra
 ../../../third_party/angle/samples
