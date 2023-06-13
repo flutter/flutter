@@ -769,7 +769,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollPositionAlignmentPolicy _applyAxisDirectionToAlignmentPolicy(ScrollPositionAlignmentPolicy alignmentPolicy) {
     return switch (axisDirection) {
       // Start and end alignments must account for axis direction.
-      // When focus is requested for example, it know the directionality of the
+      // When focus is requested for example, it knows the directionality of the
       // keyboard keys initiating traversal, but not the direction of the
       // Scrollable.
       AxisDirection.up || AxisDirection.left => _maybeFlipAlignment(alignmentPolicy),
