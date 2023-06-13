@@ -1088,6 +1088,77 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
+  testWidgets('MergeableMaterial insert and separate slice', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+
+    expect(box.size.height, equals(100));
+
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: MergeableMaterial(
+              children: <MergeableMaterialItem>[
+                MaterialSlice(
+                  key: ValueKey<String>('A'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+                MaterialGap(
+                  key: ValueKey<String>('x'),
+                ),
+                MaterialSlice(
+                  key: ValueKey<String>('B'),
+                  child: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(box.size.height, lessThan(216));
+
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Shifting);
+    matches(getBorderRadius(tester, 1), RadiusType.Shifting, RadiusType.Round);
+
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(box.size.height, equals(216));
+
+    matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
+    matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
+  });
+
   bool isDivider(BoxDecoration decoration, bool top, bool bottom) {
     const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
