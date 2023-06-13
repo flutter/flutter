@@ -26,6 +26,7 @@ FLUTTER_ASSERT_ARC
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData;
+- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
 @end
 
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
@@ -135,10 +136,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification;
 - (CGFloat)calculateMultitaskingAdjustment:(CGRect)screenRect keyboardFrame:(CGRect)keyboardFrame;
 - (void)startKeyBoardAnimation:(NSTimeInterval)duration;
-- (void)setupKeyboardAnimationVsyncClient;
 - (UIView*)keyboardAnimationView;
 - (SpringAnimation*)keyboardSpringAnimation;
 - (void)setupKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation;
+- (void)setupKeyboardAnimationVsyncClient:
+    (FlutterKeyboardAnimationCallback)keyboardAnimationCallback;
 - (void)ensureViewportMetricsIsCorrect;
 - (void)invalidateKeyboardAnimationVSyncClient;
 - (void)addInternalPlugins;
@@ -195,18 +197,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [viewControllerMock loadView];
   [viewControllerMock viewDidLoad];
   OCMVerify([viewControllerMock createTouchRateCorrectionVSyncClientIfNeeded]);
-}
-
-- (void)testStartKeyboardAnimationWillInvokeSetupKeyboardAnimationVsyncClient {
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
-  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
-  viewControllerMock.targetViewInsetBottom = 100;
-  [viewControllerMock startKeyBoardAnimation:0.25];
-  OCMVerify([viewControllerMock setupKeyboardAnimationVsyncClient]);
 }
 
 - (void)testStartKeyboardAnimationWillInvokeSetupKeyboardSpringAnimationIfNeeded {
@@ -451,6 +441,34 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
 }
 
+- (void)testKeyboardAnimationWillWaitUIThreadVsync {
+  // We need to make sure the new viewport metrics get sent after the
+  // begin frame event has processed. And this test is to expect that the callback
+  // will sync with UI thread. So just simulate a lot of works on UI thread and
+  // test the keyboard animation callback will execute until UI task completed.
+  // Related issue: https://github.com/flutter/flutter/issues/120555.
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  // Post a task to UI thread to block the thread.
+  const int delayTime = 1;
+  [engine uiTaskRunner]->PostTask([] { sleep(delayTime); });
+  XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
+
+  __block CFTimeInterval fulfillTime;
+  FlutterKeyboardAnimationCallback callback = ^(fml::TimePoint targetTime) {
+    fulfillTime = CACurrentMediaTime();
+    [expectation fulfill];
+  };
+  CFTimeInterval startTime = CACurrentMediaTime();
+  [viewController setupKeyboardAnimationVsyncClient:callback];
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+  XCTAssertTrue(fulfillTime - startTime > delayTime);
+}
+
 - (void)testCalculateKeyboardAttachMode {
   FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
   [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
@@ -629,9 +647,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testHandleKeyboardNotification {
-  FlutterEngine* mockEngine = OCMPartialMock([[FlutterEngine alloc] init]);
-  [mockEngine createShell:@"" libraryURI:@"" initialRoute:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                                 nibName:nil
                                                                                  bundle:nil];
   // keyboard is empty
@@ -652,11 +670,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [self setupMockMainScreenAndView:viewControllerMock viewFrame:viewFrame convertedFrame:viewFrame];
   viewControllerMock.targetViewInsetBottom = 0;
   XCTestExpectation* expectation = [self expectationWithDescription:@"update viewport"];
-  OCMStub([mockEngine updateViewportMetrics:flutter::ViewportMetrics()])
-      .ignoringNonObjectArgs()
-      .andDo(^(NSInvocation* invocation) {
-        [expectation fulfill];
-      });
+  OCMStub([viewControllerMock updateViewportMetricsIfNeeded]).andDo(^(NSInvocation* invocation) {
+    [expectation fulfill];
+  });
 
   [viewControllerMock handleKeyboardNotification:notification];
   XCTAssertTrue(viewControllerMock.targetViewInsetBottom == 320 * UIScreen.mainScreen.scale);

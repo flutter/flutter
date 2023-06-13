@@ -39,7 +39,8 @@ extern NSString* const kFlutterEngineWillDealloc;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
-- (fml::RefPtr<fml::TaskRunner>)RasterTaskRunner;
+- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
+- (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner;
 
 - (fml::WeakPtr<flutter::PlatformView>)platformView;
 
