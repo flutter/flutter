@@ -905,19 +905,13 @@ void main() {
   });
 
   testWidgets('Material cursor golden', (WidgetTester tester) async {
-    final Widget widget = Theme(
-      data: ThemeData(useMaterial3: false),
-      child: overlay(
-        child: Theme(
-          data: ThemeData(useMaterial3: false),
-          child: const RepaintBoundary(
-            key: ValueKey<int>(1),
-            child: TextField(
-              cursorColor: Colors.blue,
-              cursorWidth: 15,
-              cursorRadius: Radius.circular(3.0),
-            ),
-          ),
+    final Widget widget = overlay(
+      child: const RepaintBoundary(
+        key: ValueKey<int>(1),
+        child: TextField(
+          cursorColor: Colors.blue,
+          cursorWidth: 15,
+          cursorRadius: Radius.circular(3.0),
         ),
       ),
     );

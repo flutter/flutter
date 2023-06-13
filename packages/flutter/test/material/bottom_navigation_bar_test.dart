@@ -1604,6 +1604,7 @@ void main() {
   testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
+        useMaterial3: false,
         textDirection: TextDirection.ltr,
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -2503,9 +2504,9 @@ void main() {
   });
 }
 
-Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection }) {
+Widget boilerplate({ Widget? bottomNavigationBar, required TextDirection textDirection, bool? useMaterial3 }) {
   return MaterialApp(
-    theme: ThemeData(useMaterial3: false),
+    theme: ThemeData(useMaterial3: useMaterial3),
     home: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[

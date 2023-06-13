@@ -993,9 +993,10 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.all(true),
-          showTrackOnHover: true,
-        )),
+            thumbVisibility: MaterialStateProperty.all(true),
+            showTrackOnHover: true,
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1067,18 +1068,19 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
-          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            return states.contains(MaterialState.hovered);
-          }),
-          thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return 40.0;
-            }
-            // Default thickness
-            return 8.0;
-          }),
-        )),
+            thumbVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) => true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              return states.contains(MaterialState.hovered);
+            }),
+            thickness: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return 40.0;
+              }
+              // Default thickness
+              return 8.0;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1138,14 +1140,15 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.all(true),
-          trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return true;
-            }
-            return false;
-          }),
-        )),
+            thumbVisibility: MaterialStateProperty.all(true),
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            }),
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
@@ -1205,9 +1208,10 @@ void main() {
         theme: ThemeData(
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
-          thumbVisibility: MaterialStateProperty.all(true),
-          showTrackOnHover: true,
-        )),
+            thumbVisibility: MaterialStateProperty.all(true),
+            showTrackOnHover: true,
+          ),
+        ),
         home: const SingleChildScrollView(
           child: SizedBox(width: 4000.0, height: 4000.0),
         ),
