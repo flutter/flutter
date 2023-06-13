@@ -327,8 +327,10 @@ public class FlutterLoader {
         if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
           shellArgs.add("--enable-vulkan-validation");
         }
-        String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY, "opengles");
-        shellArgs.add("--impeller-backend=" + backend);
+        String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
+        if (backend != null) {
+          shellArgs.add("--impeller-backend=" + backend);
+        }
       }
 
       final String leakVM = isLeakVM(metaData) ? "true" : "false";
