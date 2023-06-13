@@ -1796,9 +1796,25 @@ mixin WidgetInspectorService {
   }
 
   List<Object> _getChildrenSummaryTree(String? diagnosticsNodeId, String groupName) {
-    final DiagnosticsNode? node = toObject(diagnosticsNodeId) as DiagnosticsNode?;
+    final Object? theObject = toObject(diagnosticsNodeId);
     final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(groupName: groupName, summaryTree: true, service: this);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
+
+
+    if (theObject is DiagnosticsNode) {
+      return _nodesToJson(_getChildrenFiltered(theObject, delegate), delegate, parent: theObject);
+    }
+
+    if (theObject is Diagnosticable) {
+      final DiagnosticsNode node = theObject.toDiagnosticsNode();
+      return _nodesToJson(_getChildrenFiltered(node, delegate), delegate, parent: node);
+    }
+
+    if (theObject == null) {
+      return <Object>[];
+    }
+
+    throw StateError('Unexpected object type ${theObject.runtimeType}');
+
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
