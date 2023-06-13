@@ -141,11 +141,17 @@ if (enable_unittests) {
   executable("txt_unittests") {
     testonly = true
 
-    sources = [ "tests/txt_run_all_unittests.cc" ]
+    sources = [
+      "tests/font_collection_tests.cc",
+      "tests/txt_run_all_unittests.cc",
+    ]
+
+    public_configs = [ ":txt_config" ]
 
     configs += [ ":allow_posix_names" ]
 
     deps = [
+      ":txt",
       ":txt_fixtures",
       "//flutter/fml",
       "//flutter/testing:testing_lib",
