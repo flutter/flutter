@@ -914,6 +914,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       }
       child = parent;
     }
+
     final double offset = switch (axisDirectionToAxis(axisDirection!)) {
       Axis.vertical => verticalOffset.pixels,
       Axis.horizontal => horizontalOffset.pixels,
@@ -981,6 +982,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     };
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+
     final double offsetDifference = switch (axisDirectionToAxis(axisDirection)){
       Axis.vertical => verticalOffset.pixels - targetOffset,
       Axis.horizontal => horizontalOffset.pixels - targetOffset,
