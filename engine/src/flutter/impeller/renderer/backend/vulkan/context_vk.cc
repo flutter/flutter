@@ -107,7 +107,7 @@ uint64_t CalculateHash(void* ptr) {
 ContextVK::ContextVK() : hash_(CalculateHash(this)) {}
 
 ContextVK::~ContextVK() {
-  if (device_holder_->device) {
+  if (device_holder_ && device_holder_->device) {
     [[maybe_unused]] auto result = device_holder_->device->waitIdle();
   }
   CommandPoolVK::ClearAllPools(this);
