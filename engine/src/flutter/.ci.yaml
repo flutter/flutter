@@ -102,6 +102,16 @@ targets:
       android_sdk_preview_license: \n84831b9409646a918e30573bab4c9c91346d8abd
     timeout: 60
 
+  - name: Linux linux_android_emulator_tests
+    bringup: true
+    enabled_branches:
+      - main
+    recipe: engine_v2/builder
+    presubmit: false
+    properties:
+      config_name: linux_android_emulator
+    timeout: 60
+
   - name: Linux Android Emulator Tests
     recipe: engine/scenarios
     enabled_branches:
