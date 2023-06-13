@@ -15,7 +15,7 @@
 # For documentation about this file format, see
 # https://dart.dev/go/data-driven-fixes.
 
-# * Fixes in this file are for RichText from the widgets library. *
+# * Fixes in this file are for EditableText from the widgets library. *
 version: 1
 transforms:
   # Change made in https://github.com/flutter/flutter/pull/128522

@@ -185,6 +185,7 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
+    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
     this.textScaleFactor,
     this.textScaler,
     this.showCursor = false,
@@ -235,6 +236,7 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
+    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
     this.textScaleFactor,
     this.textScaler,
     this.showCursor = false,
@@ -324,6 +326,7 @@ class SelectableText extends StatefulWidget {
   final TextDirection? textDirection;
 
   /// {@macro flutter.widgets.editableText.textScaleFactor}
+  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
   final double? textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}

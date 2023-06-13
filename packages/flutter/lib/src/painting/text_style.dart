@@ -19,6 +19,7 @@ import 'basic_types.dart';
 import 'colors.dart';
 import 'strut_style.dart';
 import 'text_painter.dart';
+import 'text_scaler.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
@@ -1275,7 +1276,7 @@ class TextStyle with Diagnosticable {
     @Deprecated(
       'Use textScaler instead. '
       'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
+      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,

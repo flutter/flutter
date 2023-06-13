@@ -6,6 +6,26 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('WidgetSpan codeUnitAt', () {
+    const InlineSpan span = WidgetSpan(child: SizedBox());
+    expect(span.codeUnitAt(-1), isNull);
+    expect(span.codeUnitAt(0), PlaceholderSpan.placeholderCodeUnit);
+    expect(span.codeUnitAt(1), isNull);
+    expect(span.codeUnitAt(2), isNull);
+
+    const InlineSpan nestedSpan = TextSpan(
+      text: 'AAA',
+      children: <InlineSpan>[span, span],
+    );
+    expect(nestedSpan.codeUnitAt(-1), isNull);
+    expect(nestedSpan.codeUnitAt(0), 65);
+    expect(nestedSpan.codeUnitAt(1), 65);
+    expect(nestedSpan.codeUnitAt(2), 65);
+    expect(nestedSpan.codeUnitAt(3), PlaceholderSpan.placeholderCodeUnit);
+    expect(nestedSpan.codeUnitAt(4), PlaceholderSpan.placeholderCodeUnit);
+    expect(nestedSpan.codeUnitAt(5), isNull);
+  });
+
   test('WidgetSpan.extractFromInlineSpan applies the correct scaling factor', () {
     const WidgetSpan a = WidgetSpan(child: SizedBox(), style: TextStyle(fontSize: 0));
     const WidgetSpan b = WidgetSpan(child: SizedBox(), style: TextStyle(fontSize: 10));
@@ -34,7 +54,7 @@ void main() {
     }
 
     final List<double> textScaleFactors = WidgetSpan.extractFromInlineSpan(span, const _QuadraticScaler())
-     .map(effectiveTextScaleFactorFromWidget).toList();
+      .map(effectiveTextScaleFactorFromWidget).toList();
 
     expect(textScaleFactors, <double>[
       0,  // a

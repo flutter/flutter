@@ -96,16 +96,18 @@ class WidgetSpan extends PlaceholderSpan {
   /// directly is rarely necessary.
   static List<Widget> extractFromInlineSpan(InlineSpan span, TextScaler textScaler) {
     final List<Widget> widgets = <Widget>[];
+    // 14.0 is the default font size to use when none of the ancestor spans
+    // specifies one.
     final List<double> fontSizeStack = <double>[14.0];
     int index = 0;
     // This assumes an InlineSpan tree's logical order is equivalent to preorder.
     bool visitSubtree(InlineSpan span) {
-      final double? fontSize = switch (span.style?.fontSize) {
+      final double? fontSizeToPush = switch (span.style?.fontSize) {
         final double size when size != fontSizeStack.last => size,
         _ => null,
       };
-      if (fontSize != null) {
-        fontSizeStack.add(fontSize);
+      if (fontSizeToPush != null) {
+        fontSizeStack.add(fontSizeToPush);
       }
       if (span is WidgetSpan) {
         final double fontSize = fontSizeStack.last;
@@ -125,9 +127,10 @@ class WidgetSpan extends PlaceholderSpan {
         '$span is a PlaceholderSpan but not a WidgetSpan subclass. This is currently not supported.',
       );
       span.visitDirectChildren(visitSubtree);
-      if (fontSize != null) {
-        fontSizeStack.removeLast();
+      if (fontSizeToPush != null) {
+        final double poppedFontSize = fontSizeStack.removeLast();
         assert(fontSizeStack.isNotEmpty);
+        assert(poppedFontSize == fontSizeToPush);
       }
       return true;
     }

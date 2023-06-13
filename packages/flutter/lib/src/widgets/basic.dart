@@ -5722,6 +5722,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
+    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
     this.maxLines,
@@ -5778,6 +5779,7 @@ class RichText extends MultiChildRenderObjectWidget {
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
+  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
   double get textScaleFactor => textScaler.textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}

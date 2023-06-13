@@ -435,6 +435,7 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
     this.textScaleFactor,
     this.textScaler,
     this.maxLines,
@@ -464,6 +465,7 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
     this.textScaleFactor,
     this.textScaler,
     this.maxLines,
@@ -531,9 +533,6 @@ class Text extends StatelessWidget {
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
-  /// Deprecated. Will be removed in a future version of Flutter. Use
-  /// [textScaler] instead.
-  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -542,6 +541,7 @@ class Text extends StatelessWidget {
   /// The value given to the constructor as textScaleFactor. If null, will
   /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
   final double? textScaleFactor;
 
   /// {@macro flutter.painting.textPainter.textScaler}

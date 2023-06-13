@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'inline_span.dart';
 import 'text_painter.dart';
+import 'text_scaler.dart';
 
 // Examples can assume:
 // late TextSpan myTextSpan;

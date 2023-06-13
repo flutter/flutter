@@ -147,6 +147,7 @@ class MediaQueryData {
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
+    // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
     this.platformBrightness = Brightness.light,
@@ -273,7 +274,6 @@ class MediaQueryData {
   /// the Nexus 6 has a device pixel ratio of 3.5.
   final double devicePixelRatio;
 
-
   /// Deprecated. Will be removed in a future version of Flutter. Use
   /// [textScaler] instead.
   ///
@@ -289,7 +289,7 @@ class MediaQueryData {
   @Deprecated(
     'Use textScaler instead. '
     'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
+    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
   )
   double get textScaleFactor => textScaler.textScaleFactor;
   final double _textScaleFactor;
@@ -531,15 +531,15 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given fields replaced
   /// with the new values.
   ///
-  /// If `textScaler` and `textScaleFactor` are both specified, `textScaleFactor`
-  /// will be ignored in favor of `textScaler`.
+  /// The `textScaler` parameter and `textScaleFactor` parameter can not be both
+  /// specified.
   MediaQueryData copyWith({
     Size? size,
     double? devicePixelRatio,
     @Deprecated(
       'Use textScaler instead. '
       'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
+      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
     )
     double? textScaleFactor,
     TextScaler? textScaler,
@@ -558,6 +558,7 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
   }) {
+    assert(textScaleFactor == null || textScaler == null);
     if (textScaleFactor != null) {
       textScaler ??= TextScaler.linear(textScaleFactor);
     }
@@ -1066,7 +1067,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
       builder: (BuildContext context) {
         assert(debugCheckHasMediaQuery(context));
         return MediaQuery(
-          data: of(context).copyWith(textScaler: TextScaler.noScaling, textScaleFactor: 1.0),
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
           child: child,
         );
       },
@@ -1090,9 +1091,14 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     double maxScaleFactor = double.infinity,
     required Widget child,
   }) {
+    assert(maxScaleFactor >= minScaleFactor);
+    assert(!maxScaleFactor.isNaN);
+    assert(minScaleFactor.isFinite);
+    assert(minScaleFactor >= 0);
+
     return Builder(builder: (BuildContext context) {
       assert(debugCheckHasMediaQuery(context));
-      final MediaQueryData data = of(context);
+      final MediaQueryData data = MediaQuery.of(context);
       return MediaQuery(
         data: data.copyWith(
           textScaler: data.textScaler.clamp(minScaleFactor: minScaleFactor, maxScaleFactor: maxScaleFactor),
@@ -1231,6 +1237,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  // TODO(LongCatIsLooong): To be depreacted https://github.com/flutter/flutter/issues/128825
   static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
@@ -1245,7 +1252,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   @Deprecated(
     'Use maybeTextScalerOf instead. '
     'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
+    'Use of maybeTextScaleFactorOf was deprecated after v3.12.0-2.0.pre.',
   )
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
 

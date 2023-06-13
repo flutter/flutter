@@ -299,7 +299,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     @Deprecated(
       'Use textScaler instead. '
       'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
+      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
     )
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
@@ -1023,13 +1023,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @Deprecated(
     'Use textScaler instead. '
     'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
+    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
   )
   double get textScaleFactor => _textPainter.textScaleFactor;
   @Deprecated(
     'Use textScaler instead. '
     'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
+    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
   )
   set textScaleFactor(double value) {
     textScaler = TextScaler.linear(value);

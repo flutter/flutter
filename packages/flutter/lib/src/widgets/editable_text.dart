@@ -755,7 +755,7 @@ class EditableText extends StatefulWidget {
     @Deprecated(
       'Use textScaler instead. '
       'This enables non-linear accessibility font scaling on Android 14. '
-      'This feature was deprecated after [TBD].',
+      'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
     )
     this.textScaleFactor,
     this.textScaler,
@@ -1074,7 +1074,7 @@ class EditableText extends StatefulWidget {
   @Deprecated(
     'Use textScaler instead. '
     'This enables non-linear accessibility font scaling on Android 14. '
-    'This feature was deprecated after [TBD].',
+    'Use of textScaleFactor was deprecated after v3.12.0-2.0.pre. ',
   )
   final double? textScaleFactor;
 

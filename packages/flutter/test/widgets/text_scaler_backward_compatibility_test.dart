@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Remove this file once textScaleFactor is removed.
+// TODO(LongCatIsLooong): Remove this file once textScaleFactor is removed.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TextStyle', () {
-    test('getTextSyle is backward Compatible', () {
+    test('getTextSyle is backward compatible', () {
       expect(
         const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
         contains('fontSize: 28'),
@@ -18,7 +19,7 @@ void main() {
     }, skip: kIsWeb); // [intended] CkTextStyle doesn't have a custom toString implementation.
   });
   group('TextPainter', () {
-    test('textScaleFactor translates to testScaler', () {
+    test('textScaleFactor translates to textScaler', () {
       final TextPainter textPainter = TextPainter(
         text: const TextSpan(text: 'text'),
         textDirection: TextDirection.ltr,
@@ -37,7 +38,7 @@ void main() {
   });
 
   group('MediaQuery', () {
-    test('specifying both textScaler and textScaling factor asserts', () {
+    test('specifying both textScaler and textScalingFactor asserts', () {
       expect(
         () => MediaQueryData(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
         throwsAssertionError,
@@ -54,6 +55,14 @@ void main() {
       final MediaQueryData data2 = data.copyWith(textScaler: TextScaler.noScaling);
       expect(data2.textScaler, TextScaler.noScaling);
       expect(data2.textScaleFactor, 1.0);
+    });
+
+    test('copyWith specifying both textScaler and textScalingFactor asserts', () {
+      const MediaQueryData data = MediaQueryData();
+       expect(
+        () => data.copyWith(textScaleFactor: 2, textScaler: const TextScaler.linear(2.0)),
+        throwsAssertionError,
+      );
     });
 
     testWidgets('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
