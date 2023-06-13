@@ -171,5 +171,6 @@ mixin DepthNode {
   ///
   /// Override this method in subclasses with child nodes to call [redepthChild]
   /// for each child. Do not call this method directly.
+  @protected
   void redepthChildren();
 }
