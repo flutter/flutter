@@ -491,7 +491,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
     for (final Selectable selectable in _selectionDelegate.selectables) {
-      if (!selectable.value.hasSelection || (selectable.value.status != SelectionStatus.uncollapsed)) {
+      if (!selectable.value.hasSelection || selectable.value.status != SelectionStatus.uncollapsed) {
         continue;
       }
       for (final Rect selectionRect in selectable.value.selectionRects!) {
