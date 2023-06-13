@@ -169,7 +169,7 @@ class LeakCleaner {
     final (String, LeakType) classAndType = (leakingClass, leakType);
     leaksByClassAndType[classAndType] = leaksByClassAndType[classAndType] ?? 0 + 1;
 
-    bool _isAllowedForClass(Map<String, int?> allowList) {
+    bool isAllowedForClass(Map<String, int?> allowList) {
       if (!allowList.containsKey(leakingClass)) {
         return false;
       }
@@ -182,10 +182,10 @@ class LeakCleaner {
 
     switch (leakType) {
       case LeakType.notDisposed:
-        return !_isAllowedForClass(config.notDisposedAllowList);
+        return !isAllowedForClass(config.notDisposedAllowList);
       case LeakType.notGCed:
       case LeakType.gcedLate:
-        return !_isAllowedForClass(config.notGCedAllowList);
+        return !isAllowedForClass(config.notGCedAllowList);
     }
   }
 }
