@@ -42,11 +42,14 @@ void main() {
     Color checkBoxCheckColor = const Color(0xffFFFFFF);
 
     Widget buildFrame(Color? color) {
-      return wrap(
-        child: CheckboxListTile(
-          value: true,
-          checkColor: color,
-          onChanged: (bool? value) {},
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: CheckboxListTile(
+            value: true,
+            checkColor: color,
+            onChanged: (bool? value) {},
+          ),
         ),
       );
     }
@@ -730,14 +733,17 @@ void main() {
     const double splashRadius = 24.0;
 
     Widget buildCheckbox({bool active = false, bool useOverlay = true}) {
-      return wrap(
-        child: CheckboxListTile(
-          value: active,
-          onChanged: (_) { },
-          fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-          overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
-          hoverColor: hoverColor,
-          splashRadius: splashRadius,
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Material(
+          child: CheckboxListTile(
+            value: active,
+            onChanged: (_) { },
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+            splashRadius: splashRadius,
+          ),
         ),
       );
     }

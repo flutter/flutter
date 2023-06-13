@@ -202,8 +202,9 @@ void main() {
   testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
               children: <MergeableMaterialItem>[
@@ -1100,8 +1101,9 @@ void main() {
 
   testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
               hasDividers: true,
@@ -1157,8 +1159,9 @@ void main() {
     expect(isDivider(boxes[offset + 3], true, false), isTrue);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Scaffold(
           body: SingleChildScrollView(
             child: MergeableMaterial(
               hasDividers: true,

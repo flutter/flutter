@@ -28,6 +28,7 @@ void main() {
     TextDirection textDirection = TextDirection.ltr,
   }) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Material(
         child: Directionality(
           textDirection: textDirection,

@@ -76,7 +76,7 @@ Widget wrapForChip({
   Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(brightness: brightness, useMaterial3: false),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -220,7 +220,7 @@ void main() {
 
     Widget buildFrame(Brightness brightness) {
       return MaterialApp(
-        theme: ThemeData(brightness: brightness),
+        theme: ThemeData(brightness: brightness, useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: Builder(
@@ -1689,6 +1689,7 @@ void main() {
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
+      useMaterial3: false,
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -1792,7 +1793,7 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         child: Theme(
-          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+          data: ThemeData(useMaterial3: false, materialTapTargetSize: MaterialTapTargetSize.padded),
           child: Center(
             child: RawChip(
               key: key1,
@@ -1809,7 +1810,7 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         child: Theme(
-          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          data: ThemeData(useMaterial3: false, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: Center(
             child: RawChip(
               key: key2,
@@ -2466,6 +2467,7 @@ void main() {
 
   testWidgets('Chip elevation and shadow color work correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
+      useMaterial3: false,
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -2725,6 +2727,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -2804,6 +2807,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -2886,6 +2890,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -2963,6 +2968,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -3035,6 +3041,7 @@ void main() {
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           chipTheme: ThemeData.light().chipTheme.copyWith(
             shape: themeShape,
             side: themeBorderSide,
@@ -3071,6 +3078,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: Column(

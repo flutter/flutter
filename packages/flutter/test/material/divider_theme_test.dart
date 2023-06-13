@@ -272,8 +272,9 @@ void main() {
 
     group('Horizontal Divider', () {
       testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: Scaffold(
+        await tester.pumpWidget(MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             body: Divider(),
           ),
         ));
@@ -285,7 +286,7 @@ void main() {
         final BoxDecoration decoration = container.decoration! as BoxDecoration;
         expect(decoration.border!.bottom.width, 0.0);
 
-        final ThemeData theme = ThemeData();
+        final ThemeData theme = ThemeData(useMaterial3: false);
         expect(decoration.border!.bottom.color, theme.dividerColor);
 
         final Rect dividerRect = tester.getRect(find.byType(Divider));
@@ -314,8 +315,9 @@ void main() {
 
     group('Vertical Divider', () {
       testWidgets('Passing no DividerThemeData returns defaults', (WidgetTester tester) async {
-        await tester.pumpWidget(const MaterialApp(
-          home: Scaffold(
+        await tester.pumpWidget(MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             body: VerticalDivider(),
           ),
         ));
@@ -328,7 +330,7 @@ void main() {
         final Border border = decoration.border! as Border;
         expect(border.left.width, 0.0);
 
-        final ThemeData theme = ThemeData();
+        final ThemeData theme = ThemeData(useMaterial3: false);
         expect(border.left.color, theme.dividerColor);
 
         final Rect dividerRect = tester.getRect(find.byType(VerticalDivider));

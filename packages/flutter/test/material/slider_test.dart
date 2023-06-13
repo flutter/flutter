@@ -829,6 +829,7 @@ void main() {
         ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
       }) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
@@ -2670,6 +2671,7 @@ void main() {
       bool enabled = true,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             // The builder is used to pass the context from the MaterialApp widget
@@ -3638,10 +3640,11 @@ void main() {
 
     testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       double value = 0.5;
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {

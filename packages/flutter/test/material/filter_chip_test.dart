@@ -13,9 +13,10 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
+  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -31,9 +32,11 @@ Future<void> pumpCheckmarkChip(
   required Widget chip,
   Color? themeColor,
   Brightness brightness = Brightness.light,
+  ThemeData? theme,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
+      useMaterial3: false,
       brightness: brightness,
       child: Builder(
         builder: (BuildContext context) {
@@ -385,6 +388,7 @@ void main() {
 
   testWidgets('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
+      theme: ThemeData(useMaterial3: false),
       tester,
       chip: selectedFilterChip(),
     );
@@ -400,6 +404,7 @@ void main() {
       tester,
       chip: selectedFilterChip(),
       brightness: Brightness.dark,
+      theme: ThemeData(useMaterial3: false),
     );
 
     expectCheckmarkColor(

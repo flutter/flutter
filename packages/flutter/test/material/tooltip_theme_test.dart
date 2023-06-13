@@ -686,6 +686,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             tooltipTheme: const TooltipThemeData(
               decoration: customDecoration,
             ),
@@ -723,22 +724,25 @@ void main() {
       color: Color(0x80800000),
     );
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: TooltipTheme(
-          data: const TooltipThemeData(decoration: customDecoration),
-          child: Overlay(
-            initialEntries: <OverlayEntry>[
-              OverlayEntry(
-                builder: (BuildContext context) {
-                  return Tooltip(
-                    key: key,
-                    message: tooltipText,
-                    child: const SizedBox.shrink(),
-                  );
-                },
-              ),
-            ],
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: TooltipTheme(
+            data: const TooltipThemeData(decoration: customDecoration),
+            child: Overlay(
+              initialEntries: <OverlayEntry>[
+                OverlayEntry(
+                  builder: (BuildContext context) {
+                    return Tooltip(
+                      key: key,
+                      message: tooltipText,
+                      child: const SizedBox.shrink(),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -167,6 +167,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Padding(
             padding: const EdgeInsets.only(top: 64),
