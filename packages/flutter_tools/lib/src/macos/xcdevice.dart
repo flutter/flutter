@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
@@ -531,12 +532,12 @@ class XCDevice {
           }
         }
 
-        String? sdkVersion = _sdkVersion(device);
+        String? sdkVersionString = _sdkVersion(device);
 
-        if (sdkVersion != null) {
+        if (sdkVersionString != null) {
           final String? buildVersion = _buildVersion(device);
           if (buildVersion != null) {
-            sdkVersion = '$sdkVersion $buildVersion';
+            sdkVersionString = '$sdkVersionString $buildVersion';
           }
         }
 
@@ -550,13 +551,16 @@ class XCDevice {
         // connected and the existing entry has a higher sdkVersion.
         if (deviceMap.containsKey(identifier)) {
           final IOSDevice deviceInMap = deviceMap[identifier]!;
-          if ((deviceInMap.isConnected && !isConnected) || sdkVersion == null) {
+          if ((deviceInMap.isConnected && !isConnected) || sdkVersionString == null) {
             continue;
           }
-          final String majorVersionString = sdkVersion.split('.').first.trim();
-          final int majorVersionInt = int.tryParse(majorVersionString) ?? 0;
 
-          if (!deviceInMap.isConnected && !isConnected && deviceInMap.majorSdkVersion > majorVersionInt) {
+          final Version? sdkVersion = Version.parse(sdkVersionString);
+          if (!deviceInMap.isConnected &&
+              !isConnected &&
+              sdkVersion != null &&
+              deviceInMap.sdkVersion != null &&
+              deviceInMap.sdkVersion!.compareTo(sdkVersion) > 0) {
             continue;
           }
         }
@@ -567,7 +571,7 @@ class XCDevice {
           cpuArchitecture: _cpuArchitecture(device),
           connectionInterface: _interfaceType(device),
           isConnected: isConnected,
-          sdkVersion: sdkVersion,
+          sdkVersion: sdkVersionString,
           iProxy: _iProxy,
           fileSystem: globals.fs,
           logger: _logger,
