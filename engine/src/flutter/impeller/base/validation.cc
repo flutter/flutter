@@ -46,7 +46,7 @@ void ImpellerValidationBreak(const char* message) {
   if (sValidationLogsAreFatal) {
     FML_LOG(FATAL) << stream.str();
   } else {
-    FML_LOG(INFO) << stream.str();
+    FML_LOG(ERROR) << stream.str();
   }
 #endif  // IMPELLER_DEBUG
 }
